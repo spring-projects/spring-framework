@@ -515,8 +515,7 @@ public class CallbacksSecurityTests {
 		perms.add(new AuthPermission("getSubject"));
 		ProtectionDomain pd = new ProtectionDomain(null, perms);
 
-		AccessControlContext acc = new AccessControlContext(
-				new ProtectionDomain[] { pd });
+		new AccessControlContext(new ProtectionDomain[] { pd });
 
 		final Subject subject = new Subject();
 		subject.getPrincipals().add(new TestPrincipal("user1"));

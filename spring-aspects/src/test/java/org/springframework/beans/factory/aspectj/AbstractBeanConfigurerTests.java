@@ -211,6 +211,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
 		Order testOrder = new Order();
 		Order deserializedOrder = serializeAndDeserialize(testOrder);
+		assertNotNull(deserializedOrder);
 		assertNotNull("Interface driven injection didn't occur for deserialization", testOrder.mailSender);
 	}
 

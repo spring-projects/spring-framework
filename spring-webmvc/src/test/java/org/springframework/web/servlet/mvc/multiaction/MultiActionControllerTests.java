@@ -453,7 +453,7 @@ public class MultiActionControllerTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handleIllegalStateException.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mav = mac.handleRequest(request, response);
+		mac.handleRequest(request, response);
 		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
@@ -524,7 +524,6 @@ public class MultiActionControllerTests extends TestCase {
 			this.invoked.put("commandNoSession", Boolean.TRUE);
 
 			String pname = request.getParameter("name");
-			String page = request.getParameter("age");
 			// ALLOW FOR NULL
 			if (pname == null) {
 				assertTrue("name null", command.getName() == null);
@@ -532,6 +531,8 @@ public class MultiActionControllerTests extends TestCase {
 			else {
 				assertTrue("name param set", pname.equals(command.getName()));
 			}
+
+			//String page = request.getParameter("age");
 			// if (page == null)
 			// assertTrue("age default", command.getAge() == 0);
 			// else

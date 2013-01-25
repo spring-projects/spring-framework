@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -1680,6 +1681,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("simpleProperty").getValueType(evaluationContext);
+		assertNotNull(valueType);
 	}
 
 	@Test
@@ -1687,6 +1689,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("simpleProperty").getValue(evaluationContext);
+		assertNotNull(value);
 	}
 
 	@Test
@@ -1694,6 +1697,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("primitiveProperty").getValueType(evaluationContext);
+		assertNotNull(valueType);
 	}
 
 	@Test
@@ -1701,6 +1705,7 @@ public class SpelReproTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("primitiveProperty").getValue(evaluationContext);
+		assertNotNull(value);
 	}
 
 	@Test

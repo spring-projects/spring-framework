@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ public class JmsTemplate102Tests extends TestCase {
 		template.execute(new SessionCallback() {
 			@Override
 			public Object doInJms(Session session) throws JMSException {
-				boolean b = session.getTransacted();
+				session.getTransacted();
 				return null;
 			}
 		});
@@ -249,8 +249,8 @@ public class JmsTemplate102Tests extends TestCase {
 		template.execute(new ProducerCallback() {
 			@Override
 			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
-				boolean b = session.getTransacted();
-				int i = producer.getPriority();
+				session.getTransacted();
+				producer.getPriority();
 				return null;
 			}
 		});

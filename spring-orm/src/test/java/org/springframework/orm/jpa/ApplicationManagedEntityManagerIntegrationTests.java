@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		assertTrue(Proxy.isProxyClass(em.getClass()));
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
+		assertNotNull(people);
 
 		assertTrue("Should be open to start with", em.isOpen());
 		em.close();

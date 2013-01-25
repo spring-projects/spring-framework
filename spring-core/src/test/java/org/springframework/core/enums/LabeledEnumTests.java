@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class LabeledEnumTests extends TestCase {
 
 	public void testDoesNotMatchWrongClass() {
 		try {
-			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class,
+			StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class,
 					new Short((short) 1));
 			fail("Should have failed");
 		}
@@ -119,10 +119,11 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
-	@SuppressWarnings("serial")
+	@SuppressWarnings({ "serial", "unused" })
 	private static class Other extends StaticLabeledEnum {
 
 		public static final Other THING1 = new Other(1, "Thing1");
+
 		public static final Other THING2 = new Other(2, "Thing2");
 
 

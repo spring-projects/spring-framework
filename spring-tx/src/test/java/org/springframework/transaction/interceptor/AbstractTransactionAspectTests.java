@@ -539,7 +539,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		Method m = setNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
-		Method m2 = getNameMethod;
+		// Method m2 = getNameMethod;
 		// No attributes for m2
 
 		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
