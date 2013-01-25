@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.1
  */
 public abstract class CacheAspectSupport implements InitializingBean {
@@ -212,7 +213,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 			retVal = invoker.invoke();
 
-			inspectAfterCacheEvicts(ops.get(EVICT));
+			inspectAfterCacheEvicts(ops.get(EVICT), retVal);
 
 			if (!updates.isEmpty()) {
 				update(updates, retVal);
@@ -225,14 +226,16 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	private void inspectBeforeCacheEvicts(Collection<CacheOperationContext> evictions) {
-		inspectCacheEvicts(evictions, true);
+		inspectCacheEvicts(evictions, true, ExpressionEvaluator.NO_RESULT);
 	}
 
-	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions) {
-		inspectCacheEvicts(evictions, false);
+	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions,
+			Object result) {
+		inspectCacheEvicts(evictions, false, result);
 	}
 
-	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions, boolean beforeInvocation) {
+	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions,
+			boolean beforeInvocation, Object result) {
 
 		if (!evictions.isEmpty()) {
 
@@ -242,7 +245,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				CacheEvictOperation evictOp = (CacheEvictOperation) context.operation;
 
 				if (beforeInvocation == evictOp.isBeforeInvocation()) {
-					if (context.isConditionPassing()) {
+					if (context.isConditionPassing(result)) {
 						// for each cache
 						// lazy key initialization
 						Object key = null;
@@ -278,7 +281,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	private CacheStatus inspectCacheables(Collection<CacheOperationContext> cacheables) {
 		Map<CacheOperationContext, Object> cUpdates = new LinkedHashMap<CacheOperationContext, Object>(cacheables.size());
 
-		boolean updateRequire = false;
+		boolean updateRequired = false;
 		Object retVal = null;
 
 		if (!cacheables.isEmpty()) {
@@ -305,7 +308,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					boolean localCacheHit = false;
 
 					// check whether the cache needs to be inspected or not (the method will be invoked anyway)
-					if (!updateRequire) {
+					if (!updateRequired) {
 						for (Cache cache : context.getCaches()) {
 							Cache.ValueWrapper wrapper = cache.get(key);
 							if (wrapper != null) {
@@ -317,7 +320,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					}
 
 					if (!localCacheHit) {
-						updateRequire = true;
+						updateRequired = true;
 					}
 				}
 				else {
@@ -329,7 +332,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 			// return a status only if at least on cacheable matched
 			if (atLeastOnePassed) {
-				return new CacheStatus(cUpdates, updateRequire, retVal);
+				return new CacheStatus(cUpdates, updateRequired, retVal);
 			}
 		}
 
@@ -386,8 +389,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private void update(Map<CacheOperationContext, Object> updates, Object retVal) {
 		for (Map.Entry<CacheOperationContext, Object> entry : updates.entrySet()) {
-			for (Cache cache : entry.getKey().getCaches()) {
-				cache.put(entry.getValue(), retVal);
+			CacheOperationContext operationContext = entry.getKey();
+			if(operationContext.canPutToCache(retVal)) {
+				for (Cache cache : operationContext.getCaches()) {
+					cache.put(entry.getValue(), retVal);
+				}
 			}
 		}
 	}
@@ -427,30 +433,49 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		private final CacheOperation operation;
 
-		private final Collection<Cache> caches;
-
-		private final Object target;
-
 		private final Method method;
 
 		private final Object[] args;
 
-		// context passed around to avoid multiple creations
-		private final EvaluationContext evalContext;
+		private final Object target;
+
+		private final Class<?> targetClass;
+
+		private final Collection<Cache> caches;
 
 		public CacheOperationContext(CacheOperation operation, Method method, Object[] args, Object target, Class<?> targetClass) {
 			this.operation = operation;
-			this.caches = CacheAspectSupport.this.getCaches(operation);
-			this.target = target;
 			this.method = method;
 			this.args = args;
-
-			this.evalContext = evaluator.createEvaluationContext(caches, method, args, target, targetClass);
+			this.target = target;
+			this.targetClass = targetClass;
+			this.caches = CacheAspectSupport.this.getCaches(operation);
 		}
 
 		protected boolean isConditionPassing() {
+			return isConditionPassing(ExpressionEvaluator.NO_RESULT);
+		}
+
+		protected boolean isConditionPassing(Object result) {
 			if (StringUtils.hasText(this.operation.getCondition())) {
-				return evaluator.condition(this.operation.getCondition(), this.method, this.evalContext);
+				EvaluationContext evaluationContext = createEvaluationContext(result);
+				return evaluator.condition(this.operation.getCondition(), this.method,
+						evaluationContext);
+			}
+			return true;
+		}
+
+		protected boolean canPutToCache(Object value) {
+			String unless = "";
+			if (this.operation instanceof CacheableOperation) {
+				unless = ((CacheableOperation) this.operation).getUnless();
+			}
+			else if (this.operation instanceof CachePutOperation) {
+				unless = ((CachePutOperation) this.operation).getUnless();
+			}
+			if(StringUtils.hasText(unless)) {
+				EvaluationContext evaluationContext = createEvaluationContext(value);
+				return !evaluator.unless(unless, this.method, evaluationContext);
 			}
 			return true;
 		}
@@ -461,9 +486,15 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		 */
 		protected Object generateKey() {
 			if (StringUtils.hasText(this.operation.getKey())) {
-				return evaluator.key(this.operation.getKey(), this.method, this.evalContext);
+				EvaluationContext evaluationContext = createEvaluationContext(ExpressionEvaluator.NO_RESULT);
+				return evaluator.key(this.operation.getKey(), this.method, evaluationContext);
 			}
 			return keyGenerator.generate(this.target, this.method, this.args);
+		}
+
+		private EvaluationContext createEvaluationContext(Object result) {
+			return evaluator.createEvaluationContext(this.caches, this.method, this.args,
+					this.target, this.targetClass, result);
 		}
 
 		protected Collection<Cache> getCaches() {

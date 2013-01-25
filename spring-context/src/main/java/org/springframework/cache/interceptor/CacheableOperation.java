@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,28 @@ package org.springframework.cache.interceptor;
  * Class describing a cache 'cacheable' operation.
  *
  * @author Costin Leau
+ * @author Phillip Webb
  * @since 3.1
  */
 public class CacheableOperation extends CacheOperation {
 
+	private String unless;
+
+
+	public String getUnless() {
+		return unless;
+	}
+
+	public void setUnless(String unless) {
+		this.unless = unless;
+	}
+
+	@Override
+	protected StringBuilder getOperationDescription() {
+		StringBuilder sb = super.getOperationDescription();
+		sb.append(" | unless='");
+		sb.append(this.unless);
+		sb.append("'");
+		return sb;
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.cache.Cache;
  * always causes the method to be invoked and its result to be placed into the cache.
  *
  * @author Costin Leau
+ * @author Phillip Webb
  * @since 3.1
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
@@ -58,4 +59,13 @@ public @interface CachePut {
 	 * <p>Default is "", meaning the method result is always cached.
 	 */
 	String condition() default "";
+
+	/**
+	 * Spring Expression Language (SpEL) attribute used to veto the cache update.
+	 * <p>Unlike {@link #condition()}, this expression is evaluated after the method
+	 * has been called and can therefore refer to the {@code result}. Default is "",
+	 * meaning that caching is never vetoed.
+	 * @since 3.2
+	 */
+	String unless() default "";
 }

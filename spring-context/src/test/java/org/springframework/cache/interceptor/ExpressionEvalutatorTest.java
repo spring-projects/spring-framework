@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,39 @@
 
 package org.springframework.cache.interceptor;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
+/**
+ * @author Costin Leau
+ * @author Phillip Webb
+ */
 public class ExpressionEvalutatorTest {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 	private ExpressionEvaluator eval = new ExpressionEvaluator();
 
 	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
@@ -59,6 +74,7 @@ public class ExpressionEvalutatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testMultipleCachingEval() throws Exception {
 		AnnotatedClass target = new AnnotatedClass();
 		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
@@ -76,6 +92,38 @@ public class ExpressionEvalutatorTest {
 
 		assertEquals(args[0], keyA);
 		assertEquals(args[1], keyB);
+	}
+
+	@Test
+	public void withReturnValue() throws Exception {
+		EvaluationContext context = createEvaluationContext("theResult");
+		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
+		assertThat(value, equalTo((Object) "theResult"));
+	}
+
+	@Test
+	public void withNullReturn() throws Exception {
+		EvaluationContext context = createEvaluationContext(null);
+		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
+		assertThat(value, nullValue());
+	}
+
+	@Test
+	public void withoutReturnValue() throws Exception {
+		EvaluationContext context = createEvaluationContext(ExpressionEvaluator.NO_RESULT);
+		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
+		assertThat(value, nullValue());
+	}
+
+	private EvaluationContext createEvaluationContext(Object result) {
+		AnnotatedClass target = new AnnotatedClass();
+		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
+				Object.class);
+		Object[] args = new Object[] { new Object(), new Object() };
+		@SuppressWarnings("unchecked")
+		Collection<Cache> map = Collections.singleton(new ConcurrentMapCache("test"));
+		EvaluationContext context = eval.createEvaluationContext(map, method, args, target, target.getClass(), result);
+		return context;
 	}
 
 	private static class AnnotatedClass {
