@@ -11,6 +11,7 @@ Changes in version 3.2.2 (2013-03-07)
 * DefaultMessageListenerContainer logs recovery failures at error level and exposes "isRecovering()" method (SPR-10230)
 * MediaType throws dedicated InvalidMediaTypeException instead of generic IllegalArgumentException (SPR-10226)
 * consistent use of LinkedHashMaps and independent getAttributeNames Enumeration in Servlet/Portlet mocks (SPR-10224)
+* support 'unless' expression for cache veto (SPR-8871)
 
 
 Changes in version 3.2.1 (2013-01-24)

@@ -27,6 +27,7 @@ import org.springframework.cache.annotation.Caching;
  * Simple cacheable service
  *
  * @author Costin Leau
+ * @author Phillip Webb
  */
 public class DefaultCacheableService implements CacheableService<Long> {
 
@@ -76,6 +77,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Cacheable(value = "default", condition = "#classField == 3")
 	public Long conditional(int classField) {
 		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(value = "default", unless = "#result > 10")
+	public Long unless(int arg) {
+		return (long) arg;
 	}
 
 	@Override
