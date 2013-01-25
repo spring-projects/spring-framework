@@ -57,7 +57,7 @@
   <section xml:id="new-in-3.2-webmvc-content-negotiation">
     <title>Content negotiation improvements</title>
 
-    <para>A <interfacename>ContentNeogtiationStrategy</interfacename> is now
+    <para>A <interfacename>ContentNegotiationStrategy</interfacename> is now
     available for resolving the requested media types from an incoming
     request. The available implementations are based on the file extension,
     query parameter, the 'Accept' header, or a fixed content type.
