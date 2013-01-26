@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -481,7 +481,7 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as {@code {@link Boolean#hashCode()}}.
+	 * Return the same value as {@link Boolean#hashCode()}}.
 	 * @see Boolean#hashCode()
 	 */
 	public static int hashCode(boolean bool) {
@@ -489,7 +489,7 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as {@code {@link Double#hashCode()}}.
+	 * Return the same value as {@link Double#hashCode()}}.
 	 * @see Double#hashCode()
 	 */
 	public static int hashCode(double dbl) {
@@ -498,7 +498,7 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as {@code {@link Float#hashCode()}}.
+	 * Return the same value as {@link Float#hashCode()}}.
 	 * @see Float#hashCode()
 	 */
 	public static int hashCode(float flt) {
@@ -506,7 +506,7 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as {@code {@link Long#hashCode()}}.
+	 * Return the same value as {@link Long#hashCode()}}.
 	 * @see Long#hashCode()
 	 */
 	public static int hashCode(long lng) {
