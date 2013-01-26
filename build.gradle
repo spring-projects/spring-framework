@@ -689,7 +689,7 @@ project("spring-test-mvc") {
 	description = "Spring Test MVC Framework"
 	merge.into = project(":spring-test")
 	dependencies {
-		provided(project(":spring-context"))
+		optional(project(":spring-context"))
 		provided(project(":spring-webmvc"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional("org.hamcrest:hamcrest-core:1.3")
