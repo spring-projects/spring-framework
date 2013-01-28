@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring-beans</artifactId>
+  <version>4.0.0.BUILD-SNAPSHOT</version>
+  <name>Spring Beans</name>
+  <description>Spring Beans</description>
+  <url>https://github.com/SpringSource/spring-framework</url>
+  <organization>
+    <name>SpringSource</name>
+    <url>http://springsource.org/spring-framework</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>jhoeller</id>
+      <name>Juergen Hoeller</name>
+      <email>jhoeller@vmware.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/SpringSource/spring-framework</connection>
+    <developerConnection>scm:git:git://github.com/SpringSource/spring-framework</developerConnection>
+    <url>https://github.com/SpringSource/spring-framework</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>4.0.0.BUILD-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.el</groupId>
+      <artifactId>el-api</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
