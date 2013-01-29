@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -82,6 +83,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		CacheableOperation cuo = new CacheableOperation();
 		cuo.setCacheNames(caching.value());
 		cuo.setCondition(caching.condition());
+		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
 		cuo.setName(ae.toString());
 		return cuo;
@@ -102,6 +104,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		CachePutOperation cuo = new CachePutOperation();
 		cuo.setCacheNames(caching.value());
 		cuo.setCondition(caching.condition());
+		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
 		cuo.setName(ae.toString());
 		return cuo;
