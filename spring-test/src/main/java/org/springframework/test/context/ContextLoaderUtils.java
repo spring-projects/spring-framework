@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for working with {@link ContextLoader ContextLoaders} and
  * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
- * annotated classes, and active bean definition profiles.
+ * annotated classes, active bean definition profiles, and application context
+ * initializers.
  *
  * @author Sam Brannen
  * @since 3.1
@@ -50,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @see ContextConfiguration
  * @see ContextConfigurationAttributes
  * @see ActiveProfiles
+ * @see ApplicationContextInitializer
  * @see MergedContextConfiguration
  */
 abstract class ContextLoaderUtils {
@@ -78,7 +80,7 @@ abstract class ContextLoaderUtils {
 	 * either {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
 	 * or {@value #DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME} will be used as the
 	 * default context loader class name. For details on the class resolution
-	 * process, see {@link #resolveContextLoaderClass()}.
+	 * process, see {@link #resolveContextLoaderClass}.
 	 *
 	 * @param testClass the test class for which the {@code ContextLoader}
 	 * should be resolved; must not be {@code null}
@@ -89,8 +91,9 @@ abstract class ContextLoaderUtils {
 	 * {@code ContextLoader} class to use; may be {@code null} or <em>empty</em>
 	 * @return the resolved {@code ContextLoader} for the supplied
 	 * {@code testClass} (never {@code null})
-	 * @see #resolveContextLoaderClass()
+	 * @see #resolveContextLoaderClass
 	 */
+	@SuppressWarnings("javadoc")
 	static ContextLoader resolveContextLoader(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList, String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Class must not be null");
@@ -348,11 +351,11 @@ abstract class ContextLoaderUtils {
 	 * @param defaultContextLoaderClassName the name of the default
 	 * {@code ContextLoader} class to use (may be {@code null})
 	 * @return the merged context configuration
-	 * @see #resolveContextLoader()
-	 * @see #resolveContextConfigurationAttributes()
-	 * @see SmartContextLoader#processContextConfiguration()
-	 * @see ContextLoader#processLocations()
-	 * @see #resolveActiveProfiles()
+	 * @see #resolveContextLoader
+	 * @see #resolveContextConfigurationAttributes
+	 * @see SmartContextLoader#processContextConfiguration
+	 * @see ContextLoader#processLocations
+	 * @see #resolveActiveProfiles
 	 * @see MergedContextConfiguration
 	 */
 	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
