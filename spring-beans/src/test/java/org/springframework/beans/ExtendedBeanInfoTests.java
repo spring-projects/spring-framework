@@ -974,7 +974,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	static class WithStaticWriteMethod {
-		@SuppressWarnings("unused")
 		public static void setProp1(String prop1) {
 		}
 	}

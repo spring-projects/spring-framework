@@ -157,7 +157,6 @@ public class BeanWrapperGenericsTests {
 		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		@SuppressWarnings("unchecked")
 		Map<String, Collection> input = new HashMap<String, Collection>();
 		HashSet<Integer> value1 = new HashSet<Integer>();
 		value1.add(new Integer(1));

@@ -2200,7 +2200,6 @@ public class DefaultListableBeanFactoryTests {
 		doTestFieldSettingWithInstantiationAwarePostProcessor(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);

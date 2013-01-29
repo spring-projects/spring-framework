@@ -393,7 +393,6 @@ public class FormattingConversionServiceTests {
 
 	private static class ModelWithSubclassField {
 
-		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(style = "S-")
 		public MyDate date;
 	}

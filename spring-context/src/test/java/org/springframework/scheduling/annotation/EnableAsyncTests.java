@@ -74,7 +74,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void withAsyncBeanWithExecutorQualifiedByName() throws ExecutionException, InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();

@@ -404,7 +404,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
 		LinkedList target = new LinkedList();

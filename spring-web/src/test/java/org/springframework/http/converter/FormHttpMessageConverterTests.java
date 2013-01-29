@@ -72,7 +72,6 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		Charset iso88591 = Charset.forName("ISO-8859-1");
