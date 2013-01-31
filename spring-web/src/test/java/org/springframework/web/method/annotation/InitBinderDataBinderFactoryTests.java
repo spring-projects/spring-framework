@@ -140,25 +140,21 @@ public class InitBinderDataBinderFactoryTests {
 
 	private static class InitBinderHandler {
 
-		@SuppressWarnings("unused")
 		@InitBinder
 		public void initBinder(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
 
-		@SuppressWarnings("unused")
 		@InitBinder(value="foo")
 		public void initBinderWithAttributeName(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
 
-		@SuppressWarnings("unused")
 		@InitBinder
 		public String initBinderReturnValue(WebDataBinder dataBinder) {
 			return "invalid";
 		}
 
-		@SuppressWarnings("unused")
 		@InitBinder
 		public void initBinderTypeConversion(WebDataBinder dataBinder, @RequestParam int requestParam) {
 			dataBinder.setDisallowedFields("requestParam-" + requestParam);

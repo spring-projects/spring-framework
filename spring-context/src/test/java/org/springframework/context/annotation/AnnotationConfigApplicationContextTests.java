@@ -133,7 +133,6 @@ public class AnnotationConfigApplicationContextTests {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getBeanByTypeAmbiguityRaisesException() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);

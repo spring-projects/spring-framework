@@ -308,19 +308,25 @@ public class ClassUtilsTests extends TestCase {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class OverloadedMethodsClass {
+
 		public void print(String messages) {
 			/* no-op */
 		}
+
 		public void print(String[] messages) {
 			/* no-op */
 		}
 	}
 
-	private static class SubOverloadedMethodsClass extends OverloadedMethodsClass{
+	@SuppressWarnings("unused")
+	private static class SubOverloadedMethodsClass extends OverloadedMethodsClass {
+
 		public void print(String header, String[] messages) {
 			/* no-op */
 		}
+
 		void print(String header, String[] messages, String footer) {
 			/* no-op */
 		}

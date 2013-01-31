@@ -1569,6 +1569,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Foo {
 
 		private List list;
@@ -1598,6 +1599,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NoRead {
 
 		public void setAge(int age) {
@@ -1605,6 +1607,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class EnumTester {
 
 		private Autowire autowire;
@@ -1619,6 +1622,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PropsTester {
 
 		private Properties props;
@@ -1647,6 +1651,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class GetterBean {
 
 		private String name;
@@ -1664,6 +1669,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ThrowsException {
 
 		public void doSomething(Throwable t) throws Throwable {
@@ -1672,6 +1678,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PrimitiveArrayBean {
 
 		private int[] array;
@@ -1686,6 +1693,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NumberPropertyBean {
 
 		private byte myPrimitiveByte;
@@ -1804,6 +1812,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class IntelliBean {
 
 		public void setName(String name) {}
@@ -1818,6 +1827,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Employee extends TestBean {
 
 		private String co;

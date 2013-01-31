@@ -1630,6 +1630,7 @@ public class DataBinderTests extends TestCase {
 	  }
 
 
+	@SuppressWarnings("unused")
 	private static class BeanWithIntegerList {
 
 		private List<Integer> integerList;
@@ -1644,6 +1645,7 @@ public class DataBinderTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Book {
 
 		private String Title;
@@ -1728,6 +1730,7 @@ public class DataBinderTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class GrowingList<E> extends AbstractList<E> {
 
 		private List<E> list;

@@ -20,7 +20,6 @@ import org.junit.Ignore;
 
 // converting away from old-style EasyMock APIs was problematic with this class
 // glassfish dependencies no longer on classpath
-@SuppressWarnings("deprecation")
 @Ignore
 public class GlassFishLoadTimeWeaverTests {
 

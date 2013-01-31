@@ -267,6 +267,7 @@ public final class BeanUtilsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NameAndSpecialProperty {
 
 		private String name;
@@ -291,6 +292,7 @@ public final class BeanUtilsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ContainerBean {
 
 		private ContainedBean[] containedBeans;
@@ -305,6 +307,7 @@ public final class BeanUtilsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ContainedBean {
 
 		private String name;
@@ -319,6 +322,7 @@ public final class BeanUtilsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class MethodSignatureBean {
 
 		public void doSomething() {

@@ -163,6 +163,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	public void testGetBeansOfTypeWithAbstract() {
 		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
+		assertNotNull(beansOfType);
 	}
 
 	/**
@@ -172,7 +173,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		try {
 			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
-			ITestBean testBean = (ITestBean) bf.getBean("noTransactionAttributeSource");
+			bf.getBean("noTransactionAttributeSource");
 			fail("Should require TransactionAttributeSource to be set");
 		}
 		catch (FatalBeanException ex) {

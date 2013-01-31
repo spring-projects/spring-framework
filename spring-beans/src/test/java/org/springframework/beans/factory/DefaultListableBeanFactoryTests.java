@@ -2200,7 +2200,6 @@ public class DefaultListableBeanFactoryTests {
 		doTestFieldSettingWithInstantiationAwarePostProcessor(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
@@ -2334,6 +2333,7 @@ public class DefaultListableBeanFactoryTests {
 			this.spouse = spouse;
 		}
 
+		@SuppressWarnings("unused")
 		private ConstructorDependency(TestBean spouse, TestBean otherSpouse) {
 			throw new IllegalArgumentException("Should never be called");
 		}
@@ -2560,6 +2560,7 @@ public class DefaultListableBeanFactoryTests {
 	/**
 	 * Bean with a dependency on a {@link FactoryBean}.
 	 */
+	@SuppressWarnings("unused")
 	private static class FactoryBeanDependentBean {
 
 		private FactoryBean<?> factoryBean;
@@ -2646,6 +2647,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestSecuredBean {
 
 		private String userName;
@@ -2675,6 +2677,7 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class KnowsIfInstantiated {
 
 		private static boolean instantiated;

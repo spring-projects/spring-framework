@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.web.servlet.tags;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -49,7 +52,7 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	public void testParamSupport() {
-		assertTrue(tag instanceof ParamAware);
+		assertThat(tag, instanceOf(ParamAware.class));
 	}
 
 	public void testDoStartTag() throws JspException {

@@ -157,7 +157,6 @@ public class BeanWrapperGenericsTests {
 		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		@SuppressWarnings("unchecked")
 		Map<String, Collection> input = new HashMap<String, Collection>();
 		HashSet<Integer> value1 = new HashSet<Integer>();
 		value1.add(new Integer(1));
@@ -497,6 +496,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NestedGenericCollectionBean extends BaseGenericCollectionBean {
 
 		private Map<String, Integer> mapOfInteger;
@@ -544,6 +544,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ComplexMapHolder {
 
 		private Map<List<Integer>, List<Long>> genericMap;

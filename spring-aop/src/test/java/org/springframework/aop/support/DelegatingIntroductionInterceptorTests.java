@@ -16,8 +16,10 @@
 
 package org.springframework.aop.support;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -157,7 +159,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		//assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
 		TimeStamped ts = (TimeStamped) pf.getProxy();
 
-		assertTrue(ts instanceof TimeStamped);
+		assertThat(ts, instanceOf(TimeStamped.class));
 		// Shoulnd't proxy framework interfaces
 		assertTrue(!(ts instanceof MethodInterceptor));
 		assertTrue(!(ts instanceof IntroductionInterceptor));

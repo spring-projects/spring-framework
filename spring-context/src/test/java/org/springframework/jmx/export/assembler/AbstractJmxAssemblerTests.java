@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -51,6 +51,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	public void testRegisterOperations() throws Exception {
 		IJmxTestBean bean = getBean();
+		assertNotNull(bean);
 		MBeanInfo inf = getMBeanInfo();
 		assertEquals("Incorrect number of operations registered",
 				getExpectedOperationCount(), inf.getOperations().length);
@@ -58,6 +59,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	public void testRegisterAttributes() throws Exception {
 		IJmxTestBean bean = getBean();
+		assertNotNull(bean);
 		MBeanInfo inf = getMBeanInfo();
 		assertEquals("Incorrect number of attributes registered",
 				getExpectedAttributeCount(), inf.getAttributes().length);

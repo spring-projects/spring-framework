@@ -60,7 +60,7 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	before(Object txObject) : transactionalMethodExecution(txObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
-		TransactionInfo txInfo = createTransactionIfNecessary(method, txObject.getClass());
+		createTransactionIfNecessary(method, txObject.getClass());
 	}
 
 	@SuppressAjWarnings("adviceDidNotMatch")

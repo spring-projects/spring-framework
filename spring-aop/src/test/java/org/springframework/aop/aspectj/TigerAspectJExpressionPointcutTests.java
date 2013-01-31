@@ -89,6 +89,8 @@ public final class TigerAspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchVarargs() throws SecurityException, NoSuchMethodException {
+
+		@SuppressWarnings("unused")
 		class MyTemplate {
 			public int queryForInt(String sql, Object... params) {
 				return 0;

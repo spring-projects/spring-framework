@@ -62,6 +62,7 @@ public class FactoryMethods {
 		return new FactoryMethods(tb, null, num);
 	}
 
+	@SuppressWarnings("unused")
 	private static List listInstance() {
 		return Collections.EMPTY_LIST;
 	}
@@ -99,6 +100,7 @@ public class FactoryMethods {
 		return this.tb;
 	}
 
+	@SuppressWarnings("unused")
 	private TestBean privateGetTestBean() {
 		return this.tb;
 	}

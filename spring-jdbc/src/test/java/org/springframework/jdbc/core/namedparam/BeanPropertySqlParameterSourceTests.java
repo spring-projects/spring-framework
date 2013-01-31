@@ -81,6 +81,8 @@ public class BeanPropertySqlParameterSourceTests {
 		assertFalse(source.hasValue("noOp"));
 	}
 
+
+	@SuppressWarnings("unused")
 	private static final class NoReadableProperties {
 
 		public void setNoOp(String noOp) {

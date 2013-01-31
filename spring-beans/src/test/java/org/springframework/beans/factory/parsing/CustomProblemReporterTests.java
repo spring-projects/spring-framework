@@ -91,10 +91,6 @@ public final class CustomProblemReporterTests {
 			System.out.println(problem);
 			this.warnings.add(problem);
 		}
-
-		public Problem[] getWarnings() {
-			return this.warnings.toArray(new Problem[this.warnings.size()]);
-		}
 	}
 
 }

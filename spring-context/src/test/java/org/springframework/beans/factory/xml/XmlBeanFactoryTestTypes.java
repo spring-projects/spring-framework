@@ -198,7 +198,7 @@ abstract class ConstructorInjectedOverrides {
  * @author Juergen Hoeller
  * @since 09.11.2003
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "unused" })
 class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 
 	boolean initialized;
@@ -332,6 +332,7 @@ class DummyReferencer {
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("unused")
 class FactoryMethods {
 
 	public static FactoryMethods nullInstance() {

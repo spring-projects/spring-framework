@@ -63,7 +63,7 @@ public class ResponseStatusExceptionResolverTests {
 			exceptionResolver.setMessageSource(messageSource);
 
 			StatusCodeAndReasonMessageException ex = new StatusCodeAndReasonMessageException();
-			ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+			exceptionResolver.resolveException(request, response, null, ex);
 			assertEquals("Invalid status reason", "Gone reason message", response.getErrorMessage());
 		}
 		finally {

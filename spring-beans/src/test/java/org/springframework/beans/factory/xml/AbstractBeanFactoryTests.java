@@ -121,7 +121,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetInstanceByNonmatchingClass() {
 		try {
-			Object o = getBeanFactory().getBean("rod", BeanFactory.class);
+			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}
 		catch (BeanNotOfRequiredTypeException ex) {
@@ -155,7 +155,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetSharedInstanceByNonmatchingClass() {
 		try {
-			Object o = getBeanFactory().getBean("rod", BeanFactory.class);
+			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}
 		catch (BeanNotOfRequiredTypeException ex) {
@@ -199,7 +199,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	public void testNotThere() {
 		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
 		try {
-			Object o = getBeanFactory().getBean("Mr Squiggle");
+			getBeanFactory().getBean("Mr Squiggle");
 			fail("Can't find missing bean");
 		}
 		catch (BeansException ex) {
@@ -223,7 +223,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void xtestTypeMismatch() {
 		try {
-			Object o = getBeanFactory().getBean("typeMismatch");
+			getBeanFactory().getBean("typeMismatch");
 			fail("Shouldn't succeed with type mismatch");
 		}
 		catch (BeanCreationException wex) {
@@ -278,6 +278,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 */
 	public void testFactoryIsInitialized() throws Exception {
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
+		assertNotNull(tb);
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		assertTrue("Factory was initialized because it implemented InitializingBean", factory.wasInitialized());
 	}

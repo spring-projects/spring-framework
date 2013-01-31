@@ -87,7 +87,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 			Executor executor = getTaskExecutor();
 			if (executor != null) {
 				executor.execute(new Runnable() {
-					@SuppressWarnings("unchecked")
 					public void run() {
 						listener.onApplicationEvent(event);
 					}
