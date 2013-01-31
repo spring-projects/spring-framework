@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -294,7 +295,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return Collections.enumeration(this.attributes.keySet());
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	public String getCharacterEncoding() {

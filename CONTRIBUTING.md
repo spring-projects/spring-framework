@@ -87,7 +87,7 @@ present in the framework.
 
 ```java
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,16 +108,16 @@ package ...;
 ## Update Apache license header to modified files as necessary
 
 Always check the date range in the license header. For example, if you've
-modified a file in 2012 whose header still reads
+modified a file in 2013 whose header still reads
 
 ```java
  * Copyright 2002-2011 the original author or authors.
 ```
 
-then be sure to update it to 2012 appropriately
+then be sure to update it to 2013 appropriately
 
 ```java
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
 ```
 
 ## Use @since tags for newly-added public API types and methods

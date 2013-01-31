@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http;
 
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -321,8 +322,8 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, Map<String, String> parameters) {
-		Assert.hasLength(type, "'type' must not be empty");
-		Assert.hasLength(subtype, "'subtype' must not be empty");
+		Assert.hasLength(type, "type must not be empty");
+		Assert.hasLength(subtype, "subtype must not be empty");
 		checkToken(type);
 		checkToken(subtype);
 		this.type = type.toLowerCase(Locale.ENGLISH);
@@ -347,11 +348,11 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws IllegalArgumentException in case of illegal characters
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
-	private void checkToken(String s) {
-		for (int i=0; i < s.length(); i++ ) {
-			char ch = s.charAt(i);
+	private void checkToken(String token) {
+		for (int i=0; i < token.length(); i++ ) {
+			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
-				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + s + "\"");
+				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + token + "\"");
 			}
 		}
 	}
@@ -681,7 +682,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Parse the given String into a single {@code MediaType}.
 	 * @param mediaType the string to parse
 	 * @return the media type
-	 * @throws IllegalArgumentException if the string cannot be parsed
+	 * @throws InvalidMediaTypeException if the string cannot be parsed
 	 */
 	public static MediaType parseMediaType(String mediaType) {
 		Assert.hasLength(mediaType, "'mediaType' must not be empty");
@@ -694,15 +695,15 @@ public class MediaType implements Comparable<MediaType> {
 		}
 		int subIndex = fullType.indexOf('/');
 		if (subIndex == -1) {
-			throw new IllegalArgumentException("\"" + mediaType + "\" does not contain '/'");
+			throw new InvalidMediaTypeException(mediaType, "does not contain '/'");
 		}
 		if (subIndex == fullType.length() - 1) {
-			throw new IllegalArgumentException("\"" + mediaType + "\" does not contain subtype after '/'");
+			throw new InvalidMediaTypeException(mediaType, "does not contain subtype after '/'");
 		}
 		String type = fullType.substring(0, subIndex);
 		String subtype = fullType.substring(subIndex + 1, fullType.length());
 		if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
-			throw new IllegalArgumentException("A wildcard type is legal only in '*/*' (all media types).");
+			throw new InvalidMediaTypeException(mediaType, "wildcard type is legal only in '*/*' (all media types)");
 		}
 
 		Map<String, String> parameters = null;
@@ -719,7 +720,15 @@ public class MediaType implements Comparable<MediaType> {
 			}
 		}
 
-		return new MediaType(type, subtype, parameters);
+		try {
+			return new MediaType(type, subtype, parameters);
+		}
+		catch (UnsupportedCharsetException ex) {
+			throw new InvalidMediaTypeException(mediaType, "unsupported charset '" + ex.getCharsetName() + "'");
+		}
+		catch (IllegalArgumentException ex) {
+			throw new InvalidMediaTypeException(mediaType, ex.getMessage());
+		}
 	}
 
 

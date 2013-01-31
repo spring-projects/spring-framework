@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2.2 (2013-03-07)
+--------------------------------------
+
+* ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK annotations via ASM (SPR-10249)
+* DefaultMessageListenerContainer invokes specified ExceptionListener for recovery exceptions as well (SPR-10230)
+* DefaultMessageListenerContainer logs recovery failures at error level and exposes "isRecovering()" method (SPR-10230)
+* MediaType throws dedicated InvalidMediaTypeException instead of generic IllegalArgumentException (SPR-10226)
+* consistent use of LinkedHashMaps and independent getAttributeNames Enumeration in Servlet/Portlet mocks (SPR-10224)
+
+
 Changes in version 3.2.1 (2013-01-24)
 --------------------------------------
 

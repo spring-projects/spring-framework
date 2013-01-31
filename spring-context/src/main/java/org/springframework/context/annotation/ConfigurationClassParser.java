@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.context.annotation.MetadataUtils.*;
@@ -228,7 +229,7 @@ class ConfigurationClassParser {
 
 		// process any @Import annotations
 		Set<String> imports = getImports(metadata.getClassName(), null, new HashSet<String>());
-		if (imports != null && !imports.isEmpty()) {
+		if (!CollectionUtils.isEmpty(imports)) {
 			processImport(configClass, imports.toArray(new String[imports.size()]), true);
 		}
 
@@ -292,9 +293,8 @@ class ConfigurationClassParser {
 	 * @return a set of all {@link Import#value() import values} or {@code null}
 	 * @throws IOException if there is any problem reading metadata from the named class
 	 */
-	private Set<String> getImports(String className, Set<String> imports,
-			Set<String> visited) throws IOException {
-		if (visited.add(className)) {
+	private Set<String> getImports(String className, Set<String> imports, Set<String> visited) throws IOException {
+		if (visited.add(className) && !className.startsWith("java")) {
 			AnnotationMetadata metadata = metadataReaderFactory.getMetadataReader(className).getAnnotationMetadata();
 			for (String annotationType : metadata.getAnnotationTypes()) {
 				imports = getImports(annotationType, imports, visited);
@@ -331,7 +331,7 @@ class ConfigurationClassParser {
 						throw new IllegalStateException(ex);
 					}
 				}
-				else if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader, metadataReaderFactory)) {
+				else if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader, this.metadataReaderFactory)) {
 					// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
 					try {
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(
@@ -360,17 +360,16 @@ class ConfigurationClassParser {
 	private void invokeAwareMethods(ImportBeanDefinitionRegistrar registrar) {
 		if (registrar instanceof Aware) {
 			if (registrar instanceof ResourceLoaderAware) {
-				((ResourceLoaderAware) registrar).setResourceLoader(resourceLoader);
+				((ResourceLoaderAware) registrar).setResourceLoader(this.resourceLoader);
 			}
 			if (registrar instanceof BeanClassLoaderAware) {
-				ClassLoader classLoader =
-						registry instanceof ConfigurableBeanFactory ?
-						((ConfigurableBeanFactory) registry).getBeanClassLoader() :
-						resourceLoader.getClassLoader();
+				ClassLoader classLoader = (this.registry instanceof ConfigurableBeanFactory ?
+						((ConfigurableBeanFactory) this.registry).getBeanClassLoader() :
+						this.resourceLoader.getClassLoader());
 				((BeanClassLoaderAware) registrar).setBeanClassLoader(classLoader);
 			}
-			if (registrar instanceof BeanFactoryAware && registry instanceof BeanFactory) {
-				((BeanFactoryAware) registrar).setBeanFactory((BeanFactory) registry);
+			if (registrar instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
+				((BeanFactoryAware) registrar).setBeanFactory((BeanFactory) this.registry);
 			}
 		}
 	}
@@ -397,6 +396,7 @@ class ConfigurationClassParser {
 	public ImportRegistry getImportRegistry() {
 		return this.importStack;
 	}
+
 
 	interface ImportRegistry {
 
@@ -470,4 +470,5 @@ class ConfigurationClassParser {
 					new Location(importStack.peek().getResource(), metadata));
 		}
 	}
+
 }
