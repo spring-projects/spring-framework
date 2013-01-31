@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,12 +79,15 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Phillip Webb
  * @since 1.2.6
  * @see java.beans.PropertyEditorManager
  * @see java.beans.PropertyEditorSupport#setAsText
  * @see java.beans.PropertyEditorSupport#setValue
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
+
+	private static final PropertyEditorFactories PROPERTY_EDITOR_FACTORIES = new PropertyEditorFactories();
 
 	private ConversionService conversionService;
 
@@ -176,81 +180,22 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 				return editor;
 			}
 		}
-		if (this.defaultEditors == null) {
-			createDefaultEditors();
-		}
-		return this.defaultEditors.get(requiredType);
+		return getOrCreateDefaultEditor(requiredType);
 	}
 
-	/**
-	 * Actually register the default editors for this registry instance.
-	 */
-	private void createDefaultEditors() {
-		this.defaultEditors = new HashMap<Class<?>, PropertyEditor>(64);
-
-		// Simple editors, without parameterization capabilities.
-		// The JDK does not contain a default editor for any of these target types.
-		this.defaultEditors.put(Charset.class, new CharsetEditor());
-		this.defaultEditors.put(Class.class, new ClassEditor());
-		this.defaultEditors.put(Class[].class, new ClassArrayEditor());
-		this.defaultEditors.put(Currency.class, new CurrencyEditor());
-		this.defaultEditors.put(File.class, new FileEditor());
-		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
-		this.defaultEditors.put(InputSource.class, new InputSourceEditor());
-		this.defaultEditors.put(Locale.class, new LocaleEditor());
-		this.defaultEditors.put(Pattern.class, new PatternEditor());
-		this.defaultEditors.put(Properties.class, new PropertiesEditor());
-		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
-		this.defaultEditors.put(TimeZone.class, new TimeZoneEditor());
-		this.defaultEditors.put(URI.class, new URIEditor());
-		this.defaultEditors.put(URL.class, new URLEditor());
-		this.defaultEditors.put(UUID.class, new UUIDEditor());
-
-		// Default instances of collection editors.
-		// Can be overridden by registering custom instances of those as custom editors.
-		this.defaultEditors.put(Collection.class, new CustomCollectionEditor(Collection.class));
-		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
-		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
-		this.defaultEditors.put(List.class, new CustomCollectionEditor(List.class));
-		this.defaultEditors.put(SortedMap.class, new CustomMapEditor(SortedMap.class));
-
-		// Default editors for primitive arrays.
-		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
-		this.defaultEditors.put(char[].class, new CharArrayPropertyEditor());
-
-		// The JDK does not contain a default editor for char!
-		this.defaultEditors.put(char.class, new CharacterEditor(false));
-		this.defaultEditors.put(Character.class, new CharacterEditor(true));
-
-		// Spring's CustomBooleanEditor accepts more flag values than the JDK's default editor.
-		this.defaultEditors.put(boolean.class, new CustomBooleanEditor(false));
-		this.defaultEditors.put(Boolean.class, new CustomBooleanEditor(true));
-
-		// The JDK does not contain default editors for number wrapper types!
-		// Override JDK primitive number editors with our own CustomNumberEditor.
-		this.defaultEditors.put(byte.class, new CustomNumberEditor(Byte.class, false));
-		this.defaultEditors.put(Byte.class, new CustomNumberEditor(Byte.class, true));
-		this.defaultEditors.put(short.class, new CustomNumberEditor(Short.class, false));
-		this.defaultEditors.put(Short.class, new CustomNumberEditor(Short.class, true));
-		this.defaultEditors.put(int.class, new CustomNumberEditor(Integer.class, false));
-		this.defaultEditors.put(Integer.class, new CustomNumberEditor(Integer.class, true));
-		this.defaultEditors.put(long.class, new CustomNumberEditor(Long.class, false));
-		this.defaultEditors.put(Long.class, new CustomNumberEditor(Long.class, true));
-		this.defaultEditors.put(float.class, new CustomNumberEditor(Float.class, false));
-		this.defaultEditors.put(Float.class, new CustomNumberEditor(Float.class, true));
-		this.defaultEditors.put(double.class, new CustomNumberEditor(Double.class, false));
-		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, true));
-		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, true));
-		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, true));
-
-		// Only register config value editors if explicitly requested.
-		if (this.configValueEditorsActive) {
-			StringArrayPropertyEditor sae = new StringArrayPropertyEditor();
-			this.defaultEditors.put(String[].class, sae);
-			this.defaultEditors.put(short[].class, sae);
-			this.defaultEditors.put(int[].class, sae);
-			this.defaultEditors.put(long[].class, sae);
+	private PropertyEditor getOrCreateDefaultEditor(Class<?> requiredType) {
+		if(this.defaultEditors == null) {
+			this.defaultEditors = new HashMap<Class<?>, PropertyEditor>();
 		}
+		PropertyEditor propertyEditor = this.defaultEditors.get(requiredType);
+		if(propertyEditor == null) {
+			PropertyEditorFactory factory = PROPERTY_EDITOR_FACTORIES.get(requiredType, this.configValueEditorsActive);
+			if(factory != null) {
+				propertyEditor = factory.create();
+				defaultEditors.put(requiredType, propertyEditor);
+			}
+		}
+		return propertyEditor;
 	}
 
 	/**
@@ -565,4 +510,312 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 	}
 
+	private enum PropertyEditorFactoryType {DEFAULT, CONFIG_VALUE};
+
+	private static interface PropertyEditorFactory {
+		PropertyEditor create();
+	}
+
+	private static class PropertyEditorFactories {
+
+		private static final Map<PropertyEditorFactoryType, Map<Class<?>, PropertyEditorFactory>> FACTORIES;
+		static {
+			Map<PropertyEditorFactoryType, Map<Class<?>, PropertyEditorFactory>> factories = new HashMap<PropertyEditorRegistrySupport.PropertyEditorFactoryType, Map<Class<?>, PropertyEditorFactory>>();
+			factories.put(PropertyEditorFactoryType.DEFAULT,
+				getDefaultPropertyEditorFactories());
+			factories.put(PropertyEditorFactoryType.CONFIG_VALUE,
+				getConfigValuePropertyEditorFactories());
+			FACTORIES = Collections.unmodifiableMap(factories);
+		}
+
+		private static Map<Class<?>, PropertyEditorFactory> getDefaultPropertyEditorFactories() {
+			Map<Class<?>, PropertyEditorFactory> factories = new HashMap<Class<?>, PropertyEditorFactory>();
+			addSimpleEditors(factories);
+			addCollectionEditors(factories);
+			addPrimitiveArrays(factories);
+			addCharacter(factories);
+			addCustomBoolean(factories);
+			addNumberWrappers(factories);
+			return Collections.unmodifiableMap(factories);
+		}
+
+		/**
+		 * Add Simple editors, without parameterization capabilities. The JDK does not
+		 * contain a default editor for any of these target types.
+		 * @param factories
+		 */
+		private static void addSimpleEditors(
+			Map<Class<?>, PropertyEditorFactory> factories) {
+			factories.put(Charset.class, new PropertyEditorFactory() {
+
+				public PropertyEditor create() {
+					return new CharsetEditor();
+				}
+			});
+			factories.put(Class.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new ClassEditor();
+				}
+			});
+			factories.put(Class[].class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new ClassArrayEditor();
+				}
+			});
+			factories.put(Currency.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CurrencyEditor();
+				}
+			});
+			factories.put(File.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new FileEditor();
+				}
+			});
+			factories.put(InputStream.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new InputStreamEditor();
+				}
+			});
+			factories.put(InputSource.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new InputSourceEditor();
+				}
+			});
+			factories.put(Locale.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new LocaleEditor();
+				}
+			});
+			factories.put(Pattern.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new PatternEditor();
+				}
+			});
+			factories.put(Properties.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new PropertiesEditor();
+				}
+			});
+			factories.put(Resource[].class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new ResourceArrayPropertyEditor();
+				}
+			});
+			factories.put(TimeZone.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new TimeZoneEditor();
+				}
+			});
+			factories.put(URI.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new URIEditor();
+				}
+			});
+			factories.put(URL.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new URLEditor();
+				}
+			});
+			factories.put(UUID.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new UUIDEditor();
+				}
+			});
+		}
+
+		/**
+		 * Default instances of collection editors. Can be overridden by registering
+		 * custom instances of those as custom editors.
+		 * @param factories
+		 */
+		private static void addCollectionEditors(
+			Map<Class<?>, PropertyEditorFactory> factories) {
+			factories.put(Collection.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomCollectionEditor(Collection.class);
+				}
+			});
+			factories.put(Set.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomCollectionEditor(Set.class);
+				}
+			});
+			factories.put(SortedSet.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomCollectionEditor(SortedSet.class);
+				}
+			});
+			factories.put(List.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomCollectionEditor(List.class);
+				}
+			});
+			factories.put(SortedMap.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomMapEditor(SortedMap.class);
+				}
+			});
+		}
+
+		/**
+		 * Default editors for primitive arrays.
+		 * @param factories
+		 */
+		private static void addPrimitiveArrays(Map<Class<?>, PropertyEditorFactory> factories) {
+			factories.put(byte[].class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new ByteArrayPropertyEditor();
+				}
+			});
+			factories.put(char[].class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CharArrayPropertyEditor();
+				}
+			});
+		}
+
+		/**
+		 * The JDK does not contain a default editor for char.
+		 * @param factories
+		 */
+		private static void addCharacter(Map<Class<?>, PropertyEditorFactory> factories) {
+			factories.put(char.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CharacterEditor(false);
+				}
+			});
+			factories.put(Character.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CharacterEditor(true);
+				}
+			});
+		}
+
+		/**
+		 * Spring's CustomBooleanEditor accepts more flag values than the JDK's default editor.
+		 * @param factories
+		 */
+		private static void addCustomBoolean(Map<Class<?>, PropertyEditorFactory> factories) {
+			factories.put(boolean.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomBooleanEditor(false);
+				}
+			});
+			factories.put(Boolean.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomBooleanEditor(true);
+				}
+			});
+		}
+
+		/**
+		 * The JDK does not contain default editors for number wrapper types. Override JDK
+		 * primitive number editors with our own CustomNumberEditor.
+		 * @param factories
+		 */
+		private static void addNumberWrappers(Map<Class<?>, PropertyEditorFactory> factories) {
+			factories.put(byte.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Byte.class, false);
+				}
+			});
+			factories.put(Byte.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Byte.class, true);
+				}
+			});
+			factories.put(short.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Short.class, false);
+				}
+			});
+			factories.put(Short.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Short.class, true);
+				}
+			});
+			factories.put(int.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Integer.class, false);
+				}
+			});
+			factories.put(Integer.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Integer.class, true);
+				}
+			});
+			factories.put(long.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Long.class, false);
+				}
+			});
+			factories.put(Long.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Long.class, true);
+				}
+			});
+			factories.put(float.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Float.class, false);
+				}
+			});
+			factories.put(Float.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Float.class, true);
+				}
+			});
+			factories.put(double.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Double.class, false);
+				}
+			});
+			factories.put(Double.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(Double.class, true);
+				}
+			});
+			factories.put(BigDecimal.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(BigDecimal.class, true);
+				}
+			});
+			factories.put(BigInteger.class, new PropertyEditorFactory() {
+				public PropertyEditor create() {
+					return new CustomNumberEditor(BigInteger.class, true);
+				}
+			});
+		}
+
+		private static Map<Class<?>, PropertyEditorFactory> getConfigValuePropertyEditorFactories() {
+			Map<Class<?>, PropertyEditorFactory> factories = new HashMap<Class<?>, PropertyEditorFactory>();
+			PropertyEditorFactory stringArrayProperyEditorFactory = new PropertyEditorFactory() {
+
+				public PropertyEditor create() {
+					return new StringArrayPropertyEditor();
+				}
+			};
+			factories.put(String[].class, stringArrayProperyEditorFactory);
+			factories.put(short[].class, stringArrayProperyEditorFactory);
+			factories.put(int[].class, stringArrayProperyEditorFactory);
+			factories.put(long[].class, stringArrayProperyEditorFactory);
+			return Collections.unmodifiableMap(factories);
+		}
+
+		public PropertyEditorFactory get(Class<?> requiredType, boolean configValueEditorsActive) {
+			PropertyEditorFactory factory = get(PropertyEditorFactoryType.DEFAULT, requiredType);
+			if(factory == null && configValueEditorsActive) {
+				factory = get(PropertyEditorFactoryType.CONFIG_VALUE, requiredType);
+			}
+			return factory;
+		}
+
+		private PropertyEditorFactory get(PropertyEditorFactoryType factoryType, Class<?> requiredType) {
+			Map<Class<?>, PropertyEditorFactory> factories = FACTORIES.get(factoryType);
+			if(factories == null) {
+				return null;
+			}
+			return factories.get(requiredType);
+		}
+	}
 }
