@@ -38,6 +38,7 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -191,12 +192,15 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	public void write(BufferedImage image, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-			contentType = getDefaultContentType();
-		}
-		Assert.notNull(contentType,
-				"Count not determine Content-Type, set one using the 'defaultContentType' property");
-		outputMessage.getHeaders().setContentType(contentType);
+		final HttpHeaders outputHeaders = outputMessage.getHeaders();
+		if(outputHeaders.getContentType() == null) {
+			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
+				contentType = getDefaultContentType();
+			}
+			Assert.notNull(contentType,
+					"Count not determine Content-Type, set one using the 'defaultContentType' property");
+			outputMessage.getHeaders().setContentType(contentType);
+        }
 		ImageOutputStream imageOutputStream = null;
 		ImageWriter imageWriter = null;
 		try {

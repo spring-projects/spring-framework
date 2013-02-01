@@ -94,4 +94,18 @@ public class BufferedImageHttpMessageConverterTests {
 		assertEquals("Invalid width", 750, result.getWidth());
 	}
 
+    @Test
+    public void writeWithoutOverwritingContentType() throws IOException {
+        Resource logo = new ClassPathResource("logo.jpg", BufferedImageHttpMessageConverterTests.class);
+        MediaType contentType = new MediaType("image", "jpeg");
+        BufferedImage body = ImageIO.read(logo.getFile());
+        MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+        outputMessage.getHeaders().setContentType(contentType);
+        converter.write(body, new MediaType("image", "png"), outputMessage);
+        assertEquals("Invalid content type", contentType, outputMessage.getHeaders().getContentType());
+        BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));
+        assertEquals("Invalid height", 500, result.getHeight());
+        assertEquals("Invalid width", 750, result.getWidth());
+    }
+
 }
