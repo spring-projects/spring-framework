@@ -36,6 +36,7 @@ public class CompoundExpression extends SpelNodeImpl {
 		}
 	}
 
+
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		if (getChildCount()==1) {

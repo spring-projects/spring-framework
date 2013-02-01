@@ -139,7 +139,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				SourceLocation sloc = AbstractAspectJAdvice.currentJoinPoint().getSourceLocation();
-				assertEquals("Same source location must be returned on subsequent requests",  sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
+				assertEquals("Same source location must be returned on subsequent requests", sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
 				assertEquals(TestBean.class, sloc.getWithinType());
 				try {
 					sloc.getLine();
@@ -172,7 +172,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				StaticPart staticPart = AbstractAspectJAdvice.currentJoinPoint().getStaticPart();
-				assertEquals("Same static part must be returned on subsequent requests",  staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
+				assertEquals("Same static part must be returned on subsequent requests", staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
 				assertEquals(ProceedingJoinPoint.METHOD_EXECUTION, staticPart.getKind());
 				assertSame(AbstractAspectJAdvice.currentJoinPoint().getSignature(), staticPart.getSignature());
 				assertEquals(AbstractAspectJAdvice.currentJoinPoint().getSourceLocation(), staticPart.getSourceLocation());

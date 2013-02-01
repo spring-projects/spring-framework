@@ -70,7 +70,7 @@ public class Projection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapData = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
-			for (Map.Entry<?,?> entry : mapData.entrySet()) {
+			for (Map.Entry<?, ?> entry : mapData.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry));
 					result.add(this.children[0].getValueInternal(state).getValue());
