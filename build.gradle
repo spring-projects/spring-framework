@@ -817,6 +817,7 @@ configure(rootProject) {
 		options.author = true
 		options.header = rootProject.description
 		options.overview = "src/api/overview.html"
+		options.stylesheetFile = file("src/api/stylesheet.css")
 		options.splitIndex = true
 		options.links(project.ext.javadocLinks)
 
