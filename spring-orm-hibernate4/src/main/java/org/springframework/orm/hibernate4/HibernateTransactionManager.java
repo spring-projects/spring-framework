@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,8 +150,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * The DataSource should match the one used by the Hibernate SessionFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the SessionFactory was configured with LocalDataSourceConnectionProvider,
-	 * i.e. by Spring's SessionFactoryBuilder with a specified "dataSource",
-	 * the DataSource will be auto-detected: You can still explictly specify the
+	 * i.e. by Spring's LocalSessionFactoryBean with a specified "dataSource",
+	 * the DataSource will be auto-detected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -188,7 +188,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
-	 * if set via SessionFactoryBuilder's {@code setDataSource}. Default is "true".
+	 * if set via LocalSessionFactoryBean's {@code setDataSource}. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource, in order
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
@@ -358,7 +358,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 
 			if (definition.isReadOnly() && txObject.isNewSession()) {
-				// Just set to NEVER in case of a new Session for this transaction.
+				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
 			}
 
@@ -586,7 +586,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occured
+	 * @param ex HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */
