@@ -110,7 +110,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 			}
 			else if (targetEx instanceof CreateException) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-				    invocation.getMethod(), targetEx, "Could not create remote EJB [" + getJndiName() + "]");
+					invocation.getMethod(), targetEx, "Could not create remote EJB [" + getJndiName() + "]");
 			}
 			throw targetEx;
 		}

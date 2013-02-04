@@ -736,7 +736,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	//---------------------------------------------------------------------
 
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
@@ -751,7 +751,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	protected Object doResolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 		if (value != null) {

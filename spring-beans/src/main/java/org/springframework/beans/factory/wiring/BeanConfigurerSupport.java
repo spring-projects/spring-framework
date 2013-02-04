@@ -47,7 +47,7 @@ import org.springframework.util.ClassUtils;
  * @see #setBeanWiringInfoResolver
  * @see ClassNameBeanWiringInfoResolver
  */
-public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
+public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());

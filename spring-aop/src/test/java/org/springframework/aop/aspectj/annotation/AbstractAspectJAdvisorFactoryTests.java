@@ -940,7 +940,7 @@ abstract class AbstractMakeModifiable {
 		}
 
 		// Find the current raw value, by invoking the corresponding setter
-		Method correspondingGetter =  getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
+		Method correspondingGetter = getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
 		boolean modified = true;
 		if (correspondingGetter != null) {
 			try {

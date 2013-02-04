@@ -699,7 +699,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return nestedBw.getPropertyValue(tokens);
 	}
 
-	private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
+    private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
 		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);

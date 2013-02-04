@@ -107,7 +107,7 @@ public class RuntimeBeanReference implements BeanReference {
 
 	@Override
 	public String toString() {
-	   return '<' + getBeanName() + '>';
+		return '<' + getBeanName() + '>';
 	}
 
 }
