@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Constructor;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Arrays;
-
 import javax.sql.DataSource;
 
 import org.springframework.core.JdkVersion;
@@ -30,9 +29,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
@@ -201,20 +200,25 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 		// Check SQLErrorCodes with corresponding error code, if available.
 		if (this.sqlErrorCodes != null) {
-			String errorCode = null;
+			String errorCode;
 			if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
 				errorCode = sqlEx.getSQLState();
 			}
 			else {
-				errorCode = Integer.toString(sqlEx.getErrorCode());
+				// Try to find SQLException with actual error code, looping through the causes.
+				// E.g. applicable to java.sql.DataTruncation as of JDK 1.6.
+				SQLException current = sqlEx;
+				while (current.getErrorCode() == 0 && current.getCause() instanceof SQLException) {
+					current = (SQLException) current.getCause();
+				}
+				errorCode = Integer.toString(current.getErrorCode());
 			}
 
 			if (errorCode != null) {
 				// Look for defined custom translations first.
 				CustomSQLErrorCodesTranslation[] customTranslations = this.sqlErrorCodes.getCustomTranslations();
 				if (customTranslations != null) {
-					for (int i = 0; i < customTranslations.length; i++) {
-						CustomSQLErrorCodesTranslation customTranslation = customTranslations[i];
+					for (CustomSQLErrorCodesTranslation customTranslation : customTranslations) {
 						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0) {
 							if (customTranslation.getExceptionClass() != null) {
 								DataAccessException customException = createCustomException(
@@ -273,7 +277,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 
 		// We couldn't identify it more precisely - let's hand it over to the SQLState fallback translator.
 		if (logger.isDebugEnabled()) {
-			String codes = null;
+			String codes;
 			if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation()) {
 				codes = "SQL state '" + sqlEx.getSQLState() + "', error code '" + sqlEx.getErrorCode();
 			}
@@ -321,8 +325,8 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 		try {
 			int constructorType = 0;
 			Constructor[] constructors = exceptionClass.getConstructors();
-			for (int i = 0; i < constructors.length; i++) {
-				Class[] parameterTypes = constructors[i].getParameterTypes();
+			for (Constructor constructor : constructors) {
+				Class[] parameterTypes = constructor.getParameterTypes();
 				if (parameterTypes.length == 1 && parameterTypes[0].equals(String.class)) {
 					if (constructorType < MESSAGE_ONLY_CONSTRUCTOR)
 						constructorType = MESSAGE_ONLY_CONSTRUCTOR;
@@ -350,7 +354,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 			}
 
 			// invoke constructor
-			Constructor exceptionConstructor = null;
+			Constructor exceptionConstructor;
 			switch (constructorType) {
 				case MESSAGE_SQL_SQLEX_CONSTRUCTOR:
 					Class[] messageAndSqlAndSqlExArgsClass = new Class[] {String.class, String.class, SQLException.class};
