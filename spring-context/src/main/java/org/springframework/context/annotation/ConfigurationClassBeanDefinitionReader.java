@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,7 +256,8 @@ class ConfigurationClassBeanDefinitionReader {
 		if (proxyMode != ScopedProxyMode.NO) {
 			BeanDefinitionHolder proxyDef = ScopedProxyCreator.createScopedProxy(
 					new BeanDefinitionHolder(beanDef, beanName), this.registry, proxyMode == ScopedProxyMode.TARGET_CLASS);
-			beanDefToRegister = proxyDef.getBeanDefinition();
+			beanDefToRegister =
+					new ConfigurationClassBeanDefinition((RootBeanDefinition) proxyDef.getBeanDefinition(), configClass);
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -307,9 +308,14 @@ class ConfigurationClassBeanDefinitionReader {
 	@SuppressWarnings("serial")
 	private static class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
 
-		private AnnotationMetadata annotationMetadata;
+		private final AnnotationMetadata annotationMetadata;
 
 		public ConfigurationClassBeanDefinition(ConfigurationClass configClass) {
+			this.annotationMetadata = configClass.getMetadata();
+		}
+
+		public ConfigurationClassBeanDefinition(RootBeanDefinition original, ConfigurationClass configClass) {
+			super(original);
 			this.annotationMetadata = configClass.getMetadata();
 		}
 
