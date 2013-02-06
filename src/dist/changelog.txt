@@ -6,10 +6,15 @@ http://www.springsource.org
 Changes in version 3.2.2 (2013-03-07)
 --------------------------------------
 
+* official support for Hibernate 4.2
 * ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK annotations via ASM (SPR-10249)
+* ConfigurationClassPostProcessor allows for overriding of scoped-proxy bean definitions (SPR-10265)
+* added "maximumAutoGrowSize" property to SpelParserConfiguration (SPR-10229)
+* SQLErrorCodeSQLExceptionTranslator tries to find SQLException with actual error code among causes (SPR-10260)
 * DefaultMessageListenerContainer invokes specified ExceptionListener for recovery exceptions as well (SPR-10230)
 * DefaultMessageListenerContainer logs recovery failures at error level and exposes "isRecovering()" method (SPR-10230)
 * MediaType throws dedicated InvalidMediaTypeException instead of generic IllegalArgumentException (SPR-10226)
+* marked spring-web module as 'distributable' in order for session replication to work on Tomcat (SPR-10219)
 * consistent use of LinkedHashMaps and independent getAttributeNames Enumeration in Servlet/Portlet mocks (SPR-10224)
 * support 'unless' expression for cache veto (SPR-8871)
 
@@ -35,7 +40,7 @@ Changes in version 3.2.1 (2013-01-24)
 * MessageSourceResourceBundle overrides JDK 1.6 containsKey method, avoiding NPE in getKeys (SPR-10136)
 * SpringValidationAdapter properly detects invalid value for JSR-303 field-level bean constraints (SPR-9332)
 * SpringBeanAutowiringInterceptor eagerly releases BeanFactory if post-construction fails (SPR-10013)
-* added "exposeAccessContext" flag JndiRmiClientInterceptor/ProxyFactoryBean (for WebLogic; SPR-9428)
+* added "exposeAccessContext" flag to JndiRmiClientInterceptor/ProxyFactoryBean (for WebLogic; SPR-9428)
 * MBeanExporter does not log warnings for manually unregistered MBeans (SPR-9451)
 * MBeanInfoAssembler impls expose actual method parameter names if possible (SPR-9985)
 * AbstractCacheManager accepts no caches defined, allowing for EHCache default cache setup (SPR-7955)
