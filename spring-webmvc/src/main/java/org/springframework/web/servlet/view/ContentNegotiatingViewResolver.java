@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.activation.FileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.OrderComparator;
@@ -95,7 +95,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private ContentNegotiationManagerFactoryBean cnManagerFactoryBean = new ContentNegotiationManagerFactoryBean();
+	private final ContentNegotiationManagerFactoryBean cnManagerFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
@@ -103,10 +103,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private List<ViewResolver> viewResolvers;
 
-
-	public ContentNegotiatingViewResolver() {
-		super();
-	}
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -118,7 +114,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
-	 * If not set, the default constructor is used.
+	 * <p>If not set, ContentNegotiationManager's default constructor will be used,
+	 * applying a {@link org.springframework.web.accept.HeaderContentNegotiationStrategy}.
+	 * @see ContentNegotiationManager#ContentNegotiationManager()
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
@@ -130,18 +128,16 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * <p>For instance, when this flag is {@code true} (the default), a request for {@code /hotels.pdf}
 	 * will result in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the
 	 * browser-defined {@code text/html,application/xhtml+xml}.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
-		this.cnManagerFactoryBean.setFavorParameter(favorPathExtension);
+		this.cnManagerFactoryBean.setFavorPathExtension(favorPathExtension);
 	}
 
 	/**
 	 * Indicate whether to use the Java Activation Framework to map from file extensions to media types.
 	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used (if available).
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
@@ -155,7 +151,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * <p>For instance, when this flag is {@code true}, a request for {@code /hotels?format=pdf} will result
 	 * in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined
 	 * {@code text/html,application/xhtml+xml}.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
@@ -166,7 +161,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	/**
 	 * Set the parameter name that can be used to determine the requested media type if the {@link
 	 * #setFavorParameter} property is {@code true}. The default parameter name is {@code format}.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
@@ -179,7 +173,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * <p>If set to {@code true}, this view resolver will only refer to the file extension and/or
 	 * parameter, as indicated by the {@link #setFavorPathExtension favorPathExtension} and
 	 * {@link #setFavorParameter favorParameter} properties.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
@@ -191,7 +184,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * Set the mapping from file extensions to media types.
 	 * <p>When this mapping is not set or when an extension is not present, this view resolver
 	 * will fall back to using a {@link FileTypeMap} when the Java Action Framework is available.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
@@ -207,7 +199,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * Set the default content type.
 	 * <p>This content type will be used when file extension, parameter, nor {@code Accept}
 	 * header define a content-type, either through being disabled or empty.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	@Deprecated
@@ -275,7 +266,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		this.cnManagerFactoryBean.setServletContext(servletContext);
 	}
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.contentNegotiationManager == null) {
 			this.cnManagerFactoryBean.afterPropertiesSet();
 			this.contentNegotiationManager = this.cnManagerFactoryBean.getObject();
