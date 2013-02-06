@@ -135,7 +135,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
-		this.cnManagerFactoryBean.setFavorParameter(favorPathExtension);
+		this.cnManagerFactoryBean.setFavorPathExtension(favorPathExtension);
 	}
 
 	/**
