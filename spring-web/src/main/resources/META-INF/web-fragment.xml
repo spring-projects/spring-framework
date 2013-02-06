@@ -6,4 +6,6 @@
 
 	<name>spring_web</name>
 
+        <distributable/>
+
 </web-fragment>
