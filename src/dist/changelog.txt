@@ -6,10 +6,13 @@ http://www.springsource.org
 Changes in version 3.2.2 (2013-03-07)
 --------------------------------------
 
-* official support for Hibernate 4.2
+* official support for Hibernate 4.2 (SPR-10255)
 * ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK annotations via ASM (SPR-10249)
 * ConfigurationClassPostProcessor allows for overriding of scoped-proxy bean definitions (SPR-10265)
+* "depends-on" attribute on lang namespace element actually respected at runtime now (SPR-8625)
+* allow for ordering of mixed AspectJ before/after advices (SPR-9438)
 * added "maximumAutoGrowSize" property to SpelParserConfiguration (SPR-10229)
+* @Scheduled provides String variants of fixedDelay, fixedRate, initialDelay for placeholder support (SPR-8067)
 * SQLErrorCodeSQLExceptionTranslator tries to find SQLException with actual error code among causes (SPR-10260)
 * DefaultMessageListenerContainer invokes specified ExceptionListener for recovery exceptions as well (SPR-10230)
 * DefaultMessageListenerContainer logs recovery failures at error level and exposes "isRecovering()" method (SPR-10230)
