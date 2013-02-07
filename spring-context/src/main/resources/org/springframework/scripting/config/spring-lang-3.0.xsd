@@ -82,7 +82,7 @@
 					<xsd:annotation>
 						<xsd:documentation source="java:org.springframework.core.io.Resource"><![CDATA[
 	The resource containing the script for the dynamic language-backed bean.
-	
+
 	Examples might be '/WEB-INF/scripts/Anais.groovy', 'classpath:Nin.bsh', etc.
 						]]></xsd:documentation>
 					</xsd:annotation>
@@ -127,13 +127,13 @@
 				<xsd:attribute name="depends-on" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-			The names of the beans that this bean depends on being initialized.
-			The bean factory will guarantee that these beans get initialized
-			before this bean.
+	The names of the beans that this bean depends on being initialized.
+	The bean factory will guarantee that these beans get initialized
+	before this bean.
 
-			Note that dependencies are normally expressed through bean properties.
-			This property should just be necessary other kinds of dependencies
-			like statics (*ugh*) or database preparation on startup.
+	Note that dependencies are normally expressed through bean properties.
+	This property should just be necessary for other kinds of dependencies
+	like statics (*ugh*) or database preparation on startup.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
