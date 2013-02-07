@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -497,18 +497,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
+			Class[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
+					new Class[] {typeToMatch} : new Class[] {FactoryBean.class, typeToMatch});
+
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
 			BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 			if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
 				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
-				Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd, FactoryBean.class, typeToMatch);
+				Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd, typesToMatch);
 				if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
 					return typeToMatch.isAssignableFrom(targetClass);
 				}
 			}
 
-			Class<?> beanClass = predictBeanType(beanName, mbd, FactoryBean.class, typeToMatch);
+			Class<?> beanClass = predictBeanType(beanName, mbd, typesToMatch);
 			if (beanClass == null) {
 				return false;
 			}
@@ -1332,9 +1335,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the corresponding bean definition
 	 */
 	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
-		Class<?> predictedType = predictBeanType(beanName, mbd, FactoryBean.class);
-		return (predictedType != null && FactoryBean.class.isAssignableFrom(predictedType)) ||
-				(mbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(mbd.getBeanClass()));
+		Class<?> beanClass = predictBeanType(beanName, mbd, FactoryBean.class);
+		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 	}
 
 	/**

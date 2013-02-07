@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -586,9 +586,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					Class processedType = ibp.predictBeanType(beanClass, beanName);
-					if (processedType != null) {
-						return processedType;
+					Class predictedType = ibp.predictBeanType(beanClass, beanName);
+					if (predictedType != null && (typesToMatch.length > 1 ||
+							!FactoryBean.class.equals(typesToMatch[0]) || FactoryBean.class.isAssignableFrom(predictedType))) {
+						return predictedType;
 					}
 				}
 			}
