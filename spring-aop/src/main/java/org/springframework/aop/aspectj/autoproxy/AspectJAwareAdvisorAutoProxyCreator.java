@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
@@ -67,29 +67,24 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	@Override
 	@SuppressWarnings("unchecked")
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
-		// build list for sorting
 		List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors =
-				new LinkedList<PartiallyComparableAdvisorHolder>();
+				new ArrayList<PartiallyComparableAdvisorHolder>(advisors.size());
 		for (Advisor element : advisors) {
 			partiallyComparableAdvisors.add(
 					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR));
 		}
-
-		// sort it
 		List<PartiallyComparableAdvisorHolder> sorted =
 				PartialOrder.sort(partiallyComparableAdvisors);
-		if (sorted == null) {
-			// TODO: work harder to give a better error message here.
-			throw new IllegalArgumentException("Advice precedence circularity error");
+		if (sorted != null) {
+			List<Advisor> result = new ArrayList<Advisor>(advisors.size());
+			for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
+				result.add(pcAdvisor.getAdvisor());
+			}
+			return result;
 		}
-
-		// extract results again
-		List<Advisor> result = new LinkedList<Advisor>();
-		for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
-			result.add(pcAdvisor.getAdvisor());
+		else {
+			return super.sortAdvisors(advisors);
 		}
-
-		return result;
 	}
 
 	/**

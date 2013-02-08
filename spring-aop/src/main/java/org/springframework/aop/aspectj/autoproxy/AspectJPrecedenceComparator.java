@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ class AspectJPrecedenceComparator implements Comparator {
 	private static final int HIGHER_PRECEDENCE = -1;
 	private static final int SAME_PRECEDENCE = 0;
 	private static final int LOWER_PRECEDENCE = 1;
-	private static final int NOT_COMPARABLE = 0;
 
 	private final Comparator<? super Advisor> advisorComparator;
 
@@ -85,21 +84,11 @@ class AspectJPrecedenceComparator implements Comparator {
 
 		Advisor advisor1 = (Advisor) o1;
 		Advisor advisor2 = (Advisor) o2;
-
-		boolean oneOrOtherIsAfterAdvice =
-				(AspectJAopUtils.isAfterAdvice(advisor1) || AspectJAopUtils.isAfterAdvice(advisor2));
-		boolean oneOrOtherIsBeforeAdvice =
-				(AspectJAopUtils.isBeforeAdvice(advisor1) || AspectJAopUtils.isBeforeAdvice(advisor2));
-		if (oneOrOtherIsAfterAdvice && oneOrOtherIsBeforeAdvice) {
-			return NOT_COMPARABLE;
+		int advisorPrecedence = this.advisorComparator.compare(advisor1, advisor2);
+		if (advisorPrecedence == SAME_PRECEDENCE && declaredInSameAspect(advisor1, advisor2)) {
+			advisorPrecedence = comparePrecedenceWithinAspect(advisor1, advisor2);
 		}
-		else {
-			int advisorPrecedence = this.advisorComparator.compare(advisor1, advisor2);
-			if (advisorPrecedence == SAME_PRECEDENCE && declaredInSameAspect(advisor1, advisor2)) {
-				advisorPrecedence = comparePrecedenceWithinAspect(advisor1, advisor2);
-			}
-			return advisorPrecedence;
-		}
+		return advisorPrecedence;
 	}
 
 	private int comparePrecedenceWithinAspect(Advisor advisor1, Advisor advisor2) {

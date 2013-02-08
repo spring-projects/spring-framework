@@ -16,31 +16,22 @@
 
 package org.springframework.scripting.groovy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import groovy.lang.DelegatingMetaClass;
-import groovy.lang.GroovyObject;
-
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map;
 
+import groovy.lang.DelegatingMetaClass;
+import groovy.lang.GroovyObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.NestedRuntimeException;
@@ -56,6 +47,12 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.stereotype.Component;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.ObjectUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rob Harrop
@@ -350,7 +347,9 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testInlineScriptFromTag() throws Exception {
-		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		BeanDefinition bd = ctx.getBeanFactory().getBeanDefinition("calculator");
+		assertTrue(ObjectUtils.containsElement(bd.getDependsOn(), "messenger"));
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertNotNull(calculator);
 		assertFalse(calculator instanceof Refreshable);

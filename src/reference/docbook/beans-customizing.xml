@@ -13,18 +13,25 @@
   <section xml:id="beans-factory-lifecycle">
     <title>Lifecycle callbacks</title>
 
-    <!-- MLP Beverly to review: Old Text: The Spring Framework provides several callback interfaces to
-    change the behavior of your bean in the container; they include -->
-
     <para>To interact with the container's management of the bean lifecycle, you
       can implement the Spring <interfacename>InitializingBean</interfacename>
       and <interfacename>DisposableBean</interfacename> interfaces. The
       container calls <methodname>afterPropertiesSet()</methodname> for the
       former and <methodname>destroy()</methodname> for the latter to allow the
       bean to perform certain actions upon initialization and destruction of
-      your beans. You can also achieve the same integration with the container
-      without coupling your classes to Spring interfaces through the use of
-      init-method and destroy method object definition metadata.</para>
+      your beans.</para>
+
+      <tip>
+          <para>The JSR-250 <interfacename>@PostConstruct</interfacename> and
+          <interfacename>@PreDestroy</interfacename> annotations are generally
+          considered best practice for receiving lifecycle callbacks in a modern
+          Spring application. Using these annotations means that your beans are not
+          coupled to Spring specific interfaces. For details see
+          <xref linkend="beans-postconstruct-and-predestroy-annotations"/>.</para>
+          <para>If you don't want to use the JSR-250 annotations but you are still
+          looking to remove coupling consider the use of init-method and destroy-method
+          object definition metadata.</para>
+      </tip>
 
     <para>Internally, the Spring Framework uses
       <interfacename>BeanPostProcessor</interfacename> implementations to
@@ -57,7 +64,9 @@
 
       <para>It is recommended that you do not use the
         <interfacename>InitializingBean</interfacename> interface because it
-        unnecessarily couples the code to Spring. Alternatively, specify a POJO
+        unnecessarily couples the code to Spring. Alternatively, use the
+        <link linkend="beans-postconstruct-and-predestroy-annotations">
+        <interfacename>@PostConstruct</interfacename> annotation</link> or specify a POJO
         initialization method. In the case of XML-based configuration metadata,
         you use the <literal>init-method</literal> attribute to specify the name
         of the method that has a void no-argument signature. For example, the
@@ -99,7 +108,9 @@
 
       <para>It is recommended that you do not use the
         <interfacename>DisposableBean</interfacename> callback interface because
-        it unnecessarily couples the code to Spring. Alternatively, specify a
+        it unnecessarily couples the code to Spring. Alternatively, use the
+        <link linkend="beans-postconstruct-and-predestroy-annotations">
+        <interfacename>@PreDestroy</interfacename> annotation</link> or specify a
         generic method that is supported by bean definitions. With XML-based
         configuration metadata, you use the <literal>destroy-method</literal>
         attribute on the <literal>&lt;bean/&gt;</literal>. For example, the

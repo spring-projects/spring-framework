@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -487,7 +487,7 @@ public class CronTriggerTests {
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNonExistentSpecificDate() throws Exception {
 		// TODO: maybe try and detect this as a special case in parser?
 		CronTrigger trigger = new CronTrigger("0 0 0 31 6 *", timeZone);

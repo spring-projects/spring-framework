@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -334,8 +334,9 @@ public abstract class Assert {
 	public static void isInstanceOf(Class type, Object obj, String message) {
 		notNull(type, "Type to check against must not be null");
 		if (!type.isInstance(obj)) {
-			throw new IllegalArgumentException(message +
-					". Object of class [" + (obj != null ? obj.getClass().getName() : "null") +
+			throw new IllegalArgumentException(
+					(StringUtils.hasLength(message) ? message + " " : "") +
+					"Object of class [" + (obj != null ? obj.getClass().getName() : "null") +
 					"] must be an instance of " + type);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,10 +65,25 @@ public @interface Scheduled {
 	long fixedDelay() default -1;
 
 	/**
+	 * Execute the annotated method with a fixed period between the end
+	 * of the last invocation and the start of the next.
+	 * @return the delay in milliseconds as a String value, e.g. a placeholder
+	 * @since 3.2.2
+	 */
+	String fixedDelayString() default "";
+
+	/**
 	 * Execute the annotated method with a fixed period between invocations.
 	 * @return the period in milliseconds
 	 */
 	long fixedRate() default -1;
+
+	/**
+	 * Execute the annotated method with a fixed period between invocations.
+	 * @return the period in milliseconds as a String value, e.g. a placeholder
+	 * @since 3.2.2
+	 */
+	String fixedRateString() default "";
 
 	/**
 	 * Number of milliseconds to delay before the first execution of a
@@ -76,6 +91,14 @@ public @interface Scheduled {
 	 * @return the initial delay in milliseconds
 	 * @since 3.2
 	 */
-	long initialDelay() default 0;
+	long initialDelay() default -1;
+
+	/**
+	 * Number of milliseconds to delay before the first execution of a
+	 * {@link #fixedRate()} or {@link #fixedDelay()} task.
+	 * @return the initial delay in milliseconds as a String value, e.g. a placeholder
+	 * @since 3.2.2
+	 */
+	String initialDelayString() default "";
 
 }

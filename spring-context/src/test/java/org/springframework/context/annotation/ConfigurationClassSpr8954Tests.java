@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+package org.springframework.context.annotation;
 
 import java.util.Map;
 
 import org.junit.Test;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for SPR-8954, in which a custom {@link InstantiationAwareBeanPostProcessor}
@@ -40,13 +39,14 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @author Chris Beams
  * @author Oliver Gierke
  */
-public class Spr8954Tests {
+public class ConfigurationClassSpr8954Tests {
 
 	@Test
 	public void repro() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));
-		bf.addBeanPostProcessor(new PredictingBPP());
+		AnnotationConfigApplicationContext bf = new AnnotationConfigApplicationContext();
+		bf.registerBeanDefinition("fooConfig", new RootBeanDefinition(FooConfig.class));
+		bf.getBeanFactory().addBeanPostProcessor(new PredictingBPP());
+		bf.refresh();
 
 		assertThat(bf.getBean("foo"), instanceOf(Foo.class));
 		assertThat(bf.getBean("&foo"), instanceOf(FooFactoryBean.class));
@@ -65,9 +65,10 @@ public class Spr8954Tests {
 
 	@Test
 	public void findsBeansByTypeIfNotInstantiated() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));
-		bf.addBeanPostProcessor(new PredictingBPP());
+		AnnotationConfigApplicationContext bf = new AnnotationConfigApplicationContext();
+		bf.registerBeanDefinition("fooConfig", new RootBeanDefinition(FooConfig.class));
+		bf.getBeanFactory().addBeanPostProcessor(new PredictingBPP());
+		bf.refresh();
 
 		assertThat(bf.isTypeMatch("&foo", FactoryBean.class), is(true));
 
@@ -81,6 +82,13 @@ public class Spr8954Tests {
 		assertThat("&foo", equalTo(aiBeans.keySet().iterator().next()));
 	}
 
+
+	static class FooConfig {
+
+		@Bean FooFactoryBean foo() {
+			return new FooFactoryBean();
+		}
+	}
 
 	static class FooFactoryBean implements FactoryBean<Foo>, AnInterface {
 
