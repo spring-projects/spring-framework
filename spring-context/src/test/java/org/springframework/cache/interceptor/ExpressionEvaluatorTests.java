@@ -44,7 +44,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author Costin Leau
  * @author Phillip Webb
  */
-public class ExpressionEvalutatorTest {
+public class ExpressionEvaluatorTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
