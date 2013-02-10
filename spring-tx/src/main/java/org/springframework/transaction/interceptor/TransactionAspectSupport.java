@@ -16,12 +16,8 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,7 +27,12 @@ import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Properties;
 
 /**
  * Base class for transactional aspects, such as the {@link TransactionInterceptor}
@@ -232,6 +233,90 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	/**
+	 * General delegate for around-advice-based subclasses, delegating to several other template
+	 * methods on this class. Able to handle {@link CallbackPreferringPlatformTransactionManager}
+	 * as well as regular {@link PlatformTransactionManager} implementations.
+	 * @param method the Method being invoked
+	 * @param targetClass the target class that we're invoking the method on
+	 * @param invocation the callback to use for proceeding with the target invocation
+	 * @return the return value of the method, if any
+	 * @throws Throwable propagated from the target invocation
+	 */
+	protected Object invokeWithinTransaction(Method method, Class targetClass, final InvocationCallback invocation)
+			throws Throwable {
+
+		// If the transaction attribute is null, the method is non-transactional.
+		final TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
+		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
+		final String joinpointIdentification = methodIdentification(method, targetClass);
+
+		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
+			// Standard transaction demarcation with getTransaction and commit/rollback calls.
+			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
+			Object retVal = null;
+			try {
+				// This is an around advice: Invoke the next interceptor in the chain.
+				// This will normally result in a target object being invoked.
+				retVal = invocation.proceedWithInvocation();
+			}
+			catch (Throwable ex) {
+				// target invocation exception
+				completeTransactionAfterThrowing(txInfo, ex);
+				throw ex;
+			}
+			finally {
+				cleanupTransactionInfo(txInfo);
+			}
+			commitTransactionAfterReturning(txInfo);
+			return retVal;
+		}
+
+		else {
+			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
+			try {
+				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
+						new TransactionCallback<Object>() {
+							public Object doInTransaction(TransactionStatus status) {
+								TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
+								try {
+									return invocation.proceedWithInvocation();
+								}
+								catch (Throwable ex) {
+									if (txAttr.rollbackOn(ex)) {
+										// A RuntimeException: will lead to a rollback.
+										if (ex instanceof RuntimeException) {
+											throw (RuntimeException) ex;
+										}
+										else {
+											throw new ThrowableHolderException(ex);
+										}
+									}
+									else {
+										// A normal return value: will lead to a commit.
+										return new ThrowableHolder(ex);
+									}
+								}
+								finally {
+									cleanupTransactionInfo(txInfo);
+								}
+							}
+						});
+
+				// Check result: It might indicate a Throwable to rethrow.
+				if (result instanceof ThrowableHolder) {
+					throw ((ThrowableHolder) result).getThrowable();
+				}
+				else {
+					return result;
+				}
+			}
+			catch (ThrowableHolderException ex) {
+				throw ex.getCause();
+			}
+		}
+	}
+
+	/**
 	 * Determine the specific transaction manager to use for the given transaction.
 	 */
 	protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
@@ -248,23 +333,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		else {
 			return this.beanFactory.getBean(PlatformTransactionManager.class);
 		}
-	}
-
-	/**
-	 * Create a transaction if necessary, based on the given method and class.
-	 * <p>Performs a default TransactionAttribute lookup for the given method.
-	 * @param method the method about to execute
-	 * @param targetClass the class that the method is being invoked on
-	 * @return a TransactionInfo object, whether or not a transaction was created.
-	 * The {@code hasTransaction()} method on TransactionInfo can be used to
-	 * tell if there was a transaction created.
-	 * @see #getTransactionAttributeSource()
-	 */
-	protected TransactionInfo createTransactionIfNecessary(Method method, Class targetClass) {
-		// If the transaction attribute is null, the method is non-transactional.
-		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
-		PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		return createTransactionIfNecessary(tm, txAttr, methodIdentification(method, targetClass));
 	}
 
 	/**
@@ -295,6 +363,26 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	@Deprecated
 	protected String methodIdentification(Method method) {
 		return null;
+	}
+
+	/**
+	 * Create a transaction if necessary, based on the given method and class.
+	 * <p>Performs a default TransactionAttribute lookup for the given method.
+	 * @param method the method about to execute
+	 * @param targetClass the class that the method is being invoked on
+	 * @return a TransactionInfo object, whether or not a transaction was created.
+	 * The {@code hasTransaction()} method on TransactionInfo can be used to
+	 * tell if there was a transaction created.
+	 * @see #getTransactionAttributeSource()
+	 * @deprecated in favor of
+	 * {@link #createTransactionIfNecessary(PlatformTransactionManager, TransactionAttribute, String)}
+	 */
+	@Deprecated
+	protected TransactionInfo createTransactionIfNecessary(Method method, Class targetClass) {
+		// If the transaction attribute is null, the method is non-transactional.
+		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
+		PlatformTransactionManager tm = determineTransactionManager(txAttr);
+		return createTransactionIfNecessary(tm, txAttr, methodIdentification(method, targetClass));
 	}
 
 	/**
@@ -524,6 +612,52 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		@Override
 		public String toString() {
 			return this.transactionAttribute.toString();
+		}
+	}
+
+
+	/**
+	 * Simple callback interface for proceeding with the target invocation.
+	 * Concrete interceptors/aspects adapt this to their invocation mechanism.
+	 */
+	protected interface InvocationCallback {
+
+		Object proceedWithInvocation() throws Throwable;
+	}
+
+
+	/**
+	 * Internal holder class for a Throwable, used as a return value
+	 * from a TransactionCallback (to be subsequently unwrapped again).
+	 */
+	private static class ThrowableHolder {
+
+		private final Throwable throwable;
+
+		public ThrowableHolder(Throwable throwable) {
+			this.throwable = throwable;
+		}
+
+		public final Throwable getThrowable() {
+			return this.throwable;
+		}
+	}
+
+
+	/**
+	 * Internal holder class for a Throwable, used as a RuntimeException to be
+	 * thrown from a TransactionCallback (and subsequently unwrapped again).
+	 */
+	@SuppressWarnings("serial")
+	private static class ThrowableHolderException extends RuntimeException {
+
+		public ThrowableHolderException(Throwable throwable) {
+			super(throwable);
+		}
+
+		@Override
+		public String toString() {
+			return getCause().toString();
 		}
 	}
 
