@@ -57,7 +57,7 @@
     <para>Note that just like other services in Spring Framework, the caching service is an abstraction (not a cache implementation) and requires
     the use of an actual storage to store the cache data - that is, the abstraction frees the developer from having to write the caching
     logic but does not provide the actual stores. There are two integrations available out of the box, for JDK <literal>java.util.concurrent.ConcurrentMap</literal>
-    and <link xl:href="http://ehcache.org/">Ehcache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
+    and <link xl:href="http://ehcache.org/">EhCache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
     </section>
 
     <section xml:id="cache-annotations">
@@ -558,18 +558,26 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
     </section>
 
     <section xml:id="cache-store-configuration-ehcache">
-        <title>Ehcache-based <interfacename>Cache</interfacename></title>
+        <title>EhCache-based <interfacename>Cache</interfacename></title>
 
-        <para>The Ehcache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate
+        <para>The EhCache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate
         <interfacename>CacheManager</interfacename>:</para>
 
         <programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
-<!-- Ehcache library setup -->
+<!-- EhCache library setup -->
 <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>]]></programlisting>
 
         <para>This setup bootstraps ehcache library inside Spring IoC (through bean <literal>ehcache</literal>) which is then wired into the dedicated <interfacename>CacheManager</interfacename>
         implementation. Note the entire ehcache-specific configuration is read from the resource <literal>ehcache.xml</literal>.</para>
+    </section>
+
+    <section xml:id="cache-store-configuration-gemfire">
+        <title>GemFire-based <interfacename>Cache</interfacename></title>
+
+        <para>GemFire is a memory-oriented/disk-backed, elastically scalable, continuously available, active (with built-in pattern-based subscription notifications),
+        globally replicated database and provides fully-featured edge caching. For further information on how to use GemFire as a CacheManager (and more), please refer
+        to the <link xl:href="http://static.springsource.org/spring-gemfire/docs/1.0.0.RELEASE/reference/html/">Spring GemFire reference documentation</link>.</para>
     </section>
 
     <section xml:id="cache-store-configuration-noop">
