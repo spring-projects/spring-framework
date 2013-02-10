@@ -16,12 +16,14 @@
 
 package org.springframework.jms.listener.endpoint;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import javax.jms.Destination;
 import javax.jms.Session;
 
 import junit.framework.TestCase;
 
-import org.easymock.MockControl;
 import org.springframework.jca.StubResourceAdapter;
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -60,20 +62,16 @@ public class DefaultJmsActivationSpecFactoryTests extends TestCase {
 	public void testWebSphereResourceAdapterSetup() throws Exception {
 		Destination destination = new StubQueue();
 
-		MockControl control = MockControl.createControl(DestinationResolver.class);
-		DestinationResolver destinationResolver = (DestinationResolver) control.getMock();
+		DestinationResolver destinationResolver = mock(DestinationResolver.class);
 
-		destinationResolver.resolveDestinationName(null, "destinationname", false);
-		control.setReturnValue(destination);
-		control.replay();
+		given(destinationResolver.resolveDestinationName(null, "destinationname",
+				false)).willReturn(destination);
 
 		DefaultJmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 		activationSpecFactory.setDestinationResolver(destinationResolver);
 
 		StubWebSphereActivationSpecImpl spec = (StubWebSphereActivationSpecImpl) activationSpecFactory
 				.createActivationSpec(new StubWebSphereResourceAdapterImpl(), activationSpecConfig);
-
-		control.verify();
 
 		assertEquals(destination, spec.getDestination());
 		assertEquals(5, spec.getMaxConcurrency());

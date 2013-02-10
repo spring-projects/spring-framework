@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.jms.support.destination;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import javax.jms.ConnectionFactory;
 
@@ -31,8 +32,7 @@ public class JmsDestinationAccessorTests {
 
 	@Test
 	public void testChokesIfDestinationResolverIsetToNullExplcitly() throws Exception {
-		ConnectionFactory connectionFactory = createMock(ConnectionFactory.class);
-		replay(connectionFactory);
+		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 
 		try {
 			JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
@@ -40,9 +40,11 @@ public class JmsDestinationAccessorTests {
 			accessor.setDestinationResolver(null);
 			accessor.afterPropertiesSet();
 			fail("expected IllegalArgumentException");
-		} catch (IllegalArgumentException ex) { /* expected */ }
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 
-		verify(connectionFactory);
 	}
 
 	@Test
