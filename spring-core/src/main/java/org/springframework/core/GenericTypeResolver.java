@@ -369,8 +369,7 @@ public abstract class GenericTypeResolver {
 	 * all super types, enclosing types and interfaces.
 	 */
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
-		Map<TypeVariable, Type> ref = typeVariableCache.get(clazz);
-		Map<TypeVariable, Type> typeVariableMap = (ref != null ? ref : null);
+		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 
 		if (typeVariableMap == null) {
 			typeVariableMap = new HashMap<TypeVariable, Type>();
