@@ -57,7 +57,9 @@ public class UriComponentsBuilderTests {
 		assertEquals("bar", result.getQuery());
 		assertEquals("baz", result.getFragment());
 
-		URI expected = new URI("/foo?bar#baz");
+		assertEquals("Invalid result URI String", "foo?bar#baz", result.toUriString());
+
+		URI expected = new URI("foo?bar#baz");
 		assertEquals("Invalid result URI", expected, result.toUri());
 
 		result = UriComponentsBuilder.fromPath("/foo").build();
@@ -332,4 +334,16 @@ public class UriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar"));
 	}
 
+	@Test
+	public void relativeUrls() throws Exception {
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toUriString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toUri().getPath(), equalTo("/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toString(), equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUriString(), equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath(), equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toUriString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toUri().getPath(), equalTo("/foo/../bar"));
+	}
 }

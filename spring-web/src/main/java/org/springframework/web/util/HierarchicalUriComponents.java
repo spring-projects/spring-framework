@@ -407,7 +407,10 @@ final class HierarchicalUriComponents extends UriComponents {
 			else {
 				String path = getPath();
 				if (StringUtils.hasLength(path) && path.charAt(0) != PATH_DELIMITER) {
-					path = PATH_DELIMITER + path;
+					// Only prefix the path delimiter if something exists before it
+					if(getScheme() != null || getUserInfo() != null || getHost() != null || getPort() != -1) {
+						path = PATH_DELIMITER + path;
+					}
 				}
 				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(),
 						getFragment());
