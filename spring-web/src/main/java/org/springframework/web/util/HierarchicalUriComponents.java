@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -615,7 +616,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Defines the contract for path (segments).
 	 */
-	interface PathComponent {
+	interface PathComponent extends Serializable {
 
 		String getPath();
 
