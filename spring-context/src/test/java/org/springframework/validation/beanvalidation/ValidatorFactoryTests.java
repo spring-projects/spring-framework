@@ -35,7 +35,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.HibernateValidator;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -43,7 +42,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -105,7 +104,6 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	@Ignore
 	public void testSpringValidationFieldType() throws Exception {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
@@ -115,8 +113,7 @@ public class ValidatorFactoryTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(person, "person");
 		validator.validate(person, errors);
 		assertEquals(1, errors.getErrorCount());
-		assertThat("Field/Value type missmatch",
-				errors.getFieldError("address").getRejectedValue(),
+		assertThat("Field/Value type mismatch", errors.getFieldError("address").getRejectedValue(),
 				instanceOf(ValidAddress.class));
 	}
 
