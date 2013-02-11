@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,13 +155,15 @@ public class Jaxb2Marshaller
 
 	private LSResourceResolver schemaResourceResolver;
 
-	private boolean mtomEnabled = false;
-
 	private boolean lazyInit = false;
+
+	private boolean mtomEnabled = false;
 
 	private boolean supportJaxbElementClass = false;
 
 	private boolean checkForXmlRootElement = true;
+
+	private Class<?> mappedClass;
 
 	private ClassLoader beanClassLoader;
 
@@ -330,14 +332,6 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Specify whether MTOM support should be enabled or not.
-	 * Default is {@code false}: marshalling using XOP/MTOM not being enabled.
-	 */
-	public void setMtomEnabled(boolean mtomEnabled) {
-		this.mtomEnabled = mtomEnabled;
-	}
-
-	/**
 	 * Set whether to lazily initialize the {@link JAXBContext} for this marshaller.
 	 * Default is {@code false} to initialize on startup; can be switched to {@code true}.
 	 * <p>Early initialization just applies if {@link #afterPropertiesSet()} is called.
@@ -347,13 +341,21 @@ public class Jaxb2Marshaller
 	}
 
 	/**
+	 * Specify whether MTOM support should be enabled or not.
+	 * Default is {@code false}: marshalling using XOP/MTOM not being enabled.
+	 */
+	public void setMtomEnabled(boolean mtomEnabled) {
+		this.mtomEnabled = mtomEnabled;
+	}
+
+	/**
 	 * Specify whether the {@link #supports(Class)} returns {@code true} for the {@link JAXBElement} class.
 	 * <p>Default is {@code false}, meaning that {@code supports(Class)} always returns {@code false} for
-	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can obtain the
-	 * type parameters of {@code JAXBElement}).
+	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can
+	 * obtain the type parameters of {@code JAXBElement}).
 	 * <p>This property is typically enabled in combination with usage of classes like
-	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView}, since the {@code ModelAndView}
-	 * does not offer type parameter information at runtime.
+	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView},
+	 * since the {@code ModelAndView} does not offer type parameter information at runtime.
 	 * @see #supports(Class)
 	 * @see #supports(Type)
 	 */
@@ -376,6 +378,14 @@ public class Jaxb2Marshaller
 		this.checkForXmlRootElement = checkForXmlRootElement;
 	}
 
+	/**
+	 * Specify a JAXB mapped class for partial unmarshalling.
+	 * @see javax.xml.bind.Unmarshaller#unmarshal(javax.xml.transform.Source, Class)
+	 */
+	public void setMappedClass(Class<?> mappedClass) {
+		this.mappedClass = mappedClass;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -383,6 +393,7 @@ public class Jaxb2Marshaller
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
+
 
 	public final void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
@@ -707,6 +718,9 @@ public class Jaxb2Marshaller
 			if (StaxUtils.isStaxSource(source)) {
 				return unmarshalStaxSource(unmarshaller, source);
 			}
+			else if (this.mappedClass != null) {
+				return unmarshaller.unmarshal(source, this.mappedClass);
+			}
 			else {
 				return unmarshaller.unmarshal(source);
 			}
@@ -716,7 +730,7 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	private Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
+	protected Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
 		XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(staxSource);
 		if (streamReader != null) {
 			return jaxbUnmarshaller.unmarshal(streamReader);
