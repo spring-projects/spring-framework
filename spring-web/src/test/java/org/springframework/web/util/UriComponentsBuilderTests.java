@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,12 @@ import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Phillip Webb
  */
 public class UriComponentsBuilderTests {
 
@@ -310,6 +312,24 @@ public class UriComponentsBuilderTests {
 		values.put("domain", "example.com");
 		UriComponentsBuilder.fromUriString("mailto:{user}@{domain}").buildAndExpand(values);
 		assertEquals("mailto:foo@example.com", result.toUriString());
+	}
+
+	@Test
+	public void queryParamWithValueWithEquals() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=baz").build();
+		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar=baz"));
+	}
+
+	@Test
+	public void queryParamWithoutValueWithEquals() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=").build();
+		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar="));
+	}
+
+	@Test
+	public void queryParamWithoutValueWithoutEquals() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar").build();
+		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar"));
 	}
 
 }

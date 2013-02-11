@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  */
 public class UriComponentsBuilder {
 
-	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&]+)?");
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
 
@@ -496,8 +496,10 @@ public class UriComponentsBuilder {
 			Matcher m = QUERY_PARAM_PATTERN.matcher(query);
 			while (m.find()) {
 				String name = m.group(1);
-				String value = m.group(2);
-				queryParam(name, value);
+				String eq = m.group(2);
+				String value = m.group(3);
+				queryParam(name, (value != null ? value :
+					(StringUtils.hasLength(eq) ? "" : null)));
 			}
 		}
 		else {
