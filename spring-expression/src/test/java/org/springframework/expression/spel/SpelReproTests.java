@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -1736,6 +1737,14 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertThat(fromClass, is("interfaceValue"));
 	}
 
+	@Test
+	public void SPR_10210() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("bridgeExample", new org.springframework.expression.spel.spr10210.D());
+		Expression parseExpression = parser.parseExpression("#bridgeExample.bridgetMethod()");
+		parseExpression.getValue(context);
+	}
+
 	public static class BooleanHolder {
 
 		private Boolean simpleProperty = true;
@@ -1796,4 +1805,5 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	public static class StaticFinalImpl2 extends AbstractStaticFinal {
 	}
+
 }
