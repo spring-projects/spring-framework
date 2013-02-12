@@ -40,20 +40,24 @@ import org.springframework.util.Assert;
 public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
-	private DateFormatter dateFormatter = new DateFormatter();
+	private DateFormatter dateFormatter;
 
 
 	public void registerFormatters(FormatterRegistry registry) {
 		addDateConverters(registry);
-		registry.addFormatter(this.dateFormatter);
-		registry.addFormatterForFieldType(Calendar.class, this.dateFormatter);
 		registry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+
+		// In order to retain back compatibility we only register Date/Calendar
+		// types when a user defined formatter is specified (see SPR-10105)
+		if(this.dateFormatter != null) {
+			registry.addFormatter(this.dateFormatter);
+			registry.addFormatterForFieldType(Calendar.class, this.dateFormatter);
+		}
 	}
 
 	/**
-	 * Set the date formatter to register. If not specified the default {@link DateFormatter}
-	 * will be used. This method can be used if additional formatter configuration is
-	 * required.
+	 * Set the date formatter to register. If not specified no formatter is registered.
+	 * This method can be used if global formatter configuration is required.
 	 * @param dateFormatter the date formatter
 	 */
 	public void setFormatter(DateFormatter dateFormatter) {

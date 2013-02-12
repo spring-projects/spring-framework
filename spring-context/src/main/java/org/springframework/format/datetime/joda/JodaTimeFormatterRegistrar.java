@@ -174,7 +174,16 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 		addFormatterForFields(registry,
 				new ReadableInstantPrinter(dateTimeFormatter),
 				new DateTimeParser(dateTimeFormatter),
-				ReadableInstant.class, Date.class, Calendar.class);
+				ReadableInstant.class);
+
+		// In order to retain back compatibility we only register Date/Calendar
+		// types when a user defined formatter is specified (see SPR-10105)
+		if(this.formatters.containsKey(Type.DATE_TIME)) {
+			addFormatterForFields(registry,
+					new ReadableInstantPrinter(dateTimeFormatter),
+					new DateTimeParser(dateTimeFormatter),
+					Date.class, Calendar.class);
+		}
 
 		registry.addFormatterForFieldAnnotation(
 				new JodaDateTimeFormatAnnotationFormatterFactory());
