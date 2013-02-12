@@ -45,8 +45,8 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	public void registerFormatters(FormatterRegistry registry) {
 		addDateConverters(registry);
-		registry.addFormatter(dateFormatter);
-		registry.addFormatterForFieldType(Calendar.class, dateFormatter);
+		registry.addFormatter(this.dateFormatter);
+		registry.addFormatterForFieldType(Calendar.class, this.dateFormatter);
 		registry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
 	}
 
@@ -117,7 +117,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 		private DateToCalendarConverter dateToCalendarConverter = new DateToCalendarConverter();
 
 		public Calendar convert(Long source) {
-			return dateToCalendarConverter.convert(new Date(source));
+			return this.dateToCalendarConverter.convert(new Date(source));
 		}
 	}
 }
