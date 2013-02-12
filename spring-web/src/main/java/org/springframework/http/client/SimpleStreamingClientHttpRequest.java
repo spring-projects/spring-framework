@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -27,6 +26,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpRequest} implementation that uses standard J2SE facilities to execute streaming requests.
@@ -77,7 +77,7 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 			this.connection.connect();
 			this.body = this.connection.getOutputStream();
 		}
-		return new NonClosingOutputStream(this.body);
+		return StreamUtils.nonClosing(this.body);
 	}
 
 	private void writeHeaders(HttpHeaders headers) {
@@ -104,28 +104,6 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 			// ignore
 		}
 		return new SimpleClientHttpResponse(this.connection);
-	}
-
-
-	private static class NonClosingOutputStream extends FilterOutputStream {
-
-		private NonClosingOutputStream(OutputStream out) {
-			super(out);
-		}
-
-		@Override
-		public void write(byte[] b) throws IOException {
-			super.write(b);
-		}
-
-		@Override
-		public void write(byte[] b, int off, int let) throws IOException {
-			out.write(b, off, let);
-		}
-
-		@Override
-		public void close() throws IOException {
-		}
 	}
 
 }

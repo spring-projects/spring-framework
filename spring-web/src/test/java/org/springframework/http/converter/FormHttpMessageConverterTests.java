@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -157,6 +159,7 @@ public class FormHttpMessageConverterTests {
 		item = (FileItem) items.get(4);
 		assertEquals("xml", item.getFieldName());
 		assertEquals("text/xml", item.getContentType());
+		verify(outputMessage.getBody(), never()).close();
 	}
 
 	private static class MockHttpOutputMessageRequestContext implements RequestContext {

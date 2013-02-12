@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.http;
 
+import static org.mockito.Mockito.spy;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,7 +30,7 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
-	private final ByteArrayOutputStream body = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream body = spy(new ByteArrayOutputStream());
 
 	@Override
 	public HttpHeaders getHeaders() {
