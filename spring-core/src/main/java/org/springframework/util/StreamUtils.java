@@ -143,7 +143,7 @@ public abstract class StreamUtils {
 	/**
 	 * Returns a variant of the given {@link OutputStream} where calling
 	 * {@link OutputStream#close() close()} has no effect.
-	 * @param in the OutputStream to decorate
+	 * @param out the OutputStream to decorate
 	 * @return a version of the OutputStream that ignores calls to close
 	 */
 	public static OutputStream nonClosing(OutputStream out) {
