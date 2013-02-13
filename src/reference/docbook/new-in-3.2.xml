@@ -120,7 +120,7 @@
     <interfacename>@ExceptionHandler</interfacename> method that handles
     standard Spring MVC exceptions and returns a
     <classname>ResponseEntity</classname> that allowing customizing and
-    writing the response with HTTP message converters. This servers as an
+    writing the response with HTTP message converters. This serves as an
     alternative to the <classname>DefaultHandlerExceptionResolver</classname>,
     which does the same but returns a <classname>ModelAndView</classname>
     instead.</para>
