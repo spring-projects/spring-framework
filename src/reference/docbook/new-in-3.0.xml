@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="new-in-3.0"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="new-in-3.0">
-  <title>New Features and Enhancements in Spring 3.0</title>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+  <title>New Features and Enhancements in Spring Framework 3.0</title>
 
   <para>If you have been using the Spring Framework for some time, you will be
   aware that Spring has undergone two major revisions: Spring 2.0, released in
   October 2006, and Spring 2.5, released in November 2007. It is now time for
-  a third overhaul resulting in Spring 3.0.</para>
+  a third overhaul resulting in Spring Framework 3.0.</para>
 
-  <sidebar id="new-in-3.0-intro-java">
+  <sidebar xml:id="new-in-3.0-intro-java">
     <title>Java SE and Java EE Support</title>
 
     <para>The Spring Framework is now based on Java 5, and Java 6 is fully
@@ -20,7 +24,7 @@
     at the same time introducing some early support for Java EE 6.</para>
   </sidebar>
 
-  <section id="new-in-3.0-intro">
+  <section xml:id="new-in-3.0-intro">
     <title>Java 5</title>
 
     <para>The entire framework code has been revised to take advantage of Java
@@ -44,45 +48,48 @@
     @Asynchronous annotation).</para>
   </section>
 
-  <section id="new-in-3.0-improved-docs">
+  <section xml:id="new-in-3.0-improved-docs">
     <title>Improved documentation</title>
 
     <para>The Spring reference documentation has also substantially been
-    updated to reflect all of the changes and new features for Spring 3.0.
-    While every effort has been made to ensure that there are no errors in
+    updated to reflect all of the changes and new features for Spring Framework
+    3.0. While every effort has been made to ensure that there are no errors in
     this documentation, some errors may nevertheless have crept in. If you do
     spot any typos or even more serious errors, and you can spare a few cycles
     during lunch, please do bring the error to the attention of the Spring
-    team by <ulink url="http://jira.springframework.org/">raising an
-    issue</ulink>.</para>
+    team by <link xl:href="http://jira.springframework.org/">raising an
+    issue</link>.</para>
   </section>
 
-  <section id="new-in-3.0-new-tutorial">
+  <section xml:id="new-in-3.0-new-tutorial">
     <title>New articles and tutorials</title>
 
     <para>
-		There are many excellent articles and tutorials that show how to get started with Spring 3 features.
-		Read them at the <ulink url="http://www.springsource.org/documentation">Spring Documentation</ulink> page.
-	  </para>
-	  <para id="new-in-3.0-samples">
-	  The samples have been improved and updated to take advantage of the new features in Spring 3.
-	  Additionally, the samples have been moved out of the source tree into a dedicated SVN 
-	  <ulink url="https://anonsvn.springframework.org/svn/spring-samples/">repository</ulink> available at:</para>
-	  
+        There are many excellent articles and tutorials that show how to get
+        started with Spring Framework 3 features. Read them at the
+        <link xl:href="http://www.springsource.org/documentation">Spring Documentation</link> page.
+      </para>
+      <para xml:id="new-in-3.0-samples">
+      The samples have been improved and updated to take advantage of the new features in Spring
+      Framework 3. Additionally, the samples have been moved out of the source tree into a dedicated SVN
+      <link xl:href="https://anonsvn.springframework.org/svn/spring-samples/">repository</link> available at:</para>
+
     <para>
-	  <literal>https://anonsvn.springframework.org/svn/spring-samples/</literal>
-	  </para>
-	  
-	  <para>As such, the samples are no longer distributed alongside Spring 3 and need to be downloaded separately from the repository mentioned above. However, this documentation
-	  will continue to refer to some samples (in particular Petclinic) to illustrate various features.</para>
-	  
-	  <note>For more information on Subversion (or in short SVN), see the project homepage at:
-      <literal>http://subversion.apache.org/</literal>
-	  </note>
+      <literal>https://anonsvn.springframework.org/svn/spring-samples/</literal>
+      </para>
+
+      <para>As such, the samples are no longer distributed alongside Spring
+      Framework 3 and need to be downloaded separately from the repository
+      mentioned above. However, this documentation will continue to refer to
+      some samples (in particular Petclinic) to illustrate various features.</para>
+
+      <note><para>For more information on Subversion (or in short SVN), see the project homepage at:
+      <literal>http://subversion.apache.org/</literal></para>
+      </note>
 
   </section>
 
-  <section id="new-in-3.0-modules-build">
+  <section xml:id="new-in-3.0-modules-build">
     <title>New module organization and build system</title>
 
     <para>The framework modules have been revised and are now managed
@@ -154,7 +161,7 @@
       </listitem>
     </itemizedlist>
 
-    <sidebar id="new-in-3.0-intro-spring-jar">
+    <sidebar xml:id="new-in-3.0-intro-spring-jar">
       <title>Note:</title>
 
       <para>The spring.jar artifact that contained almost the entire framework
@@ -183,10 +190,10 @@
     </itemizedlist>
   </section>
 
-  <section id="new-in-3.0-features-overview">
+  <section xml:id="new-in-3.0-features-overview">
     <title>Overview of new features</title>
 
-    <para>This is a list of new features for Spring 3.0. We will cover these
+    <para>This is a list of new features for Spring Framework 3.0. We will cover these
     features in more detail later in this section.</para>
 
     <itemizedlist>
@@ -229,7 +236,7 @@
       </listitem>
     </itemizedlist>
 
-    <section id="new-feature-java5">
+    <section xml:id="new-feature-java5">
       <title>Core APIs updated for Java 5</title>
 
       <para>BeanFactory interface returns typed bean instances as far as
@@ -269,7 +276,7 @@
       <para>Typed ApplicationListener&lt;E&gt;</para>
     </section>
 
-    <section id="new-feature-el">
+    <section xml:id="new-feature-el">
       <title>Spring Expression Language</title>
 
       <para>Spring introduces an expression language which is similar to
@@ -285,8 +292,8 @@
       across all the products in the Spring portfolio. Its language features
       are driven by the requirements of the projects in the Spring portfolio,
       including tooling requirements for code completion support within the
-      Eclipse based <ulink url="http://www.springsource.com/products/sts">SpringSource
-      Tool Suite</ulink>.</para>
+      Eclipse based <link xl:href="http://www.springsource.com/products/sts">SpringSource
+      Tool Suite</link>.</para>
 
       <para>The following is an example of how the Expression Language can be
       used to configure some properties of a database setup <programlisting
@@ -299,7 +306,7 @@
 </programlisting></para>
 
       <para>This functionality is also available if you prefer to configure
-      your components using annotations: <programlisting language="java">@Repository 
+      your components using annotations: <programlisting language="java">@Repository
 public class RewardsTestDatabase {
 
     @Value("#{systemProperties.databaseName}")
@@ -311,14 +318,14 @@ public class RewardsTestDatabase {
 </programlisting></para>
     </section>
 
-    <section id="new-feature-java-config">
+    <section xml:id="new-feature-java-config">
       <title>The Inversion of Control (IoC) container</title>
 
-      <section id="new-java-configuration">
+      <section xml:id="new-java-configuration">
         <title>Java based bean metadata</title>
 
-        <para>Some core features from the <ulink
-        url="http://www.springsource.org/javaconfig">JavaConfig</ulink>
+        <para>Some core features from the <link
+        xl:href="http://www.springsource.org/javaconfig">JavaConfig</link>
         project have been added to the Spring Framework now. This means that
         the following annotations are now directly supported: <itemizedlist>
             <listitem>
@@ -376,7 +383,7 @@ public class AppConfig {
     @Bean
     public SessionFactory sessionFactory() {
         // wire up a session factory
-        AnnotationSessionFactoryBean asFactoryBean = 
+        AnnotationSessionFactoryBean asFactoryBean =
             new AnnotationSessionFactoryBean();
         asFactoryBean.setDataSource(dataSource());
         // additional config
@@ -384,7 +391,7 @@ public class AppConfig {
     }
 
     @Bean
-    public DataSource dataSource() { 
+    public DataSource dataSource() {
         return new DriverManagerDataSource(jdbcUrl, username, password);
     }
 }
@@ -404,7 +411,7 @@ public class AppConfig {
         <literal>AnnotationConfigApplicationContext</literal>.</para>
       </section>
 
-      <section id="new-bean-metadata-in-components">
+      <section xml:id="new-bean-metadata-in-components">
         <title>Defining bean metadata within components</title>
 
         <para><literal>@Bean</literal> annotated methods are also supported
@@ -415,7 +422,7 @@ public class AppConfig {
       </section>
     </section>
 
-    <section id="new-feature-convert-and-format">
+    <section xml:id="new-feature-convert-and-format">
       <title>General purpose type conversion system and field formatting
       system</title>
 
@@ -430,7 +437,7 @@ public class AppConfig {
       environments such as Spring MVC.</para>
     </section>
 
-    <section id="new-feature-oxm">
+    <section xml:id="new-feature-oxm">
       <title>The Data Tier</title>
 
       <para>Object to XML mapping functionality (OXM) from the Spring Web
@@ -441,14 +448,14 @@ public class AppConfig {
       Mappers</link> chapter.</para>
     </section>
 
-    <section id="new-feature-rest">
+    <section xml:id="new-feature-rest">
       <title>The Web Tier</title>
 
       <para>The most exciting new feature for the Web Tier is the support for
       building RESTful web services and web applications. There are also some
       new annotations that can be used in any web application.</para>
 
-      <section id="new-feature-rest-support">
+      <section xml:id="new-feature-rest-support">
         <title>Comprehensive REST support</title>
 
         <para>Server-side support for building RESTful applications has been
@@ -471,7 +478,7 @@ public class AppConfig {
         information.</para>
       </section>
 
-      <section id="new-feature-at-mvc">
+      <section xml:id="new-feature-at-mvc">
         <title>@MVC additions</title>
 
         <para>A <literal>mvc</literal> namespace has been introduced that greatly simplifies Spring MVC configuration.</para>
@@ -486,14 +493,14 @@ public class AppConfig {
       </section>
     </section>
 
-    <section id="new-feature-validation">
+    <section xml:id="new-feature-validation">
       <title>Declarative model validation</title>
 
       <para>Several <link linkend="validation-beanvalidation">validation enhancements</link>,
       including JSR 303 support that uses Hibernate Validator as the default provider.</para>
     </section>
 
-    <section id="new-feature-jee-6">
+    <section xml:id="new-feature-jee-6">
       <title>Early support for Java EE 6</title>
 
       <para>We provide support for asynchronous method invocations through the
@@ -504,7 +511,7 @@ public class AppConfig {
 
     </section>
 
-    <section id="new-feature-embedded-databases">
+    <section xml:id="new-feature-embedded-databases">
       <title>Support for embedded databases</title>
 
       <para>Convenient support for <link

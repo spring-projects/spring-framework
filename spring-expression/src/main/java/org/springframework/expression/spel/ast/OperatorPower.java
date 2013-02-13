@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.expression.spel.ExpressionState;
 
 /**
  * The power operator.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -37,7 +37,7 @@ public class OperatorPower extends Operator {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
-	
+
 		Object operandOne = leftOp.getValueInternal(state).getValue();
 		Object operandTwo = rightOp.getValueInternal(state).getValue();
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
@@ -45,6 +45,8 @@ public class OperatorPower extends Operator {
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(Math.pow(op1.doubleValue(),op2.doubleValue()));
+			} else if (op1 instanceof Float || op2 instanceof Float) {
+				return new TypedValue(Math.pow(op1.floatValue(), op2.floatValue()));
 			} else if (op1 instanceof Long || op2 instanceof Long) {
 				double d= Math.pow(op1.longValue(), op2.longValue());
 				return new TypedValue((long)d);

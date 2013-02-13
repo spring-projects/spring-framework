@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link AutowireCandidateResolver} implementation that matches bean definition qualifiers
@@ -174,8 +175,31 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
 		for (Annotation annotation : annotationsToSearch) {
 			Class<? extends Annotation> type = annotation.annotationType();
+			boolean checkMeta = true;
+			boolean fallbackToMeta = false;
 			if (isQualifier(type)) {
 				if (!checkQualifier(bdHolder, annotation, typeConverter)) {
+					fallbackToMeta = true;
+				}
+				else {
+					checkMeta = false;
+				}
+			}
+			if (checkMeta) {
+				boolean foundMeta = false;
+				for (Annotation metaAnn : type.getAnnotations()) {
+					Class<? extends Annotation> metaType = metaAnn.annotationType();
+					if (isQualifier(metaType)) {
+						foundMeta = true;
+						// Only accept fallback match if @Qualifier annotation has a value...
+						// Otherwise it is just a marker for a custom qualifier annotation.
+						if ((fallbackToMeta && StringUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
+								!checkQualifier(bdHolder, metaAnn, typeConverter)) {
+							return false;
+						}
+					}
+				}
+				if (fallbackToMeta && !foundMeta) {
 					return false;
 				}
 			}
@@ -210,18 +234,18 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		if (qualifier == null) {
 			Annotation targetAnnotation = null;
 			if (bd.getResolvedFactoryMethod() != null) {
-				targetAnnotation = bd.getResolvedFactoryMethod().getAnnotation(type);
+				targetAnnotation = AnnotationUtils.getAnnotation(bd.getResolvedFactoryMethod(), type);
 			}
 			if (targetAnnotation == null) {
 				// look for matching annotation on the target class
 				if (this.beanFactory != null) {
 					Class<?> beanType = this.beanFactory.getType(bdHolder.getBeanName());
 					if (beanType != null) {
-						targetAnnotation = ClassUtils.getUserClass(beanType).getAnnotation(type);
+						targetAnnotation = AnnotationUtils.getAnnotation(ClassUtils.getUserClass(beanType), type);
 					}
 				}
 				if (targetAnnotation == null && bd.hasBeanClass()) {
-					targetAnnotation = ClassUtils.getUserClass(bd.getBeanClass()).getAnnotation(type);
+					targetAnnotation = AnnotationUtils.getAnnotation(ClassUtils.getUserClass(bd.getBeanClass()), type);
 				}
 			}
 			if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
@@ -286,14 +310,27 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	protected Object findValue(Annotation[] annotationsToSearch) {
 		for (Annotation annotation : annotationsToSearch) {
 			if (this.valueAnnotationType.isInstance(annotation)) {
-				Object value = AnnotationUtils.getValue(annotation);
-				if (value == null) {
-					throw new IllegalStateException("Value annotation must have a value attribute");
-				}
-				return value;
+				return extractValue(annotation);
+			}
+		}
+		for (Annotation annotation : annotationsToSearch) {
+			Annotation metaAnn = annotation.annotationType().getAnnotation(this.valueAnnotationType);
+			if (metaAnn != null) {
+				return extractValue(metaAnn);
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Extract the value attribute from the given annotation.
+	 */
+	protected Object extractValue(Annotation valueAnnotation) {
+		Object value = AnnotationUtils.getValue(valueAnnotation);
+		if (value == null) {
+			throw new IllegalStateException("Value annotation must have a value attribute");
+		}
+		return value;
 	}
 
 }

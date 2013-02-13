@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="context-introduction"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="context-introduction">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Additional Capabilities of the
     <interfacename>ApplicationContext</interfacename></title>
 
@@ -12,9 +16,9 @@
     <literal>org.springframework.beans.factory</literal> package provides basic
     functionality for managing and manipulating beans, including in a
     programmatic way. The <literal>org.springframework.context</literal> package
-    adds the <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
-    ><interfacename>ApplicationContext</interfacename></ulink> interface, which
+    adds the <link
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
+    ><interfacename>ApplicationContext</interfacename></link> interface, which
     extends the <interfacename>BeanFactory</interfacename> interface, in
     addition to extending other interfaces to provide additional functionality
     in a more <emphasis>application framework-oriented style</emphasis>. Many
@@ -56,7 +60,7 @@
     </listitem>
   </itemizedlist>
 
-  <section id="context-functionality-messagesource">
+  <section xml:id="context-functionality-messagesource">
     <title>Internationalization using
       <interfacename>MessageSource</interfacename></title>
 
@@ -181,12 +185,12 @@ argument.required=The '{0}' argument is required.</programlisting>
 
     <programlisting language="xml">&lt;beans&gt;
 
-  <lineannotation>&lt;!-- this <interfacename>MessageSource</interfacename> is being used in a web application --&gt;</lineannotation>
+  <lineannotation>&lt;!-- this MessageSource is being used in a web application --&gt;</lineannotation>
   &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
       &lt;property name="basename" value="exceptions"/&gt;
   &lt;/bean&gt;
 
-  <lineannotation>&lt;!-- lets inject the above <interfacename>MessageSource</interfacename> into this POJO --&gt;</lineannotation>
+  <lineannotation>&lt;!-- lets inject the above MessageSource into this POJO --&gt;</lineannotation>
   &lt;bean id="example" class="com.foo.Example"&gt;
       &lt;property name="messages" ref="messageSource"/&gt;
   &lt;/bean&gt;
@@ -267,7 +271,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     </note>
   </section>
 
-  <section id="context-functionality-events">
+  <section xml:id="context-functionality-events">
     <title>Standard and Custom Events</title>
 
     <para>Event handling in the
@@ -281,7 +285,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       Essentially, this is the standard <emphasis>Observer</emphasis> design
       pattern. Spring provides the following standard events:</para>
 
-    <table id="beans-ctx-events-tbl">
+    <table xml:id="beans-ctx-events-tbl">
       <title>Built-in Events</title>
 
       <tgroup cols="2">
@@ -492,16 +496,16 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <para>Spring's eventing mechanism is designed for simple communication
         between Spring beans within the same application context. However, for
         more sophisticated enterprise integration needs, the
-        separately-maintained <ulink
-        url="http://springsource.org/spring-integration">Spring
-        Integration</ulink> project provides complete support for building
-        lightweight, <ulink url="http://www.enterpriseintegrationpatterns.com"
-        >pattern-oriented</ulink>, event-driven architectures that build upon
+        separately-maintained <link
+        xl:href="http://springsource.org/spring-integration">Spring
+        Integration</link> project provides complete support for building
+        lightweight, <link xl:href="http://www.enterpriseintegrationpatterns.com"
+        >pattern-oriented</link>, event-driven architectures that build upon
         the well-known Spring programming model.</para>
     </note>
   </section>
 
-  <section id="context-functionality-resources">
+  <section xml:id="context-functionality-resources">
     <title>Convenient access to low-level resources</title>
 
     <para>For optimal usage and understanding of application contexts, users
@@ -548,7 +552,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       from the classpath or a URL, regardless of the actual context type.</para>
   </section>
 
-  <section id="context-create">
+  <section xml:id="context-create">
     <title>Convenient <interfacename>ApplicationContext</interfacename>
       instantiation for web applications</title>
 
@@ -585,7 +589,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
 &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 
-<lineannotation>&lt;!-- or use the <classname>ContextLoaderServlet</classname> instead of the above listener</lineannotation><emphasis>
+<lineannotation>&lt;!-- or use the ContextLoaderServlet instead of the above listener</lineannotation><emphasis>
 &lt;servlet&gt;
 &lt;servlet-name&gt;context&lt;/servlet-name&gt;
 &lt;servlet-class&gt;org.springframework.web.context.ContextLoaderServlet&lt;/servlet-class&gt;
@@ -611,7 +615,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       does.</para>
   </section>
 
-  <section id="context-deploy-rar">
+  <section xml:id="context-deploy-rar">
     <title>Deploying a Spring ApplicationContext as a J2EE RAR file</title>
 
     <para>In Spring 2.5 and later, it is possible to deploy a Spring
@@ -634,9 +638,9 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       application server's JCA WorkManager through Spring's
       <interfacename>TaskExecutor</interfacename> abstraction.</para>
 
-    <para>Check out the JavaDoc of the <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/jca/context/SpringContextResourceAdapter.html"
-      >SpringContextResourceAdapter</ulink> class for the configuration details
+    <para>Check out the JavaDoc of the <link
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html"
+      >SpringContextResourceAdapter</link> class for the configuration details
       involved in RAR deployment.</para>
 
     <para><emphasis>For a simple deployment of a Spring ApplicationContext as a

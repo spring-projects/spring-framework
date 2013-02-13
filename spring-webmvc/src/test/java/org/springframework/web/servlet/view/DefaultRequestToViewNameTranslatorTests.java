@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
  * @author Rick Evans
@@ -81,6 +81,12 @@ public final class DefaultRequestToViewNameTranslatorTests {
 	@Test
 	public void testGetViewNameWithNoExtension() {
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
+		assertViewName(VIEW_NAME);
+	}
+
+	@Test
+	public void testGetViewNameWithSemicolonContent() {
+		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + ";a=A;b=B");
 		assertViewName(VIEW_NAME);
 	}
 

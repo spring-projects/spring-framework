@@ -5,7 +5,7 @@ import java.util.List;
 public class TestAddress{
 		private String street;
 		private List<String> crossStreets;
-		
+
 		public String getStreet() {
 			return street;
 		}

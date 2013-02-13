@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,17 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.easymock.MockControl;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
+import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
-import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.Locator;
 
 public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 
@@ -51,22 +56,15 @@ public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 				streamReader.getName());
 		StaxStreamXMLReader xmlReader = new StaxStreamXMLReader(streamReader);
 
-		MockControl mockControl = MockControl.createStrictControl(ContentHandler.class);
-		mockControl.setDefaultMatcher(new SaxArgumentMatcher());
-		ContentHandler contentHandlerMock = (ContentHandler) mockControl.getMock();
-
-		contentHandlerMock.setDocumentLocator(null);
-		mockControl.setMatcher(MockControl.ALWAYS_MATCHER);
-		contentHandlerMock.startDocument();
-		contentHandlerMock.startElement("http://springframework.org/spring-ws", "child", "child", new AttributesImpl());
-		contentHandlerMock.endElement("http://springframework.org/spring-ws", "child", "child");
-		contentHandlerMock.endDocument();
-
-		xmlReader.setContentHandler(contentHandlerMock);
-		mockControl.replay();
+		ContentHandler contentHandler = mock(ContentHandler.class);
+		xmlReader.setContentHandler(contentHandler);
 		xmlReader.parse(new InputSource());
-		mockControl.verify();
-	}
 
+		verify(contentHandler).setDocumentLocator(any(Locator.class));
+		verify(contentHandler).startDocument();
+		verify(contentHandler).startElement(eq("http://springframework.org/spring-ws"), eq("child"), eq("child"), any(Attributes.class));
+		verify(contentHandler).endElement("http://springframework.org/spring-ws", "child", "child");
+		verify(contentHandler).endDocument();
+	}
 
 }

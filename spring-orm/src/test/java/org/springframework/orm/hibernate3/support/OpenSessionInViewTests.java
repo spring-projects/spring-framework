@@ -16,13 +16,7 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -39,6 +33,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.transaction.TransactionManager;
 
+import org.easymock.EasyMock;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
@@ -48,11 +43,11 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.mock.web.PassThroughFilterChain;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -63,8 +58,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 
@@ -177,13 +172,17 @@ public class OpenSessionInViewTests {
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler((Runnable) anyObject());
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(this.request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -424,6 +423,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -431,8 +431,9 @@ public class OpenSessionInViewTests {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
@@ -482,22 +483,26 @@ public class OpenSessionInViewTests {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				count.incrementAndGet();
 			}
 		};
 
-		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler(EasyMock.<Runnable>anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-		expectLastCall().anyTimes();
+		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
 		replay(asyncWebRequest);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(this.request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -568,6 +573,7 @@ public class OpenSessionInViewTests {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -639,6 +645,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
@@ -658,8 +665,9 @@ public class OpenSessionInViewTests {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf2);
 				TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
@@ -738,6 +746,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
@@ -760,8 +769,9 @@ public class OpenSessionInViewTests {
 		};
 
 		FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};

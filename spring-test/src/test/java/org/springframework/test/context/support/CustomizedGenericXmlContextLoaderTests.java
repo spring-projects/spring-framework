@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.context.support.GenericApplicationContext;
 /**
  * Unit test which verifies that extensions of
  * {@link AbstractGenericContextLoader} are able to <em>customize</em> the
- * newly created <code>ApplicationContext</code>. Specifically, this test
+ * newly created {@code ApplicationContext}. Specifically, this test
  * addresses the issues raised in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4008"
  * target="_blank">SPR-4008</a>: <em>Supply an opportunity to customize context

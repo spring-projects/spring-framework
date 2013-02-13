@@ -61,6 +61,8 @@ public class UrlPathHelper {
 
 	private boolean urlDecode = true;
 
+	private boolean removeSemicolonContent = true;
+
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 
@@ -93,12 +95,27 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * Set if ";" (semicolon) content should be stripped from the request URI.
+	 * <p>Default is "true".
+	 */
+	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		this.removeSemicolonContent = removeSemicolonContent;
+	}
+
+	/**
+	 * Whether configured to remove ";" (semicolon) content from the request URI.
+	 */
+	public boolean shouldRemoveSemicolonContent() {
+		return this.removeSemicolonContent;
+	}
+
+	/**
 	 * Set the default character encoding to use for URL decoding.
 	 * Default is ISO-8859-1, according to the Servlet spec.
 	 * <p>If the request specifies a character encoding itself, the request
 	 * encoding will override this setting. This also allows for generically
 	 * overriding the character encoding in a filter that invokes the
-	 * <code>ServletRequest.setCharacterEncoding</code> method.
+	 * {@code ServletRequest.setCharacterEncoding} method.
 	 * @param defaultEncoding the character encoding to use
 	 * @see #determineEncoding
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
@@ -155,9 +172,10 @@ public class UrlPathHelper {
 	public String getPathWithinServletMapping(HttpServletRequest request) {
 		String pathWithinApp = getPathWithinApplication(request);
 		String servletPath = getServletPath(request);
-		if (pathWithinApp.startsWith(servletPath)) {
+		String path = getRemainingPath(pathWithinApp, servletPath, false);
+		if (path != null) {
 			// Normal case: URI contains servlet path.
-			return pathWithinApp.substring(servletPath.length());
+			return path;
 		}
 		else {
 			// Special case: URI is different from servlet path.
@@ -178,22 +196,59 @@ public class UrlPathHelper {
 	public String getPathWithinApplication(HttpServletRequest request) {
 		String contextPath = getContextPath(request);
 		String requestUri = getRequestUri(request);
-		if (StringUtils.startsWithIgnoreCase(requestUri, contextPath)) {
+		String path = getRemainingPath(requestUri, contextPath, true);
+		if (path != null) {
 			// Normal case: URI contains context path.
-			String path = requestUri.substring(contextPath.length());
 			return (StringUtils.hasText(path) ? path : "/");
 		}
 		else {
-			// Special case: rather unusual.
 			return requestUri;
 		}
 	}
 
+	/**
+	 * Match the given "mapping" to the start of the "requestUri" and if there
+	 * is a match return the extra part. This method is needed because the
+	 * context path and the servlet path returned by the HttpServletRequest are
+	 * stripped of semicolon content unlike the requesUri.
+	 */
+	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
+		int index1 = 0;
+		int index2 = 0;
+		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
+			char c1 = requestUri.charAt(index1);
+			char c2 = mapping.charAt(index2);
+			if (c1 == ';') {
+				index1 = requestUri.indexOf('/', index1);
+				if (index1 == -1) {
+					return null;
+				}
+				c1 = requestUri.charAt(index1);
+			}
+			if (c1 == c2) {
+				continue;
+			}
+			if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+				continue;
+			}
+			return null;
+		}
+		if (index2 != mapping.length()) {
+			return null;
+		}
+		if (index1 == requestUri.length()) {
+			return "";
+		}
+		else if (requestUri.charAt(index1) == ';') {
+			index1 = requestUri.indexOf('/', index1);
+		}
+		return (index1 != -1) ? requestUri.substring(index1) : "";
+	}
 
 	/**
 	 * Return the request URI for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getRequestURI()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getRequestURI()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
 	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
@@ -212,7 +267,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * @param request current HTTP request
 	 * @return the context path
@@ -232,7 +287,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the servlet path for the given request, regarding an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getServletPath()</code> is already
+	 * <p>As the value returned by {@code request.getServletPath()} is already
 	 * decoded by the servlet container, this method will not attempt to decode it.
 	 * @param request current HTTP request
 	 * @return the servlet path
@@ -271,7 +326,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * @param request current HTTP request
 	 * @return the context path
@@ -318,15 +373,15 @@ public class UrlPathHelper {
 	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
 	 */
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
+		uri = removeSemicolonContent(uri);
 		uri = decodeRequestString(request, uri);
-		int semicolonIndex = uri.indexOf(';');
-		return (semicolonIndex != -1 ? uri.substring(0, semicolonIndex) : uri);
+		return uri;
 	}
 
 	/**
 	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
-	 * <p>The default implementation uses <code>URLDecoder.decode(input, enc)</code>.
+	 * <p>The default implementation uses {@code URLDecoder.decode(input, enc)}.
 	 * @param request current HTTP request
 	 * @param source the String to decode
 	 * @return the decoded String
@@ -342,6 +397,7 @@ public class UrlPathHelper {
 		return source;
 	}
 
+	@SuppressWarnings("deprecation")
 	private String decodeInternal(HttpServletRequest request, String source) {
 		String enc = determineEncoding(request);
 		try {
@@ -362,7 +418,7 @@ public class UrlPathHelper {
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
@@ -375,10 +431,49 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Decode the given URI path variables via {@link #decodeRequestString(HttpServletRequest, String)}
-	 * unless {@link #setUrlDecode(boolean)} is set to {@code true} in which case
-	 * it is assumed the URL path from which the variables were extracted is
-	 * already decoded through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 * Remove ";" (semicolon) content from the given request URI if the
+	 * {@linkplain #setRemoveSemicolonContent(boolean) removeSemicolonContent}
+	 * property is set to "true". Note that "jssessionid" is always removed.
+	 *
+	 * @param requestUri the request URI string to remove ";" content from
+	 * @return the updated URI string
+	 */
+	public String removeSemicolonContent(String requestUri) {
+		if (this.removeSemicolonContent) {
+			return removeSemicolonContentInternal(requestUri);
+		}
+		return removeJsessionid(requestUri);
+	}
+
+	private String removeSemicolonContentInternal(String requestUri) {
+		int semicolonIndex = requestUri.indexOf(';');
+		while (semicolonIndex != -1) {
+			int slashIndex = requestUri.indexOf('/', semicolonIndex);
+			String start = requestUri.substring(0, semicolonIndex);
+			requestUri = (slashIndex != -1) ? start + requestUri.substring(slashIndex) : start;
+			semicolonIndex = requestUri.indexOf(';', semicolonIndex);
+		}
+		return requestUri;
+	}
+
+	private String removeJsessionid(String requestUri) {
+		int startIndex = requestUri.indexOf(";jsessionid=");
+		if (startIndex != -1) {
+			int endIndex = requestUri.indexOf(';', startIndex + 12);
+			String start = requestUri.substring(0, startIndex);
+			requestUri = (endIndex != -1) ? start + requestUri.substring(endIndex) : start;
+		}
+		return requestUri;
+	}
+
+	/**
+	 * Decode the given URI path variables via
+	 * {@link #decodeRequestString(HttpServletRequest, String)} unless
+	 * {@link #setUrlDecode(boolean)} is set to {@code true} in which case it is
+	 * assumed the URL path from which the variables were extracted is already
+	 * decoded through a call to
+	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 *
 	 * @param request current HTTP request
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance

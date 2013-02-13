@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
 /**
- * Special JSF 1.2 <code>ELResolver</code> that exposes the Spring
- * <code>WebApplicationContext</code> instance under a variable named
+ * Special JSF 1.2 {@code ELResolver} that exposes the Spring
+ * {@code WebApplicationContext} instance under a variable named
  * "webApplicationContext".
  *
  * <p>In contrast to {@link SpringBeanFacesELResolver}, this ELResolver variant
@@ -42,7 +42,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * and is able to resolve "webApplicationContext.mySpringManagedBusinessObject"
  * dereferences to Spring-defined beans in that application context.
  *
- * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
+ * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
  * <pre>
  * &lt;application>
@@ -168,7 +168,7 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 	/**
 	 * Retrieve the WebApplicationContext reference to expose.
 	 * <p>The default implementation delegates to FacesContextUtils,
-	 * returning <code>null</code> if no WebApplicationContext found.
+	 * returning {@code null} if no WebApplicationContext found.
 	 * @param elContext the current JSF ELContext
 	 * @return the Spring web application context
 	 * @see org.springframework.web.jsf.FacesContextUtils#getWebApplicationContext

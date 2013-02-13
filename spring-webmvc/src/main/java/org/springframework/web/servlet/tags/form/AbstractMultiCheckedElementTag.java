@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,52 +30,53 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract base class to provide common methods for implementing
  * databinding-aware JSP tags for rendering <i>multiple</i>
- * HTML '<code>input</code>' elements with a '<code>type</code>'
- * of '<code>checkbox</code>' or '<code>radio</code>'.
+ * HTML '{@code input}' elements with a '{@code type}'
+ * of '{@code checkbox}' or '{@code radio}'.
  *
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @since 2.5.2
  */
+@SuppressWarnings("serial")
 public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElementTag {
 
 	/**
-	 * The HTML '<code>span</code>' tag.
+	 * The HTML '{@code span}' tag.
 	 */
 	private static final String SPAN_TAG = "span";
 
 
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of objects
-	 * used to generate the '<code>input type="checkbox/radio"</code>' tags.
+	 * used to generate the '{@code input type="checkbox/radio"}' tags.
 	 */
 	private Object items;
 
 	/**
-	 * The name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>input type="checkbox/radio"</code>' tag.
+	 * The name of the property mapped to the '{@code value}' attribute
+	 * of the '{@code input type="checkbox/radio"}' tag.
 	 */
 	private String itemValue;
 
 	/**
-	 * The value to be displayed as part of the '<code>input type="checkbox/radio"</code>' tag.
+	 * The value to be displayed as part of the '{@code input type="checkbox/radio"}' tag.
 	 */
 	private String itemLabel;
 
 	/**
-	 * The HTML element used to enclose the '<code>input type="checkbox/radio"</code>' tag.
+	 * The HTML element used to enclose the '{@code input type="checkbox/radio"}' tag.
 	 */
 	private String element = SPAN_TAG;
 
 	/**
-	 * Delimiter to use between each '<code>input type="checkbox/radio"</code>' tags.
+	 * Delimiter to use between each '{@code input type="checkbox/radio"}' tags.
 	 */
 	private String delimiter;
 
 
 	/**
 	 * Set the {@link java.util.Collection}, {@link java.util.Map} or array of objects
-	 * used to generate the '<code>input type="checkbox/radio"</code>' tags.
+	 * used to generate the '{@code input type="checkbox/radio"}' tags.
 	 * <p>Typically a runtime expression.
 	 * @param items said items
 	 */
@@ -86,15 +87,15 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array of objects
-	 * used to generate the '<code>input type="checkbox/radio"</code>' tags.
+	 * used to generate the '{@code input type="checkbox/radio"}' tags.
 	 */
 	protected Object getItems() {
 		return this.items;
 	}
 
 	/**
-	 * Set the name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>input type="checkbox/radio"</code>' tag.
+	 * Set the name of the property mapped to the '{@code value}' attribute
+	 * of the '{@code input type="checkbox/radio"}' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemValue(String itemValue) {
@@ -103,8 +104,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	}
 
 	/**
-	 * Get the name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>input type="checkbox/radio"</code>' tag.
+	 * Get the name of the property mapped to the '{@code value}' attribute
+	 * of the '{@code input type="checkbox/radio"}' tag.
 	 */
 	protected String getItemValue() {
 		return this.itemValue;
@@ -112,7 +113,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Set the value to be displayed as part of the
-	 * '<code>input type="checkbox/radio"</code>' tag.
+	 * '{@code input type="checkbox/radio"}' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
@@ -122,7 +123,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Get the value to be displayed as part of the
-	 * '<code>input type="checkbox/radio"</code>' tag.
+	 * '{@code input type="checkbox/radio"}' tag.
 	 */
 	protected String getItemLabel() {
 		return this.itemLabel;
@@ -130,7 +131,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Set the delimiter to be used between each
-	 * '<code>input type="checkbox/radio"</code>' tag.
+	 * '{@code input type="checkbox/radio"}' tag.
 	 * <p>By default, there is <em>no</em> delimiter.
 	 */
 	public void setDelimiter(String delimiter) {
@@ -139,7 +140,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Return the delimiter to be used between each
-	 * '<code>input type="radio"</code>' tag.
+	 * '{@code input type="radio"}' tag.
 	 */
 	public String getDelimiter() {
 		return this.delimiter;
@@ -147,8 +148,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Set the HTML element used to enclose the
-	 * '<code>input type="checkbox/radio"</code>' tag.
-	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
+	 * '{@code input type="checkbox/radio"}' tag.
+	 * <p>Defaults to an HTML '{@code &lt;span/&gt;}' tag.
 	 */
 	public void setElement(String element) {
 		Assert.hasText(element, "'element' cannot be null or blank");
@@ -157,7 +158,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 
 	/**
 	 * Get the HTML element used to enclose
-	 * '<code>input type="checkbox/radio"</code>' tag.
+	 * '{@code input type="checkbox/radio"}' tag.
 	 */
 	public String getElement() {
 		return this.element;
@@ -179,7 +180,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	}
 
 	/**
-	 * Renders the '<code>input type="radio"</code>' element with the configured
+	 * Renders the '{@code input type="radio"}' element with the configured
 	 * {@link #setItems(Object)} values. Marks the element as checked if the
 	 * value matches the bound value.
 	 */
@@ -199,7 +200,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		if (itemsObject == null && boundType != null && boundType.isEnum()) {
 			itemsObject = boundType.getEnumConstants();
 		}
-		
+
 		if (itemsObject == null) {
 			throw new IllegalArgumentException("Attribute 'items' is required and must be a Collection, an Array or a Map");
 		}
@@ -241,10 +242,10 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		Object renderValue;
 		if (valueProperty != null) {
 			renderValue = wrapper.getPropertyValue(valueProperty);
-		} 
+		}
 		else if (item instanceof Enum) {
 			renderValue = ((Enum<?>) item).name();
-		} 
+		}
 		else {
 			renderValue = item;
 		}

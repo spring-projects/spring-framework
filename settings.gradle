@@ -1,21 +1,28 @@
-rootProject.name = 'spring'
+rootProject.name = "spring"
 
-include 'spring-aop'
-include 'spring-aspects'
-include 'spring-beans'
-include 'spring-context'
-include 'spring-context-support'
-include 'spring-core'
-include 'spring-expression'
-include 'spring-instrument'
-include 'spring-instrument-tomcat'
-include 'spring-jdbc'
-include 'spring-jms'
-include 'spring-orm'
-include 'spring-oxm'
-include 'spring-struts'
-include 'spring-test'
-include 'spring-tx'
-include 'spring-web'
-include 'spring-webmvc'
-include 'spring-webmvc-portlet'
+include "spring-aop"
+include "spring-aspects"
+include "spring-beans"
+include "spring-context"
+include "spring-context-support"
+include "spring-core"
+include "spring-expression"
+include "spring-instrument"
+include "spring-instrument-tomcat"
+include "spring-jdbc"
+include "spring-jms"
+include "spring-orm"
+include "spring-orm-hibernate4"
+include "spring-oxm"
+include "spring-struts"
+include "spring-test"
+include "spring-test-mvc"
+include "spring-tx"
+include "spring-web"
+include "spring-webmvc"
+include "spring-webmvc-portlet"
+include "spring-webmvc-tiles3"
+
+// Exposes gradle buildSrc for IDE support
+include "buildSrc"
+rootProject.children.find{ it.name == "buildSrc" }.name = "spring-build-src"

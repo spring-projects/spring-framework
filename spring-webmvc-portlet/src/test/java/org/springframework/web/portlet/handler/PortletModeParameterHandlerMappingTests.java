@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,10 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 public class PortletModeParameterHandlerMappingTests extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/portlet/handler/portletModeParameterMapping.xml";
-	
-	private ConfigurablePortletApplicationContext pac; 
-	
+
+	private ConfigurablePortletApplicationContext pac;
+
+	@Override
 	public void setUp() throws Exception {
 		MockPortletContext portletContext = new MockPortletContext();
 		pac = new XmlPortletApplicationContext();
@@ -42,10 +43,10 @@ public class PortletModeParameterHandlerMappingTests extends TestCase {
 		pac.setConfigLocations(new String[] {CONF});
 		pac.refresh();
 	}
-	
+
 	public void testPortletModeViewWithParameter() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest addRequest = new MockPortletRequest();
 		addRequest.setPortletMode(PortletMode.VIEW);
 		addRequest.setParameter("action", "add");
@@ -53,25 +54,25 @@ public class PortletModeParameterHandlerMappingTests extends TestCase {
 		MockPortletRequest removeRequest = new MockPortletRequest();
 		removeRequest.setPortletMode(PortletMode.VIEW);
 		removeRequest.setParameter("action", "remove");
-		
+
 		Object addHandler = hm.getHandler(addRequest).getHandler();
 		Object removeHandler = hm.getHandler(removeRequest).getHandler();
-		
+
 		assertEquals(pac.getBean("addItemHandler"), addHandler);
 		assertEquals(pac.getBean("removeItemHandler"), removeHandler);
 	}
 
 	public void testPortletModeEditWithParameter() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.setPortletMode(PortletMode.EDIT);
 		request.setParameter("action", "prefs");
-		
+
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(pac.getBean("preferencesHandler"), handler);
 	}
-	
+
 	public void testDuplicateMappingInSamePortletMode() {
 		PortletModeParameterHandlerMapping hm = (PortletModeParameterHandlerMapping)pac.getBean("handlerMapping");
 		try {
@@ -93,18 +94,18 @@ public class PortletModeParameterHandlerMappingTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testAllowDuplicateMappingInDifferentPortletMode() throws Exception {
 		PortletModeParameterHandlerMapping hm = (PortletModeParameterHandlerMapping)pac.getBean("handlerMapping");
 		hm.setAllowDuplicateParameters(true);
-		
+
 		Object editRemoveHandler = new Object();
 		hm.registerHandler(PortletMode.EDIT, "remove", editRemoveHandler);
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.setPortletMode(PortletMode.EDIT);
 		request.setParameter("action", "remove");
-		
+
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(editRemoveHandler, handler);
 	}

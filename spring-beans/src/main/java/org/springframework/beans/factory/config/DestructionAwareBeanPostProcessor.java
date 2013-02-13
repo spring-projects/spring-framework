@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 	/**
 	 * Apply this BeanPostProcessor to the given bean instance before
 	 * its destruction. Can invoke custom destruction callbacks.
-	 * <p>Like DisposableBean's <code>destroy</code> and a custom destroy method,
+	 * <p>Like DisposableBean's {@code destroy} and a custom destroy method,
 	 * this callback just applies to singleton beans in the factory (including
 	 * inner beans).
 	 * @param bean the bean instance to be destroyed

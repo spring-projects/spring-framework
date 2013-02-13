@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * {@link #getSource() source} location might be 'The bean defined on
  * line 76 of beans.properties has an invalid Class'; another source might
  * be the actual DOM Element from a parsed XML {@link org.w3c.dom.Document};
- * or the source object might simply be <code>null</code>.
+ * or the source object might simply be {@code null}.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -51,7 +51,7 @@ public class Location {
 	 * Create a new instance of the {@link Location} class.
 	 * @param resource the resource with which this location is associated
 	 * @param source the actual location within the associated resource
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public Location(Resource resource, Object source) {
 		Assert.notNull(resource, "Resource must not be null");
@@ -69,7 +69,7 @@ public class Location {
 
 	/**
 	 * Get the actual location within the associated {@link #getResource() resource}
-	 * (may be <code>null</code>).
+	 * (may be {@code null}).
 	 * <p>See the {@link Location class level javadoc for this class} for examples
 	 * of what the actual type of the returned object may be.
 	 */

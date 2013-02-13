@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,18 @@ import javax.xml.transform.sax.SAXResult;
 import org.xml.sax.ContentHandler;
 
 /**
- * Implementation of the <code>Result</code> tagging interface for StAX writers. Can be constructed with a
- * <code>XMLEventConsumer</code> or a <code>XMLStreamWriter</code>.
+ * Implementation of the {@code Result} tagging interface for StAX writers. Can be constructed with a
+ * {@code XMLEventConsumer} or a {@code XMLStreamWriter}.
  *
- * <p>This class is necessary because there is no implementation of <code>Source</code> for StaxReaders in JAXP 1.3.
- * There is a <code>StAXResult</code> in JAXP 1.4 (JDK 1.6), but this class is kept around for back-ward compatibility
+ * <p>This class is necessary because there is no implementation of {@code Source} for StaxReaders in JAXP 1.3.
+ * There is a {@code StAXResult} in JAXP 1.4 (JDK 1.6), but this class is kept around for back-ward compatibility
  * reasons.
  *
- * <p>Even though <code>StaxResult</code> extends from <code>SAXResult</code>, calling the methods of
- * <code>SAXResult</code> is <strong>not supported</strong>. In general, the only supported operation on this class is
- * to use the <code>ContentHandler</code> obtained via {@link #getHandler()} to parse an input source using an
- * <code>XMLReader</code>. Calling {@link #setHandler(org.xml.sax.ContentHandler)} will result in
- * <code>UnsupportedOperationException</code>s.
+ * <p>Even though {@code StaxResult} extends from {@code SAXResult}, calling the methods of
+ * {@code SAXResult} is <strong>not supported</strong>. In general, the only supported operation on this class is
+ * to use the {@code ContentHandler} obtained via {@link #getHandler()} to parse an input source using an
+ * {@code XMLReader}. Calling {@link #setHandler(org.xml.sax.ContentHandler)} will result in
+ * {@code UnsupportedOperationException}s.
  *
  * @author Arjen Poutsma
  * @see XMLEventWriter
@@ -50,9 +50,9 @@ class StaxResult extends SAXResult {
 	private XMLStreamWriter streamWriter;
 
 	/**
-	 * Constructs a new instance of the <code>StaxResult</code> with the specified <code>XMLStreamWriter</code>.
+	 * Constructs a new instance of the {@code StaxResult} with the specified {@code XMLStreamWriter}.
 	 *
-	 * @param streamWriter the <code>XMLStreamWriter</code> to write to
+	 * @param streamWriter the {@code XMLStreamWriter} to write to
 	 */
 	StaxResult(XMLStreamWriter streamWriter) {
 		super.setHandler(new StaxStreamContentHandler(streamWriter));
@@ -60,9 +60,9 @@ class StaxResult extends SAXResult {
 	}
 
 	/**
-	 * Constructs a new instance of the <code>StaxResult</code> with the specified <code>XMLEventWriter</code>.
+	 * Constructs a new instance of the {@code StaxResult} with the specified {@code XMLEventWriter}.
 	 *
-	 * @param eventWriter the <code>XMLEventWriter</code> to write to
+	 * @param eventWriter the {@code XMLEventWriter} to write to
 	 */
 	StaxResult(XMLEventWriter eventWriter) {
 		super.setHandler(new StaxEventContentHandler(eventWriter));
@@ -70,11 +70,11 @@ class StaxResult extends SAXResult {
 	}
 
 	/**
-	 * Constructs a new instance of the <code>StaxResult</code> with the specified <code>XMLEventWriter</code> and
-	 * <code>XMLEventFactory</code>.
+	 * Constructs a new instance of the {@code StaxResult} with the specified {@code XMLEventWriter} and
+	 * {@code XMLEventFactory}.
 	 *
-	 * @param eventWriter  the <code>XMLEventWriter</code> to write to
-	 * @param eventFactory the <code>XMLEventFactory</code> to use for creating events
+	 * @param eventWriter  the {@code XMLEventWriter} to write to
+	 * @param eventFactory the {@code XMLEventFactory} to use for creating events
 	 */
 	StaxResult(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
 		super.setHandler(new StaxEventContentHandler(eventWriter, eventFactory));
@@ -82,8 +82,8 @@ class StaxResult extends SAXResult {
 	}
 
 	/**
-	 * Returns the <code>XMLEventWriter</code> used by this <code>StaxResult</code>. If this <code>StaxResult</code> was
-	 * created with an <code>XMLStreamWriter</code>, the result will be <code>null</code>.
+	 * Returns the {@code XMLEventWriter} used by this {@code StaxResult}. If this {@code StaxResult} was
+	 * created with an {@code XMLStreamWriter}, the result will be {@code null}.
 	 *
 	 * @return the StAX event writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLEventWriter)
@@ -93,8 +93,8 @@ class StaxResult extends SAXResult {
 	}
 
 	/**
-	 * Returns the <code>XMLStreamWriter</code> used by this <code>StaxResult</code>. If this <code>StaxResult</code> was
-	 * created with an <code>XMLEventConsumer</code>, the result will be <code>null</code>.
+	 * Returns the {@code XMLStreamWriter} used by this {@code StaxResult}. If this {@code StaxResult} was
+	 * created with an {@code XMLEventConsumer}, the result will be {@code null}.
 	 *
 	 * @return the StAX stream writer used by this result
 	 * @see #StaxResult(javax.xml.stream.XMLStreamWriter)
@@ -104,7 +104,7 @@ class StaxResult extends SAXResult {
 	}
 
 	/**
-	 * Throws a <code>UnsupportedOperationException</code>.
+	 * Throws a {@code UnsupportedOperationException}.
 	 *
 	 * @throws UnsupportedOperationException always
 	 */

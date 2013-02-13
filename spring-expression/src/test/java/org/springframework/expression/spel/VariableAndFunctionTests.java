@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -25,7 +25,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
- * 
+ *
  * @author Andy Clement
  */
 public class VariableAndFunctionTests extends ExpressionTestCase {
@@ -35,7 +35,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
 	}
-	
+
 	@Test
 	public void testVariableAccess_WellKnownVariables() {
 		evaluate("#this.getName()","Nikola Tesla",String.class);
@@ -77,11 +77,11 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		try {
 			@SuppressWarnings("unused")
 			Object v = parser.parseRaw("#notStatic()").getValue(ctx);
-			Assert.fail("Should have failed with exception - cannot call non static method that way");
+			fail("Should have failed with exception - cannot call non static method that way");
 		} catch (SpelEvaluationException se) {
 			if (se.getMessageCode() != SpelMessage.FUNCTION_MUST_BE_STATIC) {
 				se.printStackTrace();
-				Assert.fail("Should have failed a message about the function needing to be static, not: "
+				fail("Should have failed a message about the function needing to be static, not: "
 						+ se.getMessageCode());
 			}
 		}

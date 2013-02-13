@@ -30,7 +30,9 @@ import org.springframework.core.type.filter.TypeFilter;
  * Provides support parallel with Spring XML's {@code <context:component-scan>} element.
  *
  * <p>One of {@link #basePackageClasses()}, {@link #basePackages()} or its alias
- * {@link #value()} must be specified.
+ * {@link #value()} may be specified to define specific packages to scan.  If specific
+ * packages are not defined scanning will occur from the package of the
+ * class with this annotation.
  *
  * <p>Note that the {@code <context:component-scan>} element has an
  * {@code annotation-config} attribute, however this annotation does not. This is because
@@ -161,7 +163,7 @@ public @interface ComponentScan {
 		 * <p>Specifying zero classes is permitted but will have no effect on component
 		 * scanning.
 		 */
-		Class<?>[] value(); //doco
+		Class<?>[] value();
 	}
 
 }

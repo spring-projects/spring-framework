@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,11 +82,11 @@ public class MethodOverrides {
 	public boolean isEmpty() {
 		return this.overrides.isEmpty();
 	}
-	
+
 	/**
 	 * Return the override for the given method, if any.
 	 * @param method method to check for overrides for
-	 * @return the method override, or <code>null</code> if none
+	 * @return the method override, or {@code null} if none
 	 */
 	public MethodOverride getOverride(Method method) {
 		for (MethodOverride override : this.overrides) {

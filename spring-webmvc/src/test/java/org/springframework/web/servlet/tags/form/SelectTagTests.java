@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.support.BindStatus;
@@ -64,8 +64,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 	private TestBeanWithRealCountry bean;
 
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new SelectTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -83,7 +86,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemLabel("name");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 
@@ -174,9 +177,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems("${countries}");
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), "testBean");
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(Country.getCountryWithIsoCode(text));
 			}
+			@Override
 			public String getAsText() {
 				return ((Country) getValue()).getName();
 			}
@@ -202,9 +207,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemLabel("name");
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), "testBean");
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(Country.getCountryWithIsoCode(text));
 			}
+			@Override
 			public String getAsText() {
 				return ((Country) getValue()).getName();
 			}
@@ -229,6 +236,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		testBean.setBean(withCountry);
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(testBean , "testBean");
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (text==null || text.length()==0) {
 					setValue(null);
@@ -236,12 +244,13 @@ public class SelectTagTests extends AbstractFormTagTests {
 				}
 				setValue(Country.getCountryWithIsoCode(text));
 			}
+			@Override
 			public String getAsText() {
 				Country value = (Country) getValue();
 				if (value==null) {
 					return null;
 				}
-				return ((Country) value).getName();
+				return value.getName();
 			}
 		});
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
@@ -262,9 +271,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 		testBean.setBean(getTestBean());
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(testBean , "testBean");
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(Country.getCountryWithIsoCode(text));
 			}
+			@Override
 			public String getAsText() {
 				return ((Country) getValue()).getName();
 			}
@@ -286,15 +297,17 @@ public class SelectTagTests extends AbstractFormTagTests {
 		testBean.setRealCountry(null);
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(testBean, "testBean");
 		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(Country.getCountryWithIsoCode(text));
 			}
+			@Override
 			public String getAsText() {
 				Country value = (Country) getValue();
 				if (value==null) {
 					return "";
 				}
-				return ((Country) value).getName();
+				return value.getName();
 			}
 		});
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
@@ -469,9 +482,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		FormattingConversionService cs = new FormattingConversionService();
 		cs.addFormatterForFieldType(Country.class, new Formatter<Country>() {
+			@Override
 			public String print(Country object, Locale locale) {
 				return object.getName();
 			}
+			@Override
 			public Country parse(String text, Locale locale) throws ParseException {
 				return new Country(text, text);
 			}
@@ -514,9 +529,11 @@ public class SelectTagTests extends AbstractFormTagTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		FormattingConversionService cs = new FormattingConversionService();
 		cs.addFormatterForFieldType(Country.class, new Formatter<Country>() {
+			@Override
 			public String print(Country object, Locale locale) {
 				return object.getName();
 			}
+			@Override
 			public Country parse(String text, Locale locale) throws ParseException {
 				return new Country(text, text);
 			}
@@ -562,6 +579,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(List.class, new CustomCollectionEditor(LinkedList.class) {
+			@Override
 			public String getAsText() {
 				return getValue().toString();
 			}
@@ -635,14 +653,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-2660"
 	 * target="_blank">SPR-2660</a>.
 	 * <p>
-	 * Specifically, if the <code>items</code> attribute is supplied a
-	 * {@link Map}, and <code>itemValue</code> and <code>itemLabel</code>
+	 * Specifically, if the {@code items} attribute is supplied a
+	 * {@link Map}, and {@code itemValue} and {@code itemLabel}
 	 * are supplied non-null values, then:
 	 * </p>
 	 * <ul>
-	 * <li><code>itemValue</code> will be used as the property name of the
+	 * <li>{@code itemValue} will be used as the property name of the
 	 * map's <em>key</em>, and</li>
-	 * <li><code>itemLabel</code> will be used as the property name of the
+	 * <li>{@code itemLabel} will be used as the property name of the
 	 * map's <em>value</em>.</li>
 	 * </ul>
 	 */
@@ -670,10 +688,12 @@ public class SelectTagTests extends AbstractFormTagTests {
 			BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
 			bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
 
+				@Override
 				public void setAsText(final String text) throws IllegalArgumentException {
 					setValue(Country.getCountryWithIsoCode(text));
 				}
 
+				@Override
 				public String getAsText() {
 					return ((Country) getValue()).getIsoCode();
 				}
@@ -771,6 +791,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	private Map getCountryToLocaleMap() {
 		Map map = new TreeMap(new Comparator() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				return ((Country)o1).getName().compareTo(((Country)o2).getName());
 			}
@@ -792,6 +813,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		return sexes;
 	}
 
+	@Override
 	protected void extendRequest(MockHttpServletRequest request) {
 		super.extendRequest(request);
 		request.setAttribute("countries", Country.getCountries());
@@ -833,6 +855,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		}
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		this.bean = new TestBeanWithRealCountry();
 		this.bean.setName("Rob");
@@ -846,7 +869,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	private TestBean getTestBean() {
 		return (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
 	}
-	
+
 	public static class TestBeanWrapper {
 		private TestBean bean;
 
@@ -857,7 +880,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		public void setBean(TestBean bean) {
 			this.bean = bean;
 		}
-		
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * using this FactoryBean to link it in and expose it under a different name.
  * Effectively, this corresponds to an alias for the target bean.
  *
- * <p><b>NOTE:</b> For XML bean definition files, an <code>&lt;alias&gt;</code>
+ * <p><b>NOTE:</b> For XML bean definition files, an {@code &lt;alias&gt;}
  * tag is available that effectively achieves the same.
  *
  * <p>A special capability of this FactoryBean is enabled through its configuration
@@ -42,7 +42,10 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * @since 1.2
  * @see #setTargetBeanName
  * @see PropertyPlaceholderConfigurer
+ * @deprecated as of Spring 3.2, in favor of using regular bean name aliases
+ * (which support placeholder parsing since Spring 2.5)
  */
+@Deprecated
 public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAware {
 
 	private String targetBeanName;

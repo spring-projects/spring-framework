@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.multipart.MultipartRequest;
  * that build on Spring's {@link org.springframework.web.context.request.WebRequest}
  * abstraction: e.g. in a {@link org.springframework.web.context.request.WebRequestInterceptor}
  * implementation. Simply instantiate a WebRequestDataBinder for each binding
- * process, and invoke <code>bind</code> with the current WebRequest as argument:
+ * process, and invoke {@code bind} with the current WebRequest as argument:
  *
  * <pre class="code">
  * MyBean myBean = new MyBean();
@@ -61,7 +61,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new WebRequestDataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -71,7 +71,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new WebRequestDataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */

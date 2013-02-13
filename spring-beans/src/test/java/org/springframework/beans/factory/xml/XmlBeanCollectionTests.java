@@ -16,7 +16,14 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -27,20 +34,18 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.IdentityHashMap;
-import java.util.HashSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
-import test.beans.TestBean;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+
+import test.beans.TestBean;
 
 /**
  * Tests for collections in XML bean definitions.
@@ -51,10 +56,12 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class XmlBeanCollectionTests {
 
-	private final XmlBeanFactory beanFactory;
+	private final DefaultListableBeanFactory beanFactory;
 
 	public XmlBeanCollectionTests() {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				new ClassPathResource("collections.xml", getClass()));
 	}
 
 	@Test
@@ -454,7 +461,7 @@ public class XmlBeanCollectionTests {
  * @since 05.06.2003
  */
 class HasMap {
-	
+
 	private Map map;
 
 	private IdentityHashMap identityMap;
@@ -464,11 +471,11 @@ class HasMap {
 	private CopyOnWriteArraySet concurrentSet;
 
 	private Properties props;
-	
+
 	private Object[] objectArray;
-	
+
 	private Class[] classArray;
-	
+
 	private Integer[] intArray;
 
 	public Map getMap() {

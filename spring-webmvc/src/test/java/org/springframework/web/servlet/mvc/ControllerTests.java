@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
@@ -178,23 +178,28 @@ public class ControllerTests extends TestCase {
 			destroyed = false;
 		}
 
+		@Override
 		public void init(ServletConfig servletConfig) {
 			config = servletConfig;
 		}
 
+		@Override
 		public ServletConfig getServletConfig() {
 			return config;
 		}
 
+		@Override
 		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
 			request = servletRequest;
 			response = servletResponse;
 		}
 
+		@Override
 		public String getServletInfo() {
 			return "TestServlet";
 		}
 
+		@Override
 		public void destroy() {
 			destroyed = true;
 		}

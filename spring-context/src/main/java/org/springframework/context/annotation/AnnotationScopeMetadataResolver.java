@@ -44,7 +44,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	private final ScopedProxyMode defaultProxyMode;
 
 	/**
-	 * Create a new instance of the <code>AnnotationScopeMetadataResolver</code> class.
+	 * Create a new instance of the {@code AnnotationScopeMetadataResolver} class.
 	 * @see #AnnotationScopeMetadataResolver(ScopedProxyMode)
 	 * @see ScopedProxyMode#NO
 	 */
@@ -53,7 +53,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	}
 
 	/**
-	 * Create a new instance of the <code>AnnotationScopeMetadataResolver</code> class.
+	 * Create a new instance of the {@code AnnotationScopeMetadataResolver} class.
 	 * @param defaultProxyMode the desired scoped-proxy mode
 	 */
 	public AnnotationScopeMetadataResolver(ScopedProxyMode defaultProxyMode) {

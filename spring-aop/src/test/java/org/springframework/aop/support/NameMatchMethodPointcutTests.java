@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2008 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,11 +34,11 @@ import test.util.SerializationTestUtils;
  * @author Chris Beams
  */
 public final class NameMatchMethodPointcutTests {
-	
+
 	protected NameMatchMethodPointcut pc;
-	
+
 	protected Person proxied;
-	
+
 	protected SerializableNopInterceptor nop;
 
 	/**
@@ -52,7 +52,7 @@ public final class NameMatchMethodPointcutTests {
 		pf.addAdvisor(new DefaultPointcutAdvisor(pc, nop));
 		proxied = (Person) pf.getProxy();
 	}
-	
+
 	@Test
 	public void testMatchingOnly() {
 		// Can't do exact matching through isMatch
@@ -63,7 +63,7 @@ public final class NameMatchMethodPointcutTests {
 		assertFalse(pc.isMatch("setName", "set"));
 		assertTrue(pc.isMatch("testing", "*ing"));
 	}
-		
+
 	@Test
 	public void testEmpty() throws Throwable {
 		assertEquals(0, nop.getCount());
@@ -72,8 +72,8 @@ public final class NameMatchMethodPointcutTests {
 		proxied.echo(null);
 		assertEquals(0, nop.getCount());
 	}
-	
-	
+
+
 	@Test
 	public void testMatchOneMethod() throws Throwable {
 		pc.addMethodName("echo");
@@ -84,7 +84,7 @@ public final class NameMatchMethodPointcutTests {
 		assertEquals(0, nop.getCount());
 		proxied.echo(null);
 		assertEquals(1, nop.getCount());
-		
+
 		proxied.setName("");
 		assertEquals(2, nop.getCount());
 		proxied.setAge(25);
@@ -102,7 +102,7 @@ public final class NameMatchMethodPointcutTests {
 		proxied.echo(null);
 		assertEquals(2, nop.getCount());
 	}
-	
+
 	@Test
 	public void testSerializable() throws Throwable {
 		testSets();

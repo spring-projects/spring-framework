@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,22 @@ import org.springframework.core.Ordered;
  * {@link java.util.Comparator} implementation that checks
  * {@link org.springframework.core.Ordered} as well as the
  * {@link Order} annotation, with an order value provided by an
- * <code>Ordered</code> instance overriding a statically defined
+ * {@code Ordered} instance overriding a statically defined
  * annotation value (if any).
  *
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  * @since 2.0.1
  * @see org.springframework.core.Ordered
  * @see Order
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
+
+	/**
+	 * Shared default instance of AnnotationAwareOrderComparator.
+	 */
+	public static AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
+
 
 	@Override
 	protected int getOrder(Object obj) {

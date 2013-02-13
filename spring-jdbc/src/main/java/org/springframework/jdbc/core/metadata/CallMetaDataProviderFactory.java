@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class CallMetaDataProviderFactory {
 	 * Create a CallMetaDataProvider based on the database metedata
 	 * @param dataSource used to retrieve metedata
 	 * @param context the class that holds configuration and metedata
-	 * @return instance of the CallMetaDataProvider implementation to be used 
+	 * @return instance of the CallMetaDataProvider implementation to be used
 	 */
 	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,9 @@ import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -40,18 +37,19 @@ import javax.servlet.ServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.mock.web.PassThroughFilterChain;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.orm.jpa.JpaTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 /**
@@ -156,21 +154,22 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler((Runnable) anyObject());
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(webRequest);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(webRequest);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
 		});
 
 		verify(asyncWebRequest);
-		reset(asyncWebRequest);
-		replay(asyncWebRequest);
 
 		interceptor.afterConcurrentHandlingStarted(webRequest);
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));
@@ -230,8 +229,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		replay(manager, factory);
 
-		final EntityManagerFactory factory2 = (EntityManagerFactory) createMock(EntityManagerFactory.class);
-		final EntityManager manager2 = (EntityManager) createMock(EntityManager.class);
+		final EntityManagerFactory factory2 = createMock(EntityManagerFactory.class);
+		final EntityManager manager2 = createMock(EntityManager.class);
 
 		expect(factory2.createEntityManager()).andReturn(manager2);
 		expect(manager2.isOpen()).andReturn(true);
@@ -259,6 +258,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -266,8 +266,9 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
@@ -294,8 +295,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		replay(manager, factory);
 
-		final EntityManagerFactory factory2 = (EntityManagerFactory) createMock(EntityManagerFactory.class);
-		final EntityManager manager2 = (EntityManager) createMock(EntityManager.class);
+		final EntityManagerFactory factory2 = createMock(EntityManagerFactory.class);
+		final EntityManager manager2 = createMock(EntityManager.class);
 
 		expect(factory2.createEntityManager()).andReturn(manager2);
 		expect(manager2.isOpen()).andReturn(true);
@@ -325,6 +326,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		final AtomicInteger count = new AtomicInteger(0);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -335,8 +337,9 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		final AtomicInteger count2 = new AtomicInteger(0);
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 				count2.incrementAndGet();
@@ -345,16 +348,19 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
-		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-		expectLastCall().anyTimes();
+		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
 		replay(asyncWebRequest);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -389,4 +395,12 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		wac.close();
 	}
 
+	@SuppressWarnings("serial")
+	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {
+
+		@Override
+		public void execute(Runnable task, long startTimeout) {
+			task.run();
+		}
+	}
 }

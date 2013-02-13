@@ -95,7 +95,7 @@ public class ValidatorFactoryTests {
 		Set<ConstraintViolation<ValidPerson>> result = validator.validate(person);
 		assertEquals(1, result.size());
 		Iterator<ConstraintViolation<ValidPerson>> iterator = result.iterator();
-		ConstraintViolation cv = iterator.next();
+		ConstraintViolation<?> cv = iterator.next();
 		assertEquals("", cv.getPropertyPath().toString());
 		assertTrue(cv.getConstraintDescriptor().getAnnotation() instanceof NameAddressValid);
 	}
@@ -273,9 +273,11 @@ public class ValidatorFactoryTests {
 
 	public static class NameAddressValidator implements ConstraintValidator<NameAddressValid, ValidPerson> {
 
+		@Override
 		public void initialize(NameAddressValid constraintAnnotation) {
 		}
 
+		@Override
 		public boolean isValid(ValidPerson value, ConstraintValidatorContext constraintValidatorContext) {
 			return (value.name == null || !value.address.street.contains(value.name));
 		}

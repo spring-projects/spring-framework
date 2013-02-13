@@ -18,20 +18,22 @@ package org.springframework.web.servlet.mvc.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -167,6 +169,19 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
+	}
+
+	@Test
+	public void handleConversionNotSupportedException() throws Exception {
+		ConversionNotSupportedException ex =
+				new ConversionNotSupportedException(new Object(), String.class, new Exception());
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 500, response.getStatus());
+
+		// SPR-9653
+		assertSame(ex, request.getAttribute("javax.servlet.error.exception"));
 	}
 
 	public void handle(String arg) {

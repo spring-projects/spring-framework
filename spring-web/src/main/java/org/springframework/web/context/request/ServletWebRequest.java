@@ -46,7 +46,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
 
 	private static final String METHOD_GET = "GET";
-	
+
 
 	private HttpServletResponse response;
 

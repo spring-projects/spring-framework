@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,37 +22,40 @@ import org.springframework.beans.FatalBeanException;
 /**
  * Convenient base class for EJB 2.x stateful session beans (SFSBs).
  * SFSBs should extend this class, leaving them to implement the
- * <code>ejbActivate()</code> and <code>ejbPassivate()</code> lifecycle
+ * {@code ejbActivate()} and {@code ejbPassivate()} lifecycle
  * methods to comply with the requirements of the EJB specification.
  *
- * <p><b>Note: Subclasses should invoke the <code>loadBeanFactory()</code>
- * method in their custom <code>ejbCreate()</code> and <code>ejbActivate()</code>
- * methods, and should invoke the <code>unloadBeanFactory()</code> method in
- * their <code>ejbPassivate</code> method.</b>
- * 
+ * <p><b>Note: Subclasses should invoke the {@code loadBeanFactory()}
+ * method in their custom {@code ejbCreate()} and {@code ejbActivate()}
+ * methods, and should invoke the {@code unloadBeanFactory()} method in
+ * their {@code ejbPassivate} method.</b>
+ *
  * <p><b>Note: The default BeanFactoryLocator used by this class's superclass
  * (ContextJndiBeanFactoryLocator) is <b>not</b> serializable. Therefore,
  * when using the default BeanFactoryLocator, or another variant which is
- * not serializable, subclasses must call <code>setBeanFactoryLocator(null)</code>
- * in <code>ejbPassivate()</code>, with a corresponding call to
- * <code>setBeanFactoryLocator(xxx)</code> in <code>ejbActivate()</code>
+ * not serializable, subclasses must call {@code setBeanFactoryLocator(null)}
+ * in {@code ejbPassivate()}, with a corresponding call to
+ * {@code setBeanFactoryLocator(xxx)} in {@code ejbActivate()}
  * unless relying on the default locator.
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
+ * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
+@Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 
 	/**
 	 * Load a Spring BeanFactory namespace. Exposed for subclasses
-	 * to load a BeanFactory in their <code>ejbCreate()</code> methods.
+	 * to load a BeanFactory in their {@code ejbCreate()} methods.
 	 * Those callers would normally want to catch BeansException and
 	 * rethrow it as {@link javax.ejb.CreateException}. Unless the
 	 * BeanFactory is known to be serializable, this method must also
-	 * be called from <code>ejbActivate()</code>, to reload a context
-	 * removed via a call to <code>unloadBeanFactory()</code> from
-	 * the <code>ejbPassivate()</code> implementation.
+	 * be called from {@code ejbActivate()}, to reload a context
+	 * removed via a call to {@code unloadBeanFactory()} from
+	 * the {@code ejbPassivate()} implementation.
 	 */
 	@Override
 	protected void loadBeanFactory() throws BeansException {
@@ -60,12 +63,12 @@ public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 	}
 
 	/**
-	 * Unload the Spring BeanFactory instance. The default <code>ejbRemove()</code>
+	 * Unload the Spring BeanFactory instance. The default {@code ejbRemove()}
 	 * method invokes this method, but subclasses which override
-	 * <code>ejbRemove()</code> must invoke this method themselves.
+	 * {@code ejbRemove()} must invoke this method themselves.
 	 * <p>Unless the BeanFactory is known to be serializable, this method
-	 * must also be called from <code>ejbPassivate()</code>, with a corresponding
-	 * call to <code>loadBeanFactory()</code> from <code>ejbActivate()</code>.
+	 * must also be called from {@code ejbPassivate()}, with a corresponding
+	 * call to {@code loadBeanFactory()} from {@code ejbActivate()}.
 	 */
 	@Override
 	protected void unloadBeanFactory() throws FatalBeanException {

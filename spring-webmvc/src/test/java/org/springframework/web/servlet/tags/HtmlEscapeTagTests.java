@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -30,12 +30,14 @@ import org.springframework.web.util.WebUtils;
  */
 public class HtmlEscapeTagTests extends AbstractTagTests {
 
+	@SuppressWarnings("serial")
 	public void testHtmlEscapeTag() throws JspException {
 		PageContext pc = createPageContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();
 		tag.setPageContext(pc);
 		tag.doStartTag();
 		HtmlEscapingAwareTag testTag = new HtmlEscapingAwareTag() {
+			@Override
 			public int doStartTagInternal() throws Exception {
 				return EVAL_BODY_INCLUDE;
 			}
@@ -107,13 +109,16 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBody() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "test text";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}
@@ -124,13 +129,16 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("test text", result.toString());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBodyWithHtmlEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "test & text";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}
@@ -142,13 +150,16 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("test &amp; text", result.toString());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBodyWithJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "' test & text \\";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}
@@ -160,13 +171,16 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("Correct content", "\\' test & text \\\\", result.toString());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "' test & text \\";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}

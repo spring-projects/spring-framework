@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class MockRenderResponse extends MockMimeResponse implements RenderRespon
 	// RenderResponse methods
 	//---------------------------------------------------------------------
 
+	@Override
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -77,6 +78,7 @@ public class MockRenderResponse extends MockMimeResponse implements RenderRespon
 		return this.title;
 	}
 
+	@Override
 	public void setNextPossiblePortletModes(Collection<PortletMode> portletModes) {
 		this.nextPossiblePortletModes = portletModes;
 	}

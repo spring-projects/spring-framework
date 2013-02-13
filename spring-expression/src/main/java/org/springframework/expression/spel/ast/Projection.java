@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents projection, where a given operation is performed on all elements in some input sequence, returning 
+ * Represents projection, where a given operation is performed on all elements in some input sequence, returning
  * a new sequence of the same size. For example:
  * "{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}" returns "[n, y, n, y, n, y, n, y, n, y]"
  *
@@ -43,7 +43,7 @@ import org.springframework.util.ObjectUtils;
 public class Projection extends SpelNodeImpl {
 
 	private final boolean nullSafe;
-	
+
 	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
 		super(pos, expression);
 		this.nullSafe = nullSafe;
@@ -51,12 +51,17 @@ public class Projection extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		return getValueRef(state).getValue();
+	}
+
+	@Override
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue op = state.getActiveContextObject();
 
 		Object operand = op.getValue();
 		boolean operandIsArray = ObjectUtils.isArray(operand);
 		// TypeDescriptor operandTypeDescriptor = op.getTypeDescriptor();
-		
+
 		// When the input is a map, we push a special context object on the stack
 		// before calling the specified operation. This special context object
 		// has two fields 'key' and 'value' that refer to the map entries key
@@ -65,7 +70,7 @@ public class Projection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapData = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
-			for (Map.Entry entry : mapData.entrySet()) {
+			for (Map.Entry<?,?> entry : mapData.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry));
 					result.add(this.children[0].getValueInternal(state).getValue());
@@ -74,7 +79,7 @@ public class Projection extends SpelNodeImpl {
 					state.popActiveContextObject();
 				}
 			}
-			return new TypedValue(result); // TODO unable to build correct type descriptor
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this); // TODO unable to build correct type descriptor
 		}
 		else if (operand instanceof Collection || operandIsArray) {
 			Collection<?> data = (operand instanceof Collection ? (Collection<?>) operand :
@@ -104,14 +109,14 @@ public class Projection extends SpelNodeImpl {
 				}
 				Object resultArray = Array.newInstance(arrayElementType, result.size());
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
-				return new TypedValue(resultArray);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 			}
-			return new TypedValue(result);
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 		}
 		else {
 			if (operand==null) {
 				if (this.nullSafe) {
-					return TypedValue.NULL;
+					return ValueRef.NullValueRef.instance;
 				}
 				else {
 					throw new SpelEvaluationException(getStartPosition(),

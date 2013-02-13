@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ public abstract class TransactionSynchronizationUtils {
 
 
 	/**
-	 * Trigger <code>flush</code> callbacks on all currently registered synchronizations.
-	 * @throws RuntimeException if thrown by a <code>flush</code> callback
+	 * Trigger {@code flush} callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a {@code flush} callback
 	 * @see TransactionSynchronization#flush()
 	 */
 	public static void triggerFlush() {
@@ -85,9 +85,9 @@ public abstract class TransactionSynchronizationUtils {
 	}
 
 	/**
-	 * Trigger <code>beforeCommit</code> callbacks on all currently registered synchronizations.
+	 * Trigger {@code beforeCommit} callbacks on all currently registered synchronizations.
 	 * @param readOnly whether the transaction is defined as read-only transaction
-	 * @throws RuntimeException if thrown by a <code>beforeCommit</code> callback
+	 * @throws RuntimeException if thrown by a {@code beforeCommit} callback
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
 	public static void triggerBeforeCommit(boolean readOnly) {
@@ -97,7 +97,7 @@ public abstract class TransactionSynchronizationUtils {
 	}
 
 	/**
-	 * Trigger <code>beforeCompletion</code> callbacks on all currently registered synchronizations.
+	 * Trigger {@code beforeCompletion} callbacks on all currently registered synchronizations.
 	 * @see TransactionSynchronization#beforeCompletion()
 	 */
 	public static void triggerBeforeCompletion() {
@@ -112,8 +112,8 @@ public abstract class TransactionSynchronizationUtils {
 	}
 
 	/**
-	 * Trigger <code>afterCommit</code> callbacks on all currently registered synchronizations.
-	 * @throws RuntimeException if thrown by a <code>afterCommit</code> callback
+	 * Trigger {@code afterCommit} callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a {@code afterCommit} callback
 	 * @see TransactionSynchronizationManager#getSynchronizations()
 	 * @see TransactionSynchronization#afterCommit()
 	 */
@@ -122,7 +122,7 @@ public abstract class TransactionSynchronizationUtils {
 	}
 
 	/**
-	 * Actually invoke the <code>afterCommit</code> methods of the
+	 * Actually invoke the {@code afterCommit} methods of the
 	 * given Spring TransactionSynchronization objects.
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @see TransactionSynchronization#afterCommit()
@@ -136,7 +136,7 @@ public abstract class TransactionSynchronizationUtils {
 	}
 
 	/**
-	 * Trigger <code>afterCompletion</code> callbacks on all currently registered synchronizations.
+	 * Trigger {@code afterCompletion} callbacks on all currently registered synchronizations.
 	 * @see TransactionSynchronizationManager#getSynchronizations()
 	 * @param completionStatus the completion status according to the
 	 * constants in the TransactionSynchronization interface
@@ -151,7 +151,7 @@ public abstract class TransactionSynchronizationUtils {
 	}
 
 	/**
-	 * Actually invoke the <code>afterCompletion</code> methods of the
+	 * Actually invoke the {@code afterCompletion} methods of the
 	 * given Spring TransactionSynchronization objects.
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @param completionStatus the completion status according to the

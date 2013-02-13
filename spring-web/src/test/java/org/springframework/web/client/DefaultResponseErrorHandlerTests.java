@@ -75,7 +75,7 @@ public class DefaultResponseErrorHandlerTests {
 
 		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
 		expect(response.getStatusText()).andReturn("Not Found");
-		expect(response.getHeaders()).andReturn(headers);
+		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
 		expect(response.getBody()).andReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
 
 		replay(response);
@@ -98,7 +98,7 @@ public class DefaultResponseErrorHandlerTests {
 
 		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
 		expect(response.getStatusText()).andReturn("Not Found");
-		expect(response.getHeaders()).andReturn(headers);
+		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
 		expect(response.getBody()).andThrow(new IOException());
 
 		replay(response);
@@ -115,7 +115,7 @@ public class DefaultResponseErrorHandlerTests {
 
 		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
 		expect(response.getStatusText()).andReturn("Not Found");
-		expect(response.getHeaders()).andReturn(headers);
+		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
 		expect(response.getBody()).andReturn(null);
 
 		replay(response);
@@ -127,10 +127,16 @@ public class DefaultResponseErrorHandlerTests {
 
 	// SPR-9406
 
-	@Test(expected=RestClientException.class)
+	@Test(expected=UnknownHttpStatusCodeException.class)
 	public void unknownStatusCode() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
 		expect(response.getStatusCode()).andThrow(new IllegalArgumentException("No matching constant for 999"));
 		expect(response.getRawStatusCode()).andReturn(999);
+		expect(response.getStatusText()).andReturn("Custom status code");
+		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
+		expect(response.getBody()).andReturn(null);
 
 		replay(response);
 

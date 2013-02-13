@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -55,11 +55,13 @@ public class ResponseStatusExceptionResolverTests {
 	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@SuppressWarnings("serial")
 	private static class StatusCodeException extends Exception {
 
 	}
 
 	@ResponseStatus(value = HttpStatus.GONE, reason = "You suck!")
+	@SuppressWarnings("serial")
 	private static class StatusCodeAndReasonException extends Exception {
 
 	}

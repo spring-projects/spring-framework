@@ -1,66 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="mail"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="mail">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Email</title>
 
-  <section id="mail-introduction">
+  <section xml:id="mail-introduction">
     <title>Introduction</title>
-	<sidebar>
-		<title>Library dependencies</title>
-		<para>The following additional jars to be on the classpath of your
-		application in order to be able to use the Spring Framework's email library.</para>
-		<itemizedlist>
-			<listitem>
-				<para>The <ulink url="http://java.sun.com/products/javamail/">JavaMail</ulink> <filename class="libraryfile">mail.jar</filename> library</para>
-			</listitem>
-			<listitem>
-				<para>The <ulink url="http://java.sun.com/products/javabeans/jaf/downloads/index.html">JAF</ulink> <filename class="libraryfile">activation.jar</filename> library</para>
-			</listitem>
-		</itemizedlist>
-		<para>All of these libraries are freely available on the web.</para>
-	</sidebar>
+    <sidebar>
+        <title>Library dependencies</title>
+        <para>The following additional jars to be on the classpath of your
+        application in order to be able to use the Spring Framework's email library.</para>
+        <itemizedlist>
+            <listitem>
+                <para>The <link xl:href="http://java.sun.com/products/javamail/">JavaMail</link> <filename class="libraryfile">mail.jar</filename> library</para>
+            </listitem>
+            <listitem>
+                <para>The <link xl:href="http://java.sun.com/products/javabeans/jaf/downloads/index.html">JAF</link> <filename class="libraryfile">activation.jar</filename> library</para>
+            </listitem>
+        </itemizedlist>
+        <para>All of these libraries are freely available on the web.</para>
+    </sidebar>
 
     <para>The Spring Framework provides a helpful utility library for sending
-	email that shields the user from the specifics of the underlying mailing
-	system and is responsible for low level resource handling on behalf of
+    email that shields the user from the specifics of the underlying mailing
+    system and is responsible for low level resource handling on behalf of
     the client.</para>
-	  
+
     <para>The <literal>org.springframework.mail</literal> package is the root level package
-	for the Spring Framework's email support. The central interface for sending
-	emails is the <interfacename>MailSender</interfacename> interface; a simple value object
-	encapsulating the properties of a simple mail such as <emphasis>from</emphasis> and
-	<emphasis>to</emphasis> (plus many others) is the <classname>SimpleMailMessage</classname> class.
+    for the Spring Framework's email support. The central interface for sending
+    emails is the <interfacename>MailSender</interfacename> interface; a simple value object
+    encapsulating the properties of a simple mail such as <emphasis>from</emphasis> and
+    <emphasis>to</emphasis> (plus many others) is the <classname>SimpleMailMessage</classname> class.
     This package also contains a hierarchy of checked exceptions which provide
     a higher level of abstraction over the lower level mail system exceptions
     with the root exception being <exceptionname>MailException</exceptionname>. Please
     refer to the JavaDocs for more information on the rich mail exception hierarchy.</para>
 
     <para>The <interfacename>org.springframework.mail.javamail.JavaMailSender</interfacename>
-	interface adds specialized <emphasis>JavaMail</emphasis> features such as MIME
+    interface adds specialized <emphasis>JavaMail</emphasis> features such as MIME
     message support to the <interfacename>MailSender</interfacename> interface
-	(from which it inherits). <interfacename>JavaMailSender</interfacename> also provides a
-	callback interface for preparation of JavaMail MIME messages, called
+    (from which it inherits). <interfacename>JavaMailSender</interfacename> also provides a
+    callback interface for preparation of JavaMail MIME messages, called
     <interfacename>org.springframework.mail.javamail.MimeMessagePreparator</interfacename></para>
 
   </section>
 
-	<section id="mail-usage">
-		<title>Usage</title>
-		<para>Let's assume there is a business interface called <interfacename>OrderManager</interfacename>:</para>
-		<programlisting language="java"><![CDATA[public interface OrderManager {
+    <section xml:id="mail-usage">
+        <title>Usage</title>
+        <para>Let's assume there is a business interface called <interfacename>OrderManager</interfacename>:</para>
+        <programlisting language="java"><![CDATA[public interface OrderManager {
 
     void placeOrder(Order order);
 }]]></programlisting>
 
-		<para>Let us also assume that there is a requirement stating that an email message
-		with an order number needs to be generated and sent to a customer placing the
-		relevant order.</para>
-		
-		<section id="mail-usage-simple">
-			<title>Basic <interfacename>MailSender</interfacename> and <classname>SimpleMailMessage</classname> usage</title>
-			<programlisting language="java"><![CDATA[import org.springframework.mail.MailException;
+        <para>Let us also assume that there is a requirement stating that an email message
+        with an order number needs to be generated and sent to a customer placing the
+        relevant order.</para>
+
+        <section xml:id="mail-usage-simple">
+            <title>Basic <interfacename>MailSender</interfacename> and <classname>SimpleMailMessage</classname> usage</title>
+            <programlisting language="java"><![CDATA[import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
@@ -96,13 +100,13 @@ public class SimpleOrderManager implements OrderManager {
         }
         catch(MailException ex) {
             ]]><lineannotation>// simply log it and go on...</lineannotation><![CDATA[
-            System.err.println(ex.getMessage());            
+            System.err.println(ex.getMessage());
         }
     }
 }]]></programlisting>
-    
-			<para>Find below the bean definitions for the above code:</para>
-    		<programlisting language="xml"><![CDATA[<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+
+            <para>Find below the bean definitions for the above code:</para>
+            <programlisting language="xml"><![CDATA[<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
   <property name="host" value="mail.mycompany.com"/>
 </bean>
 
@@ -117,17 +121,17 @@ public class SimpleOrderManager implements OrderManager {
   <property name="templateMessage" ref="templateMessage"/>
 </bean>]]></programlisting>
 
-		</section>
-		
-		<section id="mail-usage-mime">
-			<title>Using the <interfacename>JavaMailSender</interfacename> and the <classname>MimeMessagePreparator</classname></title>
-			<para>Here is another implementation of <interfacename>OrderManager</interfacename> using
-			the <interfacename>MimeMessagePreparator</interfacename> callback interface. Please note
-			in this case that the <literal>mailSender</literal> property is of type
-			<interfacename>JavaMailSender</interfacename> so that we are able to use the JavaMail
-			<classname>MimeMessage</classname> class:</para>
-			
-			<programlisting language="java"><![CDATA[import javax.mail.Message;
+        </section>
+
+        <section xml:id="mail-usage-mime">
+            <title>Using the <interfacename>JavaMailSender</interfacename> and the <classname>MimeMessagePreparator</classname></title>
+            <para>Here is another implementation of <interfacename>OrderManager</interfacename> using
+            the <interfacename>MimeMessagePreparator</interfacename> callback interface. Please note
+            in this case that the <literal>mailSender</literal> property is of type
+            <interfacename>JavaMailSender</interfacename> so that we are able to use the JavaMail
+            <classname>MimeMessage</classname> class:</para>
+
+            <programlisting language="java"><![CDATA[import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -140,7 +144,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 public class SimpleOrderManager implements OrderManager {
 
     private JavaMailSender mailSender;
-    
+
     public void setMailSender(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -150,12 +154,12 @@ public class SimpleOrderManager implements OrderManager {
         ]]><lineannotation>// Do the business calculations...</lineannotation><![CDATA[
 
         ]]><lineannotation>// Call the collaborators to persist the order...</lineannotation><![CDATA[
-        
+
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
-        
+
             public void prepare(MimeMessage mimeMessage) throws Exception {
-        
-                mimeMessage.setRecipient(Message.RecipientType.TO, 
+
+                mimeMessage.setRecipient(Message.RecipientType.TO,
                         new InternetAddress(order.getCustomer().getEmailAddress()));
                 mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
                 mimeMessage.setText(
@@ -170,33 +174,33 @@ public class SimpleOrderManager implements OrderManager {
         }
         catch (MailException ex) {
             ]]><lineannotation>// simply log it and go on...</lineannotation><![CDATA[
-            System.err.println(ex.getMessage());            
+            System.err.println(ex.getMessage());
         }
     }
 }]]></programlisting>
-	
-			<note>
-				<para>The mail code is a crosscutting concern and could well be a candidate
-				for refactoring into a <link linkend="aop">custom Spring AOP aspect</link>,
-				which then could be executed at appropriate joinpoints on the
-				<interfacename>OrderManager</interfacename> target.</para>
-			</note>
-			
-			<para>The Spring Framework's mail support ships with the standard JavaMail
-			implementation. Please refer to the relevant JavaDocs for more information.</para>
-		</section>
-		
-	</section>
-		
-	<section id="mail-javamail-mime">
-		<title>Using the JavaMail <classname>MimeMessageHelper</classname></title>
-		
-		<para>A class that comes in pretty handy when dealing with JavaMail messages is
-		the <classname>org.springframework.mail.javamail.MimeMessageHelper</classname> class,
-		which shields you from having to use the verbose JavaMail API. Using
-		the <classname>MimeMessageHelper</classname> it is pretty easy to
-		create a <classname>MimeMessage</classname>:</para>
-		<programlisting language="java"><lineannotation>// of course you would use DI in any real-world cases</lineannotation><![CDATA[
+
+            <note>
+                <para>The mail code is a crosscutting concern and could well be a candidate
+                for refactoring into a <link linkend="aop">custom Spring AOP aspect</link>,
+                which then could be executed at appropriate joinpoints on the
+                <interfacename>OrderManager</interfacename> target.</para>
+            </note>
+
+            <para>The Spring Framework's mail support ships with the standard JavaMail
+            implementation. Please refer to the relevant JavaDocs for more information.</para>
+        </section>
+
+    </section>
+
+    <section xml:id="mail-javamail-mime">
+        <title>Using the JavaMail <classname>MimeMessageHelper</classname></title>
+
+        <para>A class that comes in pretty handy when dealing with JavaMail messages is
+        the <classname>org.springframework.mail.javamail.MimeMessageHelper</classname> class,
+        which shields you from having to use the verbose JavaMail API. Using
+        the <classname>MimeMessageHelper</classname> it is pretty easy to
+        create a <classname>MimeMessage</classname>:</para>
+        <programlisting language="java"><lineannotation>// of course you would use DI in any real-world cases</lineannotation><![CDATA[
 JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
@@ -206,18 +210,18 @@ helper.setTo("test@host.com");
 helper.setText("Thank you for ordering!");
 
 sender.send(message);]]></programlisting>
-	
-		<section id="mail-javamail-mime-attachments">
-			<title>Sending attachments and inline resources</title>
-			<para>Multipart email messages allow for both attachments and inline resources.
-			Examples of inline resources would be images or a stylesheet you want to use
-			in your message, but that you don't want displayed as an attachment.</para>
-			<section id="mail-javamail-mime-attachments-attachment">
-				<title>Attachments</title>
-				<para>The following example shows you how to use the
-				<classname>MimeMessageHelper</classname> to send an email along with a
-				single JPEG image attachment.</para>
-				<programlisting language="java"><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
+
+        <section xml:id="mail-javamail-mime-attachments">
+            <title>Sending attachments and inline resources</title>
+            <para>Multipart email messages allow for both attachments and inline resources.
+            Examples of inline resources would be images or a stylesheet you want to use
+            in your message, but that you don't want displayed as an attachment.</para>
+            <section xml:id="mail-javamail-mime-attachments-attachment">
+                <title>Attachments</title>
+                <para>The following example shows you how to use the
+                <classname>MimeMessageHelper</classname> to send an email along with a
+                single JPEG image attachment.</para>
+                <programlisting language="java"><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
 MimeMessage message = sender.createMimeMessage();
@@ -233,13 +237,13 @@ FileSystemResource file = new FileSystemResource(new File("c:/Sample.jpg"));
 helper.addAttachment("CoolImage.jpg", file);
 
 sender.send(message);]]></programlisting>
-			</section>
-			<section id="mail-javamail-mime-attachments-inline">
-				<title>Inline resources</title>
-				<para>The following example shows you how to use the
-				<classname>MimeMessageHelper</classname> to send an email along with an
-				inline image.</para>
-				<programlisting language="java"><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
+            </section>
+            <section xml:id="mail-javamail-mime-attachments-inline">
+                <title>Inline resources</title>
+                <para>The following example shows you how to use the
+                <classname>MimeMessageHelper</classname> to send an email along with an
+                inline image.</para>
+                <programlisting language="java"><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
 MimeMessage message = sender.createMimeMessage();
@@ -256,57 +260,57 @@ FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
 helper.addInline("identifier1234", res);
 
 sender.send(message);]]></programlisting>
-				<warning>
-					<para>Inline resources are added to the mime message using the
-					specified <literal>Content-ID</literal> (<literal>identifier1234</literal>
-					in the above example). The order in which you are adding the text and the
-					resource are <emphasis role="bold">very</emphasis> important. Be sure to
-					<emphasis>first add the text</emphasis> and after that the resources. If
-					you are doing it the other way around, it won't work!</para>
-				</warning>
-			</section>
-		</section>
-		<section id="mail-templates">
-			<title>Creating email content using a templating library</title>
-			<para>The code in the previous examples explicitly created the
-			content of the email message, using methods calls such as
-			<methodname>message.setText(..)</methodname>. This is fine for
-			simple cases, and it is okay in the context of the aforementioned
-			examples, where the intent was to show you the very basics of the API.</para>
-			<para>In your typical enterprise application though, you are not going
-			to create the content of your emails using the above approach for a number
-			of reasons.</para>
-			<para>
-				<itemizedlist>
-					<listitem>
-						<para>Creating HTML-based email content in Java code is tedious and error prone</para>
-					</listitem>
-					<listitem>
-						<para>There is no clear separation between display logic and business logic</para>
-					</listitem>
-					<listitem>
-						<para>Changing the display structure of the email content requires writing Java code, recompiling, redeploying...</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-			<para>Typically the approach taken to address these issues is to use a template library
-			such as FreeMarker or Velocity to define the display structure of email content. This leaves
-			your code tasked only with creating the data that is to be rendered in the email
-			template and sending the email. It is definitely a best practice for when
-			the content of your emails becomes even moderately complex, and with
-			the Spring Framework's support classes for FreeMarker and Velocity becomes
-			quite easy to do. Find below an example of using the Velocity template library
-			to create email content.</para>
-			<section id="mail-templates-example">
-				<title>A Velocity-based example</title>
-				<para>To use <ulink url="http://velocity.apache.org">Velocity</ulink> to
-				create your email template(s), you will need to have the Velocity libraries
-				available on your classpath. You will also need to create one or more Velocity templates
-				for the email content that your application needs. Find below the Velocity
-				template that this example will be using. As you can see it is HTML-based,
-				and since it is plain text it can be created using your favorite HTML
-				or text editor.</para>
-				<programlisting language="xml"><lineannotation># in the <literal>com/foo/package</literal></lineannotation><![CDATA[
+                <warning>
+                    <para>Inline resources are added to the mime message using the
+                    specified <literal>Content-ID</literal> (<literal>identifier1234</literal>
+                    in the above example). The order in which you are adding the text and the
+                    resource are <emphasis role="bold">very</emphasis> important. Be sure to
+                    <emphasis>first add the text</emphasis> and after that the resources. If
+                    you are doing it the other way around, it won't work!</para>
+                </warning>
+            </section>
+        </section>
+        <section xml:id="mail-templates">
+            <title>Creating email content using a templating library</title>
+            <para>The code in the previous examples explicitly created the
+            content of the email message, using methods calls such as
+            <methodname>message.setText(..)</methodname>. This is fine for
+            simple cases, and it is okay in the context of the aforementioned
+            examples, where the intent was to show you the very basics of the API.</para>
+            <para>In your typical enterprise application though, you are not going
+            to create the content of your emails using the above approach for a number
+            of reasons.</para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>Creating HTML-based email content in Java code is tedious and error prone</para>
+                    </listitem>
+                    <listitem>
+                        <para>There is no clear separation between display logic and business logic</para>
+                    </listitem>
+                    <listitem>
+                        <para>Changing the display structure of the email content requires writing Java code, recompiling, redeploying...</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>Typically the approach taken to address these issues is to use a template library
+            such as FreeMarker or Velocity to define the display structure of email content. This leaves
+            your code tasked only with creating the data that is to be rendered in the email
+            template and sending the email. It is definitely a best practice for when
+            the content of your emails becomes even moderately complex, and with
+            the Spring Framework's support classes for FreeMarker and Velocity becomes
+            quite easy to do. Find below an example of using the Velocity template library
+            to create email content.</para>
+            <section xml:id="mail-templates-example">
+                <title>A Velocity-based example</title>
+                <para>To use <link xl:href="http://velocity.apache.org">Velocity</link> to
+                create your email template(s), you will need to have the Velocity libraries
+                available on your classpath. You will also need to create one or more Velocity templates
+                for the email content that your application needs. Find below the Velocity
+                template that this example will be using. As you can see it is HTML-based,
+                and since it is plain text it can be created using your favorite HTML
+                or text editor.</para>
+                <programlisting language="xml"><lineannotation># in the com/foo/package</lineannotation><![CDATA[
 <html>
 <body>
 <h3>Hi ${user.userName}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
@@ -317,10 +321,10 @@ sender.send(message);]]></programlisting>
 </body>
 
 </html>]]></programlisting>
-				<para>Find below some simple code and Spring XML configuration that
-				makes use of the above Velocity template to create email content and
-				send email(s).</para>
-				<programlisting language="java"><![CDATA[package com.foo;
+                <para>Find below some simple code and Spring XML configuration that
+                makes use of the above Velocity template to create email content and
+                send email(s).</para>
+                <programlisting language="java"><![CDATA[package com.foo;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -368,11 +372,11 @@ public class SimpleRegistrationService implements RegistrationService {
       this.mailSender.send(preparator);
    }
 }]]></programlisting>
-				<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+   http://www.springframework.org/schema/beans/spring-beans.xsd">
 
    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
       <property name="host" value="mail.csonth.gov.uk"/>
@@ -382,7 +386,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
       <property name="mailSender" ref="mailSender"/>
       <property name="velocityEngine" ref="velocityEngine"/>
    </bean>
-   
+
    <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
       <property name="velocityProperties">
          <value>
@@ -393,8 +397,8 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
    </bean>
 
 </beans>]]></programlisting>
-			</section>
-		</section>
-	</section>
-  
+            </section>
+        </section>
+    </section>
+
 </chapter>

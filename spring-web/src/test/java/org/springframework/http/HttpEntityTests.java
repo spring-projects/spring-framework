@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class HttpEntityTests {
 		assertSame(body, entity.getBody());
 		assertTrue(entity.getHeaders().isEmpty());
 	}
-	
+
 	@Test
 	public void httpHeaders() {
 		HttpHeaders headers = new HttpHeaders();
@@ -56,7 +56,30 @@ public class HttpEntityTests {
 		assertEquals(MediaType.TEXT_PLAIN, entity.getHeaders().getContentType());
 		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
 	}
-	
+
+	@Test
+	public void testEquals() {
+		MultiValueMap<String, String> map1 = new LinkedMultiValueMap<String, String>();
+		map1.set("Content-Type", "text/plain");
+
+		MultiValueMap<String, String> map2 = new LinkedMultiValueMap<String, String>();
+		map2.set("Content-Type", "application/json");
+
+		assertTrue(new HttpEntity<Object>().equals(new HttpEntity<Object>()));
+		assertFalse(new HttpEntity<Object>(map1).equals(new HttpEntity<Object>()));
+		assertFalse(new HttpEntity<Object>().equals(new HttpEntity<Object>(map2)));
+
+		assertTrue(new HttpEntity<Object>(map1).equals(new HttpEntity<Object>(map1)));
+		assertFalse(new HttpEntity<Object>(map1).equals(new HttpEntity<Object>(map2)));
+
+		assertTrue(new HttpEntity<String>(null, null).equals(new HttpEntity<String>(null, null)));
+		assertFalse(new HttpEntity<String>("foo", null).equals(new HttpEntity<String>(null, null)));
+		assertFalse(new HttpEntity<String>(null, null).equals(new HttpEntity<String>("bar", null)));
+
+		assertTrue(new HttpEntity<String>("foo", map1).equals(new HttpEntity<String>("foo", map1)));
+		assertFalse(new HttpEntity<String>("foo", map1).equals(new HttpEntity<String>("bar", map1)));
+	}
+
 	@Test
 	public void responseEntity() {
 		HttpHeaders headers = new HttpHeaders();

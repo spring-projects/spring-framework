@@ -1,7 +1,6 @@
-
 /**
  *
- * Classes supporting the <code>org.springframework.jca.cci.core</code> package.
+ * Classes supporting the {@code org.springframework.jca.cci.core} package.
  * Contains a DAO base class for CciTemplate usage.
  *
  */

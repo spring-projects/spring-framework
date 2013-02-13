@@ -32,6 +32,7 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @since 14.03.2003
  */
+@SuppressWarnings("serial")
 public class ProxyFactory extends ProxyCreatorSupport {
 
 	/**
@@ -74,7 +75,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
-	 * Create a ProxyFactory for the specified <code>TargetSource</code>,
+	 * Create a ProxyFactory for the specified {@code TargetSource},
 	 * making the proxy implement the specified interface.
 	 * @param proxyInterface the interface that the proxy should implement
 	 * @param targetSource the TargetSource that the proxy should invoke
@@ -103,7 +104,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * or removed interfaces. Can add and remove interceptors.
 	 * <p>Uses the given class loader (if necessary for proxy creation).
 	 * @param classLoader the class loader to create the proxy with
-	 * (or <code>null</code> for the low-level proxy facility's default)
+	 * (or {@code null} for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
 	public Object getProxy(ClassLoader classLoader) {
@@ -127,7 +128,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
-	 * Create a proxy for the specified <code>TargetSource</code>,
+	 * Create a proxy for the specified {@code TargetSource},
 	 * implementing the specified interface.
 	 * @param proxyInterface the interface that the proxy should implement
 	 * @param targetSource the TargetSource that the proxy should invoke
@@ -140,8 +141,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
-	 * Create a proxy for the specified <code>TargetSource</code> that extends
-	 * the target class of the <code>TargetSource</code>.
+	 * Create a proxy for the specified {@code TargetSource} that extends
+	 * the target class of the {@code TargetSource}.
 	 * @param targetSource the TargetSource that the proxy should invoke
 	 * @return the proxy object
 	 */

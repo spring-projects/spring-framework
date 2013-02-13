@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -60,6 +60,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	private MessageSource themeMsgSource;
 
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlWebApplicationContext();
 		MockServletContext sc = new MockServletContext();
@@ -82,6 +83,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 		return wac;
 	}
 
+	@Override
 	public void testCount() {
 		assertTrue("should have 14 beans, not " +
 				this.applicationContext.getBeanDefinitionCount(),
@@ -92,6 +94,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 	 * Overridden as we can't trust superclass method.
 	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
 	 */
+	@Override
 	public void testEvents() throws Exception {
 		// Do nothing
 	}

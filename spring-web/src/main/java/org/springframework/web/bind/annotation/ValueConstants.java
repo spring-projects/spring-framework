@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public interface ValueConstants {
 
 	/**
 	 * Constant defining a value for no default - as a replacement for
-	 * <code>null</code> which we cannot use in annotation attributes.
+	 * {@code null} which we cannot use in annotation attributes.
 	 * <p>This is an artificial arrangement of 16 unicode characters,
 	 * with its sole purpose being to never match user-declared values.
 	 * @see RequestParam#defaultValue()

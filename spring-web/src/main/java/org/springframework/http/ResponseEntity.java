@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http;
 
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Extension of {@link HttpEntity} that adds a {@link HttpStatus} status code.
@@ -45,6 +46,7 @@ import org.springframework.util.MultiValueMap;
 public class ResponseEntity<T> extends HttpEntity<T> {
 
 	private final HttpStatus statusCode;
+
 
 	/**
 	 * Create a new {@code ResponseEntity} with the given status code, and no body nor headers.
@@ -86,20 +88,38 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		this.statusCode = statusCode;
 	}
 
+
 	/**
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum value
 	 */
 	public HttpStatus getStatusCode() {
-		return statusCode;
+		return this.statusCode;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof ResponseEntity)) {
+			return false;
+		}
+		ResponseEntity<?> otherEntity = (ResponseEntity<?>) other;
+		return (ObjectUtils.nullSafeEquals(this.statusCode, otherEntity.statusCode) && super.equals(other));
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.statusCode);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(statusCode.toString());
+		builder.append(this.statusCode.toString());
 		builder.append(' ');
-		builder.append(statusCode.getReasonPhrase());
+		builder.append(this.statusCode.getReasonPhrase());
 		builder.append(',');
 		T body = getBody();
 		HttpHeaders headers = getHeaders();

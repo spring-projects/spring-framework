@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,10 @@ import org.springframework.transaction.annotation.Transactional;
  * <li>{@link TransactionalTestExecutionListener}</li>
  * </ul>
  * <p>
- * This class specifically tests usage of <code>&#064;Transactional</code>
+ * This class specifically tests usage of {@code &#064;Transactional}
  * defined at the <strong>class level</strong>.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see MethodLevelTransactionalSpringRunnerTests

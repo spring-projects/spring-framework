@@ -54,7 +54,7 @@ import java.util.concurrent.Callable;
  * <li>Session object (Servlet API or Portlet API): either
  * {@link javax.servlet.http.HttpSession} or {@link javax.portlet.PortletSession}.
  * An argument of this type will enforce the presence of a corresponding session.
- * As a consequence, such an argument will never be <code>null</code>.
+ * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
@@ -82,6 +82,13 @@ import java.util.concurrent.Callable;
  * Additionally, {@code @PathVariable} can be used on a
  * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
  * URI template variables.
+ * <li>{@link MatrixVariable @MatrixVariable} annotated parameters (Servlet-only)
+ * for access to name-value pairs located in URI path segments. Matrix variables
+ * must be represented with a URI template variable. For example /hotels/{hotel}
+ * where the incoming URL may be "/hotels/42;q=1".
+ * Additionally, {@code @MatrixVariable} can be used on a
+ * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
+ * matrix variables in the URL or to those in a specific path variable.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,
@@ -102,7 +109,7 @@ import java.util.concurrent.Callable;
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
  * and also support access to validation results through an
  * {@link org.springframework.validation.Errors} argument.
- * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
+ * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link RequestPart @RequestPart} annotated parameters
  * (Servlet-only, {@literal @MVC 3.1-only})
@@ -113,7 +120,7 @@ import java.util.concurrent.Callable;
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
  * and support access to validation results through a
  * {@link org.springframework.validation.Errors} argument.
- * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
+ * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * (Servlet-only) for access to the Servlet request HTTP headers and contents.
@@ -154,7 +161,7 @@ import java.util.concurrent.Callable;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A <code>ModelAndView</code> object (Servlet MVC or Portlet MVC),
+ * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link org.springframework.ui.Model Model} object, with the view name
@@ -171,7 +178,7 @@ import java.util.concurrent.Callable;
  * {@link ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.Model} argument (see above).
- * <li>A {@link java.lang.String} value which is interpreted as view name,
+ * <li>A {@link String} value which is interpreted as view name,
  * with the model implicitly determined through command objects and
  * {@link ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
@@ -194,7 +201,7 @@ import java.util.concurrent.Callable;
  * <li>A {@code org.springframework.web.context.request.async.DeferredResult}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
- * <li><code>void</code> if the method handles the response itself (by
+ * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
  * / {@link javax.portlet.RenderResponse} for that purpose)
@@ -210,28 +217,28 @@ import java.util.concurrent.Callable;
  * {@link ModelAttribute} annotated reference data accessor methods.
  * </ul>
  *
- * <p><b>NOTE:</b> <code>@RequestMapping</code> will only be processed if an
- * an appropriate <code>HandlerMapping</code>-<code>HandlerAdapter</code> pair
+ * <p><b>NOTE:</b> {@code @RequestMapping} will only be processed if an
+ * an appropriate {@code HandlerMapping}-{@code HandlerAdapter} pair
  * is configured. This is the case by default in both the
- * <code>DispatcherServlet</code> and the <code>DispatcherPortlet</code>.
- * However, if you are defining custom <code>HandlerMappings</code> or
- * <code>HandlerAdapters</code>, then you need to add
- * <code>DefaultAnnotationHandlerMapping</code> and
- * <code>AnnotationMethodHandlerAdapter</code> to your configuration.</code>.
+ * {@code DispatcherServlet} and the {@code DispatcherPortlet}.
+ * However, if you are defining custom {@code HandlerMappings} or
+ * {@code HandlerAdapters}, then you need to add
+ * {@code DefaultAnnotationHandlerMapping} and
+ * {@code AnnotationMethodHandlerAdapter} to your configuration.</code>.
  *
  * <p><b>NOTE:</b> Spring 3.1 introduced a new set of support classes for
- * <code>@RequestMapping</code> methods in Servlet environments called
- * <code>RequestMappingHandlerMapping</code> and
- * <code>RequestMappingHandlerAdapter</code>. They are recommended for use and
+ * {@code @RequestMapping} methods in Servlet environments called
+ * {@code RequestMappingHandlerMapping} and
+ * {@code RequestMappingHandlerAdapter}. They are recommended for use and
  * even required to take advantage of new features in Spring MVC 3.1 (search
  * {@literal "@MVC 3.1-only"} in this source file) and going forward.
  * The new support classes are enabled by default from the MVC namespace and
- * with use of the MVC Java config (<code>@EnableWebMvc</code>) but must be
+ * with use of the MVC Java config ({@code @EnableWebMvc}) but must be
  * configured explicitly if using neither.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
- * <code>@RequestMapping</code> and <code>@SessionAttributes</code> - on
+ * {@code @RequestMapping} and {@code @SessionAttributes} - on
  * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Juergen Hoeller

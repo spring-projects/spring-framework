@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,6 +212,7 @@ public class ReflectionUtilsTests {
 	public void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestBean.class, mc, new ReflectionUtils.MethodFilter() {
+			@Override
 			public boolean matches(Method m) {
 				return Modifier.isProtected(m.getModifiers());
 			}
@@ -353,6 +354,7 @@ public class ReflectionUtilsTests {
 
 		private List<Method> methods = new LinkedList<Method>();
 
+		@Override
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
 			this.methodNames.add(m.getName());
 			this.methods.add(m);

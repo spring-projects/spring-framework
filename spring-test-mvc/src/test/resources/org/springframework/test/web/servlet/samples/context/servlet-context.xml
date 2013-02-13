@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+    <mvc:annotation-driven />
+
+    <mvc:view-controller path="/" view-name="home" />
+
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+
+    <mvc:default-servlet-handler />
+
+    <bean id="viewResolver"
+        class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+        <property name="viewClass"
+            value="org.springframework.web.servlet.view.tiles3.TilesView" />
+    </bean>
+
+    <bean id="tilesConfigurer"
+        class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+        <property name="definitions">
+            <value>
+                /WEB-INF/**/tiles.xml
+			</value>
+        </property>
+    </bean>
+
+</beans>

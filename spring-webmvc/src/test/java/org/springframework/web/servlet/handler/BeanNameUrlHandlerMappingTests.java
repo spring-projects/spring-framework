@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -35,9 +35,10 @@ import org.springframework.web.servlet.HandlerMapping;
 public class BeanNameUrlHandlerMappingTests extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
-	
+
 	private ConfigurableWebApplicationContext wac;
 
+	@Override
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();
@@ -82,7 +83,7 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		req.setContextPath("/myapp");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		
+
 		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath/welcome.html");
@@ -109,7 +110,7 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
-	
+
 	public void testRequestsWithFullPaths() throws Exception {
 		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 		hm.setAlwaysUseFullPath(true);

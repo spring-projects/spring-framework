@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @since 2.5
  */
 public interface SimpleJdbcInsertOperations {
-	
+
 	/**
 	 * Specify the table name to be used for the insert.
 	 * @param tableName the name of the stored table
@@ -85,8 +85,8 @@ public interface SimpleJdbcInsertOperations {
 	/**
 	 * Use a the provided NativeJdbcExtractor during the column meta data
 	 * lookups via JDBC.
-	 * Note: this is only necessary to include when running with a connection pool 
-	 * that wraps the meta data connection and when using a database like Oracle 
+	 * Note: this is only necessary to include when running with a connection pool
+	 * that wraps the meta data connection and when using a database like Oracle
 	 * where it is necessary to access the native connection to include synonyms.
 	 * @return the instance of this SimpleJdbcInsert
 	 */

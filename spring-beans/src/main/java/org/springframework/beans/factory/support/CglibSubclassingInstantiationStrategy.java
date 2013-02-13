@@ -53,7 +53,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 * be overridden to provide method lookup.
 	 */
 	private static final int LOOKUP_OVERRIDE = 1;
-	
+
 	/**
 	 * Index in the CGLIB callback array for a method that should
 	 * be overridden using generic Methodreplacer functionality.
@@ -98,10 +98,10 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		/**
 		 * Create a new instance of a dynamically generated subclasses implementing the
 		 * required lookups.
-		 * @param ctor constructor to use. If this is <code>null</code>, use the
+		 * @param ctor constructor to use. If this is {@code null}, use the
 		 * no-arg constructor (no parameterization, or Setter Injection)
 		 * @param args arguments to use for the constructor.
-		 * Ignored if the ctor parameter is <code>null</code>.
+		 * Ignored if the ctor parameter is {@code null}.
 		 * @return new instance of the dynamically generated class
 		 */
 		public Object instantiate(Constructor ctor, Object[] args) {
@@ -114,8 +114,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 					new ReplaceOverrideMethodInterceptor()
 			});
 
-			return (ctor == null) ? 
-					enhancer.create() : 
+			return (ctor == null) ?
+					enhancer.create() :
 					enhancer.create(ctor.getParameterTypes(), args);
 		}
 
@@ -123,7 +123,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		/**
 		 * Class providing hashCode and equals methods required by CGLIB to
 		 * ensure that CGLIB doesn't generate a distinct class per bean.
-		 * Identity is based on class and bean definition. 
+		 * Identity is based on class and bean definition.
 		 */
 		private class CglibIdentitySupport {
 
@@ -157,7 +157,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 				// Cast is safe, as CallbackFilter filters are used selectively.
 				LookupOverride lo = (LookupOverride) beanDefinition.getMethodOverrides().getOverride(method);
 				return owner.getBean(lo.getBeanName());
-			}			
+			}
 		}
 
 
@@ -180,7 +180,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * CGLIB object to filter method interception behavior.
 		 */
 		private class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
-			
+
 			public int accept(Method method) {
 				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
 				if (logger.isTraceEnabled()) {

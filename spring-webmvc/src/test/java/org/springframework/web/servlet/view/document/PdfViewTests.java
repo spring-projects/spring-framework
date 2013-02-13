@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
  * @author Alef Arendsen
@@ -44,6 +44,7 @@ public class PdfViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractPdfView pdfView = new AbstractPdfView() {
+			@Override
 			protected void buildPdfDocument(Map model, Document document, PdfWriter writer,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				document.add(new Paragraph(text));

@@ -45,16 +45,16 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.support.ControllerAdviceBean;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -63,10 +63,13 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AsyncTask;
+import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.ErrorsMethodArgumentResolver;
@@ -115,50 +118,55 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
+	private HandlerMethodArgumentResolverComposite argumentResolvers;
+
+	private HandlerMethodArgumentResolverComposite initBinderArgumentResolvers;
+
 	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+
 	private List<ModelAndViewResolver> modelAndViewResolvers;
+
+	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private WebBindingInitializer webBindingInitializer;
 
+	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
+
+	private Long asyncRequestTimeout;
+
+	private CallableProcessingInterceptor[] callableInterceptors = new CallableProcessingInterceptor[] {};
+
+	private DeferredResultProcessingInterceptor[] deferredResultInterceptors = new DeferredResultProcessingInterceptor[] {};
+
+	private boolean ignoreDefaultModelOnRedirect = false;
+
 	private int cacheSecondsForSessionAttributeHandlers = 0;
 
 	private boolean synchronizeOnSession = false;
+
+	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	private ConfigurableBeanFactory beanFactory;
 
-	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
-
-	private boolean ignoreDefaultModelOnRedirect = false;
 
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
-		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
+			new ConcurrentHashMap<Class<?>, SessionAttributesHandler>(64);
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
-
-	private HandlerMethodArgumentResolverComposite initBinderArgumentResolvers;
-
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
-
-	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<Class<?>, Set<Method>>(64);
 
 	private final Map<ControllerAdviceBean, Set<Method>> initBinderAdviceCache =
 			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
 
-	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<Class<?>, Set<Method>>(64);
 
 	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache =
 			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
-
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
-
-	private Long asyncRequestTimeout;
-
-	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 
 	/**
@@ -173,7 +181,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
 		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
-		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
 	/**
@@ -308,6 +316,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
 	 * Return the configured message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
@@ -330,81 +346,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Specify the strategy to store session attributes with. The default is
-	 * {@link org.springframework.web.bind.support.DefaultSessionAttributeStore},
-	 * storing session attributes in the HttpSession with the same attribute
-	 * name as in the model.
-	 */
-	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
-		this.sessionAttributeStore = sessionAttributeStore;
-	}
-
-	/**
-	 * Cache content produced by <code>@SessionAttributes</code> annotated handlers
-	 * for the given number of seconds. Default is 0, preventing caching completely.
-	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
-	 * handlers (but not to <code>@SessionAttributes</code> annotated handlers),
-	 * this setting will apply to <code>@SessionAttributes</code> handlers only.
-	 * @see #setCacheSeconds
-	 * @see org.springframework.web.bind.annotation.SessionAttributes
-	 */
-	public void setCacheSecondsForSessionAttributeHandlers(int cacheSecondsForSessionAttributeHandlers) {
-		this.cacheSecondsForSessionAttributeHandlers = cacheSecondsForSessionAttributeHandlers;
-	}
-
-	/**
-	 * Set if controller execution should be synchronized on the session,
-	 * to serialize parallel invocations from the same client.
-	 * <p>More specifically, the execution of the <code>handleRequestInternal</code>
-	 * method will get synchronized if this flag is "true". The best available
-	 * session mutex will be used for the synchronization; ideally, this will
-	 * be a mutex exposed by HttpSessionMutexListener.
-	 * <p>The session mutex is guaranteed to be the same object during
-	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
-	 * safe reference to synchronize on for locking on the current session.
-	 * <p>In many cases, the HttpSession reference itself is a safe mutex
-	 * as well, since it will always be the same object reference for the
-	 * same active logical session. However, this is not guaranteed across
-	 * different servlet containers; the only 100% safe way is a session mutex.
-	 * @see org.springframework.web.util.HttpSessionMutexListener
-	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
-	 */
-	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
-		this.synchronizeOnSession = synchronizeOnSession;
-	}
-
-	/**
-	 * Set the ParameterNameDiscoverer to use for resolving method parameter
-	 * names if needed (e.g. for default attribute names). Default is a
-	 * {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}.
-	 */
-	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
-	}
-
-	/**
-	 * By default the content of the "default" model is used both during
-	 * rendering and redirect scenarios. Alternatively a controller method
-	 * can declare a {@link RedirectAttributes} argument and use it to provide
-	 * attributes for a redirect.
-	 * <p>Setting this flag to {@code true} guarantees the "default" model is
-	 * never used in a redirect scenario even if a RedirectAttributes argument
-	 * is not declared. Setting it to {@code false} means the "default" model
-	 * may be used in a redirect if the controller method doesn't declare a
-	 * RedirectAttributes argument.
-	 * <p>The default setting is {@code false} but new applications should
-	 * consider setting it to {@code true}.
-	 * @see RedirectAttributes
-	 */
-	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
-		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
-	}
-
-	/**
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * return a {@link Callable}. Controller methods can override this default on
-	 * a per-request basis by returning an {@link AsyncTask}.
+	 * a per-request basis by returning an {@link WebAsyncTask}.
 	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
 	 * It's recommended to change that default in production as the simple executor
 	 * does not re-use threads.
@@ -427,11 +371,93 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
-	 * If not set, the default constructor is used.
+	 * Configure {@code CallableProcessingInterceptor}'s to register on async requests.
+	 * @param interceptors the interceptors to register
 	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
+	public void setCallableInterceptors(List<CallableProcessingInterceptor> interceptors) {
+		Assert.notNull(interceptors);
+		this.callableInterceptors = interceptors.toArray(new CallableProcessingInterceptor[interceptors.size()]);
+	}
+
+	/**
+	 * Configure {@code DeferredResultProcessingInterceptor}'s to register on async requests.
+	 * @param interceptors the interceptors to register
+	 */
+	public void setDeferredResultInterceptors(List<DeferredResultProcessingInterceptor> interceptors) {
+		Assert.notNull(interceptors);
+		this.deferredResultInterceptors = interceptors.toArray(new DeferredResultProcessingInterceptor[interceptors.size()]);
+	}
+
+	/**
+	 * By default the content of the "default" model is used both during
+	 * rendering and redirect scenarios. Alternatively a controller method
+	 * can declare a {@link RedirectAttributes} argument and use it to provide
+	 * attributes for a redirect.
+	 * <p>Setting this flag to {@code true} guarantees the "default" model is
+	 * never used in a redirect scenario even if a RedirectAttributes argument
+	 * is not declared. Setting it to {@code false} means the "default" model
+	 * may be used in a redirect if the controller method doesn't declare a
+	 * RedirectAttributes argument.
+	 * <p>The default setting is {@code false} but new applications should
+	 * consider setting it to {@code true}.
+	 * @see RedirectAttributes
+	 */
+	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
+		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
+	}
+
+	/**
+	 * Specify the strategy to store session attributes with. The default is
+	 * {@link org.springframework.web.bind.support.DefaultSessionAttributeStore},
+	 * storing session attributes in the HttpSession with the same attribute
+	 * name as in the model.
+	 */
+	public void setSessionAttributeStore(SessionAttributeStore sessionAttributeStore) {
+		this.sessionAttributeStore = sessionAttributeStore;
+	}
+
+	/**
+	 * Cache content produced by {@code @SessionAttributes} annotated handlers
+	 * for the given number of seconds. Default is 0, preventing caching completely.
+	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
+	 * handlers (but not to {@code @SessionAttributes} annotated handlers),
+	 * this setting will apply to {@code @SessionAttributes} handlers only.
+	 * @see #setCacheSeconds
+	 * @see org.springframework.web.bind.annotation.SessionAttributes
+	 */
+	public void setCacheSecondsForSessionAttributeHandlers(int cacheSecondsForSessionAttributeHandlers) {
+		this.cacheSecondsForSessionAttributeHandlers = cacheSecondsForSessionAttributeHandlers;
+	}
+
+	/**
+	 * Set if controller execution should be synchronized on the session,
+	 * to serialize parallel invocations from the same client.
+	 * <p>More specifically, the execution of the {@code handleRequestInternal}
+	 * method will get synchronized if this flag is "true". The best available
+	 * session mutex will be used for the synchronization; ideally, this will
+	 * be a mutex exposed by HttpSessionMutexListener.
+	 * <p>The session mutex is guaranteed to be the same object during
+	 * the entire lifetime of the session, available under the key defined
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
+	 * safe reference to synchronize on for locking on the current session.
+	 * <p>In many cases, the HttpSession reference itself is a safe mutex
+	 * as well, since it will always be the same object reference for the
+	 * same active logical session. However, this is not guaranteed across
+	 * different servlet containers; the only 100% safe way is a session mutex.
+	 * @see org.springframework.web.util.HttpSessionMutexListener
+	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
+	 */
+	public void setSynchronizeOnSession(boolean synchronizeOnSession) {
+		this.synchronizeOnSession = synchronizeOnSession;
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed (e.g. for default attribute names). Default is a
+	 * {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
 	/**
@@ -480,6 +506,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver());
 		resolvers.add(new PathVariableMapMethodArgumentResolver());
+		resolvers.add(new MatrixVariableMethodArgumentResolver());
+		resolvers.add(new MatrixVariableMapMethodArgumentResolver());
 		resolvers.add(new ServletModelAttributeMethodProcessor(false));
 		resolvers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
 		resolvers.add(new RequestPartMethodArgumentResolver(getMessageConverters()));
@@ -522,6 +550,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver());
+		resolvers.add(new PathVariableMapMethodArgumentResolver());
+		resolvers.add(new MatrixVariableMethodArgumentResolver());
+		resolvers.add(new MatrixVariableMapMethodArgumentResolver());
 		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));
 
 		// Type-based argument resolution
@@ -587,7 +618,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			logger.debug("Looking for controller advice: " + getApplicationContext());
 		}
 
-		List<ControllerAdviceBean> beans = ControllerAdviceBean.findBeans(getApplicationContext());
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		Collections.sort(beans, new OrderComparator());
 
 		for (ControllerAdviceBean bean : beans) {
@@ -691,12 +722,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
-		AsyncWebRequest asyncWebRequest = AsyncWebUtils.createAsyncWebRequest(request, response);
+		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
 		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
-		final WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.registerCallableInterceptors(this.callableInterceptors);
+		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();
@@ -722,7 +755,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 
 		ServletInvocableHandlerMethod requestMethod;
-		requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
+		requestMethod = new ServletInvocableHandlerMethod(handlerMethod);
 		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		requestMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		requestMethod.setDataBinderFactory(binderFactory);

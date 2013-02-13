@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +39,14 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final List defaults = new LinkedList();
 
-	private final Map componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map componentDefinitions = new LinkedHashMap<>(8);
 
-	private final Map aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map aliasMap = new LinkedHashMap<>(8);
 
 	private final List imports = new LinkedList();
 
 
+	@Override
 	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.defaults.add(defaultsDefinition);
 	}
@@ -53,6 +55,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return Collections.unmodifiableList(this.defaults);
 	}
 
+	@Override
 	public void componentRegistered(ComponentDefinition componentDefinition) {
 		this.componentDefinitions.put(componentDefinition.getName(), componentDefinition);
 	}
@@ -66,6 +69,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
+	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
 		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
@@ -80,6 +84,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
+	@Override
 	public void importProcessed(ImportDefinition importDefinition) {
 		this.imports.add(importDefinition);
 	}

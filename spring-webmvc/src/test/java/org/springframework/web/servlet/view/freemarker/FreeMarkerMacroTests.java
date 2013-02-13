@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -321,6 +321,7 @@ public class FreeMarkerMacroTests {
 		ClassPathResource resource = new ClassPathResource("test.ftl", getClass());
 		assertTrue(resource.exists());
 		String all = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		all = all.replace("\r\n", "\n");
 		String[] macros = StringUtils.delimitedListToStringArray(all, "\n\n");
 		for (String macro : macros) {
 			if (macro.startsWith(name)) {

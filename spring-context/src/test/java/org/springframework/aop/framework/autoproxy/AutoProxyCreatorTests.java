@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.TargetSource;
@@ -37,10 +36,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
 
+import static org.junit.Assert.*;
+
 /**
- * @since 09.12.2003
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @since 09.12.2003
  */
 public final class AutoProxyCreatorTests {
 
@@ -54,7 +55,8 @@ public final class AutoProxyCreatorTests {
 		proxyCreator.getPropertyValues().add("beanNames", "singletonToBeProxied,innerBean,singletonFactoryToBeProxied");
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("beanNameAutoProxyCreator", proxyCreator);
 
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		RootBeanDefinition innerBean = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().add("spouse", new BeanDefinitionHolder(innerBean, "innerBean"));
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("singletonToBeProxied", bd);
@@ -113,20 +115,18 @@ public final class AutoProxyCreatorTests {
 		ITestBean singletonToBeProxied = (ITestBean) sac.getBean("singletonToBeProxied");
 		assertTrue(Proxy.isProxyClass(singletonToBeProxied.getClass()));
 
-		// 2 invocations coming from FactoryBean inspection during lifecycle startup
-
 		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptor");
-		assertEquals(2, ti.nrOfInvocations);
+		int initialNr = ti.nrOfInvocations;
 		singletonToBeProxied.getName();
-		assertEquals(3, ti.nrOfInvocations);
+		assertEquals(initialNr + 1, ti.nrOfInvocations);
 
 		FactoryBean<?> factory = (FactoryBean<?>) sac.getBean("&singletonFactoryToBeProxied");
 		assertTrue(Proxy.isProxyClass(factory.getClass()));
 		TestBean tb = (TestBean) sac.getBean("singletonFactoryToBeProxied");
 		assertFalse(AopUtils.isAopProxy(tb));
-		assertEquals(5, ti.nrOfInvocations);
+		assertEquals(initialNr + 3, ti.nrOfInvocations);
 		tb.getAge();
-		assertEquals(5, ti.nrOfInvocations);
+		assertEquals(initialNr + 3, ti.nrOfInvocations);
 	}
 
 	@Test
@@ -282,6 +282,7 @@ public final class AutoProxyCreatorTests {
 			this.proxyObject = proxyObject;
 		}
 
+		@Override
 		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String name, TargetSource customTargetSource) {
 			if (StaticMessageSource.class.equals(beanClass)) {
 				return DO_NOT_PROXY;
@@ -309,6 +310,7 @@ public final class AutoProxyCreatorTests {
 
 		public int nrOfInvocations = 0;
 
+		@Override
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			if (!invocation.getMethod().getName().equals("finalize")) {
 				this.nrOfInvocations++;

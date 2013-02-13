@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public interface HandlerExceptionResolver {
 	 * the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to,
-	 * or <code>null</code> for default processing
+	 * or {@code null} for default processing
 	 */
 	ModelAndView resolveException(
 			RenderRequest request, RenderResponse response, Object handler, Exception ex);
@@ -59,7 +59,7 @@ public interface HandlerExceptionResolver {
 	 * the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to,
-	 * or <code>null</code> for default processing
+	 * or {@code null} for default processing
 	 */
 	ModelAndView resolveException(
 			ResourceRequest request, ResourceResponse response, Object handler, Exception ex);

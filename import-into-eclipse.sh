@@ -1,4 +1,4 @@
-STS_TEST_VERSION='2.8.1.RELEASE'
+STS_TEST_VERSION='2.9.2.RELEASE'
 
 cd `dirname $0`
 clear

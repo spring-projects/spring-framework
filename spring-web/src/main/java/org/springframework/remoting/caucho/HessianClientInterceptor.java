@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	/**
 	 * Specify the Hessian SerializerFactory to use.
 	 * <p>This will typically be passed in as an inner bean definition
-	 * of type <code>com.caucho.hessian.io.SerializerFactory</code>,
+	 * of type {@code com.caucho.hessian.io.SerializerFactory},
 	 * with custom bean property values applied.
 	 */
 	public void setSerializerFactory(SerializerFactory serializerFactory) {
@@ -223,7 +223,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
-			// Hessian 4.0 check: another layer of InvocationTargetException. 
+			// Hessian 4.0 check: another layer of InvocationTargetException.
 			if (targetEx instanceof InvocationTargetException) {
 				targetEx = ((InvocationTargetException) targetEx).getTargetException();
 			}
@@ -264,7 +264,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 		}
 		else {
 			return new RemoteAccessException(
-			    "Cannot access Hessian remote service at [" + getServiceUrl() + "]", ex);
+				"Cannot access Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

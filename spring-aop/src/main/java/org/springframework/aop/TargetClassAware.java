@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public interface TargetClassAware {
 	/**
 	 * Return the target class behind the implementing object
 	 * (typically a proxy configuration or an actual proxy).
-	 * @return the target Class, or <code>null</code> if not known
+	 * @return the target Class, or {@code null} if not known
 	 */
 	Class<?> getTargetClass();
 

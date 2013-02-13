@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="expressions"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="expressions">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Spring Expression Language (SpEL)</title>
 
-  <section id="expressions-intro">
+  <section xml:id="expressions-intro">
     <title>Introduction</title>
 
     <para>The Spring Expression Language (SpEL for short) is a powerful
@@ -44,7 +48,7 @@
     the end of the chapter.</para>
   </section>
 
-  <section id="expressions-features">
+  <section xml:id="expressions-features">
     <title>Feature Overview</title>
 
     <para>The expression language supports the following functionality</para>
@@ -85,16 +89,16 @@
       <listitem>
         <para>Calling constructors</para>
       </listitem>
-      
+
       <listitem>
         <para>Bean references</para>
       </listitem>
-      
+
       <listitem>
         <para>Array construction</para>
       </listitem>
-	
-	  <listitem>
+
+      <listitem>
         <para>Inline lists</para>
       </listitem>
 
@@ -124,12 +128,12 @@
     </itemizedlist>
   </section>
 
-  <section id="expressions-evaluation">
+  <section xml:id="expressions-evaluation">
     <title>Expression Evaluation using Spring's Expression Interface</title>
 
     <para>This section introduces the simple use of SpEL interfaces and its
     expression language. The complete language reference can be found in the
-    section <link lang="" linkend="expressions-language-ref">Language
+    section <link linkend="expressions-language-ref">Language
     Reference</link>.</para>
 
     <para>The following code introduces the SpEL API to evaluate the literal
@@ -173,7 +177,7 @@ String message = (String) exp.getValue();</programlisting>
     <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // invokes 'getBytes()'
-Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes</emphasis>");  
+Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes</emphasis>");
 
 byte[] bytes = (byte[]) exp.getValue();</programlisting>
 
@@ -185,7 +189,7 @@ byte[] bytes = (byte[]) exp.getValue();</programlisting>
     <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // invokes 'getBytes().length'
-Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes.length</emphasis>");  
+Expression exp = parser.parseExpression("<emphasis role="bold">'Hello World'.bytes.length</emphasis>");
 
 int length = (Integer) exp.getValue();</programlisting>
 
@@ -204,14 +208,14 @@ String message = exp.getValue(String.class);</programlisting>
     the registered type converter.</para>
 
     <para>The more common usage of SpEL is to provide an expression string that
-    is evaluated against a specific object instance (called the root object). 
-    There are two options here and which to choose depends on whether the object 
-    against which the expression is being evaluated will be changing with each 
+    is evaluated against a specific object instance (called the root object).
+    There are two options here and which to choose depends on whether the object
+    against which the expression is being evaluated will be changing with each
     call to evaluate the expression.  In the following example
     we retrieve the <literal>name</literal> property from an instance of the
     Inventor class.</para>
 
-    <programlisting language="java">// Create and set a calendar 
+    <programlisting language="java">// Create and set a calendar
 GregorianCalendar c = new GregorianCalendar();
 c.set(1856, 7, 9);
 
@@ -229,10 +233,10 @@ String name = (String) exp.getValue(context);</programlisting>
     object the "name" property will be evaluated against.  This is the mechanism
     to use if the root object is unlikely to change, it can simply be set once
     in the evaluation context.  If the root object is likely to change
-    repeatedly, it can be supplied on each call to <literal>getValue</literal>, 
+    repeatedly, it can be supplied on each call to <literal>getValue</literal>,
     as this next example shows:</para>
-    
-    <programlisting language="java">/ Create and set a calendar 
+
+    <programlisting language="java">/ Create and set a calendar
 GregorianCalendar c = new GregorianCalendar();
 c.set(1856, 7, 9);
 
@@ -245,13 +249,13 @@ Expression exp = parser.parseExpression("<emphasis role="bold">name</emphasis>")
 String name = (String) exp.getValue(tesla);
     </programlisting><para>In this case the inventor <literal>tesla</literal> has been
     supplied directly to <literal>getValue</literal> and the expression
-    evaluation infrastructure creates and manages a default evaluation context 
+    evaluation infrastructure creates and manages a default evaluation context
     internally - it did not require one to be supplied.</para>
-    
+
     <para>The StandardEvaluationContext is relatively expensive to construct and
     during repeated usage it builds up cached state that enables subsequent
     expression evaluations to be performed more quickly.  For this reason it is
-    better to cache and reuse them where possible, rather than construct a new 
+    better to cache and reuse them where possible, rather than construct a new
     one for each expression evaluation.
     </para>
     <para>In some cases it can be desirable to use a configured evaluation context and
@@ -261,7 +265,7 @@ String name = (String) exp.getValue(tesla);
     any (which maybe null) specified on the evaluation context.</para>
 
     <para>
-	<note>
+    <note>
         <para>In standalone usage of SpEL there is a need to create the parser,
         parse expressions and perhaps provide evaluation contexts and a root
         context object. However, more common usage
@@ -271,13 +275,13 @@ String name = (String) exp.getValue(tesla);
         and any predefined variables are all set up implicitly, requiring
         the user to specify nothing other than the expressions.</para>
     </note>
-	As a final introductory example, the use of a boolean operator is
+    As a final introductory example, the use of a boolean operator is
     shown using the Inventor object in the previous example.</para>
 
     <programlisting language="java">Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
 boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</programlisting>
 
-    <section id="expressions-evaluation-context">
+    <section xml:id="expressions-evaluation-context">
       <title>The EvaluationContext interface</title>
 
       <para>The interface <interfacename>EvaluationContext</interfacename> is
@@ -297,7 +301,7 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
       <methodname>setVariable()</methodname> and
       <methodname>registerFunction()</methodname>. The use of variables and
       functions are described in the language reference sections <link
-      linkend="expressions-ref-variables">Variables</link> and <link lang=""
+      linkend="expressions-ref-variables">Variables</link> and <link
       linkend="expressions-ref-functions">Functions</link>. The
       <classname>StandardEvaluationContext</classname> is also where you can
       register custom <classname>ConstructorResolver</classname>s,
@@ -306,7 +310,7 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
       expressions. Please refer to the JavaDoc of these classes for more
       details.</para>
 
-      <section id="expressions-type-conversion">
+      <section xml:id="expressions-type-conversion">
         <title>Type Conversion</title>
 
         <para>By default SpEL uses the conversion service available in Spring
@@ -330,14 +334,14 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
         <programlisting language="java">class Simple {
     public List&lt;Boolean&gt; booleanList = new ArrayList&lt;Boolean&gt;();
 }
-    	
+
 Simple simple = new Simple();
 
 simple.booleanList.add(true);
 
 StandardEvaluationContext simpleContext = new StandardEvaluationContext(simple);
 
-// false is passed in here as a string.  SpEL and the conversion service will 
+// false is passed in here as a string.  SpEL and the conversion service will
 // correctly recognize that it needs to be a Boolean and convert it
 parser.parseExpression("booleanList[0]").setValue(simpleContext, "false");
 
@@ -348,7 +352,7 @@ Boolean b = simple.booleanList.get(0);
     </section>
   </section>
 
-  <section id="expressions-beandef">
+  <section xml:id="expressions-beandef">
     <title>Expression support for defining bean definitions</title>
 
     <para>SpEL expressions can be used with XML or annotation based
@@ -356,7 +360,7 @@ Boolean b = simple.booleanList.get(0);
     syntax to define the expression is of the form <literal>#{ &lt;expression
     string&gt; }</literal>.</para>
 
-    <section id="expressions-beandef-xml-based">
+    <section xml:id="expressions-beandef-xml-based">
       <title>XML based configuration</title>
 
       <para>A property or constructor-arg value can be set using expressions
@@ -395,7 +399,7 @@ Boolean b = simple.booleanList.get(0);
 &lt;/bean&gt;</programlisting></para>
     </section>
 
-    <section id="expressions-beandef-annotation-based">
+    <section xml:id="expressions-beandef-annotation-based">
       <title>Annotation-based configuration</title>
 
       <para>The <literal>@Value</literal> annotation can be placed on fields,
@@ -415,7 +419,7 @@ Boolean b = simple.booleanList.get(0);
     this.defaultLocale = defaultLocale;
   }
 
-  public String getDefaultLocale() 
+  public String getDefaultLocale()
   {
     return this.defaultLocale;
   }
@@ -437,7 +441,7 @@ Boolean b = simple.booleanList.get(0);
     this.defaultLocale = defaultLocale;
   }
 
-  public String getDefaultLocale() 
+  public String getDefaultLocale()
   {
     return this.defaultLocale;
   }
@@ -453,7 +457,7 @@ Boolean b = simple.booleanList.get(0);
   private String defaultLocale;
 
   @Autowired
-  public void configure(MovieFinder movieFinder, 
+  public void configure(MovieFinder movieFinder,
                         @Value("#{ systemProperties['user.region'] }"} String defaultLocale) {
       this.movieFinder = movieFinder;
       this.defaultLocale = defaultLocale;
@@ -480,10 +484,10 @@ Boolean b = simple.booleanList.get(0);
     </section>
   </section>
 
-  <section id="expressions-language-ref">
+  <section xml:id="expressions-language-ref">
     <title>Language Reference</title>
 
-    <section id="expressions-ref-literal">
+    <section xml:id="expressions-ref-literal">
       <title>Literal expressions</title>
 
       <para>The types of literal expressions supported are strings, dates,
@@ -497,12 +501,12 @@ Boolean b = simple.booleanList.get(0);
       <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 
 // evals to "Hello World"
-String helloWorld = (String) parser.parseExpression("'Hello World'").getValue(); 
+String helloWorld = (String) parser.parseExpression("'Hello World'").getValue();
 
-double avogadrosNumber  = (Double) parser.parseExpression("6.0221415E+23").getValue();  
+double avogadrosNumber  = (Double) parser.parseExpression("6.0221415E+23").getValue();
 
 // evals to 2147483647
-int maxValue = (Integer) parser.parseExpression("0x7FFFFFFF").getValue();  
+int maxValue = (Integer) parser.parseExpression("0x7FFFFFFF").getValue();
 
 boolean trueValue = (Boolean) parser.parseExpression("true").getValue();
 
@@ -514,7 +518,7 @@ Object nullValue = parser.parseExpression("null").getValue();
       Double.parseDouble().</para>
     </section>
 
-    <section id="expressions-properties-arrays">
+    <section xml:id="expressions-properties-arrays">
       <title>Properties, Arrays, Lists, Maps, Indexers</title>
 
       <para>Navigating with property references is easy, just use a period to
@@ -524,8 +528,8 @@ Object nullValue = parser.parseExpression("null").getValue();
       examples</link>. To navigate "down" and get Tesla's year of birth and
       Pupin's city of birth the following expressions are used.</para>
 
-      <programlisting lang="" language="java">// evals to 1856
-int year = (Integer) parser.parseExpression("Birthdate.Year + 1900").getValue(context); 
+      <programlisting language="java">// evals to 1856
+int year = (Integer) parser.parseExpression("Birthdate.Year + 1900").getValue(context);
 
 
 String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);</programlisting>
@@ -540,8 +544,8 @@ String city = (String) parser.parseExpression("placeOfBirth.City").getValue(cont
 StandardEvaluationContext teslaContext = new StandardEvaluationContext(tesla);
 
 // evaluates to "Induction motor"
-String invention = parser.parseExpression("inventions[3]").getValue(teslaContext, 
-                                                                    String.class); 
+String invention = parser.parseExpression("inventions[3]").getValue(teslaContext,
+                                                                    String.class);
 
 
 // Members List
@@ -562,11 +566,11 @@ String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(s
 
       <programlisting language="java">// Officer's Dictionary
 
-Inventor pupin = parser.parseExpression("Officers['president']").getValue(societyContext, 
+Inventor pupin = parser.parseExpression("Officers['president']").getValue(societyContext,
                                                                           Inventor.class);
 
 // evaluates to "Idvor"
-String city = 
+String city =
     parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(societyContext,
                                                                                String.class);
 
@@ -576,43 +580,43 @@ parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
 
 </programlisting>
     </section>
-    <section id="expressions-inline-lists">
+    <section xml:id="expressions-inline-lists">
       <title>Inline lists</title>
 
       <para>Lists can be expressed directly in an expression using {} notation.
       </para>
 
-      <programlisting lang="" language="java">
+      <programlisting language="java">
 // evaluates to a Java list containing the four numbers
-List numbers = (List) parser.parseExpression("{1,2,3,4}").getValue(context); 
+List numbers = (List) parser.parseExpression("{1,2,3,4}").getValue(context);
 
-List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getValue(context); 
+List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getValue(context);
 </programlisting>
       <para>{} by itself means an empty list.  For performance reasons, if the
       list is itself entirely composed of fixed literals then a constant list is created
       to represent the expression, rather than building a new list on each evaluation.</para>
-	</section>
-	
-	<section id="expressions-array-construction">
+    </section>
+
+    <section xml:id="expressions-array-construction">
       <title>Array construction</title>
 
       <para>Arrays can be built using the familiar Java syntax, optionally
       supplying an initializer to have the array populated at construction time.
       </para>
 
-      <programlisting lang="" language="java">int[] numbers1 = (int[]) parser.parseExpression("new int[4]").getValue(context); 
+      <programlisting language="java">int[] numbers1 = (int[]) parser.parseExpression("new int[4]").getValue(context);
 
 // Array with initializer
-int[] numbers2 = (int[]) parser.parseExpression("new int[]{1,2,3}").getValue(context); 
+int[] numbers2 = (int[]) parser.parseExpression("new int[]{1,2,3}").getValue(context);
 
 // Multi dimensional array
-int[][] numbers3 = (int[][]) parser.parseExpression("new int[4][5]").getValue(context); 
+int[][] numbers3 = (int[][]) parser.parseExpression("new int[4][5]").getValue(context);
 </programlisting>
       <para>It is not currently allowed to supply an initializer when constructing
       a multi-dimensional array.</para>
-	</section>
-	
-    <section id="expressions-methods">
+    </section>
+
+    <section xml:id="expressions-methods">
       <title>Methods</title>
 
       <para>Methods are invoked using typical Java programming syntax. You may
@@ -626,10 +630,10 @@ boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
                                                                                 Boolean.class);</programlisting>
     </section>
 
-    <section id="expressions-operators">
+    <section xml:id="expressions-operators">
       <title>Operators</title>
 
-      <section id="expressions-operators-relational">
+      <section xml:id="expressions-operators-relational">
         <title>Relational operators</title>
 
         <para>The relational operators; equal, not equal, less than, less than
@@ -651,23 +655,23 @@ boolean trueValue = parser.parseExpression("'black' &lt; 'block'").getValue(Bool
 boolean falseValue = parser.parseExpression("'xyz' instanceof T(int)").getValue(Boolean.class);
 
 // evaluates to true
-boolean trueValue = 
+boolean trueValue =
      parser.parseExpression("'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
 //evaluates to false
-boolean falseValue = 
+boolean falseValue =
      parser.parseExpression("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 
 </programlisting>
       <para>Each symbolic operator can also be specified as a purely alphabetic equivalent.  This avoids
-      problems where the symbols used have special meaning for the document type in which 
+      problems where the symbols used have special meaning for the document type in which
       the expression is embedded (eg. an XML document).  The textual equivalents are shown
       here: lt ('&lt;'), gt ('&gt;'), le ('&lt;='), ge ('&gt;='),
       eq ('=='), ne ('!='), div ('/'), mod ('%'), not ('!').
       These are case insensitive.</para>
       </section>
 
-      <section id="expressions-operators-logical">
+      <section xml:id="expressions-operators-logical">
         <title>Logical operators</title>
 
         <para>The logical operators that are supported are and, or, and not.
@@ -702,7 +706,7 @@ String expression =  "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
 boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);</programlisting></para>
       </section>
 
-      <section id="expressions-operators-mathematical">
+      <section xml:id="expressions-operators-mathematical">
         <title>Mathematical operators</title>
 
         <para>The addition operator can be used on numbers, strings and dates.
@@ -714,7 +718,7 @@ boolean falseValue = parser.parseExpression(expression).getValue(societyContext,
         <para><programlisting language="java">// Addition
 int two = parser.parseExpression("1 + 1").getValue(Integer.class); // 2
 
-String testString = 
+String testString =
    parser.parseExpression("'test' + ' ' + 'string'").getValue(String.class);  // 'test string'
 
 // Subtraction
@@ -743,7 +747,7 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
       </section>
     </section>
 
-    <section id="expressions-assignment">
+    <section xml:id="expressions-assignment">
       <title>Assignment</title>
 
       <para>Setting of a property is done by using the assignment operator.
@@ -751,21 +755,21 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
       <literal>setValue</literal> but can also be done inside a call to
       <literal>getValue</literal>.</para>
 
-      <programlisting language="java">Inventor inventor = new Inventor();		
+      <programlisting language="java">Inventor inventor = new Inventor();
 StandardEvaluationContext inventorContext = new StandardEvaluationContext(inventor);
 
 parser.parseExpression("Name").setValue(inventorContext, "Alexander Seovic2");
 
 // alternatively
 
-String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inventorContext, 
+String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inventorContext,
                                                                             String.class);
 </programlisting>
 
       <para></para>
     </section>
 
-    <section id="expressions-types">
+    <section xml:id="expressions-types">
       <title>Types</title>
 
       <para>The special 'T' operator can be used to specify an instance of
@@ -781,21 +785,21 @@ String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inve
 
 Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
 
-boolean trueValue = 
+boolean trueValue =
    parser.parseExpression("T(java.math.RoundingMode).CEILING &lt; T(java.math.RoundingMode).FLOOR")
   .getValue(Boolean.class);
 </programlisting>
     </section>
 
-    <section id="expressions-constructors">
+    <section xml:id="expressions-constructors">
       <title>Constructors</title>
 
       <para>Constructors can be invoked using the new operator. The fully
       qualified class name should be used for all but the primitive type and
       String (where int, float, etc, can be used).</para>
 
-      <programlisting language="java">Inventor einstein = 
-  p.parseExpression("new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 
+      <programlisting language="java">Inventor einstein =
+  p.parseExpression("new org.spring.samples.spel.inventor.Inventor('Albert Einstein',
                                                                    'German')")
                                                                    .getValue(Inventor.class);
 
@@ -806,7 +810,7 @@ p.parseExpression("Members.add(new org.spring.samples.spel.inventor.Inventor('Al
 </programlisting>
     </section>
 
-    <section id="expressions-ref-variables">
+    <section xml:id="expressions-ref-variables">
       <title>Variables</title>
 
       <para>Variables can be referenced in the expression using the syntax
@@ -821,7 +825,7 @@ parser.parseExpression("Name = #newName").getValue(context);
 
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
-      <section id="expressions-this-root">
+      <section xml:id="expressions-this-root">
         <title>The #this and #root variables</title>
 
         <para>The variable #this is always defined and refers to the current
@@ -841,21 +845,21 @@ context.setVariable("primes",primes);
 
 // all prime numbers &gt; 10 from the list (using selection ?{...})
 // evaluates to [11, 13, 17]
-List&lt;Integer&gt; primesGreaterThanTen = 
+List&lt;Integer&gt; primesGreaterThanTen =
              (List&lt;Integer&gt;) parser.parseExpression("#primes.?[#this&gt;10]").getValue(context);
 
 </programlisting>
       </section>
 
       <!--
-        <section id="expressions-root">
+        <section xml:id="expressions-root">
         <title>The #root variable</title>
 
         <para>The variable #root is always defined and refers to the
-        root evaluation object.  This is the object against which the first unqualified 
+        root evaluation object.  This is the object against which the first unqualified
         reference to a property or method is resolved.</para>
-        
-        <para>It differs from #this in that #this typically varies throughout the 
+
+        <para>It differs from #this in that #this typically varies throughout the
         evaluation of an expression, whilst #root remains constant.
         It can be useful when writing a selection criteria, where the decision
         needs to be made based on some property of the root object rather than the
@@ -867,7 +871,7 @@ List&lt;Integer&gt; primesGreaterThanTen =
       -->
     </section>
 
-    <section id="expressions-ref-functions">
+    <section xml:id="expressions-ref-functions">
       <title>Functions</title>
 
       <para>You can extend SpEL by registering user defined functions that can
@@ -885,7 +889,7 @@ List&lt;Integer&gt; primesGreaterThanTen =
 
   public static String reverseString(String input) {
     StringBuilder backwards = new StringBuilder();
-    for (int i = 0; i &lt; input.length(); i++) 
+    for (int i = 0; i &lt; input.length(); i++)
       backwards.append(input.charAt(input.length() - 1 - i));
     }
     return backwards.toString();
@@ -898,19 +902,19 @@ List&lt;Integer&gt; primesGreaterThanTen =
       <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 StandardEvaluationContext context = new StandardEvaluationContext();
 
-context.registerFunction("reverseString", 
-                         StringUtils.class.getDeclaredMethod("reverseString", 
+context.registerFunction("reverseString",
+                         StringUtils.class.getDeclaredMethod("reverseString",
                                                              new Class[] { String.class }));
 
-String helloWorldReversed = 
+String helloWorldReversed =
           parser.parseExpression("#reverseString('hello')").getValue(context, String.class);</programlisting>
     </section>
 
-    <section id="expressions-bean-references">
-    	<title>Bean references</title>
-    	<para>If the evaluation context has been configured with a bean resolver it is possible to
-    	lookup beans from an expression using the (@) symbol.
-    	</para>
+    <section xml:id="expressions-bean-references">
+        <title>Bean references</title>
+        <para>If the evaluation context has been configured with a bean resolver it is possible to
+        lookup beans from an expression using the (@) symbol.
+        </para>
       <programlisting language="java">ExpressionParser parser = new SpelExpressionParser();
 StandardEvaluationContext context = new StandardEvaluationContext();
 context.setBeanResolver(new MyBeanResolver());
@@ -918,14 +922,14 @@ context.setBeanResolver(new MyBeanResolver());
 // This will end up calling resolve(context,"foo") on MyBeanResolver during evaluation
 Object bean = parser.parseExpression("@foo").getValue(context);</programlisting>
     </section>
-    
-    <section id="expressions-operator-ternary">
+
+    <section xml:id="expressions-operator-ternary">
       <title>Ternary Operator (If-Then-Else)</title>
 
       <para>You can use the ternary operator for performing if-then-else
       conditional logic inside the expression. A minimal example is:</para>
 
-      <programlisting language="java">String falseString = 
+      <programlisting language="java">String falseString =
              parser.parseExpression("false ? 'trueExp' : 'falseExp'").getValue(String.class);</programlisting>
 
       <para>In this case, the boolean false results in returning the string
@@ -934,10 +938,10 @@ Object bean = parser.parseExpression("@foo").getValue(context);</programlisting>
       <programlisting language="java">parser.parseExpression("Name").setValue(societyContext, "IEEE");
 societyContext.setVariable("queryName", "Nikola Tesla");
 
-expression = "isMember(#queryName)? #queryName + ' is a member of the ' " + 
+expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
              "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
 
-String queryResultString = 
+String queryResultString =
                     parser.parseExpression(expression).getValue(societyContext, String.class);
 // queryResultString = "Nikola Tesla is a member of the IEEE Society"</programlisting>
 
@@ -945,12 +949,11 @@ String queryResultString =
       shorter syntax for the ternary operator.</para>
     </section>
 
-    <section id="expressions-operator-elvis">
+    <section xml:id="expressions-operator-elvis">
       <title>The Elvis Operator</title>
 
       <para>The Elvis operator is a shortening of the ternary operator syntax
-      and is used in the <ulink
-      url="http://groovy.codehaus.org/Operators#Operators-ElvisOperator(%3F%3A)">Groovy</ulink>
+      and is used in the <link xl:href="http://groovy.codehaus.org/Operators#Operators-ElvisOperator(%3F%3A)">Groovy</link>
       language. With the ternary operator syntax you usually have to repeat a
       variable twice, for example:</para>
 
@@ -986,12 +989,12 @@ name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.
 System.out.println(name); // Elvis Presley</programlisting>
     </section>
 
-    <section id="expressions-operator-safe-navigation">
+    <section xml:id="expressions-operator-safe-navigation">
       <title>Safe Navigation operator</title>
 
       <para>The Safe Navigation operator is used to avoid a
-      <literal>NullPointerException</literal> and comes from the <ulink
-      url="http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)">Groovy</ulink>
+      <literal>NullPointerException</literal> and comes from the <link
+      xl:href="http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)">Groovy</link>
       language. Typically when you have a reference to an object you might
       need to verify that it is not null before accessing methods or
       properties of the object. To avoid this, the safe navigation operator
@@ -1023,7 +1026,7 @@ System.out.println(city); // null - does not throw NullPointerException!!!</prog
       </note>
     </section>
 
-    <section id="expressions-collection-selection">
+    <section xml:id="expressions-collection-selection">
       <title>Collection Selection</title>
 
       <para>Selection is a powerful expression language feature that allows you
@@ -1036,7 +1039,7 @@ System.out.println(city); // null - does not throw NullPointerException!!!</prog
       original elements. For example, selection would allow us to easily get a
       list of Serbian inventors:</para>
 
-      <programlisting language="java">List&lt;Inventor&gt; list = (List&lt;Inventor&gt;) 
+      <programlisting language="java">List&lt;Inventor&gt; list = (List&lt;Inventor&gt;)
       parser.parseExpression("Members.?[Nationality == 'Serbian']").getValue(societyContext);</programlisting>
 
       <para>Selection is possible upon both lists and maps. In the former case
@@ -1058,7 +1061,7 @@ System.out.println(city); // null - does not throw NullPointerException!!!</prog
       <literal>$[...]</literal>.</para>
     </section>
 
-    <section id="expressions-collection-projection">
+    <section xml:id="expressions-collection-projection">
       <title>Collection Projection</title>
 
       <para>Projection allows a collection to drive the evaluation of a
@@ -1079,7 +1082,7 @@ List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]"
       projection expression against each map entry.</para>
     </section>
 
-    <section id="expressions-templating">
+    <section xml:id="expressions-templating">
       <title>Expression templating</title>
 
       <para>Expression templates allow a mixing of literal text with one or
@@ -1087,8 +1090,8 @@ List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]"
       and suffix characters that you can define, a common choice is to use
       <literal>#{ }</literal> as the delimiters. For example,</para>
 
-      <programlisting language="java">String randomPhrase = 
-   parser.parseExpression("random number is #{T(java.lang.Math).random()}", 
+      <programlisting language="java">String randomPhrase =
+   parser.parseExpression("random number is #{T(java.lang.Math).random()}",
                           new TemplateParserContext()).getValue(String.class);
 
 // evaluates to "random number is 0.7038186818312008"</programlisting>
@@ -1112,7 +1115,7 @@ List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]"
   public String getExpressionSuffix() {
     return "}";
   }
-  
+
   public boolean isTemplate() {
     return true;
   }
@@ -1120,7 +1123,7 @@ List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]"
     </section>
   </section>
 
-  <section id="expressions-example-classes">
+  <section xml:id="expressions-example-classes">
     <title>Classes used in the examples</title>
 
     <para>Inventor.java</para>
@@ -1137,8 +1140,8 @@ public class Inventor {
   private String[] inventions;
   private Date birthdate;
   private PlaceOfBirth placeOfBirth;
-  
-  
+
+
   public Inventor(String name, String nationality)
   {
     GregorianCalendar c= new GregorianCalendar();
@@ -1151,7 +1154,7 @@ public class Inventor {
     this.nationality = nationality;
     this.birthdate = birthdate;
   }
-  
+
   public Inventor() {
   }
 
@@ -1184,7 +1187,7 @@ public class Inventor {
   }
   public String[] getInventions() {
     return inventions;
-  }       
+  }
 }
 </programlisting>
 
@@ -1194,34 +1197,34 @@ public class Inventor {
 
 public class PlaceOfBirth {
 
-	private String city;
-	private String country;
-	
-	public PlaceOfBirth(String city) {
-		this.city=city;
-	}
-	public PlaceOfBirth(String city, String country)
-	{
-		this(city);
-		this.country = country;
-	}
-	
-	
-	public String getCity() {
-		return city;
-	}
-	public void setCity(String s) {
-		this.city = s;
-	}
-	public String getCountry() {
-		return country;
-	}
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    private String city;
+    private String country;
 
-	
-	
+    public PlaceOfBirth(String city) {
+        this.city=city;
+    }
+    public PlaceOfBirth(String city, String country)
+    {
+        this(city);
+        this.country = country;
+    }
+
+
+    public String getCity() {
+        return city;
+    }
+    public void setCity(String s) {
+        this.city = s;
+    }
+    public String getCountry() {
+        return country;
+    }
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+
+
 }
 </programlisting>
 
@@ -1233,44 +1236,44 @@ import java.util.*;
 
 public class Society {
 
-	private String name;
-	
-	public static String Advisors = "advisors";
-	public static String President = "president";
-	
-	private List&lt;Inventor&gt; members = new ArrayList&lt;Inventor&gt;();
-	private Map officers = new HashMap();
+    private String name;
 
-	public List getMembers() {
-		return members;
-	}
+    public static String Advisors = "advisors";
+    public static String President = "president";
 
-	public Map getOfficers() {
-		return officers;
-	}
+    private List&lt;Inventor&gt; members = new ArrayList&lt;Inventor&gt;();
+    private Map officers = new HashMap();
 
-	public String getName() {
-		return name;
-	}
+    public List getMembers() {
+        return members;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Map getOfficers() {
+        return officers;
+    }
 
-	public boolean isMember(String name)
-	{
-		boolean found = false;
-		for (Inventor inventor : members) {
-			if (inventor.getName().equals(name))
-			{
-				found = true;
-				break;
-			}
-		}		
-		return found;
-	}
+    public String getName() {
+        return name;
+    }
 
-	
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isMember(String name)
+    {
+        boolean found = false;
+        for (Inventor inventor : members) {
+            if (inventor.getName().equals(name))
+            {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+
 }
 </programlisting>
   </section>

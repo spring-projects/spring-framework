@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.format.support;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,8 +35,11 @@ import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.ConversionFailedException;
@@ -82,6 +87,7 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForTypeWithPrinterParserWithCoercion() throws ParseException {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
+			@Override
 			public LocalDate convert(DateTime source) {
 				return source.toLocalDate();
 			}
@@ -92,6 +98,35 @@ public class FormattingConversionServiceTests {
 		assertEquals("10/31/09", formatted);
 		LocalDate date = formattingService.convert("10/31/09", LocalDate.class);
 		assertEquals(new LocalDate(2009, 10, 31), date);
+	}
+
+	@Test
+	public void testFormatFieldForValueInjection() {
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
+		ac.registerBeanDefinition("valueBean", new RootBeanDefinition(ValueBean.class));
+		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
+		ac.refresh();
+		ValueBean valueBean = ac.getBean(ValueBean.class);
+		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
+	}
+
+	@Test
+	public void testFormatFieldForValueInjectionUsingMetaAnnotations() {
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd = new RootBeanDefinition(MetaValueBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		ac.registerBeanDefinition("valueBean", bd);
+		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
+		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
+		ac.refresh();
+		System.setProperty("myDate", "10-31-09");
+		try {
+			MetaValueBean valueBean = ac.getBean(MetaValueBean.class);
+			assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
+		}
+		finally {
+			System.clearProperty("myDate");
+		}
 	}
 
 	@Test
@@ -139,11 +174,13 @@ public class FormattingConversionServiceTests {
 	@SuppressWarnings("unchecked")
 	private void doTestFormatFieldForAnnotation(Class<?> modelClass, boolean directFieldAccess) throws Exception {
 		formattingService.addConverter(new Converter<Date, Long>() {
+			@Override
 			public Long convert(Date source) {
 				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<DateTime, Date>() {
+			@Override
 			public Date convert(DateTime source) {
 				return source.toDate();
 			}
@@ -188,7 +225,7 @@ public class FormattingConversionServiceTests {
 			assertEquals(new LocalDate(2009, 10, 2), new LocalDate(dates.get(2)));
 		}
 	}
-	
+
 	@Test
 	public void testPrintNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
@@ -246,17 +283,20 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForAnnotationWithSubclassAsFieldType() throws Exception {
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory() {
+			@Override
 			public Printer<?> getPrinter(org.springframework.format.annotation.DateTimeFormat annotation, Class<?> fieldType) {
 				assertEquals(MyDate.class, fieldType);
 				return super.getPrinter(annotation, fieldType);
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Long>() {
+			@Override
 			public Long convert(MyDate source) {
-				return  source.getTime();
+				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Date>() {
+			@Override
 			public Date convert(MyDate source) {
 				return source;
 			}
@@ -267,11 +307,33 @@ public class FormattingConversionServiceTests {
 	}
 
 
+	public static class ValueBean {
+
+		@Value("10-31-09")
+		@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
+		public Date date;
+	}
+
+
+	public static class MetaValueBean {
+
+		@MyDateAnn
+		public Date date;
+	}
+
+
+	@Value("${myDate}")
+	@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyDateAnn {
+	}
+
+
 	public static class Model {
 
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
-		
+
 		@org.springframework.format.annotation.DateTimeFormat(pattern="M-d-yy")
 		public List<Date> dates;
 
@@ -290,7 +352,7 @@ public class FormattingConversionServiceTests {
 		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
 		public Date date;
 
-		@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
+		@MyDatePattern
 		public List<Date> dates;
 
 		public List<Date> getDates() {
@@ -301,17 +363,26 @@ public class FormattingConversionServiceTests {
 			this.dates = dates;
 		}
 	}
-	
+
+
+	@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyDatePattern {
+	}
+
+
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
+		@Override
 		public String print(Integer object, Locale locale) {
 			return null;
 		}
 
+		@Override
 		public Integer parse(String text, Locale locale) throws ParseException {
 			return null;
 		}
-		
+
 	}
 
 

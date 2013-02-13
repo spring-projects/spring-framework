@@ -17,7 +17,6 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -34,7 +33,7 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for asynchronous method execution aspects, such as
  * {@link org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor}
- * or {@link org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
+ * or {@code org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
  *
  * <p>Provides support for <i>executor qualification</i> on a method-by-method basis.
  * {@code AsyncExecutionAspectSupport} objects must be constructed with a default {@code
@@ -85,6 +84,32 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		this.beanFactory = beanFactory;
 	}
 
+
+	/**
+	 * Determine the specific executor to use when executing the given method.
+	 * @return the executor to use (never {@code null})
+	 */
+	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
+		if (!this.executors.containsKey(method)) {
+			Executor executor = this.defaultExecutor;
+			String qualifier = getExecutorQualifier(method);
+			if (StringUtils.hasLength(qualifier)) {
+				Assert.notNull(this.beanFactory,
+						"BeanFactory must be set on " + this.getClass().getSimpleName() +
+						" to access qualified executor [" + qualifier + "]");
+				executor = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+						this.beanFactory, Executor.class, qualifier);
+			}
+			if (executor instanceof AsyncTaskExecutor) {
+				this.executors.put(method, (AsyncTaskExecutor) executor);
+			}
+			else if (executor != null) {
+				this.executors.put(method, new TaskExecutorAdapter(executor));
+			}
+		}
+		return this.executors.get(method);
+	}
+
 	/**
 	 * Return the qualifier or bean name of the executor to be used when executing the
 	 * given async method, typically specified in the form of an annotation attribute.
@@ -96,33 +121,5 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @see #determineAsyncExecutor(Method)
 	 */
 	protected abstract String getExecutorQualifier(Method method);
-
-	/**
-	 * Determine the specific executor to use when executing the given method.
-	 * @returns the executor to use (never {@code null})
-	 */
-	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
-		if (!this.executors.containsKey(method)) {
-			Executor executor = this.defaultExecutor;
-
-			String qualifier = getExecutorQualifier(method);
-			if (StringUtils.hasLength(qualifier)) {
-				Assert.notNull(this.beanFactory,
-						"BeanFactory must be set on " + this.getClass().getSimpleName() +
-						" to access qualified executor [" + qualifier + "]");
-				executor = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
-						this.beanFactory, Executor.class, qualifier);
-			}
-
-			if (executor instanceof AsyncTaskExecutor) {
-				this.executors.put(method, (AsyncTaskExecutor) executor);
-			}
-			else if (executor instanceof Executor) {
-				this.executors.put(method, new TaskExecutorAdapter(executor));
-			}
-		}
-
-		return this.executors.get(method);
-	}
 
 }

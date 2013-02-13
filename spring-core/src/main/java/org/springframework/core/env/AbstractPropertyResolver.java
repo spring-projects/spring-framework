@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private PropertyPlaceholderHelper nonStrictHelper;
 	private PropertyPlaceholderHelper strictHelper;
+	private boolean ignoreUnresolvableNestedPlaceholders = false;
 
 	private String placeholderPrefix = PLACEHOLDER_PREFIX;
 	private String placeholderSuffix = PLACEHOLDER_SUFFIX;
@@ -140,6 +141,28 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 			strictHelper = createPlaceholderHelper(false);
 		}
 		return doResolvePlaceholders(text, strictHelper);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>The default value for this implementation is {@code false}.
+	 * @since 3.2
+	 */
+	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+		this.ignoreUnresolvableNestedPlaceholders = ignoreUnresolvableNestedPlaceholders;
+	}
+
+	/**
+	 * Resolve placeholders within the given string, deferring to the value of
+	 * {@link #setIgnoreUnresolvableNestedPlaceholders(boolean)} to determine whether any
+	 * unresolvable placeholders should raise an exception or be ignored.
+	 * @since 3.2
+	 * @see #setIgnoreUnresolvableNestedPlaceholders(boolean)
+	 */
+	protected String resolveNestedPlaceholders(String value) {
+		return this.ignoreUnresolvableNestedPlaceholders ?
+				this.resolvePlaceholders(value) :
+				this.resolveRequiredPlaceholders(value);
 	}
 
 	private PropertyPlaceholderHelper createPlaceholderHelper(boolean ignoreUnresolvablePlaceholders) {

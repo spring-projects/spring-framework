@@ -71,7 +71,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * @see #handleHttpMessageNotWritable
  * @see #handleMethodArgumentNotValidException
  * @see #handleMissingServletRequestParameter
- * @see #handleMissingServletRequestPart
+ * @see #handleMissingServletRequestPartException
  * @see #handleBindException
  */
 public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
@@ -162,7 +162,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param ex the NoSuchRequestHandlingMethodException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or <code>null</code> if none chosen
+	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
 	 * @return an empty ModelAndView indicating the exception was handled
 	 * @throws IOException potentially thrown from response.sendError()
@@ -183,7 +183,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @param ex the HttpRequestMethodNotSupportedException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or <code>null</code> if none chosen
+	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
 	 * @return an empty ModelAndView indicating the exception was handled
 	 * @throws IOException potentially thrown from response.sendError()
@@ -294,8 +294,19 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleConversionNotSupported(ConversionNotSupportedException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		sendServerError(ex, request, response);
 		return new ModelAndView();
+	}
+
+	/**
+	 * Invoked to send a server error. Sets the status to 500 and also sets the
+	 * request attribute "javax.servlet.error.exception" to the Exception.
+	 */
+	protected void sendServerError(Exception ex,
+			HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		request.setAttribute("javax.servlet.error.exception", ex);
+		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -352,7 +363,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		sendServerError(ex, request, response);
 		return new ModelAndView();
 	}
 

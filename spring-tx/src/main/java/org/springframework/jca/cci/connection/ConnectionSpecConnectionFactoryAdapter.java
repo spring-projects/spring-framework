@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import org.springframework.core.NamedThreadLocal;
 
 /**
  * An adapter for a target CCI {@link javax.resource.cci.ConnectionFactory},
- * applying the given ConnectionSpec to every standard <code>getConnection()</code>
- * call, that is, implicitly invoking <code>getConnection(ConnectionSpec)</code>
+ * applying the given ConnectionSpec to every standard {@code getConnection()}
+ * call, that is, implicitly invoking {@code getConnection(ConnectionSpec)}
  * on the target. All other methods simply delegate to the corresponding methods
  * of the target ConnectionFactory.
  *
  * <p>Can be used to proxy a target JNDI ConnectionFactory that does not have a
  * ConnectionSpec configured. Client code can work with the ConnectionFactory
- * without passing in a ConnectionSpec on every <code>getConnection()</code> call.
+ * without passing in a ConnectionSpec on every {@code getConnection()} call.
  *
  * <p>In the following example, client code can simply transparently work with
  * the preconfigured "myConnectionFactory", implicitly accessing
@@ -53,7 +53,7 @@ import org.springframework.core.NamedThreadLocal;
  * &lt;/bean&gt;</pre>
  *
  * <p>If the "connectionSpec" is empty, this proxy will simply delegate to the
- * standard <code>getConnection()</code> method of the target ConnectionFactory.
+ * standard {@code getConnection()} method of the target ConnectionFactory.
  * This can be used to keep a UserCredentialsConnectionFactoryAdapter bean definition
  * just for the <i>option</i> of implicitly passing in a ConnectionSpec if the
  * particular target ConnectionFactory requires it.
@@ -62,6 +62,7 @@ import org.springframework.core.NamedThreadLocal;
  * @since 1.2
  * @see #getConnection
  */
+@SuppressWarnings("serial")
 public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnectionFactory {
 
 	private ConnectionSpec connectionSpec;
@@ -81,7 +82,7 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	/**
 	 * Set a ConnectionSpec for this proxy and the current thread.
 	 * The given ConnectionSpec will be applied to all subsequent
-	 * <code>getConnection()</code> calls on this ConnectionFactory proxy.
+	 * {@code getConnection()} calls on this ConnectionFactory proxy.
 	 * <p>This will override any statically specified "connectionSpec" property.
 	 * @param spec the ConnectionSpec to apply
 	 * @see #removeConnectionSpecFromCurrentThread
@@ -118,10 +119,10 @@ public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnection
 	}
 
 	/**
-	 * This implementation delegates to the <code>getConnection(ConnectionSpec)</code>
+	 * This implementation delegates to the {@code getConnection(ConnectionSpec)}
 	 * method of the target ConnectionFactory, passing in the specified user credentials.
 	 * If the specified username is empty, it will simply delegate to the standard
-	 * <code>getConnection()</code> method of the target ConnectionFactory.
+	 * {@code getConnection()} method of the target ConnectionFactory.
 	 * @param spec the ConnectionSpec to apply
 	 * @return the Connection
 	 * @see javax.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)

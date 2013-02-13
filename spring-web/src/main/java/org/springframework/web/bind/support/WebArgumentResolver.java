@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public interface WebArgumentResolver {
 	 * Resolve an argument for the given handler method parameter within the given web request.
 	 * @param methodParameter the handler method parameter to resolve
 	 * @param webRequest the current web request, allowing access to the native request as well
-	 * @return the argument value, or <code>UNRESOLVED</code> if not resolvable
+	 * @return the argument value, or {@code UNRESOLVED} if not resolvable
 	 * @throws Exception in case of resolution failure
 	 */
 	Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
 		exporter.setNamingStrategy(new ObjectNamingStrategy() {
+			@Override
 			public ObjectName getObjectName(Object managedBean, String beanKey) {
 				return objectNameTemplate;
 			}
@@ -92,6 +93,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		exporter.setServer(getServer());
 		exporter.setEnsureUniqueRuntimeObjectNames(false);
 		exporter.setNamingStrategy(new ObjectNamingStrategy() {
+			@Override
 			public ObjectName getObjectName(Object managedBean, String beanKey) {
 				return objectNameTemplate;
 			}

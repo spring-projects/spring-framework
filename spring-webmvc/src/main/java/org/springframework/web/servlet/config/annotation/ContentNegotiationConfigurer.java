@@ -15,22 +15,14 @@
  */
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.ContentNegotiationStrategy;
-import org.springframework.web.accept.FixedContentNegotiationStrategy;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 
 /**
  * Helps with configuring a {@link ContentNegotiationManager}.
@@ -38,26 +30,24 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
  * <p>By default strategies for checking the extension of the request path and
  * the {@code Accept} header are registered. The path extension check will perform
  * lookups through the {@link ServletContext} and the Java Activation Framework
- * (if present) unless {@linkplain #setMediaTypes(Map) media types} are configured.
+ * (if present) unless {@linkplain #mediaTypes(Map) media types} are configured.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class ContentNegotiationConfigurer {
 
-	private boolean favorPathExtension = true;
+	private final ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
 
-	private boolean favorParameter = false;
+	private final Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
 
-	private boolean ignoreAcceptHeader = false;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
-
-	private Boolean useJaf;
-
-	private String parameterName;
-
-	private MediaType defaultContentType;
+	/**
+	 * Class constructor with {@link javax.servlet.ServletContext}.
+	 */
+	public ContentNegotiationConfigurer(ServletContext servletContext) {
+		this.factoryBean.setServletContext(servletContext);
+	}
 
 	/**
 	 * Indicate whether the extension of the request path should be used to determine
@@ -66,17 +56,17 @@ public class ContentNegotiationConfigurer {
 	 * for {@code /hotels.pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the {@code Accept} header.
 	 */
-	public ContentNegotiationConfigurer setFavorPathExtension(boolean favorPathExtension) {
-		this.favorPathExtension = favorPathExtension;
+	public ContentNegotiationConfigurer favorPathExtension(boolean favorPathExtension) {
+		this.factoryBean.setFavorPathExtension(favorPathExtension);
 		return this;
 	}
 
 	/**
 	 * Add mappings from file extensions to media types.
 	 * <p>If this property is not set, the Java Action Framework, if available, may
-	 * still be used in conjunction with {@link #setFavorPathExtension(boolean)}.
+	 * still be used in conjunction with {@link #favorPathExtension(boolean)}.
 	 */
-	public ContentNegotiationConfigurer addMediaType(String extension, MediaType mediaType) {
+	public ContentNegotiationConfigurer mediaType(String extension, MediaType mediaType) {
 		this.mediaTypes.put(extension, mediaType);
 		return this;
 	}
@@ -84,14 +74,11 @@ public class ContentNegotiationConfigurer {
 	/**
 	 * Add mappings from file extensions to media types.
 	 * <p>If this property is not set, the Java Action Framework, if available, may
-	 * still be used in conjunction with {@link #setFavorPathExtension(boolean)}.
+	 * still be used in conjunction with {@link #favorPathExtension(boolean)}.
 	 */
-	public ContentNegotiationConfigurer addMediaTypes(Map<String, MediaType> mediaTypes) {
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Map.Entry<String, MediaType> entry : mediaTypes.entrySet()) {
-				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
-				this.mediaTypes.put(extension, entry.getValue());
-			}
+	public ContentNegotiationConfigurer mediaTypes(Map<String, MediaType> mediaTypes) {
+		if (mediaTypes != null) {
+			this.mediaTypes.putAll(mediaTypes);
 		}
 		return this;
 	}
@@ -99,29 +86,24 @@ public class ContentNegotiationConfigurer {
 	/**
 	 * Add mappings from file extensions to media types replacing any previous mappings.
 	 * <p>If this property is not set, the Java Action Framework, if available, may
-	 * still be used in conjunction with {@link #setFavorPathExtension(boolean)}.
+	 * still be used in conjunction with {@link #favorPathExtension(boolean)}.
 	 */
 	public ContentNegotiationConfigurer replaceMediaTypes(Map<String, MediaType> mediaTypes) {
 		this.mediaTypes.clear();
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Map.Entry<String, MediaType> entry : mediaTypes.entrySet()) {
-				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
-				this.mediaTypes.put(extension, entry.getValue());
-			}
-		}
+		mediaTypes(mediaTypes);
 		return this;
 	}
 
 	/**
 	 * Indicate whether to use the Java Activation Framework as a fallback option
 	 * to map from file extensions to media types. This is used only when
-	 * {@link #setFavorPathExtension(boolean)} is set to {@code true}.
+	 * {@link #favorPathExtension(boolean)} is set to {@code true}.
 	 * <p>The default value is {@code true}.
 	 * @see #parameterName
-	 * @see #setMediaTypes(Map)
+	 * @see #mediaTypes(Map)
 	 */
-	public ContentNegotiationConfigurer setUseJaf(boolean useJaf) {
-		this.useJaf = useJaf;
+	public ContentNegotiationConfigurer useJaf(boolean useJaf) {
+		this.factoryBean.setUseJaf(useJaf);
 		return this;
 	}
 
@@ -133,21 +115,21 @@ public class ContentNegotiationConfigurer {
 	 * for {@code /hotels?format=pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the {@code Accept} header.
 	 * <p>To use this option effectively you must also configure the MediaType
-	 * type mappings via {@link #setMediaTypes(Map)}.
-	 * @see #setParameterName(String)
+	 * type mappings via {@link #mediaTypes(Map)}.
+	 * @see #parameterName(String)
 	 */
-	public ContentNegotiationConfigurer setFavorParameter(boolean favorParameter) {
-		this.favorParameter = favorParameter;
+	public ContentNegotiationConfigurer favorParameter(boolean favorParameter) {
+		this.factoryBean.setFavorParameter(favorParameter);
 		return this;
 	}
 
 	/**
 	 * Set the parameter name that can be used to determine the requested media type
-	 * if the {@link #setFavorParameter} property is {@code true}.
+	 * if the {@link #favorParameter(boolean)} property is {@code true}.
 	 * <p>The default parameter name is {@code "format"}.
 	 */
-	public ContentNegotiationConfigurer setParameterName(String parameterName) {
-		this.parameterName = parameterName;
+	public ContentNegotiationConfigurer parameterName(String parameterName) {
+		this.factoryBean.setParameterName(parameterName);
 		return this;
 	}
 
@@ -158,8 +140,8 @@ public class ContentNegotiationConfigurer {
 	 * possibly a request parameter if configured.
 	 * <p>By default this value is set to {@code false}.
 	 */
-	public ContentNegotiationConfigurer setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
-		this.ignoreAcceptHeader = ignoreAcceptHeader;
+	public ContentNegotiationConfigurer ignoreAcceptHeader(boolean ignoreAcceptHeader) {
+		this.factoryBean.setIgnoreAcceptHeader(ignoreAcceptHeader);
 		return this;
 	}
 
@@ -169,36 +151,20 @@ public class ContentNegotiationConfigurer {
 	 * nor a request parameter, nor the {@code Accept} header could help determine
 	 * the requested content type.
 	 */
-	public ContentNegotiationConfigurer setDefaultContentType(MediaType defaultContentType) {
-		this.defaultContentType = defaultContentType;
+	public ContentNegotiationConfigurer defaultContentType(MediaType defaultContentType) {
+		this.factoryBean.setDefaultContentType(defaultContentType);
 		return this;
 	}
 
 	/**
-	 * @return the configured {@link ContentNegotiationManager} instance
+	 * Return the configured {@link ContentNegotiationManager} instance
 	 */
-	protected ContentNegotiationManager getContentNegotiationManager() {
-		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
-		if (this.favorPathExtension) {
-			PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
-			if (this.useJaf != null) {
-				strategy.setUseJaf(this.useJaf);
-			}
-			strategies.add(strategy);
+	protected ContentNegotiationManager getContentNegotiationManager() throws Exception {
+		if (!this.mediaTypes.isEmpty()) {
+			this.factoryBean.addMediaTypes(mediaTypes);
 		}
-		if (this.favorParameter) {
-			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
-			strategy.setParameterName(this.parameterName);
-			strategies.add(strategy);
-		}
-		if (!this.ignoreAcceptHeader) {
-			strategies.add(new HeaderContentNegotiationStrategy());
-		}
-		if (this.defaultContentType != null) {
-			strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
-		}
-		ContentNegotiationStrategy[] array = strategies.toArray(new ContentNegotiationStrategy[strategies.size()]);
-		return new ContentNegotiationManager(array);
+		this.factoryBean.afterPropertiesSet();
+		return this.factoryBean.getObject();
 	}
 
 }

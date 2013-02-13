@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -83,22 +81,22 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Cache of singleton objects: bean name --> bean instance */
-	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(64);
 
 	/** Cache of singleton factories: bean name --> ObjectFactory */
-	private final Map<String, ObjectFactory> singletonFactories = new HashMap<String, ObjectFactory>();
+	private final Map<String, ObjectFactory> singletonFactories = new HashMap<String, ObjectFactory>(16);
 
 	/** Cache of early singleton objects: bean name --> bean instance */
-	private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>();
+	private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order */
-	private final Set<String> registeredSingletons = new LinkedHashSet<String>(16);
+	private final Set<String> registeredSingletons = new LinkedHashSet<String>(64);
 
-	/** Names of beans that are currently in creation */
-	private final Set<String> singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet<String>());
+	/** Names of beans that are currently in creation (using a ConcurrentHashMap as a Set) */
+	private final Map<String, Boolean> singletonsCurrentlyInCreation = new ConcurrentHashMap<String, Boolean>(16);
 
-	/** Names of beans currently excluded from in creation checks */
-	private final Set<String> inCreationCheckExclusions = new HashSet<String>();
+	/** Names of beans currently excluded from in creation checks (using a ConcurrentHashMap as a Set) */
+	private final Map<String, Boolean> inCreationCheckExclusions = new ConcurrentHashMap<String, Boolean>(16);
 
 	/** List of suppressed Exceptions, available for associating related causes */
 	private Set<Exception> suppressedExceptions;
@@ -110,13 +108,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Map<String, Object> disposableBeans = new LinkedHashMap<String, Object>();
 
 	/** Map between containing bean names: bean name --> Set of bean names that the bean contains */
-	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<String, Set<String>>();
+	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<String, Set<String>>(16);
 
 	/** Map between dependent bean names: bean name --> Set of dependent bean names */
-	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<String, Set<String>>();
+	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
 
 	/** Map between depending bean names: bean name --> Set of bean names for the bean's dependencies */
-	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<String, Set<String>>();
+	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
 
 
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
@@ -175,11 +173,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * reference to a currently created singleton (resolving a circular reference).
 	 * @param beanName the name of the bean to look for
 	 * @param allowEarlyReference whether early references should be created or not
-	 * @return the registered singleton object, or <code>null</code> if none found
+	 * @return the registered singleton object, or {@code null} if none found
 	 */
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject == null) {
+		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);
 				if (singletonObject == null && allowEarlyReference) {
@@ -289,36 +287,23 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 
-	/**
-	 * Callback before singleton creation.
-	 * <p>Default implementation register the singleton as currently in creation.
-	 * @param beanName the name of the singleton about to be created
-	 * @see #isSingletonCurrentlyInCreation
-	 */
-	protected void beforeSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
-			throw new BeanCurrentlyInCreationException(beanName);
-		}
-	}
-
-	/**
-	 * Callback after singleton creation.
-	 * <p>Default implementation marks the singleton as not in creation anymore.
-	 * @param beanName the name of the singleton that has been created
-	 * @see #isSingletonCurrentlyInCreation
-	 */
-	protected void afterSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.remove(beanName)) {
-			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
-		}
-	}
-
-	public final void setCurrentlyInCreation(String beanName, boolean inCreation) {
+	public void setCurrentlyInCreation(String beanName, boolean inCreation) {
+		Assert.notNull(beanName, "Bean name must not be null");
 		if (!inCreation) {
-			this.inCreationCheckExclusions.add(beanName);
-		} else {
+			this.inCreationCheckExclusions.put(beanName, Boolean.TRUE);
+		}
+		else {
 			this.inCreationCheckExclusions.remove(beanName);
 		}
+	}
+
+	public boolean isCurrentlyInCreation(String beanName) {
+		Assert.notNull(beanName, "Bean name must not be null");
+		return (!this.inCreationCheckExclusions.containsKey(beanName) && isActuallyInCreation(beanName));
+	}
+
+	protected boolean isActuallyInCreation(String beanName) {
+		return isSingletonCurrentlyInCreation(beanName);
 	}
 
 	/**
@@ -326,14 +311,40 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * (within the entire factory).
 	 * @param beanName the name of the bean
 	 */
-	public final boolean isSingletonCurrentlyInCreation(String beanName) {
-		return this.singletonsCurrentlyInCreation.contains(beanName);
+	public boolean isSingletonCurrentlyInCreation(String beanName) {
+		return this.singletonsCurrentlyInCreation.containsKey(beanName);
+	}
+
+	/**
+	 * Callback before singleton creation.
+	 * <p>Default implementation register the singleton as currently in creation.
+	 * @param beanName the name of the singleton about to be created
+	 * @see #isSingletonCurrentlyInCreation
+	 */
+	protected void beforeSingletonCreation(String beanName) {
+		if (!this.inCreationCheckExclusions.containsKey(beanName) &&
+				this.singletonsCurrentlyInCreation.put(beanName, Boolean.TRUE) != null) {
+			throw new BeanCurrentlyInCreationException(beanName);
+		}
+	}
+
+	/**
+	 * Callback after singleton creation.
+	 * <p>The default implementation marks the singleton as not in creation anymore.
+	 * @param beanName the name of the singleton that has been created
+	 * @see #isSingletonCurrentlyInCreation
+	 */
+	protected void afterSingletonCreation(String beanName) {
+		if (!this.inCreationCheckExclusions.containsKey(beanName) &&
+				!this.singletonsCurrentlyInCreation.remove(beanName)) {
+			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
+		}
 	}
 
 
 	/**
 	 * Add the given bean to the list of disposable beans in this registry.
-	 * Disposable beans usually correspond to registered singletons,
+	 * <p>Disposable beans usually correspond to registered singletons,
 	 * matching the bean name but potentially being a different instance
 	 * (for example, a DisposableBean adapter for a singleton that does not
 	 * naturally implement Spring's DisposableBean interface).
@@ -436,11 +447,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			this.singletonsCurrentlyInDestruction = true;
 		}
 
+		String[] disposableBeanNames;
 		synchronized (this.disposableBeans) {
-			String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
-			for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
-				destroySingleton(disposableBeanNames[i]);
-			}
+			disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
+		}
+		for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
+			destroySingleton(disposableBeanNames[i]);
 		}
 
 		this.containedBeanMap.clear();
@@ -457,7 +469,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
-	 * Destroy the given bean. Delegates to <code>destroyBean</code>
+	 * Destroy the given bean. Delegates to {@code destroyBean}
 	 * if a corresponding disposable bean instance is found.
 	 * @param beanName the name of the bean
 	 * @see #destroyBean

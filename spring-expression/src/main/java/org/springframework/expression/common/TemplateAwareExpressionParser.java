@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,6 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @param expressionString the expression string which may contain the suffix
 	 * @param pos the start position at which to check for the suffix
 	 * @param suffix the suffix string
-	 * @return
 	 */
 	private boolean isSuffixHere(String expressionString,int pos,String suffix) {
 		int suffixPosition = 0;

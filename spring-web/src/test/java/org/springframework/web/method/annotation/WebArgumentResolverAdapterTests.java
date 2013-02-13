@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -36,7 +36,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 
 /**
  * Test fixture with {@link WebArgumentResolverAdapterTests}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -56,7 +56,7 @@ public class WebArgumentResolverAdapterTests {
 		adapter = new TestWebArgumentResolverAdapter(adaptee);
 		parameter = new MethodParameter(getClass().getMethod("handle", Integer.TYPE), 0);
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
-		
+
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
@@ -151,7 +151,7 @@ public class WebArgumentResolverAdapterTests {
 
 	public void handle(int param) {
 	}
-	
+
 	private class TestWebArgumentResolverAdapter extends AbstractWebArgumentResolverAdapter {
 
 		public TestWebArgumentResolverAdapter(WebArgumentResolver adaptee) {

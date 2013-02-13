@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,19 @@ package org.springframework.context.event;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Event raised when an <code>ApplicationContext</code> gets initialized or refreshed.
+ * Event raised when an {@code ApplicationContext} gets initialized or refreshed.
  *
  * @author Juergen Hoeller
  * @since 04.03.2003
  * @see ContextClosedEvent
  */
+@SuppressWarnings("serial")
 public class ContextRefreshedEvent extends ApplicationContextEvent {
 
 	/**
 	 * Create a new ContextRefreshedEvent.
-	 * @param source the <code>ApplicationContext</code> that has been initialized
-	 * or refreshed (must not be <code>null</code>)
+	 * @param source the {@code ApplicationContext} that has been initialized
+	 * or refreshed (must not be {@code null})
 	 */
 	public ContextRefreshedEvent(ApplicationContext source) {
 		super(source);

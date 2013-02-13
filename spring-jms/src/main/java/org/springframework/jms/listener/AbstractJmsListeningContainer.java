@@ -214,6 +214,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			wasRunning = this.running;
 			this.running = false;
 			this.active = false;
+			this.pausedTasks.clear();
 			this.lifecycleMonitor.notifyAll();
 		}
 
@@ -342,12 +343,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Check whether this container's listeners are generally allowed to run.
-	 * <p>This implementation always returns <code>true</code>; the default 'running'
+	 * <p>This implementation always returns {@code true}; the default 'running'
 	 * state is purely determined by {@link #start()} / {@link #stop()}.
 	 * <p>Subclasses may override this method to check against temporary
 	 * conditions that prevent listeners from actually running. In other words,
 	 * they may apply further restrictions to the 'running' state, returning
-	 * <code>false</code> if such a restriction prevents listeners from running.
+	 * {@code false} if such a restriction prevents listeners from running.
 	 */
 	protected boolean runningAllowed() {
 		return true;
@@ -469,7 +470,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Return the shared JMS Connection maintained by this container.
 	 * Available after initialization.
-	 * @return the shared Connection (never <code>null</code>)
+	 * @return the shared Connection (never {@code null})
 	 * @throws IllegalStateException if this container does not maintain a
 	 * shared Connection, or if the Connection hasn't been initialized yet
 	 * @see #sharedConnectionEnabled()
@@ -561,7 +562,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Reschedule the given task object immediately.
 	 * <p>To be implemented by subclasses if they ever call
-	 * <code>rescheduleTaskIfNecessary</code>.
+	 * {@code rescheduleTaskIfNecessary}.
 	 * This implementation throws an UnsupportedOperationException.
 	 * @param task the task object to reschedule
 	 * @see #rescheduleTaskIfNecessary

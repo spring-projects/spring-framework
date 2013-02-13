@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests extends SpringJ
 	/**
 	 * Classpath-based resource path for the application context configuration
 	 * for {@link SpringJUnit4ClassRunnerAppCtxTests}:
-	 * <code>&quot;classpath:/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
+	 * {@code &quot;classpath:/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;}
 	 *
 	 * @see SpringJUnit4ClassRunnerAppCtxTests#DEFAULT_CONTEXT_RESOURCE_PATH
 	 * @see ResourceUtils#CLASSPATH_URL_PREFIX

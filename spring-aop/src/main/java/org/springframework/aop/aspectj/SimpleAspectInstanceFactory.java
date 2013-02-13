@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 	}
 
 	/**
-	 * Return the specified aspect class (never <code>null</code>).
+	 * Return the specified aspect class (never {@code null}).
 	 */
 	public final Class getAspectClass() {
 		return this.aspectClass;
@@ -81,7 +81,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 	 * Determine a fallback order for the case that the aspect instance
 	 * does not express an instance-specific order through implementing
 	 * the {@link org.springframework.core.Ordered} interface.
-	 * <p>The default implementation simply returns <code>Ordered.LOWEST_PRECEDENCE</code>.
+	 * <p>The default implementation simply returns {@code Ordered.LOWEST_PRECEDENCE}.
 	 * @param aspectClass the aspect class
 	 */
 	protected int getOrderForAspectClass(Class<?> aspectClass) {

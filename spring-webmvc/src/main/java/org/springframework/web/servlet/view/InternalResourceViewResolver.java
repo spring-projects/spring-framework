@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,8 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	/**
 	 * Set whether to make all Spring beans in the application context accessible
 	 * as request attributes, through lazy checking once an attribute gets accessed.
-	 * <p>This will make all such beans accessible in plain <code>${...}</code>
-	 * expressions in a JSP 2.0 page, as well as in JSTL's <code>c:out</code>
+	 * <p>This will make all such beans accessible in plain {@code ${...}}
+	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
 	 * value expressions.
 	 * <p>Default is "false".
 	 * @see InternalResourceView#setExposeContextBeansAsAttributes

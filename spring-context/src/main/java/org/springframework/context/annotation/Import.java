@@ -53,7 +53,8 @@ import java.lang.annotation.Target;
 public @interface Import {
 
 	/**
-	 * The @{@link Configuration} and/or {@link ImportSelector} classes to import.
+	 * The @{@link Configuration}, {@link ImportSelector} and/or
+	 * {@link ImportBeanDefinitionRegistrar} classes to import.
 	 */
 	Class<?>[] value();
 }

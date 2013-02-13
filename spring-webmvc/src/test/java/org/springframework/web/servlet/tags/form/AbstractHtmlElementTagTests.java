@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockPageContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -53,6 +53,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	private MockPageContext pageContext;
 
 
+	@Override
 	protected final void setUp() throws Exception {
 		// set up a writer for the tag content to be written to
 		this.writer = new StringWriter();
@@ -104,7 +105,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
 		ServletRequest request = getPageContext().getRequest();
 		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
-		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);		
+		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 		return mockProcessor;
 	}
 

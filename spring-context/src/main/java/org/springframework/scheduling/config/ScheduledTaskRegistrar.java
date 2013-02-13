@@ -276,7 +276,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 	/**
 	 * Schedule all registered tasks against the underlying {@linkplain
-	 * #setTaskScheduler(TaskScheduler) task scheduler.
+	 * #setTaskScheduler(TaskScheduler) task scheduler}.
 	 */
 	public void afterPropertiesSet() {
 		long now = System.currentTimeMillis();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import junit.framework.TestCase;
  * @author Keith Donald
  * @author Juergen Hoeller
  */
+@Deprecated
 public class CachingMapDecoratorTests extends TestCase {
 
 	public void testValidCache() {
@@ -94,10 +95,12 @@ public class CachingMapDecoratorTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MyCachingMap extends CachingMapDecorator<String, String> {
 
 		private boolean createCalled;
 
+		@Override
 		protected String create(String key) {
 			createCalled = true;
 			return (key != null ? "expensive value to cache" : null);

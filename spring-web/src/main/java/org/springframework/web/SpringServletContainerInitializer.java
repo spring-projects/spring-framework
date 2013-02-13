@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * {@code web.xml}-based approach.
  *
  * <h2>Mechanism of Operation</h2>
- * This class will be loaded and instantiated and have its {@link #onStartup onStartup}
+ * This class will be loaded and instantiated and have its {@link #onStartup}
  * method invoked by any Servlet 3.0-compliant container during container startup assuming
  * that the {@code spring-web} module JAR is present on the classpath. This occurs through
  * the JAR Services API {@link ServiceLoader#load(Class)} method detecting the
@@ -46,12 +46,28 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * JAR Services API documentation</a> as well as section <em>8.2.4</em> of the Servlet 3.0
  * Final Draft specification for complete details.
  *
- * <h3>when in combination with {@code web.xml}</h3>
- * <p>If a web application does include a {@code WEB-INF/web.xml} file, it is important to
+ * <h3>In combination with {@code web.xml}</h3>
+ * <p>If a web application includes a {@code WEB-INF/web.xml} file, it is important to
  * understand that neither this nor any other {@code ServletContextInitializer} will be
  * processed unless the {@code <web-app>} element's {@code version} attribute is >= "3.0"
  * and the {@code xsi:schemaLocation} for "http://java.sun.com/xml/ns/javaee" is set to
  * "http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd".
+ * <p>A web application can choose to limit the amount of classpath scanning the Servlet
+ * container does at startup either through the {@code metadata-complete} attribute in
+ * {@code web.xml}, which controls scanning for Servlet annotations or through an
+ * {@code <absolute-ordering>} element also in {@code web.xml}, which controls which
+ * web fragments (i.e. jars) are allowed to perform a {@code ServletContainerInitializer}
+ * scan. When using this feature, the {@link SpringServletContainerInitializer}
+ * can be enabled by adding "spring_web" to the list of named web fragments in
+ * {@code web.xml} as follows:
+ *
+ * <pre class="code">
+ * {@code
+ * <absolute-ordering>
+ *   <name>some_web_fragment</name>
+ *   <name>spring_web</name>
+ * </absolute-ordering>
+ * }</pre>
  *
  * <h2>Relationship to Spring's {@code WebApplicationInitializer}</h2>
  * Spring's {@code WebApplicationInitializer} SPI consists of just one method:
@@ -78,12 +94,13 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * is not in any way "tied" to Spring MVC other than the fact that the types are shipped
  * in the {@code spring-web} module JAR. Rather, they can be considered general-purpose
  * in their ability to facilitate convenient code-based configuration of the
- * {@code ServletContext}. Said another way, any servlet, listener, or filter may be
+ * {@code ServletContext}. In other words, any servlet, listener, or filter may be
  * registered within a {@code WebApplicationInitializer}, not just Spring MVC-specific
  * components.
  *
- * <p>This class is not designed for nor intended to be extended. It should be considered
- * an internal type, with {@code WebApplicationInitializer} being the public-facing SPI.
+ * <p>This class is neither designed for extension nor intended to be extended.
+ * It should be considered an internal type, with {@code WebApplicationInitializer}
+ * being the public-facing SPI.
  *
  * <h2>See Also</h2>
  * See {@link WebApplicationInitializer} Javadoc for examples and detailed usage
@@ -91,6 +108,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.1
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
@@ -110,17 +128,17 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * <p>If no {@code WebApplicationInitializer} implementations are found on the
 	 * classpath, this method is effectively a no-op. An INFO-level log message will be
 	 * issued notifying the user that the {@code ServletContainerInitializer} has indeed
-	 * been invoked, but that no {@code WebApplicationInitializer} implementations were
+	 * been invoked but that no {@code WebApplicationInitializer} implementations were
 	 * found.
 	 *
 	 * <p>Assuming that one or more {@code WebApplicationInitializer} types are detected,
 	 * they will be instantiated (and <em>sorted</em> if the @{@link
-	 * org.springframework.core.annotation.Order Order} annotation is present or
+	 * org.springframework.core.annotation.Order @Order} annotation is present or
 	 * the {@link org.springframework.core.Ordered Ordered} interface has been
 	 * implemented). Then the {@link WebApplicationInitializer#onStartup(ServletContext)}
 	 * method will be invoked on each instance, delegating the {@code ServletContext} such
 	 * that each instance may register and configure servlets such as Spring's
-	 * {@code DispatcherServlet}, listeners such as Spring's {@code ContextLoaderListener}
+	 * {@code DispatcherServlet}, listeners such as Spring's {@code ContextLoaderListener},
 	 * or any other Servlet API componentry such as filters.
 	 *
 	 * @param webAppInitializerClasses all implementations of

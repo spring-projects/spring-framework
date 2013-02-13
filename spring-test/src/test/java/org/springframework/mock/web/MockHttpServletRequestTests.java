@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,57 +16,70 @@
 
 package org.springframework.mock.web;
 
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
+ * Unit tests for {@link MockHttpServletRequest}.
+ *
  * @author Rick Evans
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class MockHttpServletRequestTests extends TestCase {
+public class MockHttpServletRequestTests {
 
-	public void testSetContentType() {
+	private MockHttpServletRequest request = new MockHttpServletRequest();
+
+
+	@Test
+	public void setContentType() {
 		String contentType = "test/plain";
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType(contentType);
 		assertEquals(contentType, request.getContentType());
 		assertEquals(contentType, request.getHeader("Content-Type"));
 		assertNull(request.getCharacterEncoding());
 	}
 
-	public void testSetContentTypeUTF8() {
+	@Test
+	public void setContentTypeUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType(contentType);
 		assertEquals(contentType, request.getContentType());
 		assertEquals(contentType, request.getHeader("Content-Type"));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
-	public void testContentTypeHeader() {
+	@Test
+	public void contentTypeHeader() {
 		String contentType = "test/plain";
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Content-Type", contentType);
 		assertEquals(contentType, request.getContentType());
 		assertEquals(contentType, request.getHeader("Content-Type"));
 		assertNull(request.getCharacterEncoding());
 	}
 
-	public void testContentTypeHeaderUTF8() {
+	@Test
+	public void contentTypeHeaderUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Content-Type", contentType);
 		assertEquals(contentType, request.getContentType());
 		assertEquals(contentType, request.getHeader("Content-Type"));
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
-	public void testSetContentTypeThenCharacterEncoding() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void setContentTypeThenCharacterEncoding() {
 		request.setContentType("test/plain");
 		request.setCharacterEncoding("UTF-8");
 		assertEquals("test/plain", request.getContentType());
@@ -74,8 +87,8 @@ public class MockHttpServletRequestTests extends TestCase {
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
-	public void testSetCharacterEncodingThenContentType() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void setCharacterEncodingThenContentType() {
 		request.setCharacterEncoding("UTF-8");
 		request.setContentType("test/plain");
 		assertEquals("test/plain", request.getContentType());
@@ -83,17 +96,17 @@ public class MockHttpServletRequestTests extends TestCase {
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
-	public void testHttpHeaderNameCasingIsPreserved() throws Exception {
+	@Test
+	public void httpHeaderNameCasingIsPreserved() throws Exception {
 		String headerName = "Header1";
-		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader(headerName, "value1");
 		Enumeration<String> requestHeaders = request.getHeaderNames();
 		assertNotNull(requestHeaders);
 		assertEquals("HTTP header casing not being preserved", headerName, requestHeaders.nextElement());
 	}
 
-	public void testSetMultipleParameters() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void setMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
 		Map<String, Object> params = new HashMap<String, Object>(2);
@@ -110,8 +123,8 @@ public class MockHttpServletRequestTests extends TestCase {
 		assertEquals("value3B", values3[1]);
 	}
 
-	public void testAddMultipleParameters() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void addMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
 		Map<String, Object> params = new HashMap<String, Object>(2);
@@ -129,8 +142,8 @@ public class MockHttpServletRequestTests extends TestCase {
 		assertEquals("value3B", values3[1]);
 	}
 
-	public void testRemoveAllParameters() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@Test
+	public void removeAllParameters() {
 		request.setParameter("key1", "value1");
 		Map<String, Object> params = new HashMap<String, Object>(2);
 		params.put("key2", "value2");
@@ -139,6 +152,49 @@ public class MockHttpServletRequestTests extends TestCase {
 		assertEquals(3, request.getParameterMap().size());
 		request.removeAllParameters();
 		assertEquals(0, request.getParameterMap().size());
+	}
+
+	@Test
+	public void defaultLocale() {
+		Locale originalDefaultLocale = Locale.getDefault();
+		try {
+			Locale newDefaultLocale = originalDefaultLocale.equals(Locale.GERMANY) ? Locale.FRANCE : Locale.GERMANY;
+			Locale.setDefault(newDefaultLocale);
+			// Create the request after changing the default locale.
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			assertFalse(newDefaultLocale.equals(request.getLocale()));
+			assertEquals(Locale.ENGLISH, request.getLocale());
+		}
+		finally {
+			Locale.setDefault(originalDefaultLocale);
+		}
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void setPreferredLocalesWithNullList() {
+		request.setPreferredLocales(null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void setPreferredLocalesWithEmptyList() {
+		request.setPreferredLocales(new ArrayList<Locale>());
+	}
+
+	@Test
+	public void setPreferredLocales() {
+		List<Locale> preferredLocales = Arrays.asList(Locale.ITALY, Locale.CHINA);
+		request.setPreferredLocales(preferredLocales);
+		assertEqualEnumerations(Collections.enumeration(preferredLocales), request.getLocales());
+	}
+
+	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
+		assertNotNull(enum1);
+		assertNotNull(enum2);
+		int count = 0;
+		while (enum1.hasMoreElements()) {
+			assertTrue("enumerations must be equal in length", enum2.hasMoreElements());
+			assertEquals("enumeration element #" + ++count, enum1.nextElement(), enum2.nextElement());
+		}
 	}
 
 }

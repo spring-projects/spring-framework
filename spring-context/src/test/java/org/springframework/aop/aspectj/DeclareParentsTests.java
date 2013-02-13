@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
@@ -26,8 +24,12 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import test.mixin.Lockable;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -36,7 +38,7 @@ import test.mixin.Lockable;
 public final class DeclareParentsTests {
 
 	private ITestBean testBeanProxy;
-	
+
 	private TestBean testBeanTarget;
 
 	private ApplicationContext ctx;
@@ -44,14 +46,14 @@ public final class DeclareParentsTests {
 	@Before
 	public void setUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-		
+
 		// we need the real target too, not just the proxy...
 		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 	}
-		
+
 	@Test
 	public void testIntroductionWasMade() {
 		assertTrue("Introduction must have been made", testBeanProxy instanceof Lockable);
@@ -63,6 +65,8 @@ public final class DeclareParentsTests {
 	// on the introduction, in which case this would not be a problem.
 	@Test
 	public void testLockingWorks() {
+		Assume.group(TestGroup.LONG_RUNNING);
+
 		Object introductionObject = ctx.getBean("introduction");
 		assertFalse("Introduction should not be proxied", AopUtils.isAopProxy(introductionObject));
 

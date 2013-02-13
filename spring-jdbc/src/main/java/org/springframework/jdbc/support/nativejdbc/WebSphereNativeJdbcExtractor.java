@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>Returns the underlying native Connection to application code instead
  * of WebSphere's wrapper implementation; unwraps the Connection for
  * native statements. The returned JDBC classes can then safely be cast,
- * e.g. to <code>oracle.jdbc.OracleConnection</code>.
+ * e.g. to {@code oracle.jdbc.OracleConnection}.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working
  * with a WebSphere DataSource: If a given object is not a WebSphere
@@ -37,8 +37,6 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see com.ibm.ws.rsadapter.jdbc.WSJdbcConnection
- * @see com.ibm.ws.rsadapter.jdbc.WSJdbcUtil#getNativeConnection
  */
 public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
@@ -71,7 +69,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 
 	/**
-	 * Return <code>true</code>, as WebSphere returns wrapped Statements.
+	 * Return {@code true}, as WebSphere returns wrapped Statements.
 	 */
 	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
@@ -79,7 +77,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Return <code>true</code>, as WebSphere returns wrapped PreparedStatements.
+	 * Return {@code true}, as WebSphere returns wrapped PreparedStatements.
 	 */
 	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
@@ -87,7 +85,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Return <code>true</code>, as WebSphere returns wrapped CallableStatements.
+	 * Return {@code true}, as WebSphere returns wrapped CallableStatements.
 	 */
 	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
@@ -95,7 +93,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via WebSphere's <code>getNativeConnection</code> method.
+	 * Retrieve the Connection via WebSphere's {@code getNativeConnection} method.
 	 */
 	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {

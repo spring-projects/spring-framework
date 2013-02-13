@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.CoreConnectionPNames;
 
 import org.springframework.context.i18n.LocaleContext;
@@ -50,6 +50,8 @@ import org.springframework.util.StringUtils;
  * <p>Allows to use a pre-configured {@link org.apache.http.client.HttpClient}
  * instance, potentially with authentication, HTTP connection pooling, etc.
  * Also designed for easy subclassing, providing specific template methods.
+ *
+ * <p>As of Spring 3.2, this request executor requires Apache HttpComponents 4.2 or higher.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -68,14 +70,14 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 	/**
 	 * Create a new instance of the HttpComponentsHttpInvokerRequestExecutor with a default
-	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager}.
+	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.PoolingClientConnectionManager}.
 	 */
 	public HttpComponentsHttpInvokerRequestExecutor() {
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 		schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
 
-		ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(schemeRegistry);
+		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(schemeRegistry);
 		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
 		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 
@@ -146,10 +148,15 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 		HttpPost postMethod = createHttpPost(config);
 		setRequestBody(config, postMethod, baos);
-		HttpResponse response = executeHttpPost(config, getHttpClient(), postMethod);
-		validateResponse(config, response);
-		InputStream responseBody = getResponseBody(config, response);
-		return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
+		try {
+			HttpResponse response = executeHttpPost(config, getHttpClient(), postMethod);
+			validateResponse(config, response);
+			InputStream responseBody = getResponseBody(config, response);
+			return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
+		}
+		finally {
+			postMethod.releaseConnection();
+		}
 	}
 
 	/**

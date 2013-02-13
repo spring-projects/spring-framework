@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	private TransactionTemplate tt;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		factoryControl = MockControl.createControl(EntityManagerFactory.class);
 		factory = (EntityManagerFactory) factoryControl.getMock();
@@ -80,6 +81,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		manager.close();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
@@ -106,9 +108,11 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				return template.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em) {
 						em.flush();
 						return l;
@@ -146,9 +150,11 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							em.flush();
 							return l;
@@ -188,9 +194,11 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							throw new RuntimeException("some exception");
 						}
@@ -229,9 +237,11 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							throw new RuntimeException("some exception");
 						}
@@ -269,10 +279,12 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
 				Object res = template.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em) {
 						em.flush();
 						return l;
@@ -307,6 +319,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.reset();
 				txControl.expectAndReturn(tx.getRollbackOnly(), false);
@@ -316,9 +329,11 @@ public class JpaTransactionManagerTests extends TestCase {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 
 						return template.execute(new JpaCallback() {
+							@Override
 							public Object doInJpa(EntityManager em) {
 								em.flush();
 								return l;
@@ -351,6 +366,7 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					txControl.expectAndReturn(tx.isActive(), true, 2);
@@ -360,8 +376,10 @@ public class JpaTransactionManagerTests extends TestCase {
 
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 							return template.execute(new JpaCallback() {
+								@Override
 								public Object doInJpa(EntityManager em) {
 									throw new RuntimeException("exception");
 								}
@@ -400,6 +418,7 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					txControl.expectAndReturn(tx.isActive(), true);
@@ -412,9 +431,11 @@ public class JpaTransactionManagerTests extends TestCase {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 
 							template.execute(new JpaCallback() {
+								@Override
 								public Object doInJpa(EntityManager em2) {
 									em2.flush();
 									return l;
@@ -462,6 +483,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.verify();
 				txControl.reset();
@@ -476,8 +498,10 @@ public class JpaTransactionManagerTests extends TestCase {
 
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						return template.execute(new JpaCallback() {
+							@Override
 							public Object doInJpa(EntityManager em2) {
 								em2.flush();
 								return l;
@@ -517,6 +541,7 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.verify();
 					txControl.reset();
@@ -531,6 +556,7 @@ public class JpaTransactionManagerTests extends TestCase {
 
 					JpaTemplate template2 = new JpaTemplate(factory);
 					template2.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) throws PersistenceException {
 							return null;
 						}
@@ -538,8 +564,10 @@ public class JpaTransactionManagerTests extends TestCase {
 
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 							return template.execute(new JpaCallback() {
+								@Override
 								public Object doInJpa(EntityManager em2) {
 									em2.flush();
 									return l;
@@ -582,13 +610,16 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertFalse(TransactionSynchronizationManager.hasResource(factory));
 				TransactionTemplate tt2 = new TransactionTemplate(transactionManager);
 				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				return tt2.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						return template.execute(new JpaCallback() {
+							@Override
 							public Object doInJpa(EntityManager em2) {
 								em2.flush();
 								return l;
@@ -630,9 +661,11 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				JpaTemplate template2 = new JpaTemplate(factory);
 				template2.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em) throws PersistenceException {
 						return null;
 					}
@@ -642,8 +675,10 @@ public class JpaTransactionManagerTests extends TestCase {
 				TransactionTemplate tt2 = new TransactionTemplate(transactionManager);
 				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				return tt2.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						return template.execute(new JpaCallback() {
+							@Override
 							public Object doInJpa(EntityManager em2) {
 								em2.flush();
 								return l;
@@ -694,18 +729,23 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				template.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em2) {
 						em2.flush();
 						return null;
 					}
 				});
 				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+					@Override
 					public void afterCompletion(int status) {
 						tt.execute(new TransactionCallback() {
+							@Override
 							public Object doInTransaction(TransactionStatus status) {
 								return template.execute(new JpaCallback() {
+									@Override
 									public Object doInJpa(EntityManager em2) {
 										em2.flush();
 										return null;
@@ -750,11 +790,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(!status.isNewTransaction());
 				return template.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em) {
 						em.flush();
 						return l;
@@ -790,11 +832,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(!status.isNewTransaction());
 				template.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em) {
 						em.flush();
 						return null;
@@ -836,10 +880,12 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 					return template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							return l;
 						}
@@ -881,10 +927,12 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 					template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							return null;
 						}
@@ -929,11 +977,13 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue(!status.isNewTransaction());
 					return template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							em.flush();
 							return l;
@@ -976,11 +1026,13 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue(!status.isNewTransaction());
 					template.execute(new JpaCallback() {
+						@Override
 						public Object doInJpa(EntityManager em) {
 							em.flush();
 							return null;
@@ -1026,10 +1078,12 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				return template.execute(new JpaCallback() {
+					@Override
 					public Object doInJpa(EntityManager em) {
 						em.flush();
 						return l;
@@ -1063,6 +1117,7 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 				}
 			});
@@ -1092,6 +1147,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			public void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				status.flush();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.export.annotation;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
@@ -61,6 +62,12 @@ public class AnnotationMBeanExporter extends MBeanExporter {
 	 */
 	public void setDefaultDomain(String defaultDomain) {
 		this.metadataNamingStrategy.setDefaultDomain(defaultDomain);
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		super.setBeanFactory(beanFactory);
+		this.annotationSource.setBeanFactory(beanFactory);
 	}
 
 }

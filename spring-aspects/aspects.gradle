@@ -2,65 +2,71 @@
 // compile sources with ajc instead of javac
 
 configurations {
-    ajc
-    aspects
-    ajInpath
+	rt
+	ajc
+	aspects
+	ajInpath
 }
 
+// exclude spring-aspects as a module within IDEA until IDEA-64446 is resolved
+tasks.getByName("idea").onlyIf { false }
+tasks.getByName("ideaModule").onlyIf { false }
+
 task compileJava(overwrite: true)  {
-    dependsOn JavaPlugin.PROCESS_RESOURCES_TASK_NAME
-    dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
+	dependsOn JavaPlugin.PROCESS_RESOURCES_TASK_NAME
+	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
 
-    def outputDir = project.sourceSets.main.output.classesDir
+	def outputDir = project.sourceSets.main.output.classesDir
 
-    inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
-    outputs.dir outputDir
+	inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
+	outputs.dir outputDir
 
-    doLast{
-        ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
-                classpath: configurations.ajc.asPath)
+	doLast{
+		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
+				classpath: configurations.ajc.asPath)
 
-        ant.iajc(source: sourceCompatibility, target: targetCompatibility,
-                maxmem: "1024m", fork: "true", Xlint: "ignore",
-                destDir: outputDir.absolutePath,
-                aspectPath: configurations.aspects.asPath,
-                inpath: configurations.ajInpath.asPath,
-                sourceRootCopyFilter: "**/*.java",
-                classpath: configurations.compile.asPath) {
-            sourceroots {
-                sourceSets.main.java.srcDirs.each {
-                    pathelement(location:it.absolutePath)
-                }
-            }
-        }
-    }
+		ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+				maxmem: "1024m", fork: "true", Xlint: "ignore",
+				destDir: outputDir.absolutePath,
+				aspectPath: configurations.aspects.asPath,
+				inpath: configurations.ajInpath.asPath,
+				sourceRootCopyFilter: "**/*.java",
+				classpath: (sourceSets.main.runtimeClasspath + configurations.rt).asPath) {
+			sourceroots {
+				sourceSets.main.java.srcDirs.each {
+					pathelement(location:it.absolutePath)
+				}
+			}
+		}
+	}
 }
 
 task compileTestJava(overwrite: true)  {
-    dependsOn JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME
-    dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
-    dependsOn jar
+	dependsOn JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME
+	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
+	dependsOn jar
 
-    def outputDir = project.sourceSets.test.output.classesDir
+	def outputDir = project.sourceSets.test.output.classesDir
 
-    inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
-    outputs.dir outputDir
+	inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
+	outputs.dir outputDir
 
-    doLast{
-        ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
-                classpath: configurations.ajc.asPath)
+	doLast{
+		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
+				classpath: configurations.ajc.asPath)
 
-        ant.iajc(source: sourceCompatibility, target: targetCompatibility,
-                maxmem: "1024m", fork: "true", Xlint: "ignore",
-                destDir: outputDir.absolutePath,
-                aspectPath: jar.archivePath,
-                inpath: configurations.ajInpath.asPath,
-                classpath: configurations.testRuntime.asPath + configurations.compile.asPath + jar.archivePath) {
-            sourceroots {
-                sourceSets.test.java.srcDirs.each {
-                    pathelement(location:it.absolutePath)
-                }
-            }
-        }
-    }
+		ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+				maxmem: "1024m", fork: "true", Xlint: "ignore",
+				destDir: outputDir.absolutePath,
+				aspectPath: jar.archivePath,
+				inpath: configurations.ajInpath.asPath,
+				classpath: sourceSets.test.runtimeClasspath.asPath + jar.archivePath +
+				           System.getProperty("path.separator") + configurations.rt.asPath) {
+			sourceroots {
+				sourceSets.test.java.srcDirs.each {
+					pathelement(location:it.absolutePath)
+				}
+			}
+		}
+	}
 }

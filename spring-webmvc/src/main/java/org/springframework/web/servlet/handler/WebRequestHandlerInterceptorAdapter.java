@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.WebRequestInterceptor;
-import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -69,7 +69,7 @@ public class WebRequestHandlerInterceptorAdapter implements AsyncHandlerIntercep
 		this.requestInterceptor.afterCompletion(new DispatcherServletWebRequest(request, response), ex);
 	}
 
-	public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response) {
+	public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) {
 		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
 			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
 			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);

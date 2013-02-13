@@ -16,18 +16,32 @@
 
 package org.springframework.jmx.support;
 
-import java.util.List;
 import java.lang.management.ManagementFactory;
+import java.util.List;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
 import junit.framework.TestCase;
 
+import org.springframework.util.MBeanTestUtils;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class MBeanServerFactoryBeanTests extends TestCase {
+
+	@Override
+	protected void setUp() throws Exception {
+		MBeanTestUtils.resetMBeanServers();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		MBeanTestUtils.resetMBeanServers();
+	}
 
 	public void testGetObject() throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();

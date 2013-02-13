@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,12 @@
 
 package org.springframework.core.env;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
-import static org.springframework.context.ConfigurableApplicationContext.ENVIRONMENT_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.DERIVED_DEV_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.DERIVED_DEV_ENV_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.DEV_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.DEV_ENV_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.ENVIRONMENT_AWARE_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.PROD_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.PROD_ENV_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.TRANSITIVE_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.XML_PATH;
-
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -69,14 +52,20 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.portlet.context.AbstractRefreshablePortletApplicationContext;
 import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.springframework.context.ConfigurableApplicationContext.*;
+import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.*;
 
 
 /**
@@ -667,6 +656,7 @@ public class EnvironmentIntegrationTests {
 
 		public Environment environment;
 
+		@Override
 		public void setEnvironment(Environment environment) {
 			this.environment = environment;
 		}

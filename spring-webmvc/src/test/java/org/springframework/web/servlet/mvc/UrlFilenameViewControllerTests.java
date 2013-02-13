@@ -18,8 +18,8 @@ package org.springframework.web.servlet.mvc;
 
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -49,6 +49,15 @@ public class UrlFilenameViewControllerTests extends TestCase {
 	public void testWithFilenamePlusExtension() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("index", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testWithFilenameAndMatrixVariables() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index;a=A;b=B");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = ctrl.handleRequest(request, response);
 		assertEquals("index", mv.getViewName());

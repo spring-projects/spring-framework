@@ -8,16 +8,16 @@ public class Person {
 	public Person(String name) {
 		this.privateName = name;
 	}
-	
+
 	public Person(String name, Company company) {
 		this.privateName = name;
 		this.company = company;
 	}
-	
+
 	public String getName() {
 		return privateName;
 	}
-	
+
 	public void setName(String n) {
 		this.privateName = n;
 	}

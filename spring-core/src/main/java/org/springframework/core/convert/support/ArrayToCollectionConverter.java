@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * <p>First, creates a new Collection of the requested targetType.
  * Then adds each array element to the target collection.
  * Will perform an element conversion from the source component type to the collection's parameterized type if necessary.
- * 
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -57,7 +57,7 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
-		}		
+		}
 		int length = Array.getLength(source);
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
 		if (targetType.getElementTypeDescriptor() == null) {
@@ -73,7 +73,7 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 						sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);
 			}
-		}		
+		}
 		return target;
 	}
 

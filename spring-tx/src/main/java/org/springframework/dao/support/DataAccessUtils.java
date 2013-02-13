@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ public abstract class DataAccessUtils {
 
 	/**
 	 * Return a single result object from the given Collection.
-	 * <p>Returns <code>null</code> if 0 result objects found;
+	 * <p>Returns {@code null} if 0 result objects found;
 	 * throws an exception if more than 1 element found.
-	 * @param results the result Collection (can be <code>null</code>)
-	 * @return the single result object, or <code>null</code> if none
+	 * @param results the result Collection (can be {@code null})
+	 * @return the single result object, or {@code null} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Collection
 	 */
@@ -58,7 +58,7 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a single result object from the given Collection.
 	 * <p>Throws an exception if 0 or more than 1 element found.
-	 * @param results the result Collection (can be <code>null</code>)
+	 * @param results the result Collection (can be {@code null})
 	 * @return the single result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * element has been found in the given Collection
@@ -78,10 +78,10 @@ public abstract class DataAccessUtils {
 
 	/**
 	 * Return a unique result object from the given Collection.
-	 * <p>Returns <code>null</code> if 0 result objects found;
+	 * <p>Returns {@code null} if 0 result objects found;
 	 * throws an exception if more than 1 instance found.
-	 * @param results the result Collection (can be <code>null</code>)
-	 * @return the unique result object, or <code>null</code> if none
+	 * @param results the result Collection (can be {@code null})
+	 * @return the unique result object, or {@code null} if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
 	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
@@ -100,7 +100,7 @@ public abstract class DataAccessUtils {
 	/**
 	 * Return a unique result object from the given Collection.
 	 * <p>Throws an exception if 0 or more than 1 instance found.
-	 * @param results the result Collection (can be <code>null</code>)
+	 * @param results the result Collection (can be {@code null})
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
@@ -124,7 +124,7 @@ public abstract class DataAccessUtils {
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to the
 	 * specified required type.
-	 * @param results the result Collection (can be <code>null</code>)
+	 * @param results the result Collection (can be {@code null})
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
@@ -163,7 +163,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique int result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to an int.
-	 * @param results the result Collection (can be <code>null</code>)
+	 * @param results the result Collection (can be {@code null})
 	 * @return the unique int result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
@@ -182,7 +182,7 @@ public abstract class DataAccessUtils {
 	 * Return a unique long result from the given Collection.
 	 * Throws an exception if 0 or more than 1 result objects found,
 	 * of if the unique result object is not convertable to a long.
-	 * @param results the result Collection (can be <code>null</code>)
+	 * @param results the result Collection (can be {@code null})
 	 * @return the unique long result
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
@@ -196,8 +196,8 @@ public abstract class DataAccessUtils {
 
 		return objectResult(results, Number.class).longValue();
 	}
-	
-	
+
+
 	/**
 	 * Return a translated exception if this is appropriate,
 	 * otherwise return the input exception.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -80,14 +80,18 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ *
+ * @deprecated as of Spring 3.2, in favor of
+ * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */
+@Deprecated
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	// dummy method placeholder
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
 
 	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>();
+			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(64);
 
 	private WebArgumentResolver[] customArgumentResolvers;
 
@@ -151,15 +155,14 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * Finds the handler method that matches the thrown exception best.
 	 * @param handler the handler object
 	 * @param thrownException the exception to be handled
-	 * @return the best matching method; or <code>null</code> if none is found
+	 * @return the best matching method; or {@code null} if none is found
 	 */
 	private Method findBestExceptionHandlerMethod(Object handler, final Exception thrownException) {
 		final Class<?> handlerType = ClassUtils.getUserClass(handler);
 		final Class<? extends Throwable> thrownExceptionType = thrownException.getClass();
 		Method handlerMethod = null;
 
-		Map<Class<? extends Throwable>, Method> handlers = exceptionHandlerCache.get(handlerType);
-
+		Map<Class<? extends Throwable>, Method> handlers = this.exceptionHandlerCache.get(handlerType);
 		if (handlers != null) {
 			handlerMethod = handlers.get(thrownExceptionType);
 			if (handlerMethod != null) {
@@ -167,11 +170,11 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 		}
 		else {
-			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>();
-			exceptionHandlerCache.put(handlerType, handlers);
+			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			this.exceptionHandlerCache.put(handlerType, handlers);
 		}
 
-		final Map<Class<? extends Throwable>, Method> resolverMethods = handlers;
+		final Map<Class<? extends Throwable>, Method> matchedHandlers = new HashMap<Class<? extends Throwable>, Method>();
 
 		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) {
@@ -179,11 +182,11 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 				List<Class<? extends Throwable>> handledExceptions = getHandledExceptions(method);
 				for (Class<? extends Throwable> handledException : handledExceptions) {
 					if (handledException.isAssignableFrom(thrownExceptionType)) {
-						if (!resolverMethods.containsKey(handledException)) {
-							resolverMethods.put(handledException, method);
+						if (!matchedHandlers.containsKey(handledException)) {
+							matchedHandlers.put(handledException, method);
 						}
 						else {
-							Method oldMappedMethod = resolverMethods.get(handledException);
+							Method oldMappedMethod = matchedHandlers.get(handledException);
 							if (!oldMappedMethod.equals(method)) {
 								throw new IllegalStateException(
 										"Ambiguous exception handler mapped for " + handledException + "]: {" +
@@ -195,7 +198,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 		});
 
-		handlerMethod = getBestMatchingMethod(resolverMethods, thrownException);
+		handlerMethod = getBestMatchingMethod(matchedHandlers, thrownException);
 		handlers.put(thrownExceptionType, (handlerMethod == null ? NO_METHOD_FOUND : handlerMethod));
 		return handlerMethod;
 	}

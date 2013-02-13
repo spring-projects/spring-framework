@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,18 +61,18 @@ import org.springframework.web.portlet.util.PortletUtils;
  * validated again to guarantee a consistent state.
  *
  * <p>Note that a validator's default validate method is not executed when using
- * this class! Rather, the <code>validatePage</code> implementation should call
- * special <code>validateXXX</code> methods that the validator needs to provide,
+ * this class! Rather, the {@code validatePage} implementation should call
+ * special {@code validateXXX} methods that the validator needs to provide,
  * validating certain pieces of the object. These can be combined to validate
  * the elements of individual pages.
  *
  * <p>Note: Page numbering starts with 0, to be able to pass an array
  * consisting of the corresponding view names to the "pages" bean property.
  *
- * <p>Parameters indicated with <code>setPassRenderParameters</code> will be present
- * for each page.  If there are render parameters you need in <code>renderFinish</code>
- * or <code>renderCancel</code>, then you need to pass those forward from the
- * <code>processFinish</code> or <code>processCancel</code> methods, respectively.
+ * <p>Parameters indicated with {@code setPassRenderParameters} will be present
+ * for each page.  If there are render parameters you need in {@code renderFinish}
+ * or {@code renderCancel}, then you need to pass those forward from the
+ * {@code processFinish} or {@code processCancel} methods, respectively.
 
  * @author Juergen Hoeller
  * @author John A. Lewis
@@ -155,7 +155,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the wizard pages, i.e. the view names for the pages.
 	 * The array index corresponds to the page number.
 	 * <p>Note that a concrete wizard form controller might override
-	 * <code>getViewName(PortletRequest, Object, int)</code> to
+	 * {@code getViewName(PortletRequest, Object, int)} to
 	 * determine the view name for each page dynamically.
 	 * @see #getViewName(PortletRequest, Object, int)
 	 */
@@ -167,7 +167,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the number of wizard pages.
 	 * Useful to check whether the last page has been reached.
 	 * <p>Note that a concrete wizard form controller might override
-	 * <code>getPageCount(PortletRequest, Object)</code> to determine
+	 * {@code getPageCount(PortletRequest, Object)} to determine
 	 * the page count dynamically.
 	 * @see #getPageCount(PortletRequest, Object)
 	 */
@@ -300,7 +300,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>The default implementation returns <code>null</code>.
+	 * <p>The default implementation returns {@code null}.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current portlet request
 	 * @param page current wizard page
@@ -327,7 +327,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Prepare the form model and view, including reference and error data,
-	 * for the given page. Can be used in <code>processFinish</code> implementations,
+	 * for the given page. Can be used in {@code processFinish} implementations,
 	 * to show the corresponding page in case of validation errors.
 	 * @param request current portlet render request
 	 * @param errors validation errors holder
@@ -342,7 +342,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			}
-			
+
 			// Set page session attribute, expose overriding request attribute.
 			Integer pageInteger = new Integer(page);
 			String pageAttrName = getPageSessionAttributeName(request);
@@ -353,7 +353,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				request.getPortletSession().setAttribute(pageAttrName, pageInteger);
 			}
 			request.setAttribute(pageAttrName, pageInteger);
-			
+
 			// Set page request attribute for evaluation by views.
 			Map controlModel = new HashMap();
 			if (this.pageAttribute != null) {
@@ -387,7 +387,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Can be overridden to dynamically switch the page view or to return view names
 	 * for dynamically defined pages.
 	 * @param request current portlet request
-	 * @param command the command object as returned by <code>formBackingObject</code>
+	 * @param command the command object as returned by {@code formBackingObject}
 	 * @return the current page count
 	 * @see #getPageCount
 	 */
@@ -399,7 +399,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
 	 * <p>The default implementation delegates to {@link #getInitialPage(PortletRequest)}.
 	 * @param request current portlet request
-	 * @param command the command object as returned by <code>formBackingObject</code>
+	 * @param command the command object as returned by {@code formBackingObject}
 	 * @return the initial page number
 	 * @see #getInitialPage(PortletRequest)
 	 * @see #formBackingObject
@@ -421,7 +421,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Return the name of the PortletSession attribute that holds the page object
 	 * for this wizard form controller.
-	 * <p>The default implementation delegates to the <code>getPageSessionAttributeName</code>
+	 * <p>The default implementation delegates to the {@code getPageSessionAttributeName}
 	 * version without arguments.
 	 * @param request current portlet request
 	 * @return the name of the form session attribute, or null if not in session form mode
@@ -469,7 +469,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Pass the the parameter that indicates the target page of the request
-	 * forward to the render phase. If the <code>getTargetPage<code> method
+	 * forward to the render phase. If the {@code getTargetPage} method
 	 * was overridden, this may need to be overriden as well.
 	 * @param request the current action request
 	 * @param response the current action response
@@ -502,7 +502,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Pass the the parameter that indicates a finish request forward to the
-	 * render phase. If the <code>isFinishRequest</code> method
+	 * render phase. If the {@code isFinishRequest} method
 	 * was overridden, this may need to be overriden as well.
 	 * @param request the current action request
 	 * @param response the current action response
@@ -525,7 +525,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Pass the the parameter that indicates a cancel request forward to the
-	 * render phase. If the <code>isCancelRequest</code> method
+	 * render phase. If the {@code isCancelRequest} method
 	 * was overridden, this may need to be overriden as well.
 	 * @param request the current action request
 	 * @param response the current action response
@@ -647,7 +647,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			request.getPortletSession().removeAttribute(pageAttrName);
 		}
 		request.setAttribute(pageAttrName, new Integer(currentPage));
-		
+
 		// cancel?
 		if (isCancelRequest(request)) {
 			if (logger.isDebugEnabled()) {
@@ -723,9 +723,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Determine whether the incoming request is a request to finish the
 	 * processing of the current form.
-	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * <p>By default, this method returns {@code true} if a parameter
 	 * matching the "_finish" key is present in the request, otherwise it
-	 * returns <code>false</code>. Subclasses may override this method
+	 * returns {@code false}. Subclasses may override this method
 	 * to provide custom logic to detect a finish request.
 	 * <p>The parameter is recognized both when sent as a plain parameter
 	 * ("_finish") or when triggered by an image button ("_finish.x").
@@ -740,9 +740,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Determine whether the incoming request is a request to cancel the
 	 * processing of the current form.
-	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * <p>By default, this method returns {@code true} if a parameter
 	 * matching the "_cancel" key is present in the request, otherwise it
-	 * returns <code>false</code>. Subclasses may override this method
+	 * returns {@code false}. Subclasses may override this method
 	 * to provide custom logic to detect a cancel request.
 	 * <p>The parameter is recognized both when sent as a plain parameter
 	 * ("_cancel") or when triggered by an image button ("_cancel.x").
@@ -838,10 +838,10 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * The default implementation calls <code>validatePage(command, errors, page)</code>.
-	 * <p>Implementations will typically call fine-granular <code>validateXXX</code>
+	 * The default implementation calls {@code validatePage(command, errors, page)}.
+	 * <p>Implementations will typically call fine-granular {@code validateXXX}
 	 * methods of this instance's Validator, combining them to validation of the
-	 * corresponding pages. The Validator's default <code>validate</code> method
+	 * corresponding pages. The Validator's default {@code validate} method
 	 * will not be called by a wizard form controller!
 	 * @param command form object with the current wizard state
 	 * @param errors validation errors holder
@@ -860,7 +860,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * The default implementation is empty.
 	 * <p>Implementations will typically call fine-granular validateXXX methods of this
 	 * instance's validator, combining them to validation of the corresponding pages.
-	 * The validator's default <code>validate</code> method will not be called by a
+	 * The validator's default {@code validate} method will not be called by a
 	 * wizard form controller!
 	 * @param command form object with the current wizard state
 	 * @param errors validation errors holder
@@ -891,7 +891,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>The default implementation throws a PortletException, saying that a finish
 	 * render request is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not need to render after a finish.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * <p>Call {@code errors.getModel()} to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
 	 * @param request current portlet render request
@@ -937,7 +937,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>The default implementation throws a PortletException, saying that a cancel
 	 * render request is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not support a cancel operation.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * <p>Call {@code errors.getModel()} to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
 	 * @param request current portlet render request

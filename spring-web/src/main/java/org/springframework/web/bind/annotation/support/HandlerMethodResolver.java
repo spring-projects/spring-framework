@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.springframework.web.bind.annotation.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -35,8 +36,8 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 /**
  * Support class for resolving web method annotations in a handler type.
- * Processes <code>@RequestMapping</code>, <code>@InitBinder</code>,
- * <code>@ModelAttribute</code> and <code>@SessionAttributes</code>.
+ * Processes {@code @RequestMapping}, {@code @InitBinder},
+ * {@code @ModelAttribute} and {@code @SessionAttributes}.
  *
  * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
  * and {@link org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.
@@ -64,7 +65,8 @@ public class HandlerMethodResolver {
 
 	private final Set<Class> sessionAttributeTypes = new HashSet<Class>();
 
-	private final Set<String> actualSessionAttributeNames = Collections.synchronizedSet(new HashSet<String>(4));
+	// using a ConcurrentHashMap as a Set
+	private final Map<String, Boolean> actualSessionAttributeNames = new ConcurrentHashMap<String, Boolean>(4);
 
 
 	/**
@@ -152,7 +154,7 @@ public class HandlerMethodResolver {
 
 	public boolean isSessionAttribute(String attrName, Class attrType) {
 		if (this.sessionAttributeNames.contains(attrName) || this.sessionAttributeTypes.contains(attrType)) {
-			this.actualSessionAttributeNames.add(attrName);
+			this.actualSessionAttributeNames.put(attrName, Boolean.TRUE);
 			return true;
 		}
 		else {
@@ -161,7 +163,7 @@ public class HandlerMethodResolver {
 	}
 
 	public Set<String> getActualSessionAttributeNames() {
-		return this.actualSessionAttributeNames;
+		return this.actualSessionAttributeNames.keySet();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,14 +43,18 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -66,6 +70,7 @@ import test.beans.TestBean;
  * @author Alef Arendsen
  * @author Arjen Poutsma
  * @author Chris Beams
+ * @author Dave Syer
  */
 public final class BeanWrapperTests {
 
@@ -78,7 +83,7 @@ public final class BeanWrapperTests {
 		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
 		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
 	}
-	
+
 	@Test
 	public void testNullNestedTypeDescriptor2() {
 		Foo foo = new Foo();
@@ -90,31 +95,31 @@ public final class BeanWrapperTests {
 		wrapper.setPropertyValue("list[0]", map);
 		assertEquals(map, foo.list.get(0));
 	}
-	
-	static class Foo {
-		
-		private List list;
-		
-		private List<Map> listOfMaps;
 
-		public List getList() {
-			return list;
-		}
-
-		public void setList(List list) {
-			this.list = list;
-		}
-
-		public List<Map> getListOfMaps() {
-			return listOfMaps;
-		}
-
-		public void setListOfMaps(List<Map> listOfMaps) {
-			this.listOfMaps = listOfMaps;
-		}
-
+	@Test
+	public void testNullNestedTypeDescriptorWithNoConversionService() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setAutoGrowNestedPaths(true);
+		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
+		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
 	}
-	
+
+	@Test
+	public void testNullNestedTypeDescriptorWithBadConversionService() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setConversionService(new GenericConversionService() {
+			@Override
+			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+				throw new ConversionFailedException(sourceType, targetType, source, null);
+			}
+		});
+		wrapper.setAutoGrowNestedPaths(true);
+		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
+		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
+	}
+
 	@Test
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
@@ -326,6 +331,7 @@ public final class BeanWrapperTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				super.setValue(value.toString());
 			}
@@ -497,6 +503,7 @@ public final class BeanWrapperTests {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) {
 				setValue(text.substring(1));
 			}
@@ -556,6 +563,7 @@ public final class BeanWrapperTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof String[]) {
 					setValue(StringUtils.arrayToDelimitedString(((String[]) value), "-"));
@@ -633,6 +641,7 @@ public final class BeanWrapperTests {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(int.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) {
 				setValue(new Integer(Integer.parseInt(text) + 1));
 			}
@@ -992,15 +1001,15 @@ public final class BeanWrapperTests {
 		bw.setPropertyValues(pvs);
 		assertEquals(tb5, bean.getArray()[0]);
 		assertEquals(tb4, bean.getArray()[1]);
-		assertEquals(tb3, ((TestBean) bean.getList().get(0)));
-		assertEquals(tb2, ((TestBean) bean.getList().get(1)));
-		assertEquals(tb0, ((TestBean) bean.getList().get(2)));
-		assertEquals(null, ((TestBean) bean.getList().get(3)));
-		assertEquals(tb1, ((TestBean) bean.getList().get(4)));
-		assertEquals(tb1, ((TestBean) bean.getMap().get("key1")));
-		assertEquals(tb0, ((TestBean) bean.getMap().get("key2")));
-		assertEquals(tb4, ((TestBean) bean.getMap().get("key5")));
-		assertEquals(tb5, ((TestBean) bean.getMap().get("key9")));
+		assertEquals(tb3, (bean.getList().get(0)));
+		assertEquals(tb2, (bean.getList().get(1)));
+		assertEquals(tb0, (bean.getList().get(2)));
+		assertEquals(null, (bean.getList().get(3)));
+		assertEquals(tb1, (bean.getList().get(4)));
+		assertEquals(tb1, (bean.getMap().get("key1")));
+		assertEquals(tb0, (bean.getMap().get("key2")));
+		assertEquals(tb4, (bean.getMap().get("key5")));
+		assertEquals(tb5, (bean.getMap().get("key9")));
 		assertEquals(tb5, bw.getPropertyValue("array[0]"));
 		assertEquals(tb4, bw.getPropertyValue("array[1]"));
 		assertEquals(tb3, bw.getPropertyValue("list[0]"));
@@ -1019,6 +1028,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1052,6 +1062,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1075,6 +1086,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1129,10 +1141,8 @@ public final class BeanWrapperTests {
 
 	@Test
 	public void testLargeMatchingPrimitiveArray() {
-		if (LogFactory.getLog(BeanWrapperTests.class).isTraceEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(LogFactory.getLog(BeanWrapperTests.class));
 
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1188,6 +1198,7 @@ public final class BeanWrapperTests {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(int.class, "array", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
 					super.setValue(new Integer(((Integer) value).intValue() + 1));
@@ -1206,6 +1217,7 @@ public final class BeanWrapperTests {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(int.class, "array[1]", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
 					super.setValue(new Integer(((Integer) value).intValue() + 1));
@@ -1538,6 +1550,49 @@ public final class BeanWrapperTests {
 		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
 	}
 
+	@Test
+	public void cornerSpr10115() {
+		Spr10115Bean foo = new Spr10115Bean();
+		BeanWrapperImpl bwi = new BeanWrapperImpl();
+		bwi.setWrappedInstance(foo);
+		bwi.setPropertyValue("prop1", "val1");
+		assertEquals("val1", Spr10115Bean.prop1);
+	}
+
+
+	static class Spr10115Bean {
+		private static String prop1;
+
+		public static void setProp1(String prop1) {
+			Spr10115Bean.prop1 = prop1;
+		}
+	}
+
+
+	private static class Foo {
+
+		private List list;
+
+		private List<Map> listOfMaps;
+
+		public List getList() {
+			return list;
+		}
+
+		public void setList(List list) {
+			this.list = list;
+		}
+
+		public List<Map> getListOfMaps() {
+			return listOfMaps;
+		}
+
+		public void setListOfMaps(List<Map> listOfMaps) {
+			this.listOfMaps = listOfMaps;
+		}
+	}
+
+
 	private static class DifferentTestBean extends TestBean {
 		// class to test naming of beans in a BeanWrapper error message
 	}
@@ -1793,6 +1848,7 @@ public final class BeanWrapperTests {
 			this.frozen = true;
 		}
 
+		@Override
 		public V put(K key, V value) {
 			if (this.frozen) {
 				throw new UnsupportedOperationException();
@@ -1802,16 +1858,19 @@ public final class BeanWrapperTests {
 			}
 		}
 
+		@Override
 		public Set<Map.Entry<K, V>> entrySet() {
 			this.accessed = true;
 			return super.entrySet();
 		}
 
+		@Override
 		public Set<K> keySet() {
 			this.accessed = true;
 			return super.keySet();
 		}
 
+		@Override
 		public int size() {
 			this.accessed = true;
 			return super.size();
@@ -1823,6 +1882,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TypedReadOnlyMap extends ReadOnlyMap<String, TestBean> {
 
 		public TypedReadOnlyMap() {

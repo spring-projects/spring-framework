@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 
+@Deprecated
 public class Spr7839Tests {
 
 	AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
@@ -48,6 +49,7 @@ public class Spr7839Tests {
 		ConfigurableWebBindingInitializer binder = new ConfigurableWebBindingInitializer();
 		GenericConversionService service = new DefaultConversionService();
 		service.addConverter(new Converter<String, NestedBean>() {
+			@Override
 			public NestedBean convert(String source) {
 				return new NestedBean(source);
 			}
@@ -69,7 +71,7 @@ public class Spr7839Tests {
 		request.addParameter("nested.list", "Nested1,Nested2");
 		adapter.handle(request, response, controller);
 	}
-	
+
 	@Test
 	public void listElement() throws Exception {
 		request.setRequestURI("/nested/listElement");
@@ -124,14 +126,14 @@ public class Spr7839Tests {
 
 	@Test
 	public void map() throws Exception {
-		request.setRequestURI("/nested/map");		
+		request.setRequestURI("/nested/map");
 		request.addParameter("nested.map['apple'].foo", "bar");
 		adapter.handle(request, response, controller);
 	}
 
 	@Test
 	public void mapOfLists() throws Exception {
-		request.setRequestURI("/nested/mapOfLists");		
+		request.setRequestURI("/nested/mapOfLists");
 		request.addParameter("nested.mapOfLists['apples'][0]", "1");
 		adapter.handle(request, response, controller);
 	}
@@ -173,17 +175,17 @@ public class Spr7839Tests {
 		public void handlerMap(JavaBean bean) {
 			assertEquals("bar", bean.nested.map.get("apple").foo);
 		}
-		
+
 		@RequestMapping("/nested/mapOfLists")
 		public void handlerMapOfLists(JavaBean bean) {
 			assertEquals(new Integer(1), bean.nested.mapOfLists.get("apples").get(0));
 		}
 
 	}
-	
+
 	public static class JavaBean {
 
-	    private NestedBean nested;
+		private NestedBean nested;
 
 		public NestedBean getNested() {
 			return nested;
@@ -193,31 +195,31 @@ public class Spr7839Tests {
 			this.nested = nested;
 		}
 
-	    
+
 	}
 
 	public static class NestedBean {
 
-	    private String foo;
+		private String foo;
 
-	    private List<NestedBean> list;
+		private List<NestedBean> list;
 
-	    private List<List<NestedBean>> listOfLists;
+		private List<List<NestedBean>> listOfLists;
 
-	    private List<NestedBean>[] arrayOfLists;
+		private List<NestedBean>[] arrayOfLists;
 
-	    private Map<String, NestedBean> map;
+		private Map<String, NestedBean> map;
 
-	    private Map<String, List<Integer>> mapOfLists;
-	    
-	    public NestedBean() {
-	    	
-	    }
-	    
-	    public NestedBean(String foo) {
-	    	this.foo = foo;
-	    }
-	    
+		private Map<String, List<Integer>> mapOfLists;
+
+		public NestedBean() {
+
+		}
+
+		public NestedBean(String foo) {
+			this.foo = foo;
+		}
+
 		public String getFoo() {
 			return foo;
 		}
@@ -265,7 +267,7 @@ public class Spr7839Tests {
 		public void setMapOfLists(Map<String, List<Integer>> mapOfLists) {
 			this.mapOfLists = mapOfLists;
 		}
-	   
+
 	}
-	
+
 }

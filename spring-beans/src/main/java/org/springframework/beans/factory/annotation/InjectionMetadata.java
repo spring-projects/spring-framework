@@ -22,8 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -50,42 +48,39 @@ public class InjectionMetadata {
 
 	private final Log logger = LogFactory.getLog(InjectionMetadata.class);
 
-	private final Set<InjectedElement> injectedElements;
+	private final Class targetClass;
+
+	private final Collection<InjectedElement> injectedElements;
+
+	private volatile Set<InjectedElement> checkedElements;
 
 
 	public InjectionMetadata(Class targetClass, Collection<InjectedElement> elements) {
-		if (!elements.isEmpty()) {
-			this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>(elements.size()));
-			for (InjectedElement element : elements) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
-				}
-				this.injectedElements.add(element);
-			}
-		}
-		else {
-			this.injectedElements = Collections.emptySet();
-		}
+		this.targetClass = targetClass;
+		this.injectedElements = elements;
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		synchronized(this.injectedElements) {
-			for (Iterator<InjectedElement> it = this.injectedElements.iterator(); it.hasNext();) {
-				Member member = it.next().getMember();
-				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
-					beanDefinition.registerExternallyManagedConfigMember(member);
-				}
-				else {
-					it.remove();
+		Set<InjectedElement> checkedElements = new LinkedHashSet<InjectedElement>(this.injectedElements.size());
+		for (InjectedElement element : this.injectedElements) {
+			Member member = element.getMember();
+			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+				beanDefinition.registerExternallyManagedConfigMember(member);
+				checkedElements.add(element);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Registered injected element on class [" + this.targetClass.getName() + "]: " + element);
 				}
 			}
 		}
+		this.checkedElements = checkedElements;
 	}
 
 	public void inject(Object target, String beanName, PropertyValues pvs) throws Throwable {
-		if (!this.injectedElements.isEmpty()) {
+		Collection<InjectedElement> elementsToIterate =
+				(this.checkedElements != null ? this.checkedElements : this.injectedElements);
+		if (!elementsToIterate.isEmpty()) {
 			boolean debug = logger.isDebugEnabled();
-			for (InjectedElement element : this.injectedElements) {
+			for (InjectedElement element : elementsToIterate) {
 				if (debug) {
 					logger.debug("Processing injected method of bean '" + beanName + "': " + element);
 				}
@@ -175,26 +170,30 @@ public class InjectionMetadata {
 		 * affected property as processed for other processors to ignore it.
 		 */
 		protected boolean checkPropertySkipping(PropertyValues pvs) {
-			if (this.skip == null) {
-				if (pvs != null) {
-					synchronized (pvs) {
-						if (this.skip == null) {
-							if (this.pd != null) {
-								if (pvs.contains(this.pd.getName())) {
-									// Explicit value provided as part of the bean definition.
-									this.skip = true;
-									return true;
-								}
-								else if (pvs instanceof MutablePropertyValues) {
-									((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
-								}
-							}
-						}
+			if (this.skip != null) {
+				return this.skip;
+			}
+			if (pvs == null) {
+				this.skip = false;
+				return false;
+			}
+			synchronized (pvs) {
+				if (this.skip != null) {
+					return this.skip;
+				}
+				if (this.pd != null) {
+					if (pvs.contains(this.pd.getName())) {
+						// Explicit value provided as part of the bean definition.
+						this.skip = true;
+						return true;
+					}
+					else if (pvs instanceof MutablePropertyValues) {
+						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
 					}
 				}
 				this.skip = false;
+				return false;
 			}
-			return this.skip;
 		}
 
 		/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 
 /**
  * EJB3-compliant interceptor class that injects Spring beans into
- * fields and methods which are annotated with <code>@Autowired</code>.
+ * fields and methods which are annotated with {@code @Autowired}.
  * Performs injection after construction as well as after activation
  * of a passivated bean.
  *
- * <p>To be applied through an <code>@Interceptors</code> annotation in
+ * <p>To be applied through an {@code @Interceptors} annotation in
  * the EJB Session Bean or Message-Driven Bean class, or through an
- * <code>interceptor-binding</code> XML element in the EJB deployment descriptor.
+ * {@code interceptor-binding} XML element in the EJB deployment descriptor.
  *
  * <p>Delegates to Spring's {@link AutowiredAnnotationBeanPostProcessor}
  * underneath, allowing for customization of its specific settings through
@@ -60,7 +60,7 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  *
  * <p><b>WARNING: Do not define the same bean as Spring-managed bean and as
  * EJB3 session bean in the same deployment unit.</b> In particular, be
- * careful when using the <code>&lt;context:component-scan&gt;</code> feature
+ * careful when using the {@code &lt;context:component-scan&gt;} feature
  * in combination with the deployment of Spring-based EJB3 session beans:
  * Make sure that the EJB3 session beans are <i>not</i> autodetected as
  * Spring-managed beans as well, using appropriate package restrictions.
@@ -130,7 +130,7 @@ public class SpringBeanAutowiringInterceptor {
 	/**
 	 * Determine the BeanFactory for autowiring the given target bean.
 	 * @param target the target bean to autowire
-	 * @return the BeanFactory to use (never <code>null</code>)
+	 * @return the BeanFactory to use (never {@code null})
 	 * @see #getBeanFactoryReference
 	 */
 	protected BeanFactory getBeanFactory(Object target) {
@@ -146,7 +146,7 @@ public class SpringBeanAutowiringInterceptor {
 	 * <p>The default implementation delegates to {@link #getBeanFactoryLocator}
 	 * and {@link #getBeanFactoryLocatorKey}.
 	 * @param target the target bean to autowire
-	 * @return the BeanFactoryReference to use (never <code>null</code>)
+	 * @return the BeanFactoryReference to use (never {@code null})
 	 * @see #getBeanFactoryLocator
 	 * @see #getBeanFactoryLocatorKey
 	 * @see org.springframework.beans.factory.access.BeanFactoryLocator#useBeanFactory(String)
@@ -163,7 +163,7 @@ public class SpringBeanAutowiringInterceptor {
 	 * <p>The default implementation exposes Spring's default
 	 * {@link ContextSingletonBeanFactoryLocator}.
 	 * @param target the target bean to autowire
-	 * @return the BeanFactoryLocator to use (never <code>null</code>)
+	 * @return the BeanFactoryLocator to use (never {@code null})
 	 * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator#getInstance()
 	 */
 	protected BeanFactoryLocator getBeanFactoryLocator(Object target) {
@@ -174,11 +174,11 @@ public class SpringBeanAutowiringInterceptor {
 	 * Determine the BeanFactoryLocator key to use. This typically indicates
 	 * the bean name of the ApplicationContext definition in
 	 * <strong>classpath*:beanRefContext.xml</strong> resource files.
-	 * <p>The default is <code>null</code>, indicating the single
+	 * <p>The default is {@code null}, indicating the single
 	 * ApplicationContext defined in the locator. This must be overridden
 	 * if more than one shared ApplicationContext definition is available.
 	 * @param target the target bean to autowire
-	 * @return the BeanFactoryLocator key to use (or <code>null</code> for
+	 * @return the BeanFactoryLocator key to use (or {@code null} for
 	 * referring to the single ApplicationContext defined in the locator)
 	 */
 	protected String getBeanFactoryLocatorKey(Object target) {

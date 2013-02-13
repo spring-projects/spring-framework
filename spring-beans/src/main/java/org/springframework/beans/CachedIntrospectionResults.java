@@ -20,25 +20,20 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -64,31 +59,24 @@ import org.springframework.util.StringUtils;
  */
 public class CachedIntrospectionResults {
 
-	/**
-	 * The location to look for the bean info mapping files. Can be present in multiple JAR files.
-	 */
-	public static final String BEAN_INFO_FACTORIES_LOCATION = "META-INF/spring.beanInfoFactories";
-
-
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
+
+	/** Stores the BeanInfoFactory instances */
+	private static List<BeanInfoFactory> beanInfoFactories =
+			SpringFactoriesLoader.loadFactories(BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
 
 	/**
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
-	static final Set<ClassLoader> acceptedClassLoaders = Collections.synchronizedSet(new HashSet<ClassLoader>());
+	static final Set<ClassLoader> acceptedClassLoaders = new HashSet<ClassLoader>();
 
 	/**
 	 * Map keyed by class containing CachedIntrospectionResults.
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
-	static final Map<Class, Object> classCache = Collections.synchronizedMap(new WeakHashMap<Class, Object>());
-
-	/** Stores the BeanInfoFactory instances */
-	private static List<BeanInfoFactory> beanInfoFactories;
-
-	private static final Object beanInfoFactoriesMutex = new Object();
+	static final Map<Class, Object> classCache = new WeakHashMap<Class, Object>();
 
 
 	/**
@@ -99,13 +87,15 @@ public class CachedIntrospectionResults {
 	 * whose lifecycle is not coupled to the application. In such a scenario,
 	 * CachedIntrospectionResults would by default not cache any of the application's
 	 * classes, since they would create a leak in the common ClassLoader.
-	 * <p>Any <code>acceptClassLoader</code> call at application startup should
+	 * <p>Any {@code acceptClassLoader} call at application startup should
 	 * be paired with a {@link #clearClassLoader} call at application shutdown.
 	 * @param classLoader the ClassLoader to accept
 	 */
 	public static void acceptClassLoader(ClassLoader classLoader) {
 		if (classLoader != null) {
-			acceptedClassLoaders.add(classLoader);
+			synchronized (acceptedClassLoaders) {
+				acceptedClassLoaders.add(classLoader);
+			}
 		}
 	}
 
@@ -148,7 +138,10 @@ public class CachedIntrospectionResults {
 	 */
 	static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
 		CachedIntrospectionResults results;
-		Object value = classCache.get(beanClass);
+		Object value;
+		synchronized (classCache) {
+			value = classCache.get(beanClass);
+		}
 		if (value instanceof Reference) {
 			Reference ref = (Reference) value;
 			results = (CachedIntrospectionResults) ref.get();
@@ -157,21 +150,21 @@ public class CachedIntrospectionResults {
 			results = (CachedIntrospectionResults) value;
 		}
 		if (results == null) {
-			// On JDK 1.5 and higher, it is almost always safe to cache the bean class...
-			// The sole exception is a custom BeanInfo class being provided in a non-safe ClassLoader.
-			boolean fullyCacheable =
-					ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
-					isClassLoaderAccepted(beanClass.getClassLoader());
-			if (fullyCacheable || !ClassUtils.isPresent(beanClass.getName() + "BeanInfo", beanClass.getClassLoader())) {
-				results = new CachedIntrospectionResults(beanClass, fullyCacheable);
-				classCache.put(beanClass, results);
+			if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
+					isClassLoaderAccepted(beanClass.getClassLoader())) {
+				results = new CachedIntrospectionResults(beanClass);
+				synchronized (classCache) {
+					classCache.put(beanClass, results);
+				}
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 				}
-				results = new CachedIntrospectionResults(beanClass, true);
-				classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
+				results = new CachedIntrospectionResults(beanClass);
+				synchronized (classCache) {
+					classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
+				}
 			}
 		}
 		return results;
@@ -187,8 +180,10 @@ public class CachedIntrospectionResults {
 	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
 		// Iterate over array copy in order to avoid synchronization for the entire
 		// ClassLoader check (avoiding a synchronized acceptedClassLoaders Iterator).
-		ClassLoader[] acceptedLoaderArray =
-				acceptedClassLoaders.toArray(new ClassLoader[acceptedClassLoaders.size()]);
+		ClassLoader[] acceptedLoaderArray;
+		synchronized (acceptedClassLoaders) {
+			acceptedLoaderArray = acceptedClassLoaders.toArray(new ClassLoader[acceptedClassLoaders.size()]);
+		}
 		for (ClassLoader registeredLoader : acceptedLoaderArray) {
 			if (isUnderneathClassLoader(classLoader, registeredLoader)) {
 				return true;
@@ -233,23 +228,22 @@ public class CachedIntrospectionResults {
 	 * @param beanClass the bean class to analyze
 	 * @throws BeansException in case of introspection failure
 	 */
-	private CachedIntrospectionResults(Class beanClass, boolean cacheFullMetadata) throws BeansException {
+	private CachedIntrospectionResults(Class beanClass) throws BeansException {
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
 
 			BeanInfo beanInfo = null;
-			List<BeanInfoFactory> beanInfoFactories = getBeanInfoFactories(beanClass.getClassLoader());
 			for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
-				if (beanInfoFactory.supports(beanClass)) {
-					beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+				beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+				if (beanInfo != null) {
 					break;
 				}
 			}
 			if (beanInfo == null) {
-				// If none of the factories supported the class, use the default
-				beanInfo = new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+				// If none of the factories supported the class, fall back to the default
+				beanInfo = Introspector.getBeanInfo(beanClass);
 			}
 			this.beanInfo = beanInfo;
 
@@ -282,9 +276,7 @@ public class CachedIntrospectionResults {
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-				if (cacheFullMetadata) {
-					pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-				}
+				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 		}
@@ -335,61 +327,4 @@ public class CachedIntrospectionResults {
 		}
 	}
 
-	private static List<BeanInfoFactory> getBeanInfoFactories(ClassLoader classLoader) {
-		if (beanInfoFactories == null) {
-			synchronized (beanInfoFactoriesMutex) {
-				if (beanInfoFactories == null) {
-					try {
-						Properties properties =
-								PropertiesLoaderUtils.loadAllProperties(
-										BEAN_INFO_FACTORIES_LOCATION, classLoader);
-
-						if (logger.isDebugEnabled()) {
-							logger.debug("Loaded BeanInfoFactories: " + properties.keySet());
-						}
-
-						List<BeanInfoFactory> factories = new ArrayList<BeanInfoFactory>(properties.size());
-
-						for (Object key : properties.keySet()) {
-							if (key instanceof String) {
-								String className = (String) key;
-								BeanInfoFactory factory = instantiateBeanInfoFactory(className, classLoader);
-								factories.add(factory);
-							}
-						}
-
-						Collections.sort(factories, new AnnotationAwareOrderComparator());
-
-						beanInfoFactories = Collections.synchronizedList(factories);
-					}
-					catch (IOException ex) {
-						throw new IllegalStateException(
-								"Unable to load BeanInfoFactories from location [" + BEAN_INFO_FACTORIES_LOCATION + "]", ex);
-					}
-				}
-			}
-		}
-		return beanInfoFactories;
-	}
-
-	private static BeanInfoFactory instantiateBeanInfoFactory(String className,
-	                                                          ClassLoader classLoader) {
-		try {
-			Class<?> factoryClass = ClassUtils.forName(className, classLoader);
-			if (!BeanInfoFactory.class.isAssignableFrom(factoryClass)) {
-				throw new FatalBeanException(
-						"Class [" + className + "] does not implement the [" +
-								BeanInfoFactory.class.getName() + "] interface");
-			}
-			return (BeanInfoFactory) BeanUtils.instantiate(factoryClass);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException(
-					"BeanInfoFactory class [" + className + "] not found", ex);
-		}
-		catch (LinkageError err) {
-			throw new FatalBeanException("Invalid BeanInfoFactory class [" + className +
-					"]: problem with handler class file or dependent class", err);
-		}
-	}
 }

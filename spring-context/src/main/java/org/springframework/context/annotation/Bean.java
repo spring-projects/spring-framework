@@ -78,7 +78,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * classes. In this case, bean methods may reference other {@code @Bean} methods
  * in the same class by calling them <i>directly</i>. This ensures that references between
  * beans are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
- * guaranteed to respect scoping and AOP semantics, just like <code>getBean()</code> lookups
+ * guaranteed to respect scoping and AOP semantics, just like {@code getBean()} lookups
  * would. These are the semantics known from the original 'Spring JavaConfig' project
  * which require CGLIB subclassing of each such configuration class at runtime. As a
  * consequence, {@code @Configuration} classes and their factory methods must not be
@@ -118,7 +118,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * the invocation via a CGLIB proxy. This is analogous to inter-{@code @Transactional}
  * method calls where in proxy mode, Spring does not intercept the invocation &mdash;
  * Spring does so only in AspectJ mode.
- * 
+ *
  * <p>For example:
  *
  * <pre class="code">
@@ -207,7 +207,6 @@ public @interface Bean {
 	 * application context, for example a {@code close()} method on a JDBC {@code
 	 * DataSource} implementation, or a Hibernate {@code SessionFactory} object.
 	 * The method must have no arguments but may throw any exception.
-	 *
 	 * <p>As a convenience to the user, the container will attempt to infer a destroy
 	 * method against an object returned from the {@code @Bean} method. For example, given a
 	 * {@code @Bean} method returning an Apache Commons DBCP {@code BasicDataSource}, the
@@ -217,14 +216,14 @@ public @interface Bean {
 	 * 'close'. The method may be declared at any level of the inheritance hierarchy and
 	 * will be detected regardless of the return type of the {@code @Bean} method (i.e.,
 	 * detection occurs reflectively against the bean instance itself at creation time).
-	 *
 	 * <p>To disable destroy method inference for a particular {@code @Bean}, specify an
-	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}.
-	 *
+	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}. Note that the
+	 * {@link org.springframework.beans.factory.DisposableBean} and the
+	 * {@link java.io.Closeable}/{@link java.lang.AutoCloseable} interfaces will
+	 * nevertheless get detected and the corresponding destroy/close method invoked.
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
 	 * factory, which is always the case for singletons but not guaranteed for any
 	 * other scope.
-	 *
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;

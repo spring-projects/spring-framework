@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import javax.servlet.http.HttpSession;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -40,6 +40,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @since 29.04.2003
  */
+@Deprecated
 public class WizardFormControllerTests extends TestCase {
 
 	public void testNoDirtyPageChange() throws Exception {
@@ -105,9 +106,11 @@ public class WizardFormControllerTests extends TestCase {
 
 	public void testCustomSessionAttributes() throws Exception {
 		AbstractWizardFormController wizard = new TestWizardController() {
+			@Override
 			protected String getFormSessionAttributeName() {
 				return "myFormAttr";
 			}
+			@Override
 			protected String getPageSessionAttributeName() {
 				return "myPageAttr";
 			}
@@ -140,9 +143,11 @@ public class WizardFormControllerTests extends TestCase {
 
 	public void testCustomRequestDependentSessionAttributes() throws Exception {
 		AbstractWizardFormController wizard = new TestWizardController() {
+			@Override
 			protected String getFormSessionAttributeName(HttpServletRequest request) {
 				return "myFormAttr" + request.getParameter("formAttr");
 			}
+			@Override
 			protected String getPageSessionAttributeName(HttpServletRequest request) {
 				return "myPageAttr" + request.getParameter("pageAttr");
 			}
@@ -383,15 +388,18 @@ public class WizardFormControllerTests extends TestCase {
 			setPages(new String[] {"page0", "page1"});
 		}
 
+		@Override
 		protected Map referenceData(HttpServletRequest request, int page) throws Exception {
 			assertEquals(new Integer(page), request.getAttribute("target"));
 			return super.referenceData(request, page);
 		}
 
+		@Override
 		protected boolean suppressValidation(HttpServletRequest request, Object command) {
 			return (request.getParameter("formChange") != null);
 		}
 
+		@Override
 		protected void validatePage(Object command, Errors errors, int page) {
 			TestBean tb = (TestBean) command;
 			switch (page) {
@@ -405,21 +413,23 @@ public class WizardFormControllerTests extends TestCase {
 						errors.rejectValue("age", "AGE_REQUIRED", null, "Age is required");
 					}
 					break;
-			  default:
+			default:
 					throw new IllegalArgumentException("Invalid page number");
 			}
 		}
 
+		@Override
 		protected ModelAndView processFinish(
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
-		    throws ServletException, IOException {
+			throws ServletException, IOException {
 			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
 			return new ModelAndView("success", getCommandName(), command);
 		}
 
+		@Override
 		protected ModelAndView processCancel(
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
-		    throws ServletException, IOException {
+			throws ServletException, IOException {
 			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
 			return new ModelAndView("cancel", getCommandName(), command);
 		}

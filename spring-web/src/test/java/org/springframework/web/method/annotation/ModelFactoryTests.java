@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpSessionRequiredException;
@@ -50,13 +50,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Text fixture for {@link ModelFactory} tests.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ModelFactoryTests {
-	
+
 	private Object handler = new ModelHandler();
-	
+
 	private InvocableHandlerMethod handleMethod;
 
 	private InvocableHandlerMethod handleSessionAttrMethod;
@@ -77,13 +77,13 @@ public class ModelFactoryTests {
 		sessionAttrsHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
-	
+
 	@Test
 	public void modelAttributeMethod() throws Exception {
 		ModelFactory modelFactory = createModelFactory("modelAttr", Model.class);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
-		
+
 		assertEquals(Boolean.TRUE, mavContainer.getModel().get("modelAttr"));
 	}
 
@@ -114,14 +114,14 @@ public class ModelFactoryTests {
 		assertTrue(mavContainer.containsAttribute("name"));
 		assertNull(mavContainer.getModel().get("name"));
 	}
-	
+
 	@Test
 	public void sessionAttribute() throws Exception {
 		sessionAttributeStore.storeAttribute(webRequest, "sessionAttr", "sessionAttrValue");
 
 		// Resolve successfully handler session attribute once
 		assertTrue(sessionAttrsHandler.isHandlerSessionAttribute("sessionAttr", null));
-		
+
 		ModelFactory modelFactory = createModelFactory("modelAttr", Model.class);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
@@ -137,7 +137,7 @@ public class ModelFactoryTests {
 			modelFactory.initModel(webRequest, new ModelAndViewContainer(), handleSessionAttrMethod);
 			fail("Expected HttpSessionRequiredException");
 		} catch (HttpSessionRequiredException e) { }
-		
+
 		sessionAttributeStore.storeAttribute(webRequest, "sessionAttr", "sessionAttrValue");
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		modelFactory.initModel(webRequest, mavContainer, handleSessionAttrMethod);
@@ -151,19 +151,19 @@ public class ModelFactoryTests {
 		Object attrValue = new Object();
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAttribute(attrName, attrValue);
-		
+
 		WebDataBinder dataBinder = new WebDataBinder(attrValue, attrName);
 		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
 		expect(binderFactory.createBinder(webRequest, attrValue, attrName)).andReturn(dataBinder);
 		replay(binderFactory);
-		
+
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler);
 		modelFactory.updateModel(webRequest, mavContainer);
 
 		assertEquals(attrValue, mavContainer.getModel().remove(attrName));
 		assertSame(dataBinder.getBindingResult(), mavContainer.getModel().remove(bindingResultKey(attrName)));
 		assertEquals(0, mavContainer.getModel().size());
-		
+
 		verify(binderFactory);
 	}
 
@@ -171,12 +171,12 @@ public class ModelFactoryTests {
 	public void updateModelSessionStatusComplete() throws Exception {
 		String attrName = "sessionAttr";
 		String attrValue = "sessionAttrValue";
-		
+
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAttribute(attrName, attrValue);
 		mavContainer.getSessionStatus().setComplete();
 		sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
-		
+
 		// Resolve successfully handler session attribute once
 		assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName, null));
 
@@ -193,11 +193,11 @@ public class ModelFactoryTests {
 
 		verify(binderFactory);
 	}
-	
+
 	private String bindingResultKey(String key) {
 		return BindingResult.MODEL_KEY_PREFIX + key;
 	}
-	
+
 	private ModelFactory createModelFactory(String methodName, Class<?>... parameterTypes) throws Exception{
 		Method method = ModelHandler.class.getMethod(methodName, parameterTypes);
 
@@ -208,13 +208,13 @@ public class ModelFactoryTests {
 		handlerMethod.setHandlerMethodArgumentResolvers(argResolvers);
 		handlerMethod.setDataBinderFactory(null);
 		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
-		
+
 		return new ModelFactory(Arrays.asList(handlerMethod), null, sessionAttrsHandler);
 	}
-	
+
 	@SessionAttributes("sessionAttr") @SuppressWarnings("unused")
 	private static class ModelHandler {
-		
+
 		@ModelAttribute
 		public void modelAttr(Model model) {
 			model.addAttribute("modelAttr", Boolean.TRUE);
@@ -234,7 +234,7 @@ public class ModelFactoryTests {
 		public Boolean nullModelAttr() {
 			return null;
 		}
-		
+
 		public void handle() {
 		}
 

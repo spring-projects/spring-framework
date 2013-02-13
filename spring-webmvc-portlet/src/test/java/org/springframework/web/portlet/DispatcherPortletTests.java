@@ -73,6 +73,7 @@ public class DispatcherPortletTests extends TestCase {
 	private DispatcherPortlet complexDispatcherPortlet;
 
 
+	@Override
 	protected void setUp() throws PortletException {
 		simplePortletConfig = new MockPortletConfig(new MockPortletContext(), "simple");
 		complexPortletConfig = new MockPortletConfig(simplePortletConfig.getPortletContext(), "complex");

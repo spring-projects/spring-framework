@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import test.beans.TestBean;
  * @author Juergen Hoeller
  */
 public class FactoryMethods {
-	
+
 	public static FactoryMethods nullInstance() {
 		return null;
 	}
@@ -39,21 +39,21 @@ public class FactoryMethods {
 		tb.setName("defaultInstance");
 		return new FactoryMethods(tb, "default", 0);
 	}
-	
+
 	/**
 	 * Note that overloaded methods are supported.
 	 */
 	public static FactoryMethods newInstance(TestBean tb) {
 		return new FactoryMethods(tb, "default", 0);
 	}
-	
+
 	protected static FactoryMethods newInstance(TestBean tb, int num, String name) {
 		if (name == null) {
 			throw new IllegalStateException("Should never be called with null value");
 		}
 		return new FactoryMethods(tb, name, num);
 	}
-	
+
 	static FactoryMethods newInstance(TestBean tb, int num, Integer something) {
 		if (something != null) {
 			throw new IllegalStateException("Should never be called with non-null value");
@@ -81,35 +81,35 @@ public class FactoryMethods {
 		this.name = name;
 		this.num = num;
 	}
-	
+
 	public void setStringValue(String stringValue) {
 		this.stringValue = stringValue;
 	}
-	
+
 	public String getStringValue() {
 		return this.stringValue;
 	}
-	
+
 	public TestBean getTestBean() {
 		return this.tb;
 	}
-	
+
 	protected TestBean protectedGetTestBean() {
 		return this.tb;
 	}
-	
+
 	private TestBean privateGetTestBean() {
 		return this.tb;
 	}
-	
+
 	public int getNum() {
 		return num;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * Set via Setter Injection once instance is created.
 	 */

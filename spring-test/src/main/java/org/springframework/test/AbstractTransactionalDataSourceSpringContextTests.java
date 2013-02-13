@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	/**
 	 * Convenient method to delete all rows from these tables.
 	 * Calling this method will make avoidance of rollback by calling
-	 * <code>setComplete()</code> impossible.
+	 * {@code setComplete()} impossible.
 	 * @see #setComplete
 	 */
 	protected void deleteFromTables(String[] names) {

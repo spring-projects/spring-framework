@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package org.springframework.core.convert.support;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.math.BigDecimal;
@@ -60,7 +56,7 @@ public class DefaultConversionTests {
 	public void testStringToCharacter() {
 		assertEquals(Character.valueOf('1'), conversionService.convert("1", Character.class));
 	}
-	
+
 	@Test
 	public void testStringToCharacterEmptyString() {
 		assertEquals(null, conversionService.convert("", Character.class));
@@ -208,7 +204,7 @@ public class DefaultConversionTests {
 	public void testStringToEnum() throws Exception {
 		assertEquals(Foo.BAR, conversionService.convert("BAR", Foo.class));
 	}
-	
+
 	@Test
 	public void testStringToEnumEmptyString() {
 		assertEquals(null, conversionService.convert("", Foo.class));
@@ -233,17 +229,18 @@ public class DefaultConversionTests {
 		String str = "test";
 		assertSame(str, conversionService.convert(str, String.class));
 	}
-	
+
 	@Test
 	public void testNumberToNumber() {
 		assertEquals(Long.valueOf(1), conversionService.convert(Integer.valueOf(1), Long.class));
 	}
-	
+
 	@Test(expected=ConversionFailedException.class)
 	public void testNumberToNumberNotSupportedNumber() {
 		conversionService.convert(Integer.valueOf(1), CustomNumber.class);
 	}
 
+	@SuppressWarnings("serial")
 	public static class CustomNumber extends Number {
 
 		@Override
@@ -265,9 +262,9 @@ public class DefaultConversionTests {
 		public long longValue() {
 			return 0;
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testNumberToCharacter() {
 		assertEquals(Character.valueOf('A'), conversionService.convert(Integer.valueOf(65), Character.class));
@@ -301,7 +298,7 @@ public class DefaultConversionTests {
 
 	@Test
 	public void testSpr7766() throws Exception {
-		ConverterRegistry registry = ((ConverterRegistry) conversionService);
+		ConverterRegistry registry = (conversionService);
 		registry.addConverter(new ColorConverter());
 		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" }, TypeDescriptor.valueOf(String[].class), new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
 		assertEquals(2, colors.size());
@@ -310,13 +307,14 @@ public class DefaultConversionTests {
 	}
 
 	public class ColorConverter implements Converter<String, Color> {
+		@Override
 		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
-	
+
 	public void handlerMethod(List<Color> color) {
-		
+
 	}
-		
+
 	@Test
 	public void convertArrayToCollectionImpl() {
 		LinkedList<?> result = conversionService.convert(new String[] { "1", "2", "3" }, LinkedList.class);
@@ -333,7 +331,7 @@ public class DefaultConversionTests {
 	public static enum FooEnum {
 		BAR, BAZ
 	}
-	
+
 	@Test
 	public void convertArrayToString() {
 		String result = conversionService.convert(new String[] { "1", "2", "3" }, String.class);
@@ -403,7 +401,7 @@ public class DefaultConversionTests {
 	public void convertArrayToObjectAssignableTargetType() {
 		Long[] array = new Long[] { 3L };
 		Long[] result = (Long[]) conversionService.convert(array, Object.class);
-		assertEquals(array, result);
+		assertArrayEquals(array, result);
 	}
 
 	@Test
@@ -505,7 +503,22 @@ public class DefaultConversionTests {
 		Object result = conversionService.convert(source, new TypeDescriptor(getClass().getField("assignableTarget")));
 		assertEquals(source, result);
 	}
-	
+
+	@Test
+	public void convertCollectionToObjectWithCustomConverter() throws Exception {
+		List<String> source = new ArrayList<String>();
+		source.add("A");
+		source.add("B");
+		conversionService.addConverter(new Converter<List, ListWrapper>() {
+			@Override
+			public ListWrapper convert(List source) {
+				return new ListWrapper(source);
+			}
+		});
+		ListWrapper result = conversionService.convert(source, ListWrapper.class);
+		assertSame(source, result.getList());
+	}
+
 	@Test
 	public void convertObjectToCollection() {
 		List<String> result = (List<String>) conversionService.convert(3L, List.class);
@@ -592,7 +605,7 @@ public class DefaultConversionTests {
 		assertEquals(new Integer(2), bar.get(1));
 		assertEquals(new Integer(3), bar.get(2));
 	}
-	
+
 	@Test
 	public void collection() {
 		List<String> strings = new ArrayList<String>();
@@ -652,7 +665,7 @@ public class DefaultConversionTests {
 		assertEquals("baz", result.get("bar"));
 		assertEquals("boop", result.get("baz"));
 	}
-	
+
 	// generic object conversion
 
 	@Test
@@ -664,7 +677,7 @@ public class DefaultConversionTests {
 	public void convertObjectToStringStringConstructorPresent() {
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
 	}
-	
+
 	@Test
 	public void convertObjectToStringNotSupported() {
 		assertFalse(conversionService.canConvert(TestEntity.class, String.class));
@@ -685,17 +698,17 @@ public class DefaultConversionTests {
 	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
 		conversionService.convert(new Long(3), SSN.class);
 	}
-	
+
 	public Object assignableTarget;
-	
+
 	private static class SSN {
-		
+
 		private String value;
-		
+
 		public SSN(String value) {
 			this.value = value;
 		}
-		
+
 		public boolean equals(Object o) {
 			if (!(o instanceof SSN)) {
 				return false;
@@ -703,24 +716,24 @@ public class DefaultConversionTests {
 			SSN ssn = (SSN) o;
 			return this.value.equals(ssn.value);
 		}
-		
+
 		public int hashCode() {
 			return value.hashCode();
 		}
-		
+
 		public String toString() {
 			return value;
 		}
 	}
-	
+
 	private static class ISBN {
 
 		private String value;
-		
+
 		private ISBN(String value) {
 			this.value = value;
 		}
-		
+
 		public boolean equals(Object o) {
 			if (!(o instanceof ISBN)) {
 				return false;
@@ -728,20 +741,20 @@ public class DefaultConversionTests {
 			ISBN isbn = (ISBN) o;
 			return this.value.equals(isbn.value);
 		}
-		
+
 		public int hashCode() {
 			return value.hashCode();
 		}
-		
+
 		public String toString() {
 			return value;
 		}
-		
+
 		public static ISBN valueOf(String value) {
 			return new ISBN(value);
 		}
 	}
-	
+
 	@Test
 	public void convertObjectToObjectFinderMethod() {
 		TestEntity e = conversionService.convert(1L, TestEntity.class);
@@ -763,18 +776,31 @@ public class DefaultConversionTests {
 	public static class TestEntity {
 
 		private Long id;
-		
+
 		public TestEntity(Long id) {
 			this.id = id;
 		}
-		
+
 		public Long getId() {
 			return id;
 		}
-		
+
 		public static TestEntity findTestEntity(Long id) {
 			return new TestEntity(id);
 		}
 	}
-	
+
+	private static class ListWrapper {
+
+		private List<?> list;
+
+		public ListWrapper(List<?> list) {
+			this.list = list;
+		}
+
+		public List<?> getList() {
+			return list;
+		}
+	}
+
 }

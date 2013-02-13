@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,11 @@ public @interface RequestHeader {
 
 	/**
 	 * Whether the header is required.
-	 * <p>Default is <code>true</code>, leading to an exception thrown in case
-	 * of the header missing in the request. Switch this to <code>false</code>
-	 * if you prefer a <code>null</value> in case of the header missing.
+	 * <p>Default is {@code true}, leading to an exception thrown in case
+	 * of the header missing in the request. Switch this to {@code false}
+	 * if you prefer a {@code null} in case of the header missing.
 	 * <p>Alternatively, provide a {@link #defaultValue() defaultValue},
-	 * which implicitely sets this flag to <code>false</code>.
+	 * which implicitely sets this flag to {@code false}.
 	 */
 	boolean required() default true;
 

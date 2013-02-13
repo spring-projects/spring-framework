@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Return whether this factory's bean definitions are frozen,
 	 * i.e. are not supposed to be modified or post-processed any further.
-	 * @return <code>true</code> if the factory's configuration is considered frozen
+	 * @return {@code true} if the factory's configuration is considered frozen
 	 */
 	boolean isConfigurationFrozen();
 

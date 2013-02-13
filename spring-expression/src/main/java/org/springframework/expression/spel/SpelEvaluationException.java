@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ import org.springframework.expression.EvaluationException;
  * Root exception for Spring EL related exceptions. Rather than holding a hard coded string indicating the problem, it
  * records a message key and the inserts for the message. See {@link SpelMessage} for the list of all possible messages
  * that can occur.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class SpelEvaluationException extends EvaluationException {
 
 	private SpelMessage message;
@@ -37,7 +38,7 @@ public class SpelEvaluationException extends EvaluationException {
 	}
 
 	public SpelEvaluationException(int position, SpelMessage message, Object... inserts) {
-		super(position, message.formatMessage(position, inserts)); 
+		super(position, message.formatMessage(position, inserts));
 		this.message = message;
 		this.inserts = inserts;
 	}
@@ -75,7 +76,7 @@ public class SpelEvaluationException extends EvaluationException {
 
 	/**
 	 * Set the position in the related expression which gave rise to this exception.
-	 * 
+	 *
 	 * @param position the position in the expression that gave rise to the exception
 	 */
 	public void setPosition(int position) {

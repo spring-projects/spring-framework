@@ -18,10 +18,8 @@ package org.springframework.web.portlet.mvc.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.portlet.ActionRequest;
 import javax.portlet.ClientDataRequest;
@@ -92,11 +90,8 @@ import org.springframework.web.portlet.handler.PortletRequestMethodNotSupportedE
  */
 public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping<PortletMode> {
 
-	private final Map<Class, RequestMapping> cachedMappings = new HashMap<Class, RequestMapping>();
-
-
 	/**
-	 * Calls the <code>registerHandlers</code> method in addition
+	 * Calls the {@code registerHandlers} method in addition
 	 * to the superclass's initialization.
 	 * @see #detectHandlers
 	 */
@@ -118,7 +113,6 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 			RequestMapping mapping = context.findAnnotationOnBean(beanName, RequestMapping.class);
 			if (mapping != null) {
 				// @RequestMapping found at type level
-				this.cachedMappings.put(handlerType, mapping);
 				String[] modeKeys = mapping.value();
 				String[] params = mapping.params();
 				boolean registerHandlerType = true;
@@ -144,8 +138,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 * @param handlerType the handler type to introspect
 	 * @param beanName the name of the bean introspected
 	 * @param typeMapping the type level mapping (if any)
-	 * @return <code>true</code> if at least 1 handler method has been registered;
-	 * <code>false</code> otherwise
+	 * @return {@code true} if at least 1 handler method has been registered;
+	 * {@code false} otherwise
 	 */
 	protected boolean detectHandlerMethods(Class<?> handlerType, final String beanName, final RequestMapping typeMapping) {
 		final Set<Boolean> handlersRegistered = new HashSet<Boolean>(1);
@@ -222,49 +216,6 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		return request.getPortletMode();
 	}
 
-	/**
-	 * Validate the given annotated handler against the current request.
-	 * @see #validateMapping
-	 */
-	protected void validateHandler(Object handler, PortletRequest request) throws Exception {
-		RequestMapping mapping = this.cachedMappings.get(handler.getClass());
-		if (mapping == null) {
-			mapping = AnnotationUtils.findAnnotation(handler.getClass(), RequestMapping.class);
-		}
-		if (mapping != null) {
-			validateMapping(mapping, request);
-		}
-	}
-
-	/**
-	 * Validate the given type-level mapping metadata against the current request,
-	 * checking request method and parameter conditions.
-	 * @param mapping the mapping metadata to validate
-	 * @param request current portlet request
-	 * @throws Exception if validation failed
-	 */
-	protected void validateMapping(RequestMapping mapping, PortletRequest request) throws Exception {
-		RequestMethod[] mappedMethods = mapping.method();
-		if (!PortletAnnotationMappingUtils.checkRequestMethod(mappedMethods, request)) {
-			String[] supportedMethods = new String[mappedMethods.length];
-			for (int i = 0; i < mappedMethods.length; i++) {
-				supportedMethods[i] = mappedMethods[i].name();
-			}
-			if (request instanceof ClientDataRequest) {
-				throw new PortletRequestMethodNotSupportedException(((ClientDataRequest) request).getMethod(), supportedMethods);
-			}
-			else {
-				throw new PortletRequestMethodNotSupportedException(supportedMethods);
-			}
-		}
-		String[] mappedHeaders = mapping.headers();
-		if (!PortletAnnotationMappingUtils.checkHeaders(mappedHeaders, request)) {
-			throw new PortletRequestBindingException("Header conditions \"" +
-					StringUtils.arrayToDelimitedString(mappedHeaders, ", ") +
-					"\" not met for actual request");
-		}
-	}
-
 
 	private interface SpecialRequestTypePredicate {
 	}
@@ -272,7 +223,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 	private static abstract class AbstractParameterMappingPredicate implements PortletRequestMappingPredicate {
 
-		protected final String[] params;
+		private final String[] params;
 
 		public AbstractParameterMappingPredicate(String[] params) {
 			this.params = params;
@@ -280,6 +231,17 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public boolean match(PortletRequest request) {
 			return PortletAnnotationMappingUtils.checkParameters(this.params, request);
+		}
+
+		protected int compareParams(AbstractParameterMappingPredicate other) {
+			return new Integer(other.params.length).compareTo(this.params.length);
+		}
+
+		protected int compareParams(Object other) {
+			if (other instanceof AbstractParameterMappingPredicate) {
+				return compareParams((AbstractParameterMappingPredicate) other);
+			}
+			return 0;
 		}
 	}
 
@@ -318,10 +280,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		public int compareTo(Object other) {
-			if (other instanceof AbstractParameterMappingPredicate) {
-				return new Integer(((AbstractParameterMappingPredicate) other).params.length).compareTo(this.params.length);
-			}
-			return (other instanceof SpecialRequestTypePredicate ? -1 : 0);
+			return (other instanceof SpecialRequestTypePredicate ? -1 : compareParams(other));
 		}
 	}
 
@@ -336,13 +295,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		public int compareTo(Object other) {
-			if (other instanceof SpecialRequestTypePredicate) {
-				return 1;
-			}
-			else if (other instanceof AbstractParameterMappingPredicate) {
-				return new Integer(((AbstractParameterMappingPredicate) other).params.length).compareTo(this.params.length);
-			}
-			return 0;
+			return (other instanceof SpecialRequestTypePredicate ? 1 : compareParams(other));
 		}
 	}
 
@@ -378,10 +331,13 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return (hasActionName ? -1 : 1);
 				}
 				else {
-					return new Integer(otherAction.params.length).compareTo(this.params.length);
+					return compareParams(otherAction);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+			return -1;
 		}
 	}
 
@@ -417,10 +373,13 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return (hasWindowState ? -1 : 1);
 				}
 				else {
-					return new Integer(otherRender.params.length).compareTo(this.params.length);
+					return compareParams(otherRender);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+			return -1;
 		}
 	}
 
@@ -443,13 +402,16 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public int compareTo(Object other) {
 			if (other instanceof ResourceMappingPredicate) {
-				boolean hasResourceId = "".equals(this.resourceId);
-				boolean otherHasResourceId = "".equals(((ResourceMappingPredicate) other).resourceId);
+				boolean hasResourceId = !"".equals(this.resourceId);
+				boolean otherHasResourceId = !"".equals(((ResourceMappingPredicate) other).resourceId);
 				if (hasResourceId != otherHasResourceId) {
 					return (hasResourceId ? -1 : 1);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+			return -1;
 		}
 	}
 
@@ -478,13 +440,16 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public int compareTo(Object other) {
 			if (other instanceof EventMappingPredicate) {
-				boolean hasEventName = "".equals(this.eventName);
-				boolean otherHasEventName = "".equals(((EventMappingPredicate) other).eventName);
+				boolean hasEventName = !"".equals(this.eventName);
+				boolean otherHasEventName = !"".equals(((EventMappingPredicate) other).eventName);
 				if (hasEventName != otherHasEventName) {
 					return (hasEventName ? -1 : 1);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+			return -1;
 		}
 	}
 

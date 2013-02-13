@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.core.convert.TypeDescriptor;
 /**
  * Encapsulates an object and a type descriptor that describes it.
  * The type descriptor can hold generic information that would not be
- * accessible through a simple <code>getClass()</code> call on the object.
+ * accessible through a simple {@code getClass()} call on the object.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -56,12 +56,12 @@ public class TypedValue {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
-	
+
 
 	public Object getValue() {
 		return this.value;
 	}
-	
+
 	public TypeDescriptor getTypeDescriptor() {
 		if (this.typeDescriptor == null) {
 			this.typeDescriptor = TypeDescriptor.forObject(this.value);
@@ -76,5 +76,5 @@ public class TypedValue {
 		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor() + "]");
 		return str.toString();
 	}
-	
+
 }

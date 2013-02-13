@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public @interface ActionMapping {
 	 * <p>If not specified, the method will be used as default handler:
 	 * i.e. for action requests where no specific action mapping was found.
 	 * <p>Note that all such annotated action methods only apply within the
-	 * <code>@RequestMapping</code> constraints of the containing handler class.
+	 * {@code @RequestMapping} constraints of the containing handler class.
 	 * @see javax.portlet.ActionRequest#ACTION_NAME
 	 */
 	String value() default "";

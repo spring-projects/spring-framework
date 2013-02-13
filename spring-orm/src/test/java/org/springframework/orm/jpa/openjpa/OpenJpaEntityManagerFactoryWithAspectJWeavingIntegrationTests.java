@@ -16,22 +16,26 @@
 
 package org.springframework.orm.jpa.openjpa;
 
+import org.junit.Ignore;
+
 /**
- * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA (see SPR-3873 for more details). 
+ * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA (see SPR-3873 for more details).
  *
  * @author Ramnivas Laddad
  */
-@org.junit.Ignore // TODO SPR-8116 this test causes gradle to hang.
-// when run independently e.g. `./gradlew :spring-orm:test -Dtest.single=OpenJpaEntity...`
+// TODO [SPR-10074] this test causes gradle to hang.
+// When run independently e.g. `./gradlew :spring-orm:test -Dtest.single=OpenJpaEntity...`
 // it works fine. When run together with all other tests e.g. `./gradlew :spring-orm:test`
 // it hangs on the 'testCanSerializeProxies' test method. Note that this test DOES pass in
 // Eclipse, even when the entire 'spring-orm' module is run. Run gradle with '-i' to
 // get more details when reproducing the hanging test.
+@Ignore("this test causes gradle to hang")
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
+	@Override
 	protected String[] getConfigLocations() {
 		return new String[] {
-				"/org/springframework/orm/jpa/openjpa/openjpa-manager-aspectj-weaving.xml", 
+				"/org/springframework/orm/jpa/openjpa/openjpa-manager-aspectj-weaving.xml",
 				"/org/springframework/orm/jpa/memdb.xml",
 				"/org/springframework/orm/jpa/inject.xml"};
 	}

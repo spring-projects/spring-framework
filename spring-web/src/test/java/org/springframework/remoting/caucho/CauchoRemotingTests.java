@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,14 +219,17 @@ public class CauchoRemotingTests extends TestCase {
 		private String password;
 		private boolean overloadEnabled;
 
+		@Override
 		public void setUser(String user) {
 			this.user = user;
 		}
 
+		@Override
 		public void setPassword(String password) {
 			this.password = password;
 		}
 
+		@Override
 		public void setOverloadEnabled(boolean overloadEnabled) {
 			this.overloadEnabled = overloadEnabled;
 		}
@@ -239,14 +242,17 @@ public class CauchoRemotingTests extends TestCase {
 		private String password;
 		private boolean overloadEnabled;
 
+		@Override
 		public void setUser(String user) {
 			this.user = user;
 		}
 
+		@Override
 		public void setPassword(String password) {
 			this.password = password;
 		}
 
+		@Override
 		public void setOverloadEnabled(boolean overloadEnabled) {
 			this.overloadEnabled = overloadEnabled;
 		}

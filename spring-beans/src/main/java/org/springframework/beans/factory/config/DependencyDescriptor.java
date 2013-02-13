@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class DependencyDescriptor implements Serializable {
 
 	private transient MethodParameter methodParameter;
@@ -121,11 +122,29 @@ public class DependencyDescriptor implements Serializable {
 		this.eager = eager;
 	}
 
+	/**
+	 * Copy constructor.
+	 * @param original the original descriptor to create a copy from
+	 */
+	public DependencyDescriptor(DependencyDescriptor original) {
+		this.methodParameter = (original.methodParameter != null ? new MethodParameter(original.methodParameter) : null);
+		this.field = original.field;
+		this.declaringClass = original.declaringClass;
+		this.methodName = original.methodName;
+		this.parameterTypes = original.parameterTypes;
+		this.parameterIndex = original.parameterIndex;
+		this.fieldName = original.fieldName;
+		this.required = original.required;
+		this.eager = original.eager;
+		this.nestingLevel = original.nestingLevel;
+		this.fieldAnnotations = original.fieldAnnotations;
+	}
+
 
 	/**
 	 * Return the wrapped MethodParameter, if any.
 	 * <p>Note: Either MethodParameter or Field is available.
-	 * @return the MethodParameter, or <code>null</code> if none
+	 * @return the MethodParameter, or {@code null} if none
 	 */
 	public MethodParameter getMethodParameter() {
 		return this.methodParameter;
@@ -134,7 +153,7 @@ public class DependencyDescriptor implements Serializable {
 	/**
 	 * Return the wrapped Field, if any.
 	 * <p>Note: Either MethodParameter or Field is available.
-	 * @return the Field, or <code>null</code> if none
+	 * @return the Field, or {@code null} if none
 	 */
 	public Field getField() {
 		return this.field;
@@ -156,6 +175,10 @@ public class DependencyDescriptor implements Serializable {
 	}
 
 
+	/**
+	 * Increase this descriptor's nesting level.
+	 * @see MethodParameter#increaseNestingLevel()
+	 */
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
 		if (this.methodParameter != null) {
@@ -177,7 +200,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Determine the name of the wrapped parameter/field.
-	 * @return the declared name (never <code>null</code>)
+	 * @return the declared name (never {@code null})
 	 */
 	public String getDependencyName() {
 		return (this.field != null ? this.field.getName() : this.methodParameter.getParameterName());
@@ -185,7 +208,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
-	 * @return the declared type (never <code>null</code>)
+	 * @return the declared type (never {@code null})
 	 */
 	public Class<?> getDependencyType() {
 		if (this.field != null) {
@@ -216,7 +239,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Determine the generic element type of the wrapped Collection parameter/field, if any.
-	 * @return the generic type, or <code>null</code> if none
+	 * @return the generic type, or {@code null} if none
 	 */
 	public Class<?> getCollectionType() {
 		return (this.field != null ?
@@ -226,7 +249,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Determine the generic key type of the wrapped Map parameter/field, if any.
-	 * @return the generic type, or <code>null</code> if none
+	 * @return the generic type, or {@code null} if none
 	 */
 	public Class<?> getMapKeyType() {
 		return (this.field != null ?
@@ -236,7 +259,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Determine the generic value type of the wrapped Map parameter/field, if any.
-	 * @return the generic type, or <code>null</code> if none
+	 * @return the generic type, or {@code null} if none
 	 */
 	public Class<?> getMapValueType() {
 		return (this.field != null ?

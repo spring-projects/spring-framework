@@ -27,6 +27,7 @@ package org.springframework.dao;
  * @author Thomas Risberg
  * @since 3.1
  */
+@SuppressWarnings("serial")
 public class QueryTimeoutException extends TransientDataAccessException {
 
 	/**

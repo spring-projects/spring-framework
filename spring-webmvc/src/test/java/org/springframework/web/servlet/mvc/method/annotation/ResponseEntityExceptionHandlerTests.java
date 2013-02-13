@@ -16,6 +16,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
@@ -36,8 +37,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -204,6 +205,12 @@ public class ResponseEntityExceptionHandlerTests {
 
 	private ResponseEntity<Object> testException(Exception ex) {
 		ResponseEntity<Object> responseEntity = this.exceptionHandlerSupport.handleException(ex, this.request);
+
+		// SPR-9653
+		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
+			assertSame(ex, this.servletRequest.getAttribute("javax.servlet.error.exception"));
+		}
+
 		this.defaultExceptionResolver.resolveException(this.servletRequest, this.servletResponse, null, ex);
 
 		assertEquals(this.servletResponse.getStatus(), responseEntity.getStatusCode().value());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,11 @@ public class ScopedBeanInterceptorTests extends TestCase {
 		final Object realObject = new Object();
 
 		ScopedObject scoped = new ScopedObject() {
+			@Override
 			public Object getTargetObject() {
-				return realObject; 
+				return realObject;
 			}
+			@Override
 			public void removeFromScope() {
 				// do nothing
 			}
@@ -53,9 +55,11 @@ public class ScopedBeanInterceptorTests extends TestCase {
 		final Object proxy = proxyFactory.getProxy();
 
 		ScopedObject scoped = new ScopedObject() {
+			@Override
 			public Object getTargetObject() {
 				return proxy;
 			}
+			@Override
 			public void removeFromScope() {
 				// do nothing
 			}

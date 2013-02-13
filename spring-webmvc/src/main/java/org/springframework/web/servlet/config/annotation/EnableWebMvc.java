@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Import;
 /**
  * Add this annotation to an {@code @Configuration} class to have the Spring MVC
  * configuration defined in {@link WebMvcConfigurationSupport} imported:
- * 
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -33,9 +33,9 @@ import org.springframework.context.annotation.Import;
  * }
  * </pre>
  * <p>Customize the imported configuration by implementing the
- * {@link WebMvcConfigurer} interface or more likely by extending the 
- * {@link WebMvcConfigurerAdapter} base class and overriding individual methods: 
- * 
+ * {@link WebMvcConfigurer} interface or more likely by extending the
+ * {@link WebMvcConfigurerAdapter} base class and overriding individual methods:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -56,11 +56,11 @@ import org.springframework.context.annotation.Import;
  * }
  * </pre>
  *
- * <p>If the customization options of {@link WebMvcConfigurer} do not expose 
- * something you need to configure, consider removing the {@code @EnableWebMvc} 
- * annotation and extending directly from {@link WebMvcConfigurationSupport} 
+ * <p>If the customization options of {@link WebMvcConfigurer} do not expose
+ * something you need to configure, consider removing the {@code @EnableWebMvc}
+ * annotation and extending directly from {@link WebMvcConfigurationSupport}
  * overriding selected {@code @Bean} methods:
- * 
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })

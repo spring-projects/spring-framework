@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockMultipartFile;
+import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -394,28 +394,33 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	private static class StubValidator implements Validator {
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return true;
 		}
 
+		@Override
 		public void validate(Object target, Errors errors) {
 			errors.reject("error");
 		}
 	}
 
 	private static class ColorArgumentResolver implements WebArgumentResolver {
+		@Override
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
 			return new Color(0);
 		}
 	}
 
 	private static class User implements Principal {
+		@Override
 		public String getName() {
 			return "user";
 		}
 	}
 
 	private static class OtherUser implements Principal {
+		@Override
 		public String getName() {
 			return "other user";
 		}

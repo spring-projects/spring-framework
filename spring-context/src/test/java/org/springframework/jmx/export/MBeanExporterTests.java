@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,11 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Ignore;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
@@ -48,12 +47,13 @@ import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.jmx.support.RegistrationPolicy;
 
 import test.interceptor.NopInterceptor;
 
 /**
  * Integration tests for the {@link MBeanExporter} class.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -98,6 +98,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	public void testRegisterNotificationListenerForNonExistentMBean() throws Exception {
 		Map listeners = new HashMap();
 		NotificationListener dummyListener = new NotificationListener() {
+			@Override
 			public void handleNotification(Notification notification, Object handback) {
 				throw new UnsupportedOperationException();
 			}
@@ -154,7 +155,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectMBeans() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 			MBeanServer server = (MBeanServer) bf.getBean("server");
@@ -170,7 +172,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectWithExclude() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 			MBeanServer server = (MBeanServer) bf.getBean("server");
@@ -188,7 +191,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectLazyMBeans() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 			MBeanServer server = (MBeanServer) bf.getBean("server");
@@ -208,7 +212,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectNoMBeans() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 		} finally {
@@ -238,7 +243,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		ProxyFactory factory = new ProxyFactory();
 		factory.setTarget(bean);
 		factory.addAdvice(new NopInterceptor());
-		factory.setInterfaces(new Class[] { IJmxTestBean.class });
+		factory.setInterfaces(new Class<?>[] { IJmxTestBean.class });
 
 		IJmxTestBean proxy = (IJmxTestBean) factory.getProxy();
 		String name = "bean:mmm=whatever";
@@ -324,7 +329,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setRegistrationBehavior(MBeanExporter.REGISTRATION_REPLACE_EXISTING);
+		exporter.setRegistrationPolicy(RegistrationPolicy.REPLACE_EXISTING);
 
 		exporter.afterPropertiesSet();
 
@@ -666,6 +671,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private boolean invoked = false;
 
+		@Override
 		public ModelMBeanInfo getMBeanInfo(Object managedResource, String beanKey) throws JMException {
 			invoked = true;
 			return null;
@@ -678,10 +684,12 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private List<ObjectName> unregistered = new ArrayList<ObjectName>();
 
+		@Override
 		public void mbeanRegistered(ObjectName objectName) {
 			registered.add(objectName);
 		}
 
+		@Override
 		public void mbeanUnregistered(ObjectName objectName) {
 			unregistered.add(objectName);
 		}
@@ -703,6 +711,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			this.objectName = objectName;
 		}
 
+		@Override
 		public ObjectName getObjectName() throws MalformedObjectNameException {
 			return this.objectName;
 		}
@@ -717,6 +726,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private String name;
 
+		@Override
 		public String getName() {
 			return name;
 		}
@@ -730,6 +740,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private List<Notification> notifications = new ArrayList<Notification>();
 
+		@Override
 		public void handleNotification(Notification notification, Object handback) {
 			this.notifications.add(notification);
 		}
@@ -756,6 +767,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			this.namedBean = namedBean;
 		}
 
+		@Override
 		public boolean includeBean(Class<?> beanClass, String beanName) {
 			return this.namedBean.equals(beanName);
 		}

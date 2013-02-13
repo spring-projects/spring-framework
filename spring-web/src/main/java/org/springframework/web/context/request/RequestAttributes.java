@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public interface RequestAttributes {
 	 * Return the value for the scoped attribute of the given name, if any.
 	 * @param name the name of the attribute
 	 * @param scope the scope identifier
-	 * @return the current attribute value, or <code>null</code> if not found
+	 * @return the current attribute value, or {@code null} if not found
 	 */
 	Object getAttribute(String name, int scope);
 
@@ -129,20 +129,20 @@ public interface RequestAttributes {
 	 * <p>At a minimum: the HttpServletRequest/PortletRequest reference for key
 	 * "request", and the HttpSession/PortletSession reference for key "session".
 	 * @param key the contextual key
-	 * @return the corresponding object, or <code>null</code> if none found
+	 * @return the corresponding object, or {@code null} if none found
 	 */
 	Object resolveReference(String key);
 
 	/**
 	 * Return an id for the current underlying session.
-	 * @return the session id as String (never <code>null</code>
+	 * @return the session id as String (never {@code null}
 	 */
 	String getSessionId();
 
 	/**
 	 * Expose the best available mutex for the underlying session:
 	 * that is, an object to synchronize on for the underlying session.
-	 * @return the session mutex to use (never <code>null</code>
+	 * @return the session mutex to use (never {@code null}
 	 */
 	Object getSessionMutex();
 

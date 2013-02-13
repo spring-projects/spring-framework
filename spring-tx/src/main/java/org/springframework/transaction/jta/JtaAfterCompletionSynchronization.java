@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
 
 /**
- * Adapter for a JTA Synchronization, invoking the <code>afterCommit</code> /
- * <code>afterCompletion</code> callbacks of Spring {@link TransactionSynchronization}
+ * Adapter for a JTA Synchronization, invoking the {@code afterCommit} /
+ * {@code afterCompletion} callbacks of Spring {@link TransactionSynchronization}
  * objects callbacks after the outer JTA transaction has completed.
  * Applied when participating in an existing (non-Spring) JTA transaction.
  *

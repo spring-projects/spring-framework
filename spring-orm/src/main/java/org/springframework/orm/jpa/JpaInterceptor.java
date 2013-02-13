@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * or from a surrounding JPA-intercepted method), the interceptor simply participates in it.
  *
  * <p>Application code must retrieve a JPA EntityManager via the
- * <code>EntityManagerFactoryUtils.getEntityManager</code> method or - preferably -
- * via a shared <code>EntityManager</code> reference, to be able to detect a
+ * {@code EntityManagerFactoryUtils.getEntityManager} method or - preferably -
+ * via a shared {@code EntityManager} reference, to be able to detect a
  * thread-bound EntityManager. Typically, the code will look like as follows:
  *
  * <pre>
@@ -40,9 +40,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * }</pre>
  *
  * <p>Note that this interceptor automatically translates PersistenceExceptions,
- * via delegating to the <code>EntityManagerFactoryUtils.convertJpaAccessException</code>
+ * via delegating to the {@code EntityManagerFactoryUtils.convertJpaAccessException}
  * method that converts them to exceptions that are compatible with the
- * <code>org.springframework.dao</code> exception hierarchy (like JpaTemplate does).
+ * {@code org.springframework.dao} exception hierarchy (like JpaTemplate does).
  *
  * <p>This class can be considered a declarative alternative to JpaTemplate's
  * callback approach. The advantages are:
@@ -63,7 +63,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see JpaTransactionManager
  * @see JpaTemplate
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>) and
+ * (typically obtained through {@code @PersistenceContext}) and
  * AOP-driven exception translation through
  * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}
  */
@@ -75,7 +75,7 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 
 	/**
 	 * Set whether to convert any PersistenceException raised to a Spring DataAccessException,
-	 * compatible with the <code>org.springframework.dao</code> exception hierarchy.
+	 * compatible with the {@code org.springframework.dao} exception hierarchy.
 	 * <p>Default is "true". Turn this flag off to let the caller receive raw exceptions
 	 * as-is, without any wrapping.
 	 * @see org.springframework.dao.DataAccessException

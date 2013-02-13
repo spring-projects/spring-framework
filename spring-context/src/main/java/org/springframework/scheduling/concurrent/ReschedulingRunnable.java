@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final ScheduledExecutorService executor;
 
-	private volatile ScheduledFuture currentFuture;
+	private ScheduledFuture currentFuture;
 
-	private volatile Date scheduledExecutionTime;
+	private Date scheduledExecutionTime;
 
 	private final Object triggerContextMonitor = new Object();
 
@@ -82,35 +82,53 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		Date completionTime = new Date();
 		synchronized (this.triggerContextMonitor) {
 			this.triggerContext.update(this.scheduledExecutionTime, actualExecutionTime, completionTime);
-		}
-		if (!this.currentFuture.isCancelled()) {
-			schedule();
+			if (!this.currentFuture.isCancelled()) {
+				schedule();
+			}
 		}
 	}
 
 
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		return this.currentFuture.cancel(mayInterruptIfRunning);
+		synchronized (this.triggerContextMonitor) {
+			return this.currentFuture.cancel(mayInterruptIfRunning);
+		}
 	}
 
 	public boolean isCancelled() {
-		return this.currentFuture.isCancelled();
+		synchronized (this.triggerContextMonitor) {
+			return this.currentFuture.isCancelled();
+		}
 	}
 
 	public boolean isDone() {
-		return this.currentFuture.isDone();
+		synchronized (this.triggerContextMonitor) {
+			return this.currentFuture.isDone();
+		}
 	}
 
 	public Object get() throws InterruptedException, ExecutionException {
-		return this.currentFuture.get();
+		ScheduledFuture curr;
+		synchronized (this.triggerContextMonitor) {
+			curr = this.currentFuture;
+		}
+		return curr.get();
 	}
 
 	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		return this.currentFuture.get(timeout, unit);
+		ScheduledFuture curr;
+		synchronized (this.triggerContextMonitor) {
+			curr = this.currentFuture;
+		}
+		return curr.get(timeout, unit);
 	}
 
 	public long getDelay(TimeUnit unit) {
-		return this.currentFuture.getDelay(unit);
+		ScheduledFuture curr;
+		synchronized (this.triggerContextMonitor) {
+			curr = this.currentFuture;
+		}
+		return curr.getDelay(unit);
 	}
 
 	public int compareTo(Delayed other) {

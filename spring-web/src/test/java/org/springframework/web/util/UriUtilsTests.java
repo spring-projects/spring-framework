@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public class UriUtilsTests {
 
 	private static final String ENC = "UTF-8";
 
-	
+
 
 	@Test
 	public void encodeScheme() throws UnsupportedEncodingException {
@@ -106,6 +106,7 @@ public class UriUtilsTests {
 	}
 
 	@Test
+	@Deprecated
 	public void encodeUri() throws UnsupportedEncodingException {
 		assertEquals("Invalid encoded URI", "http://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeUri("http://www.ietf.org/rfc/rfc3986.txt", ENC));
@@ -134,6 +135,7 @@ public class UriUtilsTests {
 	}
 
 	@Test
+	@Deprecated
 	public void encodeHttpUrl() throws UnsupportedEncodingException {
 		assertEquals("Invalid encoded HTTP URL", "http://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeHttpUrl("http://www.ietf.org/rfc/rfc3986.txt", ENC));
@@ -156,6 +158,7 @@ public class UriUtilsTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	@Deprecated
 	public void encodeHttpUrlMail() throws UnsupportedEncodingException {
 		UriUtils.encodeHttpUrl("mailto:java-net@java.sun.com", ENC);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
@@ -39,63 +40,55 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class AroundAdviceBindingTests {
 
 	private AroundAdviceBindingCollaborator mockCollaborator;
-	
+
 	private ITestBean testBeanProxy;
-	
+
 	private TestBean testBeanTarget;
-	
+
 	protected ApplicationContext ctx;
 
 	@Before
 	public void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		AroundAdviceBindingTestAspect  aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
-		
+
 		ITestBean injectedTestBean = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(injectedTestBean));
-		
+
 		this.testBeanProxy = injectedTestBean;
 		// we need the real target too, not just the proxy...
-		
+
 		this.testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
-		
-		mockCollaborator = createNiceMock(AroundAdviceBindingCollaborator.class);
+
+		mockCollaborator = mock(AroundAdviceBindingCollaborator.class);
 		aroundAdviceAspect.setCollaborator(mockCollaborator);
 	}
 
 	@Test
 	public void testOneIntArg() {
-		mockCollaborator.oneIntArg(5);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneIntArg(5);
 	}
-	
+
 	@Test
 	public void testOneObjectArgBoundToTarget() {
-		mockCollaborator.oneObjectArg(this.testBeanTarget);
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);;
 	}
-	
+
 	@Test
 	public void testOneIntAndOneObjectArgs() {
-		mockCollaborator.oneIntAndOneObject(5, this.testBeanProxy);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneIntAndOneObject(5, this.testBeanProxy);;
 	}
-	
+
 	@Test
 	public void testJustJoinPoint() {
-		mockCollaborator.justJoinPoint("getAge");
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).justJoinPoint("getAge");;
 	}
-	
+
 }
 
 

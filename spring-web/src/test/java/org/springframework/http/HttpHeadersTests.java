@@ -55,6 +55,16 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Accept header", "text/html, text/plain", headers.getFirst("Accept"));
 	}
 
+	// SPR-9655
+
+	@Test
+	public void acceptiPlanet() {
+		headers.add("Accept", "text/html");
+		headers.add("Accept", "text/plain");
+		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
+		assertEquals("Invalid Accept header", expected, headers.getAccept());
+	}
+
 	@Test
 	public void acceptCharsets() {
 		Charset charset1 = Charset.forName("UTF-8");

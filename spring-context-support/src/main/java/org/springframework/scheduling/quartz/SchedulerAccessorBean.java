@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,8 +95,8 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 		if (this.beanFactory instanceof ListableBeanFactory) {
 			ListableBeanFactory lbf = (ListableBeanFactory) this.beanFactory;
 			String[] beanNames = lbf.getBeanNamesForType(Scheduler.class);
-			for (int i = 0; i < beanNames.length; i++) {
-				Scheduler schedulerBean = (Scheduler) lbf.getBean(beanNames[i]);
+			for (String beanName : beanNames) {
+				Scheduler schedulerBean = (Scheduler) lbf.getBean(beanName);
 				if (schedulerName.equals(schedulerBean.getSchedulerName())) {
 					return schedulerBean;
 				}

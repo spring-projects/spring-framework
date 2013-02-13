@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  * @see org.springframework.beans.factory.config.BeanExpressionResolver
  * @see org.springframework.beans.factory.support.AutowireCandidateResolver#getSuggestedValue
  */
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Value {

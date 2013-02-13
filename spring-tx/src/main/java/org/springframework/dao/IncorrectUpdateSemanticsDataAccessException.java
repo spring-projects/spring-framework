@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAccessResourceUsageException {
 
 	/**
@@ -42,7 +43,7 @@ public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAcce
 	public IncorrectUpdateSemanticsDataAccessException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
-	
+
 	/**
 	 * Return whether data was updated.
 	 * If this method returns false, there's nothing to roll back.

@@ -33,8 +33,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility for detecting the JBoss VFS version available in the classpath.
- * JBoss AS 5+ uses VFS 2.x (package <code>org.jboss.virtual</code>) while
- * JBoss AS 6+ uses VFS 3.x (package <code>org.jboss.vfs</code>).
+ * JBoss AS 5+ uses VFS 2.x (package {@code org.jboss.virtual}) while
+ * JBoss AS 6+ uses VFS 3.x (package {@code org.jboss.vfs}).
  *
  * <p>Thanks go to Marius Bogoevici for the initial patch.
  *

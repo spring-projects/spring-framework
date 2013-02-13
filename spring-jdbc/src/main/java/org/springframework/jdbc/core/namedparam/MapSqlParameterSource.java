@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * <p>This class is intended for passing in a simple Map of parameter values
  * to the methods of the {@link NamedParameterJdbcTemplate} class.
  *
- * <p>The <code>addValue</code> methods on this class will make adding several
+ * <p>The {@code addValue} methods on this class will make adding several
  * values easier. The methods return a reference to the {@link MapSqlParameterSource}
  * itself, so you can chain several method calls together within a single statement.
  *
@@ -48,7 +48,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
 	/**
 	 * Create an empty MapSqlParameterSource,
-	 * with values to be added via <code>addValue</code>.
+	 * with values to be added via {@code addValue}.
 	 * @see #addValue(String, Object)
 	 */
 	public MapSqlParameterSource() {
@@ -67,7 +67,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
 	/**
 	 * Create a new MapSqlParameterSource based on a Map.
-	 * @param values a Map holding existing parameter values (can be <code>null</code>)
+	 * @param values a Map holding existing parameter values (can be {@code null})
 	 */
 	public MapSqlParameterSource(Map<String, ?> values) {
 		addValues(values);
@@ -124,7 +124,7 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 
 	/**
 	 * Add a Map of parameters to this parameter source.
-	 * @param values a Map holding existing parameter values (can be <code>null</code>)
+	 * @param values a Map holding existing parameter values (can be {@code null})
 	 * @return a reference to this parameter source,
 	 * so it's possible to chain several calls together
 	 */

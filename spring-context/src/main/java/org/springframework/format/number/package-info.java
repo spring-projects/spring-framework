@@ -1,4 +1,4 @@
 /**
- * Formatters for <code>java.lang.Number</code> properties.
+ * Formatters for {@code java.lang.Number} properties.
  */
 package org.springframework.format.number;

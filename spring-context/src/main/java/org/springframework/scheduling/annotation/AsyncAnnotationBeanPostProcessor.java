@@ -19,21 +19,11 @@ package org.springframework.scheduling.annotation;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.Executor;
 
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aop.framework.ProxyConfig;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.core.Ordered;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Bean post-processor that automatically applies asynchronous invocation
@@ -46,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * be provided as well as the annotation type that indicates a method should be
  * invoked asynchronously. If no annotation type is specified, this post-
  * processor will detect both Spring's {@link Async @Async} annotation as well
- * as the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation.
+ * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -55,31 +45,18 @@ import org.springframework.util.ClassUtils;
  * @see AsyncAnnotationAdvisor
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
-		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
-		InitializingBean, Ordered {
+public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor
+		implements BeanFactoryAware {
 
 	private Class<? extends Annotation> asyncAnnotationType;
 
 	private Executor executor;
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
-
-	private AsyncAnnotationAdvisor asyncAnnotationAdvisor;
-
-	/**
-	 * This should run after all other post-processors, so that it can just add
-	 * an advisor to existing proxies rather than double-proxy.
-	 */
-	private int order = Ordered.LOWEST_PRECEDENCE;
-
-	private BeanFactory beanFactory;
-
 
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method
 	 * level. By default, both the {@link Async} annotation and the EJB 3.1
-	 * <code>javax.ejb.Asynchronous</code> annotation will be detected.
+	 * {@code javax.ejb.Asynchronous} annotation will be detected.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a method (or all
 	 * methods of a given class) should be invoked asynchronously.
@@ -97,59 +74,14 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 		this.executor = executor;
 	}
 
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
-	public void afterPropertiesSet() {
-		this.asyncAnnotationAdvisor = (this.executor != null ?
+	public void setBeanFactory(BeanFactory beanFactory) {
+		AsyncAnnotationAdvisor advisor = (this.executor != null ?
 				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor());
 		if (this.asyncAnnotationType != null) {
-			this.asyncAnnotationAdvisor.setAsyncAnnotationType(this.asyncAnnotationType);
+			advisor.setAsyncAnnotationType(this.asyncAnnotationType);
 		}
-		this.asyncAnnotationAdvisor.setBeanFactory(this.beanFactory);
-	}
-
-	public int getOrder() {
-		return this.order;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
-	}
-
-	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (bean instanceof AopInfrastructureBean) {
-			// Ignore AOP infrastructure such as scoped proxies.
-			return bean;
-		}
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		if (AopUtils.canApply(this.asyncAnnotationAdvisor, targetClass)) {
-			if (bean instanceof Advised) {
-				((Advised) bean).addAdvisor(0, this.asyncAnnotationAdvisor);
-				return bean;
-			}
-			else {
-				ProxyFactory proxyFactory = new ProxyFactory(bean);
-				// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
-				proxyFactory.copyFrom(this);
-				proxyFactory.addAdvisor(this.asyncAnnotationAdvisor);
-				return proxyFactory.getProxy(this.beanClassLoader);
-			}
-		}
-		else {
-			// No async proxy needed.
-			return bean;
-		}
+		advisor.setBeanFactory(beanFactory);
+		this.advisor = advisor;
 	}
 
 }

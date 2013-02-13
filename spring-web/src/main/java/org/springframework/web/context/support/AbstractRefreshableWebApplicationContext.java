@@ -86,7 +86,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/** Servlet config that this context runs in, if any */
 	private ServletConfig servletConfig;
 
-	/** Namespace of this context, or <code>null</code> if root */
+	/** Namespace of this context, or {@code null} if root */
 	private String namespace;
 
 	/** the ThemeSource for this ApplicationContext */
@@ -109,7 +109,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 		if (servletConfig != null && this.servletContext == null) {
-			this.setServletContext(servletConfig.getServletContext());
+			setServletContext(servletConfig.getServletContext());
 		}
 	}
 
@@ -133,8 +133,24 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		return super.getConfigLocations();
 	}
 
+	@Override
+	public String getApplicationName() {
+		if (this.servletContext == null) {
+			return "";
+		}
+		if (this.servletContext.getMajorVersion() == 2 && this.servletContext.getMinorVersion() < 5) {
+			String name = this.servletContext.getServletContextName();
+			return (name != null ? name : "");
+		}
+		else {
+			// Servlet 2.5 available
+			return this.servletContext.getContextPath();
+		}
+	}
+
 	/**
-	 * Create and return a new {@link StandardServletEnvironment}.
+	 * Create and return a new {@link StandardServletEnvironment}. Subclasses may override
+	 * in order to configure the environment or specialize the environment type returned.
 	 */
 	@Override
 	protected ConfigurableEnvironment createEnvironment() {

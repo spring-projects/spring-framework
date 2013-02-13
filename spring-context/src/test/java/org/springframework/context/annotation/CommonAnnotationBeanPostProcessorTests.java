@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -162,6 +164,83 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertTrue(bean.destroyCalled);
 		assertTrue(bean.destroy2Called);
 		assertTrue(bean.destroy3Called);
+	}
+
+	@Test
+	public void testResourceInjectionWithPrototypes() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setResourceFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition abd = new RootBeanDefinition(ResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd1 = new RootBeanDefinition(TestBean.class);
+		tbd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tbd1);
+		RootBeanDefinition tbd2 = new RootBeanDefinition(TestBean.class);
+		tbd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean2", tbd2);
+
+		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
+		assertTrue(bean.initCalled);
+		assertTrue(bean.init2Called);
+		assertTrue(bean.init3Called);
+
+		TestBean tb = bean.getTestBean();
+		TestBean tb2 = bean.getTestBean2();
+		assertNotNull(tb);
+		assertNotNull(tb2);
+
+		ResourceInjectionBean anotherBean = (ResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNotSame(anotherBean, bean);
+		assertNotSame(anotherBean.getTestBean(), tb);
+		assertNotSame(anotherBean.getTestBean2(), tb2);
+
+		bf.destroyBean("annotatedBean", bean);
+		assertTrue(bean.destroyCalled);
+		assertTrue(bean.destroy2Called);
+		assertTrue(bean.destroy3Called);
+	}
+
+	@Test
+	public void testResourceInjectionWithResolvableDependencyType() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition abd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean4", tbd);
+
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
+			@Override
+			public Object getObject() throws BeansException {
+				return new NestedTestBean();
+			}
+		});
+
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.setProperty("tb", "testBean4");
+		ppc.setProperties(props);
+		ppc.postProcessBeanFactory(bf);
+
+		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		INestedTestBean tb = bean.getTestBean6();
+		assertNotNull(tb);
+
+		ExtendedResourceInjectionBean anotherBean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNotSame(anotherBean, bean);
+		assertNotSame(anotherBean.getTestBean6(), tb);
+
+		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
+		assertEquals(1, depBeans.length);
+		assertEquals("testBean4", depBeans[0]);
 	}
 
 	@Test
@@ -385,6 +464,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 	public static class InitDestroyBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertFalse(((AnnotatedInitDestroyBean) bean).initCalled);
@@ -392,6 +472,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertTrue(((AnnotatedInitDestroyBean) bean).initCalled);
@@ -399,6 +480,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertFalse(((AnnotatedInitDestroyBean) bean).destroyCalled);
@@ -499,6 +581,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		@Resource
 		private BeanFactory beanFactory;
 
+		@Override
 		@Resource
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -522,6 +605,15 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean4;
 		}
 
+		public INestedTestBean getTestBean5() {
+			return testBean5;
+		}
+
+		public INestedTestBean getTestBean6() {
+			return testBean6;
+		}
+
+		@Override
 		@PostConstruct
 		protected void init2() {
 			if (this.testBean3 == null || this.testBean4 == null) {
@@ -530,6 +622,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.init2();
 		}
 
+		@Override
 		@PreDestroy
 		protected void destroy2() {
 			super.destroy2();
@@ -552,6 +645,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		@Resource
 		private BeanFactory beanFactory;
 
+		@Override
 		@EJB
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -575,6 +669,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean4;
 		}
 
+		@Override
 		@PostConstruct
 		protected void init2() {
 			if (this.testBean3 == null || this.testBean4 == null) {
@@ -583,6 +678,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.init2();
 		}
 
+		@Override
 		@PreDestroy
 		protected void destroy2() {
 			super.destroy2();

@@ -34,7 +34,7 @@ public interface ContentNegotiationStrategy {
 	 * Resolve the given request to a list of media types. The returned list is
 	 * ordered by specificity first and by quality parameter second.
 	 *
-	 * @param request the current request
+	 * @param webRequest the current request
 	 * @return the requested media types or an empty list, never {@code null}
 	 *
 	 * @throws HttpMediaTypeNotAcceptableException if the requested media types cannot be parsed

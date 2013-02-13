@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -40,7 +40,7 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Test fixture for {@link ServletModelAttributeMethodProcessor} specific tests.
  * Also see org.springframework.web.method.annotation.support.ModelAttributeMethodProcessorTests
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class SerlvetModelAttributeMethodProcessorTests {
@@ -48,7 +48,7 @@ public class SerlvetModelAttributeMethodProcessorTests {
 	private ServletModelAttributeMethodProcessor processor;
 
 	private MethodParameter testBeanModelAttr;
-	
+
 	private MethodParameter testBeanWithoutStringConstructorModelAttr;
 
 	private ModelAndViewContainer mavContainer;
@@ -63,18 +63,18 @@ public class SerlvetModelAttributeMethodProcessorTests {
 	public void setUp() throws Exception {
 		this.processor = new ServletModelAttributeMethodProcessor(false);
 
-		Method method = getClass().getDeclaredMethod("modelAttribute", 
+		Method method = getClass().getDeclaredMethod("modelAttribute",
 				TestBean.class, TestBeanWithoutStringConstructor.class);
-		
+
 		this.testBeanModelAttr = new MethodParameter(method, 0);
 		this.testBeanWithoutStringConstructorModelAttr = new MethodParameter(method, 1);
-		
+
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
-		
+
 		this.binderFactory = new ServletRequestDataBinderFactory(null, initializer );
 		this.mavContainer = new ModelAndViewContainer();
-		
+
 		this.request = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(request);
 	}
@@ -87,10 +87,10 @@ public class SerlvetModelAttributeMethodProcessorTests {
 
 		// Type conversion from "Patty" to TestBean via TestBean(String) constructor
 
-		TestBean testBean = 
+		TestBean testBean =
 			(TestBean) this.processor.resolveArgument(
 					this.testBeanModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
-		
+
 		assertEquals("Patty", testBean.getName());
 	}
 
@@ -100,10 +100,10 @@ public class SerlvetModelAttributeMethodProcessorTests {
 		uriTemplateVars.put("testBean2", "Patty");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		TestBeanWithoutStringConstructor testBean = 
+		TestBeanWithoutStringConstructor testBean =
 			(TestBeanWithoutStringConstructor) this.processor.resolveArgument(
 					this.testBeanWithoutStringConstructorModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
-		
+
 		assertNotNull(testBean);
 	}
 
@@ -113,10 +113,10 @@ public class SerlvetModelAttributeMethodProcessorTests {
 
 		// Type conversion from "Patty" to TestBean via TestBean(String) constructor
 
-		TestBean testBean = 
+		TestBean testBean =
 			(TestBean) this.processor.resolveArgument(
 					this.testBeanModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
-		
+
 		assertEquals("Patty", testBean.getName());
 	}
 
@@ -124,17 +124,17 @@ public class SerlvetModelAttributeMethodProcessorTests {
 	public void createAttributeRequestParameterCannotConvert() throws Exception {
 		this.request.addParameter("testBean1", "Patty");
 
-		TestBeanWithoutStringConstructor testBean = 
+		TestBeanWithoutStringConstructor testBean =
 			(TestBeanWithoutStringConstructor) this.processor.resolveArgument(
 					this.testBeanWithoutStringConstructorModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
-		
+
 		assertNotNull(testBean);
 	}
 
-	
+
 	@SuppressWarnings("unused")
-	private void modelAttribute(@ModelAttribute("testBean1") TestBean testBean1, 
-								@ModelAttribute("testBean2") TestBeanWithoutStringConstructor testBean2) { 
+	private void modelAttribute(@ModelAttribute("testBean1") TestBean testBean1,
+								@ModelAttribute("testBean2") TestBeanWithoutStringConstructor testBean2) {
 	}
 
 
@@ -143,10 +143,10 @@ public class SerlvetModelAttributeMethodProcessorTests {
 
 		public TestBeanWithoutStringConstructor() {
 		}
-		
+
 		public TestBeanWithoutStringConstructor(int i) {
 		}
-		
+
 	}
 
 }

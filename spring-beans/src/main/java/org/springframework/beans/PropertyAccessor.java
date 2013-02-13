@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Determine whether the specified property is readable.
-	 * <p>Returns <code>false</code> if the property doesn't exist.
+	 * <p>Returns {@code false} if the property doesn't exist.
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is readable
@@ -66,7 +66,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Determine whether the specified property is writable.
-	 * <p>Returns <code>false</code> if the property doesn't exist.
+	 * <p>Returns {@code false} if the property doesn't exist.
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is writable
@@ -80,7 +80,7 @@ public interface PropertyAccessor {
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
-	 * or <code>null</code> if not determinable
+	 * or {@code null} if not determinable
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
 	 * @throws PropertyAccessException if the property was valid but the
@@ -94,7 +94,7 @@ public interface PropertyAccessor {
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
-	 * or <code>null</code> if not determinable
+	 * or {@code null} if not determinable
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
 	 */
@@ -191,7 +191,7 @@ public interface PropertyAccessor {
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
-	    throws BeansException;
+			throws BeansException;
 
 	/**
 	 * Perform a batch update with full control over behavior.
@@ -213,6 +213,6 @@ public interface PropertyAccessor {
 	 * successfully updated.
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
-	    throws BeansException;
+			throws BeansException;
 
 }

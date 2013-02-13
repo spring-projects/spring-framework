@@ -179,6 +179,10 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
+		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
+			request.setAttribute("javax.servlet.error.exception", ex, WebRequest.SCOPE_REQUEST);
+		}
+
 		return new ResponseEntity<Object>(body, headers, status);
 	}
 

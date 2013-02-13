@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -509,6 +509,7 @@ public class BindTagTests extends AbstractTagTests {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, null, new PropertyEditorSupport() {
+			@Override
 			public String getAsText() {
 				return "something";
 			}
@@ -976,6 +977,7 @@ public class BindTagTests extends AbstractTagTests {
 	/**
 	 * SPR-4022
 	 */
+	@SuppressWarnings("serial")
 	public void testNestingInFormTag() throws JspException {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();
@@ -986,6 +988,7 @@ public class BindTagTests extends AbstractTagTests {
 		pc.getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		FormTag formTag = new FormTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(new StringWriter());
 			}

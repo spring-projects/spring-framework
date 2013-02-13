@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -265,14 +265,17 @@ public class ModelAttributeMethodProcessorTests {
 			return validateInvoked;
 		}
 
+		@Override
 		public void bind(WebRequest request) {
 			bindInvoked = true;
 		}
 
+		@Override
 		public void validate() {
 			validateInvoked = true;
 		}
 
+		@Override
 		public void validate(Object... validationHints) {
 			validateInvoked = true;
 		}

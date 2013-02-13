@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	 * Specify the EntityManager interface to expose.
 	 * <p>Default is the EntityManager interface as defined by the
 	 * EntityManagerFactoryInfo, if available. Else, the standard
-	 * <code>javax.persistence.EntityManager</code> interface will be used.
+	 * {@code javax.persistence.EntityManager} interface will be used.
 	 * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
 	 * @see javax.persistence.EntityManager
 	 */

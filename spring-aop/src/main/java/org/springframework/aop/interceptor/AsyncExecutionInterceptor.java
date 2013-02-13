@@ -30,19 +30,19 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * AOP Alliance <code>MethodInterceptor</code> that processes method invocations
+ * AOP Alliance {@code MethodInterceptor} that processes method invocations
  * asynchronously, using a given {@link org.springframework.core.task.AsyncTaskExecutor}.
  * Typically used with the {@link org.springframework.scheduling.annotation.Async} annotation.
  *
  * <p>In terms of target method signatures, any parameter types are supported.
- * However, the return type is constrained to either <code>void</code> or
- * <code>java.util.concurrent.Future</code>. In the latter case, the Future handle
+ * However, the return type is constrained to either {@code void} or
+ * {@code java.util.concurrent.Future}. In the latter case, the Future handle
  * returned from the proxy will be an actual asynchronous Future that can be used
  * to track the result of the asynchronous method execution. However, since the
  * target method needs to implement the same signature, it will have to return
  * a temporary Future handle that just passes the return value through
  * (like Spring's {@link org.springframework.scheduling.annotation.AsyncResult}
- * or EJB 3.1's <code>javax.ejb.AsyncResult</code>).
+ * or EJB 3.1's {@code javax.ejb.AsyncResult}).
  *
  * <p>As of Spring 3.1.2 the {@code AnnotationAsyncExecutionInterceptor} subclass is
  * preferred for use due to its support for executor qualification in conjunction with

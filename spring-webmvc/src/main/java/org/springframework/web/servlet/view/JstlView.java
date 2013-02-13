@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,8 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * <p>Hint: Set the {@link #setExposeContextBeansAsAttributes} flag to "true"
  * in order to make all Spring beans in the application context accessible
- * within JSTL expressions (e.g. in a <code>c:out</code> value expression).
- * This will also make all such beans accessible in plain <code>${...}</code>
+ * within JSTL expressions (e.g. in a {@code c:out} value expression).
+ * This will also make all such beans accessible in plain {@code ${...}}
  * expressions in a JSP 2.0 page.
  *
  * @author Juergen Hoeller
@@ -99,7 +99,7 @@ public class JstlView extends InternalResourceView {
 	 * @param url the URL to forward to
 	 * @param messageSource the MessageSource to expose to JSTL tags
 	 * (will be wrapped with a JSTL-aware MessageSource that is aware of JSTL's
-	 * <code>javax.servlet.jsp.jstl.fmt.localizationContext</code> context-param)
+	 * {@code javax.servlet.jsp.jstl.fmt.localizationContext} context-param)
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */
 	public JstlView(String url, MessageSource messageSource) {
@@ -110,7 +110,7 @@ public class JstlView extends InternalResourceView {
 
 	/**
 	 * Wraps the MessageSource with a JSTL-aware MessageSource that is aware
-	 * of JSTL's <code>javax.servlet.jsp.jstl.fmt.localizationContext</code>
+	 * of JSTL's {@code javax.servlet.jsp.jstl.fmt.localizationContext}
 	 * context-param.
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */

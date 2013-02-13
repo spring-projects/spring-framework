@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
  * <p>
  * Note that the Jakarta JSTL implementation (jstl.jar, standard.jar) has to be
  * available on the class path to use this expression evaluator.
- * 
+ *
  * @author Juergen Hoeller
  * @since 1.1.5
  * @see org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager
@@ -49,7 +49,7 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 
 	/**
 	 * Create a new MockExpressionEvaluator for the given PageContext.
-	 * 
+	 *
 	 * @param pageContext the JSP PageContext to run in
 	 */
 	public MockExpressionEvaluator(PageContext pageContext) {

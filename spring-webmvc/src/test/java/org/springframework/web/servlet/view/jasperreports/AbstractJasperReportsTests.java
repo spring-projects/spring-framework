@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.Map;
 import junit.framework.TestCase;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.ui.jasperreports.ProductBean;
 import org.springframework.util.ClassUtils;
@@ -54,6 +54,7 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	protected MockHttpServletResponse response;
 
 
+	@Override
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();

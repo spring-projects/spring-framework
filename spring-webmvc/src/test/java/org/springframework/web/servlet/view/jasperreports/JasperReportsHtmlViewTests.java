@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -30,10 +30,12 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		return new JasperReportsHtmlView();
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "text/html";
 	}

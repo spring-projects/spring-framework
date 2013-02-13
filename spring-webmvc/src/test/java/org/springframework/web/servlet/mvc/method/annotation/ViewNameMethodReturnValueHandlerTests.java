@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 /**
  * Test fixture with {@link ViewNameMethodReturnValueHandler}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ViewNameMethodReturnValueHandlerTests {
@@ -51,17 +51,17 @@ public class ViewNameMethodReturnValueHandlerTests {
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
-	
+
 	@Test
 	public void supportsReturnType() throws Exception {
 		assertTrue(this.handler.supportsReturnType(createReturnValueParam("viewName")));
 	}
-	
+
 	@Test
 	public void returnViewName() throws Exception {
 		MethodParameter param = createReturnValueParam("viewName");
 		this.handler.handleReturnValue("testView", param, this.mavContainer, this.webRequest);
-		
+
 		assertEquals("testView", this.mavContainer.getViewName());
 	}
 
@@ -80,9 +80,9 @@ public class ViewNameMethodReturnValueHandlerTests {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
-	
+
 	String viewName() {
 		return null;
 	}
-	
+
 }

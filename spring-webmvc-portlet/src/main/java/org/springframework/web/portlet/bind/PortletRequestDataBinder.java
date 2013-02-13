@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ import org.springframework.web.portlet.util.PortletUtils;
  *
  * <p>Used by Spring Portlet MVC's BaseCommandController.
  * Note that BaseCommandController and its subclasses allow for easy customization
- * of the binder instances that they use through overriding <code>initBinder</code>.
+ * of the binder instances that they use through overriding {@code initBinder}.
  *
  * <p>Can also be used for manual data binding in custom web controllers:
  * for example, in a plain Portlet Controller implementation. Simply instantiate
- * a PortletRequestDataBinder for each binding process, and invoke <code>bind</code>
+ * a PortletRequestDataBinder for each binding process, and invoke {@code bind}
  * with the current PortletRequest as argument:
  *
  * <pre class="code">
@@ -67,7 +67,7 @@ public class PortletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new PortletRequestDataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -77,7 +77,7 @@ public class PortletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new PortletRequestDataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */

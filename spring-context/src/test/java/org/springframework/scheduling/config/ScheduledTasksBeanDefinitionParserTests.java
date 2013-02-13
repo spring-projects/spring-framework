@@ -52,7 +52,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	public void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"scheduledTasksContext.xml", ScheduledTasksBeanDefinitionParserTests.class);
-		this.registrar = (ScheduledTaskRegistrar) this.context.getBeansOfType(
+		this.registrar = this.context.getBeansOfType(
 				ScheduledTaskRegistrar.class).values().iterator().next();
 		this.testBean = this.context.getBean("testBean");
 	}
@@ -123,6 +123,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 
 	static class TestTrigger implements Trigger {
 
+		@Override
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 			return null;
 		}

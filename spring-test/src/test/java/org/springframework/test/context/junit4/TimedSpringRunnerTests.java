@@ -16,8 +16,9 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
@@ -32,7 +33,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * <li>JUnit's {@link Test#timeout() @Test(timeout=...)}</li>
  * <li>Spring's {@link Timed @Timed}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */
@@ -56,10 +57,9 @@ public class TimedSpringRunnerTests {
 	}
 
 
-	@org.junit.Ignore // TODO SPR-8116 causing timeouts on cbeams' (otherwise fast) MBP.
-	// Timeouts are 2x-5x their expected range. Something seems wrong indeed.
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@RunWith(SpringJUnit4ClassRunner.class)
-	@TestExecutionListeners( {})
+	@TestExecutionListeners({})
 	public static final class TimedSpringRunnerTestCase {
 
 		// Should Pass.

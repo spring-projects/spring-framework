@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.expression.ParseException;
@@ -26,7 +27,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 /**
  * Parse some expressions and check we get the AST we expect. Rather than inspecting each node in the AST, we ask it to
  * write itself to a string form and check that is as expected.
- * 
+ *
  * @author Andy Clement
  */
 public class ParsingTests {
@@ -160,7 +161,7 @@ public class ParsingTests {
 	public void testElvis() {
 		parseCheck("3?:1", "3 ?: 1");
 	}
-	
+
 	// public void testRelOperatorsIn01() {
 	// parseCheck("3 in {1,2,3,4,5}", "(3 in {1,2,3,4,5})");
 	// }
@@ -399,14 +400,14 @@ public class ParsingTests {
 		parseCheck("#var1='value1'");
 	}
 
-	
+
 	// ternary operator
-	
+
 	@Test
 	public void testTernaryOperator01() {
 		parseCheck("1>2?3:4","(1 > 2) ? 3 : 4");
 	}
-	
+
 	// public void testTernaryOperator01() {
 	// parseCheck("{1}.#isEven(#this) == 'y'?'it is even':'it is odd'",
 	// "({1}.#isEven(#this) == 'y') ? 'it is even' : 'it is odd'");
@@ -432,16 +433,16 @@ public class ParsingTests {
 	public void testTypeReferences02() {
 		parseCheck("T(String)");
 	}
-	
+
 	@Test
 	public void testInlineList1() {
 		parseCheck("{1,2,3,4}");
 	}
-	
+
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the same
 	 * as the original expression.
-	 * 
+	 *
 	 * @param expression the expression to parse *and* the expected value of the string form of the resultant AST
 	 */
 	public void parseCheck(String expression) {
@@ -451,23 +452,23 @@ public class ParsingTests {
 	/**
 	 * Parse the supplied expression and then create a string representation of the resultant AST, it should be the
 	 * expected value.
-	 * 
+	 *
 	 * @param expression the expression to parse
 	 * @param expectedStringFormOfAST the expected string form of the AST
 	 */
 	public void parseCheck(String expression, String expectedStringFormOfAST) {
 		try {
-			SpelExpression e = (SpelExpression) parser.parseRaw(expression);
+			SpelExpression e = parser.parseRaw(expression);
 			if (e != null && !e.toStringAST().equals(expectedStringFormOfAST)) {
 				SpelUtilities.printAbstractSyntaxTree(System.err, e);
 			}
 			if (e == null) {
-				Assert.fail("Parsed exception was null");
+				fail("Parsed exception was null");
 			}
-			Assert.assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
+			assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
 		} catch (ParseException ee) {
 			ee.printStackTrace();
-			Assert.fail("Unexpected Exception: " + ee.getMessage());
+			fail("Unexpected Exception: " + ee.getMessage());
 		}
 	}
 

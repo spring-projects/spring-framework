@@ -21,12 +21,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -64,15 +65,15 @@ import org.springframework.util.StringUtils;
  * <em>rolled back</em> after completion of the test; whereas, changes to the
  * database during a test that is run with {@code @NotTransactional} will
  * <strong>not</strong> be run within a transaction. Test methods that are not
- * annotated with either {@code @Transactional} (at the class or method level)
- * or {@code @NotTransactional} will not be run within a transaction.
+ * annotated with {@code @Transactional} (at the class or method level) will not
+ * be run within a transaction.
  *
  * <p>Transactional commit and rollback behavior can be configured via the
  * class-level {@link TransactionConfiguration @TransactionConfiguration} and
  * method-level {@link Rollback @Rollback} annotations.
  *
  * <p>In case there are multiple instances of {@code PlatformTransactionManager}
- * within the test's {@code ApplicationContext}, @{@code TransactionConfiguration}
+ * within the test's {@code ApplicationContext}, {@code @TransactionConfiguration}
  * supports configuring the bean name of the {@code PlatformTransactionManager}
  * that should be used to drive transactions. Alternatively,
  * {@link TransactionManagementConfigurer} can be implemented in an
@@ -90,6 +91,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5
  * @see TransactionConfiguration
+ * @see TransactionManagementConfigurer
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
@@ -110,7 +112,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
 	private final Map<Method, TransactionContext> transactionContextCache =
-			Collections.synchronizedMap(new IdentityHashMap<Method, TransactionContext>());
+			new ConcurrentHashMap<Method, TransactionContext>(8);
 
 	private TransactionConfigurationAttributes configurationAttributes;
 
@@ -122,9 +124,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * configured to run within a transaction, this method will run
 	 * {@link BeforeTransaction &#064;BeforeTransaction methods} and start a new
 	 * transaction.
-	 * <p>Note that if a {@code BeforeTransaction &#064;BeforeTransaction method} fails,
-	 * remaining {@code BeforeTransaction &#064;BeforeTransaction methods} will not
-	 * be invoked, and a transaction will not be started.
+	 * <p>Note that if a {@code @BeforeTransaction} method fails, any remaining
+	 * {@code @BeforeTransaction} methods will not be invoked, and a transaction
+	 * will not be started.
 	 * @see org.springframework.transaction.annotation.Transactional
 	 * @see org.springframework.test.annotation.NotTransactional
 	 * @see #getTransactionManager(TestContext, String)
@@ -175,7 +177,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * If a transaction is currently active for the test method of the supplied
 	 * {@link TestContext test context}, this method will end the transaction
 	 * and run {@link AfterTransaction &#064;AfterTransaction methods}.
-	 * <p>{@code AfterTransaction &#064;AfterTransaction methods} are guaranteed to be
+	 * <p>{@code @AfterTransaction} methods are guaranteed to be
 	 * invoked even if an error occurs while ending the transaction.
 	 */
 	@Override
@@ -303,12 +305,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Get the {@link PlatformTransactionManager transaction manager} to use
 	 * for the supplied {@link TestContext test context} and {@code qualifier}.
 	 * <p>Delegates to {@link #getTransactionManager(TestContext)} if the
-	 * supplied {@code qualifier} is <code>null</code> or empty.
+	 * supplied {@code qualifier} is {@code null} or empty.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved
 	 * @param qualifier the qualifier for selecting between multiple bean matches;
-	 * may be <code>null</code> or empty
-	 * @return the transaction manager to use, or <code>null</code> if not found
+	 * may be {@code null} or empty
+	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext)
 	 */
@@ -340,7 +342,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * for the supplied {@link TestContext test context}.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved
-	 * @return the transaction manager to use, or <code>null</code> if not found
+	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext, String)
 	 */
@@ -451,7 +453,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Gets all methods in the supplied {@link Class class} and its superclasses
-	 * which are annotated with the supplied <code>annotationType</code> but
+	 * which are annotated with the supplied {@code annotationType} but
 	 * which are not <em>shadowed</em> by methods overridden in subclasses.
 	 * <p>Note: This code has been borrowed from
 	 * {@link org.junit.internal.runners.TestClass#getAnnotatedMethods(Class)}
@@ -478,11 +480,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Determines if the supplied {@link Method method} is <em>shadowed</em>
 	 * by a method in supplied {@link List list} of previous methods.
 	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method,List)}.
+	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, List)}.
 	 * @param method the method to check for shadowing
 	 * @param previousMethods the list of methods which have previously been processed
-	 * @return <code>true</code> if the supplied method is shadowed by a
-	 * method in the <code>previousMethods</code> list
+	 * @return {@code true} if the supplied method is shadowed by a
+	 * method in the {@code previousMethods} list
 	 */
 	private boolean isShadowed(Method method, List<Method> previousMethods) {
 		for (Method each : previousMethods) {
@@ -497,10 +499,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Determines if the supplied {@link Method current method} is
 	 * <em>shadowed</em> by a {@link Method previous method}.
 	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method,Method)}.
+	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, Method)}.
 	 * @param current the current method
 	 * @param previous the previous method
-	 * @return <code>true</code> if the previous method shadows the current one
+	 * @return {@code true} if the previous method shadows the current one
 	 */
 	private boolean isShadowed(Method current, Method previous) {
 		if (!previous.getName().equals(current.getName())) {
@@ -521,9 +523,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Retrieves the {@link TransactionConfigurationAttributes} for the
 	 * specified {@link Class class} which may optionally declare or inherit
 	 * {@link TransactionConfiguration &#064;TransactionConfiguration}. If
-	 * {@code &#064;TransactionConfiguration} is not present for the supplied
+	 * {@code @TransactionConfiguration} is not present for the supplied
 	 * class, the <em>default values</em> for attributes defined in
-	 * {@code &#064;TransactionConfiguration} will be used instead.
+	 * {@code @TransactionConfiguration} will be used instead.
 	 * @param testContext the test context for which the configuration
 	 * attributes should be retrieved
 	 * @return a new TransactionConfigurationAttributes instance

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,13 @@ import javax.validation.ValidatorFactory;
 
 import org.aopalliance.aop.Advice;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aop.framework.ProxyConfig;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -58,8 +49,8 @@ import org.springframework.validation.annotation.Validated;
  * as well. By default, JSR-303 will validate against its default group only.
  *
  * <p>As of Spring 3.1, this functionality requires Hibernate Validator 4.2 or higher.
- * In Spring 3.1.2, this class will autodetect a Bean Validation 1.1 compliant provider
- * and automatically use the standard method validation support there (once available).
+ * In a future version of Spring, this class will autodetect a Bean Validation 1.1 compliant
+ * provider and automatically use the standard method validation support when available.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -67,16 +58,11 @@ import org.springframework.validation.annotation.Validated;
  * @see org.hibernate.validator.method.MethodValidator
  */
 @SuppressWarnings("serial")
-public class MethodValidationPostProcessor extends ProxyConfig
-		implements BeanPostProcessor, BeanClassLoaderAware, Ordered, InitializingBean {
+public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProcessor implements InitializingBean {
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
 	private Validator validator;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
-
-	private Advisor advisor;
 
 
 	/**
@@ -110,52 +96,11 @@ public class MethodValidationPostProcessor extends ProxyConfig
 		this.validator = validatorFactory.getValidator();
 	}
 
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
-	public int getOrder() {
-		// This should run after all other post-processors, so that it can just add
-		// an advisor to existing proxies rather than double-proxy.
-		return LOWEST_PRECEDENCE;
-	}
-
-
 	public void afterPropertiesSet() {
 		Pointcut pointcut = new AnnotationMatchingPointcut(this.validatedAnnotationType, true);
 		Advice advice = (this.validator != null ? new MethodValidationInterceptor(this.validator) :
 				new MethodValidationInterceptor());
 		this.advisor = new DefaultPointcutAdvisor(pointcut, advice);
-	}
-
-
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		return bean;
-	}
-
-	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof AopInfrastructureBean) {
-			// Ignore AOP infrastructure such as scoped proxies.
-			return bean;
-		}
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		if (AopUtils.canApply(this.advisor, targetClass)) {
-			if (bean instanceof Advised) {
-				((Advised) bean).addAdvisor(this.advisor);
-				return bean;
-			}
-			else {
-				ProxyFactory proxyFactory = new ProxyFactory(bean);
-				// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
-				proxyFactory.copyFrom(this);
-				proxyFactory.addAdvisor(this.advisor);
-				return proxyFactory.getProxy(this.beanClassLoader);
-			}
-		}
-		else {
-			// This is not a repository.
-			return bean;
-		}
 	}
 
 }

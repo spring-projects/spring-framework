@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.ELException;
@@ -26,26 +27,27 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import org.junit.Test;
 
-import org.springframework.mock.web.MockExpressionEvaluator;
-import org.springframework.mock.web.MockPageContext;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockExpressionEvaluator;
+import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.mock.web.test.MockServletContext;
 
 import static org.junit.Assert.*;
 
 /**
- * @author Aled Arendsen
+ * @author Alef Arendsen
  * @author Juergen Hoeller
  * @since 16.09.2003
  */
+@Deprecated
 public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testIsSpringJspExpressionSupportActive() {
 		MockServletContext sc = new MockServletContext();
 		PageContext pc = new MockPageContext(sc);
-		assertTrue(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
-		sc.addInitParameter("springJspExpressionSupport", "false");
 		assertFalse(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		assertTrue(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
 	}
 
 	@Test
@@ -82,7 +84,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluate() throws Exception {
-		PageContext ctx = new MockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		MockPageContext ctx = new MockPageContext(sc);
 		ctx.setAttribute("bla", "blie");
 
 		assertEquals("blie", ExpressionEvaluationUtils.evaluate("test", "${bla}", String.class, ctx));
@@ -99,7 +103,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluateWithConcatenation() throws Exception {
-		PageContext ctx = new MockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		MockPageContext ctx = new MockPageContext(sc);
 		ctx.setAttribute("bla", "blie");
 
 		String expr = "text${bla}text${bla}text";
@@ -139,7 +145,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluateString() throws Exception {
-		PageContext ctx = new MockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		MockPageContext ctx = new MockPageContext(sc);
 		ctx.setAttribute("bla", "blie");
 
 		assertEquals("blie", ExpressionEvaluationUtils.evaluateString("test", "${bla}", ctx));
@@ -148,7 +156,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluateStringWithConcatenation() throws Exception {
-		PageContext ctx = new MockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		MockPageContext ctx = new MockPageContext(sc);
 		ctx.setAttribute("bla", "blie");
 
 		String expr = "text${bla}text${bla}text";
@@ -180,7 +190,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluateInteger() throws Exception {
-		PageContext ctx = new MockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		MockPageContext ctx = new MockPageContext(sc);
 		ctx.setAttribute("bla", new Integer(1));
 
 		assertEquals(1, ExpressionEvaluationUtils.evaluateInteger("test", "${bla}", ctx));
@@ -189,7 +201,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluateBoolean() throws Exception {
-		PageContext ctx = new MockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		MockPageContext ctx = new MockPageContext(sc);
 		ctx.setAttribute("bla", new Boolean(true));
 
 		assertTrue(ExpressionEvaluationUtils.evaluateBoolean("test", "${bla}", ctx));
@@ -198,7 +212,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testRepeatedEvaluate() throws Exception {
-		PageContext ctx = new CountingMockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		PageContext ctx = new CountingMockPageContext(sc);
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
 		ctx.setAttribute("bla", "blie");
 		ctx.setAttribute("blo", "blue");
@@ -218,7 +234,9 @@ public class ExpressionEvaluationUtilsTests {
 
 	@Test
 	public void testEvaluateWithComplexConcatenation() throws Exception {
-		PageContext ctx = new CountingMockPageContext();
+		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		PageContext ctx = new CountingMockPageContext(sc);
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
 		ctx.setAttribute("bla", "blie");
 		ctx.setAttribute("blo", "blue");
@@ -247,8 +265,13 @@ public class ExpressionEvaluationUtilsTests {
 
 	private static class CountingMockPageContext extends MockPageContext {
 
+		public CountingMockPageContext(ServletContext servletContext) {
+			super(servletContext);
+		}
+
 		private ExpressionEvaluator eval = new CountingMockExpressionEvaluator(this);
 
+		@Override
 		public ExpressionEvaluator getExpressionEvaluator() {
 			return eval;
 		}
@@ -265,11 +288,13 @@ public class ExpressionEvaluationUtilsTests {
 			super(pageContext);
 		}
 
+		@Override
 		public Expression parseExpression(String expression, Class expectedType, FunctionMapper functionMapper) throws ELException {
 			this.parseExpressionCount++;
 			return super.parseExpression(expression, expectedType, functionMapper);
 		}
 
+		@Override
 		public Object evaluate(String expression, Class expectedType, VariableResolver variableResolver, FunctionMapper functionMapper) throws ELException {
 			this.evaluateCount++;
 			return super.evaluate(expression, expectedType, variableResolver, functionMapper);

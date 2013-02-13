@@ -63,9 +63,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	public void canRead() throws Exception {
-		assertTrue(converter.canRead(rootElementListType, null));
-		assertTrue(converter.canRead(rootElementSetType, null));
-		assertTrue(converter.canRead(typeSetType, null));
+		assertTrue(converter.canRead(rootElementListType, null, null));
+		assertTrue(converter.canRead(rootElementSetType, null, null));
+		assertTrue(converter.canRead(typeSetType, null, null));
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		String content = "<list><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
-		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, inputMessage);
+		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
 
 		assertEquals("Invalid result", 2, result.size());
 		assertEquals("Invalid result", "1", result.get(0).type.s);
@@ -87,7 +87,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		String content = "<set><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></set>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
-		Set<RootElement> result = (Set<RootElement>) converter.read(rootElementSetType, inputMessage);
+		Set<RootElement> result = (Set<RootElement>) converter.read(rootElementSetType, null, inputMessage);
 
 		assertEquals("Invalid result", 2, result.size());
 		assertTrue("Invalid result", result.contains(new RootElement("1")));
@@ -100,7 +100,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		String content = "<list><foo s=\"1\"/><bar s=\"2\"/></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
-		List<TestType> result = (List<TestType>) converter.read(typeListType, inputMessage);
+		List<TestType> result = (List<TestType>) converter.read(typeListType, null, inputMessage);
 
 		assertEquals("Invalid result", 2, result.size());
 		assertEquals("Invalid result", "1", result.get(0).s);
@@ -113,7 +113,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		String content = "<set><foo s=\"1\"/><bar s=\"2\"/></set>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
-		Set<TestType> result = (Set<TestType>) converter.read(typeSetType, inputMessage);
+		Set<TestType> result = (Set<TestType>) converter.read(typeSetType, null, inputMessage);
 
 		assertEquals("Invalid result", 2, result.size());
 		assertTrue("Invalid result", result.contains(new TestType("1")));

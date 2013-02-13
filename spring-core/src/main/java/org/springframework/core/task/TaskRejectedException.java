@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import java.util.concurrent.RejectedExecutionException;
  * @see TaskExecutor#execute(Runnable)
  * @see TaskTimeoutException
  */
+@SuppressWarnings("serial")
 public class TaskRejectedException extends RejectedExecutionException {
 
 	/**
-	 * Create a new <code>TaskRejectedException</code>
+	 * Create a new {@code TaskRejectedException}
 	 * with the specified detail message and no root cause.
 	 * @param msg the detail message
 	 */
@@ -39,11 +40,11 @@ public class TaskRejectedException extends RejectedExecutionException {
 	}
 
 	/**
-	 * Create a new <code>TaskRejectedException</code>
+	 * Create a new {@code TaskRejectedException}
 	 * with the specified detail message and the given root cause.
 	 * @param msg the detail message
 	 * @param cause the root cause (usually from using an underlying
-	 * API such as the <code>java.util.concurrent</code> package)
+	 * API such as the {@code java.util.concurrent} package)
 	 * @see java.util.concurrent.RejectedExecutionException
 	 */
 	public TaskRejectedException(String msg, Throwable cause) {

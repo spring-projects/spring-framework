@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,20 @@ package org.springframework.aop.interceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * AOP Alliance <code>MethodInterceptor</code> that can be introduced in a chain
+ * AOP Alliance {@code MethodInterceptor} that can be introduced in a chain
  * to display verbose information about intercepted invocations to the logger.
  *
  * <p>Logs full invocation details on method entry and method exit,
  * including invocation arguments and invocation count. This is only
- * intended for debugging purposes; use <code>SimpleTraceInterceptor</code>
- * or <code>CustomizableTraceInterceptor</code> for pure tracing purposes.
+ * intended for debugging purposes; use {@code SimpleTraceInterceptor}
+ * or {@code CustomizableTraceInterceptor} for pure tracing purposes.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see SimpleTraceInterceptor
  * @see CustomizableTraceInterceptor
  */
+@SuppressWarnings("serial")
 public class DebugInterceptor extends SimpleTraceInterceptor {
 
 	private volatile long count;

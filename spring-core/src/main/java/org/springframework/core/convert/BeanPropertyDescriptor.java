@@ -29,9 +29,9 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 	private final Property property;
 
 	private final MethodParameter methodParameter;
-	
+
 	private final Annotation[] annotations;
-	
+
 
 	public BeanPropertyDescriptor(Property property) {
 		super(property.getType());
@@ -45,7 +45,7 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 	public Annotation[] getAnnotations() {
 		return this.annotations;
 	}
-	
+
 	@Override
 	protected Class<?> resolveCollectionElementType() {
 		return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
@@ -65,10 +65,10 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 	protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
 		MethodParameter methodParameter = new MethodParameter(this.methodParameter);
 		methodParameter.increaseNestingLevel();
-		methodParameter.setTypeIndexForCurrentLevel(typeIndex);			
+		methodParameter.setTypeIndexForCurrentLevel(typeIndex);
 		return new BeanPropertyDescriptor(type, this.property, methodParameter, this.annotations);
 	}
-	
+
 
 	// internal
 
@@ -78,5 +78,5 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 		this.methodParameter = methodParameter;
 		this.annotations = annotations;
 	}
-	
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>textarea</code>'.
+ * Databinding-aware JSP tag for rendering an HTML '{@code textarea}'.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class TextareaTag extends AbstractHtmlInputElementTag {
 
 	public static final String ROWS_ATTRIBUTE = "rows";
@@ -44,7 +45,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Set the value of the '<code>rows</code>' attribute.
+	 * Set the value of the '{@code rows}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setRows(String rows) {
@@ -52,14 +53,14 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>rows</code>' attribute.
+	 * Get the value of the '{@code rows}' attribute.
 	 */
 	protected String getRows() {
 		return this.rows;
 	}
 
 	/**
-	 * Set the value of the '<code>cols</code>' attribute.
+	 * Set the value of the '{@code cols}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setCols(String cols) {
@@ -67,14 +68,14 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>cols</code>' attribute.
+	 * Get the value of the '{@code cols}' attribute.
 	 */
 	protected String getCols() {
 		return this.cols;
 	}
 
 	/**
-	 * Set the value of the '<code>onselect</code>' attribute.
+	 * Set the value of the '{@code onselect}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnselect(String onselect) {
@@ -82,7 +83,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>onselect</code>' attribute.
+	 * Get the value of the '{@code onselect}' attribute.
 	 */
 	protected String getOnselect() {
 		return this.onselect;

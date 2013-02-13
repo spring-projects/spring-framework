@@ -19,42 +19,48 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.method.HandlerMethod;
+
 /**
- * Extends the HandlerInterceptor contract for scenarios where a handler may be
- * executed asynchronously. Since the handler will complete execution in another
- * thread, the results are not available in the current thread, and therefore the
- * DispatcherServlet exits quickly and on its way out invokes
- * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse)}
- * instead of {@code postHandle} and {@code afterCompletion}.
- * When the async handler execution completes, and the request is dispatched back
- * for further processing, the DispatcherServlet will invoke {@code preHandle}
- * again, as well as {@code postHandle} and {@code afterCompletion}.
+ * Extends {@code HandlerInterceptor} with a callback method invoked during
+ * asynchronous request handling.
  *
- * <p>Existing implementations should consider the fact that {@code preHandle} may
- * be invoked twice before {@code postHandle} and {@code afterCompletion} are
- * called if they don't implement this contract. Once before the start of concurrent
- * handling and a second time as part of an asynchronous dispatch after concurrent
- * handling is done. This may be not important in most cases but when some work
- * needs to be done after concurrent handling starts (e.g. clearing thread locals)
- * then this contract can be implemented.
+ * <p>When a handler starts asynchronous request handling, the DispatcherServlet
+ * exits without invoking {@code postHandle} and {@code afterCompletion}, as it
+ * normally does, since the results of request handling (e.g. ModelAndView)
+ * will. be produced concurrently in another thread. In such scenarios,
+ * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse, Object)}
+ * is invoked instead allowing implementations to perform tasks such as cleaning
+ * up thread bound attributes.
+ *
+ * <p>When asynchronous handling completes, the request is dispatched to the
+ * container for further processing. At this stage the DispatcherServlet invokes
+ * {@code preHandle}, {@code postHandle} and {@code afterCompletion} as usual.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  *
  * @see org.springframework.web.context.request.async.WebAsyncManager
+ * @see org.springframework.web.context.request.async.CallableProcessingInterceptor
+ * @see org.springframework.web.context.request.async.DeferredResultProcessingInterceptor
  */
 public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 
 	/**
-	 * Called instead of {@code postHandle} and {@code afterCompletion}, when the
-	 * a handler is being executed concurrently. Implementations may use the provided
-	 * request and response but should avoid modifying them in ways that would
-	 * conflict with the concurrent execution of the handler. A typical use of
-	 * this method would be to clean thread local variables.
+	 * Called instead of {@code postHandle} and {@code afterCompletion}, when
+	 * the a handler is being executed concurrently. Implementations may use the
+	 * provided request and response but should avoid modifying them in ways
+	 * that would conflict with the concurrent execution of the handler. A
+	 * typical use of this method would be to clean thread local variables.
 	 *
 	 * @param request the current request
 	 * @param response the current response
+	 * @param handler handler (or {@link HandlerMethod}) that started async
+	 * execution, for type and/or instance examination
+	 * @throws Exception in case of errors
 	 */
-	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response);
+	void afterConcurrentHandlingStarted(
+			HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception;
 
 }

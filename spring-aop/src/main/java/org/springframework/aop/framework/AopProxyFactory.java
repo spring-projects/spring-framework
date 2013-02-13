@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ package org.springframework.aop.framework;
  *
  * <p>Proxies may or may not allow advice changes to be made.
  * If they do not permit advice changes (for example, because
- * the configuration was frozen) a proxy should throw an 
+ * the configuration was frozen) a proxy should throw an
  * {@link AopConfigException} on an attempted advice change.
  *
  * @author Rod Johnson

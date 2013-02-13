@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,16 @@ import org.springframework.beans.factory.BeanNameAware;
  * no special code to handle any particular aspects, such as pooling aspects.
  *
  * <p>It's possible to filter out advisors - for example, to use multiple post processors
- * of this type in the same factory - by setting the <code>usePrefix</code> property
+ * of this type in the same factory - by setting the {@code usePrefix} property
  * to true, in which case only advisors beginning with the DefaultAdvisorAutoProxyCreator's
  * bean name followed by a dot (like "aapc.") will be used. This default prefix can be
- * changed from the bean name by setting the <code>advisorBeanNamePrefix</code> property.
+ * changed from the bean name by setting the {@code advisorBeanNamePrefix} property.
  * The separator (.) will also be used in this case.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  */
+@SuppressWarnings("serial")
 public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator implements BeanNameAware {
 
 	/** Separator between prefix and remainder of bean name */
@@ -94,6 +95,6 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 	@Override
 	protected boolean isEligibleAdvisorBean(String beanName) {
 		return (!isUsePrefix() || beanName.startsWith(getAdvisorBeanNamePrefix()));
-	}              
+	}
 
 }

@@ -59,6 +59,8 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
+
+		assertFalse(applicationWildcardXml.includes(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -84,6 +86,8 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
+
+		assertFalse(applicationWildcardXml.isCompatibleWith(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -313,6 +317,7 @@ public class MediaTypeTests {
 		MediaType audio07 = new MediaType("audio", "*", 0.7);
 		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
 		MediaType textHtml = new MediaType("text", "html");
+		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
 		Comparator<MediaType> comp = MediaType.SPECIFICITY_COMPARATOR;
@@ -328,9 +333,11 @@ public class MediaTypeTests {
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, audio) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, all) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audio, all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(MediaType.APPLICATION_XHTML_XML, allXml) < 0);
 
 		// unspecific to specific
 		assertTrue("Invalid comparison result", comp.compare(audio, audioBasic) > 0);
+		assertTrue("Invalid comparison result", comp.compare(allXml, MediaType.APPLICATION_XHTML_XML) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audioBasic) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audio) > 0);
 
@@ -414,6 +421,7 @@ public class MediaTypeTests {
 		MediaType audio07 = new MediaType("audio", "*", 0.7);
 		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
 		MediaType textHtml = new MediaType("text", "html");
+		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
 		Comparator<MediaType> comp = MediaType.QUALITY_VALUE_COMPARATOR;
@@ -429,11 +437,13 @@ public class MediaTypeTests {
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, audio) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, all) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audio, all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(MediaType.APPLICATION_XHTML_XML, allXml) < 0);
 
 		// unspecific to specific
 		assertTrue("Invalid comparison result", comp.compare(audio, audioBasic) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audioBasic) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audio) > 0);
+		assertTrue("Invalid comparison result", comp.compare(allXml, MediaType.APPLICATION_XHTML_XML) > 0);
 
 		// qualifiers
 		assertTrue("Invalid comparison result", comp.compare(audio, audio07) < 0);

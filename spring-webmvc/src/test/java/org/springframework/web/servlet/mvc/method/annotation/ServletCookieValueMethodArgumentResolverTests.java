@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,15 @@ import javax.servlet.http.Cookie;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ServletCookieValueMethodArgumentResolver;
 
 /**
  * Test fixture with {@link ServletCookieValueMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -52,7 +52,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		resolver = new ServletCookieValueMethodArgumentResolver(null);
-		
+
 		Method method = getClass().getMethod("params", Cookie.class, String.class);
 		cookieParameter = new MethodParameter(method, 0);
 		cookieStringParameter = new MethodParameter(method, 1);

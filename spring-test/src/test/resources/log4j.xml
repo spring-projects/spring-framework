@@ -45,6 +45,10 @@
 		<level value="warn" />
 	</logger>
 
+	<logger name="org.springframework.test.context.web">
+		<level value="warn" />
+	</logger>
+
 	<logger name="org.springframework.test.context">
 		<level value="warn" />
 	</logger>

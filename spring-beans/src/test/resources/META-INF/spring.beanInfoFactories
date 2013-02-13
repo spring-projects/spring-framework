@@ -1,3 +1,0 @@
-# Dummy bean info factories file, used by CachedIntrospectionResultsTests
-
-org.springframework.beans.DummyBeanInfoFactory

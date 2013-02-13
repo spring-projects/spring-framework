@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import javax.servlet.http.HttpServletRequest;
  * have to. A handler will always be wrapped in a {@link HandlerExecutionChain}
  * instance, optionally accompanied by some {@link HandlerInterceptor} instances.
  * The DispatcherServlet will first call each HandlerInterceptor's
- * <code>preHandle</code> method in the given order, finally invoking the handler
- * itself if all <code>preHandle</code> methods have returned <code>true</code>.
+ * {@code preHandle} method in the given order, finally invoking the handler
+ * itself if all {@code preHandle} methods have returned {@code true}.
  *
  * <p>The ability to parameterize this mapping is a powerful and unusual
  * capability of this MVC framework. For example, it is possible to write
@@ -93,10 +93,21 @@ public interface HandlerMapping {
 	String URI_TEMPLATE_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".uriTemplateVariables";
 
 	/**
-	 * Name of the {@link HttpServletRequest} attribute that contains the set of producible MediaTypes 
-	 * applicable to the mapped handler. 
-	 * <p>Note: This attribute is not required to be supported by all HandlerMapping implementations. 
-	 * Handlers should not necessarily expect this request attribute to be present in all scenarios.
+	 * Name of the {@link HttpServletRequest} attribute that contains a map with
+	 * URI matrix variables.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations and may also not be present depending on
+	 * whether the HandlerMapping is configured to keep matrix variable content
+	 * in the request URI.
+	 */
+	String MATRIX_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".matrixVariables";
+
+	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the set of
+	 * producible MediaTypes applicable to the mapped handler.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. Handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
@@ -107,12 +118,12 @@ public interface HandlerMapping {
 	 * even a tag interface, so that handlers are not constrained in any way.
 	 * For example, a HandlerAdapter could be written to allow another framework's
 	 * handler objects to be used.
-	 * <p>Returns <code>null</code> if no match was found. This is not an error.
+	 * <p>Returns {@code null} if no match was found. This is not an error.
 	 * The DispatcherServlet will query all registered HandlerMapping beans to find
 	 * a match, and only decide there is an error if none can find a handler.
 	 * @param request current HTTP request
 	 * @return a HandlerExecutionChain instance containing handler object and
-	 * any interceptors, or <code>null</code> if no mapping found
+	 * any interceptors, or {@code null} if no mapping found
 	 * @throws Exception if there is an internal error
 	 */
 	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;

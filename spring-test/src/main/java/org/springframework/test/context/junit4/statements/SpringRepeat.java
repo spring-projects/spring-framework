@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import org.springframework.test.annotation.Repeat;
 import org.springframework.util.ClassUtils;
 
 /**
- * <code>SpringRepeat</code> is a custom JUnit 4.5+ {@link Statement} which adds
+ * {@code SpringRepeat} is a custom JUnit 4.5+ {@link Statement} which adds
  * support for Spring's {@link Repeat &#064;Repeat} annotation by repeating the
  * test for the specified number of times.
- * 
+ *
  * @see #evaluate()
  * @author Sam Brannen
  * @since 3.0
@@ -45,9 +45,9 @@ public class SpringRepeat extends Statement {
 
 
 	/**
-	 * Constructs a new <code>SpringRepeat</code> statement.
-	 * 
-	 * @param next the next <code>Statement</code> in the execution chain
+	 * Constructs a new {@code SpringRepeat} statement.
+	 *
+	 * @param next the next {@code Statement} in the execution chain
 	 * @param testMethod the current test method
 	 * @param repeat the configured repeat count for the current test method
 	 * @see Repeat#value()

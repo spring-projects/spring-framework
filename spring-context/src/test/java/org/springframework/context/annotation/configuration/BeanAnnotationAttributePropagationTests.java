@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.context.annotation.DependsOn;
  * Unit tests proving that the various attributes available via the {@link Bean}
  * annotation are correctly reflected in the {@link BeanDefinition} created when
  * processing the {@link Configuration} class.
- * 
+ *
  * <p>Also includes tests proving that using {@link Lazy} and {@link Primary}
  * annotations in conjunction with Bean propagate their respective metadata
  * correctly into the resulting BeanDefinition

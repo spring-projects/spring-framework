@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.test.jdbc;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +39,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
  * @author Juergen Hoeller
  * @author Thomas Risberg
  * @since 2.5
- * @deprecated As of Spring 3.2, use {@link JdbcTestUtils} instead.
+ * @deprecated as of Spring 3.1.3; use {@link JdbcTestUtils} instead.
  */
 @Deprecated
 public abstract class SimpleJdbcTestUtils {
@@ -87,7 +86,7 @@ public abstract class SimpleJdbcTestUtils {
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, ResourceLoader resourceLoader,
 			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
@@ -97,7 +96,7 @@ public abstract class SimpleJdbcTestUtils {
 	}
 
 	/**
-	 * Execute the given SQL script. The script will normally be loaded by classpath. 
+	 * Execute the given SQL script. The script will normally be loaded by classpath.
 	 * <p>Statements should be delimited with a semicolon.  If statements are not delimited with
 	 * a semicolon then there should be one statement per line.  Statements are allowed to span
 	 * lines only if they are delimited with a semicolon.
@@ -107,7 +106,7 @@ public abstract class SimpleJdbcTestUtils {
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, Resource resource,
 			boolean continueOnError) throws DataAccessException {
@@ -126,7 +125,7 @@ public abstract class SimpleJdbcTestUtils {
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, EncodedResource resource,
 			boolean continueOnError) throws DataAccessException {

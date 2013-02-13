@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -35,8 +36,8 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
  * {@code resources} element to register a {@link ResourceHttpRequestHandler}.
- * Will also register a {@link SimpleUrlHandlerMapping} for mapping resource requests, 
- * and a {@link HttpRequestHandlerAdapter}. 
+ * Will also register a {@link SimpleUrlHandlerMapping} for mapping resource requests,
+ * and a {@link HttpRequestHandlerAdapter}.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
@@ -46,51 +47,54 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
-		
+
 		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
 		if (resourceHandlerName == null) {
 			return null;
 		}
-		
+
 		Map<String, String> urlMap = new ManagedMap<String, String>();
 		String resourceRequestPath = element.getAttribute("mapping");
 		if (!StringUtils.hasText(resourceRequestPath)) {
 			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
-	        return null;
+			return null;
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
-		
+
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
-		
+
 		String order = element.getAttribute("order");
 		// use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
 		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
-		
+
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
-		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));	
+		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));
 
-		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off" 
+		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
 		// Register HttpRequestHandlerAdapter
 		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		return null;
 	}
-	
+
 	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
 			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
-	        return null;
-		}		
+			return null;
+		}
+
+		ManagedList<String> locations = new ManagedList<String>();
+		locations.addAll(StringUtils.commaDelimitedListToSet(locationAttr));
 
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", StringUtils.commaDelimitedListToStringArray(locationAttr));
+		resourceHandlerDef.getPropertyValues().add("locations", locations);
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
@@ -99,7 +103,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
-		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));	
+		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));
 		return beanName;
 	}
 

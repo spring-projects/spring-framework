@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.format.datetime.joda;
-
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +32,7 @@ import org.joda.time.MutableDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -42,21 +41,28 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
  */
 public class JodaTimeFormattingTests {
 
-	private FormattingConversionService conversionService = new FormattingConversionService();
+	private FormattingConversionService conversionService;
 
 	private DataBinder binder;
 
 	@Before
 	public void setUp() {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		setUp(registrar);
+	}
+
+	private void setUp(JodaTimeFormatterRegistrar registrar) {
+		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
 
-		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
 		registrar.registerFormatters(conversionService);
 
 		JodaTimeBean bean = new JodaTimeBean();
@@ -83,7 +89,7 @@ public class JodaTimeFormattingTests {
 		System.out.println(org.joda.time.format.DateTimeFormat.patternForStyle("LL", LocaleContextHolder.getLocale()));
 		System.out.println(org.joda.time.format.DateTimeFormat.patternForStyle("FF", LocaleContextHolder.getLocale()));
 	}
-	
+
 	@Test
 	public void testBindLocalDate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -94,9 +100,33 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalDateWithSpecificStyle() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setDateStyle("L");
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDate", "October 31, 2009");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("October 31, 2009", binder.getBindingResult().getFieldValue("localDate"));
+	}
+
+	@Test
+	public void testBindLocalDateWithSpecifcFormatter() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setDateFormatter(org.joda.time.format.DateTimeFormat.forPattern("yyyyMMdd"));
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDate", "20091031");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("20091031", binder.getBindingResult().getFieldValue("localDate"));
+	}
+
+	@Test
 	public void testBindLocalDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDate", new String[] {"10/31/09"});
+		propertyValues.add("localDate", new String[]{"10/31/09"});
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
@@ -158,6 +188,30 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalTimeWithSpecificStyle() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setTimeStyle("M");
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localTime", "12:00:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("12:00:00 PM", binder.getBindingResult().getFieldValue("localTime"));
+	}
+
+	@Test
+	public void testBindLocalTimeWithSpecificFormatter() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setTimeFormatter(org.joda.time.format.DateTimeFormat.forPattern("HHmmss"));
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localTime", "130000");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("130000", binder.getBindingResult().getFieldValue("localTime"));
+	}
+
+	@Test
 	public void testBindLocalTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTimeAnnotated", "12:00:00 PM");
@@ -205,6 +259,42 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeWithSpecificStyle() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setDateTimeStyle("MM");
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateTime", "Oct 31, 2009 12:00:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("Oct 31, 2009 12:00:00 PM", binder.getBindingResult().getFieldValue("localDateTime"));
+	}
+
+	@Test
+	public void testBindDateTimeISO() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setUseIsoFormat(true);
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTime", "2009-10-31T12:00:00.000Z");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("dateTime"));
+	}
+
+	@Test
+	public void testBindDateTimeWithSpecificFormatter() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setDateTimeFormatter(org.joda.time.format.DateTimeFormat.forPattern("yyyyMMddHHmmss"));
+		setUp(registrar);
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTime", "20091031130000");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("20091031130000", binder.getBindingResult().getFieldValue("dateTime"));
+	}
+
+	@Test
 	public void testBindDateTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateTimeAnnotated", "Oct 31, 2009 12:00 PM");
@@ -238,6 +328,24 @@ public class JodaTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("date"));
+	}
+
+	@Test
+	public void testBindDateWithErrorAvoidingDateConstructor() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("date", "Sat, 12 Aug 1995 13:30:00 GMT");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+		assertEquals("Sat, 12 Aug 1995 13:30:00 GMT", binder.getBindingResult().getFieldValue("date"));
+	}
+
+	@Test
+	public void testBindDateWithoutErrorFallingBackToDateConstructor() {
+		DataBinder binder = new DataBinder(new JodaTimeBean());
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("date", "Sat, 12 Aug 1995 13:30:00 GMT");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
 
 	@Test
@@ -320,7 +428,7 @@ public class JodaTimeFormattingTests {
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("instant"));
 	}
-	
+
 	@Test
 	public void testBindInstantAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -338,7 +446,7 @@ public class JodaTimeFormattingTests {
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("mutableDateTime"));
 	}
-	
+
 	@Test
 	public void testBindMutableDateTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -464,7 +572,7 @@ public class JodaTimeFormattingTests {
 		public void setLocalDateTimeAnnotated(LocalDateTime localDateTimeAnnotated) {
 			this.localDateTimeAnnotated = localDateTimeAnnotated;
 		}
-		
+
 		public LocalDateTime getLocalDateTimeAnnotatedLong() {
 			return localDateTimeAnnotatedLong;
 		}
@@ -577,7 +685,7 @@ public class JodaTimeFormattingTests {
 		public void setIsoDateTime(DateTime isoDateTime) {
 			this.isoDateTime = isoDateTime;
 		}
-		
+
 		public Instant getInstant() {
 			return instant;
 		}

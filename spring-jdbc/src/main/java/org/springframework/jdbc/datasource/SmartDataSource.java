@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 /**
- * Extension of the <code>javax.sql.DataSource</code> interface, to be
+ * Extension of the {@code javax.sql.DataSource} interface, to be
  * implemented by special DataSources that return JDBC Connections
  * in an unwrapped fashion.
  *
@@ -36,11 +36,11 @@ import javax.sql.DataSource;
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public interface SmartDataSource extends DataSource {
-		
-	/** 
+
+	/**
 	 * Should we close this Connection, obtained from this DataSource?
 	 * <p>Code that uses Connections from a SmartDataSource should always
-	 * perform a check via this method before invoking <code>close()</code>.
+	 * perform a check via this method before invoking {@code close()}.
 	 * <p>Note that the JdbcTemplate class in the 'jdbc.core' package takes care of
 	 * releasing JDBC Connections, freeing application code of this responsibility.
 	 * @param con the Connection to check

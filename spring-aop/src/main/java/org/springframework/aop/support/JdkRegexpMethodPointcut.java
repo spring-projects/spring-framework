@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Regular expression pointcut based on the <code>java.util.regex</code> package.
+ * Regular expression pointcut based on the {@code java.util.regex} package.
  * Supports the following JavaBean properties:
  * <ul>
  * <li>pattern: regular expression for the fully-qualified method names to match
@@ -30,28 +30,29 @@ import java.util.regex.PatternSyntaxException;
  * </ul>
  *
  * <p>Note: the regular expressions must be a match. For example,
- * <code>.*get.*</code> will match com.mycom.Foo.getBar().
- * <code>get.*</code> will not.
+ * {@code .*get.*} will match com.mycom.Foo.getBar().
+ * {@code get.*} will not.
  *
  * @author Dmitriy Kopylenko
  * @author Rob Harrop
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
-	
-	/** 
+
+	/**
 	 * Compiled form of the patterns.
 	 */
 	private Pattern[] compiledPatterns = new Pattern[0];
 
-	/** 
+	/**
 	 * Compiled form of the exclusion patterns.
 	 */
 	private Pattern[] compiledExclusionPatterns = new Pattern[0];
 
 
 	/**
-	 * Initialize {@link Pattern Patterns} from the supplied <code>String[]</code>.
+	 * Initialize {@link Pattern Patterns} from the supplied {@code String[]}.
 	 */
 	@Override
 	protected void initPatternRepresentation(String[] patterns) throws PatternSyntaxException {
@@ -59,7 +60,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	}
 
 	/**
-	 * Initialize exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
+	 * Initialize exclusion {@link Pattern Patterns} from the supplied {@code String[]}.
 	 */
 	@Override
 	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws PatternSyntaxException {
@@ -67,8 +68,8 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	}
 
 	/**
-	 * Returns <code>true</code> if the {@link Pattern} at index <code>patternIndex</code>
-	 * matches the supplied candidate <code>String</code>.
+	 * Returns {@code true} if the {@link Pattern} at index {@code patternIndex}
+	 * matches the supplied candidate {@code String}.
 	 */
 	@Override
 	protected boolean matches(String pattern, int patternIndex) {
@@ -77,8 +78,8 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	}
 
 	/**
-	 * Returns <code>true</code> if the exclusion {@link Pattern} at index <code>patternIndex</code>
-	 * matches the supplied candidate <code>String</code>.
+	 * Returns {@code true} if the exclusion {@link Pattern} at index {@code patternIndex}
+	 * matches the supplied candidate {@code String}.
 	 */
 	@Override
 	protected boolean matchesExclusion(String candidate, int patternIndex) {
@@ -88,7 +89,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 
 
 	/**
-	 * Compiles the supplied <code>String[]</code> into an array of
+	 * Compiles the supplied {@code String[]} into an array of
 	 * {@link Pattern} objects and returns that array.
 	 */
 	private Pattern[] compilePatterns(String[] source) throws PatternSyntaxException {

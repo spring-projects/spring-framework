@@ -46,5 +46,5 @@ public interface ParameterizedPreparedStatementSetter<T> {
 	 * @throws SQLException if a SQLException is encountered (i.e. there is no need to catch SQLException)
 	 */
 	void setValues(PreparedStatement ps, T argument) throws SQLException;
-	
+
 }

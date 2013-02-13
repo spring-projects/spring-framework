@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.util.ClassUtils;
 /**
  * Convenience methods for working with the StAX API.
  *
- * <p>In particular, methods for using StAX ({@link javax.xml.stream}) in combination with the TrAX API
- * ({@link javax.xml.transform}), and converting StAX readers/writers into SAX readers/handlers and vice-versa.
+ * <p>In particular, methods for using StAX ({@code javax.xml.stream}) in combination with the TrAX API
+ * ({@code javax.xml.transform}), and converting StAX readers/writers into SAX readers/handlers and vice-versa.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -267,7 +267,7 @@ public abstract class StaxUtils {
 	/**
 	 * Create a SAX {@link ContentHandler} that writes to the given StAX {@link XMLStreamWriter}.
 	 * @param streamWriter the StAX stream writer
-	 * @return a content handler writing to the <code>streamWriter</code>
+	 * @return a content handler writing to the {@code streamWriter}
 	 */
 	public static ContentHandler createContentHandler(XMLStreamWriter streamWriter) {
 		return new StaxStreamContentHandler(streamWriter);
@@ -276,7 +276,7 @@ public abstract class StaxUtils {
 	/**
 	 * Create a SAX {@link ContentHandler} that writes events to the given StAX {@link XMLEventWriter}.
 	 * @param eventWriter the StAX event writer
-	 * @return a content handler writing to the <code>eventWriter</code>
+	 * @return a content handler writing to the {@code eventWriter}
 	 */
 	public static ContentHandler createContentHandler(XMLEventWriter eventWriter) {
 		return new StaxEventContentHandler(eventWriter);
@@ -285,7 +285,7 @@ public abstract class StaxUtils {
 	/**
 	 * Create a SAX {@link XMLReader} that reads from the given StAX {@link XMLStreamReader}.
 	 * @param streamReader the StAX stream reader
-	 * @return a XMLReader reading from the <code>streamWriter</code>
+	 * @return a XMLReader reading from the {@code streamWriter}
 	 */
 	public static XMLReader createXMLReader(XMLStreamReader streamReader) {
 		return new StaxStreamXMLReader(streamReader);
@@ -294,7 +294,7 @@ public abstract class StaxUtils {
 	/**
 	 * Create a SAX {@link XMLReader} that reads from the given StAX {@link XMLEventReader}.
 	 * @param eventReader the StAX event reader
-	 * @return a XMLReader reading from the <code>eventWriter</code>
+	 * @return a XMLReader reading from the {@code eventWriter}
 	 */
 	public static XMLReader createXMLReader(XMLEventReader eventReader) {
 		return new StaxEventXMLReader(eventReader);
@@ -302,11 +302,20 @@ public abstract class StaxUtils {
 
 	/**
 	 * Return a {@link XMLStreamReader} that reads from a {@link XMLEventReader}. Useful, because the StAX
-	 * <code>XMLInputFactory</code> allows one to create a event reader from a stream reader, but not vice-versa.
+	 * {@code XMLInputFactory} allows one to create a event reader from a stream reader, but not vice-versa.
 	 * @return a stream reader that reads from an event reader
 	 */
 	public static XMLStreamReader createEventStreamReader(XMLEventReader eventReader) throws XMLStreamException {
 		return new XMLEventStreamReader(eventReader);
+	}
+
+	/**
+	 * Return a {@link XMLStreamWriter} that writes to a {@link XMLEventWriter}.
+	 * @return a stream writer that writes to an event writer
+	 * @since 3.2
+	 */
+	public static XMLStreamWriter createEventStreamWriter(XMLEventWriter eventWriter) {
+		return new XMLEventStreamWriter(eventWriter, XMLEventFactory.newFactory());
 	}
 
 	/**

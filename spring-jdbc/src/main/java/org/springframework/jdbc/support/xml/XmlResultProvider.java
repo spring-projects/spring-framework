@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.jdbc.support.xml;
 import javax.xml.transform.Result;
 
 /**
- * Interface defining handling involved with providing <code>Result</code>
+ * Interface defining handling involved with providing {@code Result}
  * data for XML input.
  *
  * @author Thomas Risberg
@@ -30,9 +30,9 @@ public interface XmlResultProvider {
 
 	/**
 	 * Implementations must implement this method to provide the XML content
-	 * for the <code>Result</code>. Implementations will vary depending on
-	 * the <code>Result</code> implementation used.
-	 * @param result the <code>Result</code> object being used to provide the XML input 
+	 * for the {@code Result}. Implementations will vary depending on
+	 * the {@code Result} implementation used.
+	 * @param result the {@code Result} object being used to provide the XML input
 	 */
 	void provideXml(Result result);
 

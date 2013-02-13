@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 
 	/**
 	 * Determine the rollback-only flag via checking this TransactionStatus.
-	 * <p>Will only return "true" if the application called <code>setRollbackOnly</code>
+	 * <p>Will only return "true" if the application called {@code setRollbackOnly}
 	 * on this TransactionStatus object.
 	 */
 	public boolean isLocalRollbackOnly() {
@@ -83,7 +83,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	/**
 	 * Template method for determining the global rollback-only flag of the
 	 * underlying transaction, if any.
-	 * <p>This implementation always returns <code>false</code>.
+	 * <p>This implementation always returns {@code false}.
 	 */
 	public boolean isGlobalRollbackOnly() {
 		return false;

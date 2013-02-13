@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +38,7 @@ import org.springframework.web.method.annotation.RequestParamMapMethodArgumentRe
 
 /**
  * Test fixture with {@link RequestParamMapMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -61,7 +61,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestParamMapMethodArgumentResolver();
-		
+
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, Map.class, Map.class);
 		paramMap = new MethodParameter(method, 0);
 		paramMultiValueMap = new MethodParameter(method, 1);
@@ -88,7 +88,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		Map<String, String> expected = Collections.singletonMap(name, value);
 
 		Object result = resolver.resolveArgument(paramMap, null, webRequest, null);
-		
+
 		assertTrue(result instanceof Map);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -99,7 +99,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		String value1 = "bar";
 		String value2 = "baz";
 		request.addParameter(name, new String[]{value1, value2});
-		
+
 		MultiValueMap<String, String> expected = new LinkedMultiValueMap<String, String>(1);
 		expected.add(name, value1);
 		expected.add(name, value2);

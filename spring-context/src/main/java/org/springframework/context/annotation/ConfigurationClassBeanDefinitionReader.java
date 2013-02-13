@@ -49,7 +49,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.context.annotation.MetadataUtils.*;
@@ -83,29 +82,25 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final Environment environment;
 
-	private final BeanNameGenerator beanNameGenerator;
+	private final BeanNameGenerator importBeanNameGenerator;
 
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
-	 * @param problemReporter 
-	 * @param metadataReaderFactory 
 	 */
 	public ConfigurationClassBeanDefinitionReader(
 			BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader, Environment environment,
-			BeanNameGenerator beanNameGenerator) {
+			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator) {
 
-		Assert.notNull(beanNameGenerator, "BeanNameGenerator must not be null");
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
-		this.beanNameGenerator = beanNameGenerator;
+		this.importBeanNameGenerator = importBeanNameGenerator;
 	}
 
 
@@ -124,7 +119,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
-		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
+		if (configClass.isImported()) {
+			registerBeanDefinitionForImportedConfigurationClass(configClass);
+		}
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
@@ -134,17 +131,13 @@ class ConfigurationClassBeanDefinitionReader {
 	/**
 	 * Register the {@link Configuration} class itself as a bean definition.
 	 */
-	private void doLoadBeanDefinitionForConfigurationClassIfNecessary(ConfigurationClass configClass) {
-		if (!configClass.isImported()) {
-			return;
-		}
-
+	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
 		String className = metadata.getClassName();
 		configBeanDef.setBeanClassName(className);
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
-			String configBeanName = this.beanNameGenerator.generateBeanName(configBeanDef, this.registry);
+			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
 			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
@@ -340,7 +333,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
-	
+
 	/**
 	 * Configuration classes must be annotated with {@link Configuration @Configuration} or
 	 * declare at least one {@link Bean @Bean} method.

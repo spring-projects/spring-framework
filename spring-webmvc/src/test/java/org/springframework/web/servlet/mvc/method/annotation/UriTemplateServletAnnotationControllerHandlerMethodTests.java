@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,11 +37,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,22 +56,22 @@ import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotati
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
- * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests}. 
- * 
+ * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests}.
+ *
  * Tests in this class run against the {@link HandlerMethod} infrastructure:
  * <ul>
- * 	<li>RequestMappingHandlerMapping 
- * 	<li>RequestMappingHandlerAdapter 
+ * 	<li>RequestMappingHandlerMapping
+ * 	<li>RequestMappingHandlerAdapter
  * 	<li>ExceptionHandlerExceptionResolver
  * </ul>
- * 
+ *
  * <p>Rather than against the existing infrastructure:
  * <ul>
  * 	<li>DefaultAnnotationHandlerMapping
  * 	<li>AnnotationMethodHandlerAdapter
  * 	<li>AnnotationMethodHandlerExceptionResolver
- * </ul> 
- * 
+ * </ul>
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -80,17 +84,18 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("test-42", response.getContentAsString());
+		assertEquals("test-42-7", response.getContentAsString());
 	}
 
 	@Test
 	public void multiple() throws Exception {
 		initServletWithControllers(MultipleUriTemplateController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21-other");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42;q=24/bookings/21-other;q=12");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("test-42-21-other", response.getContentAsString());
+		assertEquals(200, response.getStatus());
+		assertEquals("test-42-q24-21-other-q12", response.getContentAsString());
 	}
 
 	@Test
@@ -99,9 +104,10 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		pathVars.put("hotel", "42");
 		pathVars.put("booking", 21);
 		pathVars.put("other", "other");
-		
-		WebApplicationContext wac = 
+
+		WebApplicationContext wac =
 			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+				@Override
 				public void initialize(GenericWebApplicationContext context) {
 					RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
 					beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
@@ -109,9 +115,9 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 				}
 			}, ViewRenderingController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21-other");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42;q=1,2/bookings/21-other;q=3;r=R");
 		getServlet().service(request, new MockHttpServletResponse());
-		
+
 		ModelValidatingViewResolver resolver = wac.getBean(ModelValidatingViewResolver.class);
 		assertEquals(3, resolver.validatedAttrCount);
 	}
@@ -166,10 +172,10 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	public void extension() throws Exception {
 		initServletWithControllers(SimpleUriTemplateController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42.xml");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42;jsessionid=c0o7fszeb1;q=24.xml");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("test-42", response.getContentAsString());
+		assertEquals("test-42-24", response.getContentAsString());
 
 	}
 
@@ -287,10 +293,11 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	public void customRegex() throws Exception {
 		initServletWithControllers(CustomRegexController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42;q=1;q=2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("test-42", response.getContentAsString());
+		assertEquals(200, response.getStatus());
+		assertEquals("test-42-;q=1;q=2-[1, 2]", response.getContentAsString());
 	}
 
 	/*
@@ -343,7 +350,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	@Test
 	public void doIt() throws Exception {
 		initServletWithControllers(Spr6978Controller.class);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/100");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
@@ -375,9 +382,11 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	public static class SimpleUriTemplateController {
 
 		@RequestMapping("/{root}")
-		public void handle(@PathVariable("root") int root, Writer writer) throws IOException {
+		public void handle(@PathVariable("root") int root, @MatrixVariable(required=false, defaultValue="7") int q,
+				Writer writer) throws IOException {
+
 			assertEquals("Invalid path variable value", 42, root);
-			writer.write("test-" + root);
+			writer.write("test-" + root + "-" + q);
 		}
 
 	}
@@ -389,10 +398,12 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		public void handle(@PathVariable("hotel") String hotel,
 				@PathVariable int booking,
 				@PathVariable String other,
+				@MatrixVariable(value="q", pathVar="hotel") int qHotel,
+				@MatrixVariable(value="q", pathVar="other") int qOther,
 				Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", 21, booking);
-			writer.write("test-" + hotel + "-" + booking + "-" + other);
+			writer.write("test-" + hotel + "-q" + qHotel + "-" + booking + "-" + other + "-q" + qOther);
 		}
 
 	}
@@ -401,9 +412,13 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	public static class ViewRenderingController {
 
 		@RequestMapping("/hotels/{hotel}/bookings/{booking}-{other}")
-		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking, @PathVariable String other) {
+		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking,
+				@PathVariable String other, @MatrixVariable MultiValueMap<String, String> params) {
+
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", 21, booking);
+			assertEquals(Arrays.asList("1", "2", "3"), params.get("q"));
+			assertEquals("R", params.getFirst("r"));
 		}
 
 	}
@@ -499,12 +514,13 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	@Controller
 	public static class CustomRegexController {
 
-		@RequestMapping("/{root:\\d+}")
-		public void handle(@PathVariable("root") int root, Writer writer) throws IOException {
-			assertEquals("Invalid path variable value", 42, root);
-			writer.write("test-" + root);
-		}
+		@RequestMapping("/{root:\\d+}{params}")
+		public void handle(@PathVariable("root") int root, @PathVariable("params") String paramString,
+				@MatrixVariable List<Integer> q, Writer writer) throws IOException {
 
+			assertEquals("Invalid path variable value", 42, root);
+			writer.write("test-" + root + "-" + paramString + "-" + q);
+		}
 	}
 
 	@Controller
@@ -515,7 +531,6 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 			throws IOException {
 			writer.write("latitude-" + latitude + "-longitude-" + longitude);
 		}
-
 	}
 
 
@@ -650,15 +665,17 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 	public static class ModelValidatingViewResolver implements ViewResolver {
 
 		private final Map<String, Object> attrsToValidate;
-		
+
 		int validatedAttrCount;
-		
+
 		public ModelValidatingViewResolver(Map<String, Object> attrsToValidate) {
 			this.attrsToValidate = attrsToValidate;
 		}
 
+		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new AbstractView () {
+				@Override
 				public String getContentType() {
 					return null;
 				}
@@ -674,8 +691,8 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 			};
 		}
 	}
-	
-// @Ignore("ControllerClassNameHandlerMapping")	
+
+// @Ignore("ControllerClassNameHandlerMapping")
 //	public void controllerClassName() throws Exception {
 
 //	@Ignore("useDefaultSuffixPattern property not supported")
@@ -683,5 +700,5 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 
 //	@Ignore("useDefaultSuffixPattern property not supported")
 //	public void noDefaultSuffixPattern() throws Exception {
-	
+
 }

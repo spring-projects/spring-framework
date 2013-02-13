@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,15 @@
 
 package org.springframework.web.servlet;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
+
 import java.io.IOException;
 import java.util.Locale;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -25,7 +32,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -33,14 +39,18 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletConfig;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletConfig;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.bind.EscapedErrors;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ServletConfigAwareBean;
 import org.springframework.web.context.ServletContextAwareBean;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -70,6 +80,7 @@ public class DispatcherServletTests extends TestCase {
 
 	private DispatcherServlet complexDispatcherServlet;
 
+	@Override
 	protected void setUp() throws ServletException {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 		MockServletConfig complexConfig = new MockServletConfig(servletConfig.getServletContext(), "complex");
@@ -132,7 +143,7 @@ public class DispatcherServletTests extends TestCase {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		Assert.assertEquals(1, listener.counter);
+		assertEquals(1, listener.counter);
 	}
 
 	public void testPublishEventsOff() throws Exception {
@@ -143,7 +154,7 @@ public class DispatcherServletTests extends TestCase {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		Assert.assertEquals(0, listener.counter);
+		assertEquals(0, listener.counter);
 	}
 
 	public void testFormRequest() throws Exception {
@@ -823,9 +834,42 @@ public class DispatcherServletTests extends TestCase {
 		servlet.destroy();
 	}
 
+	public void testEnvironmentOperations() {
+		DispatcherServlet servlet = new DispatcherServlet();
+		ConfigurableWebEnvironment defaultEnv = servlet.getEnvironment();
+		assertThat(defaultEnv, notNullValue());
+		ConfigurableEnvironment env1 = new StandardServletEnvironment();
+		servlet.setEnvironment(env1); // should succeed
+		assertThat(servlet.getEnvironment(), sameInstance(env1));
+		try {
+			servlet.setEnvironment(new StandardEnvironment());
+			fail("expected exception");
+		}
+		catch (IllegalArgumentException ex) {
+		}
+		class CustomServletEnvironment extends StandardServletEnvironment { }
+		@SuppressWarnings("serial")
+		DispatcherServlet custom = new DispatcherServlet() {
+			@Override
+			protected ConfigurableWebEnvironment createEnvironment() {
+				return new CustomServletEnvironment();
+			}
+		};
+		assertThat(custom.getEnvironment(), instanceOf(CustomServletEnvironment.class));
+	}
+
+	public void testAllowedOptionsIncludesPatchMethod() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "OPTIONS", "/foo");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.service(request, response);
+		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));
+	}
+
 
 	public static class ControllerFromParent implements Controller {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			return new ModelAndView(ControllerFromParent.class.getName());
 		}

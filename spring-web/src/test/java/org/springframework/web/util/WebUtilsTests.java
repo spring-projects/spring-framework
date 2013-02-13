@@ -16,16 +16,19 @@
 
 package org.springframework.web.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import org.springframework.util.MultiValueMap;
 
 /**
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class WebUtilsTests {
 
@@ -62,6 +65,36 @@ public class WebUtilsTests {
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=a"));
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a"));
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
+	}
+
+	@Test
+	public void parseMatrixVariablesString() {
+		MultiValueMap<String, String> variables;
+
+		variables = WebUtils.parseMatrixVariables(null);
+		assertEquals(0, variables.size());
+
+		variables = WebUtils.parseMatrixVariables("year");
+		assertEquals(1, variables.size());
+		assertEquals("", variables.getFirst("year"));
+
+		variables = WebUtils.parseMatrixVariables("year=2012");
+		assertEquals(1, variables.size());
+		assertEquals("2012", variables.getFirst("year"));
+
+		variables = WebUtils.parseMatrixVariables("year=2012;colors=red,blue,green");
+		assertEquals(2, variables.size());
+		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+		assertEquals("2012", variables.getFirst("year"));
+
+		variables = WebUtils.parseMatrixVariables(";year=2012;colors=red,blue,green;");
+		assertEquals(2, variables.size());
+		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+		assertEquals("2012", variables.getFirst("year"));
+
+		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
+		assertEquals(1, variables.size());
+		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
 	}
 
 }

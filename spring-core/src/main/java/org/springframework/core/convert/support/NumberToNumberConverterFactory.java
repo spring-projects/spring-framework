@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.util.NumberUtils;
@@ -38,10 +40,15 @@ import org.springframework.util.NumberUtils;
  * @see java.math.BigDecimal
  * @see NumberUtils
  */
-final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number> {
+final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number>,
+		ConditionalConverter {
 
 	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
 		return new NumberToNumber<T>(targetType);
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return !sourceType.equals(targetType);
 	}
 
 	private final static class NumberToNumber<T extends Number> implements Converter<Number, T> {

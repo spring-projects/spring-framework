@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-java"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-java">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Java-based container configuration</title>
 
-  <section id="beans-java-basic-concepts">
+  <section xml:id="beans-java-basic-concepts">
     <title>Basic concepts: <literal>@Configuration</literal> and
       <literal>@Bean</literal></title>
 
@@ -41,7 +45,7 @@ public class AppConfig {
       spring container using Java-based configuration.</para>
   </section>
 
-  <section id="beans-java-instantiating-container">
+  <section xml:id="beans-java-instantiating-container">
     <title>Instantiating the Spring container using
       <literal>AnnotationConfigApplicationContext</literal></title>
 
@@ -63,7 +67,7 @@ public class AppConfig {
       <literal>@Inject</literal> are used within those classes where
       necessary.</para>
 
-    <section id="beans-java-instantiating-container-contstructor">
+    <section xml:id="beans-java-instantiating-container-contstructor">
       <title>Simple construction</title>
 
       <para>In much the same way that Spring XML files are used as input when
@@ -92,7 +96,7 @@ public class AppConfig {
         <literal>@Autowired</literal>.</para>
     </section>
 
-    <section id="beans-java-instantiating-container-register">
+    <section xml:id="beans-java-instantiating-container-register">
       <title>Building the container programmatically using
         <literal>register(Class&lt;?&gt;...)</literal></title>
 
@@ -111,7 +115,7 @@ public class AppConfig {
 }</programlisting></para>
     </section>
 
-    <section id="beans-java-instantiating-container-scan">
+    <section xml:id="beans-java-instantiating-container-scan">
       <title>Enabling component scanning with
         <literal>scan(String...)</literal></title>
 
@@ -148,7 +152,7 @@ public class AppConfig {
       </note>
     </section>
 
-    <section id="beans-java-instantiating-container-web">
+    <section xml:id="beans-java-instantiating-container-web">
       <title>Support for web applications with
         <literal>AnnotationConfigWebApplicationContext</literal></title>
 
@@ -214,10 +218,10 @@ public class AppConfig {
     </section>
   </section>
 
-  <section id="beans-java-composing-configuration-classes">
+  <section xml:id="beans-java-composing-configuration-classes">
     <title>Composing Java-based configurations</title>
 
-    <section id="beans-java-using-import">
+    <section xml:id="beans-java-using-import">
       <title>Using the <literal>@Import</literal> annotation</title>
 
       <para>Much as the <literal>&lt;import/&gt;</literal> element is used
@@ -250,7 +254,7 @@ public class ConfigB {
         a potentially large number of <literal>@Configuration</literal> classes
         during construction.</para>
 
-      <section id="beans-java-injecting-imported-beans">
+      <section xml:id="beans-java-injecting-imported-beans">
         <title>Injecting dependencies on imported <literal>@Bean</literal>
           definitions</title>
 
@@ -304,7 +308,7 @@ public static void main(String[] args) {
   transferService.transfer(100.00, "A123", "C456");
 }</programlisting></para>
 
-        <section id="beans-java-injecting-imported-beans-fq">
+        <section xml:id="beans-java-injecting-imported-beans-fq">
           <title>Fully-qualifying imported beans for ease of navigation</title>
 
           <para>In the scenario above, using <literal>@Autowired</literal> works
@@ -314,8 +318,8 @@ public static void main(String[] args) {
             <literal>ServiceConfig</literal>, how do you know exactly where the
             <literal>@Autowired AccountRepository</literal> bean is declared?
             It's not explicit in the code, and this may be just fine. Remember
-            that the <ulink url="http://www.springsource.com/products/sts"
-            >SpringSource Tool Suite</ulink> provides tooling that can render
+            that the <link xl:href="http://www.springsource.com/products/sts"
+            >SpringSource Tool Suite</link> provides tooling that can render
             graphs showing how everything is wired up - that may be all you
             need. Also, your Java IDE can easily find all declarations and uses
             of the <literal>AccountRepository</literal> type, and will quickly
@@ -386,7 +390,7 @@ public static void main(String[] args) {
       </section>
     </section>
 
-    <section id="beans-java-combining">
+    <section xml:id="beans-java-combining">
       <title>Combining Java and XML configuration</title>
 
       <para>Spring's <literal>@Configuration</literal> class support does not
@@ -400,7 +404,7 @@ public static void main(String[] args) {
         <literal>@ImportResource</literal> annotation to import XML as
         needed.</para>
 
-      <section id="beans-java-combining-xml-centric">
+      <section xml:id="beans-java-combining-xml-centric">
         <title>XML-centric use of <literal>@Configuration</literal>
           classes</title>
 
@@ -413,7 +417,7 @@ public static void main(String[] args) {
           <literal>@Configuration</literal> classes in this kind of
           "XML-centric" situation.</para>
 
-        <section id="beans-java-combining-xml-centric-declare-as-bean">
+        <section xml:id="beans-java-combining-xml-centric-declare-as-bean">
           <title>Declaring <literal>@Configuration</literal> classes as plain
             Spring <literal>&lt;bean/&gt;</literal> elements</title>
 
@@ -476,7 +480,7 @@ jdbc.password=</programlisting>
           </note>
         </section>
 
-        <section id="beans-java-combining-xml-centric-component-scan">
+        <section xml:id="beans-java-combining-xml-centric-component-scan">
           <title>Using <literal>&lt;context:component-scan/&gt;</literal> to
             pick up <literal>@Configuration</literal> classes</title>
 
@@ -506,7 +510,7 @@ jdbc.password=</programlisting>
         </section>
       </section>
 
-      <section id="beans-java-combining-java-centric">
+      <section xml:id="beans-java-combining-java-centric">
         <title><literal>@Configuration</literal> class-centric use of XML with
           <literal>@ImportResource</literal></title>
 
@@ -544,7 +548,7 @@ jdbc.password=</programlisting>
     </section>
   </section>
 
-  <section id="beans-java-bean-annotation">
+  <section xml:id="beans-java-bean-annotation">
     <title>Using the <interfacename>@Bean</interfacename> annotation</title>
 
     <para><interfacename>@Bean</interfacename> is a method-level annotation and
@@ -562,7 +566,7 @@ jdbc.password=</programlisting>
       <interfacename>@Configuration</interfacename>-annotated or in a
       <interfacename>@Component</interfacename>-annotated class.</para>
 
-    <section id="beans-java-declaring-a-bean">
+    <section xml:id="beans-java-declaring-a-bean">
       <title>Declaring a bean</title>
 
       <para>To declare a bean, simply annotate a method with the
@@ -595,7 +599,7 @@ transferService -&gt; com.acme.TransferServiceImpl
               </programlisting></para>
     </section>
 
-    <section id="beans-java-injecting-dependencies">
+    <section xml:id="beans-java-injecting-dependencies">
       <title>Injecting dependencies</title>
 
       <para>When <interfacename>@Bean</interfacename>s have dependencies on one
@@ -620,7 +624,7 @@ public class AppConfig {
         to <code> bar</code> via constructor injection.</para>
     </section>
 
-    <section id="beans-java-lifecycle-callbacks">
+    <section xml:id="beans-java-lifecycle-callbacks">
       <title>Receiving lifecycle callbacks</title>
 
       <para>Beans declared in a
@@ -697,10 +701,10 @@ public class AppConfig {
       </tip>
     </section>
 
-    <section id="beans-java-specifying-bean-scope">
+    <section xml:id="beans-java-specifying-bean-scope">
       <title>Specifying bean scope</title>
 
-      <section id="beans-java-available-scopes">
+      <section xml:id="beans-java-available-scopes">
         <title>Using the <interfacename>@Scope</interfacename>
           annotation</title>
 
@@ -724,7 +728,7 @@ public class MyConfiguration {
 }</programlisting></para>
       </section>
 
-      <section id="beans-java-scoped-proxy">
+      <section xml:id="beans-java-scoped-proxy">
         <title><code>@Scope and scoped-proxy</code></title>
 
         <para>Spring offers a convenient way of working with scoped dependencies
@@ -757,7 +761,7 @@ public Service userService() {
 }                </programlisting></para>
       </section>
 
-      <section id="beans-java-method-injection">
+      <section xml:id="beans-java-method-injection">
         <title>Lookup method injection</title>
 
         <para>As noted earlier, <link linkend="beans-factory-method-injection"
@@ -804,7 +808,7 @@ public CommandManager commandManager() {
       </section>
     </section>
 
-    <section id="beans-java-customizing-bean-naming">
+    <section xml:id="beans-java-customizing-bean-naming">
       <title>Customizing bean naming</title>
 
       <para>By default, configuration classes use a
@@ -825,7 +829,7 @@ public class AppConfig {
 
 
 
-    <section id="beans-java-bean-aliasing">
+    <section xml:id="beans-java-bean-aliasing">
       <title>Bean aliasing</title>
 
       <para>As discussed in <xref linkend="beans-beanname"/>, it is sometimes
@@ -845,7 +849,7 @@ public class AppConfig {
     </section>
   </section>
 
-  <section id="beans-java-further-information-java-config">
+  <section xml:id="beans-java-further-information-java-config">
     <title>Further information about how Java-based configuration works
       internally</title>
 

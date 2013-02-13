@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 /**
  * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -104,6 +104,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
+	@Override
 	@Resource
 	public void setDataSource(DataSource dataSource) {
 		super.setDataSource(dataSource);
@@ -119,10 +120,12 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		this.bar = bar;
 	}
 
+	@Override
 	public final void setBeanName(final String beanName) {
 		this.beanName = beanName;
 	}
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}

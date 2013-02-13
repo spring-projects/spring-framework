@@ -70,7 +70,7 @@ public class StandardServletEnvironment extends StandardEnvironment
 	 * environment variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The {@code Servlet}-related property sources are added as {@link
 	 * StubPropertySource stubs} at this stage, and will be {@linkplain
-	 * #initPropertySources(ServletContext) fully initialized} once the actual
+	 * #initPropertySources(ServletContext, ServletConfig) fully initialized} once the actual
 	 * {@link ServletContext} object becomes available.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
@@ -78,7 +78,7 @@ public class StandardServletEnvironment extends StandardEnvironment
 	 * @see ServletContextPropertySource
 	 * @see org.springframework.jndi.JndiPropertySource
 	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources
-	 * @see #initPropertySources(ServletContext)
+	 * @see #initPropertySources(ServletContext, ServletConfig)
 	 */
 	@Override
 	protected void customizePropertySources(MutablePropertySources propertySources) {

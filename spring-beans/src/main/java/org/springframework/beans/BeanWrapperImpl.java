@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.Property;
@@ -54,18 +53,18 @@ import org.springframework.util.StringUtils;
  * for all typical use cases. Caches introspection results for efficiency.
  *
  * <p>Note: Auto-registers default property editors from the
- * <code>org.springframework.beans.propertyeditors</code> package, which apply
+ * {@code org.springframework.beans.propertyeditors} package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
  * the {@link #registerCustomEditor(Class, java.beans.PropertyEditor)} method
  * to register an editor for a particular instance (i.e. they are not shared
  * across the application). See the base class
  * {@link PropertyEditorRegistrySupport} for details.
  *
- * <p><code>BeanWrapperImpl</code> will convert collection and array values
+ * <p>{@code BeanWrapperImpl} will convert collection and array values
  * to the corresponding target collections or arrays, if necessary. Custom
  * property editors that deal with collections or arrays can either be
- * written via PropertyEditor's <code>setValue</code>, or against a
- * comma-delimited String via <code>setAsText</code>, as String arrays are
+ * written via PropertyEditor's {@code setValue}, or against a
+ * comma-delimited String via {@code setAsText}, as String arrays are
  * converted in such a format if the array itself is not assignable.
  *
  * <p><b>NOTE: As of Spring 2.5, this is - for almost all purposes - an
@@ -99,8 +98,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private String nestedPath = "";
 
 	private Object rootObject;
-
-	private TypeConverterDelegate typeConverterDelegate;
 
 	/**
 	 * The security context used for invoking the property methods
@@ -180,7 +177,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
-	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
+	 * @param superBw the containing BeanWrapper (must not be {@code null})
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
@@ -342,10 +339,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	/**
 	 * Internal version of {@link #getPropertyDescriptor}:
-	 * Returns <code>null</code> if not found rather than throwing an exception.
+	 * Returns {@code null} if not found rather than throwing an exception.
 	 * @param propertyName the property to obtain the descriptor for
 	 * @return the property descriptor for the specified property,
-	 * or <code>null</code> if not found
+	 * or {@code null} if not found
 	 * @throws BeansException in case of introspection failure
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
@@ -445,25 +442,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return false;
 	}
 
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
-			throws TypeMismatchException {
-		try {
-			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
-		}
-		catch (ConverterNotFoundException ex) {
-			throw new ConversionNotSupportedException(value, requiredType, ex);
-		}
-		catch (ConversionException ex) {
-			throw new TypeMismatchException(value, requiredType, ex);
-		}
-		catch (IllegalStateException ex) {
-			throw new ConversionNotSupportedException(value, requiredType, ex);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new TypeMismatchException(value, requiredType, ex);
-		}
-	}
-
 	private Object convertIfNecessary(String propertyName, Object oldValue, Object newValue, Class<?> requiredType,
 			TypeDescriptor td) throws TypeMismatchException {
 		try {
@@ -494,7 +472,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Convert the given value for the specified property to the latter's type.
 	 * <p>This method is only intended for optimizations in a BeanFactory.
-	 * Use the <code>convertIfNecessary</code> methods for programmatic conversion.
+	 * Use the {@code convertIfNecessary} methods for programmatic conversion.
 	 * @param value the value to convert
 	 * @param propertyName the target property
 	 * (note that nested or indexed properties are not supported here)
@@ -579,7 +557,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				propertyValue = setDefaultValue(tokens);
 			}
 			else {
-				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);				
+				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);
 			}
 		}
 
@@ -743,7 +721,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					readMethod.setAccessible(true);
 				}
 			}
-			
+
 			Object value;
 			if (System.getSecurityManager() != null) {
 				try {
@@ -758,10 +736,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else {
-                value = readMethod.invoke(object, (Object[]) null);
+				value = readMethod.invoke(object, (Object[]) null);
 			}
-			
-			if (tokens.keys != null) {				
+
+			if (tokens.keys != null) {
 				if (value == null) {
 					if (this.autoGrowNestedPaths) {
 						value = setDefaultValue(tokens.actualName);
@@ -769,9 +747,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
-								"property path '" + propertyName + "': returned null");							
+								"property path '" + propertyName + "': returned null");
 					}
-				}			
+				}
 				String indexedPropertyName = tokens.actualName;
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
@@ -779,7 +757,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (value == null) {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
-								"property path '" + propertyName + "': returned null");						
+								"property path '" + propertyName + "': returned null");
 					}
 					else if (value.getClass().isArray()) {
 						int index = Integer.parseInt(key);
@@ -787,9 +765,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						value = Array.get(value, index);
 					}
 					else if (value instanceof List) {
-						int index = Integer.parseInt(key);						
+						int index = Integer.parseInt(key);
 						List list = (List) value;
-						growCollectionIfNecessary(list, index, indexedPropertyName, pd, i + 1);						
+						growCollectionIfNecessary(list, index, indexedPropertyName, pd, i + 1);
 						value = list.get(index);
 					}
 					else if (value instanceof Set) {
@@ -824,7 +802,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								"Property referenced in indexed property path '" + propertyName +
 								"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
 					}
-					indexedPropertyName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;					
+					indexedPropertyName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
 				}
 			}
 			return value;

@@ -28,6 +28,7 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 		return new SimpleClientHttpRequestFactory();
 	}
 
+	@Override
 	@Test
 	public void httpMethods() throws Exception {
 		try {

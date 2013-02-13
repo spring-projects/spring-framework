@@ -40,7 +40,10 @@ import org.springframework.util.Assert;
  * @see #setSqlMapClientTemplate
  * @see org.springframework.orm.ibatis.SqlMapClientTemplate
  * @see org.springframework.orm.ibatis.SqlMapClientTemplate#setExceptionTranslator
+ * @deprecated as of Spring 3.2, in favor of the native Spring support
+ * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
  */
+@Deprecated
 public abstract class SqlMapClientDaoSupport extends DaoSupport {
 
 	private SqlMapClientTemplate sqlMapClientTemplate = new SqlMapClientTemplate();

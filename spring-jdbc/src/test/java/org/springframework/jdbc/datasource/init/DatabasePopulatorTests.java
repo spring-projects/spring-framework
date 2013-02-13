@@ -17,15 +17,14 @@
 package org.springframework.jdbc.datasource.init;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.easymock.EasyMock;
-
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -41,10 +40,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class DatabasePopulatorTests {
 
 	private final EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+
 	private final EmbeddedDatabase db = builder.build();
+
 	private final ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+
 	private final ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
+
 	private final JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
+
 
 	private void assertTestDatabaseCreated() {
 		assertTestDatabaseCreated("Keith");
@@ -54,19 +58,19 @@ public class DatabasePopulatorTests {
 		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
 	}
 
-	private void assertUsersDatabaseCreated() {
-		assertEquals("Sam", jdbcTemplate.queryForObject("select first_name from users where last_name = 'Brannen'",
-				String.class));
+	private void assertUsersDatabaseCreated(String... lastNames) {
+		for (String lastName : lastNames) {
+			assertEquals("Did not find user with last name [" + lastName + "].", 1,
+				jdbcTemplate.queryForInt("select count(0) from users where last_name = ?", lastName));
+		}
 	}
 
 	@After
 	public void shutDown() {
-
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.clear();
 			TransactionSynchronizationManager.unbindResource(db);
 		}
-
 		db.shutdown();
 	}
 
@@ -78,7 +82,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -92,7 +97,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -106,7 +112,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -120,7 +127,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -136,7 +144,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -152,7 +161,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -167,7 +177,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -183,7 +194,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -198,11 +210,27 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
-		assertUsersDatabaseCreated();
+		assertUsersDatabaseCreated("Brannen");
+	}
+
+	@Test
+	public void scriptWithCommentsWithinStatements() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("users-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("users-data-with-comments.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		}
+		finally {
+			connection.close();
+		}
+
+		assertUsersDatabaseCreated("Brannen", "Hoeller");
 	}
 
 	@Test
@@ -212,7 +240,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -221,21 +250,32 @@ public class DatabasePopulatorTests {
 	}
 
 	/**
-	 * @see SPR-9457
+	 * See SPR-9457
 	 */
 	@Test
 	public void usesBoundConnectionIfAvailable() throws SQLException {
-
 		TransactionSynchronizationManager.initSynchronization();
 		Connection connection = DataSourceUtils.getConnection(db);
-
-		DatabasePopulator populator = EasyMock.createMock(DatabasePopulator.class);
-		populator.populate(connection);
-		EasyMock.expectLastCall();
-		EasyMock.replay(populator);
-
+		DatabasePopulator populator = mock(DatabasePopulator.class);
 		DatabasePopulatorUtils.execute(populator, db);
-
-		EasyMock.verify(populator);
+		verify(populator).populate(connection);
 	}
+
+	/**
+	 * See SPR-9781
+	 */
+	@Test(timeout = 1000)
+	public void executesHugeScriptInReasonableTime() throws SQLException {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-huge.sql"));
+
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		}
+		finally {
+			connection.close();
+		}
+	}
+
 }

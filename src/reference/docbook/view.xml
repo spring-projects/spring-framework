@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="view"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="view">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>View technologies</title>
 
-  <section id="view-introduction">
+  <section xml:id="view-introduction">
     <title>Introduction</title>
 
     <para>One of the areas in which Spring excels is in the separation of view
@@ -18,7 +22,7 @@
     framework.</para>
   </section>
 
-  <section id="view-jsp">
+  <section xml:id="view-jsp">
     <title>JSP &amp; JSTL</title>
 
     <para>Spring provides a couple of out-of-the-box solutions for JSP and
@@ -26,22 +30,22 @@
     in the <interfacename>WebApplicationContext</interfacename>. Furthermore,
     of course you need to write some JSPs that will actually render the
     view.</para>
-    
+
     <note>
       <para>
         Setting up your application to use JSTL is a common source of error,
         mainly caused by confusion over the different servlet spec., JSP and JSTL
-        version numbers, what they mean and how to declare the taglibs correctly. 
+        version numbers, what they mean and how to declare the taglibs correctly.
         The article
-        <ulink url="http://www.mularien.com/blog/2008/04/24/how-to-reference-and-use-jstl-in-your-web-application/">
-        How to Reference and Use JSTL in your Web Application</ulink> provides a 
+        <link xl:href="http://www.mularien.com/blog/2008/04/24/how-to-reference-and-use-jstl-in-your-web-application/">
+        How to Reference and Use JSTL in your Web Application</link> provides a
         useful guide to the common pitfalls and how to avoid them. Note that as of
         Spring 3.0, the minimum supported servlet version is 2.4 (JSP 2.0 and JSTL 1.1),
         which reduces the scope for confusion somewhat.
       </para>
     </note>
 
-    <section id="view-jsp-resolver">
+    <section xml:id="view-jsp-resolver">
       <title>View resolvers</title>
 
       <para>Just as with any other view technology you're integrating with
@@ -51,7 +55,7 @@
       <classname>ResourceBundleViewResolver</classname>. Both are declared in
       the <interfacename>WebApplicationContext</interfacename>:</para>
 
-      <programlisting language="xml"><lineannotation>&lt;!-- the <classname>ResourceBundleViewResolver</classname> --&gt;</lineannotation>
+      <programlisting language="xml"><lineannotation>&lt;!-- the ResourceBundleViewResolver --&gt;</lineannotation>
 &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
   &lt;property name="basename" value="views"/&gt;
 &lt;/bean&gt;
@@ -82,7 +86,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       be no direct access by clients.</para>
     </section>
 
-    <section id="view-jsp-jstl">
+    <section xml:id="view-jsp-jstl">
       <title>'Plain-old' JSPs versus JSTL</title>
 
       <para>When using the Java Standard Tag Library you must use a special
@@ -90,7 +94,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       preparation before things such as the I18N features will work.</para>
     </section>
 
-    <section id="view-jsp-tags">
+    <section xml:id="view-jsp-tags">
       <title>Additional tags facilitating development</title>
 
       <para>Spring provides data binding of request parameters to command
@@ -106,7 +110,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       the appendix entitled <xref linkend="spring.tld" />.</para>
     </section>
 
-    <section id="view-jsp-formtaglib">
+    <section xml:id="view-jsp-formtaglib">
       <title>Using Spring's form tag library</title>
 
       <para>As of version 2.0, Spring provides a comprehensive set of data
@@ -126,7 +130,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       tag is used. We have included generated HTML snippets where certain tags
       require further commentary.</para>
 
-      <section id="view-jsp-formtaglib-configuration">
+      <section xml:id="view-jsp-formtaglib-configuration">
         <title>Configuration</title>
 
         <para>The form tag library comes bundled in
@@ -143,7 +147,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         want to use for the tags from this library.</para>
       </section>
 
-      <section id="view-jsp-formtaglib-formtag">
+      <section xml:id="view-jsp-formtaglib-formtag">
         <title>The <literal>form</literal> tag</title>
 
         <para>This tag renders an HTML 'form' tag and exposes a binding path
@@ -228,17 +232,17 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/form:form&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-inputtag">
+      <section xml:id="view-jsp-formtaglib-inputtag">
         <title>The <literal>input</literal> tag</title>
 
         <para>This tag renders an HTML 'input' tag using the bound value
         and type='text' by default. For an example of this tag, see <xref
         linkend="view-jsp-formtaglib-formtag" />. Starting with Spring 3.1
-        you can use other types such HTML5-specific types like 'email', 
+        you can use other types such HTML5-specific types like 'email',
         'tel', 'date', and others.</para>
       </section>
 
-      <section id="view-jsp-formtaglib-checkboxtag">
+      <section xml:id="view-jsp-formtaglib-checkboxtag">
         <title>The <literal>checkbox</literal> tag</title>
 
         <para>This tag renders an HTML 'input' tag with type
@@ -287,14 +291,14 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;Subscribe to newsletter?:&lt;/td&gt;
-              <lineannotation>&lt;%-- Approach 1: Property is of type <classname>java.lang.Boolean</classname> --%&gt;</lineannotation>
+              <lineannotation>&lt;%-- Approach 1: Property is of type java.lang.Boolean --%&gt;</lineannotation>
               &lt;td&gt;&lt;form:checkbox path="preferences.receiveNewsletter"/&gt;&lt;/td&gt;
           &lt;/tr&gt;
 
           &lt;tr&gt;
               &lt;td&gt;Interests:&lt;/td&gt;
               &lt;td&gt;
-                  <lineannotation>&lt;%-- Approach 2: Property is of an array or of type <interfacename>java.util.Collection</interfacename> --%&gt;</lineannotation>
+                  <lineannotation>&lt;%-- Approach 2: Property is of an array or of type java.util.Collection --%&gt;</lineannotation>
                   Quidditch: &lt;form:checkbox path="preferences.interests" value="Quidditch"/&gt;
                   Herbology: &lt;form:checkbox path="preferences.interests" value="Herbology"/&gt;
                   Defence Against the Dark Arts: &lt;form:checkbox path="preferences.interests"
@@ -304,7 +308,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
           &lt;tr&gt;
               &lt;td&gt;Favourite Word:&lt;/td&gt;
               &lt;td&gt;
-                  <lineannotation>&lt;%-- Approach 3: Property is of type <classname>java.lang.Object</classname> --%&gt;</lineannotation>
+                  <lineannotation>&lt;%-- Approach 3: Property is of type java.lang.Object --%&gt;</lineannotation>
                   Magic: &lt;form:checkbox path="preferences.favouriteWord" value="Magic"/&gt;
               &lt;/td&gt;
           &lt;/tr&gt;
@@ -313,7 +317,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
       <para>There are 3 approaches to the <literal>checkbox</literal> tag
       which should meet all your checkbox needs.</para>
-      
+
       <itemizedlist>
           <listitem>
             <para>Approach One - When the bound value is of type
@@ -373,7 +377,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         </quote>.</para>
       </section>
 
-      <section id="view-jsp-formtaglib-checkboxestag">
+      <section xml:id="view-jsp-formtaglib-checkboxestag">
         <title>The <literal>checkboxes</literal> tag</title>
 
         <para>This tag renders multiple HTML 'input' tags with type
@@ -396,7 +400,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
           &lt;tr&gt;
               &lt;td&gt;Interests:&lt;/td&gt;
               &lt;td&gt;
-                  <lineannotation>&lt;%-- Property is of an array or of type <interfacename>java.util.Collection</interfacename> --%&gt;</lineannotation>
+                  <lineannotation>&lt;%-- Property is of an array or of type java.util.Collection --%&gt;</lineannotation>
                   &lt;form:checkboxes path="preferences.interests" items="${interestList}"/&gt;
               &lt;/td&gt;
           &lt;/tr&gt;
@@ -412,7 +416,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       using "itemValue" and the label using "itemLabel".</para>
       </section>
 
-      <section id="view-jsp-formtaglib-radiobuttontag">
+      <section xml:id="view-jsp-formtaglib-radiobuttontag">
         <title>The <literal>radiobutton</literal> tag</title>
 
         <para>This tag renders an HTML 'input' tag with type 'radio'.</para>
@@ -427,7 +431,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/tr&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-radiobuttonstag">
+      <section xml:id="view-jsp-formtaglib-radiobuttonstag">
         <title>The <literal>radiobuttons</literal> tag</title>
 
         <para>This tag renders multiple HTML 'input' tags with type
@@ -450,7 +454,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/tr&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-passwordtag">
+      <section xml:id="view-jsp-formtaglib-passwordtag">
         <title>The <literal>password</literal> tag</title>
 
         <para>This tag renders an HTML 'input' tag with type 'password' using
@@ -476,7 +480,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/tr&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-selecttag">
+      <section xml:id="view-jsp-formtaglib-selecttag">
         <title>The <literal>select</literal> tag</title>
 
         <para>This tag renders an HTML 'select' element. It supports data
@@ -504,7 +508,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/tr&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-optiontag">
+      <section xml:id="view-jsp-formtaglib-optiontag">
         <title>The <literal>option</literal> tag</title>
 
         <para>This tag renders an HTML 'option'. It sets 'selected' as
@@ -538,7 +542,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
    &lt;/tr&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-optionstag">
+      <section xml:id="view-jsp-formtaglib-optionstag">
         <title>The <literal>options</literal> tag</title>
 
         <para>This tag renders a list of HTML 'option' tags. It sets the
@@ -588,7 +592,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         property will apply to the map value.</para>
       </section>
 
-      <section id="view-jsp-formtaglib-textAreatag">
+      <section xml:id="view-jsp-formtaglib-textAreatag">
         <title>The <literal>textarea</literal> tag</title>
 
         <para>This tag renders an HTML 'textarea'.</para>
@@ -600,7 +604,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/tr&gt;</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-hiddeninputtag">
+      <section xml:id="view-jsp-formtaglib-hiddeninputtag">
         <title>The <literal>hidden</literal> tag</title>
 
         <para>This tag renders an HTML 'input' tag with type 'hidden' using
@@ -617,7 +621,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   </programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-errorstag">
+      <section xml:id="view-jsp-formtaglib-errorstag">
         <title>The <literal>errors</literal> tag</title>
 
         <para>This tag renders field errors in an HTML 'span' tag. It provides
@@ -761,7 +765,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
   &lt;/form&gt;</programlisting>
       </section>
 
-      <section id="rest-method-conversion">
+      <section xml:id="rest-method-conversion">
         <title>HTTP Method Conversion</title>
 
         <para>A key principle of REST is the use of the Uniform Interface.
@@ -812,25 +816,25 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 }</programlisting>
       </section>
 
-      <section id="view-jsp-formtaglib-html5">
+      <section xml:id="view-jsp-formtaglib-html5">
         <title>HTML5 Tags</title>
-			
+
         <para>Starting with Spring 3, the Spring form tag library allows entering
-		dynamic attributes, which means you can enter any HTML5 specific attributes.
-		</para>
+        dynamic attributes, which means you can enter any HTML5 specific attributes.
+        </para>
 
         <para>In Spring 3.1, the form input tag supports entering a type attribute
-		other than 'text'. This is intended to allow rendering new HTML5 specific
-        input types such as 'email', 'date', 'range', and others. Note that 
-        entering type='text' is not required since 'text' is the default type.    
-		</para>
+        other than 'text'. This is intended to allow rendering new HTML5 specific
+        input types such as 'email', 'date', 'range', and others. Note that
+        entering type='text' is not required since 'text' is the default type.
+        </para>
 
       </section>
 
     </section>
   </section>
 
-  <section id="view-tiles">
+  <section xml:id="view-tiles">
     <title>Tiles</title>
 
     <para>It is possible to integrate Tiles - just as any other view
@@ -839,13 +843,15 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 
     <para><emphasis>NOTE:</emphasis> This section focuses on Spring's support
     for Tiles 2 (the standalone version of Tiles, requiring Java 5+) in the
-    <literal>org.springframework.web.servlet.view.tiles2</literal> package.
+    <literal>org.springframework.web.servlet.view.tiles2</literal> package as
+    as well as Tiles 3 in the
+    <literal>org.springframework.web.servlet.view.tiles3</literal> package.
     Spring also continues to support Tiles 1.x (a.k.a. "Struts Tiles", as
     shipped with Struts 1.1+; compatible with Java 1.4) in the original
     <literal>org.springframework.web.servlet.view.tiles</literal>
     package.</para>
 
-    <section id="view-tiles-dependencies">
+    <section xml:id="view-tiles-dependencies">
       <title>Dependencies</title>
 
       <para>To be able to use Tiles you have to have a couple of additional
@@ -872,13 +878,13 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 
     </section>
 
-    <section id="view-tiles-integrate">
+    <section xml:id="view-tiles-integrate">
       <title>How to integrate Tiles</title>
 
       <para>To be able to use Tiles, you have to configure it using files
       containing definitions (for basic information on definitions and other
-      Tiles concepts, please have a look at <ulink
-      url="http://tiles.apache.org" />). In Spring this is done using the
+      Tiles concepts, please have a look at <link
+      xl:href="http://tiles.apache.org" />). In Spring this is done using the
       <classname>TilesConfigurer</classname>. Have a look at the following
       piece of example ApplicationContext configuration:</para>
 
@@ -906,7 +912,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
       find two possibilities, the <classname>UrlBasedViewResolver</classname>
       and the <classname>ResourceBundleViewResolver</classname>.</para>
 
-      <section id="view-tiles-url">
+      <section xml:id="view-tiles-url">
         <title>
           <classname>UrlBasedViewResolver</classname>
         </title>
@@ -920,7 +926,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 &lt;/bean&gt;</programlisting>
       </section>
 
-      <section id="view-tiles-resource">
+      <section xml:id="view-tiles-resource">
         <title>
           <classname>ResourceBundleViewResolver</classname>
         </title>
@@ -948,13 +954,13 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <classname>ResourceBundleViewResolver</classname>, you can easily mix
         different view technologies.</para>
 
-	      <para>Note that the <classname>TilesView</classname> class for Tiles 2
-	      supports JSTL (the JSP Standard Tag Library) out of the box, whereas
-	      there is a separate <classname>TilesJstlView</classname> subclass in the
-	      Tiles 1.x support.</para>
+          <para>Note that the <classname>TilesView</classname> class for Tiles 2
+          supports JSTL (the JSP Standard Tag Library) out of the box, whereas
+          there is a separate <classname>TilesJstlView</classname> subclass in the
+          Tiles 1.x support.</para>
       </section>
 
-      <section id="view-tiles-preparer">
+      <section xml:id="view-tiles-preparer">
         <title><classname>SimpleSpringPreparerFactory</classname> and
         <classname>SpringBeanPreparerFactory</classname></title>
 
@@ -1003,18 +1009,18 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
     </section>
   </section>
 
-  <section id="view-velocity">
+  <section xml:id="view-velocity">
     <title>Velocity &amp; FreeMarker</title>
 
-    <para><ulink url="http://velocity.apache.org">Velocity</ulink> and <ulink
-    url="http://www.freemarker.org">FreeMarker</ulink> are two templating
+    <para><link xl:href="http://velocity.apache.org">Velocity</link> and <link
+    xl:href="http://www.freemarker.org">FreeMarker</link> are two templating
     languages that can be used as view technologies within Spring MVC
     applications. The languages are quite similar and serve similar needs and
     so are considered together in this section. For semantic and syntactic
-    differences between the two languages, see the <ulink
-    url="http://www.freemarker.org">FreeMarker</ulink> web site.</para>
+    differences between the two languages, see the <link
+    xl:href="http://www.freemarker.org">FreeMarker</link> web site.</para>
 
-    <section id="view-velocity-dependencies">
+    <section xml:id="view-velocity-dependencies">
       <title>Dependencies</title>
 
       <para>Your web application will need to include <filename
@@ -1033,14 +1039,14 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       class="libraryfile">velocity-tools-generic-1.x.jar</filename></para>
     </section>
 
-    <section id="view-velocity-contextconfig">
+    <section xml:id="view-velocity-contextconfig">
       <title>Context configuration</title>
 
       <para>A suitable configuration is initialized by adding the relevant
       configurer bean definition to your <filename>'*-servlet.xml'</filename>
       as shown below:</para>
 
-      <programlisting language="xml"><lineannotation>&lt;!-- 
+      <programlisting language="xml"><lineannotation>&lt;!--
   This bean sets up the Velocity environment for us based on a root path for templates.
   Optionally, a properties file can be specified for more control over the Velocity
   environment, but the defaults are pretty sane for file based template loading.
@@ -1049,7 +1055,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   &lt;property name="resourceLoaderPath" value="/WEB-INF/velocity/"/&gt;
 &lt;/bean&gt;
 
-<lineannotation>&lt;!-- 
+<lineannotation>&lt;!--
 
   View resolvers can also be configured with ResourceBundles or XML files. If you need
   different view resolving based on Locale, you have to use the resource bundle resolver.
@@ -1066,7 +1072,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   &lt;property name="templateLoaderPath" value="/WEB-INF/freemarker/"/&gt;
 &lt;/bean&gt;
 
-<lineannotation>&lt;!-- 
+<lineannotation>&lt;!--
 
   View resolvers can also be configured with ResourceBundles or XML files. If you need
   different view resolving based on Locale, you have to use the resource bundle resolver.
@@ -1086,7 +1092,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       </note>
     </section>
 
-    <section id="view-velocity-createtemplates">
+    <section xml:id="view-velocity-createtemplates">
       <title>Creating templates</title>
 
       <para>Your templates need to be stored in the directory specified by the
@@ -1103,14 +1109,14 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       appropriate.</para>
     </section>
 
-    <section id="view-velocity-advancedconfig">
+    <section xml:id="view-velocity-advancedconfig">
       <title>Advanced configuration</title>
 
       <para>The basic configurations highlighted above will be suitable for
       most application requirements, however additional configuration options
       are available for when unusual or advanced requirements dictate.</para>
 
-      <section id="view-velocity-example-velocityproperties">
+      <section xml:id="view-velocity-example-velocityproperties">
         <title>velocity.properties</title>
 
         <para>This file is completely optional, but if specified, contains the
@@ -1140,14 +1146,14 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
-        <para>Refer to the <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
-        documentation</ulink> for Spring configuration of Velocity, or the
+        <para>Refer to the <link
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
+        documentation</link> for Spring configuration of Velocity, or the
         Velocity documentation for examples and definitions of the
         <filename>'velocity.properties'</filename> file itself.</para>
       </section>
 
-      <section id="views-freemarker">
+      <section xml:id="views-freemarker">
         <title>FreeMarker</title>
 
         <para>FreeMarker 'Settings' and 'SharedVariables' can be passed
@@ -1176,7 +1182,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       </section>
     </section>
 
-    <section id="view-velocity-forms">
+    <section xml:id="view-velocity-forms">
       <title>Bind support and form handling</title>
 
       <para>Spring provides a tag library for use in JSP's that contains
@@ -1188,7 +1194,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       and FreeMarker, with additional convenience macros for generating form
       input elements themselves.</para>
 
-      <section id="view-bind-macros">
+      <section xml:id="view-bind-macros">
         <title>The bind macros</title>
 
         <para>A standard set of macros are maintained within the
@@ -1207,7 +1213,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         respectively.</para>
       </section>
 
-      <section id="view-simple-binding">
+      <section xml:id="view-simple-binding">
         <title>Simple binding</title>
 
         <para>In your html forms (vm / ftl templates) that act as the
@@ -1224,14 +1230,14 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 &lt;html&gt;
 ...
 &lt;form action="" method="POST"&gt;
-  Name: 
+  Name:
   #springBind( "command.name" )
-  &lt;input type="text" 
-    name="${status.expression}" 
+  &lt;input type="text"
+    name="${status.expression}"
     value="$!status.value" /&gt;&lt;br&gt;
   #foreach($error in $status.errorMessages) &lt;b&gt;$error&lt;/b&gt; &lt;br&gt; #end
   &lt;br&gt;
-  ... 
+  ...
   &lt;input type="submit" value="submit"/&gt;
 &lt;/form&gt;
 ...
@@ -1243,14 +1249,14 @@ recommend sticking to 'spring' --&gt;
 &lt;html&gt;
 ...
 &lt;form action="" method="POST"&gt;
-  Name: 
-  &lt;@spring.bind "command.name" /&gt; 
-  &lt;input type="text" 
-    name="${spring.status.expression}" 
+  Name:
+  &lt;@spring.bind "command.name" /&gt;
+  &lt;input type="text"
+    name="${spring.status.expression}"
     value="${spring.status.value?default("")}" /&gt;&lt;br&gt;
   &lt;#list spring.status.errorMessages as error&gt; &lt;b&gt;${error}&lt;/b&gt; &lt;br&gt; &lt;/#list&gt;
   &lt;br&gt;
-  ... 
+  ...
   &lt;input type="submit" value="submit"/&gt;
 &lt;/form&gt;
 ...
@@ -1276,7 +1282,7 @@ recommend sticking to 'spring' --&gt;
         the next section.</para>
       </section>
 
-      <section id="views-form-macros">
+      <section xml:id="views-form-macros">
         <title>Form input generation macros</title>
 
         <para>Additional convenience macros for both languages simplify both
@@ -1288,7 +1294,7 @@ recommend sticking to 'spring' --&gt;
         <para>The following table of available macros show the VTL and FTL
         definitions and the parameter list that each takes.</para>
 
-        <table id="views-macros-defs-tbl">
+        <table xml:id="views-macros-defs-tbl">
           <title>Table of macro definitions</title>
 
           <tgroup cols="3">
@@ -1513,7 +1519,7 @@ recommend sticking to 'spring' --&gt;
         in VTL. Where usage differences exist between the two languages, they
         are explained in the notes.</para>
 
-        <section id="views-form-macros-input">
+        <section xml:id="views-form-macros-input">
           <title>Input Fields</title>
 
           <para><programlisting language="xml">&lt;!-- the Name field example from above using form macros in VTL --&gt;
@@ -1548,7 +1554,7 @@ recommend sticking to 'spring' --&gt;
           <para>The generated HTML looks like this:</para>
 
           <programlisting>Name:
-  &lt;input type="text" name="name" value=""     
+  &lt;input type="text" name="name" value=""
 &gt;
 &lt;br&gt;
   &lt;b&gt;required&lt;/b&gt;
@@ -1561,7 +1567,7 @@ recommend sticking to 'spring' --&gt;
           rows and cols attributes for the textarea.</para>
         </section>
 
-        <section id="views-form-macros-select">
+        <section xml:id="views-form-macros-select">
           <title>Selection Fields</title>
 
           <para>Four selection field macros can be used to generate common UI
@@ -1611,15 +1617,15 @@ recommend sticking to 'spring' --&gt;
 
           <programlisting>Town:
 &lt;input type="radio" name="address.town" value="London"
-   
+
 &gt;
 London
 &lt;input type="radio" name="address.town" value="Paris"
-  checked="checked" 
+  checked="checked"
 &gt;
 Paris
 &lt;input type="radio" name="address.town" value="New York"
-   
+
 &gt;
 New York</programlisting>
 
@@ -1632,7 +1638,7 @@ New York</programlisting>
   cityMap.put("LDN", "London");
   cityMap.put("PRS", "Paris");
   cityMap.put("NYC", "New York");
-  
+
   Map m = new HashMap();
   m.put("cityMap", cityMap);
   return m;
@@ -1644,21 +1650,21 @@ New York</programlisting>
 
           <programlisting>Town:
 &lt;input type="radio" name="address.town" value="LDN"
-   
+
 &gt;
 London
 &lt;input type="radio" name="address.town" value="PRS"
-  checked="checked" 
+  checked="checked"
 &gt;
 Paris
 &lt;input type="radio" name="address.town" value="NYC"
-   
+
 &gt;
 New York</programlisting>
         </section>
       </section>
 
-      <section id="views-form-macros-html-escaping">
+      <section xml:id="views-form-macros-html-escaping">
         <title>HTML escaping and XHTML compliance</title>
 
         <para>Default usage of the form macros above will result in HTML tags
@@ -1698,7 +1704,7 @@ New York</programlisting>
     </section>
   </section>
 
-  <section id="view-xslt">
+  <section xml:id="view-xslt">
     <title>XSLT</title>
 
     <para>XSLT is a transformation language for XML and is popular as a view
@@ -1708,7 +1714,7 @@ New York</programlisting>
     an XML document as model data and have it transformed with XSLT in a
     Spring Web MVC application.</para>
 
-    <section id="view-xslt-firstwords">
+    <section xml:id="view-xslt-firstwords">
       <title>My First Words</title>
 
       <para>This example is a trivial Spring application that creates a list
@@ -1719,7 +1725,7 @@ New York</programlisting>
       turn the list of words into a simple XML document ready for
       transformation.</para>
 
-      <section id="view-xslt-beandefs">
+      <section xml:id="view-xslt-beandefs">
         <title>Bean definitions</title>
 
         <para>Configuration is standard for a simple Spring application. The
@@ -1732,7 +1738,7 @@ New York</programlisting>
         <para>... that encapsulates our word generation logic.</para>
       </section>
 
-      <section id="view-xslt-controllercode">
+      <section xml:id="view-xslt-controllercode">
         <title>Standard MVC controller code</title>
 
         <para>The controller logic is encapsulated in a subclass of
@@ -1742,15 +1748,15 @@ New York</programlisting>
         <programlisting language="java">protected ModelAndView handleRequestInternal(
     HttpServletRequest request,
     HttpServletResponse response) throws Exception {
-        
+
     Map map = new HashMap();
     List wordList = new ArrayList();
-        
+
     wordList.add("hello");
     wordList.add("world");
-       
+
     map.put("wordList", wordList);
-      
+
     return new ModelAndView("home", map);
 }</programlisting>
 
@@ -1769,7 +1775,7 @@ New York</programlisting>
         tools to manage the domification process.</para>
       </section>
 
-      <section id="view-xslt-subclassing">
+      <section xml:id="view-xslt-subclassing">
         <title>Convert the model data to XML</title>
 
         <para>In order to create a DOM document from our list of words or any
@@ -1820,7 +1826,7 @@ public class HomePage extends AbstractXsltView {
         request)</methodname> method instead.</para>
       </section>
 
-      <section id="view-xslt-viewdefinitions">
+      <section xml:id="view-xslt-viewdefinitions">
         <title>Defining the view properties</title>
 
         <para>The views.properties file (or equivalent xml definition if
@@ -1843,7 +1849,7 @@ home.root=words</programlisting>
         the <methodname>createXsltSource(..)</methodname> method(s).</para>
       </section>
 
-      <section id="view-xslt-transforming">
+      <section xml:id="view-xslt-transforming">
         <title>Document transformation</title>
 
         <para>Finally, we have the XSLT code used for transforming the above
@@ -1875,7 +1881,7 @@ home.root=words</programlisting>
       </section>
     </section>
 
-    <section id="view-xslt-summary">
+    <section xml:id="view-xslt-summary">
       <title>Summary</title>
 
       <para>A summary of the files discussed and their location in the WAR
@@ -1891,7 +1897,7 @@ home.root=words</programlisting>
           |    |
           |    +- xslt
           |    |   |
-          |    |   +- HomePageController.class 
+          |    |   +- HomePageController.class
           |    |   +- HomePage.class
           |    |
           |    +- views.properties
@@ -1913,10 +1919,10 @@ home.root=words</programlisting>
     </section>
   </section>
 
-  <section id="view-document">
+  <section xml:id="view-document">
     <title>Document views (PDF/Excel)</title>
 
-    <section id="view-document-intro">
+    <section xml:id="view-document-intro">
       <title>Introduction</title>
 
       <para>Returning an HTML page isn't always the best way for the user to
@@ -1930,7 +1936,7 @@ home.root=words</programlisting>
       your classpath, and for PDF generation, the iText library.</para>
     </section>
 
-    <section id="view-document-config">
+    <section xml:id="view-document-config">
       <title>Configuration and setup</title>
 
       <para>Document based views are handled in an almost identical fashion to
@@ -1940,14 +1946,14 @@ home.root=words</programlisting>
       spreadsheet (which can also be viewed or manipulated in Open
       Office).</para>
 
-      <section id="view-document-configviews">
+      <section xml:id="view-document-configviews">
         <title>Document view definitions</title>
 
         <para>First, let's amend the views.properties file (or xml
         equivalent) and add a simple view definition for both document types.
         The entire file now looks like this with the XSLT view shown from
         earlier:</para>
-        
+
         <programlisting>home.(class)=xslt.HomePage
 home.stylesheetLocation=/WEB-INF/xsl/home.xslt
 home.root=words
@@ -1961,7 +1967,7 @@ pdf.(class)=pdf.HomePage</programlisting>
         as the 'url' property in the view definition</emphasis></para>
       </section>
 
-      <section id="view-document-configcontroller">
+      <section xml:id="view-document-configcontroller">
         <title>Controller code</title>
 
         <para>The controller code we'll use remains exactly the same from the
@@ -1971,7 +1977,7 @@ pdf.(class)=pdf.HomePage</programlisting>
         at decoupling the views from the controllers!</para>
       </section>
 
-      <section id="view-document-configsubclasses">
+      <section xml:id="view-document-configsubclasses">
         <title>Subclassing for Excel views</title>
 
         <para>Exactly as we did for the XSLT example, we'll subclass suitable
@@ -1986,7 +1992,7 @@ pdf.(class)=pdf.HomePage</programlisting>
         <para>Here's the complete listing for our POI Excel view which
         displays the word list from the model map in consecutive rows of the
         first column of a new spreadsheet:</para>
-        
+
         <programlisting language="java">package excel;
 
 // imports omitted for brevity
@@ -1999,7 +2005,7 @@ public class HomePage extends AbstractExcelView {
         HttpServletRequest req,
         HttpServletResponse resp)
         throws Exception {
-    
+
         HSSFSheet sheet;
         HSSFRow sheetRow;
         HSSFCell cell;
@@ -2025,7 +2031,7 @@ public class HomePage extends AbstractExcelView {
 
         <para>And the following is a view generating the same Excel file, now using
         JExcelApi:</para>
-        
+
         <programlisting language="java">package excel;
 
 // imports omitted for brevity
@@ -2037,11 +2043,11 @@ public class HomePage extends AbstractJExcelView {
         HttpServletRequest request,
         HttpServletResponse response)
     throws Exception {
-			
+
         WritableSheet sheet = wb.createSheet("Spring", 0);
 
         sheet.addCell(new Label(0, 0, "Spring-Excel test"));
-		
+
         List words = (List) model.get("wordList");
         for (int i = 0; i &lt; words.size(); i++) {
             sheet.addCell(new Label(2+i, 0, (String) words.get(i)));
@@ -2061,7 +2067,7 @@ public class HomePage extends AbstractJExcelView {
         automatically when you request the same page as before.</para>
       </section>
 
-      <section id="view-document-configsubclasspdf">
+      <section xml:id="view-document-configsubclasspdf">
         <title>Subclassing for PDF views</title>
 
         <para>The PDF version of the word list is even simpler. This time, the
@@ -2083,12 +2089,12 @@ public class PDFPage extends AbstractPdfView {
         HttpServletRequest req,
         HttpServletResponse resp)
         throws Exception {
-        
+
         List words = (List) model.get("wordList");
-        
+
         for (int i=0; i&lt;words.size(); i++)
             doc.add( new Paragraph((String) words.get(i)));
-    
+
     }
 }</programlisting>
 
@@ -2101,17 +2107,17 @@ public class PDFPage extends AbstractPdfView {
     </section>
   </section>
 
-  <section id="view-jasper-reports">
+  <section xml:id="view-jasper-reports">
     <title>JasperReports</title>
 
-    <para>JasperReports (<ulink
-    url="http://jasperreports.sourceforge.net"></ulink>) is a powerful
+    <para>JasperReports (<link
+    xl:href="http://jasperreports.sourceforge.net"></link>) is a powerful
     open-source reporting engine that supports the creation of report designs
     using an easily understood XML file format. JasperReports is capable of
     rendering reports in four different formats: CSV, Excel, HTML and
     PDF.</para>
 
-    <section id="view-jasper-reports-dependencies">
+    <section xml:id="view-jasper-reports-dependencies">
       <title>Dependencies</title>
 
       <para>Your application will need to include the latest release of
@@ -2151,7 +2157,7 @@ public class PDFPage extends AbstractPdfView {
       <para>JasperReports also requires a JAXP compliant XML parser.</para>
     </section>
 
-    <section id="view-jasper-reports-configuration">
+    <section xml:id="view-jasper-reports-configuration">
       <title>Configuration</title>
 
       <para>To configure JasperReports views in your Spring container
@@ -2160,7 +2166,7 @@ public class PDFPage extends AbstractPdfView {
       appropriate view class depending on which format you want your report
       rendered in.</para>
 
-      <section id="view-jasper-reports-configuration-resolver">
+      <section xml:id="view-jasper-reports-configuration-resolver">
         <title>Configuring the
         <interfacename>ViewResolver</interfacename></title>
 
@@ -2179,7 +2185,7 @@ public class PDFPage extends AbstractPdfView {
         the next section.)</para>
       </section>
 
-      <section id="view-jasper-reports-configuration-views">
+      <section xml:id="view-jasper-reports-configuration-views">
         <title>Configuring the <literal>View</literal>s</title>
 
         <para>The Spring Framework contains five different
@@ -2188,7 +2194,7 @@ public class PDFPage extends AbstractPdfView {
         by JasperReports, and one that allows for the format to be determined
         at runtime:</para>
 
-        <table id="view-jasper-reports-configuration-views-classes">
+        <table xml:id="view-jasper-reports-configuration-views-classes">
           <title>JasperReports <interfacename>View</interfacename>
           classes</title>
 
@@ -2256,7 +2262,7 @@ simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper</programlisting>
         the underlying report file.</para>
       </section>
 
-      <section id="view-jasper-reports-configuration-report-files">
+      <section xml:id="view-jasper-reports-configuration-report-files">
         <title>About Report Files</title>
 
         <para>JasperReports has two distinct types of report file: the design
@@ -2274,7 +2280,7 @@ simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper</programlisting>
         restart your application.</para>
       </section>
 
-      <section id="view-jasper-reports-configuration-multiformat-view">
+      <section xml:id="view-jasper-reports-configuration-multiformat-view">
         <title>Using
         <classname>JasperReportsMultiFormatView</classname></title>
 
@@ -2315,7 +2321,7 @@ HttpServletResponse response) throws Exception {
         <para>By default the following mapping key mappings are configured in
         <classname>JasperReportsMultiFormatView</classname>:</para>
 
-        <table id="view-jasper-reports-configuration-multiformat-view-mappings">
+        <table xml:id="view-jasper-reports-configuration-multiformat-view-mappings">
           <title><classname>JasperReportsMultiFormatView</classname> Default
           Mapping Key Mappings</title>
 
@@ -2368,7 +2374,7 @@ HttpServletResponse response) throws Exception {
       </section>
     </section>
 
-    <section id="view-jasper-reports-model">
+    <section xml:id="view-jasper-reports-model">
       <title>Populating the <classname>ModelAndView</classname></title>
 
       <para>In order to render your report correctly in the format you have
@@ -2427,7 +2433,7 @@ simpleReport.reportDataKey=myBeanData</programlisting>
       second approach.</para>
     </section>
 
-    <section id="view-jasper-reports-subreports">
+    <section xml:id="view-jasper-reports-subreports">
       <title>Working with Sub-Reports</title>
 
       <para>JasperReports provides support for embedded sub-reports within
@@ -2440,7 +2446,7 @@ simpleReport.reportDataKey=myBeanData</programlisting>
       configure sub-reports declaratively, and you can include additional data
       for these sub-reports directly from your controllers.</para>
 
-      <section id="view-jasper-reports-subreports-config-reports">
+      <section xml:id="view-jasper-reports-subreports-config-reports">
         <title>Configuring Sub-Report Files</title>
 
         <para>To control which sub-report files are included in a master
@@ -2485,7 +2491,7 @@ simpleReport.reportDataKey=myBeanData</programlisting>
         the JasperReports engine under the given key.</para>
       </section>
 
-      <section id="view-jasper-reports-subreports-config-datasources">
+      <section xml:id="view-jasper-reports-subreports-config-datasources">
         <title>Configuring Sub-Report Data Sources</title>
 
         <para>This step is entirely optional when using Spring to configure your
@@ -2506,7 +2512,7 @@ simpleReport.reportDataKey=myBeanData</programlisting>
       </section>
     </section>
 
-    <section id="view-jasper-reports-exporter-parameters">
+    <section xml:id="view-jasper-reports-exporter-parameters">
       <title>Configuring Exporter Parameters</title>
 
       <para>If you have special requirements for exporter configuration --
@@ -2542,14 +2548,14 @@ simpleReport.reportDataKey=myBeanData</programlisting>
     </section>
   </section>
 
-  <section id="view-feeds">
+  <section xml:id="view-feeds">
     <title>Feed Views</title>
 
     <para>Both <classname>AbstractAtomFeedView</classname> and
     <classname>AbstractRssFeedView</classname> inherit from the base class
     <classname>AbstractFeedView</classname> and are used to provide Atom and
-    RSS Feed views respectfully. They are based on java.net's <ulink
-    url="https://rome.dev.java.net">ROME</ulink> project and are located in
+    RSS Feed views respectfully. They are based on java.net's <link
+    xl:href="https://rome.dev.java.net">ROME</link> project and are located in
     the package
     <literal>org.springframework.web.servlet.view.feed</literal>.</para>
 
@@ -2602,11 +2608,11 @@ simpleReport.reportDataKey=myBeanData</programlisting>
     written to the response object after the method returns.</para>
 
     <para>For an example of creating an Atom view please refer to Alef
-    Arendsen's SpringSource Team Blog <ulink
-    url="http://blog.springsource.com/2009/03/16/adding-an-atom-view-to-an-application-using-springs-rest-support/">entry</ulink>.</para>
+    Arendsen's SpringSource Team Blog <link
+    xl:href="http://blog.springsource.com/2009/03/16/adding-an-atom-view-to-an-application-using-springs-rest-support/">entry</link>.</para>
   </section>
 
-  <section id="view-xml-marshalling">
+  <section xml:id="view-xml-marshalling">
     <title>XML Marshalling View</title>
 
     <para>The <classname>MarhsallingView</classname> uses an XML
@@ -2622,28 +2628,28 @@ simpleReport.reportDataKey=myBeanData</programlisting>
     chapter <link linkend="oxm">Marshalling XML using O/X
     Mappers</link>.</para>
   </section>
-  
-  <section id="view-json-mapping">
-  	<title>JSON Mapping View</title>
-  	
+
+  <section xml:id="view-json-mapping">
+      <title>JSON Mapping View</title>
+
         <para>The <classname>MappingJackson2JsonView</classname>
         (or <classname>MappingJacksonJsonView</classname> depending on the
         the Jackson version you have) uses the Jackson
-  	library's <classname>ObjectMapper</classname> to render the response content 
-  	as JSON. By default, the entire contents of the model map (with the exception 
-  	of framework-specific classes) will be encoded as JSON. For cases where the 
-  	contents of the map need to be filtered, users may specify a specific set of 
-  	model attributes to encode via the <literal>RenderedAttributes</literal> 
-  	property. The <literal>extractValueFromSingleKeyModel</literal> property
-  	may also be  used to have the value in single-key models extracted and 
-  	serialized directly rather than as a map of model attributes.</para>
+      library's <classname>ObjectMapper</classname> to render the response content
+      as JSON. By default, the entire contents of the model map (with the exception
+      of framework-specific classes) will be encoded as JSON. For cases where the
+      contents of the map need to be filtered, users may specify a specific set of
+      model attributes to encode via the <literal>RenderedAttributes</literal>
+      property. The <literal>extractValueFromSingleKeyModel</literal> property
+      may also be  used to have the value in single-key models extracted and
+      serialized directly rather than as a map of model attributes.</para>
 
-	<para>JSON mapping can be customized as needed through the use of Jackson's provided 
-	annotations. When further control is needed, a custom 
-	<interfacename>ObjectMapper</interfacename> can be injected through the 
-	<literal>ObjectMapper</literal> property for cases where custom JSON 
-	serializers/deserializers need to be provided for specific types.</para>
-  	
+    <para>JSON mapping can be customized as needed through the use of Jackson's provided
+    annotations. When further control is needed, a custom
+    <interfacename>ObjectMapper</interfacename> can be injected through the
+    <literal>ObjectMapper</literal> property for cases where custom JSON
+    serializers/deserializers need to be provided for specific types.</para>
+
   </section>
 
 </chapter>

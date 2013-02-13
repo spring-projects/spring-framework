@@ -77,6 +77,7 @@ public class RestTemplateTests {
 				.andReturn(request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -86,13 +87,14 @@ public class RestTemplateTests {
 
 		verifyMocks();
 	}
-	
+
 	@Test
 	public void varArgsNullTemplateVariable() throws Exception {
 		expect(requestFactory.createRequest(new URI("http://example.com/-foo"), HttpMethod.GET))
 				.andReturn(request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -108,6 +110,7 @@ public class RestTemplateTests {
 				.andReturn(request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -124,6 +127,7 @@ public class RestTemplateTests {
 				.andReturn(request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -177,6 +181,7 @@ public class RestTemplateTests {
 		expect(converter.canRead(String.class, textPlain)).andReturn(true);
 		String expected = "Hello World";
 		expect(converter.read(String.class, response)).andReturn(expected);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -205,6 +210,7 @@ public class RestTemplateTests {
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		expect(converter.canRead(String.class, contentType)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -239,6 +245,7 @@ public class RestTemplateTests {
 		String expected = "Hello World";
 		expect(converter.read(String.class, response)).andReturn(expected);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -260,6 +267,7 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -282,6 +290,7 @@ public class RestTemplateTests {
 		URI expected = new URI("http://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -307,6 +316,7 @@ public class RestTemplateTests {
 		URI expected = new URI("http://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -335,6 +345,7 @@ public class RestTemplateTests {
 		URI expected = new URI("http://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -360,6 +371,7 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -379,6 +391,7 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -409,6 +422,7 @@ public class RestTemplateTests {
 		Integer expected = 42;
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -442,6 +456,7 @@ public class RestTemplateTests {
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -472,6 +487,7 @@ public class RestTemplateTests {
 		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(null);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -481,7 +497,7 @@ public class RestTemplateTests {
 
 		verifyMocks();
 	}
-	
+
 	@Test
 	public void postForEntityNull() throws Exception {
 		MediaType textPlain = new MediaType("text", "plain");
@@ -500,6 +516,7 @@ public class RestTemplateTests {
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(null);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -520,6 +537,7 @@ public class RestTemplateTests {
 		converter.write(helloWorld, null, request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -536,6 +554,7 @@ public class RestTemplateTests {
 		expect(request.getHeaders()).andReturn(requestHeaders);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -550,6 +569,7 @@ public class RestTemplateTests {
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.DELETE)).andReturn(request);
 		expect(request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -568,6 +588,7 @@ public class RestTemplateTests {
 		EnumSet<HttpMethod> expected = EnumSet.of(HttpMethod.GET, HttpMethod.POST);
 		responseHeaders.setAllow(expected);
 		expect(response.getHeaders()).andReturn(responseHeaders);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -621,6 +642,7 @@ public class RestTemplateTests {
 		expect(converter.canRead(Integer.class, MediaType.TEXT_PLAIN)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replayMocks();
@@ -644,7 +666,7 @@ public class RestTemplateTests {
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
 
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
-		expect(converter.canRead(intList.getType(), null)).andReturn(true);
+		expect(converter.canRead(intList.getType(), null, null)).andReturn(true);
 		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -660,9 +682,10 @@ public class RestTemplateTests {
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		List<Integer> expected = Collections.singletonList(42);
-		expect(converter.canRead(intList.getType(), MediaType.TEXT_PLAIN)).andReturn(true);
-		expect(converter.read(intList.getType(), response)).andReturn(expected);
+		expect(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).andReturn(true);
+		expect(converter.read(intList.getType(), null, response)).andReturn(expected);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		addLogResponseStatusExpectations(HttpStatus.OK);
 		response.close();
 
 		replay(requestFactory, request, response, errorHandler, converter);
@@ -680,6 +703,11 @@ public class RestTemplateTests {
 		verify(requestFactory, request, response, errorHandler, converter);
 	}
 
+
+	private void addLogResponseStatusExpectations(HttpStatus status) throws IOException {
+		expect(response.getStatusCode()).andReturn(status).times(0, 1);
+		expect(response.getStatusText()).andReturn(status.getReasonPhrase()).times(0, 1);
+	}
 
 	private void replayMocks() {
 		replay(requestFactory, request, response, errorHandler, converter);

@@ -23,7 +23,6 @@ import java.util.Map;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -38,25 +37,23 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A ContentNegotiationStrategy that uses the path extension of the URL to determine
- * what media types are requested. The path extension is used as follows:
+ * A ContentNegotiationStrategy that uses the path extension of the URL to
+ * determine what media types are requested. The path extension is first looked
+ * up in the map of media types provided to the constructor. If that fails, the
+ * Java Activation framework is used as a fallback mechanism.
  *
- * <ol>
- * 	<li>Look upin the map of media types provided to the constructor
- * 	<li>Call to {@link ServletContext#getMimeType(String)}
- * 	<li>Use the Java Activation framework
- * </ol>
- *
- * <p>The presence of the Java Activation framework is detected and enabled automatically
- * but the {@link #setUseJaf(boolean)} property may be used to override that setting.
+ * <p>
+ * The presence of the Java Activation framework is detected and enabled
+ * automatically but the {@link #setUseJaf(boolean)} property may be used to
+ * override that setting.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class PathExtensionContentNegotiationStrategy extends AbstractMappingContentNegotiationStrategy {
 
-	private static final boolean JAF_PRESENT =
-			ClassUtils.isPresent("javax.activation.FileTypeMap", PathExtensionContentNegotiationStrategy.class.getClassLoader());
+	private static final boolean JAF_PRESENT = ClassUtils.isPresent("javax.activation.FileTypeMap",
+					PathExtensionContentNegotiationStrategy.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(PathExtensionContentNegotiationStrategy.class);
 
@@ -68,6 +65,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	private boolean useJaf = JAF_PRESENT;
 
+
 	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
@@ -78,8 +76,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	/**
 	 * Create an instance without any mappings to start with. Mappings may be added
-	 * later on if any extensions are resolved through {@link ServletContext#getMimeType(String)}
-	 * or through the Java Activation framework.
+	 * later on if any extensions are resolved through the Java Activation framework.
 	 */
 	public PathExtensionContentNegotiationStrategy() {
 		super(null);
@@ -112,21 +109,13 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	@Override
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension) {
-		MediaType mediaType = null;
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		if (servletRequest != null) {
-			String mimeType = servletRequest.getServletContext().getMimeType("file." + extension);
-			if (StringUtils.hasText(mimeType)) {
-				mediaType = MediaType.parseMediaType(mimeType);
-			}
-		}
-		if ((mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) && this.useJaf) {
+		if (this.useJaf) {
 			MediaType jafMediaType = JafMediaTypeFactory.getMediaType("file." + extension);
 			if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
-				mediaType = jafMediaType;
+				return jafMediaType;
 			}
 		}
-		return mediaType;
+		return null;
 	}
 
 

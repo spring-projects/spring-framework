@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;

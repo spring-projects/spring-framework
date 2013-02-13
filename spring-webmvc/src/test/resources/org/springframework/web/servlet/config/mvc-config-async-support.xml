@@ -5,7 +5,14 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
 
 	<mvc:annotation-driven>
-		<mvc:async-support default-timeout="2500" task-executor="executor" />
+		<mvc:async-support default-timeout="2500" task-executor="executor">
+			<mvc:callable-interceptors>
+				<bean class="org.springframework.web.servlet.config.MvcNamespaceTests.TestCallableProcessingInterceptor" />
+			</mvc:callable-interceptors>
+			<mvc:deferred-result-interceptors>
+				<bean class="org.springframework.web.servlet.config.MvcNamespaceTests.TestDeferredResultProcessingInterceptor" />
+			</mvc:deferred-result-interceptors>
+		</mvc:async-support>
 	</mvc:annotation-driven>
 
 	<bean id="executor" class="org.springframework.scheduling.concurrent.ConcurrentTaskExecutor" />

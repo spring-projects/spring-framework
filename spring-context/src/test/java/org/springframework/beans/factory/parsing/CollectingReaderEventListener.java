@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ package org.springframework.beans.factory.parsing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.core.CollectionFactory;
 
 /**
  * @author Rob Harrop
@@ -31,55 +30,59 @@ import org.springframework.core.CollectionFactory;
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
-	private final List defaults = new LinkedList();
+	private final List<DefaultsDefinition> defaults = new LinkedList<DefaultsDefinition>();
 
-	private final Map componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, ComponentDefinition> componentDefinitions = new LinkedHashMap<>(8);
 
-	private final Map aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, List<AliasDefinition>> aliasMap = new LinkedHashMap<>(8);
 
-	private final List imports = new LinkedList();
+	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 
 
+	@Override
 	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.defaults.add(defaultsDefinition);
 	}
 
-	public List getDefaults() {
+	public List<DefaultsDefinition> getDefaults() {
 		return Collections.unmodifiableList(this.defaults);
 	}
 
+	@Override
 	public void componentRegistered(ComponentDefinition componentDefinition) {
 		this.componentDefinitions.put(componentDefinition.getName(), componentDefinition);
 	}
 
 	public ComponentDefinition getComponentDefinition(String name) {
-		return (ComponentDefinition) this.componentDefinitions.get(name);
+		return this.componentDefinitions.get(name);
 	}
 
 	public ComponentDefinition[] getComponentDefinitions() {
-		Collection collection = this.componentDefinitions.values();
-		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
+		Collection<ComponentDefinition> collection = this.componentDefinitions.values();
+		return collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
+	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
-		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
+		List<AliasDefinition> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
-			aliases = new ArrayList();
+			aliases = new ArrayList<AliasDefinition>();
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
 		aliases.add(aliasDefinition);
 	}
 
-	public List getAliases(String beanName) {
-		List aliases = (List) this.aliasMap.get(beanName);
+	public List<?> getAliases(String beanName) {
+		List<?> aliases = this.aliasMap.get(beanName);
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
+	@Override
 	public void importProcessed(ImportDefinition importDefinition) {
 		this.imports.add(importDefinition);
 	}
 
-	public List getImports() {
+	public List<ImportDefinition> getImports() {
 		return Collections.unmodifiableList(this.imports);
 	}
 

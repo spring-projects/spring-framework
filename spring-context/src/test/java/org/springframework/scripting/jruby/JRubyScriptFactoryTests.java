@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.scripting.jruby;
 
 import java.util.Map;
 
-import junit.framework.TestCase;
-import junit.framework.Assert;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.TestBean;
@@ -32,13 +31,18 @@ import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.TestBeanAwareMessenger;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class JRubyScriptFactoryTests extends TestCase {
+public class JRubyScriptFactoryTests {
 
 	private static final String RUBY_SCRIPT_SOURCE_LOCATOR =
 			"inline:require 'java'\n" +
@@ -46,7 +50,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 					"end\n" +
 					"RubyBar.new";
 
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.LONG_RUNNING);
+	}
 
+	@Test
 	public void testStaticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
 		Calculator calc = (Calculator) ctx.getBean("calculator");
@@ -55,16 +64,17 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
 
-		Assert.assertEquals(calc, calc);
-		Assert.assertEquals(messenger, messenger);
+		assertEquals(calc, calc);
+		assertEquals(messenger, messenger);
 		assertTrue(!messenger.equals(calc));
 		assertNotSame(messenger.hashCode(), calc.hashCode());
 		assertTrue(!messenger.toString().equals(calc.toString()));
 
 		String desiredMessage = "Hello World!";
-		Assert.assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
+	@Test
 	public void testNonStaticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
@@ -73,15 +83,16 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
 
 		String desiredMessage = "Hello World!";
-		Assert.assertEquals("Message is incorrect.", desiredMessage, messenger.getMessage());
+		assertEquals("Message is incorrect.", desiredMessage, messenger.getMessage());
 
 		Refreshable refreshable = (Refreshable) messenger;
 		refreshable.refresh();
 
-		Assert.assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
+		assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
+	@Test
 	public void testScriptCompilationException() throws Exception {
 		try {
 			new ClassPathXmlApplicationContext("jrubyBrokenContext.xml", getClass());
@@ -92,33 +103,37 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory(null, new Class[]{Messenger.class});
+			new JRubyScriptFactory(null, new Class<?>[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
 	}
 
+	@Test
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("", new Class[]{Messenger.class});
+			new JRubyScriptFactory("", new Class<?>[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
 	}
 
+	@Test
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("\n   ", new Class[]{Messenger.class});
+			new JRubyScriptFactory("\n   ", new Class<?>[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
 	}
 
+	@Test
 	public void testCtorWithNullScriptInterfacesArray() throws Exception {
 		try {
 			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, null);
@@ -128,30 +143,33 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
 		try {
-			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[]{});
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class<?>[]{});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
 	}
 
+	@Test
 	public void testResourceScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		TestBean testBean = (TestBean) ctx.getBean("testBean");
 
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		Assert.assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger.getMessage());
 		assertFalse(messenger instanceof Refreshable);
 
 		TestBeanAwareMessenger messengerByType = (TestBeanAwareMessenger) ctx.getBean("messengerByType");
-		Assert.assertEquals(testBean, messengerByType.getTestBean());
+		assertEquals(testBean, messengerByType.getTestBean());
 
 		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
-		Assert.assertEquals(testBean, messengerByName.getTestBean());
+		assertEquals(testBean, messengerByName.getTestBean());
 	}
 
+	@Test
 	public void testPrototypeScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -159,14 +177,15 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 		assertNotSame(messenger, messenger2);
 		assertSame(messenger.getClass(), messenger2.getClass());
-		Assert.assertEquals("Hello World!", messenger.getMessage());
-		Assert.assertEquals("Hello World!", messenger2.getMessage());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
 		messenger.setMessage("Bye World!");
 		messenger2.setMessage("Byebye World!");
-		Assert.assertEquals("Bye World!", messenger.getMessage());
-		Assert.assertEquals("Byebye World!", messenger2.getMessage());
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
+	@Test
 	public void testInlineScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
@@ -174,23 +193,25 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertFalse(calculator instanceof Refreshable);
 	}
 
+	@Test
 	public void testRefreshableFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
-		Assert.assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
 
 	public void testThatMultipleScriptInterfacesAreSupported() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("calculatingMessenger");
-		Assert.assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger.getMessage());
 
 		// cool, now check that the Calculator interface is also exposed
 		Calculator calc = (Calculator) messenger;
-		Assert.assertEquals(0, calc.add(2, -2));
+		assertEquals(0, calc.add(2, -2));
 	}
 
+	@Test
 	public void testWithComplexArg() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
 		Printer printer = (Printer) ctx.getBean("printer");
@@ -199,6 +220,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals(1, printable.count);
 	}
 
+	@Test
 	public void testWithPrimitiveArgsInReturnTypeAndParameters() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForPrimitives.xml", getClass());
 		PrimitiveAdder adder = (PrimitiveAdder) ctx.getBean("adder");
@@ -212,6 +234,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals('c', adder.echo('c'));
 	}
 
+	@Test
 	public void testWithWrapperArgsInReturnTypeAndParameters() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForWrappers.xml", getClass());
 		WrapperAdder adder = (WrapperAdder) ctx.getBean("adder");
@@ -250,14 +273,14 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals("2", lol[1][0]);
 		assertEquals("3", lol[2][0]);
 
-		Map singleValueMap = adder.toMap("key", "value");
+		Map<?, ?> singleValueMap = adder.toMap("key", "value");
 		assertNotNull(singleValueMap);
 		assertEquals(1, singleValueMap.size());
 		assertEquals("key", singleValueMap.keySet().iterator().next());
 		assertEquals("value", singleValueMap.values().iterator().next());
 
 		String[] expectedStrings = new String[]{"1", "2", "3"};
-		Map map = adder.toMap("key", expectedStrings);
+		Map<?, ?> map = adder.toMap("key", expectedStrings);
 		assertNotNull(map);
 		assertEquals(1, map.size());
 		assertEquals("key", map.keySet().iterator().next());
@@ -267,10 +290,11 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testAOP() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-aop.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		Assert.assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());
+		assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());
 	}
 
 
@@ -278,6 +302,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 		public int count;
 
+		@Override
 		public String getContent() {
 			this.count++;
 			return "Hello World!";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -67,12 +68,14 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
+import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -224,7 +227,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public AbstractApplicationContext(ApplicationContext parent) {
 		this.parent = parent;
 		this.resourcePatternResolver = getResourcePatternResolver();
-		this.environment = this.createEnvironment();
 	}
 
 
@@ -242,12 +244,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.id = id;
 	}
 
-	/**
-	 * Return the unique id of this application context.
-	 * @return the unique id of the context, or <code>null</code> if none
-	 */
 	public String getId() {
 		return this.id;
+	}
+
+	public String getApplicationName() {
+		return "";
 	}
 
 	/**
@@ -262,21 +264,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return a friendly name for this context.
-	 * @return a display name for this context (never <code>null</code>)
+	 * @return a display name for this context (never {@code null})
 	 */
 	public String getDisplayName() {
 		return this.displayName;
 	}
 
 	/**
-	 * Return the parent context, or <code>null</code> if there is no parent
+	 * Return the parent context, or {@code null} if there is no parent
 	 * (that is, this context is the root of the context hierarchy).
 	 */
 	public ApplicationContext getParent() {
 		return this.parent;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>If {@code null}, a new environment will be initialized via
+	 * {@link #createEnvironment()}.
+	 */
 	public ConfigurableEnvironment getEnvironment() {
+		if (this.environment == null) {
+			this.environment = createEnvironment();
+		}
 		return this.environment;
 	}
 
@@ -329,7 +339,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal ApplicationEventMulticaster used by the context.
-	 * @return the internal ApplicationEventMulticaster (never <code>null</code>)
+	 * @return the internal ApplicationEventMulticaster (never {@code null})
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
@@ -342,7 +352,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal LifecycleProcessor used by the context.
-	 * @return the internal LifecycleProcessor (never <code>null</code>)
+	 * @return the internal LifecycleProcessor (never {@code null})
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private LifecycleProcessor getLifecycleProcessor() {
@@ -361,7 +371,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Can be overridden in subclasses, for extended resolution strategies,
 	 * for example in a web environment.
 	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
-	 * Call the context's <code>getResources</code> method instead, which
+	 * Call the context's {@code getResources} method instead, which
 	 * will delegate to the ResourcePatternResolver.
 	 * @return the ResourcePatternResolver for this context
 	 * @see #getResources
@@ -387,9 +397,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void setParent(ApplicationContext parent) {
 		this.parent = parent;
 		if (parent != null) {
-			Object parentEnvironment =  parent.getEnvironment();
+			Environment parentEnvironment = parent.getEnvironment();
 			if (parentEnvironment instanceof ConfigurableEnvironment) {
-				this.environment.merge((ConfigurableEnvironment)parentEnvironment);
+				getEnvironment().merge((ConfigurableEnvironment) parentEnvironment);
 			}
 		}
 	}
@@ -505,7 +515,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Validate that all properties marked as required are resolvable
 		// see ConfigurablePropertyResolver#setRequiredProperties
-		this.environment.validateRequiredProperties();
+		getEnvironment().validateRequiredProperties();
 	}
 
 	/**
@@ -541,7 +551,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
-		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, this.getEnvironment()));
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -566,15 +576,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
-		if (!beanFactory.containsBean(ENVIRONMENT_BEAN_NAME)) {
+		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
-
-		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+		if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
 			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
 		}
-
-		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+		if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
 		}
 	}
@@ -908,6 +916,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 
+		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
+		String[] weaverAwareNames = beanFactory.getBeanNamesForType(LoadTimeWeaverAware.class, false, false);
+		for (String weaverAwareName : weaverAwareNames) {
+			getBean(weaverAwareName);
+		}
+
 		// Stop using the temporary ClassLoader for type matching.
 		beanFactory.setTempClassLoader(null);
 
@@ -932,10 +946,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
+
+		// Participate in LiveBeansView MBean, if active.
+		LiveBeansView.registerApplicationContext(this);
 	}
 
 	/**
-	 * Cancel this context's refresh attempt, resetting the <code>active</code> flag
+	 * Cancel this context's refresh attempt, resetting the {@code active} flag
 	 * after an exception got thrown.
 	 * @param ex the exception that led to the cancellation
 	 */
@@ -949,8 +966,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context
 	 * on JVM shutdown unless it has already been closed at that time.
-	 * <p>Delegates to <code>doClose()</code> for the actual closing procedure.
-	 * @see java.lang.Runtime#addShutdownHook
+	 * <p>Delegates to {@code doClose()} for the actual closing procedure.
+	 * @see Runtime#addShutdownHook
 	 * @see #close()
 	 * @see #doClose()
 	 */
@@ -972,7 +989,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Only called when the ApplicationContext itself is running
 	 * as a bean in another BeanFactory or ApplicationContext,
 	 * which is rather unusual.
-	 * <p>The <code>close</code> method is the native way to
+	 * <p>The {@code close} method is the native way to
 	 * shut down an ApplicationContext.
 	 * @see #close()
 	 * @see org.springframework.beans.factory.access.SingletonBeanFactoryLocator
@@ -983,7 +1000,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Close this application context, destroying all beans in its bean factory.
-	 * <p>Delegates to <code>doClose()</code> for the actual closing procedure.
+	 * <p>Delegates to {@code doClose()} for the actual closing procedure.
 	 * Also removes a JVM shutdown hook, if registered, as it's not needed anymore.
 	 * @see #doClose()
 	 * @see #registerShutdownHook()
@@ -1007,7 +1024,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Actually performs context closing: publishes a ContextClosedEvent and
 	 * destroys the singletons in the bean factory of this application context.
-	 * <p>Called by both <code>close()</code> and a JVM shutdown hook, if any.
+	 * <p>Called by both {@code close()} and a JVM shutdown hook, if any.
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 * @see #destroyBeans()
 	 * @see #close()
@@ -1024,6 +1041,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing " + this);
 			}
+
+			LiveBeansView.unregisterApplicationContext(this);
 
 			try {
 				// Publish shutdown event.
@@ -1059,7 +1078,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Template method for destroying all beans that this context manages.
 	 * The default implementation destroy all cached singletons in this context,
-	 * invoking <code>DisposableBean.destroy()</code> and/or the specified
+	 * invoking {@code DisposableBean.destroy()} and/or the specified
 	 * "destroy-method".
 	 * <p>Can be overridden to add context-specific bean destruction steps
 	 * right before or right after standard singleton destruction,
@@ -1221,7 +1240,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal MessageSource used by the context.
-	 * @return the internal MessageSource (never <code>null</code>)
+	 * @return the internal MessageSource (never {@code null})
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private MessageSource getMessageSource() throws IllegalStateException {
@@ -1238,7 +1257,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected MessageSource getInternalParentMessageSource() {
 		return (getParent() instanceof AbstractApplicationContext) ?
-		    ((AbstractApplicationContext) getParent()).messageSource : getParent();
+			((AbstractApplicationContext) getParent()).messageSource : getParent();
 	}
 
 
@@ -1299,7 +1318,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Note: Subclasses should check whether the context is still active before
 	 * returning the internal bean factory. The internal factory should generally be
 	 * considered unavailable once the context has been closed.
-	 * @return this application context's internal bean factory (never <code>null</code>)
+	 * @return this application context's internal bean factory (never {@code null})
 	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
 	 * (usually if {@link #refresh()} has never been called) or if the context has been
 	 * closed already
@@ -1368,7 +1387,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private class ApplicationListenerDetector implements MergedBeanDefinitionPostProcessor {
 
-		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>();
+		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(64);
 
 		public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 			if (beanDefinition.isSingleton()) {

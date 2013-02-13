@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2011 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,8 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.Aware;
 
 /**
- * Interface to be implemented by any object that wishes to be notified
- * of the ServletContext (typically determined by the WebApplicationContext)
+ * Interface to be implemented by any object that wishes to be notified of the
+ * {@link ServletContext} (typically determined by the {@link WebApplicationContext})
  * that it runs in.
  *
  * @author Juergen Hoeller
@@ -33,11 +33,11 @@ import org.springframework.beans.factory.Aware;
 public interface ServletContextAware extends Aware {
 
 	/**
-	 * Set the ServletContext that this object runs in.
+	 * Set the {@link ServletContext} that this object runs in.
 	 * <p>Invoked after population of normal bean properties but before an init
-	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
+	 * callback like InitializingBean's {@code afterPropertiesSet} or a
 	 * custom init-method. Invoked after ApplicationContextAware's
-	 * <code>setApplicationContext</code>.
+	 * {@code setApplicationContext}.
 	 * @param servletContext ServletContext object to be used by this object
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext

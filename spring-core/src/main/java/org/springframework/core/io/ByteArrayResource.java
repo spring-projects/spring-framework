@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class ByteArrayResource extends AbstractResource {
 
 
 	/**
-	 * This implementation always returns <code>true</code>.
+	 * This implementation always returns {@code true}.
 	 */
 	@Override
 	public boolean exists() {
@@ -112,7 +112,7 @@ public class ByteArrayResource extends AbstractResource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof ByteArrayResource && Arrays.equals(((ByteArrayResource) obj).byteArray, this.byteArray)));
+			(obj instanceof ByteArrayResource && Arrays.equals(((ByteArrayResource) obj).byteArray, this.byteArray)));
 	}
 
 	/**

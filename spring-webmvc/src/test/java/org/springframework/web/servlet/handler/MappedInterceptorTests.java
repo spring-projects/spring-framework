@@ -45,7 +45,7 @@ public class MappedInterceptorTests {
 	}
 
 	@Test
-	public void includePatternOnly() {
+	public void includePattern() {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/foo/*" }, this.interceptor);
 
 		assertTrue(mappedInterceptor.matches("/foo/bar", pathMatcher));
@@ -53,7 +53,13 @@ public class MappedInterceptorTests {
 	}
 
 	@Test
-	public void excludePatternOnly() {
+	public void includePatternWithMatrixVariables() {
+		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/foo*/*" }, this.interceptor);
+		assertTrue(mappedInterceptor.matches("/foo;q=1/bar;s=2", pathMatcher));
+	}
+
+	@Test
+	public void excludePattern() {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(null, new String[] { "/admin/**" }, this.interceptor);
 
 		assertTrue(mappedInterceptor.matches("/foo", pathMatcher));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
  * <p>This is basically a JSR-330 compliant variant of Spring's good old
  * {@link ObjectFactoryCreatingFactoryBean}. It can be used for traditional
  * external dependency injection configuration that targets a property or
- * constructor argument of type <code>javax.inject.Provider</code>, as an
- * alternative to JSR-330's <code>@Inject</code> annotation-driven approach.
+ * constructor argument of type {@code javax.inject.Provider}, as an
+ * alternative to JSR-330's {@code @Inject} annotation-driven approach.
  *
  * @author Juergen Hoeller
  * @since 3.0.2
@@ -46,7 +46,7 @@ public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
 
 	/**
 	 * Set the name of the target bean.
-	 * <p>The target does not <i>have</> to be a non-singleton bean, but realisticially
+	 * <p>The target does not <i>have</i> to be a non-singleton bean, but realistically
 	 * always will be (because if the target bean were a singleton, then said singleton
 	 * bean could simply be injected straight into the dependent object, thus obviating
 	 * the need for the extra level of indirection afforded by this factory approach).
@@ -76,6 +76,7 @@ public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
 	/**
 	 * Independent inner class - for serialization purposes.
 	 */
+	@SuppressWarnings("serial")
 	private static class TargetBeanProvider implements Provider, Serializable {
 
 		private final BeanFactory beanFactory;

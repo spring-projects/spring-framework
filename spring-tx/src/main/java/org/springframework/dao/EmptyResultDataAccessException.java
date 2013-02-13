@@ -24,6 +24,7 @@ package org.springframework.dao;
  * @since 2.0
  * @see IncorrectResultSizeDataAccessException
  */
+@SuppressWarnings("serial")
 public class EmptyResultDataAccessException extends IncorrectResultSizeDataAccessException {
 
 	/**

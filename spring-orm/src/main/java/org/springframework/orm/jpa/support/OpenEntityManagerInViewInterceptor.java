@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa.support;
 
+import java.util.concurrent.Callable;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -26,11 +28,12 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.context.request.AsyncWebRequestInterceptor;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * Spring web request interceptor that binds a JPA EntityManager to the
@@ -74,9 +77,9 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 
 		String participateAttributeName = getParticipateAttributeName();
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		if (asyncManager.hasConcurrentResult()) {
-			if (asyncManager.initializeAsyncThread(participateAttributeName)) {
+			if (applyCallableInterceptor(asyncManager, participateAttributeName)) {
 				return;
 			}
 		}
@@ -94,8 +97,8 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 				EntityManagerHolder emHolder = new EntityManagerHolder(em);
 				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), emHolder);
 
-				WebAsyncThreadInitializer asyncThreadInitializer = createThreadInitializer(emHolder);
-				asyncManager.registerAsyncThreadInitializer(participateAttributeName, asyncThreadInitializer);
+				asyncManager.registerCallableInterceptor(participateAttributeName,
+						new EntityManagerBindingCallableInterceptor(emHolder));
 			}
 			catch (PersistenceException ex) {
 				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
@@ -147,15 +150,41 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 		return getEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
 	}
 
-	private WebAsyncThreadInitializer createThreadInitializer(final EntityManagerHolder emHolder) {
-		return new WebAsyncThreadInitializer() {
-			public void initialize() {
-				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), emHolder);
-			}
-			public void reset() {
-				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
-			}
-		};
+
+	private boolean applyCallableInterceptor(WebAsyncManager asyncManager, String key) {
+		if (asyncManager.getCallableInterceptor(key) == null) {
+			return false;
+		}
+		((EntityManagerBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		return true;
+	}
+
+
+	/**
+	 * Bind and unbind the Hibernate {@code Session} to the current thread.
+	 */
+	private class EntityManagerBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
+
+		private final EntityManagerHolder emHolder;
+
+
+		public EntityManagerBindingCallableInterceptor(EntityManagerHolder emHolder) {
+			this.emHolder = emHolder;
+		}
+
+		@Override
+		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
+			initializeThread();
+		}
+
+		@Override
+		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+		}
+
+		private void initializeThread() {
+			TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), this.emHolder);
+		}
 	}
 
 }

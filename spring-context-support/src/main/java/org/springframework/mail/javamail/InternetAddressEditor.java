@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import javax.mail.internet.InternetAddress;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.mail.internet.InternetAddress</code>,
+ * Editor for {@code java.mail.internet.InternetAddress},
  * to directly populate an InternetAddress property.
  *
  * <p>Expects the same syntax as InternetAddress's constructor with

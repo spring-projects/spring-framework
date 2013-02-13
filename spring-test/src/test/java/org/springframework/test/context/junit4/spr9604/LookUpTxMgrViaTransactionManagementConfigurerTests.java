@@ -50,6 +50,7 @@ public class LookUpTxMgrViaTransactionManagementConfigurerTests {
 	@Configuration
 	static class Config implements TransactionManagementConfigurer {
 
+		@Override
 		public PlatformTransactionManager annotationDrivenTransactionManager() {
 			return txManager1();
 		}

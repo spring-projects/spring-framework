@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,20 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
 
@@ -40,8 +46,12 @@ import org.springframework.aop.aspectj.DeclareParentsAdvisor;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConvertingComparator;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.comparator.CompoundComparator;
+import org.springframework.util.comparator.InstanceComparator;
 
 /**
  * Factory that can create Spring AOP Advisors given AspectJ classes from
@@ -52,9 +62,33 @@ import org.springframework.util.StringUtils;
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
+ * @author Phillip Webb
  * @since 2.0
  */
 public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory {
+
+	private static final Comparator<Method> METHOD_COMPARATOR;
+
+	static {
+		CompoundComparator<Method> comparator = new CompoundComparator<Method>();
+		comparator.addComparator(new ConvertingComparator<Method, Annotation>(
+				new InstanceComparator<Annotation>(
+						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
+				new Converter<Method, Annotation>() {
+					public Annotation convert(Method method) {
+						AspectJAnnotation<?> annotation = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+						return annotation == null ? null : annotation.getAnnotation();
+					}
+				}));
+		comparator.addComparator(new ConvertingComparator<Method, String>(
+				new Converter<Method, String>() {
+					public String convert(Method method) {
+						return method.getName();
+					}
+				}));
+		METHOD_COMPARATOR = comparator;
+	}
+
 
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory maaif) {
 		final Class<?> aspectClass = maaif.getAspectMetadata().getAspectClass();
@@ -67,17 +101,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new LazySingletonAspectInstanceFactoryDecorator(maaif);
 
 		final List<Advisor> advisors = new LinkedList<Advisor>();
-		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method method) throws IllegalArgumentException {
-				// Exclude pointcuts
-				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
-					Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
-					if (advisor != null) {
-						advisors.add(advisor);
-					}
-				}
+		for (Method method : getAdvisorMethods(aspectClass)) {
+			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
+			if (advisor != null) {
+				advisors.add(advisor);
 			}
-		});
+		}
 
 		// If it's a per target aspect, emit the dummy instantiating aspect.
 		if (!advisors.isEmpty() && lazySingletonAspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
@@ -96,15 +125,29 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		return advisors;
 	}
 
+	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
+		final List<Method> methods = new LinkedList<Method>();
+		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
+			public void doWith(Method method) throws IllegalArgumentException {
+				// Exclude pointcuts
+				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
+					methods.add(method);
+				}
+			}
+		});
+		Collections.sort(methods, METHOD_COMPARATOR);
+		return methods;
+	}
+
 	/**
 	 * Build a {@link org.springframework.aop.aspectj.DeclareParentsAdvisor}
 	 * for the given introduction field.
 	 * <p>Resulting Advisors will need to be evaluated for targets.
 	 * @param introductionField the field to introspect
-	 * @return <code>null</code> if not an Advisor
+	 * @return {@code null} if not an Advisor
 	 */
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
-		DeclareParents declareParents = (DeclareParents) introductionField.getAnnotation(DeclareParents.class);
+		DeclareParents declareParents = introductionField.getAnnotation(DeclareParents.class);
 		if (declareParents == null) {
 			// Not an introduction field
 			return null;
@@ -160,7 +203,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			return null;
 		}
 
-		// If we get here, we know we have an AspectJ method. 
+		// If we get here, we know we have an AspectJ method.
 		// Check that it's an AspectJ-annotated class
 		if (!isAspect(candidateAspectClass)) {
 			throw new AopConfigException("Advice must be declared inside an aspect type: " +
@@ -224,6 +267,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * Triggered by per-clause pointcut on non-singleton aspect.
 	 * The advice has no effect.
 	 */
+	@SuppressWarnings("serial")
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
 
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {

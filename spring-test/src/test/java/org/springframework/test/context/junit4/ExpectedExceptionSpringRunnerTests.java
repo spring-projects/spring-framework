@@ -16,10 +16,11 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
@@ -34,7 +35,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * <li>JUnit's {@link Test#expected() &#064;Test(expected=...)}</li>
  * <li>Spring's {@link ExpectedException &#064;ExpectedException}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */
@@ -59,7 +60,7 @@ public class ExpectedExceptionSpringRunnerTests {
 	}
 
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners({})
 	public static final class ExpectedExceptionSpringRunnerTestCase {

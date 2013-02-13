@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.http.HttpRequest;
 /**
  * Represents a client-side HTTP request. Created via an implementation of the {@link ClientHttpRequestFactory}.
  *
- * <p>A <code>HttpRequest</code> can be {@linkplain #execute() executed}, getting a {@link ClientHttpResponse}
+ * <p>A {@code HttpRequest} can be {@linkplain #execute() executed}, getting a {@link ClientHttpResponse}
  * which can be read from.
  *
  * @author Arjen Poutsma

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.expression;
 
 /**
  * A bean resolver can be registered with the evaluation context
- * and will kick in for <code>@myBeanName</code> still expressions.
+ * and will kick in for {@code @myBeanName} still expressions.
  *
  * @author Andy Clement
  * @since 3.0.3
@@ -35,4 +35,3 @@ public interface BeanResolver {
 	Object resolve(EvaluationContext context, String beanName) throws AccessException;
 
 }
-	

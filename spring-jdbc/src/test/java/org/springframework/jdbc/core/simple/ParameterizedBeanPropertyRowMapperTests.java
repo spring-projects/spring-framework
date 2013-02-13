@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.sql.SQLException;
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.AbstractRowMapperTests;
 import org.springframework.jdbc.core.test.ConcretePerson;
@@ -29,45 +33,43 @@ import org.springframework.jdbc.core.test.Person;
  */
 public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
-	private SimpleJdbcTemplate simpleJdbcTemplate;
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
-	protected void setUp() throws SQLException {
-		super.setUp();
-		simpleJdbcTemplate = new SimpleJdbcTemplate(jdbcTemplate);
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void testOverridingDifferentClassDefinedForMapping() {
+		ParameterizedBeanPropertyRowMapper mapper = ParameterizedBeanPropertyRowMapper.newInstance(Person.class);
+		thrown.expect(InvalidDataAccessApiUsageException.class);
+		mapper.setMappedClass(Long.class);
 	}
 
-	public void testOverridingClassDefinedForMapping() {
-		ParameterizedBeanPropertyRowMapper<Person> mapper =
-				ParameterizedBeanPropertyRowMapper.newInstance(Person.class);
-		try {
-			((ParameterizedBeanPropertyRowMapper) mapper).setMappedClass(Long.class);
-			fail("Setting new class should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// expected
-		}
-		try {
-			mapper.setMappedClass(Person.class);
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			fail("Setting same class should not have thrown InvalidDataAccessApiUsageException");
-		}
+	@Test
+	public void testOverridingSameClassDefinedForMapping() {
+		ParameterizedBeanPropertyRowMapper<Person> mapper = ParameterizedBeanPropertyRowMapper.newInstance(Person.class);
+		mapper.setMappedClass(Person.class);
 	}
 
-	public void testStaticQueryWithRowMapper() throws SQLException {
-		List<Person> result = simpleJdbcTemplate.query("select name, age, birth_date, balance from people",
+	@Test
+	public void testStaticQueryWithRowMapper() throws Exception {
+		Mock mock = new Mock();
+		List<Person> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
 				ParameterizedBeanPropertyRowMapper.newInstance(Person.class));
 		assertEquals(1, result.size());
-		Person bean = result.get(0);
-		verifyPerson(bean);
+		verifyPerson(result.get(0));
+		mock.verifyClosed();
 	}
 
-	public void testMappingWithInheritance() throws SQLException {
-		List<ConcretePerson> result = simpleJdbcTemplate.query("select name, age, birth_date, balance from people",
+	@Test
+	public void testMappingWithInheritance() throws Exception {
+		Mock mock = new Mock();
+		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
 				ParameterizedBeanPropertyRowMapper.newInstance(ConcretePerson.class));
 		assertEquals(1, result.size());
-		ConcretePerson bean = result.get(0);
-		verifyConcretePerson(bean);
+		verifyConcretePerson(result.get(0));
+		mock.verifyClosed();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,8 @@ public class RemoteInvocationResult implements Serializable {
 
 	/**
 	 * Return whether this invocation result holds an exception.
-	 * If this returns <code>false</code>, the result value applies
-	 * (even if <code>null</code>).
+	 * If this returns {@code false}, the result value applies
+	 * (even if {@code null}).
 	 * @see #getValue
 	 * @see #getException
 	 */

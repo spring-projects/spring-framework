@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ import org.springframework.core.Ordered;
  * <pre class="code">
  * {@code
  * <beans>
- *     <task:annotation-config executor="myExecutor"/>
+ *     <task:annotation-driven executor="myExecutor"/>
  *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
  *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
  * </beans>
@@ -96,7 +96,13 @@ import org.springframework.core.Ordered;
  * the examples are equivalent save the setting of the <em>thread name prefix</em> of the
  * Executor; this is because the the {@code task:} namespace {@code executor} element does
  * not expose such an attribute. This demonstrates how the code-based approach allows for
- * maximum configurability through direct access to actual componentry.<p>
+ * maximum configurability through direct access to actual componentry.
+ *
+ * <p>Note: In the above example the {@code ThreadPoolTaskExecutor} is not a fully managed
+ * Spring Bean. Add the {@code @Bean} annotation to the {@code getAsyncExecutor()} method
+ * if you want a fully managed bean. In such circumstances it is no longer necessary to
+ * manually call the {@code executor.initialize()} method as this will be invoked
+ * automatically when the bean is initialized.
  *
  * @author Chris Beams
  * @since 3.1
@@ -113,7 +119,7 @@ public @interface EnableAsync {
 	/**
 	 * Indicate the 'async' annotation type to be detected at either class
 	 * or method level. By default, both the {@link Async} annotation and
-	 * the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation will be
+	 * the EJB 3.1 {@code javax.ejb.Asynchronous} annotation will be
 	 * detected. <p>This setter property exists so that developers can provide
 	 * their own (non-Spring-specific) annotation type to indicate that a method
 	 * (or all methods of a given class) should be invoked asynchronously.

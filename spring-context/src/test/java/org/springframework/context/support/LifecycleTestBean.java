@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,18 +43,21 @@ public class LifecycleTestBean implements Lifecycle {
 		return stopOrder;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
 
+	@Override
 	public void start() {
 		this.startOrder = ++startCounter;
 		this.running = true;
 	}
 
+	@Override
 	public void stop() {
 		this.stopOrder = ++stopCounter;
-		this.running = false;		
+		this.running = false;
 	}
 
 }

@@ -65,6 +65,7 @@ public class ConfigurationBeanNameTests {
 	public void registerOuterConfig_withBeanNameGenerator() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {
+			@Override
 			public String generateBeanName(
 					BeanDefinition definition, BeanDefinitionRegistry registry) {
 				return "custom-" + super.generateBeanName(definition, registry);

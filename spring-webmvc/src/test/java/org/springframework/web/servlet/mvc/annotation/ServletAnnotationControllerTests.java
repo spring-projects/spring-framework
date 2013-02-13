@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,11 @@ import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -86,12 +88,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.MockServletConfig;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockMultipartFile;
+import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
+import org.springframework.mock.web.test.MockServletConfig;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
@@ -161,6 +163,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void emptyRequestMapping() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -185,6 +188,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void emptyValueMapping() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -271,6 +275,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void defaultExpressionParameters() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -285,7 +290,7 @@ public class ServletAnnotationControllerTests {
 			}
 		};
 		servlet.init(new MockServletConfig());
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myPath.do");
 		request.setContextPath("/myApp");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -300,6 +305,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void typeNestedSetBinding() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -334,7 +340,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
-		String allowHeader = (String) response.getHeader("Allow");
+		String allowHeader = response.getHeader("Allow");
 		assertNotNull("No Allow header", allowHeader);
 		Set<String> allowedMethods = new HashSet<String>();
 		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
@@ -348,6 +354,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void proxiedStandardHandleMethod() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -560,6 +567,7 @@ public class ServletAnnotationControllerTests {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerClass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -656,6 +664,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void proxiedFormController() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -1510,7 +1519,7 @@ public class ServletAnnotationControllerTests {
 		request.setCookies(new Cookie("date", "2008-11-18"));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-108", response.getContentAsString());
+		assertEquals("test-2008", response.getContentAsString());
 	}
 
 	@Test
@@ -1583,6 +1592,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void controllerClassNameNoTypeLevelAnn() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1617,6 +1627,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void simpleUrlHandlerMapping() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1667,6 +1678,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void requestMappingInterfaceWithProxy() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -1705,7 +1717,7 @@ public class ServletAnnotationControllerTests {
 		assertEquals("handle", response.getContentAsString());
 
 	}
-	
+
 	@Test
 	public void trailingSlash() throws Exception {
 		initServlet(TrailingSlashController.class);
@@ -1865,6 +1877,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void parameterCsvAsIntegerArray() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1893,6 +1906,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void parameterCsvAsIntegerSet() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1921,6 +1935,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void parameterCsvAsIntegerSetWithCustomSeparator() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1951,6 +1966,7 @@ public class ServletAnnotationControllerTests {
 
 	public static class ListEditorRegistrar implements PropertyEditorRegistrar {
 
+		@Override
 		public void registerCustomEditors(PropertyEditorRegistry registry) {
 			registry.registerCustomEditor(Set.class, new ListEditor());
 		}
@@ -2177,12 +2193,14 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	public static class MySessionAttributesControllerImpl implements MySessionAttributesControllerIfc {
 
+		@Override
 		public String get(Model model) {
 			model.addAttribute("object1", new Object());
 			model.addAttribute("object2", new Object());
 			return "page1";
 		}
 
+		@Override
 		public String post(@ModelAttribute("object1") Object object1) {
 			//do something with object1
 			return "page2";
@@ -2209,6 +2227,7 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	public static class MyParameterizedControllerImpl implements MyEditableParameterizedControllerIfc<TestBean> {
 
+		@Override
 		public List<TestBean> getTestBeans() {
 			List<TestBean> list = new LinkedList<TestBean>();
 			list.add(new TestBean("tb1"));
@@ -2216,12 +2235,14 @@ public class ServletAnnotationControllerTests {
 			return list;
 		}
 
+		@Override
 		public String get(Model model) {
 			model.addAttribute("object1", new TestBean());
 			model.addAttribute("object2", new TestBean());
 			return "page1";
 		}
 
+		@Override
 		public String post(TestBean object) {
 			//do something with object1
 			return "page2";
@@ -2231,6 +2252,7 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	public static class MyParameterizedControllerImplWithOverriddenMappings implements MyEditableParameterizedControllerIfc<TestBean> {
 
+		@Override
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
 			List<TestBean> list = new LinkedList<TestBean>();
@@ -2239,6 +2261,7 @@ public class ServletAnnotationControllerTests {
 			return list;
 		}
 
+		@Override
 		@RequestMapping(method = RequestMethod.GET)
 		public String get(Model model) {
 			model.addAttribute("object1", new TestBean());
@@ -2246,6 +2269,7 @@ public class ServletAnnotationControllerTests {
 			return "page1";
 		}
 
+		@Override
 		@RequestMapping(method = RequestMethod.POST)
 		public String post(@ModelAttribute("object1") TestBean object1) {
 			//do something with object1
@@ -2415,6 +2439,7 @@ public class ServletAnnotationControllerTests {
 
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
+		@Override
 		public void initBinder(WebDataBinder binder, WebRequest request) {
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
@@ -2428,6 +2453,7 @@ public class ServletAnnotationControllerTests {
 
 	private static class MySpecialArgumentResolver implements WebArgumentResolver {
 
+		@Override
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
 			if (methodParameter.getParameterType().equals(MySpecialArg.class)) {
 				return new MySpecialArg("myValue");
@@ -2436,6 +2462,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Controller
 	@RequestMapping("/myPath.do")
 	private static class MyParameterDispatchingController implements Serializable {
@@ -2585,6 +2612,7 @@ public class ServletAnnotationControllerTests {
 
 	private static class TestPrincipal implements Principal {
 
+		@Override
 		public String getName() {
 			return "test";
 		}
@@ -2592,6 +2620,7 @@ public class ServletAnnotationControllerTests {
 
 	private static class OtherPrincipal implements Principal {
 
+		@Override
 		public String getName() {
 			return "other";
 		}
@@ -2599,12 +2628,15 @@ public class ServletAnnotationControllerTests {
 
 	private static class TestViewResolver implements ViewResolver {
 
+		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new View() {
+				@Override
 				public String getContentType() {
 					return null;
 				}
 
+				@Override
 				@SuppressWarnings({"unchecked", "deprecation"})
 				public void render(Map model, HttpServletRequest request, HttpServletResponse response)
 						throws Exception {
@@ -2643,11 +2675,14 @@ public class ServletAnnotationControllerTests {
 
 	public static class ModelExposingViewResolver implements ViewResolver {
 
+		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new View() {
+				@Override
 				public String getContentType() {
 					return null;
 				}
+				@Override
 				public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 					request.setAttribute("viewName", viewName);
 					request.getSession().setAttribute("model", model);
@@ -2744,6 +2779,7 @@ public class ServletAnnotationControllerTests {
 
 	public static class TestBeanConverter implements Converter<String, ITestBean> {
 
+		@Override
 		public ITestBean convert(String source) {
 			return new TestBean(source);
 		}
@@ -2824,7 +2860,7 @@ public class ServletAnnotationControllerTests {
 
 	@XmlRootElement
 	public static class A {
-		
+
 	}
 
 	@XmlRootElement
@@ -2835,23 +2871,28 @@ public class ServletAnnotationControllerTests {
 
 	public static class NotReadableMessageConverter implements HttpMessageConverter {
 
+		@Override
 		public boolean canRead(Class clazz, MediaType mediaType) {
 			return true;
 		}
 
+		@Override
 		public boolean canWrite(Class clazz, MediaType mediaType) {
 			return true;
 		}
 
+		@Override
 		public List getSupportedMediaTypes() {
 			return Collections.singletonList(new MediaType("application", "pdf"));
 		}
 
+		@Override
 		public Object read(Class clazz, HttpInputMessage inputMessage)
 				throws IOException, HttpMessageNotReadableException {
 			throw new HttpMessageNotReadableException("Could not read");
 		}
 
+		@Override
 		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			throw new UnsupportedOperationException("Not implemented");
@@ -2866,23 +2907,28 @@ public class ServletAnnotationControllerTests {
 			this.supportedMediaTypes = Arrays.asList(supportedMediaTypes);
 		}
 
+		@Override
 		public boolean canRead(Class clazz, MediaType mediaType) {
 			return supportedMediaTypes.contains(mediaType);
 		}
 
+		@Override
 		public boolean canWrite(Class clazz, MediaType mediaType) {
 			return supportedMediaTypes.contains(mediaType);
 		}
 
+		@Override
 		public List getSupportedMediaTypes() {
 			return supportedMediaTypes;
 		}
 
+		@Override
 		public Object read(Class clazz, HttpInputMessage inputMessage)
 				throws IOException, HttpMessageNotReadableException {
 			return null;
 		}
 
+		@Override
 		public void write(Object o, MediaType contentType, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
 			outputMessage.getHeaders().setContentType(contentType);
@@ -2954,6 +3000,7 @@ public class ServletAnnotationControllerTests {
 
 	public static class MyModelAndViewResolver implements ModelAndViewResolver {
 
+		@Override
 		public ModelAndView resolveModelAndView(Method handlerMethod,
 				Class handlerType,
 				Object returnValue,
@@ -2961,10 +3008,12 @@ public class ServletAnnotationControllerTests {
 				NativeWebRequest webRequest) {
 			if (returnValue instanceof MySpecialArg) {
 				return new ModelAndView(new View() {
+					@Override
 					public String getContentType() {
 						return "text/html";
 					}
 
+					@Override
 					public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
 							throws Exception {
 						response.getWriter().write("myValue");
@@ -3005,8 +3054,10 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void handle(@CookieValue("date") Date date, Writer writer) throws IOException {
-			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
-			writer.write("test-" + date.getYear());
+			assertEquals("Invalid path variable value", new GregorianCalendar(2008, 10, 18).getTime(), date);
+			Calendar c = new GregorianCalendar();
+			c.setTime(date);
+			writer.write("test-" + c.get(Calendar.YEAR));
 		}
 	}
 
@@ -3022,6 +3073,7 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	public static class TestControllerImpl implements TestController<MyEntity> {
 
+		@Override
 		@RequestMapping("/method")
 		public ModelAndView method(MyEntity object) {
 			return new ModelAndView("/something");
@@ -3117,6 +3169,7 @@ public class ServletAnnotationControllerTests {
 	@Controller
 	public static class IMyControllerImpl implements IMyController {
 
+		@Override
 		public void handle(Writer writer, @RequestParam(value="p", required=false) String param) throws IOException {
 			writer.write("handle " + param);
 		}
@@ -3144,7 +3197,7 @@ public class ServletAnnotationControllerTests {
 		public void root(Writer writer) throws IOException {
 			writer.write("root");
 		}
-		
+
 		@RequestMapping(value = "/{templatePath}/", method = RequestMethod.GET)
 		public void templatePath(Writer writer) throws IOException {
 			writer.write("templatePath");
@@ -3256,10 +3309,10 @@ public class ServletAnnotationControllerTests {
 			writer.write("handle2");
 		}
 	}
-	
+
 	@Controller
 	static class HeadersConditionController {
-		
+
 		@RequestMapping(value = "/", method = RequestMethod.GET)
 		public String home() {
 			return "home";
@@ -3279,5 +3332,5 @@ public class ServletAnnotationControllerTests {
 		public void handle(RedirectAttributes redirectAttrs) {
 		}
 	}
-	
+
 }

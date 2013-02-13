@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 				return pmf;
 			}
@@ -73,6 +74,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidProperty() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 				throw new IllegalArgumentException((String) props.get("myKey"));
 			}
@@ -92,6 +94,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithFile() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 				throw new IllegalArgumentException((String) props.get("myKey"));
 			}
@@ -109,6 +112,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithName() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(String name) {
 				throw new IllegalArgumentException(name);
 			}
@@ -126,6 +130,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithNameAndProperties() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(String name) {
 				throw new IllegalArgumentException(name);
 			}

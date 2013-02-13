@@ -42,7 +42,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="default"/>
 						<xsd:enumeration value="simple"/>
 					</xsd:restriction>
@@ -146,7 +146,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="queue"/>
 						<xsd:enumeration value="topic"/>
 						<xsd:enumeration value="durableTopic"/>
@@ -172,7 +172,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="none"/>
 						<xsd:enumeration value="connection"/>
 						<xsd:enumeration value="session"/>
@@ -191,7 +191,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="auto"/>
 						<xsd:enumeration value="client"/>
 						<xsd:enumeration value="dups-ok"/>
@@ -335,7 +335,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="queue"/>
 						<xsd:enumeration value="topic"/>
 						<xsd:enumeration value="durableTopic"/>
@@ -360,7 +360,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:restriction base="xsd:string">
 						<xsd:enumeration value="auto"/>
 						<xsd:enumeration value="client"/>
 						<xsd:enumeration value="dups-ok"/>

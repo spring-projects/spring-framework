@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Property editor for {@link java.lang.Class java.lang.Class}, to enable the direct
- * population of a <code>Class</code> property without recourse to having to use a
+ * Property editor for {@link Class java.lang.Class}, to enable the direct
+ * population of a {@code Class} property without recourse to having to use a
  * String class name property as bridge.
  *
  * <p>Also supports "java.lang.String[]"-style array class names, in contrast to the
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 13.05.2003
- * @see java.lang.Class#forName
+ * @see Class#forName
  * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
  */
 public class ClassEditor extends PropertyEditorSupport {
@@ -50,7 +50,7 @@ public class ClassEditor extends PropertyEditorSupport {
 	/**
 	 * Create a default ClassEditor, using the given ClassLoader.
 	 * @param classLoader the ClassLoader to use
-	 * (or <code>null</code> for the thread context ClassLoader)
+	 * (or {@code null} for the thread context ClassLoader)
 	 */
 	public ClassEditor(ClassLoader classLoader) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());

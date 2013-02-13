@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date
- * 
+ *
  * @author Andy Clement
  */
 public class LiteralTests extends ExpressionTestCase {
@@ -126,12 +126,12 @@ public class LiteralTests extends ExpressionTestCase {
 	@Test
 	public void testLiteralReal02_CreatingFloats() {
 		// For now, everything becomes a double...
-		evaluate("1.25f", 1.25d, Double.class);
-		evaluate("2.5f", 2.5d, Double.class);
-		evaluate("-3.5f", -3.5d, Double.class);
-		evaluate("1.25F", 1.25d, Double.class);
-		evaluate("2.5F", 2.5d, Double.class);
-		evaluate("-3.5F", -3.5d, Double.class);
+		evaluate("1.25f", 1.25f, Float.class);
+		evaluate("2.5f", 2.5f, Float.class);
+		evaluate("-3.5f", -3.5f, Float.class);
+		evaluate("1.25F", 1.25f, Float.class);
+		evaluate("2.5F", 2.5f, Float.class);
+		evaluate("-3.5F", -3.5f, Float.class);
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("6.0221415e+23", "6.0221415E23", Double.class);
 		evaluate("6.0221415E+23d", "6.0221415E23", Double.class);
 		evaluate("6.0221415e+23D", "6.0221415E23", Double.class);
-		evaluate("6E2f", 600.0d, Double.class);
+		evaluate("6E2f", 6E2f, Float.class);
 	}
 
 	@Test
@@ -160,14 +160,14 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("new Integer(37).byteValue()", (byte) 37, Byte.class); // calling byteValue() on Integer.class
 		evaluateAndAskForReturnType("new Integer(37)", (byte) 37, Byte.class); // relying on registered type converters
 	}
-	
+
 	@Test
 	public void testNotWritable() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("37");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 		expr = (SpelExpression)parser.parseExpression("37L");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 		expr = (SpelExpression)parser.parseExpression("true");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 }

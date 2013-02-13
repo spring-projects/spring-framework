@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2008 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,9 @@
 
 package org.springframework.aop.support;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 
@@ -56,17 +57,14 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof TimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(TimeStamped.class);
+		TimeStamped ts = mock(TimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
 
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
@@ -75,17 +73,14 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof SubTimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(SubTimeStamped.class);
+		TimeStamped ts = mock(SubTimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
-		
+		given(ts.getTimeStamp()).willReturn(timestamp);
+
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), SubTimeStamped.class));
 
 		SubTimeStamped tsp = (SubTimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
@@ -94,26 +89,25 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof TimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(SubTimeStamped.class);
+		TimeStamped ts = mock(SubTimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), TimeStamped.class));
 
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(!(tsp instanceof SubTimeStamped));
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
 	public void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
 		final long t = 1001L;
 		class Tester implements TimeStamped, ITester {
+			@Override
 			public void foo() throws Exception {
 			}
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -141,8 +135,10 @@ public final class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
+			@Override
 			public void foo() throws Exception {
 			}
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -206,6 +202,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		String company = "Interface21";
 		target.setCompany(company);
 		TestBean delegate = new TestBean() {
+			@Override
 			public ITestBean getSpouse() {
 				return this;
 			}
@@ -250,6 +247,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -278,6 +276,7 @@ public final class DelegatingIntroductionInterceptorTests {
 			this.ts = ts;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return ts;
 		}
@@ -292,6 +291,7 @@ public final class DelegatingIntroductionInterceptorTests {
 			this.t = t;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return t;
 		}

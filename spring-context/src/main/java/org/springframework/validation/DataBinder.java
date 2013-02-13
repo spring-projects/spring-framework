@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -147,7 +148,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Create a new DataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -157,7 +158,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Create a new DataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
@@ -382,7 +383,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>disallowed</i> fields.
 	 * @param allowedFields array of field names
 	 * @see #setDisallowedFields
@@ -406,7 +407,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Mark fields as disallowed for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> fields.
 	 * @param disallowedFields array of field names
 	 * @see #setAllowedFields
@@ -474,7 +475,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
-	 * required field errors and <code>PropertyAccessException</code>s.
+	 * required field errors and {@code PropertyAccessException}s.
 	 * <p>Default is a DefaultBindingErrorProcessor.
 	 * @see DefaultBindingErrorProcessor
 	 */
@@ -547,10 +548,16 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return getTypeConverter().convertIfNecessary(value, requiredType);
 	}
 
-	public <T> T convertIfNecessary(
-			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
+			throws TypeMismatchException {
 
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
+	}
+
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
+			throws TypeMismatchException {
+
+		return getTypeConverter().convertIfNecessary(value, requiredType, field);
 	}
 
 

@@ -16,14 +16,15 @@
 
 package org.springframework.web.method.support;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -41,10 +42,11 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final List<HandlerMethodArgumentResolver> argumentResolvers =
-		new ArrayList<HandlerMethodArgumentResolver>();
+			new LinkedList<HandlerMethodArgumentResolver>();
 
 	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
-		new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>();
+			new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>(256);
+
 
 	/**
 	 * Return a read-only list with the contained resolvers, or an empty list.
@@ -81,7 +83,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
-			for (HandlerMethodArgumentResolver methodArgumentResolver : argumentResolvers) {
+			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Testing if argument resolver [" + methodArgumentResolver + "] supports [" +
 							parameter.getGenericParameterType() + "]");

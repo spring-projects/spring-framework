@@ -84,7 +84,7 @@ public class CustomSQLExceptionTranslatorRegistry {
 	/**
 	 * Find a custom translator for the specified database.
 	 * @param dbName the database name
-	 * @return the custom translator, or <code>null</code> if none found
+	 * @return the custom translator, or {@code null} if none found
 	 */
 	public SQLExceptionTranslator findTranslatorForDatabase(String dbName) {
 		return this.translatorMap.get(dbName);

@@ -24,7 +24,7 @@ import org.springframework.expression.spel.ExpressionState;
 /**
  * Implements the {@code multiply} operator.
  *
- * <p>Conversions and promotions are handled as defined in 
+ * <p>Conversions and promotions are handled as defined in
  * <a href="http://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section 5.6.2
  * of the Java Language Specification</a>:
  *
@@ -48,13 +48,12 @@ public class OpMultiply extends Operator {
 	 * Implements the {@code multiply} operator directly here for certain types
 	 * of supported operands and otherwise delegates to any registered overloader
 	 * for types not supported here.
-	 * 
 	 * <p>Supported operand types:
 	 * <ul>
 	 * <li>doubles
 	 * <li>longs
 	 * <li>integers
-	 * <li>string and int ('abc' * 2 == 'abcabc')
+	 * <li>String and int ('abc' * 2 == 'abcabc')
 	 * </ul>
 	 */
 	@Override
@@ -66,6 +65,9 @@ public class OpMultiply extends Operator {
 			Number rightNumber = (Number) operandTwo;
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
+			}
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return new TypedValue(leftNumber.floatValue() * rightNumber.floatValue());
 			}
 			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return new TypedValue(leftNumber.longValue() * rightNumber.longValue());

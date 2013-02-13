@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ import org.springframework.util.Assert;
  * Implementation of AspectJ ProceedingJoinPoint interface
  * wrapping an AOP Alliance MethodInvocation.
  *
- * <p><b>Note</b>: the <code>getThis()</code> method returns the current Spring AOP proxy.
- * The <code>getTarget()</code> method returns the current Spring AOP target (which may be
- * <code>null</code> if there is no target), and is a plain POJO without any advice.
+ * <p><b>Note</b>: the {@code getThis()} method returns the current Spring AOP proxy.
+ * The {@code getTarget()} method returns the current Spring AOP target (which may be
+ * {@code null} if there is no target), and is a plain POJO without any advice.
  * <b>If you want to call the object and have the advice take effect, use
- * <code>getThis()</code>.</b> A common example is casting the object to an
+ * {@code getThis()}.</b> A common example is casting the object to an
  * introduced interface in the implementation of an introduction.
  *
  * <p>Of course there is no such distinction between target and proxy in AspectJ.
@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
-	
+
 	private final ProxyMethodInvocation methodInvocation;
 
 	private Object[] defensiveCopyOfArgs;
@@ -92,14 +92,14 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	/**
-	 * Returns the Spring AOP proxy. Cannot be <code>null</code>.
+	 * Returns the Spring AOP proxy. Cannot be {@code null}.
 	 */
 	public Object getThis() {
 		return this.methodInvocation.getProxy();
 	}
 
 	/**
-	 * Returns the Spring AOP target. May be <code>null</code> if there is no target.
+	 * Returns the Spring AOP target. May be {@code null} if there is no target.
 	 */
 	public Object getTarget() {
 		return this.methodInvocation.getThis();

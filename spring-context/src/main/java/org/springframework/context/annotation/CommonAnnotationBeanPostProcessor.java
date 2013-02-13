@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -70,7 +69,7 @@ import org.springframework.util.StringUtils;
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that supports common Java annotations out of the box, in particular the JSR-250
- * annotations in the <code>javax.annotation</code> package. These common Java
+ * annotations in the {@code javax.annotation} package. These common Java
  * annotations are supported in many Java EE 5 technologies (e.g. JSF 1.2),
  * as well as in Java 6's JAX-WS.
  *
@@ -81,9 +80,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>The central element is the {@link javax.annotation.Resource} annotation
  * for annotation-driven injection of named beans, by default from the containing
- * Spring BeanFactory, with only <code>mappedName</code> references resolved in JNDI.
+ * Spring BeanFactory, with only {@code mappedName} references resolved in JNDI.
  * The {@link #setAlwaysUseJndiLookup "alwaysUseJndiLookup" flag} enforces JNDI lookups
- * equivalent to standard Java EE 5 resource injection for <code>name</code> references
+ * equivalent to standard Java EE 5 resource injection for {@code name} references
  * and default names as well. The target beans can be simple POJOs, with no special
  * requirements other than the type having to match.
  *
@@ -117,9 +116,9 @@ import org.springframework.util.StringUtils;
  *   &lt;property name="alwaysUseJndiLookup" value="true"/&gt;
  * &lt;/bean&gt;</pre>
  *
- * <code>mappedName</code> references will always be resolved in JNDI,
+ * {@code mappedName} references will always be resolved in JNDI,
  * allowing for global JNDI names (including "java:" prefix) as well. The
- * "alwaysUseJndiLookup" flag just affects <code>name</code> references and
+ * "alwaysUseJndiLookup" flag just affects {@code name} references and
  * default names (inferred from the field name / property name).
  *
  * <p><b>NOTE:</b> A default CommonAnnotationBeanPostProcessor will be registered
@@ -128,7 +127,7 @@ import org.springframework.util.StringUtils;
  * to specify a custom CommonAnnotationBeanPostProcessor bean definition!
  * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection; thus
  * the latter configuration will override the former for properties wired through
- * both approaches. 
+ * both approaches.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -179,7 +178,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private transient BeanFactory beanFactory;
 
 	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
 
 
 	/**
@@ -197,9 +196,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	/**
-	 * Ignore the given resource type when resolving <code>@Resource</code>
+	 * Ignore the given resource type when resolving {@code @Resource}
 	 * annotations.
-	 * <p>By default, the <code>javax.xml.ws.WebServiceContext</code> interface
+	 * <p>By default, the {@code javax.xml.ws.WebServiceContext} interface
 	 * will be ignored, since it will be resolved by the JAX-WS runtime.
 	 * @param resourceType the resource type to ignore
 	 */
@@ -224,11 +223,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	/**
 	 * Set whether to always use JNDI lookups equivalent to standard Java EE 5 resource
-	 * injection, <b>even for <code>name</code> attributes and default names</b>.
+	 * injection, <b>even for {@code name} attributes and default names</b>.
 	 * <p>Default is "false": Resource names are used for Spring bean lookups in the
-	 * containing BeanFactory; only <code>mappedName</code> attributes point directly
+	 * containing BeanFactory; only {@code mappedName} attributes point directly
 	 * into JNDI. Switch this flag to "true" for enforcing Java EE style JNDI lookups
-	 * in any case, even for <code>name</code> attributes and default names.
+	 * in any case, even for {@code name} attributes and default names.
 	 * @see #setJndiFactory
 	 * @see #setResourceFactory
 	 */
@@ -237,11 +236,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	/**
-	 * Specify the factory for objects to be injected into <code>@Resource</code> /
-	 * <code>@WebServiceRef</code> / <code>@EJB</code> annotated fields and setter methods,
-	 * <b>for <code>mappedName</code> attributes that point directly into JNDI</b>.
+	 * Specify the factory for objects to be injected into {@code @Resource} /
+	 * {@code @WebServiceRef} / {@code @EJB} annotated fields and setter methods,
+	 * <b>for {@code mappedName} attributes that point directly into JNDI</b>.
 	 * This factory will also be used if "alwaysUseJndiLookup" is set to "true" in order
-	 * to enforce JNDI lookups even for <code>name</code> attributes and default names.
+	 * to enforce JNDI lookups even for {@code name} attributes and default names.
 	 * <p>The default is a {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
 	 * for JNDI lookup behavior equivalent to standard Java EE 5 resource injection.
 	 * @see #setResourceFactory
@@ -253,15 +252,15 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	/**
-	 * Specify the factory for objects to be injected into <code>@Resource</code> /
-	 * <code>@WebServiceRef</code> / <code>@EJB</code> annotated fields and setter methods,
-	 * <b>for <code>name</code> attributes and default names</b>.
+	 * Specify the factory for objects to be injected into {@code @Resource} /
+	 * {@code @WebServiceRef} / {@code @EJB} annotated fields and setter methods,
+	 * <b>for {@code name} attributes and default names</b>.
 	 * <p>The default is the BeanFactory that this post-processor is defined in,
 	 * if any, looking up resource names as Spring bean names. Specify the resource
 	 * factory explicitly for programmatic usage of this post-processor.
 	 * <p>Specifying Spring's {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
 	 * leads to JNDI lookup behavior equivalent to standard Java EE 5 resource injection,
-	 * even for <code>name</code> attributes and default names. This is the same behavior
+	 * even for {@code name} attributes and default names. This is the same behavior
 	 * that the "alwaysUseJndiLookup" flag enables.
 	 * @see #setAlwaysUseJndiLookup
 	 */
@@ -400,7 +399,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * Obtain the resource object for the given name and type.
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
-	 * @return the resource object (never <code>null</code>)
+	 * @return the resource object (never {@code null})
 	 * @throws BeansException if we failed to obtain the target resource
 	 */
 	protected Object getResource(LookupElement element, String requestingBeanName) throws BeansException {
@@ -423,7 +422,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @param factory the factory to autowire against
 	 * @param element the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
-	 * @return the resource object (never <code>null</code>)
+	 * @return the resource object (never {@code null})
 	 * @throws BeansException if we failed to obtain the target resource
 	 */
 	protected Object autowireResource(BeanFactory factory, LookupElement element, String requestingBeanName)
@@ -447,7 +446,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		if (factory instanceof ConfigurableBeanFactory) {
 			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) factory;
 			for (String autowiredBeanName : autowiredBeanNames) {
-				beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
+				if (beanFactory.containsBean(autowiredBeanName)) {
+					beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
+				}
 			}
 		}
 
@@ -512,10 +513,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		protected boolean shareable = true;
 
-		private volatile boolean cached = false;
-
-		private volatile Object cachedFieldValue;
-
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
 		}
@@ -550,20 +547,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			Object value = null;
-			if (this.cached && this.shareable) {
-				value = this.cachedFieldValue;
-			}
-			synchronized (this) {
-				if (!this.cached) {
-					value = getResource(this, requestingBeanName);
-					if (value != null && this.shareable) {
-						this.cachedFieldValue = value;
-						this.cached = true;
-					}
-				}
-			}
-			return value;
+			return getResource(this, requestingBeanName);
 		}
 	}
 

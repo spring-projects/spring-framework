@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
  *
  * <p>Instantiated per document to parse: Implementations can hold
  * state in instance variables during the execution of the
- * <code>registerBeanDefinitions</code> method, for example global
+ * {@code registerBeanDefinitions} method, for example global
  * settings that are defined for all bean definitions in the document.
  *
  * @author Juergen Hoeller

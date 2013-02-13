@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.http.MediaType;
 
 /**
  * MVC View for a web interaction. Implementations are responsible for rendering
@@ -51,19 +53,26 @@ public interface View {
 
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains a Map with path variables.
-	 * The map consists of String-based URI template variable names as keys and their corresponding 
-	 * Object-based values -- extracted from segments of the URL and type converted.  
-	 * 
+	 * The map consists of String-based URI template variable names as keys and their corresponding
+	 * Object-based values -- extracted from segments of the URL and type converted.
+	 *
 	 * <p>Note: This attribute is not required to be supported by all View implementations.
 	 */
 	String PATH_VARIABLES = View.class.getName() + ".pathVariables";
+
+	/**
+	 * The {@link MediaType} selected during content negotiation, which may be
+	 * more specific than the one the View is configured with. For example:
+	 * "application/vnd.example-v1+xml" vs "application/*+xml".
+	 */
+	String SELECTED_CONTENT_TYPE = View.class.getName() + ".selectedContentType";
 
 	/**
 	 * Return the content type of the view, if predetermined.
 	 * <p>Can be used to check the content type upfront,
 	 * before the actual rendering process.
 	 * @return the content type String (optionally including a character set),
-	 * or <code>null</code> if not predetermined.
+	 * or {@code null} if not predetermined.
 	 */
 	String getContentType();
 
@@ -74,7 +83,7 @@ public interface View {
 	 * The second step will be the actual rendering of the view,
 	 * for example including the JSP via a RequestDispatcher.
 	 * @param model Map with name Strings as keys and corresponding model
-	 * objects as values (Map can also be <code>null</code> in case of empty model)
+	 * objects as values (Map can also be {@code null} in case of empty model)
 	 * @param request current HTTP request
 	 * @param response HTTP response we are building
 	 * @throws Exception if rendering failed

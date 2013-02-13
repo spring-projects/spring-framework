@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 		this.taskExecutor = SchedulerFactoryBean.getConfigTimeTaskExecutor();
 		if (this.taskExecutor == null) {
 			throw new SchedulerConfigException(
-			    "No local TaskExecutor found for configuration - " +
-			    "'taskExecutor' property must be set on SchedulerFactoryBean");
+				"No local TaskExecutor found for configuration - " +
+				"'taskExecutor' property must be set on SchedulerFactoryBean");
 		}
 	}
 
@@ -83,8 +83,8 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 		// The present implementation always returns 1, making Quartz (1.6)
 		// always schedule any tasks that it feels like scheduling.
 		// This could be made smarter for specific TaskExecutors,
-		// for example calling <code>getMaximumPoolSize() - getActiveCount()</code>
-		// on a <code>java.util.concurrent.ThreadPoolExecutor</code>.
+		// for example calling {@code getMaximumPoolSize() - getActiveCount()}
+		// on a {@code java.util.concurrent.ThreadPoolExecutor}.
 		return 1;
 	}
 

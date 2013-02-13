@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ package org.springframework.web.servlet.mvc.annotation;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
+@Deprecated
 public class ServletAnnotationMappingUtilsTests {
 
 	@Test
@@ -68,7 +71,7 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertTrue("Invalid request method result", result);
 	}
-	
+
 	@Test
 	public void checkParametersKeyValueNoMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -77,7 +80,7 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertFalse("Invalid request method result", result);
 	}
-	
+
 	@Test
 	public void checkParametersNegatedValueMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -86,7 +89,7 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertTrue("Invalid request method result", result);
 	}
-	
+
 	@Test
 	public void checkParametersNegatedValueNoMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -143,8 +146,8 @@ public class ServletAnnotationMappingUtilsTests {
 		assertFalse("Invalid request method result", result);
 	}
 
-	// SPR-8862 
-	
+	// SPR-8862
+
 	@Test
 	public void checkHeadersKeyValueNoMatchWithNegation() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");

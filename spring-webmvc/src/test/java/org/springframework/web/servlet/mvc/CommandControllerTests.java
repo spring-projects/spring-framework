@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,9 +33,9 @@ import junit.framework.TestCase;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -78,7 +78,7 @@ public class CommandControllerTests extends TestCase {
 		assertTrue("command name bound ok", person.getName().equals(name));
 		assertTrue("command age bound ok", person.getAge() == age);
 	}
-	
+
 	public void test2Args1Mismatch() throws Exception {
 		TestController mc = new TestController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
@@ -208,6 +208,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithLastModified() throws Exception {
 		class LastModifiedTestController extends TestController implements LastModified {
+			@Override
 			public long getLastModified(HttpServletRequest request) {
 				return 0;
 			}
@@ -223,6 +224,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomCacheForSecondsCall() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				cacheForSeconds(response, 5);
 				return super.handle(request, response, command, errors);
@@ -237,6 +239,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomApplyCacheSecondsCall1() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				applyCacheSeconds(response, 5);
 				return super.handle(request, response, command, errors);
@@ -251,6 +254,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomApplyCacheSecondsCall2() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				applyCacheSeconds(response, 0);
 				return super.handle(request, response, command, errors);
@@ -267,6 +271,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomApplyCacheSecondsCall3() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				applyCacheSeconds(response, -1);
 				return super.handle(request, response, command, errors);
@@ -282,6 +287,7 @@ public class CommandControllerTests extends TestCase {
 	public void testCustomDateEditorWithAllowEmpty() throws Exception {
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMAN);
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(df, true));
 			}
@@ -311,6 +317,7 @@ public class CommandControllerTests extends TestCase {
 	public void testCustomDateEditorWithoutAllowEmpty() throws Exception {
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMAN);
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(df, false));
 			}
@@ -341,6 +348,7 @@ public class CommandControllerTests extends TestCase {
 		final NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
 			}
@@ -371,6 +379,7 @@ public class CommandControllerTests extends TestCase {
 		final NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, false));
 			}
@@ -463,9 +472,11 @@ public class CommandControllerTests extends TestCase {
 
 	public void testResetEmptyFieldsTurnedOff() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected Object getCommand(HttpServletRequest request) throws Exception {
 				return new TestBean("original", 99);
 			}
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.setFieldMarkerPrefix(null);
 			}
@@ -492,11 +503,12 @@ public class CommandControllerTests extends TestCase {
 
 
 	private static class TestController extends AbstractCommandController {
-		
+
 		private TestController() {
 			super(TestBean.class, "person");
 		}
-		
+
+		@Override
 		protected ModelAndView handle(HttpServletRequest request,	HttpServletResponse response,	Object command,	BindException errors) {
 			Map m = new HashMap();
 			assertTrue("Command not null", command != null);

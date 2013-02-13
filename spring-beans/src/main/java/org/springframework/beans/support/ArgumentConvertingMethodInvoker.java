@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * Actually find a method with matching parameter type, i.e. where each
 	 * argument value is assignable to the corresponding parameter type.
 	 * @param arguments the argument values to match against method parameters
-	 * @return a matching method, or <code>null</code> if none
+	 * @return a matching method, or {@code null} if none
 	 */
 	protected Method doFindMatchingMethod(Object[] arguments) {
 		TypeConverter converter = getTypeConverter();

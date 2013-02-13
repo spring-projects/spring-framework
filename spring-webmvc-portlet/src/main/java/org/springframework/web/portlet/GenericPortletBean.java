@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,23 +34,26 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.PortletContextResourceLoader;
+import org.springframework.web.portlet.context.StandardPortletEnvironment;
 
 /**
- * Simple extension of <code>javax.portlet.GenericPortlet</code> that treats
+ * Simple extension of {@code javax.portlet.GenericPortlet} that treats
  * its config parameters as bean properties.
  *
  * <p>A very handy superclass for any type of portlet. Type conversion is automatic.
  * It is also possible for subclasses to specify required properties.
  *
  * <p>This portlet leaves request handling to subclasses, inheriting the default
- * behaviour of GenericPortlet (<code>doDispatch</code>, <code>processAction</code>, etc).
+ * behaviour of GenericPortlet ({@code doDispatch}, {@code processAction}, etc).
  *
  * <p>This portlet superclass has no dependency on a Spring application context,
  * in contrast to the FrameworkPortlet class which loads its own context.
@@ -65,18 +68,19 @@ import org.springframework.web.portlet.context.PortletContextResourceLoader;
  * @see #processAction
  * @see FrameworkPortlet
  */
-public abstract class GenericPortletBean extends GenericPortlet implements EnvironmentAware {
+public abstract class GenericPortletBean extends GenericPortlet
+		implements EnvironmentCapable, EnvironmentAware {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+	/**
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this portlet.
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	private Environment environment = new StandardPortletEnvironment();
+	private ConfigurableEnvironment environment;
 
 
 	/**
@@ -101,13 +105,13 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 		if (logger.isInfoEnabled()) {
 			logger.info("Initializing portlet '" + getPortletName() + "'");
 		}
-		
+
 		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new PortletContextResourceLoader(getPortletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}
@@ -123,7 +127,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 			logger.info("Portlet '" + getPortletName() + "' configured successfully");
 		}
 	}
-	
+
 	/**
 	 * Initialize the BeanWrapper for this GenericPortletBean,
 	 * possibly with custom editors.
@@ -136,7 +140,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
@@ -146,7 +150,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 	}
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
@@ -167,17 +171,39 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Any environment set here overrides the {@link StandardPortletEnvironment}
-	 * provided by default.
+	 * @throws IllegalArgumentException if environment is not assignable to
+	 * {@code ConfigurableEnvironment}.
 	 */
 	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
+		this.environment = (ConfigurableEnvironment)environment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>If {@code null}, a new environment will be initialized via
+	 * {@link #createEnvironment()}.
+	 */
+	public ConfigurableEnvironment getEnvironment() {
+		if (this.environment == null) {
+			this.environment = this.createEnvironment();
+		}
+		return this.environment;
+	}
+
+	/**
+	 * Create and return a new {@link StandardPortletEnvironment}. Subclasses may override
+	 * in order to configure the environment or specialize the environment type returned.
+	 */
+	protected ConfigurableEnvironment createEnvironment() {
+		return new StandardPortletEnvironment();
 	}
 
 
 	/**
 	 * PropertyValues implementation created from PortletConfig init parameters.
 	 */
+	@SuppressWarnings("serial")
 	private static class PortletConfigPropertyValues extends MutablePropertyValues {
 
 		/**
@@ -189,7 +215,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 		 */
 		private PortletConfigPropertyValues(PortletConfig config, Set<String> requiredProperties)
 			throws PortletException {
-				
+
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 

@@ -38,7 +38,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * that does <b>not</b> use a true {@link Configuration @Configuration class} but
  * rather a <em>lite mode</em> configuration class (see the Javadoc for {@link Bean @Bean}
  * for details).
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see Bean
@@ -50,7 +50,7 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 
 	/**
 	 * This is intentionally <b>not</b> annotated with {@code @Configuration}.
-	 * 
+	 *
 	 * <p>Consequently, this class contains <i>annotated factory bean methods</i>
 	 * instead of standard singleton bean methods.
 	 */
@@ -74,10 +74,10 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 		/**
 		 * Since this method does not reside in a true {@code @Configuration class},
 		 * it acts as a factory method when invoked directly (e.g., from
-		 * {@link #transactionManager()}) and as a singleton bean when retrieved 
+		 * {@link #transactionManager()}) and as a singleton bean when retrieved
 		 * through the application context (e.g., when injected into the test
 		 * instance). The result is that this method will be called twice:
-		 * 
+		 *
 		 * <ol>
 		 * <li>once <em>indirectly</em> by the {@link TransactionalTestExecutionListener}
 		 * when it retrieves the {@link PlatformTransactionManager} from the
@@ -110,8 +110,8 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 	}
 
 	/**
-	 * Overrides {@code afterTransaction()} in order to assert a different result. 
-	 * 
+	 * Overrides {@code afterTransaction()} in order to assert a different result.
+	 *
 	 * <p>See in-line comments for details.
 	 *
 	 * @see AbstractTransactionalAnnotatedConfigClassTests#afterTransaction()

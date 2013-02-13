@@ -70,10 +70,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the <code>Marshaller</code> and <code>Unmarshaller</code> interfaces for JiBX.
+ * Implementation of the {@code Marshaller} and {@code Unmarshaller} interfaces for JiBX.
  *
- * <p>The typical usage will be to set the <code>targetClass</code> and optionally the
- * <code>bindingName</code> property on this bean.
+ * <p>The typical usage will be to set the {@code targetClass} and optionally the
+ * {@code bindingName} property on this bean.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -136,7 +136,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Set the number of nesting indent spaces. Default is <code>-1</code>, i.e. no indentation.
+	 * Set the number of nesting indent spaces. Default is {@code -1}, i.e. no indentation.
 	 */
 	public void setIndent(int indent) {
 		this.indent = indent;
@@ -338,8 +338,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
-		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
-		marshalSaxHandlers(graph, contentHandler, null);
+		XMLStreamWriter streamWriter = StaxUtils.createEventStreamWriter(eventWriter);
+		marshalXmlStreamWriter(graph, streamWriter);
 	}
 
 
@@ -426,7 +426,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 
 	/**
-	 * Create a new <code>IMarshallingContext</code>, configured with the correct indentation.
+	 * Create a new {@code IMarshallingContext}, configured with the correct indentation.
 	 * @return the created marshalling context
 	 * @throws JiBXException in case of errors
 	 */
@@ -437,7 +437,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Create a new <code>IUnmarshallingContext</code>.
+	 * Create a new {@code IUnmarshallingContext}.
 	 * @return the created unmarshalling context
 	 * @throws JiBXException in case of errors
 	 */
@@ -446,14 +446,14 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Convert the given <code>JiBXException</code> to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
+	 * Convert the given {@code JiBXException} to an appropriate exception from the
+	 * {@code org.springframework.oxm} hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
 	 * unmarshalling, since JiBX itself does not make this distinction in its exception hierarchy.
-	 * @param ex <code>JiBXException</code> that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
-	 * or unmarshalling (<code>false</code>)
-	 * @return the corresponding <code>XmlMappingException</code>
+	 * @param ex {@code JiBXException} that occured
+	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+	 * or unmarshalling ({@code false})
+	 * @return the corresponding {@code XmlMappingException}
 	 */
 	public XmlMappingException convertJibxException(JiBXException ex, boolean marshalling) {
 		if (ex instanceof ValidationException) {

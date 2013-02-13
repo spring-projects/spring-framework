@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,6 +50,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	protected boolean runTests = true;
 
+	@Override
 	public void onSetUp() throws Exception {
 		target = new JmxTestBean();
 		target.setAge(100);
@@ -277,10 +278,12 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	private static class ProxyTestAssembler extends AbstractReflectiveMBeanInfoAssembler {
 
+		@Override
 		protected boolean includeReadAttribute(Method method, String beanKey) {
 			return true;
 		}
 
+		@Override
 		protected boolean includeWriteAttribute(Method method, String beanKey) {
 			if ("setAge".equals(method.getName())) {
 				return false;
@@ -288,6 +291,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 			return true;
 		}
 
+		@Override
 		protected boolean includeOperation(Method method, String beanKey) {
 			if ("dontExposeMe".equals(method.getName())) {
 				return false;

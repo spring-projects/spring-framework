@@ -32,7 +32,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
- * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>),
+ * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}),
  * and writes with a {@code Content-Type} of {@code text/plain}. This can be overridden
  * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
@@ -76,14 +76,13 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		this.writeAcceptCharset = writeAcceptCharset;
 	}
 
-
 	@Override
 	public boolean supports(Class<?> clazz) {
 		return String.class.equals(clazz);
 	}
 
 	@Override
-	protected String readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
+	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
 	}
@@ -126,5 +125,4 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			return this.defaultCharset;
 		}
 	}
-
 }

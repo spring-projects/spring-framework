@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public abstract class SharedEntityManagerCreator {
 	 * appropriate handling of the native EntityManagerFactory and available
 	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @param properties the properties to be passed into the
-	 * <code>createEntityManager</code> call (may be <code>null</code>)
+	 * {@code createEntityManager} call (may be {@code null})
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
@@ -100,7 +100,7 @@ public abstract class SharedEntityManagerCreator {
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param properties the properties to be passed into the
-	 * <code>createEntityManager</code> call (may be <code>null</code>)
+	 * {@code createEntityManager} call (may be {@code null})
 	 * @param entityManagerInterfaces the interfaces to be implemented by the
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
 	 * @return a shareable transactional EntityManager proxy
@@ -126,6 +126,7 @@ public abstract class SharedEntityManagerCreator {
 	 * transactional EntityManager, if any; else, it will fall back
 	 * to a newly created EntityManager per operation.
 	 */
+	@SuppressWarnings("serial")
 	private static class SharedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
 		private final Log logger = LogFactory.getLog(getClass());

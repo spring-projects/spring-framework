@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 import org.junit.Before;
@@ -32,7 +32,7 @@ import org.springframework.core.NestedRuntimeException;
 
 /**
  * Unit tests for {@link ServiceLocatorFactoryBean}.
- * 
+ *
  * @author Colin Sampaleanu
  * @author Rick Evans
  * @author Chris Beams
@@ -40,7 +40,7 @@ import org.springframework.core.NestedRuntimeException;
 public final class ServiceLocatorFactoryBeanTests {
 
 	private DefaultListableBeanFactory bf;
-	
+
 	@Before
 	public void setUp() {
 		bf = new DefaultListableBeanFactory();
@@ -53,7 +53,7 @@ public final class ServiceLocatorFactoryBeanTests {
 				genericBeanDefinition(ServiceLocatorFactoryBean.class)
 				.addPropertyValue("serviceLocatorInterface", TestServiceLocator.class)
 				.getBeanDefinition());
-		
+
 		TestServiceLocator factory = (TestServiceLocator) bf.getBean("factory");
 		TestService testService = factory.getTestService();
 		assertNotNull(testService);
@@ -75,13 +75,13 @@ public final class ServiceLocatorFactoryBeanTests {
 				genericBeanDefinition(ServiceLocatorFactoryBean.class)
 				.addPropertyValue("serviceLocatorInterface", TestService2Locator.class)
 				.getBeanDefinition());
-		
+
 		try {
 			TestServiceLocator factory = (TestServiceLocator) bf.getBean("factory");
 			factory.getTestService();
 			fail("Must fail on more than one matching type");
 		} catch (NoSuchBeanDefinitionException ex) { /* expected */ }
-		
+
 		try {
 			TestServiceLocator2 factory = (TestServiceLocator2) bf.getBean("factory2");
 			factory.getTestService(null);
@@ -114,7 +114,7 @@ public final class ServiceLocatorFactoryBeanTests {
 				.addPropertyValue("serviceLocatorInterface", TestService2Locator.class)
 				.addPropertyValue("serviceLocatorExceptionClass", CustomServiceLocatorException3.class)
 				.getBeanDefinition());
-		
+
 		try {
 			TestServiceLocator factory = (TestServiceLocator) bf.getBean("factory");
 			factory.getTestService();
@@ -123,7 +123,7 @@ public final class ServiceLocatorFactoryBeanTests {
 		catch (CustomServiceLocatorException1 expected) {
 			assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
 		}
-		
+
 		try {
 			TestServiceLocator2 factory2 = (TestServiceLocator2) bf.getBean("factory2");
 			factory2.getTestService(null);
@@ -132,7 +132,7 @@ public final class ServiceLocatorFactoryBeanTests {
 		catch (CustomServiceLocatorException2 expected) {
 			assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
 		}
-		
+
 		try {
 			TestService2Locator factory3 = (TestService2Locator) bf.getBean("factory3");
 			factory3.getTestService();
@@ -150,7 +150,7 @@ public final class ServiceLocatorFactoryBeanTests {
 
 		// test string-arg getter with null id
 		TestServiceLocator2 factory = (TestServiceLocator2) bf.getBean("factory");
-		
+
 		@SuppressWarnings("unused")
 		TestService testBean = factory.getTestService(null);
 		// now test with explicit id
@@ -166,12 +166,12 @@ public final class ServiceLocatorFactoryBeanTests {
 	public void testCombinedLocatorInterface() {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerAlias("testService", "1");
-		
+
 		bf.registerBeanDefinition("factory",
 				genericBeanDefinition(ServiceLocatorFactoryBean.class)
 				.addPropertyValue("serviceLocatorInterface", TestServiceLocator3.class)
 				.getBeanDefinition());
-		
+
 //		StaticApplicationContext ctx = new StaticApplicationContext();
 //		ctx.registerPrototype("testService", TestService.class, new MutablePropertyValues());
 //		ctx.registerAlias("testService", "1");
@@ -204,7 +204,7 @@ public final class ServiceLocatorFactoryBeanTests {
 				.addPropertyValue("serviceLocatorInterface", TestServiceLocator3.class)
 				.addPropertyValue("serviceMappings", "=testService1\n1=testService1\n2=testService2")
 				.getBeanDefinition());
-		
+
 //		StaticApplicationContext ctx = new StaticApplicationContext();
 //		ctx.registerPrototype("testService1", TestService.class, new MutablePropertyValues());
 //		ctx.registerPrototype("testService2", ExtendedTestService.class, new MutablePropertyValues());
@@ -269,17 +269,13 @@ public final class ServiceLocatorFactoryBeanTests {
 
 	@Test
 	public void testRequiresListableBeanFactoryAndChokesOnAnythingElse() throws Exception {
-		final BeanFactory beanFactory = createMock(BeanFactory.class);
-		replay(beanFactory);
-
+		BeanFactory beanFactory = mock(BeanFactory.class);
 		try {
 			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 			factory.setBeanFactory(beanFactory);
 		} catch (FatalBeanException ex) {
 			// expected
 		}
-
-		verify(beanFactory);
 	}
 
 

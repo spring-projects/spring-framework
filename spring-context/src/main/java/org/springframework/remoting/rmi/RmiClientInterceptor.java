@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ import org.springframework.remoting.support.RemoteInvocationUtils;
  * (e.g. "rmi://localhost:1099/myservice").
  *
  * <p>RMI invokers work at the RmiInvocationHandler level, needing only one stub for
- * any service. Service interfaces do not have to extend <code>java.rmi.Remote</code>
- * or throw <code>java.rmi.RemoteException</code>. Spring's unchecked
+ * any service. Service interfaces do not have to extend {@code java.rmi.Remote}
+ * or throw {@code java.rmi.RemoteException}. Spring's unchecked
  * RemoteAccessException will be thrown on remote invocation failure.
  * Of course, in and out parameters have to be serializable.
  *
@@ -152,8 +152,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.debug("Using service interface [" + getServiceInterface().getName() +
-					    "] for RMI stub [" + getServiceUrl() + "] - " +
-					    (!isImpl ? "not " : "") + "directly implemented");
+						"] for RMI stub [" + getServiceUrl() + "] - " +
+						(!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
 			if (this.cacheStub) {
@@ -167,7 +167,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * <p>Called on interceptor initialization if "cacheStub" is "true";
 	 * else called for each invocation by {@link #getStub()}.
 	 * <p>The default implementation looks up the service URL via
-	 * <code>java.rmi.Naming</code>. This can be overridden in subclasses.
+	 * {@code java.rmi.Naming}. This can be overridden in subclasses.
 	 * @return the RMI stub to store in this interceptor
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setCacheStub
@@ -243,7 +243,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 
 	/**
-	 * Fetches an RMI stub and delegates to <code>doInvoke</code>.
+	 * Fetches an RMI stub and delegates to {@code doInvoke}.
 	 * If configured to refresh on connect failure, it will call
 	 * {@link #refreshAndRetry} on corresponding RMI exceptions.
 	 * @see #getStub
@@ -401,7 +401,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Dummy URLStreamHandler that's just specified to suppress the standard
-	 * <code>java.net.URL</code> URLStreamHandler lookup, to be able to
+	 * {@code java.net.URL} URLStreamHandler lookup, to be able to
 	 * use the standard URL class for parsing "rmi:..." URLs.
 	 */
 	private static class DummyURLStreamHandler extends URLStreamHandler {

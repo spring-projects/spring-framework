@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import java.util.Map;
  * <p>Preserves the original order as well as the original casing of keys,
  * while allowing for contains, get and remove calls with any case of key.
  *
- * <p>Does <i>not</i> support <code>null</code> keys.
+ * <p>Does <i>not</i> support {@code null} keys.
  *
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 
 	private final Map<String, String> caseInsensitiveKeys;
@@ -88,7 +89,10 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 
 	@Override
 	public V put(String key, V value) {
-		this.caseInsensitiveKeys.put(convertKey(key), key);
+		String oldKey = this.caseInsensitiveKeys.put(convertKey(key), key);
+		if (oldKey != null && !oldKey.equals(key)) {
+			super.remove(oldKey);
+		}
 		return super.put(key, value);
 	}
 

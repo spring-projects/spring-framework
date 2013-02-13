@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	/**
 	 * Specify the Hessian SerializerFactory to use.
 	 * <p>This will typically be passed in as an inner bean definition
-	 * of type <code>com.caucho.hessian.io.SerializerFactory</code>,
+	 * of type {@code com.caucho.hessian.io.SerializerFactory},
 	 * with custom bean property values applied.
 	 */
 	public void setSerializerFactory(SerializerFactory serializerFactory) {

@@ -73,7 +73,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			if ((value = propertySource.getProperty(key)) != null) {
 				Class<?> valueType = value.getClass();
 				if (String.class.equals(valueType)) {
-					value = this.resolveRequiredPlaceholders((String) value);
+					value = this.resolveNestedPlaceholders((String) value);
 				}
 				if (debugEnabled) {
 					logger.debug(

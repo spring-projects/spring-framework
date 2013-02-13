@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,10 +43,12 @@ public class JmxTestBean implements IJmxTestBean {
 	 * @@org.springframework.jmx.export.metadata.ManagedAttribute
 	 *   (description="The Age Attribute", currencyTimeLimit=15)
 	 */
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
@@ -54,6 +56,7 @@ public class JmxTestBean implements IJmxTestBean {
 	/**
 	 * @@org.springframework.jmx.export.metadata.ManagedOperation(currencyTimeLimit=30)
 	 */
+	@Override
 	public long myOperation() {
 		return 1L;
 	}
@@ -63,6 +66,7 @@ public class JmxTestBean implements IJmxTestBean {
 	 *  (description="The Name Attribute",  currencyTimeLimit=20,
 	 *   defaultValue="bar", persistPolicy="OnUpdate")
 	 */
+	@Override
 	public void setName(String name) throws Exception {
 		if ("Juergen".equals(name)) {
 			throw new IllegalArgumentException("Juergen");
@@ -80,6 +84,7 @@ public class JmxTestBean implements IJmxTestBean {
 	 * @@org.springframework.jmx.export.metadata.ManagedAttribute
 	 *   (defaultValue="foo", persistPeriod=300)
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -117,6 +122,7 @@ public class JmxTestBean implements IJmxTestBean {
 	 * @@org.springframework.jmx.export.metadata.ManagedOperationParameter(index=0, name="x", description="Left operand")
 	 * @@org.springframework.jmx.export.metadata.ManagedOperationParameter(index=1, name="y", description="Right operand")
 	 */
+	@Override
 	public int add(int x, int y) {
 		return x + y;
 	}
@@ -124,6 +130,7 @@ public class JmxTestBean implements IJmxTestBean {
 	/**
 	 * Test method that is not exposed by the MetadataAssembler.
 	 */
+	@Override
 	public void dontExposeMe() {
 		throw new RuntimeException();
 	}

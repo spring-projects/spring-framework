@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,9 @@ import org.springframework.beans.TestBean;
  */
 public class ClassUtilsTests extends TestCase {
 
+	private ClassLoader classLoader = getClass().getClassLoader();
+
+	@Override
 	public void setUp() {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;
@@ -48,56 +51,56 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testIsPresent() throws Exception {
-		assertTrue(ClassUtils.isPresent("java.lang.String"));
-		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString"));
+		assertTrue(ClassUtils.isPresent("java.lang.String", classLoader));
+		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString", classLoader));
 	}
 
 	public void testForName() throws ClassNotFoundException {
-		assertEquals(String.class, ClassUtils.forName("java.lang.String"));
-		assertEquals(String[].class, ClassUtils.forName("java.lang.String[]"));
-		assertEquals(String[].class, ClassUtils.forName(String[].class.getName()));
-		assertEquals(String[][].class, ClassUtils.forName(String[][].class.getName()));
-		assertEquals(String[][][].class, ClassUtils.forName(String[][][].class.getName()));
-		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean"));
-		assertEquals(TestBean[].class, ClassUtils.forName("org.springframework.beans.TestBean[]"));
-		assertEquals(TestBean[].class, ClassUtils.forName(TestBean[].class.getName()));
-		assertEquals(TestBean[][].class, ClassUtils.forName("org.springframework.beans.TestBean[][]"));
-		assertEquals(TestBean[][].class, ClassUtils.forName(TestBean[][].class.getName()));
-		assertEquals(short[][][].class, ClassUtils.forName("[[[S"));
+		assertEquals(String.class, ClassUtils.forName("java.lang.String", classLoader));
+		assertEquals(String[].class, ClassUtils.forName("java.lang.String[]", classLoader));
+		assertEquals(String[].class, ClassUtils.forName(String[].class.getName(), classLoader));
+		assertEquals(String[][].class, ClassUtils.forName(String[][].class.getName(), classLoader));
+		assertEquals(String[][][].class, ClassUtils.forName(String[][][].class.getName(), classLoader));
+		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean", classLoader));
+		assertEquals(TestBean[].class, ClassUtils.forName("org.springframework.beans.TestBean[]", classLoader));
+		assertEquals(TestBean[].class, ClassUtils.forName(TestBean[].class.getName(), classLoader));
+		assertEquals(TestBean[][].class, ClassUtils.forName("org.springframework.beans.TestBean[][]", classLoader));
+		assertEquals(TestBean[][].class, ClassUtils.forName(TestBean[][].class.getName(), classLoader));
+		assertEquals(short[][][].class, ClassUtils.forName("[[[S", classLoader));
 	}
 
 	public void testForNameWithPrimitiveClasses() throws ClassNotFoundException {
-		assertEquals(boolean.class, ClassUtils.forName("boolean"));
-		assertEquals(byte.class, ClassUtils.forName("byte"));
-		assertEquals(char.class, ClassUtils.forName("char"));
-		assertEquals(short.class, ClassUtils.forName("short"));
-		assertEquals(int.class, ClassUtils.forName("int"));
-		assertEquals(long.class, ClassUtils.forName("long"));
-		assertEquals(float.class, ClassUtils.forName("float"));
-		assertEquals(double.class, ClassUtils.forName("double"));
-		assertEquals(void.class, ClassUtils.forName("void"));
+		assertEquals(boolean.class, ClassUtils.forName("boolean", classLoader));
+		assertEquals(byte.class, ClassUtils.forName("byte", classLoader));
+		assertEquals(char.class, ClassUtils.forName("char", classLoader));
+		assertEquals(short.class, ClassUtils.forName("short", classLoader));
+		assertEquals(int.class, ClassUtils.forName("int", classLoader));
+		assertEquals(long.class, ClassUtils.forName("long", classLoader));
+		assertEquals(float.class, ClassUtils.forName("float", classLoader));
+		assertEquals(double.class, ClassUtils.forName("double", classLoader));
+		assertEquals(void.class, ClassUtils.forName("void", classLoader));
 	}
 
 	public void testForNameWithPrimitiveArrays() throws ClassNotFoundException {
-		assertEquals(boolean[].class, ClassUtils.forName("boolean[]"));
-		assertEquals(byte[].class, ClassUtils.forName("byte[]"));
-		assertEquals(char[].class, ClassUtils.forName("char[]"));
-		assertEquals(short[].class, ClassUtils.forName("short[]"));
-		assertEquals(int[].class, ClassUtils.forName("int[]"));
-		assertEquals(long[].class, ClassUtils.forName("long[]"));
-		assertEquals(float[].class, ClassUtils.forName("float[]"));
-		assertEquals(double[].class, ClassUtils.forName("double[]"));
+		assertEquals(boolean[].class, ClassUtils.forName("boolean[]", classLoader));
+		assertEquals(byte[].class, ClassUtils.forName("byte[]", classLoader));
+		assertEquals(char[].class, ClassUtils.forName("char[]", classLoader));
+		assertEquals(short[].class, ClassUtils.forName("short[]", classLoader));
+		assertEquals(int[].class, ClassUtils.forName("int[]", classLoader));
+		assertEquals(long[].class, ClassUtils.forName("long[]", classLoader));
+		assertEquals(float[].class, ClassUtils.forName("float[]", classLoader));
+		assertEquals(double[].class, ClassUtils.forName("double[]", classLoader));
 	}
 
 	public void testForNameWithPrimitiveArraysInternalName() throws ClassNotFoundException {
-		assertEquals(boolean[].class, ClassUtils.forName(boolean[].class.getName()));
-		assertEquals(byte[].class, ClassUtils.forName(byte[].class.getName()));
-		assertEquals(char[].class, ClassUtils.forName(char[].class.getName()));
-		assertEquals(short[].class, ClassUtils.forName(short[].class.getName()));
-		assertEquals(int[].class, ClassUtils.forName(int[].class.getName()));
-		assertEquals(long[].class, ClassUtils.forName(long[].class.getName()));
-		assertEquals(float[].class, ClassUtils.forName(float[].class.getName()));
-		assertEquals(double[].class, ClassUtils.forName(double[].class.getName()));
+		assertEquals(boolean[].class, ClassUtils.forName(boolean[].class.getName(), classLoader));
+		assertEquals(byte[].class, ClassUtils.forName(byte[].class.getName(), classLoader));
+		assertEquals(char[].class, ClassUtils.forName(char[].class.getName(), classLoader));
+		assertEquals(short[].class, ClassUtils.forName(short[].class.getName(), classLoader));
+		assertEquals(int[].class, ClassUtils.forName(int[].class.getName(), classLoader));
+		assertEquals(long[].class, ClassUtils.forName(long[].class.getName(), classLoader));
+		assertEquals(float[].class, ClassUtils.forName(float[].class.getName(), classLoader));
+		assertEquals(double[].class, ClassUtils.forName(double[].class.getName(), classLoader));
 	}
 
 	public void testGetShortName() {
@@ -171,14 +174,14 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testHasMethod() throws Exception {
-		assertTrue(ClassUtils.hasMethod(Collection.class, "size", null));
-		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", new Class[] {Object.class}));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "remove", null));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod", null));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "size"));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", Object.class));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "remove"));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod"));
 	}
 
 	public void testGetMethodIfAvailable() throws Exception {
-		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size", null);
+		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size");
 		assertNotNull(method);
 		assertEquals("size", method.getName());
 
@@ -186,8 +189,8 @@ public class ClassUtilsTests extends TestCase {
 		assertNotNull(method);
 		assertEquals("remove", method.getName());
 
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove", null));
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove"));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod"));
 	}
 
 	public void testGetMethodCountForName() {

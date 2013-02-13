@@ -217,7 +217,7 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
-		response.setContentType(getContentType());
+		setResponseContentType(request, response);
 		response.setCharacterEncoding(this.encoding.getJavaName());
 		if (this.disableCaching) {
 			response.addHeader("Pragma", "no-cache");

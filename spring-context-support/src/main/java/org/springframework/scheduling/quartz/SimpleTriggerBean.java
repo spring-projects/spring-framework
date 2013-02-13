@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.core.Constants;
  * Convenience subclass of Quartz's {@link org.quartz.SimpleTrigger} class,
  * making bean-style usage easier.
  *
- * <p><code>SimpleTrigger</code> itself is already a JavaBean but lacks sensible defaults.
+ * <p>{@code SimpleTrigger} itself is already a JavaBean but lacks sensible defaults.
  * This class uses the Spring bean name as job name, the Quartz default group
  * ("DEFAULT") as job group, the current time as start time, and indefinite
  * repetition, if not specified.
@@ -43,7 +43,7 @@ import org.springframework.core.Constants;
  * instead of registering the JobDetail separately.
  *
  * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
- * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new Quartz 2.0
+ * Use Quartz 2.0's native {@code JobDetailImpl} class or the new Quartz 2.0
  * builder API instead. Alternatively, switch to Spring's {@link SimpleTriggerFactoryBean}
  * which largely is a drop-in replacement for this class and its properties and
  * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.
@@ -60,6 +60,7 @@ import org.springframework.core.Constants;
  * @see SchedulerFactoryBean#setJobDetails
  * @see CronTriggerBean
  */
+@SuppressWarnings("serial")
 public class SimpleTriggerBean extends SimpleTrigger
 		implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 
@@ -93,7 +94,7 @@ public class SimpleTriggerBean extends SimpleTrigger
 	/**
 	 * Set the misfire instruction via the name of the corresponding
 	 * constant in the {@link org.quartz.SimpleTrigger} class.
-	 * Default is <code>MISFIRE_INSTRUCTION_SMART_POLICY</code>.
+	 * Default is {@code MISFIRE_INSTRUCTION_SMART_POLICY}.
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT

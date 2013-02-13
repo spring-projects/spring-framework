@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -60,7 +60,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
-	private final FormHttpMessageConverter formConverter = new XmlAwareFormHttpMessageConverter();
+	private final FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
 
 	/**
 	 * The default character set to use for reading form data.
@@ -87,14 +87,18 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		else {
 			filterChain.doFilter(request, response);
 		}
-
 	}
 
 	private boolean isFormContentType(HttpServletRequest request) {
 		String contentType = request.getContentType();
 		if (contentType != null) {
-			MediaType mediaType = MediaType.parseMediaType(contentType);
-			return (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType));
+			try {
+				MediaType mediaType = MediaType.parseMediaType(contentType);
+				return (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType));
+			}
+			catch (IllegalArgumentException ex) {
+				return false;
+			}
 		}
 		else {
 			return false;

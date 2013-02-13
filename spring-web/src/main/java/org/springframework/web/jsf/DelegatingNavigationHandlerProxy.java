@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
  * JSF NavigationHandler implementation that delegates to a NavigationHandler
  * bean obtained from the Spring root WebApplicationContext.
  *
- * <p>Configure this handler proxy in your <code>faces-config.xml</code> file
+ * <p>Configure this handler proxy in your {@code faces-config.xml} file
  * as follows:
  *
  * <pre>
@@ -101,8 +101,8 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	 * through delegating to the target bean in the Spring application context.
 	 * <p>The target bean needs to extend the JSF NavigationHandler class.
 	 * If it extends Spring's DecoratingNavigationHandler, the overloaded
-	 * <code>handleNavigation</code> method with the original NavigationHandler
-	 * as argument will be used. Else, the standard <code>handleNavigation</code>
+	 * {@code handleNavigation} method with the original NavigationHandler
+	 * as argument will be used. Else, the standard {@code handleNavigation}
 	 * method will be called.
 	 */
 	@Override
@@ -128,7 +128,7 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	 */
 	protected NavigationHandler getDelegate(FacesContext facesContext) {
 		String targetBeanName = getTargetBeanName(facesContext);
-		return (NavigationHandler) getBeanFactory(facesContext).getBean(targetBeanName, NavigationHandler.class);
+		return getBeanFactory(facesContext).getBean(targetBeanName, NavigationHandler.class);
 	}
 
 	/**
@@ -143,11 +143,11 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 
 	/**
 	 * Retrieve the Spring BeanFactory to delegate bean name resolution to.
-	 * <p>Default implementation delegates to <code>getWebApplicationContext</code>.
+	 * <p>Default implementation delegates to {@code getWebApplicationContext}.
 	 * Can be overridden to provide an arbitrary BeanFactory reference to resolve
 	 * against; usually, this will be a full Spring ApplicationContext.
 	 * @param facesContext the current JSF context
-	 * @return the Spring BeanFactory (never <code>null</code>)
+	 * @return the Spring BeanFactory (never {@code null})
 	 * @see #getWebApplicationContext
 	 */
 	protected BeanFactory getBeanFactory(FacesContext facesContext) {
@@ -158,7 +158,7 @@ public class DelegatingNavigationHandlerProxy extends NavigationHandler {
 	 * Retrieve the web application context to delegate bean name resolution to.
 	 * <p>Default implementation delegates to FacesContextUtils.
 	 * @param facesContext the current JSF context
-	 * @return the Spring web application context (never <code>null</code>)
+	 * @return the Spring web application context (never {@code null})
 	 * @see FacesContextUtils#getRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {

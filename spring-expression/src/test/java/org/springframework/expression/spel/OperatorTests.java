@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.expression.spel.ast.Operator;
@@ -24,7 +24,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Tests the evaluation of expressions using relational operators.
- * 
+ *
  * @author Andy Clement
  */
 public class OperatorTests extends ExpressionTestCase {
@@ -125,7 +125,7 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testGreaterThanOrEqual() {
 		evaluate("3 >= 5", false, Boolean.class);
 		evaluate("5 >= 3", true, Boolean.class);
-		evaluate("6 >= 6", true, Boolean.class);		
+		evaluate("6 >= 6", true, Boolean.class);
 		evaluate("3L >= 5L", false, Boolean.class);
 		evaluate("5L >= 3L", true, Boolean.class);
 		evaluate("5L >= 5L", true, Boolean.class);
@@ -138,14 +138,14 @@ public class OperatorTests extends ExpressionTestCase {
 
 		evaluate("3 GE 5", false, Boolean.class);
 		evaluate("5 gE 3", true, Boolean.class);
-		evaluate("6 Ge 6", true, Boolean.class);		
+		evaluate("6 Ge 6", true, Boolean.class);
 		evaluate("3L ge 5L", false, Boolean.class);
 	}
 
 	@Test
 	public void testGreaterThan() {
 		evaluate("3 > 5", false, Boolean.class);
-		evaluate("5 > 3", true, Boolean.class);		
+		evaluate("5 > 3", true, Boolean.class);
 		evaluate("3L > 5L", false, Boolean.class);
 		evaluate("5L > 3L", true, Boolean.class);
 		evaluate("3.0d > 5.0d", false, Boolean.class);
@@ -173,7 +173,7 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testMathOperatorAdd02() {
 		evaluate("'hello' + ' ' + 'world'", "hello world", String.class);
 	}
-	
+
 	@Test
 	public void testMathOperatorsInChains() {
 		evaluate("1+2+3",6,Integer.class);
@@ -187,7 +187,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5 - 4", "1", Integer.class);
 		evaluate("3 * 5", 15, Integer.class);
 		evaluate("3.2d * 5", 16.0d, Double.class);
-		evaluate("3 * 5f", 15d, Double.class);
+		evaluate("3 * 5f", 15f, Float.class);
 		evaluate("3 / 1", 3, Integer.class);
 		evaluate("3 % 2", 1, Integer.class);
 		evaluate("3 mod 2", 1, Integer.class);
@@ -195,72 +195,72 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3 Mod 2", 1, Integer.class);
 		evaluate("3 MOD 2", 1, Integer.class);
 	}
-	
+
 	@Test
 	public void testPlus() throws Exception {
 		evaluate("7 + 2", "9", Integer.class);
-		evaluate("3.0f + 5.0f", 8.0d, Double.class);
+		evaluate("3.0f + 5.0f", 8.0f, Float.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
 
 		evaluate("'ab' + 2", "ab2", String.class);
 		evaluate("2 + 'a'", "2a", String.class);
 		evaluate("'ab' + null", "abnull", String.class);
 		evaluate("null + 'ab'", "nullab", String.class);
-		
+
 		// AST:
 		SpelExpression expr = (SpelExpression)parser.parseExpression("+3");
-		Assert.assertEquals("+3",expr.toStringAST());
+		assertEquals("+3",expr.toStringAST());
 		expr = (SpelExpression)parser.parseExpression("2+3");
-		Assert.assertEquals("(2 + 3)",expr.toStringAST());
-		
+		assertEquals("(2 + 3)",expr.toStringAST());
+
 		// use as a unary operator
 		evaluate("+5d",5d,Double.class);
 		evaluate("+5L",5L,Long.class);
 		evaluate("+5",5,Integer.class);
 		evaluateAndCheckError("+'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
-		
+
 		// string concatenation
 		evaluate("'abc'+'def'","abcdef",String.class);
-		
-		// 
+
+		//
 		evaluate("5 + new Integer('37')",42,Integer.class);
 	}
-	
+
 	@Test
 	public void testMinus() throws Exception {
 		evaluate("'c' - 2", "a", String.class);
-		evaluate("3.0f - 5.0f", -2.0d, Double.class);
+		evaluate("3.0f - 5.0f", -2.0f, Float.class);
 		evaluateAndCheckError("'ab' - 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("2-'ab'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
-		Assert.assertEquals("-3",expr.toStringAST());
+		assertEquals("-3",expr.toStringAST());
 		expr = (SpelExpression)parser.parseExpression("2-3");
-		Assert.assertEquals("(2 - 3)",expr.toStringAST());
-		
+		assertEquals("(2 - 3)",expr.toStringAST());
+
 		evaluate("-5d",-5d,Double.class);
 		evaluate("-5L",-5L,Long.class);
 		evaluate("-5",-5,Integer.class);
 		evaluateAndCheckError("-'abc'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
-	
+
 	@Test
 	public void testModulus() {
 		evaluate("3%2",1,Integer.class);
 		evaluate("3L%2L",1L,Long.class);
-		evaluate("3.0f%2.0f",1d,Double.class);
+		evaluate("3.0f%2.0f",1f,Float.class);
 		evaluate("5.0d % 3.1d", 1.9d, Double.class);
 		evaluateAndCheckError("'abc'%'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
 	public void testDivide() {
-		evaluate("3.0f / 5.0f", 0.6d, Double.class);
+		evaluate("3.0f / 5.0f", 0.6f, Float.class);
 		evaluate("4L/2L",2L,Long.class);
-		evaluate("3.0f div 5.0f", 0.6d, Double.class);
+		evaluate("3.0f div 5.0f", 0.6f, Float.class);
 		evaluate("4L DIV 2L",2L,Long.class);
 		evaluateAndCheckError("'abc'/'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
-	
+
 	@Test
 	public void testMathOperatorDivide_ConvertToDouble() {
 		evaluateAndAskForReturnType("8/4", new Double(2.0), Double.class);
@@ -283,52 +283,52 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3.0d / 5.0d", 0.6d, Double.class);
 		evaluate("6.0d % 3.5d", 2.5d, Double.class);
 	}
-	
+
 	@Test
 	public void testOperatorNames() throws Exception {
 		Operator node = getOperatorNode((SpelExpression)parser.parseExpression("1==3"));
-		Assert.assertEquals("==",node.getOperatorName());
+		assertEquals("==",node.getOperatorName());
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("1!=3"));
-		Assert.assertEquals("!=",node.getOperatorName());
-		
+		assertEquals("!=",node.getOperatorName());
+
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3/3"));
-		Assert.assertEquals("/",node.getOperatorName());
-		
+		assertEquals("/",node.getOperatorName());
+
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3+3"));
-		Assert.assertEquals("+",node.getOperatorName());
-		
+		assertEquals("+",node.getOperatorName());
+
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3-3"));
-		Assert.assertEquals("-",node.getOperatorName());
+		assertEquals("-",node.getOperatorName());
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3<4"));
-		Assert.assertEquals("<",node.getOperatorName());
+		assertEquals("<",node.getOperatorName());
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3<=4"));
-		Assert.assertEquals("<=",node.getOperatorName());
-		
+		assertEquals("<=",node.getOperatorName());
+
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3*4"));
-		Assert.assertEquals("*",node.getOperatorName());
+		assertEquals("*",node.getOperatorName());
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3%4"));
-		Assert.assertEquals("%",node.getOperatorName());
-		
+		assertEquals("%",node.getOperatorName());
+
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3>=4"));
-		Assert.assertEquals(">=",node.getOperatorName());
+		assertEquals(">=",node.getOperatorName());
 
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3 between 4"));
-		Assert.assertEquals("between",node.getOperatorName());
-		
+		assertEquals("between",node.getOperatorName());
+
 		node = getOperatorNode((SpelExpression)parser.parseExpression("3 ^ 4"));
-		Assert.assertEquals("^",node.getOperatorName());
+		assertEquals("^",node.getOperatorName());
 	}
-	
+
 	@Test
 	public void testOperatorOverloading() {
 		evaluateAndCheckError("'a' * '2'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("'a' ^ '2'", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
-	
+
 	@Test
 	public void testPower() {
 		evaluate("3^2",9,Integer.class);
@@ -336,27 +336,27 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L^2L",9L,Long.class);
 		evaluate("(2^32)^2",9223372036854775807L,Long.class);
 	}
-	
+
 	@Test
 	public void testMixedOperands_FloatsAndDoubles() {
 		evaluate("3.0d + 5.0f", 8.0d, Double.class);
 		evaluate("3.0D - 5.0f", -2.0d, Double.class);
 		evaluate("3.0f * 5.0d", 15.0d, Double.class);
 		evaluate("3.0f / 5.0D", 0.6d, Double.class);
-		evaluate("5.0D % 3f", 2.0d, Double.class);		
+		evaluate("5.0D % 3f", 2.0d, Double.class);
 	}
-	
+
 	@Test
 	public void testMixedOperands_DoublesAndInts() {
 		evaluate("3.0d + 5", 8.0d, Double.class);
 		evaluate("3.0D - 5", -2.0d, Double.class);
-		evaluate("3.0f * 5", 15.0d, Double.class);
-		evaluate("6.0f / 2", 3.0, Double.class);
-		evaluate("6.0f / 4", 1.5d, Double.class);
-		evaluate("5.0D % 3", 2.0d, Double.class);		
-		evaluate("5.5D % 3", 2.5, Double.class);		
+		evaluate("3.0f * 5", 15.0f, Float.class);
+		evaluate("6.0f / 2", 3.0f, Float.class);
+		evaluate("6.0f / 4", 1.5f, Float.class);
+		evaluate("5.0D % 3", 2.0d, Double.class);
+		evaluate("5.5D % 3", 2.5, Double.class);
 	}
-	
+
 	@Test
 	public void testStrings() {
 		evaluate("'abc' == 'abc'",true,Boolean.class);
@@ -364,7 +364,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("'abc' != 'abc'",false,Boolean.class);
 		evaluate("'abc' != 'def'",true,Boolean.class);
 	}
-	
+
 	@Test
 	public void testLongs() {
 		evaluate("3L == 4L", false, Boolean.class);
@@ -375,14 +375,14 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("3L + 50L", 53L, Long.class);
 		evaluate("3L - 50L", -47L, Long.class);
 	}
-	
+
 	// ---
-	
+
 	private Operator getOperatorNode(SpelExpression e) {
 		SpelNode node = e.getAST();
 		return (Operator)findNode(node,Operator.class);
 	}
-	
+
 	private SpelNode findNode(SpelNode node, Class<Operator> clazz) {
 		if (clazz.isAssignableFrom(node.getClass())) {
 			return node;
@@ -396,5 +396,5 @@ public class OperatorTests extends ExpressionTestCase {
 		}
 		return null;
 	}
-	
+
 }

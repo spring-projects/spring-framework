@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,27 +28,27 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
  * Test fixture for {@link InvocableHandlerMethod} unit tests.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class InvocableHandlerMethodTests {
 
-	private InvocableHandlerMethod handleMethod;
+	private InvocableHandlerMethod handlerMethod;
 
 	private NativeWebRequest webRequest;
 
 	@Before
 	public void setUp() throws Exception {
 		Method method = Handler.class.getDeclaredMethod("handle", Integer.class, String.class);
-		this.handleMethod = new InvocableHandlerMethod(new Handler(), method);
+		this.handlerMethod = new InvocableHandlerMethod(new Handler(), method);
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}
 
@@ -60,14 +60,14 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(intResolver);
 		composite.addResolver(stringResolver);
-		handleMethod.setHandlerMethodArgumentResolvers(composite);
-		
-		Object returnValue = handleMethod.invokeForRequest(webRequest, null);
-		
+		handlerMethod.setHandlerMethodArgumentResolvers(composite);
+
+		Object returnValue = handlerMethod.invokeForRequest(webRequest, null);
+
 		assertEquals(1, intResolver.getResolvedParameters().size());
 		assertEquals(1, stringResolver.getResolvedParameters().size());
 		assertEquals("99-value", returnValue);
-		
+
 		assertEquals("intArg", intResolver.getResolvedParameters().get(0).getParameterName());
 		assertEquals("stringArg", stringResolver.getResolvedParameters().get(0).getParameterName());
 	}
@@ -80,10 +80,10 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(intResolver);
 		composite.addResolver(stringResolver);
-		handleMethod.setHandlerMethodArgumentResolvers(composite);
-		
-		Object returnValue = handleMethod.invokeForRequest(webRequest, null);
-		
+		handlerMethod.setHandlerMethodArgumentResolvers(composite);
+
+		Object returnValue = handlerMethod.invokeForRequest(webRequest, null);
+
 		assertEquals(1, intResolver.getResolvedParameters().size());
 		assertEquals(1, stringResolver.getResolvedParameters().size());
 		assertEquals("null-null", returnValue);
@@ -92,7 +92,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void cannotResolveArg() throws Exception {
 		try {
-			handleMethod.invokeForRequest(webRequest, null);
+			handlerMethod.invokeForRequest(webRequest, null);
 			fail("Expected exception");
 		} catch (IllegalStateException ex) {
 			assertTrue(ex.getMessage().contains("No suitable resolver for argument [0] [type=java.lang.Integer]"));
@@ -101,7 +101,7 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolveProvidedArg() throws Exception {
-		Object returnValue = handleMethod.invokeForRequest(webRequest, null, 99, "value");
+		Object returnValue = handlerMethod.invokeForRequest(webRequest, null, 99, "value");
 
 		assertEquals(String.class, returnValue.getClass());
 		assertEquals("99-value", returnValue);
@@ -115,21 +115,21 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(intResolver);
 		composite.addResolver(stringResolver);
-		handleMethod.setHandlerMethodArgumentResolvers(composite);
+		handlerMethod.setHandlerMethodArgumentResolvers(composite);
 
-		Object returnValue = handleMethod.invokeForRequest(webRequest, null, 2, "value2");
+		Object returnValue = handlerMethod.invokeForRequest(webRequest, null, 2, "value2");
 
 		assertEquals("2-value2", returnValue);
 	}
-	
+
 	@Test
 	public void exceptionInResolvingArg() throws Exception {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(new ExceptionRaisingArgumentResolver());
-		handleMethod.setHandlerMethodArgumentResolvers(composite);
-		
+		handlerMethod.setHandlerMethodArgumentResolvers(composite);
+
 		try {
-			handleMethod.invokeForRequest(webRequest, null);
+			handlerMethod.invokeForRequest(webRequest, null);
 			fail("Expected exception");
 		} catch (HttpMessageNotReadableException ex) {
 			// Expected..
@@ -145,10 +145,10 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(intResolver);
 		composite.addResolver(stringResolver);
-		handleMethod.setHandlerMethodArgumentResolvers(composite);
+		handlerMethod.setHandlerMethodArgumentResolvers(composite);
 
 		try {
-			handleMethod.invokeForRequest(webRequest, null);
+			handlerMethod.invokeForRequest(webRequest, null);
 			fail("Expected exception");
 		} catch (IllegalArgumentException ex) {
 			assertNotNull("Exception not wrapped", ex.getCause());
@@ -200,10 +200,10 @@ public class InvocableHandlerMethodTests {
 		new InvocableHandlerMethod(handler, method).invokeForRequest(webRequest, null);
 		fail("Expected exception");
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static class Handler {
-		
+
 		public String handle(Integer intArg, String stringArg) {
 			return intArg + "-" + stringArg;
 		}
@@ -211,29 +211,31 @@ public class InvocableHandlerMethodTests {
 
 	@SuppressWarnings("unused")
 	private static class ExceptionRaisingHandler {
-		
+
 		private final Throwable t;
 
 		public ExceptionRaisingHandler(Throwable t) {
 			this.t = t;
 		}
-		
+
 		public void raiseException() throws Throwable {
 			throw t;
 		}
-		
+
 	}
-	
+
 	private static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
 
+		@Override
 		public boolean supportsParameter(MethodParameter parameter) {
 			return true;
 		}
 
+		@Override
 		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 			throw new HttpMessageNotReadableException("oops, can't read");
 		}
 	}
-	
+
 }

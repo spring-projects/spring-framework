@@ -16,19 +16,20 @@
 
 package org.springframework.core.io;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.internal.matchers.StringContains.containsString;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
+
+import static org.hamcrest.Matchers.*;
 
 /**
  * Unit tests that serve as regression tests for the bugs described in SPR-6888

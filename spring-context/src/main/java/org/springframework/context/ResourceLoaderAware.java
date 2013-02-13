@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ import org.springframework.core.io.ResourceLoader;
  * to resolve resource patterns into arrays of Resource objects. This will always
  * work when running in an ApplicationContext (the context interface extends
  * ResourcePatternResolver). Use a PathMatchingResourcePatternResolver as default.
- * See also the <code>ResourcePatternUtils.getResourcePatternResolver</code> method.
+ * See also the {@code ResourcePatternUtils.getResourcePatternResolver} method.
  *
  * <p>As alternative to a ResourcePatternResolver dependency, consider exposing
  * bean properties of type Resource array, populated via pattern Strings with
  * automatic type conversion by the bean factory.
- * 
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 10.03.2004
@@ -64,11 +64,11 @@ public interface ResourceLoaderAware extends Aware {
 	/**
 	 * Set the ResourceLoader that this object runs in.
 	 * <p>This might be a ResourcePatternResolver, which can be checked
-	 * through <code>instanceof ResourcePatternResolver</code>. See also the
-	 * <code>ResourcePatternUtils.getResourcePatternResolver</code> method.
+	 * through {@code instanceof ResourcePatternResolver}. See also the
+	 * {@code ResourcePatternUtils.getResourcePatternResolver} method.
 	 * <p>Invoked after population of normal bean properties but before an init callback
-	 * like InitializingBean's <code>afterPropertiesSet</code> or a custom init-method.
-	 * Invoked before ApplicationContextAware's <code>setApplicationContext</code>.
+	 * like InitializingBean's {@code afterPropertiesSet} or a custom init-method.
+	 * Invoked before ApplicationContextAware's {@code setApplicationContext}.
 	 * @param resourceLoader ResourceLoader object to be used by this object
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.ResourcePatternUtils#getResourcePatternResolver

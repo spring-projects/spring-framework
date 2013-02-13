@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	}
 
 	/**
-	 * Return the current Hibernate entity interceptor, or <code>null</code> if none.
+	 * Return the current Hibernate entity interceptor, or {@code null} if none.
 	 * Resolves an entity interceptor bean name via the bean factory,
 	 * if necessary.
 	 * @throws IllegalStateException if bean name specified but no bean factory set
@@ -208,7 +208,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
-			return (Interceptor) this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
+			return this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
 		}
 		return (Interceptor) this.entityInterceptor;
 	}
@@ -322,7 +322,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * @param session the current Hibernate Session
 	 * @param existingTransaction if executing within an existing transaction
 	 * @return the previous flush mode to restore after the operation,
-	 * or <code>null</code> if none
+	 * or {@code null} if none
 	 * @see #setFlushMode
 	 * @see org.hibernate.Session#setFlushMode
 	 */
@@ -394,7 +394,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy.
+	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
 	 * @param ex HibernateException that occured
@@ -414,7 +414,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Convert the given Hibernate JDBCException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy, using the
+	 * from the {@code org.springframework.dao} hierarchy, using the
 	 * given SQLExceptionTranslator.
 	 * @param ex Hibernate JDBCException that occured
 	 * @param translator the SQLExceptionTranslator to use
@@ -426,13 +426,12 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Convert the given SQLException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy. Can be overridden in subclasses.
+	 * {@code org.springframework.dao} hierarchy. Can be overridden in subclasses.
 	 * <p>Note that a direct SQLException can just occur when callback code
-	 * performs direct JDBC access via <code>Session.connection()</code>.
+	 * performs direct JDBC access via {@code Session.connection()}.
 	 * @param ex the SQLException
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
-	 * @see org.hibernate.Session#connection()
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		SQLExceptionTranslator translator = getJdbcExceptionTranslator();

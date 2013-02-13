@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.core.convert.converter.Converter;
 /**
  * Converts a String to a Properties by calling Properties#load(java.io.InputStream).
  * Uses ISO-8559-1 encoding required by Properties.
- * 
+ *
  * @author Keith Donald
  * @since 3.0
  */

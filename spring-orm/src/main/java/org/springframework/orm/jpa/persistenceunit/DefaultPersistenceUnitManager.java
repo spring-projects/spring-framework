@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -62,10 +61,10 @@ import org.springframework.util.ResourceUtils;
  * Used as internal default by
  * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}.
  *
- * <p>Supports standard JPA scanning for <code>persistence.xml</code> files,
+ * <p>Supports standard JPA scanning for {@code persistence.xml} files,
  * with configurable file locations, JDBC DataSource lookup and load-time weaving.
  *
- * <p>The default XML file location is <code>classpath*:META-INF/persistence.xml</code>,
+ * <p>The default XML file location is {@code classpath*:META-INF/persistence.xml},
  * scanning for all matching files in the class path (as defined in the JPA specification).
  * DataSource names are by default interpreted as JNDI names, and no load time weaving
  * is available (which requires weaving to be turned off in the persistence provider).
@@ -81,7 +80,7 @@ public class DefaultPersistenceUnitManager
 		implements PersistenceUnitManager, ResourceLoaderAware, LoadTimeWeaverAware, InitializingBean {
 
 	/**
-	 * Default location of the <code>persistence.xml</code> file:
+	 * Default location of the {@code persistence.xml} file:
 	 * "classpath*:META-INF/persistence.xml".
 	 */
 	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/persistence.xml";
@@ -118,6 +117,8 @@ public class DefaultPersistenceUnitManager
 
 	private DataSource defaultDataSource;
 
+	private DataSource defaultJtaDataSource;
+
 	private PersistenceUnitPostProcessor[] persistenceUnitPostProcessors;
 
 	private LoadTimeWeaver loadTimeWeaver;
@@ -130,7 +131,7 @@ public class DefaultPersistenceUnitManager
 
 
 	/**
-	 * Specify the location of the <code>persistence.xml</code> files to load.
+	 * Specify the location of the {@code persistence.xml} files to load.
 	 * These can be specified as Spring resource locations and/or location patterns.
 	 * <p>Default is "classpath*:META-INF/persistence.xml".
 	 */
@@ -139,11 +140,11 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Specify multiple locations of <code>persistence.xml</code> files to load.
+	 * Specify multiple locations of {@code persistence.xml} files to load.
 	 * These can be specified as Spring resource locations and/or location patterns.
 	 * <p>Default is "classpath*:META-INF/persistence.xml".
 	 * @param persistenceXmlLocations an array of Spring resource Strings
-	 * identifying the location of the <code>persistence.xml</code> files to read
+	 * identifying the location of the {@code persistence.xml} files to read
 	 */
 	public void setPersistenceXmlLocations(String... persistenceXmlLocations) {
 		this.persistenceXmlLocations = persistenceXmlLocations;
@@ -162,7 +163,7 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Specify the name of the default persistence unit, if any. Default is "default".
-	 * <p>Primarily applied to a scanned persistence unit without <code>persistence.xml</code>.
+	 * <p>Primarily applied to a scanned persistence unit without {@code persistence.xml}.
 	 * Also applicable to selecting a default unit from several persistence units available.
 	 * @see #setPackagesToScan
 	 * @see #obtainDefaultPersistenceUnitInfo
@@ -173,8 +174,8 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Set whether to use Spring-based scanning for entity classes in the classpath
-	 * instead of using JPA's standard scanning of jar files with <code>persistence.xml</code>
-	 * markers in them. In case of Spring-based scanning, no <code>persistence.xml</code>
+	 * instead of using JPA's standard scanning of jar files with {@code persistence.xml}
+	 * markers in them. In case of Spring-based scanning, no {@code persistence.xml}
 	 * is necessary; all you need to do is to specify base packages to search here.
 	 * <p>Default is none. Specify packages to search for autodetection of your entity
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
@@ -185,13 +186,13 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Specify one or more mapping resources (equivalent to <code>&lt;mapping-file&gt;</code>
-	 * entries in <code>persistence.xml</code>) for the default persistence unit.
+	 * Specify one or more mapping resources (equivalent to {@code &lt;mapping-file&gt;}
+	 * entries in {@code persistence.xml}) for the default persistence unit.
 	 * Can be used on its own or in combination with entity scanning in the classpath,
-	 * in both cases avoiding <code>persistence.xml</code>.
+	 * in both cases avoiding {@code persistence.xml}.
 	 * <p>Note that mapping resources must be relative to the classpath root,
 	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
-	 * so that they can be loaded through <code>ClassLoader.getResource</code>.
+	 * so that they can be loaded through {@code ClassLoader.getResource}.
 	 * @see #setPackagesToScan
 	 */
 	public void setMappingResources(String... mappingResources) {
@@ -201,9 +202,9 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Specify the JDBC DataSources that the JPA persistence provider is supposed
 	 * to use for accessing the database, resolving data source names in
-	 * <code>persistence.xml</code> against Spring-managed DataSources.
+	 * {@code persistence.xml} against Spring-managed DataSources.
 	 * <p>The specified Map needs to define data source names for specific DataSource
-	 * objects, matching the data source names used in <code>persistence.xml</code>.
+	 * objects, matching the data source names used in {@code persistence.xml}.
 	 * If not specified, data source names will be resolved as JNDI names instead
 	 * (as defined by standard JPA).
 	 * @see org.springframework.jdbc.datasource.lookup.MapDataSourceLookup
@@ -214,13 +215,13 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Specify the JDBC DataSourceLookup that provides DataSources for the
-	 * persistence provider, resolving data source names in <code>persistence.xml</code>
+	 * persistence provider, resolving data source names in {@code persistence.xml}
 	 * against Spring-managed DataSource instances.
 	 * <p>Default is JndiDataSourceLookup, which resolves DataSource names as
 	 * JNDI names (as defined by standard JPA). Specify a BeanFactoryDataSourceLookup
 	 * instance if you want DataSource names to be resolved against Spring bean names.
 	 * <p>Alternatively, consider passing in a map from names to DataSource instances
-	 * via the "dataSources" property. If the <code>persistence.xml</code> file
+	 * via the "dataSources" property. If the {@code persistence.xml} file
 	 * does not define DataSource names at all, specify a default DataSource
 	 * via the "defaultDataSource" property.
 	 * @see org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup
@@ -234,7 +235,7 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Return the JDBC DataSourceLookup that provides DataSources for the
-	 * persistence provider, resolving data source names in <code>persistence.xml</code>
+	 * persistence provider, resolving data source names in {@code persistence.xml}
 	 * against Spring-managed DataSource instances.
 	 */
 	public DataSourceLookup getDataSourceLookup() {
@@ -242,9 +243,9 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
-	 * to use for accessing the database if none has been specified in
-	 * <code>persistence.xml</code>.
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in {@code persistence.xml}.
+	 * This variant indicates no special transaction setup, i.e. typical resource-local.
 	 * <p>In JPA speak, a DataSource passed in here will be uses as "nonJtaDataSource"
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, provided that
 	 * none has been registered before.
@@ -255,20 +256,39 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Return the JDBC DataSource that the JPA persistence provider is supposed
-	 * to use for accessing the database if none has been specified in
-	 * <code>persistence.xml</code>.
+	 * Return the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in {@code persistence.xml}.
 	 */
 	public DataSource getDefaultDataSource() {
 		return this.defaultDataSource;
 	}
 
 	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in {@code persistence.xml}.
+	 * This variant indicates that JTA is supposed to be used as transaction type.
+	 * <p>In JPA speak, a DataSource passed in here will be uses as "jtaDataSource"
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, provided that
+	 * none has been registered before.
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
+	 */
+	public void setDefaultJtaDataSource(DataSource defaultJtaDataSource) {
+		this.defaultJtaDataSource = defaultJtaDataSource;
+	}
+
+	/**
+	 * Return the JTA-aware DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in {@code persistence.xml}.
+	 */
+	public DataSource getDefaultJtaDataSource() {
+		return this.defaultJtaDataSource;
+	}
+
+	/**
 	 * Set the PersistenceUnitPostProcessors to be applied to each
 	 * PersistenceUnitInfo that has been parsed by this manager.
-	 * <p>Such post-processors can, for example, register further entity
-	 * classes and jar files, in addition to the metadata read in from
-	 * <code>persistence.xml</code>.
+	 * <p>Such post-processors can, for example, register further entity classes and
+	 * jar files, in addition to the metadata read from {@code persistence.xml}.
 	 */
 	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor... postProcessors) {
 		this.persistenceUnitPostProcessors = postProcessors;
@@ -296,7 +316,7 @@ public class DefaultPersistenceUnitManager
 	 * <p><b>NOTE:</b> As of Spring 2.5, the context's default LoadTimeWeaver (defined
 	 * as bean with name "loadTimeWeaver") will be picked up automatically, if available,
 	 * removing the need for LoadTimeWeaver configuration on each affected target bean.</b>
-	 * Consider using the <code>context:load-time-weaver</code> XML tag for creating
+	 * Consider using the {@code context:load-time-weaver} XML tag for creating
 	 * such a shared LoadTimeWeaver (autodetecting the environment by default).
 	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
@@ -328,7 +348,7 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Prepare the PersistenceUnitInfos according to the configuration
-	 * of this manager: scanning for <code>persistence.xml</code> files,
+	 * of this manager: scanning for {@code persistence.xml} files,
 	 * parsing all matching files, configuring and post-processing them.
 	 * <p>PersistenceUnitInfos cannot be obtained before this preparation
 	 * method has been invoked.
@@ -342,6 +362,9 @@ public class DefaultPersistenceUnitManager
 		for (SpringPersistenceUnitInfo pui : puis) {
 			if (pui.getPersistenceUnitRootUrl() == null) {
 				pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
+			}
+			if (pui.getJtaDataSource() == null) {
+				pui.setJtaDataSource(this.defaultJtaDataSource);
 			}
 			if (pui.getNonJtaDataSource() == null) {
 				pui.setNonJtaDataSource(this.defaultDataSource);
@@ -371,14 +394,22 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Read all persistence unit infos from <code>persistence.xml</code>,
+	 * Read all persistence unit infos from {@code persistence.xml},
 	 * as defined in the JPA specification.
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
-		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
-		infos.addAll(Arrays.asList(reader.readPersistenceUnitInfos(this.persistenceXmlLocations)));
-		if (this.packagesToScan != null || this.mappingResources != null) {
+		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
+		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
+		SpringPersistenceUnitInfo[] readInfos = reader.readPersistenceUnitInfos(this.persistenceXmlLocations);
+		for (SpringPersistenceUnitInfo readInfo : readInfos) {
+			infos.add(readInfo);
+			if (this.defaultPersistenceUnitName != null &&
+					this.defaultPersistenceUnitName.equals(readInfo.getPersistenceUnitName())) {
+				buildDefaultUnit = false;
+			}
+		}
+		if (buildDefaultUnit) {
 			infos.add(buildDefaultPersistenceUnitInfo());
 		}
 		return infos;
@@ -468,7 +499,7 @@ public class DefaultPersistenceUnitManager
 	 * <p>This can be used in {@link #postProcessPersistenceUnitInfo} implementations,
 	 * detecting existing persistence units of the same name and potentially merging them.
 	 * @param persistenceUnitName the name of the desired persistence unit
-	 * @return the PersistenceUnitInfo in mutable form, or <code>null</code> if not available
+	 * @return the PersistenceUnitInfo in mutable form, or {@code null} if not available
 	 */
 	protected final MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
 		PersistenceUnitInfo pui = this.persistenceUnitInfos.get(persistenceUnitName);
@@ -488,7 +519,7 @@ public class DefaultPersistenceUnitManager
 	 * <p>The default implementation delegates to all registered PersistenceUnitPostProcessors.
 	 * It is usually preferable to register further entity classes, jar files etc there
 	 * rather than in a subclass of this manager, to be able to reuse the post-processors.
-	 * @param pui the chosen PersistenceUnitInfo, as read from <code>persistence.xml</code>.
+	 * @param pui the chosen PersistenceUnitInfo, as read from {@code persistence.xml}.
 	 * Passed in as MutablePersistenceUnitInfo.
 	 * @see #setPersistenceUnitPostProcessors
 	 */
@@ -503,7 +534,7 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Return whether an override of a same-named persistence unit is allowed.
-	 * <p>Default is <code>false</code>. May be overridden to return <code>true</code>,
+	 * <p>Default is {@code false}. May be overridden to return {@code true},
 	 * for example if {@link #postProcessPersistenceUnitInfo} is able to handle that case.
 	 */
 	protected boolean isPersistenceUnitOverrideAllowed() {
@@ -546,8 +577,8 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Decorator that exposes a JPA 2.0 compliant PersistenceUnitInfo interface for a
-	 * JPA 1.0 based SpringPersistenceUnitInfo object, adapting the <code>getSharedCacheMode</code>
-	 * and <code>getValidationMode</code> methods from String names to enum return values.
+	 * JPA 1.0 based SpringPersistenceUnitInfo object, adapting the {@code getSharedCacheMode}
+	 * and {@code getValidationMode} methods from String names to enum return values.
 	 */
 	private static class Jpa2PersistenceUnitInfoDecorator implements InvocationHandler {
 

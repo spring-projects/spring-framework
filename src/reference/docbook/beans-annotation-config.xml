@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-annotation-config"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-annotation-config">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Annotation-based container configuration</title>
 
   <sidebar>
@@ -25,8 +29,8 @@
       linkend="beans-java">JavaConfig</link> option, Spring allows annotations
       to be used in a non-invasive way, without touching the target components
       source code and that in terms of tooling, all configuration styles are
-      supported by the <ulink url="http://www.springsource.com/products/sts"
-      >SpringSource Tool Suite</ulink>.</para>
+      supported by the <link xl:href="http://www.springsource.com/products/sts"
+      >SpringSource Tool Suite</link>.</para>
   </sidebar>
 
   <para>An alternative to XML setups is provided by annotation-based
@@ -51,10 +55,10 @@
     JSR-330 (Dependency Injection for Java) annotations contained in the
     javax.inject package such as <classname>@Inject</classname> and
     <literal> @Named</literal>. Details about those annotations can be found in the <link linkend="beans-standard-annotations"
-    >relevant section</link>. <note> Annotation injection is performed
+    >relevant section</link>. <note><para>Annotation injection is performed
     <emphasis>before</emphasis> XML injection, thus the latter configuration
     will override the former for properties wired through both approaches.
-    </note> As always, you can register them as individual bean definitions, but
+    </para></note> As always, you can register them as individual bean definitions, but
     they can also be implicitly registered by including the following tag in an
     XML-based Spring configuration (notice the inclusion of the
     <literal>context</literal> namespace):</para>
@@ -64,24 +68,24 @@
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      <lineannotation>xmlns:context="http://www.springframework.org/schema/context"</lineannotation>
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/beans/spring-beans.xsd
          http://www.springframework.org/schema/context
-         http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+         http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
    <lineannotation>&lt;context:annotation-config/&gt;</lineannotation>
 
 &lt;/beans&gt;</programlisting>
 
-  <para>(The implicitly registered post-processors include <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"
-    ><classname>AutowiredAnnotationBeanPostProcessor</classname></ulink>, <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"
-    ><classname>CommonAnnotationBeanPostProcessor</classname></ulink>, <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"
-    ><classname>PersistenceAnnotationBeanPostProcessor</classname></ulink>, as
-    well as the aforementioned <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"
-    ><classname>RequiredAnnotationBeanPostProcessor</classname></ulink>.)</para>
+  <para>(The implicitly registered post-processors include <link
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"
+    ><classname>AutowiredAnnotationBeanPostProcessor</classname></link>, <link
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"
+    ><classname>CommonAnnotationBeanPostProcessor</classname></link>, <link
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"
+    ><classname>PersistenceAnnotationBeanPostProcessor</classname></link>, as
+    well as the aforementioned <link
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"
+    ><classname>RequiredAnnotationBeanPostProcessor</classname></link>.)</para>
 
   <note>
     <para><literal>&lt;context:annotation-config/&gt;</literal> only looks for
@@ -95,7 +99,7 @@
       information.</para>
   </note>
 
-  <section id="beans-required-annotation">
+  <section xml:id="beans-required-annotation">
     <title><interfacename>@Required</interfacename></title>
 
     <para>The <interfacename>@Required</interfacename> annotation applies to
@@ -124,14 +128,14 @@
       and values even when you use the class outside of a container.</para>
   </section>
 
-  <section id="beans-autowired-annotation">
+  <section xml:id="beans-autowired-annotation">
     <title><interfacename>@Autowired</interfacename></title>
 
     <para>As expected, you can apply the
       <interfacename>@Autowired</interfacename> annotation to "traditional"
       setter methods:</para>
 
-    
+
 
     <programlisting language="java">public class SimpleMovieLister {
 
@@ -145,13 +149,13 @@
   <lineannotation>// ...</lineannotation>
 }</programlisting>
 
-	<note>
+    <note>
       <para>JSR 330's @Inject annotation can be used in place of Spring's
         <interfacename>@Autowired</interfacename> annotation in the examples below. See <link linkend="beans-standard-annotations"
     >here</link> for more details</para>
     </note>
-    
-    
+
+
     <para>You can also apply the annotation to methods with arbitrary names
       and/or multiple arguments:</para>
 
@@ -310,7 +314,7 @@
     </note>
   </section>
 
-  <section id="beans-autowired-annotation-qualifiers">
+  <section xml:id="beans-autowired-annotation-qualifiers">
     <title>Fine-tuning annotation-based autowiring with qualifiers</title>
 
     <para>Because autowiring by type may lead to multiple candidates, it is
@@ -358,9 +362,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+      http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:annotation-config/&gt;
 
@@ -475,9 +479,9 @@ public @interface Genre {
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+      http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:annotation-config/&gt;
 
@@ -598,9 +602,9 @@ public @interface MovieQualifier {
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+      http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:annotation-config/&gt;
 
@@ -635,12 +639,12 @@ public @interface MovieQualifier {
 &lt;/beans&gt;</programlisting>
   </section>
 
-  <section id="beans-custom-autowire-configurer">
+  <section xml:id="beans-custom-autowire-configurer">
     <title><classname>CustomAutowireConfigurer</classname></title>
 
-    <para>The <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"
-      ><classname>CustomAutowireConfigurer</classname></ulink> is a
+    <para>The <link
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"
+      ><classname>CustomAutowireConfigurer</classname></link> is a
       <interfacename>BeanFactoryPostProcessor</interfacename> that enables you
       to register your own custom qualifier annotation types even if they are
       not annotated with Spring's <interfacename>@Qualifier</interfacename>
@@ -675,7 +679,7 @@ public @interface MovieQualifier {
       will be selected.</para>
   </section>
 
-  <section id="beans-resource-annotation">
+  <section xml:id="beans-resource-annotation">
     <title><interfacename>@Resource</interfacename></title>
 
     <para>Spring also supports injection using the JSR-250
@@ -719,9 +723,9 @@ public @interface MovieQualifier {
       <para>The name provided with the annotation is resolved as a bean name by
         the <interfacename>ApplicationContext</interfacename> of which the
         <classname>CommonAnnotationBeanPostProcessor</classname> is aware. The
-        names can be resolved through JNDI if you configure Spring's <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"
-        ><classname>SimpleJndiBeanFactory</classname></ulink> explicitly.
+        names can be resolved through JNDI if you configure Spring's <link
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"
+        ><classname>SimpleJndiBeanFactory</classname></link> explicitly.
         However, it is recommended that you rely on the default behavior and
         simply use Spring's JNDI lookup capabilities to preserve the level of
         indirection.</para>
@@ -760,7 +764,7 @@ public @interface MovieQualifier {
 }</programlisting>
   </section>
 
-  <section id="beans-postconstruct-and-predestroy-annotations">
+  <section xml:id="beans-postconstruct-and-predestroy-annotations">
     <title><interfacename>@PostConstruct</interfacename> and
       <interfacename>@PreDestroy</interfacename></title>
 

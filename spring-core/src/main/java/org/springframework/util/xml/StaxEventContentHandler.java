@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,16 @@ import javax.xml.stream.util.XMLEventConsumer;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * SAX <code>ContentHandler</code> that transforms callback calls to <code>XMLEvent</code>s and writes them to a
- * <code>XMLEventConsumer</code>.
+ * SAX {@code ContentHandler} that transforms callback calls to {@code XMLEvent}s
+ * and writes them to a {@code XMLEventConsumer}.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see XMLEvent
  * @see XMLEventConsumer
- * @since 3.0
  */
 class StaxEventContentHandler extends AbstractStaxContentHandler {
 
@@ -50,101 +49,82 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 
 	private final XMLEventConsumer eventConsumer;
 
+
 	/**
-	 * Constructs a new instance of the <code>StaxEventContentHandler</code> that writes to the given
-	 * <code>XMLEventConsumer</code>. A default <code>XMLEventFactory</code> will be created.
-	 *
+	 * Construct a new instance of the {@code StaxEventContentHandler} that writes to the given
+	 * {@code XMLEventConsumer}. A default {@code XMLEventFactory} will be created.
 	 * @param consumer the consumer to write events to
 	 */
 	StaxEventContentHandler(XMLEventConsumer consumer) {
-		Assert.notNull(consumer, "'consumer' must not be null");
-		eventFactory = XMLEventFactory.newInstance();
-		eventConsumer = consumer;
+		this.eventFactory = XMLEventFactory.newInstance();
+		this.eventConsumer = consumer;
 	}
 
 	/**
-	 * Constructs a new instance of the <code>StaxEventContentHandler</code> that uses the given event factory to create
-	 * events and writes to the given <code>XMLEventConsumer</code>.
-	 *
+	 * Construct a new instance of the {@code StaxEventContentHandler} that uses the given
+	 * event factory to create events and writes to the given {@code XMLEventConsumer}.
 	 * @param consumer the consumer to write events to
 	 * @param factory  the factory used to create events
 	 */
 	StaxEventContentHandler(XMLEventConsumer consumer, XMLEventFactory factory) {
-		eventFactory = factory;
-		eventConsumer = consumer;
+		this.eventFactory = factory;
+		this.eventConsumer = consumer;
 	}
 
-	public void setDocumentLocator(final Locator locator) {
+	public void setDocumentLocator(Locator locator) {
 		if (locator != null) {
-			eventFactory.setLocation(new Location() {
-
-				public int getLineNumber() {
-					return locator.getLineNumber();
-				}
-
-				public int getColumnNumber() {
-					return locator.getColumnNumber();
-				}
-
-				public int getCharacterOffset() {
-					return -1;
-				}
-
-				public String getPublicId() {
-					return locator.getPublicId();
-				}
-
-				public String getSystemId() {
-					return locator.getSystemId();
-				}
-			});
+			this.eventFactory.setLocation(new LocatorLocationAdapter(locator));
 		}
 	}
 
 	@Override
 	protected void startDocumentInternal() throws XMLStreamException {
-		consumeEvent(eventFactory.createStartDocument());
+		consumeEvent(this.eventFactory.createStartDocument());
 	}
 
 	@Override
 	protected void endDocumentInternal() throws XMLStreamException {
-		consumeEvent(eventFactory.createEndDocument());
+		consumeEvent(this.eventFactory.createEndDocument());
 	}
 
 	@Override
 	protected void startElementInternal(QName name, Attributes atts, SimpleNamespaceContext namespaceContext)
 			throws XMLStreamException {
+
 		List attributes = getAttributes(atts);
 		List namespaces = createNamespaces(namespaceContext);
-		consumeEvent(eventFactory.createStartElement(name, attributes.iterator(), namespaces != null ? namespaces.iterator() : null));
+		consumeEvent(this.eventFactory.createStartElement(name, attributes.iterator(),
+				(namespaces != null ? namespaces.iterator() : null)));
 	}
 
 	@Override
 	protected void endElementInternal(QName name, SimpleNamespaceContext namespaceContext) throws XMLStreamException {
 		List namespaces = createNamespaces(namespaceContext);
-		consumeEvent(eventFactory.createEndElement(name, namespaces != null ? namespaces.iterator() : null));
+		consumeEvent(this.eventFactory.createEndElement(name, namespaces != null ? namespaces.iterator() : null));
 	}
 
 	@Override
 	protected void charactersInternal(char[] ch, int start, int length) throws XMLStreamException {
-		consumeEvent(eventFactory.createCharacters(new String(ch, start, length)));
+		consumeEvent(this.eventFactory.createCharacters(new String(ch, start, length)));
 	}
 
 	@Override
 	protected void ignorableWhitespaceInternal(char[] ch, int start, int length) throws XMLStreamException {
-		consumeEvent(eventFactory.createIgnorableSpace(new String(ch, start, length)));
+		consumeEvent(this.eventFactory.createIgnorableSpace(new String(ch, start, length)));
 	}
 
 	@Override
 	protected void processingInstructionInternal(String target, String data) throws XMLStreamException {
-		consumeEvent(eventFactory.createProcessingInstruction(target, data));
+		consumeEvent(this.eventFactory.createProcessingInstruction(target, data));
 	}
 
 	private void consumeEvent(XMLEvent event) throws XMLStreamException {
-		eventConsumer.add(event);
+		this.eventConsumer.add(event);
 	}
 
-	/** Creates and returns a list of <code>NameSpace</code> objects from the <code>NamespaceContext</code>. */
+	/**
+	 * Create and return a list of {@code NameSpace} objects from the {@code NamespaceContext}.
+	 */
 	private List<Namespace> createNamespaces(SimpleNamespaceContext namespaceContext) {
 		if (namespaceContext == null) {
 			return null;
@@ -153,12 +133,12 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 		List<Namespace> namespaces = new ArrayList<Namespace>();
 		String defaultNamespaceUri = namespaceContext.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX);
 		if (StringUtils.hasLength(defaultNamespaceUri)) {
-			namespaces.add(eventFactory.createNamespace(defaultNamespaceUri));
+			namespaces.add(this.eventFactory.createNamespace(defaultNamespaceUri));
 		}
 		for (Iterator iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
 			String prefix = (String) iterator.next();
 			String namespaceUri = namespaceContext.getNamespaceURI(prefix);
-			namespaces.add(eventFactory.createNamespace(prefix, namespaceUri));
+			namespaces.add(this.eventFactory.createNamespace(prefix, namespaceUri));
 		}
 		return namespaces;
 	}
@@ -168,18 +148,45 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 		for (int i = 0; i < attributes.getLength(); i++) {
 			QName name = toQName(attributes.getURI(i), attributes.getQName(i));
 			if (!("xmlns".equals(name.getLocalPart()) || "xmlns".equals(name.getPrefix()))) {
-				list.add(eventFactory.createAttribute(name, attributes.getValue(i)));
+				list.add(this.eventFactory.createAttribute(name, attributes.getValue(i)));
 			}
 		}
 		return list;
 	}
 
-	//
-	// No operation
-	//
-
+	/* No operation */
 	@Override
 	protected void skippedEntityInternal(String name) throws XMLStreamException {
+	}
+
+
+	private static final class LocatorLocationAdapter implements Location {
+
+		private final Locator locator;
+
+		public LocatorLocationAdapter(Locator locator) {
+			this.locator = locator;
+		}
+
+		public int getLineNumber() {
+			return this.locator.getLineNumber();
+		}
+
+		public int getColumnNumber() {
+			return this.locator.getColumnNumber();
+		}
+
+		public int getCharacterOffset() {
+			return -1;
+		}
+
+		public String getPublicId() {
+			return this.locator.getPublicId();
+		}
+
+		public String getSystemId() {
+			return this.locator.getSystemId();
+		}
 	}
 
 }

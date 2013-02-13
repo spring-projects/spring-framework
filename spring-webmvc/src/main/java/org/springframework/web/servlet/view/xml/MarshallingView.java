@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class MarshallingView extends AbstractView {
 	private String modelKey;
 
 	/**
-	 * Constructs a new <code>MarshallingView</code> with no {@link Marshaller} set. The marshaller must be set after
+	 * Constructs a new {@code MarshallingView} with no {@link Marshaller} set. The marshaller must be set after
 	 * construction by invoking {@link #setMarshaller(Marshaller)}.
 	 */
 	public MarshallingView() {
@@ -63,7 +63,7 @@ public class MarshallingView extends AbstractView {
 	}
 
 	/**
-	 * Constructs a new <code>MarshallingView</code> with the given {@link Marshaller} set.
+	 * Constructs a new {@code MarshallingView} with the given {@link Marshaller} set.
 	 */
 	public MarshallingView(Marshaller marshaller) {
 		Assert.notNull(marshaller, "'marshaller' must not be null");
@@ -96,8 +96,8 @@ public class MarshallingView extends AbstractView {
 	}
 
 	@Override
-	protected void renderMergedOutputModel(Map<String, Object> model, 
-										   HttpServletRequest request, 
+	protected void renderMergedOutputModel(Map<String, Object> model,
+										   HttpServletRequest request,
 										   HttpServletResponse response) throws Exception {
 		Object toBeMarshalled = locateToBeMarshalled(model);
 		if (toBeMarshalled == null) {
@@ -106,7 +106,7 @@ public class MarshallingView extends AbstractView {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(2048);
 		marshaller.marshal(toBeMarshalled, new StreamResult(bos));
 
-		response.setContentType(getContentType());
+		setResponseContentType(request, response);
 		response.setContentLength(bos.size());
 
 		FileCopyUtils.copy(bos.toByteArray(), response.getOutputStream());
@@ -118,7 +118,7 @@ public class MarshallingView extends AbstractView {
 	 * Marshaller#supports(Class) supported type}.
 	 *
 	 * @param model the model Map
-	 * @return the Object to be marshalled (or <code>null</code> if none found)
+	 * @return the Object to be marshalled (or {@code null} if none found)
 	 * @throws ServletException if the model object specified by the {@linkplain #setModelKey(String) model key} is not
 	 *                          supported by the marshaller
 	 * @see #setModelKey(String)

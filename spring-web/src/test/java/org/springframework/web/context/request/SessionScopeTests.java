@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.util.SerializationTestUtils;
 
 /**
@@ -40,6 +40,7 @@ public class SessionScopeTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.beanFactory.registerScope("session", new SessionScope());
@@ -162,30 +163,37 @@ public class SessionScopeTests extends TestCase {
 
 	private static class CustomDestructionAwareBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		}
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class CustomSerializableDestructionAwareBeanPostProcessor
 			implements DestructionAwareBeanPostProcessor, Serializable {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 			if (bean instanceof BeanNameAware) {
 				((BeanNameAware) bean).setBeanName(null);

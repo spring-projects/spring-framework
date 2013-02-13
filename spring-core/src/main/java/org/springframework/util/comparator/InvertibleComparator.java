@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,18 @@ package org.springframework.util.comparator;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.springframework.util.Assert;
+
 /**
  * A decorator for a comparator, with an "ascending" flag denoting
  * whether comparison results should be treated in forward (standard
  * ascending) order or flipped for reverse (descending) order.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
  */
+@SuppressWarnings("serial")
 public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 
 	private final Comparator<T> comparator;
@@ -41,6 +44,7 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 	 * @param comparator the comparator to decorate
 	 */
 	public InvertibleComparator(Comparator<T> comparator) {
+		Assert.notNull(comparator, "Comparator must not be null");
 		this.comparator = comparator;
 	}
 
@@ -51,6 +55,7 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
 	public InvertibleComparator(Comparator<T> comparator, boolean ascending) {
+		Assert.notNull(comparator, "Comparator must not be null");
 		this.comparator = comparator;
 		setAscending(ascending);
 	}
@@ -97,6 +102,7 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -104,7 +110,7 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 		if (!(obj instanceof InvertibleComparator)) {
 			return false;
 		}
-		InvertibleComparator other = (InvertibleComparator) obj;
+		InvertibleComparator<T> other = (InvertibleComparator<T>) obj;
 		return (this.comparator.equals(other.comparator) && this.ascending == other.ascending);
 	}
 

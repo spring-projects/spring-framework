@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import javax.servlet.ServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -41,19 +41,20 @@ public class RequestContextFilterTests extends TestCase {
 	public void testHappyPath() throws Exception {
 		testFilterInvocation(null);
 	}
-	
+
 	public void testWithException() throws Exception {
 		testFilterInvocation(new ServletException());
 	}
-		
+
 	public void testFilterInvocation(final ServletException sex) throws Exception {
 		final MockHttpServletRequest req = new MockHttpServletRequest();
 		req.setAttribute("myAttr", "myValue");
 		final MockHttpServletResponse resp = new MockHttpServletResponse();
-		
+
 		// Expect one invocation by the filter being tested
 		class DummyFilterChain implements FilterChain {
 			public int invocations = 0;
+			@Override
 			public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
 				++invocations;
 				if (invocations == 1) {
@@ -84,7 +85,7 @@ public class RequestContextFilterTests extends TestCase {
 		catch (ServletException ex) {
 			assertNotNull(sex);
 		}
-		
+
 		try {
 			RequestContextHolder.currentRequestAttributes();
 			fail();

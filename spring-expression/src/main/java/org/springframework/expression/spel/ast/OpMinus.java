@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,8 @@ public class OpMinus extends Operator {
 				Number n = (Number) operand;
 				if (operand instanceof Double) {
 					return new TypedValue(0 - n.doubleValue());
+				} else if (operand instanceof Float) {
+					return new TypedValue(0 - n.floatValue());
 				} else if (operand instanceof Long) {
 					return new TypedValue(0 - n.longValue());
 				} else {
@@ -67,6 +69,8 @@ public class OpMinus extends Operator {
 				Number op2 = (Number) right;
 				if (op1 instanceof Double || op2 instanceof Double) {
 					return new TypedValue(op1.doubleValue() - op2.doubleValue());
+				} else if (op1 instanceof Float || op2 instanceof Float) {
+					return new TypedValue(op1.floatValue() - op2.floatValue());
 				} else if (op1 instanceof Long || op2 instanceof Long) {
 					return new TypedValue(op1.longValue() - op2.longValue());
 				} else {

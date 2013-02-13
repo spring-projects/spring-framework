@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 
 
 	/**
-	 * Calls the <code>registerHandlers</code> method in addition
+	 * Calls the {@code registerHandlers} method in addition
 	 * to the superclass's initialization.
 	 * @see #registerHandlers
 	 */

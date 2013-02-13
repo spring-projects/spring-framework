@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import test.beans.TestBean;
 
 /**
  * Unit tests for {@link BeanUtils}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
@@ -250,17 +250,17 @@ public final class BeanUtilsTests {
 	}
 
 	@Test
-    public void testSPR6063() {
-        PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
+	public void testSPR6063() {
+		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
 
-        PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
-        assertEquals(String.class, keyDescr.getPropertyType());
-        for (PropertyDescriptor propertyDescriptor : descrs) {
-            if (propertyDescriptor.getName().equals(keyDescr.getName())) {
-                assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
-            }
-        }
-    }
+		PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
+		assertEquals(String.class, keyDescr.getPropertyType());
+		for (PropertyDescriptor propertyDescriptor : descrs) {
+			if (propertyDescriptor.getName().equals(keyDescr.getName())) {
+				assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
+			}
+		}
+	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
@@ -360,18 +360,22 @@ public final class BeanUtilsTests {
 
 		private String value;
 
+		@Override
 		public String getKey() {
 			return key;
 		}
 
+		@Override
 		public void setKey(String aKey) {
 			key = aKey;
 		}
 
+		@Override
 		public String getValue() {
 			return value;
 		}
 
+		@Override
 		public void setValue(String aValue) {
 			value = aValue;
 		}

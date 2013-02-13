@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ package org.springframework.core;
 public interface AttributeAccessor {
 
 	/**
-	 * Set the attribute defined by <code>name</code> to the supplied	<code>value</code>.
-	 * If <code>value</code> is <code>null</code>, the attribute is {@link #removeAttribute removed}.
+	 * Set the attribute defined by {@code name} to the supplied	{@code value}.
+	 * If {@code value} is {@code null}, the attribute is {@link #removeAttribute removed}.
 	 * <p>In general, users should take care to prevent overlaps with other
 	 * metadata attributes by using fully-qualified names, perhaps using
 	 * class or package names as prefix.
@@ -37,24 +37,24 @@ public interface AttributeAccessor {
 	void setAttribute(String name, Object value);
 
 	/**
-	 * Get the value of the attribute identified by <code>name</code>.
-	 * Return <code>null</code> if the attribute doesn't exist.
+	 * Get the value of the attribute identified by {@code name}.
+	 * Return {@code null} if the attribute doesn't exist.
 	 * @param name the unique attribute key
 	 * @return the current value of the attribute, if any
 	 */
 	Object getAttribute(String name);
 
 	/**
-	 * Remove the attribute identified by <code>name</code> and return its value.
-	 * Return <code>null</code> if no attribute under <code>name</code> is found.
+	 * Remove the attribute identified by {@code name} and return its value.
+	 * Return {@code null} if no attribute under {@code name} is found.
 	 * @param name the unique attribute key
 	 * @return the last value of the attribute, if any
 	 */
 	Object removeAttribute(String name);
 
 	/**
-	 * Return <code>true</code> if the attribute identified by <code>name</code> exists.
-	 * Otherwise return <code>false</code>.
+	 * Return {@code true} if the attribute identified by {@code name} exists.
+	 * Otherwise return {@code false}.
 	 * @param name the unique attribute key
 	 */
 	boolean hasAttribute(String name);

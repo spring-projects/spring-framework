@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.core.NamedThreadLocal;
  * Simple holder class that associates a LocaleContext instance
  * with the current thread. The LocaleContext will be inherited
  * by any child threads spawned by the current thread if the
- * <code>inheritable<code> flag is set to <code>true</code>.
+ * {@code inheritable} flag is set to {@code true}.
  *
  * <p>Used as a central holder for the current Locale in Spring,
  * wherever necessary: for example, in MessageSourceAccessor.
@@ -68,9 +68,9 @@ public abstract class LocaleContextHolder {
 	/**
 	 * Associate the given LocaleContext with the current thread.
 	 * @param localeContext the current LocaleContext,
-	 * or <code>null</code> to reset the thread-bound context
+	 * or {@code null} to reset the thread-bound context
 	 * @param inheritable whether to expose the LocaleContext as inheritable
-	 * for child threads (using an {@link java.lang.InheritableThreadLocal})
+	 * for child threads (using an {@link InheritableThreadLocal})
 	 */
 	public static void setLocaleContext(LocaleContext localeContext, boolean inheritable) {
 		if (localeContext == null) {
@@ -90,7 +90,7 @@ public abstract class LocaleContextHolder {
 
 	/**
 	 * Return the LocaleContext associated with the current thread, if any.
-	 * @return the current LocaleContext, or <code>null</code> if none
+	 * @return the current LocaleContext, or {@code null} if none
 	 */
 	public static LocaleContext getLocaleContext() {
 		LocaleContext localeContext = localeContextHolder.get();
@@ -104,7 +104,7 @@ public abstract class LocaleContextHolder {
 	 * Associate the given Locale with the current thread.
 	 * <p>Will implicitly create a LocaleContext for the given Locale,
 	 * <i>not</i> exposing it as inheritable for child threads.
-	 * @param locale the current Locale, or <code>null</code> to reset
+	 * @param locale the current Locale, or {@code null} to reset
 	 * the thread-bound context
 	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
 	 */
@@ -115,10 +115,10 @@ public abstract class LocaleContextHolder {
 	/**
 	 * Associate the given Locale with the current thread.
 	 * <p>Will implicitly create a LocaleContext for the given Locale.
-	 * @param locale the current Locale, or <code>null</code> to reset
+	 * @param locale the current Locale, or {@code null} to reset
 	 * the thread-bound context
 	 * @param inheritable whether to expose the LocaleContext as inheritable
-	 * for child threads (using an {@link java.lang.InheritableThreadLocal})
+	 * for child threads (using an {@link InheritableThreadLocal})
 	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
 	 */
 	public static void setLocale(Locale locale, boolean inheritable) {

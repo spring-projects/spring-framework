@@ -44,7 +44,6 @@ public class ParameterContentNegotiationStrategy extends AbstractMappingContentN
 	 */
 	public ParameterContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
-		Assert.notEmpty(mediaTypes, "Cannot look up media types without any mappings");
 	}
 
 	/**
@@ -52,6 +51,7 @@ public class ParameterContentNegotiationStrategy extends AbstractMappingContentN
 	 * <p>The default parameter name is {@code format}.
 	 */
 	public void setParameterName(String parameterName) {
+		Assert.notNull(parameterName, "parameterName is required");
 		this.parameterName = parameterName;
 	}
 

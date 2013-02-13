@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.FileCopyUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.
  *
- * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>), and writes with a {@code
+ * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}), and writes with a {@code
  * Content-Type} of {@code application/octet-stream}. This can be overridden by setting the {@link
  * #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
  *

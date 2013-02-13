@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
 
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -28,7 +31,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Tests the evaluation of real expressions in a real context.
- * 
+ *
  * @author Andy Clement
  */
 public class PerformanceTests {
@@ -40,9 +43,11 @@ public class PerformanceTests {
 	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	private static final boolean DEBUG = false;
-	
+
 	@Test
 	public void testPerformanceOfPropertyAccess() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		long starttime = 0;
 		long endtime = 0;
 
@@ -50,16 +55,16 @@ public class PerformanceTests {
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
 			if (expr == null) {
-				Assert.fail("Parser returned null for expression");
+				fail("Parser returned null for expression");
 			}
 			expr.getValue(eContext);
 		}
-		
+
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
 			if (expr == null) {
-				Assert.fail("Parser returned null for expression");
+				fail("Parser returned null for expression");
 			}
 			expr.getValue(eContext);
 		}
@@ -71,7 +76,7 @@ public class PerformanceTests {
 
 		Expression expr = parser.parseExpression("placeOfBirth.city");
 		if (expr == null) {
-			Assert.fail("Parser returned null for expression");
+			fail("Parser returned null for expression");
 		}
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
@@ -85,19 +90,22 @@ public class PerformanceTests {
 		if (reuseTime > freshParseTime) {
 			System.out.println("Fresh parse every time, ITERATIONS iterations = " + freshParseTime + "ms");
 			System.out.println("Reuse SpelExpression, ITERATIONS iterations = " + reuseTime + "ms");
-			Assert.fail("Should have been quicker to reuse!");
+			fail("Should have been quicker to reuse!");
 		}
 	}
 
+	@Test
 	public void testPerformanceOfMethodAccess() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		long starttime = 0;
 		long endtime = 0;
-		
+
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 			if (expr == null) {
-				Assert.fail("Parser returned null for expression");
+				fail("Parser returned null for expression");
 			}
 			expr.getValue(eContext);
 		}
@@ -106,7 +114,7 @@ public class PerformanceTests {
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 			if (expr == null) {
-				Assert.fail("Parser returned null for expression");
+				fail("Parser returned null for expression");
 			}
 			expr.getValue(eContext);
 		}
@@ -118,7 +126,7 @@ public class PerformanceTests {
 
 		Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
 		if (expr == null) {
-			Assert.fail("Parser returned null for expression");
+			fail("Parser returned null for expression");
 		}
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
@@ -133,7 +141,7 @@ public class PerformanceTests {
 		if (reuseTime > freshParseTime) {
 			System.out.println("Fresh parse every time, ITERATIONS iterations = " + freshParseTime + "ms");
 			System.out.println("Reuse SpelExpression, ITERATIONS iterations = " + reuseTime + "ms");
-			Assert.fail("Should have been quicker to reuse!");
+			fail("Should have been quicker to reuse!");
 		}
 	}
 

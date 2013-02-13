@@ -121,7 +121,7 @@
 			<value>Microsoft SQL Server</value>
 		</property>
 		<property name="badSqlGrammarCodes">
-			<value>156,170,207,208</value>
+			<value>156,170,207,208,209</value>
 		</property>
 		<property name="permissionDeniedCodes">
 			<value>229</value>
@@ -166,7 +166,7 @@
 
 	<bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="badSqlGrammarCodes">
-			<value>900,903,904,917,936,942,17006</value>
+			<value>900,903,904,917,936,942,17006,6550</value>
 		</property>
 		<property name="invalidResultSetAccessCodes">
 			<value>17003</value>
@@ -239,6 +239,9 @@
 		</property>
 		<property name="transientDataAccessResourceCodes">
 			<value>921,1105</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>12205</value>
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>1205</value>

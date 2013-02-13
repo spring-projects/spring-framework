@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.FileCopyUtils;
 
 /**
  * {@link LobHandler} implementation for Oracle databases. Uses proprietary API
- * to create <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+ * to create {@code oracle.sql.BLOB} and {@code oracle.sql.CLOB}
  * instances, as necessary when working with Oracle's JDBC driver.
  * Note that this LobHandler requires Oracle JDBC driver 9i or higher!
  *
@@ -55,10 +55,10 @@ import org.springframework.util.FileCopyUtils;
  * to use a strategy like this LobHandler implementation.
  *
  * <p>Needs to work on a native JDBC Connection, to be able to cast it to
- * <code>oracle.jdbc.OracleConnection</code>. If you pass in Connections from a
+ * {@code oracle.jdbc.OracleConnection}. If you pass in Connections from a
  * connection pool (the usual case in a J2EE environment), you need to set an
  * appropriate {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
- * to allow for automatical retrieval of the underlying native JDBC Connection.
+ * to allow for automatic retrieval of the underlying native JDBC Connection.
  * LobHandler and NativeJdbcExtractor are separate concerns, therefore they
  * are represented by separate strategy interfaces.
  *
@@ -73,8 +73,6 @@ import org.springframework.util.FileCopyUtils;
  * @author Thomas Risberg
  * @since 04.12.2003
  * @see #setNativeJdbcExtractor
- * @see oracle.sql.BLOB
- * @see oracle.sql.CLOB
  */
 public class OracleLobHandler extends AbstractLobHandler {
 
@@ -110,20 +108,21 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Set an appropriate NativeJdbcExtractor to be able to retrieve the underlying
-	 * native <code>oracle.jdbc.OracleConnection</code>. This is necessary for
+	 * native {@code oracle.jdbc.OracleConnection}. This is necessary for
 	 * DataSource-based connection pools, as those need to return wrapped JDBC
 	 * Connection handles that cannot be cast to a native Connection implementation.
 	 * <p>Effectively, this LobHandler just invokes a single NativeJdbcExtractor
-	 * method, namely <code>getNativeConnectionFromStatement</code> with a
+	 * method, namely {@code getNativeConnectionFromStatement} with a
 	 * PreparedStatement argument (falling back to a
-	 * <code>PreparedStatement.getConnection()</code> call if no extractor is set).
-	 * <p>A common choice is SimpleNativeJdbcExtractor, whose Connection unwrapping
+	 * {@code PreparedStatement.getConnection()} call if no extractor is set).
+	 * <p>A common choice is {@code SimpleNativeJdbcExtractor}, whose Connection unwrapping
 	 * (which is what OracleLobHandler needs) will work with many connection pools.
-	 * See SimpleNativeJdbcExtractor's javadoc for details.
+	 * See {@code SimpleNativeJdbcExtractor} and
+	 * <a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/jdbc/OracleConnection.html">
+	 * oracle.jdbc.OracleConnection</a> javadoc for details.
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor#getNativeConnectionFromStatement
 	 * @see org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor
 	 * @see org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor
-	 * @see oracle.jdbc.OracleConnection
 	 */
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
@@ -132,29 +131,34 @@ public class OracleLobHandler extends AbstractLobHandler {
 	/**
 	 * Set whether to cache the temporary LOB in the buffer cache.
 	 * This value will be passed into BLOB/CLOB.createTemporary.
-	 *
-	 * <p>Default is <code>true</code>.
-	 * @see oracle.sql.BLOB#createTemporary
-	 * @see oracle.sql.CLOB#createTemporary
+	 * <p>Default is {@code true}.
+	 * <p><strong>See Also:</strong>
+	 * <ul>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#createTemporary()">oracle.sql.BLOB.createTemporary</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#createTemporary()">oracle.sql.CLOB.createTemporary</a></li>
+	 * </ul>
 	 */
 	public void setCache(boolean cache) {
 		this.cache = cache;
 	}
 
 	/**
-	 * Set whether to agressively release any resources used by the LOB. If set to <code>true</code>
+	 * Set whether to agressively release any resources used by the LOB. If set to {@code true}
 	 * then you can only read the LOB values once. Any subsequent reads will fail since the resources
 	 * have been closed.
-	 * <p>Setting this property to <code>true</code> can be useful when your queries generates large
+	 * <p>Setting this property to {@code true} can be useful when your queries generates large
 	 * temporary LOBs that occupy space in the TEMPORARY tablespace or when you want to free up any
 	 * memory allocated by the driver for the LOB reading.
-	 * <p>Default is <code>false</code>.
-	 * @see oracle.sql.BLOB#freeTemporary
-	 * @see oracle.sql.CLOB#freeTemporary
-	 * @see oracle.sql.BLOB#open
-	 * @see oracle.sql.CLOB#open
-	 * @see oracle.sql.BLOB#close
-	 * @see oracle.sql.CLOB#close
+	 * <p>Default is {@code false}.
+	 * <p><strong>See Also:</strong>
+	 * <ul>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#freeTemporary()">oracle.sql.BLOB.freeTemporary</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#freeTemporary()">oracle.sql.CLOB.freeTemporary</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#open()">oracle.sql.BLOB.open</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#open()">oracle.sql.CLOB.open</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#open()">oracle.sql.BLOB.close</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#open()">oracle.sql.CLOB.close</a></li>
+	 * </ul>
 	 */
 	public void setReleaseResourcesAfterRead(boolean releaseResources) {
 		this.releaseResourcesAfterRead = releaseResources;
@@ -162,17 +166,20 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 
 	/**
-	 * Retrieve the <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+	 * Retrieve the {@code oracle.sql.BLOB} and {@code oracle.sql.CLOB}
 	 * classes via reflection, and initialize the values for the
 	 * DURATION_SESSION, MODE_READWRITE and MODE_READONLY constants defined there.
+	 * <p><strong>See Also:</strong>
+	 * <ul>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#DURATION_SESSION">oracle.sql.BLOB.DURATION_SESSION</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#MODE_READWRITE">oracle.sql.BLOB.MODE_READWRITE</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#MODE_READONLY">oracle.sql.BLOB.MODE_READONLY</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#DURATION_SESSION">oracle.sql.CLOB.DURATION_SESSION</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#MODE_READWRITE">oracle.sql.CLOB.MODE_READWRITE</a></li>
+	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#MODE_READONLY">oracle.sql.CLOB.MODE_READONLY</a></li>
+	 * </ul>
 	 * @param con the Oracle Connection, for using the exact same class loader
 	 * that the Oracle driver was loaded with
-	 * @see oracle.sql.BLOB#DURATION_SESSION
-	 * @see oracle.sql.BLOB#MODE_READWRITE
-	 * @see oracle.sql.BLOB#MODE_READONLY
-	 * @see oracle.sql.CLOB#DURATION_SESSION
-	 * @see oracle.sql.CLOB#MODE_READWRITE
-	 * @see oracle.sql.CLOB#MODE_READONLY
 	 */
 	protected synchronized void initOracleDriverClasses(Connection con) {
 		if (this.blobClass == null) {
@@ -255,9 +262,9 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Initialize any LOB resources before a read is done.
-	 * <p>This implementation calls <code>BLOB.open(BLOB.MODE_READONLY)</code> or
-	 * <code>CLOB.open(CLOB.MODE_READONLY)</code> on any non-temporary LOBs if
-	 * <code>releaseResourcesAfterRead</code> property is set to <code>true</code>.
+	 * <p>This implementation calls {@code BLOB.open(BLOB.MODE_READONLY)} or
+	 * {@code CLOB.open(CLOB.MODE_READONLY)} on any non-temporary LOBs if
+	 * {@code releaseResourcesAfterRead} property is set to {@code true}.
 	 * <p>This method can be overridden by sublcasses if different behavior is desired.
 	 * @param con the connection to be usde for initilization
 	 * @param lob the LOB to initialize
@@ -290,11 +297,11 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Release any LOB resources after read is complete.
-	 * <p>If <code>releaseResourcesAfterRead</code> property is set to <code>true</code>
+	 * <p>If {@code releaseResourcesAfterRead} property is set to {@code true}
 	 * then this implementation calls
-	 * <code>BLOB.close()</code> or <code>CLOB.close()</code>
+	 * {@code BLOB.close()} or {@code CLOB.close()}
 	 * on any non-temporary LOBs that are open or
-	 * <code>BLOB.freeTemporary()</code> or <code>CLOB.freeTemporary()</code>
+	 * {@code BLOB.freeTemporary()} or {@code CLOB.freeTemporary()}
 	 * on any temporary LOBs.
 	 * <p>This method can be overridden by sublcasses if different behavior is desired.
 	 * @param con the connection to be usde for initilization
@@ -407,7 +414,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		}
 
 		public void setClobAsString(PreparedStatement ps, int paramIndex, final String content)
-		    throws SQLException {
+			throws SQLException {
 
 			if (content != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
@@ -430,7 +437,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, final InputStream asciiStream, int contentLength)
-		    throws SQLException {
+			throws SQLException {
 
 			if (asciiStream != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
@@ -453,7 +460,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, final Reader characterStream, int contentLength)
-		    throws SQLException {
+			throws SQLException {
 
 			if (characterStream != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,42 +16,46 @@
 
 package org.springframework.core.convert.support;
 
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import java.awt.Color;
 import java.awt.SystemColor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
-import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
+
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class GenericConversionServiceTests {
 
@@ -61,9 +65,9 @@ public class GenericConversionServiceTests {
 	public void canConvert() {
 		assertFalse(conversionService.canConvert(String.class, Integer.class));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(String.class, Integer.class));		
+		assertTrue(conversionService.canConvert(String.class, Integer.class));
 	}
-	
+
 	@Test
 	public void canConvertAssignable() {
 		assertTrue(conversionService.canConvert(String.class, String.class));
@@ -71,29 +75,29 @@ public class GenericConversionServiceTests {
 		assertTrue(conversionService.canConvert(boolean.class, boolean.class));
 		assertTrue(conversionService.canConvert(boolean.class, Boolean.class));
 	}
-	
+
 	@Test
 	public void canConvertIllegalArgumentNullTargetType() {
 		try {
 			assertFalse(conversionService.canConvert(String.class, null));
 			fail("Should have failed");
 		} catch (IllegalArgumentException e) {
-			
+
 		}
 		try {
 			assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), null));
 			fail("Should have failed");
 		} catch (IllegalArgumentException e) {
-			
+
 		}
 	}
-	
+
 	@Test
 	public void canConvertNullSourceType() {
 		assertTrue(conversionService.canConvert(null, Integer.class));
 		assertTrue(conversionService.canConvert(null, TypeDescriptor.valueOf(Integer.class)));
 	}
-	
+
 	@Test
 	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
@@ -141,6 +145,7 @@ public class GenericConversionServiceTests {
 	public void addConverterNoSourceTargetClassInfoAvailable() {
 		try {
 			conversionService.addConverter(new Converter() {
+				@Override
 				public Object convert(Object source) {
 					return source;
 				}
@@ -199,6 +204,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertSuperSourceType() {
 		conversionService.addConverter(new Converter<CharSequence, Integer>() {
+			@Override
 			public Integer convert(CharSequence source) {
 				return Integer.valueOf(source.toString());
 			}
@@ -208,7 +214,7 @@ public class GenericConversionServiceTests {
 	}
 
 	// SPR-8718
-	
+
 	@Test(expected=ConverterNotFoundException.class)
 	public void convertSuperTarget() {
 		conversionService.addConverter(new ColorConverter());
@@ -216,6 +222,7 @@ public class GenericConversionServiceTests {
 	}
 
 	public class ColorConverter implements Converter<String, Color> {
+		@Override
 		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 
@@ -235,11 +242,11 @@ public class GenericConversionServiceTests {
 	public void convertObjectToPrimitiveViaConverterFactory() {
 		assertFalse(conversionService.canConvert(String.class, int.class));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(String.class, int.class));		
+		assertTrue(conversionService.canConvert(String.class, int.class));
 		Integer three = conversionService.convert("3", int.class);
 		assertEquals(3, three.intValue());
 	}
-	
+
 	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
@@ -383,7 +390,17 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void testConvertUUID() throws Exception {
+		GenericConversionService service = new DefaultConversionService();
+		UUID uuid = UUID.randomUUID();
+		String convertToString = service.convert(uuid, String.class);
+		UUID convertToUUID = service.convert(convertToString, UUID.class);
+		assertEquals(uuid, convertToUUID);
+	}
+
+	@Test
 	public void testPerformance1() {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -398,9 +415,10 @@ public class GenericConversionServiceTests {
 		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
-	
+
 	@Test
 	public void testPerformance2() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -420,7 +438,7 @@ public class GenericConversionServiceTests {
 				target.add(Integer.valueOf(element));
 			}
 		}
-		watch.stop();		
+		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
 
@@ -428,6 +446,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance3() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -435,7 +454,7 @@ public class GenericConversionServiceTests {
 		source.put("1", "1");
 		source.put("2", "2");
 		source.put("3", "3");
-		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));		
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));
 		for (int i = 0; i < 1000000; i++) {
 			conversionService.convert(source, TypeDescriptor.forObject(source), td);
 		}
@@ -447,10 +466,10 @@ public class GenericConversionServiceTests {
 				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
 			}
 		}
-		watch.stop();		
+		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
-	
+
 	public static Map<String, Integer> map;
 
 	@Test
@@ -492,6 +511,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
 
+		@Override
 		public String convert(MyBaseInterface source) {
 			return "RESULT";
 		}
@@ -500,6 +520,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
 
+		@Override
 		public Resource[] convert(String[] source) {
 			Resource[] result = new Resource[source.length];
 			for (int i = 0; i < source.length; i++) {
@@ -512,6 +533,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
 
+		@Override
 		public Integer[] convert(String[] source) {
 			Integer[] result = new Integer[source.length];
 			for (int i = 0; i < source.length; i++) {
@@ -524,6 +546,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
 
+		@Override
 		public Integer[] convert(String source) {
 			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
 			Integer[] result = new Integer[srcArray.length];
@@ -554,19 +577,19 @@ public class GenericConversionServiceTests {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(String.class, Integer[].class));
 	}
-	
+
 	@Test
 	public void stringToCollectionCanConvert() throws Exception {
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
 		assertTrue(conversionService.canConvert(String.class, Collection.class));
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("stringToCollection"));
-		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));		
+		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));		
+		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 	}
-	
+
 	public Collection<Integer> stringToCollection;
-	
+
 	@Test
 	public void testConvertiblePairsInSet() throws Exception {
 		Set<GenericConverter.ConvertiblePair> set = new HashSet<GenericConverter.ConvertiblePair>();
@@ -590,4 +613,261 @@ public class GenericConversionServiceTests {
 		assertFalse(pair.hashCode() == pairOpposite.hashCode());
 	}
 
+	@Test
+	public void convertPrimitiveArray() throws Exception {
+		GenericConversionService conversionService = new DefaultConversionService();
+		byte[] byteArray = new byte[] { 1, 2, 3 };
+		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
+		assertTrue(Arrays.equals(converted, new Byte[] { 1, 2, 3 }));
+	}
+
+	@Test
+	public void canConvertIllegalArgumentNullTargetTypeFromClass() {
+		try {
+			conversionService.canConvert(String.class, null);
+			fail("Did not thow IllegalArgumentException");
+		} catch(IllegalArgumentException e) {
+		}
+	}
+
+	@Test
+	public void canConvertIllegalArgumentNullTargetTypeFromTypeDescriptor() {
+		try {
+			conversionService.canConvert(TypeDescriptor.valueOf(String.class), null);
+			fail("Did not thow IllegalArgumentException");
+		} catch(IllegalArgumentException e) {
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes" })
+	public void convertHashMapValuesToList() throws Exception {
+		GenericConversionService conversionService = new DefaultConversionService();
+		Map<String, Integer> hashMap = new LinkedHashMap<String, Integer>();
+		hashMap.put("1", 1);
+		hashMap.put("2", 2);
+		List converted = conversionService.convert(hashMap.values(), List.class);
+		assertEquals(Arrays.asList(1, 2), converted);
+	}
+
+	@Test
+	public void removeConvertible() throws Exception {
+		conversionService.addConverter(new ColorConverter());
+		assertTrue(conversionService.canConvert(String.class, Color.class));
+		conversionService.removeConvertible(String.class, Color.class);
+		assertFalse(conversionService.canConvert(String.class, Color.class));
+	}
+
+	@Test
+	public void conditionalConverter() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		MyConditionalConverter converter = new MyConditionalConverter();
+		conversionService.addConverter(new ColorConverter());
+		conversionService.addConverter(converter);
+		assertEquals(Color.BLACK, conversionService.convert("#000000", Color.class));
+		assertTrue(converter.getMatchAttempts() > 0);
+	}
+
+	@Test
+	public void conditionalConverterFactory() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		MyConditionalConverterFactory converter = new MyConditionalConverterFactory();
+		conversionService.addConverter(new ColorConverter());
+		conversionService.addConverterFactory(converter);
+		assertEquals(Color.BLACK, conversionService.convert("#000000", Color.class));
+		assertTrue(converter.getMatchAttempts() > 0);
+		assertTrue(converter.getNestedMatchAttempts() > 0);
+	}
+
+	@Test
+	public void shouldNotSuportNullConvertibleTypesFromNonConditionalGenericConverter()
+			throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		GenericConverter converter = new GenericConverter() {
+
+			@Override
+			public Set<ConvertiblePair> getConvertibleTypes() {
+				return null;
+			}
+
+			@Override
+			public Object convert(Object source, TypeDescriptor sourceType,
+					TypeDescriptor targetType) {
+				return null;
+			}
+		};
+		try {
+			conversionService.addConverter(converter);
+			fail("Did not throw");
+		} catch (IllegalStateException e) {
+			assertEquals("Only conditional converters may return null convertible types", e.getMessage());
+		}
+	}
+
+	@Test
+	public void conditionalConversionForAllTypes() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		MyConditionalGenericConverter converter = new MyConditionalGenericConverter();
+		conversionService.addConverter(converter);
+		assertEquals((Integer) 3, conversionService.convert(3, Integer.class));
+		assertThat(converter.getSourceTypes().size(), greaterThan(2));
+		Iterator<TypeDescriptor> iterator = converter.getSourceTypes().iterator();
+		while(iterator.hasNext()) {
+			assertEquals(Integer.class, iterator.next().getType());
+		}
+	}
+
+	@Test
+	public void convertOptimizeArray() throws Exception {
+		// SPR-9566
+		GenericConversionService conversionService = new DefaultConversionService();
+		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] converted = conversionService.convert(byteArray, byte[].class);
+		assertSame(byteArray, converted);
+	}
+
+	@Test
+	public void convertCannotOptimizeArray() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		conversionService.addConverter(new Converter<Byte, Byte>() {
+			@Override
+			public Byte convert(Byte source) {
+				return (byte) (source + 1);
+			}
+		});
+		DefaultConversionService.addDefaultConverters(conversionService);
+		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] converted = conversionService.convert(byteArray, byte[].class);
+		assertNotSame(byteArray, converted);
+		assertTrue(Arrays.equals(new byte[] { 2, 3, 4 }, converted));
+	}
+
+	@Test
+	public void testEnumToStringConversion() {
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		String result = conversionService.convert(MyEnum.A, String.class);
+		assertEquals("A", result);
+	}
+
+	@Test
+	public void testEnumWithInterfaceToStringConversion() {
+		// SPR-9692
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		conversionService.addConverter(new MyEnumInterfaceToStringConverter<MyEnum>());
+		String result = conversionService.convert(MyEnum.A, String.class);
+		assertEquals("1", result);
+	}
+
+	@Test
+	public void convertNullAnnotatedStringToString() throws Exception {
+		DefaultConversionService.addDefaultConverters(conversionService);
+		String source = null;
+		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("annotatedString"));
+		TypeDescriptor targetType = TypeDescriptor.valueOf(String.class);
+		conversionService.convert(source, sourceType, targetType);
+	}
+
+	@ExampleAnnotation
+	public String annotatedString;
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface ExampleAnnotation {
+	}
+
+	private static class MyConditionalConverter implements Converter<String, Color>,
+			ConditionalConverter {
+
+		private int matchAttempts = 0;
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			matchAttempts++;
+			return false;
+		}
+
+		@Override
+		public Color convert(String source) {
+			throw new IllegalStateException();
+		}
+
+		public int getMatchAttempts() {
+			return matchAttempts;
+		}
+	}
+
+	private static class MyConditionalGenericConverter implements GenericConverter,
+			ConditionalConverter {
+
+		private List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
+
+		@Override
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return null;
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			sourceTypes.add(sourceType);
+			return false;
+		}
+
+		@Override
+		public Object convert(Object source, TypeDescriptor sourceType,
+				TypeDescriptor targetType) {
+			return null;
+		}
+
+		public List<TypeDescriptor> getSourceTypes() {
+			return sourceTypes;
+		}
+	}
+
+	private static class MyConditionalConverterFactory implements
+			ConverterFactory<String, Color>, ConditionalConverter {
+
+		private MyConditionalConverter converter = new MyConditionalConverter();
+
+		private int matchAttempts = 0;
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			matchAttempts++;
+			return true;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends Color> Converter<String, T> getConverter(Class<T> targetType) {
+			return (Converter<String, T>) converter;
+		}
+
+		public int getMatchAttempts() {
+			return matchAttempts;
+		}
+
+		public int getNestedMatchAttempts() {
+			return converter.getMatchAttempts();
+		}
+	}
+
+	interface MyEnumInterface {
+		String getCode();
+	}
+
+	public static enum MyEnum implements MyEnumInterface {
+		A {
+			@Override
+			public String getCode() {
+				return "1";
+			}
+		};
+	}
+
+	private static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface>
+			implements Converter<T, String> {
+		@Override
+		public String convert(T source) {
+			return source.getCode();
+		}
+	}
 }

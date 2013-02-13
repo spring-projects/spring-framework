@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.method.HandlerMethod;
+
 /**
  * Workflow interface that allows for customized handler execution chains.
  * Applications can register any number of existing or custom interceptors
@@ -36,8 +38,8 @@ import javax.servlet.http.HttpServletResponse;
  * {@code postHandle} and {@code afterCompletion} callbacks. When concurrent
  * handler execution completes, the request is dispatched back in order to
  * proceed with rendering the model and all methods of this contract are invoked
- * again. For further options and comments see
- * {@code org.springframework.web.servlet.HandlerInterceptor}
+ * again. For further options and details see
+ * {@code org.springframework.web.servlet.AsyncHandlerInterceptor}
  *
  * <p>Typically an interceptor chain is defined per HandlerMapping bean,
  * sharing its granularity. To be able to apply a certain interceptor chain
@@ -82,7 +84,7 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @return <code>true</code> if the execution chain should proceed with the
+	 * @return {@code true} if the execution chain should proceed with the
 	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
@@ -100,9 +102,10 @@ public interface HandlerInterceptor {
 	 * getting applied in inverse order of the execution chain.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @param modelAndView the <code>ModelAndView</code> that the handler returned
-	 * (can also be <code>null</code>)
+	 * @param handler handler (or {@link HandlerMethod}) that started async
+	 * execution, for type and/or instance examination
+	 * @param modelAndView the {@code ModelAndView} that the handler returned
+	 * (can also be {@code null})
 	 * @throws Exception in case of errors
 	 */
 	void postHandle(
@@ -113,14 +116,15 @@ public interface HandlerInterceptor {
 	 * Callback after completion of request processing, that is, after rendering
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
-	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
-	 * method has successfully completed and returned <code>true</code>!
+	 * <p>Note: Will only be called if this interceptor's {@code preHandle}
+	 * method has successfully completed and returned {@code true}!
 	 * <p>As with the {@code postHandle} method, the method will be invoked on each
 	 * interceptor in the chain in reverse order, so the first interceptor will be
 	 * the last to be invoked.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param handler handler (or {@link HandlerMethod}) that started async
+	 * execution, for type and/or instance examination
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */

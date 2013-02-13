@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 
 /**
- * Configures a request handler for serving static resources by forwarding the request to the Servlet container's 
- * "default" Servlet. This is indended to be used when the Spring MVC {@link DispatcherServlet} is mapped to "/"
- * thus overriding the Servlet container's default handling of static resources. Since this handler is configured 
+ * Configures a request handler for serving static resources by forwarding the request to the Servlet container's
+ * "default" Servlet. This is intended to be used when the Spring MVC {@link DispatcherServlet} is mapped to "/"
+ * thus overriding the Servlet container's default handling of static resources. Since this handler is configured
  * at the lowest precedence, effectively it allows all other handler mappings to handle the request, and if none
  * of them do, this handler can forward it to the "default" Servlet.
  *
@@ -57,7 +57,7 @@ public class DefaultServletHandlerConfigurer {
 
 	/**
 	 * Enable forwarding to the "default" Servlet. When this method is used the {@link DefaultServletHttpRequestHandler}
-	 * will try to auto-detect the "default" Servlet name. Alternatively, you can specify the name of the default 
+	 * will try to auto-detect the "default" Servlet name. Alternatively, you can specify the name of the default
 	 * Servlet via {@link #enable(String)}.
 	 * @see DefaultServletHttpRequestHandler
 	 */
@@ -78,14 +78,14 @@ public class DefaultServletHandlerConfigurer {
 
 	/**
 	 * Return a handler mapping instance ordered at {@link Integer#MAX_VALUE} containing the
-	 * {@link DefaultServletHttpRequestHandler} instance mapped to {@code "/**"}; or {@code null} if 
+	 * {@link DefaultServletHttpRequestHandler} instance mapped to {@code "/**"}; or {@code null} if
 	 * default servlet handling was not been enabled.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
 		if (handler == null) {
 			return null;
 		}
-		
+
 		Map<String, HttpRequestHandler> urlMap = new HashMap<String, HttpRequestHandler>();
 		urlMap.put("/**", handler);
 

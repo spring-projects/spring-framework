@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -47,7 +43,7 @@ public class RequestMethodsRequestConditionTests {
 
 		assertNull(condition.getMatchingCondition(request));
 	}
-	
+
 	@Test
 	public void multipleMethodsMatch() {
 		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
@@ -67,13 +63,22 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
+	public void unknownMethodType() throws Exception {
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PROPFIND", "/foo");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
 	public void compareTo() {
 		RequestMethodsRequestCondition condition1 = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.HEAD);
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(RequestMethod.POST);
 		RequestMethodsRequestCondition condition3 = new RequestMethodsRequestCondition();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 

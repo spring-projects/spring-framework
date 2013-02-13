@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Converts objects to String form, generally for debugging purposes,
- * using Spring's <code>toString</code> styling conventions.
+ * using Spring's {@code toString} styling conventions.
  *
  * <p>Uses the reflective visitor pattern underneath the hood to nicely
  * encapsulate styling algorithms for each type of styled object.

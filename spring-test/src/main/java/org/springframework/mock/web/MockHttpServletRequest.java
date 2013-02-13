@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -52,12 +52,13 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
  * <p>Compatible with Servlet 2.5 and partially with Servlet 3.0 (notable exceptions:
- * the <code>getPart(s)</code> and <code>startAsync</code> families of methods).
+ * the {@code getPart(s)} and {@code startAsync} families of methods).
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -93,12 +94,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
-	
+
 	private static final String CHARSET_PREFIX = "charset=";
 
-
 	private boolean active = true;
-
 
 	// ---------------------------------------------------------------------
 	// ServletRequest properties
@@ -140,7 +139,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String localAddr = DEFAULT_SERVER_ADDR;
 
 	private int localPort = DEFAULT_SERVER_PORT;
-
 
 	// ---------------------------------------------------------------------
 	// HttpServletRequest properties
@@ -186,45 +184,48 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// ---------------------------------------------------------------------
 
 	/**
-	 * Create a new MockHttpServletRequest with a default
+	 * Create a new {@code MockHttpServletRequest} with a default
 	 * {@link MockServletContext}.
-	 * @see MockServletContext
+	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest() {
 		this(null, "", "");
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest with a default
+	 * Create a new {@code MockHttpServletRequest} with a default
 	 * {@link MockServletContext}.
-	 * @param method the request method (may be <code>null</code>)
-	 * @param requestURI the request URI (may be <code>null</code>)
+	 * @param method the request method (may be {@code null})
+	 * @param requestURI the request URI (may be {@code null})
 	 * @see #setMethod
 	 * @see #setRequestURI
-	 * @see MockServletContext
+	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest(String method, String requestURI) {
 		this(null, method, requestURI);
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest.
+	 * Create a new {@code MockHttpServletRequest} with the supplied {@link ServletContext}.
 	 * @param servletContext the ServletContext that the request runs in (may be
-	 * <code>null</code> to use a default MockServletContext)
-	 * @see MockServletContext
+	 * {@code null} to use a default {@link MockServletContext})
+	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
 		this(servletContext, "", "");
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest.
+	 * Create a new {@code MockHttpServletRequest} with the supplied {@link ServletContext},
+	 * {@code method}, and {@code requestURI}.
+	 * <p>The preferred locale will be set to {@link Locale#ENGLISH}.
 	 * @param servletContext the ServletContext that the request runs in (may be
-	 * <code>null</code> to use a default MockServletContext)
-	 * @param method the request method (may be <code>null</code>)
-	 * @param requestURI the request URI (may be <code>null</code>)
+	 * {@code null} to use a default {@link MockServletContext})
+	 * @param method the request method (may be {@code null})
+	 * @param requestURI the request URI (may be {@code null})
 	 * @see #setMethod
 	 * @see #setRequestURI
+	 * @see #setPreferredLocales
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
@@ -233,7 +234,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.requestURI = requestURI;
 		this.locales.add(Locale.ENGLISH);
 	}
-
 
 	// ---------------------------------------------------------------------
 	// Lifecycle methods
@@ -279,7 +279,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-
 	// ---------------------------------------------------------------------
 	// ServletRequest interface
 	// ---------------------------------------------------------------------
@@ -291,7 +290,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return new Vector<String>(this.attributes.keySet()).elements();
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public String getCharacterEncoding() {
@@ -302,7 +301,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.characterEncoding = characterEncoding;
 		updateContentTypeHeader();
 	}
-	
+
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
@@ -348,8 +347,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Set a single value for the specified HTTP parameter.
-	 * <p>
-	 * If there are already one or more values registered for the given
+	 * <p>If there are already one or more values registered for the given
 	 * parameter name, they will be replaced.
 	 */
 	public void setParameter(String name, String value) {
@@ -358,8 +356,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Set an array of values for the specified HTTP parameter.
-	 * <p>
-	 * If there are already one or more values registered for the given
+	 * <p>If there are already one or more values registered for the given
 	 * parameter name, they will be replaced.
 	 */
 	public void setParameter(String name, String[] values) {
@@ -368,7 +365,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Sets all provided parameters <emphasis>replacing</emphasis> any existing
+	 * Sets all provided parameters <strong>replacing</strong> any existing
 	 * values for the provided parameter names. To add without replacing
 	 * existing values, use {@link #addParameters(java.util.Map)}.
 	 */
@@ -393,8 +390,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a single value for the specified HTTP parameter.
-	 * <p>
-	 * If there are already one or more values registered for the given
+	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given value will be added to the end of the list.
 	 */
 	public void addParameter(String name, String value) {
@@ -403,8 +399,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add an array of values for the specified HTTP parameter.
-	 * <p>
-	 * If there are already one or more values registered for the given
+	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given values will be added to the end of the list.
 	 */
 	public void addParameter(String name, String[] values) {
@@ -422,7 +417,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Adds all provided parameters <emphasis>without</emphasis> replacing any
+	 * Adds all provided parameters <strong>without</strong> replacing any
 	 * existing values. To replace existing values, use
 	 * {@link #setParameters(java.util.Map)}.
 	 */
@@ -446,8 +441,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Remove already registered values for the specified HTTP parameter, if
-	 * any.
+	 * Remove already registered values for the specified HTTP parameter, if any.
 	 */
 	public void removeParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
@@ -566,10 +560,23 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a new preferred locale, before any existing locales.
+	 * @see #setPreferredLocales
 	 */
 	public void addPreferredLocale(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.locales.add(0, locale);
+	}
+
+	/**
+	 * Set the list of preferred locales, in descending order, effectively replacing
+	 * any existing locales.
+	 * @see #addPreferredLocale
+	 * @since 3.2
+	 */
+	public void setPreferredLocales(List<Locale> locales) {
+		Assert.notEmpty(locales, "preferred locales list must not be empty");
+		this.locales.clear();
+		this.locales.addAll(locales);
 	}
 
 	public Locale getLocale() {
@@ -628,7 +635,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.localPort;
 	}
 
-
 	// ---------------------------------------------------------------------
 	// HttpServletRequest interface
 	// ---------------------------------------------------------------------
@@ -656,8 +662,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * adding the given value (more specifically, its toString representation)
 	 * as further element.
 	 * <p>Multiple values can only be stored as list of Strings, following the
-	 * Servlet spec (see <code>getHeaders</code> accessor). As alternative to
-	 * repeated <code>addHeader</code> calls for individual elements, you can
+	 * Servlet spec (see {@code getHeaders} accessor). As alternative to
+	 * repeated {@code addHeader} calls for individual elements, you can
 	 * use a single call with an entire array or Collection of values as
 	 * parameter.
 	 * @see #getHeaderNames
@@ -673,7 +679,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 		doAddHeaderValue(name, value, false);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -711,6 +717,20 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
+	public String getHeader(String name) {
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		return (header != null ? header.getStringValue() : null);
+	}
+
+	public Enumeration<String> getHeaders(String name) {
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
+	}
+
+	public Enumeration<String> getHeaderNames() {
+		return Collections.enumeration(this.headers.keySet());
+	}
+
 	public int getIntHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Object value = (header != null ? header.getValue() : null);
@@ -726,20 +746,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else {
 			return -1;
 		}
-	}
-
-	public String getHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getStringValue() : null);
-	}
-
-	public Enumeration<String> getHeaders(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
-	}
-
-	public Enumeration<String> getHeaderNames() {
-		return Collections.enumeration(this.headers.keySet());
 	}
 
 	public void setMethod(String method) {
@@ -791,8 +797,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public boolean isUserInRole(String role) {
-		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext &&
-				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
+		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext && ((MockServletContext) this.servletContext).getDeclaredRoles().contains(
+			role)));
 	}
 
 	public void setUserPrincipal(Principal userPrincipal) {

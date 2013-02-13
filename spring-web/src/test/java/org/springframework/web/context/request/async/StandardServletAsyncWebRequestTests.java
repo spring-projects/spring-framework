@@ -33,10 +33,9 @@ import javax.servlet.AsyncEvent;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockAsyncContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockAsyncContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
  * A test fixture with a {@link StandardServletAsyncWebRequest}.
@@ -120,7 +119,7 @@ public class StandardServletAsyncWebRequestTests {
 	@Test
 	public void onTimeoutDefaultBehavior() throws Exception {
 		this.asyncRequest.onTimeout(new AsyncEvent(null));
-		assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), this.response.getStatus());
+		assertEquals(200, this.response.getStatus());
 	}
 
 	@Test
@@ -129,7 +128,7 @@ public class StandardServletAsyncWebRequestTests {
 		timeoutHandler.run();
 		replay(timeoutHandler);
 
-		this.asyncRequest.setTimeoutHandler(timeoutHandler);
+		this.asyncRequest.addTimeoutHandler(timeoutHandler);
 		this.asyncRequest.onTimeout(new AsyncEvent(null));
 
 		verify(timeoutHandler);

@@ -30,9 +30,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.MockFilterChain;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockFilterChain;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
  * Test fixture for {@link HttpPutFormContentFilter}.
@@ -85,6 +85,15 @@ public class HttpPutFormContentFilterTests {
 			filter.doFilter(request, response, filterChain);
 			assertSame("Should not wrap for content type " + contentType, request, filterChain.getRequest());
 		}
+	}
+
+	@Test
+	public void invalidMediaType() throws Exception {
+		request.setContent("".getBytes("ISO-8859-1"));
+		request.setContentType("foo");
+		filterChain = new MockFilterChain();
+		filter.doFilter(request, response, filterChain);
+		assertSame(request, filterChain.getRequest());
 	}
 
 	@Test

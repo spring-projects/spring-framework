@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,17 @@ import org.springframework.util.StringUtils;
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<Method>();
+
+
+	/**
+	 * Return the factory method currently being invoked or {@code null} if none.
+	 * <p>Allows factory method implementations to determine whether the current
+	 * caller is the container itself as opposed to user code.
+	 */
+	public static Method getCurrentlyInvokedFactoryMethod() {
+		return currentlyInvokedFactoryMethod.get();
+	}
+
 
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
@@ -147,7 +158,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			try {
 				currentlyInvokedFactoryMethod.set(factoryMethod);
 				return factoryMethod.invoke(factoryBean, args);
-			} finally {
+			}
+			finally {
 				if (priorInvokedFactoryMethod != null) {
 					currentlyInvokedFactoryMethod.set(priorInvokedFactoryMethod);
 				}
@@ -171,12 +183,4 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		}
 	}
 
-	/**
-	 * Return the factory method currently being invoked or {@code null} if none.
-	 * Allows factory method implementations to determine whether the current
-	 * caller is the container itself as opposed to user code.
-	 */
-	public static Method getCurrentlyInvokedFactoryMethod() {
-		return currentlyInvokedFactoryMethod.get();
-	}
 }

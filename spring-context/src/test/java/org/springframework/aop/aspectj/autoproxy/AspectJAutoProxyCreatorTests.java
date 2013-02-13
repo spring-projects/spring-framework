@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.lang.reflect.Method;
 
@@ -50,6 +51,8 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -112,10 +115,8 @@ public final class AspectJAutoProxyCreatorTests {
 
 	@Test
 	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		StopWatch sw = new StopWatch();
 		sw.start("Prototype Creation");
@@ -134,10 +135,8 @@ public final class AspectJAutoProxyCreatorTests {
 
 	@Test
 	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		StopWatch sw = new StopWatch();
 		sw.start("Prototype Creation");
@@ -151,15 +150,13 @@ public final class AspectJAutoProxyCreatorTests {
 
 		// What's a reasonable expectation for _any_ server or developer machine load?
 		// 3 seconds?
-		assertStopWatchTimeLimit(sw, 3000);
+		assertStopWatchTimeLimit(sw, 6000);
 	}
 
 	@Test
 	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		GenericApplicationContext ac = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ac).loadBeanDefinitions(new ClassPathResource(qName("aspectsPlusAdvisor.xml"),
 				getClass()));
@@ -180,7 +177,7 @@ public final class AspectJAutoProxyCreatorTests {
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
-		// Create a child factory with a bean that should be woven                                              
+		// Create a child factory with a bean that should be woven
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian"))
 				.addPropertyValue(new PropertyValue("age", new Integer(34)));
@@ -297,7 +294,7 @@ public final class AspectJAutoProxyCreatorTests {
 		adrian1.getAge();
 		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean("aspect");
 		//(AdviceUsingThisJoinPoint) Aspects.aspectOf(AdviceUsingThisJoinPoint.class);
-		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());		
+		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());
 		assertTrue(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0);
 	}
 
@@ -387,6 +384,7 @@ class PerTargetAspect implements Ordered {
 		++count;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -438,14 +436,17 @@ class DummyAspectWithParameter {
 
 class DummyFactoryBean implements FactoryBean<Object> {
 
+	@Override
 	public Object getObject() throws Exception {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean isSingleton() {
 		throw new UnsupportedOperationException();
 	}
@@ -573,12 +574,14 @@ class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
 	public TestBeanAdvisor() {
 		setAdvice(new MethodBeforeAdvice() {
+			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				++count;
 			}
 		});
 	}
 
+	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return ITestBean.class.isAssignableFrom(targetClass);
 	}

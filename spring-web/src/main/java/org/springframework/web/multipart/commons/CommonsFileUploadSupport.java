@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public abstract class CommonsFileUploadSupport {
 
 
 	/**
-	 * Return the underlying <code>org.apache.commons.fileupload.disk.DiskFileItemFactory</code>
+	 * Return the underlying {@code org.apache.commons.fileupload.disk.DiskFileItemFactory}
 	 * instance. There is hardly any need to access this.
 	 * @return the underlying DiskFileItemFactory instance
 	 */
@@ -91,7 +91,7 @@ public abstract class CommonsFileUploadSupport {
 	}
 
 	/**
-	 * Return the underlying <code>org.apache.commons.fileupload.FileUpload</code>
+	 * Return the underlying {@code org.apache.commons.fileupload.FileUpload}
 	 * instance. There is hardly any need to access this.
 	 * @return the underlying FileUpload instance
 	 */
@@ -127,7 +127,7 @@ public abstract class CommonsFileUploadSupport {
 	 * <p>If the request specifies a character encoding itself, the request
 	 * encoding will override this setting. This also allows for generically
 	 * overriding the character encoding in a filter that invokes the
-	 * <code>ServletRequest.setCharacterEncoding</code> method.
+	 * {@code ServletRequest.setCharacterEncoding} method.
 	 * @param defaultEncoding the character encoding to use
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 * @see javax.servlet.ServletRequest#setCharacterEncoding

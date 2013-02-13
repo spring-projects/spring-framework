@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	/**
 	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
 	 * JdbcTemplate.
-	 * @param dataSource the <code>DataSource</code> to use
+	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(DataSource dataSource) {
@@ -62,7 +62,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 
 	/**
 	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
-	 * @param jdbcTemplate the <code>JdbcTemplate</code> to use
+	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(JdbcTemplate jdbcTemplate) {

@@ -43,8 +43,8 @@ import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 
@@ -149,7 +149,7 @@ public class MappingJacksonJsonViewTests {
 		view.setPrettyPrint(true);
 		view.render(model, request, response);
 
-		String result = response.getContentAsString();
+		String result = response.getContentAsString().replace("\r\n", "\n");
 		assertTrue("Pretty printing not applied:\n" + result, result.startsWith("{\n  \"foo\" : {\n    "));
 
 		validateResult();

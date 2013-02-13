@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,18 @@ package org.springframework.expression;
 
 /**
  * Represent an exception that occurs during expression evaluation.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class EvaluationException extends ExpressionException {
 
 	/**
 	 * Creates a new expression evaluation exception.
 	 * @param position the position in the expression where the problem occurred
 	 * @param message description of the problem that occurred
-	 */ 
+	 */
 	public EvaluationException(int position, String message) {
 		super(position, message);
 	}
@@ -37,7 +38,7 @@ public class EvaluationException extends ExpressionException {
 	 * Creates a new expression evaluation exception.
 	 * @param expressionString the expression that could not be evaluated
 	 * @param message description of the problem that occurred
-	 */ 
+	 */
 	public EvaluationException(String expressionString, String message) {
 		super(expressionString, message);
 	}
@@ -47,7 +48,7 @@ public class EvaluationException extends ExpressionException {
 	 * @param position the position in the expression where the problem occurred
 	 * @param message description of the problem that occurred
 	 * @param cause the underlying cause of this exception
-	 */ 
+	 */
 	public EvaluationException(int position, String message, Throwable cause) {
 		super(position, message, cause);
 	}
@@ -55,7 +56,7 @@ public class EvaluationException extends ExpressionException {
 	/**
 	 * Creates a new expression evaluation exception.
 	 * @param message description of the problem that occurred
-	 */ 
+	 */
 	public EvaluationException(String message) {
 		super(message);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ package org.springframework.expression;
  * It differs from a SpelEvaluationException because this indicates the occurrence of a checked exception
  * that the invoked method was defined to throw.  SpelEvaluationExceptions are for handling (and wrapping)
  * unexpected exceptions.
- * 
+ *
  * @author Andy Clement
  * @since 3.0.3
  */
+@SuppressWarnings("serial")
 public class ExpressionInvocationTargetException extends EvaluationException {
 
 	public ExpressionInvocationTargetException(int position, String message, Throwable cause) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.ibatis;
 import java.util.List;
 import java.util.Map;
 
-import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 import org.springframework.dao.DataAccessException;
@@ -39,7 +38,10 @@ import org.springframework.dao.DataAccessException;
  * @see SqlMapClientTemplate
  * @see com.ibatis.sqlmap.client.SqlMapClient
  * @see com.ibatis.sqlmap.client.SqlMapExecutor
+ * @deprecated as of Spring 3.2, in favor of the native Spring support
+ * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
  */
+@Deprecated
 public interface SqlMapClientOperations {
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link ScopedObject} interface.
- * 
+ *
  * <p>Simply delegates the calls to the underlying
  * {@link ConfigurableBeanFactory bean factory}
  * ({@link ConfigurableBeanFactory#getBean(String)}/
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroyScopedBean
  */
+@SuppressWarnings("serial")
 public class DefaultScopedObject implements ScopedObject, Serializable {
 
 	private final ConfigurableBeanFactory beanFactory;

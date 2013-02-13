@@ -19,8 +19,11 @@ package org.springframework.scheduling.annotation;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +45,11 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class EnableSchedulingTests {
+
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
 	@Test
 	public void withFixedRateTask() throws InterruptedException {
@@ -216,6 +224,7 @@ public class EnableSchedulingTests {
 			return null;
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler1());
 		}
@@ -318,6 +327,7 @@ public class EnableSchedulingTests {
 			return new ThreadAwareWorker();
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler2());
 		}
@@ -378,6 +388,7 @@ public class EnableSchedulingTests {
 			return scheduler;
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler2());
 		}
@@ -410,10 +421,12 @@ public class EnableSchedulingTests {
 			return new ThreadPoolTaskScheduler();
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler());
 			taskRegistrar.addFixedRateTask(new IntervalTask(
 					new Runnable() {
+						@Override
 						public void run() {
 							worker().executedByThread = Thread.currentThread().getName();
 						}
@@ -449,11 +462,13 @@ public class EnableSchedulingTests {
 			scheduler.initialize();
 			scheduler.schedule(
 				new Runnable() {
+					@Override
 					public void run() {
 						counter().incrementAndGet();
 					}
 				},
 				new Trigger() {
+					@Override
 					public Date nextExecutionTime(TriggerContext triggerContext) {
 						return new Date(new Date().getTime()+10);
 					}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.util.TagUtils;
 
 /**
  * Tag for transforming reference data values from form controllers and
- * other objects inside a <code>spring:bind</code> tag (or a data-bound
+ * other objects inside a {@code spring:bind} tag (or a data-bound
  * form element tag from Spring's form tag library).
  *
  * <p>The BindTag has a PropertyEditor that it uses to transform properties of
@@ -40,6 +40,7 @@ import org.springframework.web.util.TagUtils;
  * @since 20.09.2003
  * @see BindTag
  */
+@SuppressWarnings("serial")
 public class TransformTag extends HtmlEscapingAwareTag {
 
 	/** the value to transform using the appropriate property editor */

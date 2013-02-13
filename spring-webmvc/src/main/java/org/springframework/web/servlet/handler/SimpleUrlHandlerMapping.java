@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import org.springframework.util.CollectionUtils;
  * bean references, e.g. via the map element in XML bean definitions.
  *
  * <p>Mappings to bean names can be set via the "mappings" property, in a form
- * accepted by the <code>java.util.Properties</code> class, like as follows:<br>
- * <code>
+ * accepted by the {@code java.util.Properties} class, like as follows:<br>
+ * {@code
  * /welcome.html=ticketController
  * /show.html=ticketController
- * </code><br>
- * The syntax is <code>PATH=HANDLER_BEAN_NAME</code>.
+ * }<br>
+ * The syntax is {@code PATH=HANDLER_BEAN_NAME}.
  * If the path doesn't begin with a slash, one is prepended.
  *
  * <p>Supports direct matches (given "/test" -> registered "/test") and "*"
@@ -54,7 +54,7 @@ import org.springframework.util.CollectionUtils;
  * @see BeanNameUrlHandlerMapping
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
-	
+
 	private final Map<String, Object> urlMap = new HashMap<String, Object>();
 
 

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="aop"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="aop">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Aspect Oriented Programming with Spring</title>
 
-  <section id="aop-introduction">
+  <section xml:id="aop-introduction">
     <title>Introduction</title>
 
     <para><emphasis>Aspect-Oriented Programming</emphasis> (AOP) complements
@@ -57,12 +61,12 @@
       </listitem>
     </itemizedlist>
 
-    <remark><para>If you are interested only in generic declarative services
+    <remark>If you are interested only in generic declarative services
     or other pre-packaged declarative middleware services such as pooling, you
     do not need to work directly with Spring AOP, and can skip most of this
-    chapter. </para></remark>
+    chapter.</remark>
 
-    <section id="aop-introduction-defn">
+    <section xml:id="aop-introduction-defn">
       <title>AOP concepts</title>
 
       <para>Let us begin by defining some central AOP concepts and
@@ -206,7 +210,7 @@
       service layer).</para>
     </section>
 
-    <section id="aop-introduction-spring-defn">
+    <section xml:id="aop-introduction-spring-defn">
       <title>Spring AOP capabilities and goals</title>
 
       <para>Spring AOP is implemented in pure Java. There is no need for a
@@ -276,7 +280,7 @@
       </note>
     </section>
 
-    <section id="aop-introduction-proxies">
+    <section xml:id="aop-introduction-proxies">
       <title>AOP Proxies</title>
 
       <para>Spring AOP defaults to using standard J2SE <emphasis>dynamic
@@ -300,23 +304,23 @@
     </section>
   </section>
 
-  <section id="aop-ataspectj">
+  <section xml:id="aop-ataspectj">
     <title>@AspectJ support</title>
 
     <para>@AspectJ refers to a style of declaring aspects as regular Java
     classes annotated with Java 5 annotations. The @AspectJ style was
-    introduced by the <ulink url="http://www.eclipse.org/aspectj">AspectJ
-    project</ulink> as part of the AspectJ 5 release. Spring 2.0 interprets
+    introduced by the <link xl:href="http://www.eclipse.org/aspectj">AspectJ
+    project</link> as part of the AspectJ 5 release. Spring 2.0 interprets
     the same annotations as AspectJ 5, using a library supplied by AspectJ for
     pointcut parsing and matching. The AOP runtime is still pure Spring AOP
     though, and there is no dependency on the AspectJ compiler or
     weaver.</para>
 
-    <remark><para>Using the AspectJ compiler and weaver enables use of the
+    <remark>Using the AspectJ compiler and weaver enables use of the
     full AspectJ language, and is discussed in <xref
-    linkend="aop-using-aspectj" />.</para></remark>
+    linkend="aop-using-aspectj" />.</remark>
 
-    <section id="aop-aspectj-support">
+    <section xml:id="aop-aspectj-support">
       <title>Enabling @AspectJ Support</title>
 
       <para>To use @AspectJ aspects in a Spring configuration you need to
@@ -327,30 +331,49 @@
       automatically generate a proxy for that bean to intercept method
       invocations and ensure that advice is executed as needed.</para>
 
-      <para>The @AspectJ support is enabled by including the following element
-      inside your spring configuration:</para>
+      <para>The @AspectJ support can be enabled with XML or Java style
+      configuration.  In either case you will also need to ensure that
+      AspectJ's <filename class="libraryfile">aspectjweaver.jar</filename>
+      library is on the classpath of your application (version 1.6.8 or later).
+      This library is available in the <filename class="directory">'lib'</filename>
+      directory of an AspectJ distribution or via the Maven Central repository.</para>
 
-      <programlisting language="xml">&lt;aop:aspectj-autoproxy/&gt;</programlisting>
+      <section xml:id="aop-enable-aspectj-java">
+        <title>Enabling @AspectJ Support with Java configuration</title>
 
-      <para>This assumes that you are using schema support as described in
-      <xref linkend="xsd-config" />. See <xref
-      linkend="xsd-config-body-schemas-aop" /> for how to import the tags in
-      the aop namespace.</para>
+        <para>To enable @AspectJ support with Java
+        <interfacename>@Configuration</interfacename> add the
+        <interfacename>@EnableAspectJAutoProxy</interfacename> annotation:</para>
 
-      <para>If you are using the DTD, it is still possible to enable @AspectJ
-      support by adding the following definition to your application
-      context:</para>
+        <programlisting language="java">@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig {
 
-      <programlisting language="xml">&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
+}</programlisting>
+      </section>
 
-      <para>You will also need AspectJ's
-      <filename class="libraryfile">aspectjrt.jar</filename> library on the
-      classpath of your application, version 1.6.8 or later. This library is
-      available in the <filename class="directory">'lib'</filename> directory
-      of an AspectJ distribution or via the Maven Central repository.</para>
+      <section xml:id="aop-enable-aspectj-xml">
+        <title>Enabling @AspectJ Support with XML configuration</title>
+
+        <para>To enable @AspectJ support with XML based configuration use the
+        <literal>aop:aspectj-autoproxy</literal> element:</para>
+
+        <programlisting language="xml">&lt;aop:aspectj-autoproxy/&gt;</programlisting>
+
+        <para>This assumes that you are using schema support as described in
+        <xref linkend="xsd-config" />. See <xref
+        linkend="xsd-config-body-schemas-aop" /> for how to import the tags in
+        the aop namespace.</para>
+
+        <para>If you are using the DTD, it is still possible to enable @AspectJ
+        support by adding the following definition to your application
+        context:</para>
+
+        <programlisting language="xml">&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
+      </section>
     </section>
 
-    <section id="aop-at-aspectj">
+    <section xml:id="aop-at-aspectj">
       <title>Declaring an aspect</title>
 
       <para>With the @AspectJ support enabled, any bean defined in your
@@ -410,7 +433,7 @@ public class NotVeryUsefulAspect {
       </note>
     </section>
 
-    <section id="aop-pointcuts">
+    <section xml:id="aop-pointcuts">
       <title>Declaring a pointcut</title>
 
       <para>Recall that pointcuts determine join points of interest, and thus
@@ -438,15 +461,15 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
       <para>The pointcut expression that forms the value of the
       <interfacename>@Pointcut</interfacename> annotation is a regular AspectJ
       5 pointcut expression. For a full discussion of AspectJ's pointcut
-      language, see the <ulink
-      url="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">AspectJ
-      Programming Guide</ulink> (and for Java 5 based extensions, the <ulink
-      url="http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html">AspectJ
-      5 Developers Notebook</ulink>) or one of the books on AspectJ such as
+      language, see the <link
+      xl:href="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">AspectJ
+      Programming Guide</link> (and for Java 5 based extensions, the <link
+      xl:href="http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html">AspectJ
+      5 Developers Notebook</link>) or one of the books on AspectJ such as
       <quote>Eclipse AspectJ</quote> by Colyer et. al. or <quote>AspectJ in
       Action</quote> by Ramnivas Laddad.</para>
 
-      <section id="aop-pointcuts-designators">
+      <section xml:id="aop-pointcuts-designators">
         <title>Supported Pointcut Designators</title>
 
         <para>Spring AOP supports the following AspectJ pointcut designators
@@ -592,7 +615,7 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         </note>
       </section>
 
-      <section id="aop-pointcuts-combining">
+      <section xml:id="aop-pointcuts-combining">
         <title>Combining pointcut expressions</title>
 
         <para>Pointcut expressions can be combined using '&amp;&amp;', '||'
@@ -607,10 +630,10 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
 
         <programlisting language="java">    @Pointcut("execution(public * *(..))")
     private void anyPublicOperation() {}
-    
+
     @Pointcut("within(com.xyz.someapp.trading..*)")
     private void inTrading() {}
-    
+
     @Pointcut("anyPublicOperation() &amp;&amp; inTrading()")
     private void tradingOperation() {}</programlisting>
 
@@ -622,7 +645,7 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
         affect pointcut <emphasis>matching</emphasis>.</para>
       </section>
 
-      <section id="aop-common-pointcuts">
+      <section xml:id="aop-common-pointcuts">
         <title>Sharing common pointcut definitions</title>
 
         <para>When working with enterprise applications, you often want to
@@ -649,7 +672,7 @@ public class SystemArchitecture {
 
   <lineannotation>/**
    * A join point is in the service layer if the method is defined
-   * in a type in the <literal>com.xyz.someapp.service</literal> package or any sub-package
+   * in a type in the com.xyz.someapp.service package or any sub-package
    * under that.
    */</lineannotation>
   @Pointcut("within(com.xyz.someapp.service..*)")
@@ -657,7 +680,7 @@ public class SystemArchitecture {
 
   <lineannotation>/**
    * A join point is in the data access layer if the method is defined
-   * in a type in the <literal>com.xyz.someapp.dao</literal> package or any sub-package
+   * in a type in the com.xyz.someapp.dao package or any sub-package
    * under that.
    */</lineannotation>
   @Pointcut("within(com.xyz.someapp.dao..*)")
@@ -667,23 +690,23 @@ public class SystemArchitecture {
    * A business service is the execution of any method defined on a service
    * interface. This definition assumes that interfaces are placed in the
    * "service" package, and that implementation types are in sub-packages.
-   * 
-   * If you group service interfaces by functional area (for example, 
-   * in packages <literal>com.xyz.someapp.abc.service</literal> and <literal>com.xyz.def.service</literal>) then
-   * the pointcut expression "<literal>execution(* com.xyz.someapp..service.*.*(..))</literal>"
+   *
+   * If you group service interfaces by functional area (for example,
+   * in packages com.xyz.someapp.abc.service and com.xyz.def.service) then
+   * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
    * could be used instead.
    *
-   * Alternatively, you can write the expression using the '<literal>bean</literal>'
-   * PCD, like so "<literal>bean(*Service)</literal>". (This assumes that you have
+   * Alternatively, you can write the expression using the 'bean'
+   * PCD, like so "bean(*Service)". (This assumes that you have
    * named your Spring service beans in a consistent fashion.)
    */</lineannotation>
   @Pointcut("execution(* com.xyz.someapp.service.*.*(..))")
   public void businessService() {}
-  
+
   <lineannotation>/**
-   * A data access operation is the execution of any method defined on a 
+   * A data access operation is the execution of any method defined on a
    * dao interface. This definition assumes that interfaces are placed in the
-   * "<literal>dao</literal>" package, and that implementation types are in sub-packages.
+   * "dao" package, and that implementation types are in sub-packages.
    */</lineannotation>
   @Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
   public void dataAccessOperation() {}
@@ -695,7 +718,7 @@ public class SystemArchitecture {
         service layer transactional, you could write:</para>
 
         <programlisting language="xml">&lt;aop:config&gt;
-  &lt;aop:advisor 
+  &lt;aop:advisor
       pointcut="com.xyz.someapp.SystemArchitecture.businessService()"
       advice-ref="tx-advice"/&gt;
 &lt;/aop:config&gt;
@@ -712,7 +735,7 @@ public class SystemArchitecture {
         <xref linkend="transaction" />.</para>
       </section>
 
-      <section id="aop-pointcuts-examples">
+      <section xml:id="aop-pointcuts-examples">
         <title>Examples</title>
 
         <para>Spring AOP users are likely to use the
@@ -737,9 +760,9 @@ public class SystemArchitecture {
         <literal>(*)</literal> matches a method taking one parameter of any
         type, <literal>(*,String)</literal> matches a method taking two
         parameters, the first can be of any type, the second must be a String.
-        Consult the <ulink
-        url="http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html">
-        Language Semantics</ulink> section of the AspectJ Programming Guide
+        Consult the <link
+        xl:href="http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html">
+        Language Semantics</link> section of the AspectJ Programming Guide
         for more information.</para>
 
         <para>Some examples of common pointcut expressions are given
@@ -801,9 +824,9 @@ public class SystemArchitecture {
 
             <programlisting language="java">this(com.xyz.service.AccountService)</programlisting>
 
-            <remark><para>'this' is more commonly used in a binding form :-
+            <remark>'this' is more commonly used in a binding form :-
             see the following section on advice for how to make the proxy
-            object available in the advice body.</para></remark>
+            object available in the advice body.</remark>
           </listitem>
 
           <listitem>
@@ -813,9 +836,9 @@ public class SystemArchitecture {
 
             <programlisting language="java">target(com.xyz.service.AccountService)</programlisting>
 
-            <remark><para>'target' is more commonly used in a binding form :-
+            <remark>'target' is more commonly used in a binding form :-
             see the following section on advice for how to make the target
-            object available in the advice body.</para></remark>
+            object available in the advice body.</remark>
           </listitem>
 
           <listitem>
@@ -844,9 +867,9 @@ public class SystemArchitecture {
 
             <programlisting language="java">@target(org.springframework.transaction.annotation.Transactional)</programlisting>
 
-            <remark><para>'@target' can also be used in a binding form :- see
+            <remark>'@target' can also be used in a binding form :- see
             the following section on advice for how to make the annotation
-            object available in the advice body.</para></remark>
+            object available in the advice body.</remark>
           </listitem>
 
           <listitem>
@@ -856,9 +879,9 @@ public class SystemArchitecture {
 
             <programlisting language="java">@within(org.springframework.transaction.annotation.Transactional)</programlisting>
 
-            <remark><para>'@within' can also be used in a binding form :- see
+            <remark>'@within' can also be used in a binding form :- see
             the following section on advice for how to make the annotation
-            object available in the advice body.</para></remark>
+            object available in the advice body.</remark>
           </listitem>
 
           <listitem>
@@ -868,9 +891,9 @@ public class SystemArchitecture {
 
             <programlisting language="java">@annotation(org.springframework.transaction.annotation.Transactional)</programlisting>
 
-            <remark><para>'@annotation' can also be used in a binding form :-
+            <remark>'@annotation' can also be used in a binding form :-
             see the following section on advice for how to make the annotation
-            object available in the advice body.</para></remark>
+            object available in the advice body.</remark>
           </listitem>
 
           <listitem>
@@ -881,9 +904,9 @@ public class SystemArchitecture {
 
             <programlisting language="java">@args(com.xyz.security.Classified)</programlisting>
 
-            <remark><para>'@args' can also be used in a binding form :- see
+            <remark>'@args' can also be used in a binding form :- see
             the following section on advice for how to make the annotation
-            object(s) available in the advice body.</para></remark>
+            object(s) available in the advice body.</remark>
           </listitem>
 
           <listitem>
@@ -902,38 +925,38 @@ public class SystemArchitecture {
           </listitem>
         </itemizedlist>
       </section>
-      <section id="writing-good-pointcuts">
+      <section xml:id="writing-good-pointcuts">
         <title>Writing good pointcuts</title>
 
-        <para>During compilation, AspectJ processes pointcuts in order to try and optimize matching performance. Examining code 
-        and determining if each join point matches (statically or dynamically) a given pointcut is a costly process. (A dynamic 
-        match means the match cannot be fully determined from static analysis and a test will be placed in the code to 
-        determine if there is an actual match when the code is running). On first encountering a pointcut declaration, 
-        AspectJ will rewrite it into an optimal form for the matching process. What does this mean? Basically pointcuts 
-        are rewritten in DNF (Disjunctive Normal Form) and the components of the pointcut are sorted such that those 
-        components that are cheaper to evaluate are checked first. This means you do not have to worry about understanding 
+        <para>During compilation, AspectJ processes pointcuts in order to try and optimize matching performance. Examining code
+        and determining if each join point matches (statically or dynamically) a given pointcut is a costly process. (A dynamic
+        match means the match cannot be fully determined from static analysis and a test will be placed in the code to
+        determine if there is an actual match when the code is running). On first encountering a pointcut declaration,
+        AspectJ will rewrite it into an optimal form for the matching process. What does this mean? Basically pointcuts
+        are rewritten in DNF (Disjunctive Normal Form) and the components of the pointcut are sorted such that those
+        components that are cheaper to evaluate are checked first. This means you do not have to worry about understanding
         the performance of various pointcut designators and may supply them in any order in a pointcut declaration.</para>
-        
-        <para>However, AspectJ can only work with what it is told, and for optimal performance of matching you should 
-        think about what they are trying to achieve and narrow the search space for matches as much as possible in the 
+
+        <para>However, AspectJ can only work with what it is told, and for optimal performance of matching you should
+        think about what they are trying to achieve and narrow the search space for matches as much as possible in the
         definition. The existing designators naturally fall into one of three groups: kinded, scoping and context:</para>
         <itemizedlist>
-	        <listitem><para>Kinded designators are those which select a particular kind of join point. For example: execution, get, set, call, handler</para></listitem>
-    	    <listitem><para>Scoping designators are those which select a group of join points of interest (of probably many kinds). For example: within, withincode</para></listitem>
-        	<listitem><para>Contextual designators are those that match (and optionally bind) based on context. For example: this, target, @annotation</para></listitem>
+            <listitem><para>Kinded designators are those which select a particular kind of join point. For example: execution, get, set, call, handler</para></listitem>
+            <listitem><para>Scoping designators are those which select a group of join points of interest (of probably many kinds). For example: within, withincode</para></listitem>
+            <listitem><para>Contextual designators are those that match (and optionally bind) based on context. For example: this, target, @annotation</para></listitem>
         </itemizedlist>
-        
-        <para>A well written pointcut should try and include at least the first two types (kinded and scoping), whilst 
-        the contextual designators may be included if wishing to match based on join point context, or bind that context 
-        for use in the advice. Supplying either just a kinded designator or just a contextual designator will work but 
-        could affect weaving performance (time and memory used) due to all the extra processing and analysis. Scoping 
-        designators are very fast to match and their usage means AspectJ can very quickly dismiss groups of 
-        join points that should not be further processed - that is why a good pointcut should always include 
-        one if possible.</para> 
+
+        <para>A well written pointcut should try and include at least the first two types (kinded and scoping), whilst
+        the contextual designators may be included if wishing to match based on join point context, or bind that context
+        for use in the advice. Supplying either just a kinded designator or just a contextual designator will work but
+        could affect weaving performance (time and memory used) due to all the extra processing and analysis. Scoping
+        designators are very fast to match and their usage means AspectJ can very quickly dismiss groups of
+        join points that should not be further processed - that is why a good pointcut should always include
+        one if possible.</para>
       </section>
     </section>
 
-    <section id="aop-advice">
+    <section xml:id="aop-advice">
       <title>Declaring advice</title>
 
       <para>Advice is associated with a pointcut expression, and runs before,
@@ -941,7 +964,7 @@ public class SystemArchitecture {
       expression may be either a simple reference to a named pointcut, or a
       pointcut expression declared in place.</para>
 
-      <section id="aop-advice-before">
+      <section xml:id="aop-advice-before">
         <title>Before advice</title>
 
         <para>Before advice is declared in an aspect using the
@@ -977,7 +1000,7 @@ public class BeforeExample {
 }</programlisting>
       </section>
 
-      <section id="aop-advice-after-returning">
+      <section xml:id="aop-advice-after-returning">
         <title>After returning advice</title>
 
         <para>After returning advice runs when a matched method execution
@@ -1019,7 +1042,7 @@ public class AfterReturningExample {
   public void doAccessCheck(Object retVal) {
     <lineannotation>// ...</lineannotation>
   }
-  
+
 }</programlisting>
 
         <para>The name used in the <literal>returning</literal> attribute must
@@ -1036,7 +1059,7 @@ public class AfterReturningExample {
         advice.</para>
       </section>
 
-      <section id="aop-advice-after-throwing">
+      <section xml:id="aop-advice-after-throwing">
         <title>After throwing advice</title>
 
         <para>After throwing advice runs when a matched method execution exits
@@ -1088,7 +1111,7 @@ public class AfterThrowingExample {
         (<classname>DataAccessException</classname> in this case).</para>
       </section>
 
-      <section id="aop-advice-after-finally">
+      <section xml:id="aop-advice-after-finally">
         <title>After (finally) advice</title>
 
         <para>After (finally) advice runs however a matched method execution
@@ -1111,7 +1134,7 @@ public class AfterFinallyExample {
 }</programlisting>
       </section>
 
-      <section id="aop-ataspectj-around-advice">
+      <section xml:id="aop-ataspectj-around-advice">
         <title>Around advice</title>
 
         <para>The final kind of advice is around advice. Around advice runs
@@ -1136,7 +1159,7 @@ public class AfterFinallyExample {
         execution when it proceeds.</para>
 
         <remark>The behavior of proceed when called with an
-        <classname>Object[]</classname> is a little different than the
+        Object[] is a little different than the
         behavior of proceed for around advice compiled by the AspectJ
         compiler. For around advice written using the traditional AspectJ
         language, the number of arguments passed to proceed must match the
@@ -1178,7 +1201,7 @@ public class AroundExample {
         quite legal.</para>
       </section>
 
-      <section id="aop-ataspectj-advice-params">
+      <section xml:id="aop-ataspectj-advice-params">
         <title>Advice parameters</title>
 
         <para>Spring 2.0 offers fully typed advice - meaning that you declare
@@ -1190,7 +1213,7 @@ public class AroundExample {
         that can find out about the method the advice is currently
         advising.</para>
 
-        <section id="aop-ataspectj-advice-params-the-joinpoint">
+        <section xml:id="aop-ataspectj-advice-params-the-joinpoint">
           <title>Access to the current
           <interfacename>JoinPoint</interfacename></title>
 
@@ -1212,7 +1235,7 @@ public class AroundExample {
           details.</para>
         </section>
 
-        <section id="aop-ataspectj-advice-params-passing">
+        <section xml:id="aop-ataspectj-advice-params-passing">
           <title>Passing parameters to advice</title>
 
           <para>We've already seen how to bind the returned value or exception
@@ -1226,7 +1249,7 @@ public class AroundExample {
           Account object as the first parameter, and you need access to the
           account in the advice body. You could write the following:</para>
 
-          <programlisting language="java">@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" + 
+          <programlisting language="java">@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" +
         "args(account,..)")
 public void validateAccount(Account account) {
   <lineannotation>// ...</lineannotation>
@@ -1245,7 +1268,7 @@ public void validateAccount(Account account) {
           matches a join point, and then just refer to the named pointcut from
           the advice. This would look as follows:</para>
 
-          <programlisting language="java">@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" + 
+          <programlisting language="java">@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() &amp;&amp;" +
           "args(account,..)")
 private void accountDataAccessOperation(Account account) {}
 
@@ -1271,13 +1294,13 @@ public void validateAccount(Account account) {
           <programlisting language="java">@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Auditable {
-	AuditCode value();
+    AuditCode value();
 }</programlisting>
 
           <para>And then the advice that matches the execution of
           <interfacename>@Auditable</interfacename> methods:</para>
 
-          <programlisting language="java">@Before("com.xyz.lib.Pointcuts.anyPublicMethod() &amp;&amp; " + 
+          <programlisting language="java">@Before("com.xyz.lib.Pointcuts.anyPublicMethod() &amp;&amp; " +
         "@annotation(auditable)")
 public void audit(Auditable auditable) {
   AuditCode code = auditable.value();
@@ -1285,7 +1308,7 @@ public void audit(Auditable auditable) {
 }</programlisting>
         </section>
 
-        <section id="aop-ataspectj-advice-params-generics">
+        <section xml:id="aop-ataspectj-advice-params-generics">
           <title>Advice parameters and generics</title>
 
           <para>Spring AOP can handle generics used in class declarations and
@@ -1323,7 +1346,7 @@ public void beforeSampleMethod(Collection&lt;MyType&gt; param) {
           check the type of the elements.</para>
         </section>
 
-        <section id="aop-ataspectj-advice-params-names">
+        <section xml:id="aop-ataspectj-advice-params-names">
           <title>Determining argument names</title>
 
           <para>The parameter binding in advice invocations relies on matching
@@ -1402,7 +1425,7 @@ public void audit(JoinPoint jp) {
 
               <remark>If an @AspectJ aspect has been compiled by the AspectJ
               compiler (ajc) even without the debug information then there is
-              no need to add the <literal>argNames</literal> attribute as the
+              no need to add the argNames attribute as the
               compiler will retain the needed information.</remark>
             </listitem>
 
@@ -1426,7 +1449,7 @@ public void audit(JoinPoint jp) {
           </orderedlist>
         </section>
 
-        <section id="aop-ataspectj-advice-proceeding-with-the-call">
+        <section xml:id="aop-ataspectj-advice-proceeding-with-the-call">
           <title>Proceeding with arguments</title>
 
           <para>We remarked earlier that we would describe how to write a
@@ -1437,12 +1460,12 @@ public void audit(JoinPoint jp) {
 
           <programlisting language="java">@Around("execution(List&lt;Account&gt; find*(..)) &amp;&amp;" +
         "com.xyz.myapp.SystemArchitecture.inDataAccessLayer() &amp;&amp; " +
-        "args(accountHolderNamePattern)")		
+        "args(accountHolderNamePattern)")
 public Object preProcessQueryPattern(ProceedingJoinPoint pjp, String accountHolderNamePattern)
 throws Throwable {
   String newPattern = preProcess(accountHolderNamePattern);
   return pjp.proceed(new Object[] {newPattern});
-}        
+}
 </programlisting>
 
           <para>In many cases you will be doing this binding anyway (as in the
@@ -1450,7 +1473,7 @@ throws Throwable {
         </section>
       </section>
 
-      <section id="aop-ataspectj-advice-ordering">
+      <section xml:id="aop-ataspectj-advice-ordering">
         <title>Advice ordering</title>
 
         <para>What happens when multiple pieces of advice all want to run at
@@ -1485,7 +1508,7 @@ throws Throwable {
       </section>
     </section>
 
-    <section id="aop-introductions">
+    <section xml:id="aop-introductions">
       <title>Introductions</title>
 
       <para>Introductions (known as inter-type declarations in AspectJ) enable
@@ -1509,13 +1532,13 @@ public class UsageTracking {
   @DeclareParents(value="com.xzy.myapp.service.*+",
                   defaultImpl=DefaultUsageTracked.class)
   public static UsageTracked mixin;
-  
+
   @Before("com.xyz.myapp.SystemArchitecture.businessService() &amp;&amp;" +
           "this(usageTracked)")
   public void recordUsage(UsageTracked usageTracked) {
     usageTracked.incrementUseCount();
   }
-  
+
 }</programlisting>
 
       <para>The interface to be implemented is determined by the type of the
@@ -1530,7 +1553,7 @@ public class UsageTracking {
       <programlisting language="java">UsageTracked usageTracked = (UsageTracked) context.getBean("myService");</programlisting>
     </section>
 
-    <section id="aop-instantiation-models">
+    <section xml:id="aop-instantiation-models">
       <title>Aspect instantiation models</title>
 
       <remark>(This is an advanced topic, so if you are just starting out with
@@ -1553,12 +1576,12 @@ public class UsageTracking {
 public class MyAspect {
 
   private int someState;
-	
+
   @Before(com.xyz.myapp.SystemArchitecture.businessService())
   public void recordServiceUsage() {
     <lineannotation>// ...</lineannotation>
   }
-  	
+
 }</programlisting>
 
       <para>The effect of the <literal>'perthis'</literal> clause is that one
@@ -1578,7 +1601,7 @@ public class MyAspect {
       each unique target object at matched join points.</para>
     </section>
 
-    <section id="aop-ataspectj-example">
+    <section xml:id="aop-ataspectj-example">
       <title>Example</title>
 
       <para>Now that you have seen how all the constituent parts work, let's
@@ -1601,7 +1624,7 @@ public class MyAspect {
 
       <programlisting language="java">@Aspect
 public class ConcurrentOperationExecutor implements Ordered {
-   
+
    private static final int DEFAULT_MAX_RETRIES = 2;
 
    private int maxRetries = DEFAULT_MAX_RETRIES;
@@ -1610,22 +1633,22 @@ public class ConcurrentOperationExecutor implements Ordered {
    public void setMaxRetries(int maxRetries) {
       this.maxRetries = maxRetries;
    }
-   
+
    public int getOrder() {
       return this.order;
    }
-   
+
    public void setOrder(int order) {
       this.order = order;
    }
-   
+
    @Around("com.xyz.myapp.SystemArchitecture.businessService()")
-   public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
+   public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       int numAttempts = 0;
       PessimisticLockingFailureException lockFailureException;
       do {
          numAttempts++;
-         try { 
+         try {
             return pjp.proceed();
          }
          catch(PessimisticLockingFailureException ex) {
@@ -1658,7 +1681,7 @@ public class ConcurrentOperationExecutor implements Ordered {
 &lt;bean id="concurrentOperationExecutor"
   class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor"&gt;
      &lt;property name="maxRetries" value="3"/&gt;
-     &lt;property name="order" value="100"/&gt;  
+     &lt;property name="order" value="100"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>To refine the aspect so that it only retries idempotent
@@ -1675,15 +1698,15 @@ public @interface Idempotent {
       simply involves refining the pointcut expression so that only
       <interfacename>@Idempotent</interfacename> operations match:</para>
 
-      <programlisting language="java">@Around("com.xyz.myapp.SystemArchitecture.businessService() &amp;&amp; " + 
+      <programlisting language="java">@Around("com.xyz.myapp.SystemArchitecture.businessService() &amp;&amp; " +
         "@annotation(com.xyz.myapp.service.Idempotent)")
-public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
-  ...	
+public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+  ...
 }</programlisting>
     </section>
   </section>
 
-  <section id="aop-schema">
+  <section xml:id="aop-schema">
     <title>Schema-based AOP support</title>
 
     <para>If you are unable to use Java 5, or simply prefer an XML-based
@@ -1721,7 +1744,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       <interfacename>AutoProxyCreator</interfacename> style.</para>
     </warning>
 
-    <section id="aop-schema-declaring-an-aspect">
+    <section xml:id="aop-schema-declaring-an-aspect">
       <title>Declaring an aspect</title>
 
       <para>Using the schema support, an aspect is simply a regular Java
@@ -1748,7 +1771,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       other Spring bean.</para>
     </section>
 
-    <section id="aop-schema-pointcuts">
+    <section xml:id="aop-schema-pointcuts">
       <title>Declaring a pointcut</title>
 
       <para>A named pointcut can be declared inside an &lt;aop:config&gt;
@@ -1760,7 +1783,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
       <programlisting language="xml">&lt;aop:config&gt;
 
-  &lt;aop:pointcut id="businessService" 
+  &lt;aop:pointcut id="businessService"
         expression="execution(* com.xyz.myapp.service.*.*(..))"/&gt;
 
 &lt;/aop:config&gt;</programlisting>
@@ -1776,7 +1799,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
       <programlisting language="xml">&lt;aop:config&gt;
 
-  &lt;aop:pointcut id="businessService" 
+  &lt;aop:pointcut id="businessService"
         expression="com.xyz.myapp.SystemArchitecture.businessService()"/&gt;
 
 &lt;/aop:config&gt;</programlisting>
@@ -1791,11 +1814,11 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
 
-    &lt;aop:pointcut id="businessService" 
+    &lt;aop:pointcut id="businessService"
           expression="execution(* com.xyz.myapp.service.*.*(..))"/&gt;
-          
+
     ...
-    
+
   &lt;/aop:aspect&gt;
 
 &lt;/aop:config&gt;</programlisting>
@@ -1809,11 +1832,11 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
 
-    &lt;aop:pointcut id="businessService" 
+    &lt;aop:pointcut id="businessService"
           expression="execution(* com.xyz.myapp.service.*.*(..)) &amp;amp;&amp;amp; this(service)"/&gt;
     &lt;aop:before pointcut-ref="businessService" method="monitor"/&gt;
     ...
-    
+
   &lt;/aop:aspect&gt;
 
 &lt;/aop:config&gt;</programlisting>
@@ -1834,12 +1857,12 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
   &lt;aop:aspect id="myAspect" ref="aBean"&gt;
 
-    &lt;aop:pointcut id="businessService" 
+    &lt;aop:pointcut id="businessService"
           expression="execution(* com.xyz.myapp.service.*.*(..)) <emphasis
           role="bold">and</emphasis> this(service)"/&gt;
     &lt;aop:before pointcut-ref="businessService" method="monitor"/&gt;
     ...
-    
+
   &lt;/aop:aspect&gt;
 
 &lt;/aop:config&gt;</programlisting>
@@ -1851,13 +1874,13 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       style.</para>
     </section>
 
-    <section id="aop-schema-advice">
+    <section xml:id="aop-schema-advice">
       <title>Declaring advice</title>
 
       <para>The same five advice kinds are supported as for the @AspectJ
       style, and they have exactly the same semantics.</para>
 
-      <section id="aop-schema-advice-before">
+      <section xml:id="aop-schema-advice-before">
         <title>Before advice</title>
 
         <para>Before advice runs before a matched method execution. It is
@@ -1866,12 +1889,12 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
         <programlisting language="xml">&lt;aop:aspect id="beforeExample" ref="aBean"&gt;
 
-    &lt;aop:before 
-      pointcut-ref="dataAccessOperation" 
+    &lt;aop:before
+      pointcut-ref="dataAccessOperation"
       method="doAccessCheck"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>Here <literal>dataAccessOperation</literal> is the id of a
@@ -1882,12 +1905,12 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
         <programlisting language="xml">&lt;aop:aspect id="beforeExample" ref="aBean"&gt;
 
-    &lt;aop:before 
-      pointcut="execution(* com.xyz.myapp.dao.*.*(..))" 
+    &lt;aop:before
+      pointcut="execution(* com.xyz.myapp.dao.*.*(..))"
       method="doAccessCheck"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>As we noted in the discussion of the @AspectJ style, using named
@@ -1903,7 +1926,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         invoked.</para>
       </section>
 
-      <section id="aop-schema-advice-after-returning">
+      <section xml:id="aop-schema-advice-after-returning">
         <title>After returning advice</title>
 
         <para>After returning advice runs when a matched method execution
@@ -1913,12 +1936,12 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
         <programlisting language="xml">&lt;aop:aspect id="afterReturningExample" ref="aBean"&gt;
 
-    &lt;aop:after-returning 
-      pointcut-ref="dataAccessOperation" 
+    &lt;aop:after-returning
+      pointcut-ref="dataAccessOperation"
       method="doAccessCheck"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>Just as in the @AspectJ style, it is possible to get hold of the
@@ -1928,13 +1951,13 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
         <programlisting language="xml">&lt;aop:aspect id="afterReturningExample" ref="aBean"&gt;
 
-    &lt;aop:after-returning 
+    &lt;aop:after-returning
       pointcut-ref="dataAccessOperation"
-      returning="retVal" 
+      returning="retVal"
       method="doAccessCheck"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>The doAccessCheck method must declare a parameter named
@@ -1945,7 +1968,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <programlisting language="java">public void doAccessCheck(Object retVal) {...</programlisting>
       </section>
 
-      <section id="aop-schema-advice-after-throwing">
+      <section xml:id="aop-schema-advice-after-throwing">
         <title>After throwing advice</title>
 
         <para>After throwing advice executes when a matched method execution
@@ -1956,11 +1979,11 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <programlisting language="xml">&lt;aop:aspect id="afterThrowingExample" ref="aBean"&gt;
 
     &lt;aop:after-throwing
-      pointcut-ref="dataAccessOperation" 
+      pointcut-ref="dataAccessOperation"
       method="doRecoveryActions"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>Just as in the @AspectJ style, it is possible to get hold of the
@@ -1970,13 +1993,13 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
         <programlisting language="xml">&lt;aop:aspect id="afterThrowingExample" ref="aBean"&gt;
 
-    &lt;aop:after-throwing 
+    &lt;aop:after-throwing
       pointcut-ref="dataAccessOperation"
-      throwing="dataAccessEx" 
+      throwing="dataAccessEx"
       method="doRecoveryActions"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>The doRecoveryActions method must declare a parameter named
@@ -1987,7 +2010,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <programlisting language="java">public void doRecoveryActions(DataAccessException dataAccessEx) {...</programlisting>
       </section>
 
-      <section id="aop-schema-advice-after-finally">
+      <section xml:id="aop-schema-advice-after-finally">
         <title>After (finally) advice</title>
 
         <para>After (finally) advice runs however a matched method execution
@@ -1997,15 +2020,15 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <programlisting language="xml">&lt;aop:aspect id="afterFinallyExample" ref="aBean"&gt;
 
     &lt;aop:after
-      pointcut-ref="dataAccessOperation" 
+      pointcut-ref="dataAccessOperation"
       method="doReleaseLock"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
       </section>
 
-      <section id="aop-schema-advice-around">
+      <section xml:id="aop-schema-advice-around">
         <title>Around advice</title>
 
         <para>The final kind of advice is around advice. Around advice runs
@@ -2034,11 +2057,11 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <programlisting language="xml">&lt;aop:aspect id="aroundExample" ref="aBean"&gt;
 
     &lt;aop:around
-      pointcut-ref="businessService" 
+      pointcut-ref="businessService"
       method="doBasicProfiling"/&gt;
-          
+
     ...
-    
+
 &lt;/aop:aspect&gt;</programlisting>
 
         <para>The implementation of the <literal>doBasicProfiling</literal>
@@ -2053,7 +2076,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 }</programlisting>
       </section>
 
-      <section id="aop-schema-params">
+      <section xml:id="aop-schema-params">
         <title>Advice parameters</title>
 
         <para>The schema based declaration style supports fully typed advice
@@ -2129,8 +2152,8 @@ public class SimpleProfiler {
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:aop="http://www.springframework.org/schema/aop"
       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
    <lineannotation>&lt;!-- this is the object that will be proxied by Spring's AOP infrastructure --&gt;</lineannotation>
    &lt;bean id="fooService" class="x.y.service.DefaultFooService"/&gt;
@@ -2176,7 +2199,7 @@ ms     %     Task name
 00000  ?  execution(getFoo)</programlisting>
       </section>
 
-      <section id="aop-ordering">
+      <section xml:id="aop-ordering">
         <title>Advice ordering</title>
 
         <para>When multiple advice needs to execute at the same join point
@@ -2189,7 +2212,7 @@ ms     %     Task name
       </section>
     </section>
 
-    <section id="aop-schema-introductions">
+    <section xml:id="aop-schema-introductions">
       <title>Introductions</title>
 
       <para>Introductions (known as inter-type declarations in AspectJ) enable
@@ -2214,12 +2237,12 @@ ms     %     Task name
       types-matching="com.xzy.myapp.service.*+"
       implement-interface="com.xyz.myapp.service.tracking.UsageTracked"
       default-impl="com.xyz.myapp.service.tracking.DefaultUsageTracked"/&gt;
-  
+
   &lt;aop:before
     pointcut="com.xyz.myapp.SystemArchitecture.businessService()
               and this(usageTracked)"
     method="recordUsage"/&gt;
-  
+
 &lt;/aop:aspect&gt;</programlisting>
 
       <para>The class backing the <literal>usageTracking</literal> bean would
@@ -2242,7 +2265,7 @@ ms     %     Task name
       <programlisting language="java">UsageTracked usageTracked = (UsageTracked) context.getBean("myService");</programlisting>
     </section>
 
-    <section id="aop-schema-instatiation-models">
+    <section xml:id="aop-schema-instatiation-models">
       <title>Aspect instantiation models</title>
 
       <para>The only supported instantiation model for schema-defined aspects
@@ -2250,7 +2273,7 @@ ms     %     Task name
       future releases.</para>
     </section>
 
-    <section id="aop-schema-advisors">
+    <section xml:id="aop-schema-advisors">
       <title>Advisors</title>
 
       <para>The concept of "advisors" is brought forward from the AOP support
@@ -2271,10 +2294,10 @@ ms     %     Task name
   &lt;aop:pointcut id="businessService"
         expression="execution(* com.xyz.myapp.service.*.*(..))"/&gt;
 
-  &lt;aop:advisor 
+  &lt;aop:advisor
       pointcut-ref="businessService"
       advice-ref="tx-advice"/&gt;
-      
+
 &lt;/aop:config&gt;
 
 &lt;tx:advice id="tx-advice"&gt;
@@ -2282,17 +2305,18 @@ ms     %     Task name
     &lt;tx:method name="*" propagation="REQUIRED"/&gt;
   &lt;/tx:attributes&gt;
 &lt;/tx:advice&gt;</programlisting>
+
+      <para>As well as the <literal>pointcut-ref</literal> attribute used in the
+      above example, you can also use the <literal>pointcut</literal> attribute
+      to define a pointcut expression inline.</para>
+
+      <para>To define the precedence of an advisor so that the advice can
+      participate in ordering, use the <literal>order</literal> attribute to
+      define the <literal>Ordered</literal> value of the advisor.</para>
+
     </section>
 
-    <para>As well as the <literal>pointcut-ref</literal> attribute used in the
-    above example, you can also use the <literal>pointcut</literal> attribute
-    to define a pointcut expression inline.</para>
-
-    <para>To define the precedence of an advisor so that the advice can
-    participate in ordering, use the <literal>order</literal> attribute to
-    define the <literal>Ordered</literal> value of the advisor.</para>
-
-    <section id="aop-schema-example">
+    <section xml:id="aop-schema-example">
       <title>Example</title>
 
       <para>Let's see how the concurrent locking failure retry example from
@@ -2316,7 +2340,7 @@ ms     %     Task name
       schema support):</para>
 
       <programlisting language="java">public class ConcurrentOperationExecutor implements Ordered {
-   
+
    private static final int DEFAULT_MAX_RETRIES = 2;
 
    private int maxRetries = DEFAULT_MAX_RETRIES;
@@ -2325,21 +2349,21 @@ ms     %     Task name
    public void setMaxRetries(int maxRetries) {
       this.maxRetries = maxRetries;
    }
-   
+
    public int getOrder() {
       return this.order;
    }
-   
+
    public void setOrder(int order) {
       this.order = order;
    }
-   
-   public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
+
+   public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
       int numAttempts = 0;
       PessimisticLockingFailureException lockFailureException;
       do {
          numAttempts++;
-         try { 
+         try {
             return pjp.proceed();
          }
          catch(PessimisticLockingFailureException ex) {
@@ -2374,11 +2398,11 @@ ms     %     Task name
 
     &lt;aop:pointcut id="idempotentOperation"
         expression="execution(* com.xyz.myapp.service.*.*(..))"/&gt;
-       
+
     &lt;aop:around
        pointcut-ref="idempotentOperation"
        method="doConcurrentOperation"/&gt;
-  
+
   &lt;/aop:aspect&gt;
 
 &lt;/aop:config&gt;
@@ -2386,7 +2410,7 @@ ms     %     Task name
 &lt;bean id="concurrentOperationExecutor"
   class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor"&gt;
      &lt;property name="maxRetries" value="3"/&gt;
-     &lt;property name="order" value="100"/&gt;  
+     &lt;property name="order" value="100"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>Notice that for the time being we assume that all business
@@ -2411,7 +2435,7 @@ public @interface Idempotent {
     </section>
   </section>
 
-  <section id="aop-choosing">
+  <section xml:id="aop-choosing">
     <title>Choosing which AOP declaration style to use</title>
 
     <para>Once you have decided that an aspect is the best approach for
@@ -2421,7 +2445,7 @@ public @interface Idempotent {
     by a number of factors including application requirements, development
     tools, and team familiarity with AOP.</para>
 
-    <section id="aop-spring-or-aspectj">
+    <section xml:id="aop-spring-or-aspectj">
       <title>Spring AOP or full AspectJ?</title>
 
       <para>Use the simplest thing that can work. Spring AOP is simpler than
@@ -2438,9 +2462,9 @@ public @interface Idempotent {
       syntax (also known as the "code style") or the @AspectJ annotation
       style. Clearly, if you are not using Java 5+ then the choice has been
       made for you... use the code style. If aspects play a large role in your
-      design, and you are able to use the <ulink
-      url="http://www.eclipse.org/ajdt/">AspectJ Development Tools
-      (AJDT)</ulink> plugin for Eclipse, then the AspectJ language syntax is
+      design, and you are able to use the <link
+      xl:href="http://www.eclipse.org/ajdt/">AspectJ Development Tools
+      (AJDT)</link> plugin for Eclipse, then the AspectJ language syntax is
       the preferred option: it is cleaner and simpler because the language was
       purposefully designed for writing aspects. If you are not using Eclipse,
       or have only a few aspects that do not play a major role in your
@@ -2449,7 +2473,7 @@ public @interface Idempotent {
       aspect weaving phase to your build script.</para>
     </section>
 
-    <section id="aop-ataspectj-or-xml">
+    <section xml:id="aop-ataspectj-or-xml">
       <title>@AspectJ or XML for Spring AOP?</title>
 
       <para>If you have chosen to use Spring AOP, then you have a choice of
@@ -2514,7 +2538,7 @@ public @interface Idempotent {
     </section>
   </section>
 
-  <section id="aop-mixing-styles">
+  <section xml:id="aop-mixing-styles">
     <title>Mixing aspect types</title>
 
     <para>It is perfectly possible to mix @AspectJ style aspects using the
@@ -2525,7 +2549,7 @@ public @interface Idempotent {
     support mechanism and will co-exist without any difficulty.</para>
   </section>
 
-  <section id="aop-proxying">
+  <section xml:id="aop-proxying">
     <title>Proxying mechanisms</title>
 
     <para>Spring AOP uses either JDK dynamic proxies or CGLIB to create the
@@ -2570,7 +2594,7 @@ public @interface Idempotent {
       </listitem>
     </itemizedlist>
 
-    <para id="aop-autoproxy-force-CGLIB">To force the use of CGLIB proxies set
+    <para xml:id="aop-autoproxy-force-CGLIB">To force the use of CGLIB proxies set
     the value of the <literal>proxy-target-class</literal> attribute of the
     <literal>&lt;aop:config&gt;</literal> element to true:</para>
 
@@ -2603,7 +2627,7 @@ public @interface Idempotent {
       CGLIB proxies <emphasis>for all three of them</emphasis>.</para>
     </note>
 
-    <section id="aop-understanding-aop-proxies">
+    <section xml:id="aop-understanding-aop-proxies">
       <title>Understanding AOP proxies</title>
 
       <para>Spring AOP is <emphasis>proxy-based</emphasis>. It is vitally
@@ -2618,11 +2642,11 @@ public @interface Idempotent {
       <programlisting language="java">public class SimplePojo implements Pojo {
 
    public void foo() {
-      <lineannotation>// this next method invocation is a <emphasis
-            role="bold">direct</emphasis> call on the 'this' reference</lineannotation>
+      <lineannotation>// this next method invocation is a direct
+      call on the 'this' reference</lineannotation>
       this.bar();
    }
-   
+
    public void bar() {
       <lineannotation>// some logic...</lineannotation>
    }
@@ -2633,26 +2657,20 @@ public @interface Idempotent {
       be seen below.</para>
 
       <para><mediaobject>
-          <imageobject role="fo">
+          <imageobject>
             <imagedata align="center"
                        fileref="images/aop-proxy-plain-pojo-call.png"
-                       format="PNG" />
-          </imageobject>
-
-          <imageobject role="html">
-            <imagedata align="center"
-                       fileref="images/aop-proxy-plain-pojo-call.png"
-                       format="PNG" />
+                       format="PNG" width="400"/>
           </imageobject>
         </mediaobject></para>
 
       <programlisting language="java">public class Main {
 
    public static void main(String[] args) {
-   
+
       Pojo pojo = new SimplePojo();
-      
-      <lineannotation>// this is a <emphasis role="bold">direct</emphasis> method call on the 'pojo' reference</lineannotation>
+
+      <lineannotation>// this is a direct method call on the 'pojo' reference</lineannotation>
       pojo.foo();
    }
 }</programlisting>
@@ -2661,28 +2679,23 @@ public @interface Idempotent {
       a proxy. Consider the following diagram and code snippet.</para>
 
       <para><mediaobject>
-          <imageobject role="fo">
+          <imageobject>
             <imagedata align="center" fileref="images/aop-proxy-call.png"
-                       format="PNG" />
-          </imageobject>
-
-          <imageobject role="html">
-            <imagedata align="center" fileref="images/aop-proxy-call.png"
-                       format="PNG" />
+                       format="PNG" width="400" />
           </imageobject>
         </mediaobject></para>
 
       <programlisting language="java">public class Main {
 
    public static void main(String[] args) {
-   
+
       ProxyFactory factory = new ProxyFactory(new SimplePojo());
       factory.addInterface(Pojo.class);
       factory.addAdvice(new RetryAdvice());
 
       Pojo pojo = (Pojo) factory.getProxy();
-      
-      <lineannotation>// this is a method call <emphasis role="bold">on the proxy!</emphasis></lineannotation>
+
+      <lineannotation>// this is a method call on the proxy!</lineannotation>
       pojo.foo();
    }
 }</programlisting>
@@ -2718,7 +2731,7 @@ public @interface Idempotent {
       <lineannotation>// this works, but... gah!</lineannotation>
       ((Pojo) AopContext.currentProxy()).bar();
    }
-   
+
    public void bar() {
       <lineannotation>// some logic...</lineannotation>
    }
@@ -2733,15 +2746,15 @@ public @interface Idempotent {
       <programlisting language="java">public class Main {
 
    public static void main(String[] args) {
-   
+
       ProxyFactory factory = new ProxyFactory(new SimplePojo());
       factory.adddInterface(Pojo.class);
       factory.addAdvice(new RetryAdvice());
-      <lineannotation><emphasis role="bold">factory.setExposeProxy(true);</emphasis></lineannotation>
+      <lineannotation>factory.setExposeProxy(true);</lineannotation>
 
       Pojo pojo = (Pojo) factory.getProxy();
 
-      <lineannotation>// this is a method call <emphasis role="bold">on the proxy!</emphasis></lineannotation>
+      <lineannotation>// this is a method call on the proxy!</lineannotation>
       pojo.foo();
    }
 }</programlisting>
@@ -2752,7 +2765,7 @@ public @interface Idempotent {
     </section>
   </section>
 
-  <section id="aop-aspectj-programmatic">
+  <section xml:id="aop-aspectj-programmatic">
     <title>Programmatic creation of @AspectJ Proxies</title>
 
     <para>In addition to declaring aspects in your configuration using either
@@ -2770,20 +2783,20 @@ public @interface Idempotent {
     illustrated below. See the Javadocs for full information.</para>
 
     <programlisting language="java"><lineannotation>// create a factory that can generate a proxy for the given target object</lineannotation>
-AspectJProxyFactory factory = new AspectJProxyFactory(targetObject); 
+AspectJProxyFactory factory = new AspectJProxyFactory(targetObject);
 
 <lineannotation>// add an aspect, the class must be an @AspectJ aspect
 // you can call this as many times as you need with different aspects</lineannotation>
 factory.addAspect(SecurityManager.class);
 
 <lineannotation>// you can also add existing aspect instances, the type of the object supplied must be an @AspectJ aspect</lineannotation>
-factory.addAspect(usageTracker);	
+factory.addAspect(usageTracker);
 
 <lineannotation>// now get the proxy object...</lineannotation>
 MyInterfaceType proxy = factory.getProxy();</programlisting>
   </section>
 
-  <section id="aop-using-aspectj">
+  <section xml:id="aop-using-aspectj">
     <title>Using AspectJ with Spring applications</title>
 
     <para>Everything we've covered so far in this chapter is pure Spring AOP.
@@ -2802,7 +2815,7 @@ MyInterfaceType proxy = factory.getProxy();</programlisting>
     linkend="aop-aj-ltw"/> provides an introduction to load-time weaving for
     Spring applications using AspectJ.</para>
 
-    <section id="aop-atconfigurable">
+    <section xml:id="aop-atconfigurable">
       <title>Using AspectJ to dependency inject domain objects with
       Spring</title>
 
@@ -2868,10 +2881,10 @@ public class Account {
       <literal>@Configurable(autowire=Autowire.BY_TYPE)</literal> or
       <literal>@Configurable(autowire=Autowire.BY_NAME</literal> for
       autowiring by type or by name respectively. As an alternative, as of
-      Spring 2.5 it is preferable to specify explicit, annotation-driven 
-      dependency injection for your <interfacename>@Configurable</interfacename> 
+      Spring 2.5 it is preferable to specify explicit, annotation-driven
+      dependency injection for your <interfacename>@Configurable</interfacename>
       beans by using <interfacename>@Autowired</interfacename> or
-      <interfacename>@Inject</interfacename> at the field or method level (see 
+      <interfacename>@Inject</interfacename> at the field or method level (see
       <xref linkend="beans-annotation-config" /> for further details).</para>
 
       <para>Finally you can enable Spring dependency checking for the object
@@ -2893,8 +2906,8 @@ public class Account {
       to newly instantiated objects (e.g., objects instantiated with the
       '<literal>new</literal>' operator) as well as to
       <interfacename>Serializable</interfacename> objects that are undergoing
-      deserialization (e.g., via <ulink
-      url="http://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html">readResolve()</ulink>).</para>
+      deserialization (e.g., via <link
+      xl:href="http://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html">readResolve()</link>).</para>
 
       <note>
         <para>One of the key phrases in the above paragraph is '<emphasis>in
@@ -2914,32 +2927,43 @@ public class Account {
         <programlisting language="java">@Configurable(preConstruction=true)</programlisting>
 
         <para>You can find out more information about the language semantics
-        of the various pointcut types in AspectJ <ulink
-        url="http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html">in
-        this appendix</ulink> of the <ulink
-        url="http://www.eclipse.org/aspectj/doc/next/progguide/index.html">AspectJ
-        Programming Guide</ulink>.</para>
+        of the various pointcut types in AspectJ <link
+        xl:href="http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html">in
+        this appendix</link> of the <link
+        xl:href="http://www.eclipse.org/aspectj/doc/next/progguide/index.html">AspectJ
+        Programming Guide</link>.</para>
       </note>
 
       <para>For this to work the annotated types must be woven with the
       AspectJ weaver - you can either use a build-time Ant or Maven task to do
-      this (see for example the <ulink
-      url="http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ
-      Development Environment Guide</ulink>) or load-time weaving (see <xref
+      this (see for example the <link
+      xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ
+      Development Environment Guide</link>) or load-time weaving (see <xref
       linkend="aop-aj-ltw"/>). The
       <classname>AnnotationBeanConfigurerAspect</classname> itself needs
       configuring by Spring (in order to obtain a reference to the bean
-      factory that is to be used to configure new objects). The Spring <link
+      factory that is to be used to configure new objects). If you are
+      using Java based configuration simply add
+      <interfacename>@EnableSpringConfigured</interfacename> to any
+      <interfacename>@Configuration</interfacename> class.</para>
+
+      <programlisting language="java">@Configuration
+@EnableSpringConfigured
+public class AppConfig {
+
+}</programlisting>
+
+      <para>If you prefer XML based configuration, the Spring <link
       linkend="xsd-config-body-schemas-context"><literal>context</literal>
-      namespace</link> defines a convenient tag for doing this: just include
-      the following in your application context configuration:</para>
+      namespace</link> defines a convenient
+      <literal>context:spring-configured</literal> element:</para>
 
       <programlisting language="xml">&lt;context:spring-configured/&gt;</programlisting>
 
       <para>If you are using the DTD instead of schema, the equivalent
       definition is:</para>
 
-      <programlisting language="xml">&lt;bean 
+      <programlisting language="xml">&lt;bean
       class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"
       factory-method="aspectOf"/&gt;</programlisting>
 
@@ -2970,7 +2994,7 @@ public class Account {
         through the container and once through the aspect.</para>
       </note>
 
-      <section id="aop-configurable-testing">
+      <section xml:id="aop-configurable-testing">
         <title>Unit testing <interfacename>@Configurable</interfacename>
         objects</title>
 
@@ -2990,7 +3014,7 @@ public class Account {
         has not been configured by Spring.</para>
       </section>
 
-      <section id="aop-configurable-container">
+      <section xml:id="aop-configurable-container">
         <title>Working with multiple application contexts</title>
 
         <para>The <classname>AnnotationBeanConfigurerAspect</classname> used
@@ -3000,7 +3024,7 @@ public class Account {
         there is one aspect instance per classloader that defines the type.
         This means that if you define multiple application contexts within the
         same classloader hierarchy you need to consider where to define the
-        <literal>&lt;context:spring-configured/&gt;</literal> bean and where to
+        <interfacename>@EnableSpringConfigured</interfacename> bean and where to
         place <filename class="libraryfile">spring-aspects.jar</filename> on
         the classpath.</para>
 
@@ -3011,7 +3035,7 @@ public class Account {
         these contexts will co-exist within the same classloader hierarchy,
         and so the <literal>AnnotationBeanConfigurerAspect</literal> can only
         hold a reference to one of them. In this case we recommend defining
-        the <literal>&lt;context:spring-configured/&gt;</literal> bean in the
+        the <interfacename>@EnableSpringConfigured</interfacename> bean in the
         shared (parent) application context: this defines the services that
         you are likely to want to inject into domain objects. A consequence is
         that you cannot configure domain objects with references to beans
@@ -3032,7 +3056,7 @@ public class Account {
       </section>
     </section>
 
-    <section id="aop-ajlib-other">
+    <section xml:id="aop-ajlib-other">
       <title>Other Spring aspects for AspectJ</title>
 
       <para>In addition to the <interfacename>@Configurable</interfacename>
@@ -3085,13 +3109,13 @@ public class Account {
   <lineannotation>// the creation of a new bean (any object in the domain model)</lineannotation>
   protected pointcut beanCreation(Object beanInstance) :
     initialization(new(..)) &amp;&amp;
-    SystemArchitecture.inDomainModel() &amp;&amp; 
+    SystemArchitecture.inDomainModel() &amp;&amp;
     this(beanInstance);
-		   		   
+
 }</programlisting>
     </section>
 
-    <section id="aop-aj-configure">
+    <section xml:id="aop-aj-configure">
       <title>Configuring AspectJ aspects using Spring IoC</title>
 
       <para>When using AspectJ aspects with Spring applications, it is natural
@@ -3148,7 +3172,7 @@ public class Account {
       </note>
     </section>
 
-    <section id="aop-aj-ltw">
+    <section xml:id="aop-aj-ltw">
       <title>Load-time weaving with AspectJ in the Spring Framework</title>
 
       <para>Load-time weaving (LTW) refers to the process of weaving AspectJ
@@ -3157,9 +3181,9 @@ public class Account {
       configuring and using LTW in the specific context of the Spring
       Framework: this section is not an introduction to LTW though. For full
       details on the specifics of LTW and configuring LTW with just AspectJ
-      (with Spring not being involved at all), see the <ulink
-      url="http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html">LTW
-      section of the AspectJ Development Environment Guide</ulink>.</para>
+      (with Spring not being involved at all), see the <link
+      xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html">LTW
+      section of the AspectJ Development Environment Guide</link>.</para>
 
       <para>The value-add that the Spring Framework brings to AspectJ LTW is
       in enabling much finer-grained control over the weaving process.
@@ -3177,7 +3201,7 @@ public class Account {
       <emphasis>without making any modifications to the application server's
       launch script</emphasis> that will be needed to add
       <literal>-javaagent:path/to/aspectjweaver.jar</literal> or (as we describe later in this
-      section) <literal>-javaagent:path/to/org.springframework.instrument-{version}.jar</literal> 
+      section) <literal>-javaagent:path/to/org.springframework.instrument-{version}.jar</literal>
       (previously named <literal>spring-agent.jar</literal>). Developers simply modify
       one or more files that form the application context to enable load-time
       weaving instead of relying on administrators who typically are in charge
@@ -3188,7 +3212,7 @@ public class Account {
       specifics about elements introduced in the following example. For a
       complete example, please see the Petclinic <link linkend="new-in-3.0-samples">sample</link> application.</para>
 
-      <section id="aop-aj-ltw-first-example">
+      <section xml:id="aop-aj-ltw-first-example">
         <title>A first example</title>
 
         <para>Let us assume that you are an application developer who has been
@@ -3198,6 +3222,16 @@ public class Account {
         quickly get some performance metrics, so that we can then apply a
         finer-grained profiling tool to that specific area immediately
         afterwards.</para>
+
+        <note>
+          <para>The example presented here uses XML style configuration, it is
+          also possible to configure and use @AspectJ with
+          <link linkend="beans-java">Java Configuration</link>.
+          Specifically the <interfacename>@EnableLoadTimeWeaving</interfacename>
+          annotation can be used as an alternative to
+          <literal>&lt;context:load-time-weaver/&gt;</literal>
+          (see <link linkend="aop-aj-ltw-spring">below</link> for details).</para>
+        </note>
 
         <para>Here is the profiling aspect. Nothing too fancy, just a
         quick-and-dirty time-based profiler, using the @AspectJ-style of
@@ -3253,7 +3287,7 @@ public class ProfilingAspect {
 
     &lt;aspects&gt;
 
-        <lineannotation>&lt;!-- weave in just this aspect --&gt;</lineannotation>        
+        <lineannotation>&lt;!-- weave in just this aspect --&gt;</lineannotation>
         &lt;aspect name="foo.ProfilingAspect"/&gt;
 
     &lt;/aspects&gt;
@@ -3275,10 +3309,10 @@ public class ProfilingAspect {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans 
-    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context 
-    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     <lineannotation>&lt;!-- a service object; we will be profiling its methods --&gt;</lineannotation>
     &lt;bean id="entitlementCalculationService"
@@ -3323,13 +3357,13 @@ public final class Main {
         <programlisting>java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main</programlisting>
 
         <para>The '<literal>-javaagent</literal>' is a Java 5+ flag for
-        specifying and enabling <ulink
-        url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agents
-        to instrument programs running on the JVM</ulink>. The Spring
+        specifying and enabling <link
+        xl:href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agents
+        to instrument programs running on the JVM</link>. The Spring
         Framework ships with such an agent, the
         <classname>InstrumentationSavingAgent</classname>, which is packaged
         in the <filename class="libraryfile">spring-instrument.jar</filename>
-		that
+        that
         was supplied as the value of the <literal>-javaagent</literal>
         argument in the above example.</para>
 
@@ -3392,7 +3426,7 @@ public final class Main {
         </note>
       </section>
 
-      <section id="aop-aj-ltw-the-aspects">
+      <section xml:id="aop-aj-ltw-the-aspects">
         <title>Aspects</title>
 
         <para>The aspects that you use in LTW have to be AspectJ aspects. They
@@ -3404,7 +3438,7 @@ public final class Main {
         available on the classpath.</para>
       </section>
 
-      <section id="aop-aj-ltw-aop_dot_xml">
+      <section xml:id="aop-aj-ltw-aop_dot_xml">
         <title>'<filename>META-INF/aop.xml</filename>'</title>
 
         <para>The AspectJ LTW infrastructure is configured using one or more
@@ -3412,9 +3446,9 @@ public final class Main {
         classpath (either directly, or more typically in jar files).</para>
 
         <para>The structure and contents of this file is detailed in the main
-        AspectJ reference documentation, and the interested reader is <ulink
-        url="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred
-        to that resource</ulink>. (I appreciate that this section is brief,
+        AspectJ reference documentation, and the interested reader is <link
+        xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred
+        to that resource</link>. (I appreciate that this section is brief,
         but the '<filename>aop.xml</filename>' file is 100% AspectJ - there is
         no Spring-specific information or semantics that apply to it, and so
         there is no extra value that I can contribute either as a result), so
@@ -3422,7 +3456,7 @@ public final class Main {
         developers wrote, I am just directing you there.)</para>
       </section>
 
-      <section id="aop-aj-ltw-libraries">
+      <section xml:id="aop-aj-ltw-libraries">
         <title>Required libraries (JARS)</title>
 
         <para>At a minimum you will need the following libraries to use the
@@ -3452,7 +3486,7 @@ public final class Main {
         </orderedlist>
       </section>
 
-      <section id="aop-aj-ltw-spring">
+      <section xml:id="aop-aj-ltw-spring">
         <title>Spring configuration</title>
 
         <para>The key component in Spring's LTW support is the
@@ -3477,7 +3511,7 @@ public final class Main {
         </tip>
 
         <para>Configuring a <interfacename>LoadTimeWeaver</interfacename>
-        using XML for a particular
+        for a particular
         <interfacename>ApplicationContext</interfacename> can be as easy as
         adding one line. (Please note that you almost certainly will need to
         be using an <interfacename>ApplicationContext</interfacename> as your
@@ -3489,9 +3523,17 @@ public final class Main {
         <para>To enable the Spring Framework's LTW support, you need to
         configure a <interfacename>LoadTimeWeaver</interfacename>, which
         typically is done using the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> element. Find
-        below a valid <literal>&lt;context:load-time-weaver/&gt;</literal>
-        definition that uses default settings.</para>
+        <interfacename>@EnableLoadTimeWeaving</interfacename> annotation.</para>
+
+        <programlisting language="java">@Configuration
+@EnableLoadTimeWeaving
+public class AppConfig {
+
+}</programlisting>
+
+        <para>Alternatively, if you prefer XML based configuration, use the
+        <literal>&lt;context:load-time-weaver/&gt;</literal> element. Note
+        that the element is defined in the '<literal>context</literal>' namespace.</para>
 
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -3499,35 +3541,27 @@ public final class Main {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+    http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:load-time-weaver/&gt;
 
 &lt;/beans&gt;</programlisting>
 
-        <para>The above <literal>&lt;context:load-time-weaver/&gt;</literal>
-        bean definition will define and register a number of LTW-specific
-        infrastructure beans for you automatically, such as a
-        <interfacename>LoadTimeWeaver</interfacename> and an
-        <classname>AspectJWeavingEnabler</classname>. Notice how the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> is defined in the
-        '<literal>context</literal>' namespace; note also that the referenced
-        XML Schema file is only available in versions of Spring 2.5 and
-        later.</para>
-
-        <para>What the above configuration does is define and register a
-        default <interfacename>LoadTimeWeaver</interfacename> bean for you.
-        The default <interfacename>LoadTimeWeaver</interfacename> is the
+        <para>The above configuration will define and register a number of
+        LTW-specific infrastructure beans for you automatically, such
+        as a <interfacename>LoadTimeWeaver</interfacename> and an
+        <classname>AspectJWeavingEnabler</classname>.  The default
+        <interfacename>LoadTimeWeaver</interfacename> is the
         <classname>DefaultContextLoadTimeWeaver</classname> class, which
         attempts to decorate an automatically detected
         <interfacename>LoadTimeWeaver</interfacename>: the exact type of
         <interfacename>LoadTimeWeaver</interfacename> that will be
         'automatically detected' is dependent upon your runtime environment
-        (summarised in the following table).</para>
+        (summarized in the following table).</para>
 
-        <table id="aop-aj-ltw-spring-env-impls" pgwide="1">
+        <table xml:id="aop-aj-ltw-spring-env-impls" pgwide="1">
           <title><classname>DefaultContextLoadTimeWeaver</classname>
           <interfacename>LoadTimeWeavers</interfacename></title>
 
@@ -3543,32 +3577,32 @@ http://www.springframework.org/schema/context
 
             <tbody>
               <row>
-                <entry><para>Running in <ulink
-                url="http://www.bea.com/framework.jsp?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
-                Weblogic 10</ulink></para></entry>
+                <entry><para>Running in <link
+                xl:href="http://www.bea.com/framework.jsp?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
+                Weblogic 10</link></para></entry>
                 <entry><para><classname>WebLogicLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <ulink
-                url="http://www-01.ibm.com/software/webservers/appserv/was/">IBM WebSphere Application Server 7</ulink></para></entry>
+                <entry><para>Running in <link
+                xl:href="http://www-01.ibm.com/software/webservers/appserv/was/">IBM WebSphere Application Server 7</link></para></entry>
                 <entry><para><classname>WebSphereLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <ulink
-                url="http://www.oracle.com/technology/products/oc4j/index.html">Oracle's
-                OC4J</ulink></para></entry>
+                <entry><para>Running in <link
+                xl:href="http://www.oracle.com/technology/products/oc4j/index.html">Oracle's
+                OC4J</link></para></entry>
                 <entry><para><classname>OC4JLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <ulink url="http://glassfish.dev.java.net/">GlassFish</ulink></para></entry>
+                <entry><para>Running in <link xl:href="http://glassfish.dev.java.net/">GlassFish</link></para></entry>
                 <entry><para><classname>GlassFishLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <ulink url="http://www.jboss.org/jbossas/">JBoss AS</ulink></para></entry>
+                <entry><para>Running in <link xl:href="http://www.jboss.org/jbossas/">JBoss AS</link></para></entry>
                 <entry><para><classname>JBossLoadTimeWeaver</classname></para></entry>
               </row>
 
@@ -3582,8 +3616,8 @@ http://www.springframework.org/schema/context
 
               <row>
                 <entry><para>Fallback, expecting the underlying ClassLoader to follow common conventions
-                (e.g. applicable to <classname>TomcatInstrumentableClassLoader</classname> and 
-                <ulink url="http://www.caucho.com/">Resin</ulink>)</para></entry>
+                (e.g. applicable to <classname>TomcatInstrumentableClassLoader</classname> and
+                <link xl:href="http://www.caucho.com/">Resin</link>)</para></entry>
                 <entry><para><classname>ReflectiveLoadTimeWeaver</classname></para></entry>
               </row>
             </tbody>
@@ -3595,21 +3629,35 @@ http://www.springframework.org/schema/context
         when using the <classname>DefaultContextLoadTimeWeaver</classname>: it
         is of course possible to specify exactly which
         <interfacename>LoadTimeWeaver</interfacename> implementation that you
-        wish to use by specifying the fully-qualified classname as the value
-        of the '<literal>weaver-class</literal>' attribute of the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> element. Find
-        below an example of doing just that:</para>
+        wish to use.</para>
 
-        <!-- removed <emphasis> below to solve NPE problem -->
+        <para>To specify a specific <interfacename>LoadTimeWeaver</interfacename>
+        with Java configuration implement the
+        <interfacename>LoadTimeWeavingConfigurer</interfacename> interface and override
+        the <literal>getLoadTimeWeaver()</literal> method:</para>
+
+        <programlisting language="java">@Configuration
+@EnableLoadTimeWeaving
+public class AppConfig implements LoadTimeWeavingConfigurer {
+    @Override
+    public LoadTimeWeaver getLoadTimeWeaver() {
+        return new ReflectiveLoadTimeWeaver();
+    }
+}</programlisting>
+
+        <para>If you are using XML based configuration you can specify the fully-qualified
+        classname as the value of the '<literal>weaver-class</literal>' attribute on the
+        <literal>&lt;context:load-time-weaver/&gt;</literal> element:</para>
+
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
+    http://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:load-time-weaver
             weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/&gt;
@@ -3617,8 +3665,7 @@ http://www.springframework.org/schema/context
 &lt;/beans&gt;</programlisting>
 
         <para>The <interfacename>LoadTimeWeaver</interfacename> that is
-        defined and registered by the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> element can be
+        defined and registered by the configuration can be
         later retrieved from the Spring container using the well-known name
         '<literal>loadTimeWeaver</literal>'. Remember that the
         <interfacename>LoadTimeWeaver</interfacename> exists just as a
@@ -3632,41 +3679,45 @@ http://www.springframework.org/schema/context
         details, because the specifics of how the weaving is actually effected
         is beyond the scope of this section.</para>
 
-        <para>There is one final attribute of the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> left to discuss:
-        the '<literal>aspectj-weaving</literal>' attribute. This is a simple
+        <para>There is one final attribute of the configuration left to discuss:
+        the '<literal>aspectjWeaving</literal>' attribute
+        (or '<literal>aspectj-weaving</literal>' if you are using XML). This is a simple
         attribute that controls whether LTW is enabled or not, it is as simple
-        as that. It accepts one of three possible values, summarised below,
-        with the default value if the attribute is not present being '
-        <literal>autodetect</literal>'</para>
+        as that. It accepts one of three possible values, summarized below,
+        with the default value if the attribute is not present being
+        '<literal>autodetect</literal>'</para>
 
-        <table id="aop-aj-ltw-ltw-tag-attrs" pgwide="1">
-          <title>'<literal>aspectj-weaving</literal>' attribute values</title>
+        <table xml:id="aop-aj-ltw-ltw-tag-attrs" pgwide="1">
+          <title>AspectJ weaving attribute values</title>
 
-          <tgroup cols="2">
+          <tgroup cols="3">
             <colspec align="left" />
 
             <thead>
               <row>
-                <entry>Attribute Value</entry>
+                <entry>Annotation Value</entry>
+                <entry>XML Value</entry>
                 <entry>Explanation</entry>
               </row>
             </thead>
 
             <tbody>
               <row>
+                <entry><para><literal>ENABLED</literal></para></entry>
                 <entry><para><literal>on</literal></para></entry>
                 <entry><para>AspectJ weaving is on, and aspects will be woven
                 at load-time as appropriate.</para></entry>
               </row>
 
               <row>
+                <entry><para><literal>DISABLED</literal></para></entry>
                 <entry><para><literal>off</literal></para></entry>
                 <entry><para>LTW is off... no aspect will be woven at
                 load-time.</para></entry>
               </row>
 
               <row>
+                <entry><para><literal>AUTODETECT</literal></para></entry>
                 <entry><para><literal>autodetect</literal></para></entry>
                 <entry><para>If the Spring LTW infrastructure can find at
                 least one '<filename>META-INF/aop.xml</filename>' file, then
@@ -3678,22 +3729,22 @@ http://www.springframework.org/schema/context
         </table>
       </section>
 
-      <section id="aop-aj-ltw-environments">
+      <section xml:id="aop-aj-ltw-environments">
         <title>Environment-specific configuration</title>
 
         <para>This last section contains any additional settings and
         configuration that you will need when using Spring's LTW support in
         environments such as application servers and web containers.</para>
 
-        <section id="aop-aj-ltw-environment-tomcat">
+        <section xml:id="aop-aj-ltw-environment-tomcat">
           <title>Tomcat</title>
 
-		  <para><ulink url="http://tomcat.apache.org/">Apache Tomcat</ulink>'s default class loader 
-		  does not support class transformation which is why Spring provides an enhanced implementation that
-		  addresses this need. Named <classname>TomcatInstrumentableClassLoader</classname>, the loader works
-		  on Tomcat 5.0 and above and can be registered individually for <emphasis>each</emphasis> web application
-		  as follows:</para>
-		  
+          <para><link xl:href="http://tomcat.apache.org/">Apache Tomcat</link>'s default class loader
+          does not support class transformation which is why Spring provides an enhanced implementation that
+          addresses this need. Named <classname>TomcatInstrumentableClassLoader</classname>, the loader works
+          on Tomcat 5.0 and above and can be registered individually for <emphasis>each</emphasis> web application
+          as follows:</para>
+
           <itemizedlist>
             <listitem>
               <para>Tomcat 6.0.x or higher</para>
@@ -3717,23 +3768,23 @@ http://www.springframework.org/schema/context
 &lt;/Context&gt;</programlisting>
 
                 <para>Apache Tomcat 6.0.x (similar to 5.0.x/5.5.x) series supports several context locations:</para>
-					<itemizedlist>
-						<listitem>server configuration file - <emphasis>$CATALINA_HOME/conf/server.xml</emphasis> </listitem>
-						<listitem>default context configuration - <emphasis>$CATALINA_HOME/conf/context.xml</emphasis> - that
-						affects all deployed web applications</listitem>
-						<listitem>per-web application configuration which can be deployed either on the server-side at
-						<emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml</emphasis> or embedded inside
-						the web-app archive at <emphasis>META-INF/context.xml</emphasis></listitem>
-					</itemizedlist>
+                    <itemizedlist>
+                        <listitem><para>server configuration file - <emphasis>$CATALINA_HOME/conf/server.xml</emphasis></para></listitem>
+                        <listitem><para>default context configuration - <emphasis>$CATALINA_HOME/conf/context.xml</emphasis> - that
+                        affects all deployed web applications</para></listitem>
+                        <listitem><para>per-web application configuration which can be deployed either on the server-side at
+                        <emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml</emphasis> or embedded inside
+                        the web-app archive at <emphasis>META-INF/context.xml</emphasis></para></listitem>
+                    </itemizedlist>
                 <para>For efficiency, the embedded per-web-app configuration style <!--Which one is inside the web-app config style? Reword. TR: REVISED, PLS REVIEW. Same change as for 5.0/5.5-->is
                 recommended because it will impact only applications that use
                 the custom class loader and does not require any changes to the server configuration.
-                See the Tomcat 6.0.x <ulink url="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</ulink>
+                See the Tomcat 6.0.x <link xl:href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</link>
                 for more details about available context locations.</para>
               </listitem>
             </orderedlist>
-	        </listitem>
-              
+            </listitem>
+
           <listitem>
               <para>Tomcat 5.0.x/5.5.x</para>
 
@@ -3756,18 +3807,18 @@ http://www.springframework.org/schema/context
 &lt;/Context&gt;</programlisting>
 
                 <para>Tomcat 5.0.x and 5.5.x series supports several context locations:</para>
-                	<itemizedlist>
-						<listitem>server configuration file - <emphasis>$CATALINA_HOME/conf/server.xml</emphasis> </listitem>
-						<listitem>default context configuration - <emphasis>$CATALINA_HOME/conf/context.xml</emphasis> - that
-						affects all deployed web applications</listitem>
-						<listitem>per-web application configuration which can be deployed either on the server-side at
-						<emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml</emphasis> or embedded inside
-						the web-app archive at <emphasis>META-INF/context.xml</emphasis></listitem>
-					</itemizedlist>
-                <para>For efficiency, the embedded web-app configuration style<!--Which of the preceding is *inside the web-app config style*? Two paths contain webapp. 
+                    <itemizedlist>
+                        <listitem><para>server configuration file - <emphasis>$CATALINA_HOME/conf/server.xml</emphasis></para></listitem>
+                        <listitem><para>default context configuration - <emphasis>$CATALINA_HOME/conf/context.xml</emphasis> - that
+                        affects all deployed web applications</para></listitem>
+                        <listitem><para>per-web application configuration which can be deployed either on the server-side at
+                        <emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml</emphasis> or embedded inside
+                        the web-app archive at <emphasis>META-INF/context.xml</emphasis></para></listitem>
+                    </itemizedlist>
+                <para>For efficiency, the embedded web-app configuration style<!--Which of the preceding is *inside the web-app config style*? Two paths contain webapp.
 TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
-                recommended because it will impact only applications that use the class loader. See the Tomcat 5.x <ulink
-                url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
+                recommended because it will impact only applications that use the class loader. See the Tomcat 5.x <link
+                xl:href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</link>
                 for more details about available context locations.</para>
 
                 <para>Tomcat versions prior to 5.5.20 contained a bug in the
@@ -3775,9 +3826,9 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 <literal>Loader</literal> tag inside
                 <emphasis>server.xml</emphasis> configuration, regardless of whether a class
                 loader is specified or whether it is the official or a custom
-                one. See Tomcat's bugzilla for <ulink
-                url="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
-                details</ulink>.</para><!--Will reader know what Tomcat's bugzilla is and where to find it? TR: OK AS IS. They just need to click on the hyerlink.-->
+                one. See Tomcat's bugzilla for <link
+                xl:href="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
+                details</link>.</para><!--Will reader know what Tomcat's bugzilla is and where to find it? TR: OK AS IS. They just need to click on the hyerlink.-->
 
                 <para>In Tomcat 5.5.x, versions 5.5.20 or later, you should set
                 <emphasis>useSystemClassLoaderAsParent</emphasis> to
@@ -3791,9 +3842,9 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
 &lt;/Context&gt;</programlisting><para>This setting is not needed on Tomcat 6 or higher.</para>
               </listitem>
             </orderedlist>
-            
+
             </listitem>
-            
+
           </itemizedlist>
 
           <para>Alternatively, consider the use of the Spring-provided generic
@@ -3802,29 +3853,29 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
           applications, no matter what ClassLoader they happen to run on.</para>
         </section>
 
-        <section id="aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss">
+        <section xml:id="aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss">
           <title>WebLogic, WebSphere, OC4J, Resin, GlassFish, JBoss</title>
 
           <para>Recent versions of BEA WebLogic (version 10 and above), IBM WebSphere Application Server (version 7 and above),
           Oracle Containers for Java EE (OC4J 10.1.3.1 and above), Resin (3.1 and above) and JBoss (5.x or above)
           provide a ClassLoader that is capable of local instrumentation.
           Spring's native LTW leverages such ClassLoaders to enable AspectJ weaving.
-          You can enable LTW by simply activating <literal>context:load-time-weaver</literal>
+          You can enable LTW by simply activating load-time weaving
           as described earlier. Specifically, you do <emphasis>not</emphasis>
           need to modify the launch script to add
           <literal>-javaagent:path/to/spring-instrument.jar</literal>.</para>
 
-          <para>Note that GlassFish instrumentation-capable ClassLoader is available only in its EAR environment. 
+          <para>Note that GlassFish instrumentation-capable ClassLoader is available only in its EAR environment.
           For GlassFish web applications, follow the Tomcat setup instructions as outlined above.</para>
-          
+
           <para>Note that on JBoss 6.x, the app server scanning needs to be disabled to prevent it from loading the classes
           before the application actually starts. A quick workaround is to add to your artifact a file named
           <filename class="libraryfile">WEB-INF/jboss-scanning.xml</filename> with the following content:</para>
-          
+
           <programlisting language="xml">&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</programlisting>
           </section>
-        
-        <section id="aop-aj-ltw-environment-generic">
+
+        <section xml:id="aop-aj-ltw-environment-generic">
           <title>Generic Java applications</title>
 
           <para>When class instrumentation is required in environments that do not support or
@@ -3835,28 +3886,28 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
           which requires a Spring-specific (but very general) VM agent,
           <filename class="libraryfile">org.springframework.instrument-{version}.jar</filename>
           (previously named <filename class="libraryfile">spring-agent.jar</filename>).</para>
-          
+
           <para>To use it, you must start the virtual machine with the Spring agent, by
           supplying the following JVM options:</para>
           <programlisting>-javaagent:/path/to/org.springframework.instrument-{version}.jar</programlisting>
-          
-		  <para>         
+
+          <para>
           Note that this requires modification of the VM launch script which may prevent you from using this in application server
           environments (depending on your operation policies). Additionally, the JDK agent will instrument the <emphasis>entire</emphasis>
           VM which can prove expensive.</para>
-          <para>For performance reasons, it is recommended to use this configuration only if your target environment 
-          (such as <ulink url="http://www.eclipse.org/jetty/">Jetty</ulink>) does not have (or does not support) a dedicated LTW.</para>
+          <para>For performance reasons, it is recommended to use this configuration only if your target environment
+          (such as <link xl:href="http://www.eclipse.org/jetty/">Jetty</link>) does not have (or does not support) a dedicated LTW.</para>
         </section>
-        
+
       </section>
     </section>
   </section>
 
-  <section id="aop-resources">
+  <section xml:id="aop-resources">
     <title>Further Resources</title>
 
-    <para>More information on AspectJ can be found on the <ulink
-    url="http://www.eclipse.org/aspectj">AspectJ website</ulink>.</para>
+    <para>More information on AspectJ can be found on the <link
+    xl:href="http://www.eclipse.org/aspectj">AspectJ website</link>.</para>
 
     <para>The book <emphasis>Eclipse AspectJ</emphasis> by Adrian Colyer et.
     al. (Addison-Wesley, 2005) provides a comprehensive introduction and

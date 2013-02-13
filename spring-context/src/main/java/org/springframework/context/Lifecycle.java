@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public interface Lifecycle {
 
 	/**
 	 * Check whether this component is currently running.
-	 * <p>In the case of a container, this will return <code>true</code>
+	 * <p>In the case of a container, this will return {@code true}
 	 * only if <i>all</i> components that apply are currently running.
 	 * @return whether the component is currently running
 	 */

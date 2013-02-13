@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,6 +143,22 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		return super.getConfigLocations();
 	}
 
+	@Override
+	public String getApplicationName() {
+		if (this.portletContext == null) {
+			return "";
+		}
+		String name = this.portletContext.getPortletContextName();
+		return (name != null ? name : "");
+	}
+
+	/**
+	 * Create and return a new {@link StandardPortletEnvironment}.
+	 */
+	@Override
+	protected ConfigurableEnvironment createEnvironment() {
+		return new StandardPortletEnvironment();
+	}
 
 	/**
 	 * Register request/session scopes, a {@link PortletContextAwareProcessor}, etc.
@@ -158,14 +174,6 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		PortletApplicationContextUtils.registerPortletApplicationScopes(beanFactory, this.portletContext);
 		PortletApplicationContextUtils.registerEnvironmentBeans(
 				beanFactory, this.servletContext, this.portletContext, this.portletConfig);
-	}
-
-	/**
-	 * Create and return a new {@link StandardPortletEnvironment}.
-	 */
-	@Override
-	protected ConfigurableEnvironment createEnvironment() {
-		return new StandardPortletEnvironment();
 	}
 
 	/**
@@ -190,4 +198,5 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 		super.customizeBeanFactory(beanFactory);
 	}
+
 }

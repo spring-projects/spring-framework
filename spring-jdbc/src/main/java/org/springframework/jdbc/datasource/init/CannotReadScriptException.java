@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,18 @@ package org.springframework.jdbc.datasource.init;
 import org.springframework.core.io.support.EncodedResource;
 
 /**
- * Thrown by {@link ResourceDatabasePopulator} if one of its SQL scripts could
- * not be read during population.
+ * Thrown by {@link ResourceDatabasePopulator} if one of its SQL scripts cannot
+ * be read during population.
  *
  * @author Keith Donald
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class CannotReadScriptException extends RuntimeException {
 
 	/**
-	 * Constructor a new CannotReadScriptException.
-	 * @param resource the resource that could not be read from
+	 * Construct a new {@code CannotReadScriptException}.
+	 * @param resource the resource that cannot be read from
 	 * @param cause the underlying cause of the resource access failure
 	 */
 	public CannotReadScriptException(EncodedResource resource, Throwable cause) {

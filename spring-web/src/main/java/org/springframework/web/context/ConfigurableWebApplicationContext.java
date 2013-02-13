@@ -105,7 +105,7 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 
 	/**
 	 * Return the config locations for this web application context,
-	 * or <code>null</code> if none specified.
+	 * or {@code null} if none specified.
 	 */
 	String[] getConfigLocations();
 

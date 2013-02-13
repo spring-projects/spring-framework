@@ -37,9 +37,14 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	void setTimeout(Long timeout);
 
 	/**
-	 * Set a handler to be invoked if concurrent processing times out.
+	 * Add a handler to invoke when concurrent handling has timed out.
 	 */
-	void setTimeoutHandler(Runnable runnable);
+	void addTimeoutHandler(Runnable runnable);
+
+	/**
+	 * Add a handle to invoke when request processing completes.
+	 */
+	void addCompletionHandler(Runnable runnable);
 
 	/**
 	 * Mark the start of asynchronous request processing so that when the main
@@ -61,17 +66,6 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	 * concurrent execution in an application thread.
 	 */
 	void dispatch();
-
-	/**
-	 * Whether the request was dispatched to the container in order to resume
-	 * processing after concurrent execution in an application thread.
-	 */
-	boolean isDispatched();
-
-	/**
-	 * Add a Runnable to be invoked when request processing completes.
-	 */
-	void addCompletionHandler(Runnable runnable);
 
 	/**
 	 * Whether asynchronous processing has completed.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * allowing for one thread-bound Session per factory. {@link SessionFactoryUtils}
  * and {@link HibernateTemplate} are aware of thread-bound Sessions and participate
  * in such transactions automatically. Using either of those or going through
- * <code>SessionFactory.getCurrentSession()</code> is required for Hibernate
+ * {@code SessionFactory.getCurrentSession()} is required for Hibernate
  * access code that needs to support this transaction handling mechanism.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
@@ -129,6 +129,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
+@SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
@@ -234,7 +235,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
-	 * if set via LocalSessionFactoryBean's <code>setDataSource</code>. Default is "true".
+	 * if set via LocalSessionFactoryBean's {@code setDataSource}. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource, in order
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
@@ -251,7 +252,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * JDBC Connection.
 	 * <p>Default is "true". If you turn this flag off, the transaction manager
 	 * will not support per-transaction isolation levels anymore. It will not
-	 * call <code>Connection.setReadOnly(true)</code> for read-only transactions
+	 * call {@code Connection.setReadOnly(true)} for read-only transactions
 	 * anymore either. If this flag is turned off, no cleanup of a JDBC Connection
 	 * is required after a transaction, since no Connection settings will get modified.
 	 * @see java.sql.Connection#setTransactionIsolation
@@ -274,14 +275,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>Switch this flag to "true" in order to enforce use of a Hibernate-managed Session.
 	 * Note that this requires {@link org.hibernate.SessionFactory#getCurrentSession()}
 	 * to always return a proper Session when called for a Spring-managed transaction;
-	 * transaction begin will fail if the <code>getCurrentSession()</code> call fails.
+	 * transaction begin will fail if the {@code getCurrentSession()} call fails.
 	 * <p>This mode will typically be used in combination with a custom Hibernate
 	 * {@link org.hibernate.context.CurrentSessionContext} implementation that stores
 	 * Sessions in a place other than Spring's TransactionSynchronizationManager.
 	 * It may also be used in combination with Spring's Open-Session-in-View support
 	 * (using Spring's default {@link SpringSessionContext}), in which case it subtly
 	 * differs from the Spring-managed Session mode: The pre-bound Session will <i>not</i>
-	 * receive a <code>clear()</code> call (on rollback) or a <code>disconnect()</code>
+	 * receive a {@code clear()} call (on rollback) or a {@code disconnect()}
 	 * call (on transaction completion) in such a scenario; this is rather left up
 	 * to a custom CurrentSessionContext implementation (if desired).
 	 */
@@ -295,7 +296,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * commit step. Switch this to "true" in order to enforce an explicit early
 	 * flush right <i>before</i> the actual commit step.
 	 * <p>An early flush happens before the before-commit synchronization phase,
-	 * making flushed state visible to <code>beforeCommit</code> callbacks of registered
+	 * making flushed state visible to {@code beforeCommit} callbacks of registered
 	 * {@link org.springframework.transaction.support.TransactionSynchronization}
 	 * objects. Such explicit flush behavior is consistent with Spring-driven
 	 * flushing in a JTA transaction environment, so may also get enforced for
@@ -342,7 +343,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
-	 * Return the current Hibernate entity interceptor, or <code>null</code> if none.
+	 * Return the current Hibernate entity interceptor, or {@code null} if none.
 	 * Resolves an entity interceptor bean name via the bean factory,
 	 * if necessary.
 	 * @throws IllegalStateException if bean name specified but no bean factory set
@@ -758,7 +759,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>Default implementation checks the Session's connection release mode
 	 * to be "on_close". Unfortunately, this requires casting to SessionImpl,
 	 * as of Hibernate 3.1. If that cast doesn't work, we'll simply assume
-	 * we're safe and return <code>true</code>.
+	 * we're safe and return {@code true}.
 	 * @param session the Hibernate Session to check
 	 * @see org.hibernate.impl.SessionImpl#getConnectionReleaseMode()
 	 * @see org.hibernate.ConnectionReleaseMode#ON_CLOSE
@@ -775,7 +776,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy.
+	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
 	 * @param ex HibernateException that occured
@@ -795,7 +796,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Convert the given Hibernate JDBCException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy, using the
+	 * from the {@code org.springframework.dao} hierarchy, using the
 	 * given SQLExceptionTranslator.
 	 * @param ex Hibernate JDBCException that occured
 	 * @param translator the SQLExceptionTranslator to use
@@ -888,7 +889,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public void flush() {
 			try {
-			    this.sessionHolder.getSession().flush();
+				this.sessionHolder.getSession().flush();
 			}
 			catch (HibernateException ex) {
 				throw convertHibernateAccessException(ex);
@@ -899,7 +900,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by <code>doSuspend</code> and <code>doResume</code>.
+	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
 	private static class SuspendedResourcesHolder {
 

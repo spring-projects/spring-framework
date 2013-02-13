@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package org.springframework.test.annotation;
  * testing environment.
  * </p>
  * <p>
- * Concrete implementations must provide a <code>public</code> no-args
+ * Concrete implementations must provide a {@code public} no-args
  * constructor.
  * </p>
  * <p>
@@ -44,7 +44,7 @@ public interface ProfileValueSource {
 	/**
 	 * Get the <em>profile value</em> indicated by the specified key.
 	 * @param key the name of the <em>profile value</em>
-	 * @return the String value of the <em>profile value</em>, or <code>null</code>
+	 * @return the String value of the <em>profile value</em>, or {@code null}
 	 * if there is no <em>profile value</em> with that key
 	 */
 	String get(String key);

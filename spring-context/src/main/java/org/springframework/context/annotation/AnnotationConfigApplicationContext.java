@@ -153,4 +153,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this.scanner.scan(basePackages);
 	}
 
+	@Override
+	protected void prepareRefresh() {
+		this.scanner.clearCache();
+		super.prepareRefresh();
+	}
+
 }

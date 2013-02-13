@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ import org.springframework.util.Assert;
 /**
  * Helper class that simplifies Hibernate data access code. Automatically
  * converts HibernateExceptions into DataAccessExceptions, following the
- * <code>org.springframework.dao</code> exception hierarchy.
+ * {@code org.springframework.dao} exception hierarchy.
  *
- * <p>The central method is <code>execute</code>, supporting Hibernate access code
+ * <p>The central method is {@code execute}, supporting Hibernate access code
  * implementing the {@link HibernateCallback} interface. It provides Hibernate Session
  * handling such that neither the HibernateCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing Hibernate Sessions,
@@ -70,7 +70,7 @@ import org.springframework.util.Assert;
  * instead, based on {@link org.hibernate.SessionFactory#getCurrentSession()}.</b>
  *
  * <p>This class can be considered as direct alternative to working with the raw
- * Hibernate3 Session API (through <code>SessionFactory.getCurrentSession()</code>).
+ * Hibernate3 Session API (through {@code SessionFactory.getCurrentSession()}).
  * The major advantage is its automatic conversion to DataAccessExceptions as well
  * as its capability to fall back to 'auto-commit' style behavior when used outside
  * of transactions. <b>Note that HibernateTemplate will perform its own Session
@@ -82,7 +82,7 @@ import org.springframework.util.Assert;
  * The Spring application context will manage its lifecycle, initializing and
  * shutting down the factory as part of the application.
  *
- * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
+ * <p>Note that operations that return an Iterator (i.e. {@code iterate})
  * are supposed to be used within Spring-driven or JTA-driven transactions
  * (with HibernateTransactionManager, JtaTransactionManager, or EJB CMT).
  * Else, the Iterator won't be able to read results from its ResultSet anymore,
@@ -91,8 +91,8 @@ import org.springframework.util.Assert;
  * <p>Lazy loading will also just work with an open Hibernate Session,
  * either within a transaction or within OpenSessionInViewFilter/Interceptor.
  * Furthermore, some operations just make sense within transactions,
- * for example: <code>contains</code>, <code>evict</code>, <code>lock</code>,
- * <code>flush</code>, <code>clear</code>.
+ * for example: {@code contains}, {@code evict}, {@code lock},
+ * {@code flush}, {@code clear}.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -154,22 +154,22 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Set if a new {@link Session} should be created when no transactional
-	 * <code>Session</code> can be found for the current thread.
-	 * The default value is <code>true</code>.
-	 * <p><code>HibernateTemplate</code> is aware of a corresponding
-	 * <code>Session</code> bound to the current thread, for example when using
-	 * {@link HibernateTransactionManager}. If <code>allowCreate</code> is
-	 * <code>true</code>, a new non-transactional <code>Session</code> will be
+	 * {@code Session} can be found for the current thread.
+	 * The default value is {@code true}.
+	 * <p>{@code HibernateTemplate} is aware of a corresponding
+	 * {@code Session} bound to the current thread, for example when using
+	 * {@link HibernateTransactionManager}. If {@code allowCreate} is
+	 * {@code true}, a new non-transactional {@code Session} will be
 	 * created if none is found, which needs to be closed at the end of the operation.
-	 * If <code>false</code>, an {@link IllegalStateException} will get thrown in
+	 * If {@code false}, an {@link IllegalStateException} will get thrown in
 	 * this case.
-	 * <p><b>NOTE: As of Spring 2.5, switching <code>allowCreate</code>
-	 * to <code>false</code> will delegate to Hibernate's
+	 * <p><b>NOTE: As of Spring 2.5, switching {@code allowCreate}
+	 * to {@code false} will delegate to Hibernate's
 	 * {@link org.hibernate.SessionFactory#getCurrentSession()} method,</b>
 	 * which - with Spring-based setup - will by default delegate to Spring's
-	 * <code>SessionFactoryUtils.getSession(sessionFactory, false)</code>.
+	 * {@code SessionFactoryUtils.getSession(sessionFactory, false)}.
 	 * This mode also allows for custom Hibernate CurrentSessionContext strategies
-	 * to be plugged in, whereas <code>allowCreate</code> set to <code>true</code>
+	 * to be plugged in, whereas {@code allowCreate} set to {@code true}
 	 * will always use a Spring-managed Hibernate Session.
 	 * @see SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
@@ -211,7 +211,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Set whether to expose the native Hibernate Session to
 	 * HibernateCallback code.
 	 * <p>Default is "false": a Session proxy will be returned, suppressing
-	 * <code>close</code> calls and automatically applying query cache
+	 * {@code close} calls and automatically applying query cache
 	 * settings and transaction timeouts.
 	 * @see HibernateCallback
 	 * @see org.hibernate.Session
@@ -354,7 +354,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * <p>This execute variant overrides the template-wide
 	 * {@link #isAlwaysUseNewSession() "alwaysUseNewSession"} setting.
 	 * @param action callback object that specifies the Hibernate action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public <T> T executeWithNewSession(HibernateCallback<T> action) {
@@ -367,7 +367,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * <p>This execute variant overrides the template-wide
 	 * {@link #isExposeNativeSession() "exposeNativeSession"} setting.
 	 * @param action callback object that specifies the Hibernate action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public <T> T executeWithNativeSession(HibernateCallback<T> action) {
@@ -381,7 +381,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * even if there is a pre-bound transactional Session
 	 * @param enforceNativeSession whether to enforce exposure of the native
 	 * Hibernate Session to callback code
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	protected <T> T doExecute(HibernateCallback<T> action, boolean enforceNewSession, boolean enforceNativeSession)
@@ -443,7 +443,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * JDBC Connection as a transactional Session, if applicable), a pre-bound
 	 * Session in case of "allowCreate" turned off, and a pre-bound or new Session
 	 * otherwise (new only if no transactional or otherwise pre-bound Session exists).
-	 * @return the Session to use (never <code>null</code>)
+	 * @return the Session to use (never {@code null})
 	 * @see SessionFactoryUtils#getSession
 	 * @see SessionFactoryUtils#getNewSession
 	 * @see #setAlwaysUseNewSession
@@ -1160,7 +1160,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	/**
 	 * Check whether write operations are allowed on the given Session.
 	 * <p>Default implementation throws an InvalidDataAccessApiUsageException in
-	 * case of <code>FlushMode.MANUAL</code>. Can be overridden in subclasses.
+	 * case of {@code FlushMode.MANUAL}. Can be overridden in subclasses.
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
 	 * @see #setCheckWriteOperations

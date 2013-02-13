@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="aop-api"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="aop-api">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Spring AOP APIs</title>
 
-  <section id="aop-api-introduction">
+  <section xml:id="aop-api-introduction">
     <title>Introduction</title>
 
     <para>The previous chapter described the Spring 2.0 and later version's
@@ -19,13 +23,13 @@
     described in this chapter is fully supported in Spring 3.0.</para>
   </section>
 
-  <section id="aop-api-pointcuts">
+  <section xml:id="aop-api-pointcuts">
     <title>Pointcut API in Spring</title>
 
     <para>Let's look at how Spring handles the crucial pointcut
     concept.</para>
 
-    <section id="aop-api-concepts">
+    <section xml:id="aop-api-concepts">
       <title>Concepts</title>
 
       <para>Spring's pointcut model enables pointcut reuse independent of
@@ -93,7 +97,7 @@
       </tip>
     </section>
 
-    <section id="aop-api-pointcut-ops">
+    <section xml:id="aop-api-pointcut-ops">
       <title>Operations on pointcuts</title>
 
       <para>Spring supports operations on pointcuts: notably,
@@ -123,7 +127,7 @@
       </itemizedlist>
     </section>
 
-    <section id="aop-api-pointcuts-aspectj">
+    <section xml:id="aop-api-pointcuts-aspectj">
       <title>AspectJ expression pointcuts</title>
 
       <para>Since 2.0, the most important type of pointcut used by Spring is
@@ -135,14 +139,14 @@
       pointcut primitives.</para>
     </section>
 
-    <section id="aop-api-pointcuts-impls">
+    <section xml:id="aop-api-pointcuts-impls">
       <title>Convenience pointcut implementations</title>
 
       <para>Spring provides several convenient pointcut implementations. Some
       can be used out of the box; others are intended to be subclassed in
       application-specific pointcuts.</para>
 
-      <section id="aop-api-pointcuts-static">
+      <section xml:id="aop-api-pointcuts-static">
         <title>Static pointcuts</title>
 
         <para>Static pointcuts are based on method and target class, and
@@ -155,7 +159,7 @@
         <para>Let's consider some static pointcut implementations included
         with Spring.</para>
 
-        <section id="aop-api-pointcuts-regex">
+        <section xml:id="aop-api-pointcuts-regex">
           <title>Regular expression pointcuts</title>
 
           <para>One obvious way to specify static pointcuts is regular
@@ -172,7 +176,7 @@
 
           <para>The usage is shown below:</para>
 
-          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulatePointcut" 
+          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulatePointcut"
     class="org.springframework.aop.support.JdkRegexpMethodPointcut"&gt;
     &lt;property name="patterns"&gt;
         &lt;list&gt;
@@ -191,7 +195,7 @@
           the one bean encapsulates both pointcut and advice, as shown
           below:</para>
 
-          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulateAdvisor" 
+          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulateAdvisor"
     class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
     &lt;property name="advice"&gt;
         &lt;ref local="beanNameOfAopAllianceInterceptor"/&gt;
@@ -208,7 +212,7 @@
           with any Advice type.</para>
         </section>
 
-        <section id="aop-api-pointcuts-attribute-driven">
+        <section xml:id="aop-api-pointcuts-attribute-driven">
           <title>Attribute-driven pointcuts</title>
 
           <para>An important type of static pointcut is a
@@ -217,7 +221,7 @@
         </section>
       </section>
 
-      <section id="aop-api-pointcuts-dynamic">
+      <section xml:id="aop-api-pointcuts-dynamic">
         <title>Dynamic pointcuts</title>
 
         <para>Dynamic pointcuts are costlier to evaluate than static
@@ -229,7 +233,7 @@
         <para>The main example is the <literal>control flow</literal>
         pointcut.</para>
 
-        <section id="aop-api-pointcuts-cflow">
+        <section xml:id="aop-api-pointcuts-cflow">
           <title>Control flow pointcuts</title>
 
           <para>Spring control flow pointcuts are conceptually similar to
@@ -252,7 +256,7 @@
       </section>
     </section>
 
-    <section id="aop-api-pointcuts-superclasses">
+    <section xml:id="aop-api-pointcuts-superclasses">
       <title>Pointcut superclasses</title>
 
       <para>Spring provides useful pointcut superclasses to help you to
@@ -274,7 +278,7 @@
       RC2 and above.</para>
     </section>
 
-    <section id="aop-api-pointcuts-custom">
+    <section xml:id="aop-api-pointcuts-custom">
       <title>Custom pointcuts</title>
 
       <para>Because pointcuts in Spring AOP are Java classes, rather than
@@ -291,12 +295,12 @@
     </section>
   </section>
 
-  <section id="aop-api-advice">
+  <section xml:id="aop-api-advice">
     <title>Advice API in Spring</title>
 
     <para>Let's now look at how Spring AOP handles advice.</para>
 
-    <section id="aop-api-advice-lifecycle">
+    <section xml:id="aop-api-advice-lifecycle">
       <title>Advice lifecycles</title>
 
       <para>Each advice is a Spring bean. An advice instance can be shared
@@ -317,14 +321,14 @@
       the same AOP proxy.</para>
     </section>
 
-    <section id="aop-api-advice-types">
+    <section xml:id="aop-api-advice-types">
       <title>Advice types in Spring</title>
 
       <para>Spring provides several advice types out of the box, and is
       extensible to support arbitrary advice types. Let us look at the basic
       concepts and standard advice types.</para>
 
-      <section id="aop-api-advice-around">
+      <section xml:id="aop-api-advice-around">
         <title>Interception around advice</title>
 
         <para>The most fundamental advice type in Spring is
@@ -335,7 +339,7 @@
         around advice should implement the following interface:</para>
 
         <programlisting language="java">public interface MethodInterceptor extends Interceptor {
-  
+
     Object invoke(MethodInvocation invocation) throws Throwable;
 }</programlisting>
 
@@ -379,7 +383,7 @@
         </note>
       </section>
 
-      <section id="aop-api-advice-before">
+      <section xml:id="aop-api-advice-before">
         <title>Before advice</title>
 
         <para>A simpler advice type is a <emphasis role="bold">before
@@ -422,8 +426,8 @@
         ++count;
     }
 
-    public int getCount() { 
-        return count; 
+    public int getCount() {
+        return count;
     }
 }</programlisting>
 
@@ -432,7 +436,7 @@
         </tip>
       </section>
 
-      <section id="aop-api-advice-throws">
+      <section xml:id="aop-api-advice-throws">
         <title>Throws advice</title>
 
         <para><emphasis role="bold">Throws advice</emphasis> is invoked after
@@ -484,7 +488,7 @@
     public void afterThrowing(RemoteException ex) throws Throwable {
         // Do something with remote exception
     }
- 
+
     public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
         // Do something with all arguments
     }
@@ -506,7 +510,7 @@
         </tip>
       </section>
 
-      <section id="aop-api-advice-after-returning">
+      <section xml:id="aop-api-advice-after-returning">
         <title>After Returning advice</title>
 
         <para>An after returning advice in Spring must implement the
@@ -515,7 +519,7 @@
 
         <programlisting language="java">public interface AfterReturningAdvice extends Advice {
 
-    void afterReturning(Object returnValue, Method m, Object[] args, Object target) 
+    void afterReturning(Object returnValue, Method m, Object[] args, Object target)
             throws Throwable;
 }</programlisting>
 
@@ -549,30 +553,30 @@
         </tip>
       </section>
 
-      <section id="aop-api-advice-introduction">
-         
+      <section xml:id="aop-api-advice-introduction">
+
 
         <title>Introduction advice</title>
 
-         
+
 
         <para>Spring treats introduction advice as a special kind of
         interception advice.</para>
 
-         
+
 
         <para>Introduction requires an <literal>IntroductionAdvisor</literal>,
         and an <literal>IntroductionInterceptor</literal>, implementing the
         following interface:</para>
 
-         
+
 
         <programlisting language="java">public interface IntroductionInterceptor extends MethodInterceptor {
 
     boolean implementsInterface(Class intf);
 }</programlisting>
 
-         
+
 
         <para>The <literal>invoke() </literal>method inherited from the AOP
         Alliance <literal>MethodInterceptor</literal> interface must implement
@@ -581,53 +585,47 @@
         the method call - it cannot invoke
         <literal>proceed()</literal>.</para>
 
-         
+
 
         <para>Introduction advice cannot be used with any pointcut, as it
         applies only at class, rather than method, level. You can only use
         introduction advice with the <literal>IntroductionAdvisor</literal>,
         which has the following methods:</para>
 
-         
+
 
         <programlisting language="java">public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
-	ClassFilter getClassFilter();
+    ClassFilter getClassFilter();
 
-	void validateInterfaces() throws IllegalArgumentException;
+    void validateInterfaces() throws IllegalArgumentException;
 }
 
 public interface IntroductionInfo {
 
-	Class[] getInterfaces();
+    Class[] getInterfaces();
 }</programlisting>
 
-         
+
 
         <para>There is no <interfacename>MethodMatcher</interfacename>, and
         hence no <interfacename>Pointcut</interfacename>, associated with
         introduction advice. Only class filtering is logical.</para>
 
-         
+
 
         <para>The <literal>getInterfaces()</literal> method returns the
         interfaces introduced by this advisor.</para>
 
-         The 
-
-        <literal>validateInterfaces()</literal>
-
-         method is used internally to see whether or not the introduced interfaces can be implemented by the configured 
-
-        <literal>IntroductionInterceptor</literal>
-
-         . 
+        <para>The <literal>validateInterfaces()</literal> method is used internally to
+        see whether or not the introduced interfaces can be implemented by the configured
+        <literal>IntroductionInterceptor</literal>.</para>
 
         <para>Let's look at a simple example from the Spring test suite. Let's
         suppose we want to introduce the following interface to one or more
         objects:</para>
 
-         
+
 
         <para>
           <programlisting language="java">public interface Lockable {
@@ -637,7 +635,7 @@ public interface IntroductionInfo {
 }</programlisting>
         </para>
 
-         
+
 
         <para>This illustrates a <emphasis role="bold">mixin</emphasis>. We
         want to be able to cast advised objects to Lockable, whatever their
@@ -647,7 +645,7 @@ public interface IntroductionInfo {
         provides the ability to make objects immutable, without them having
         any knowledge of it: a good example of AOP.</para>
 
-         
+
 
         <para>Firstly, we'll need an
         <literal>IntroductionInterceptor</literal> that does the heavy
@@ -658,7 +656,7 @@ public interface IntroductionInfo {
         <literal>DelegatingIntroductionInterceptor</literal> is best for most
         cases.</para>
 
-         
+
 
         <para>The <literal>DelegatingIntroductionInterceptor</literal> is
         designed to delegate an introduction to an actual implementation of
@@ -682,7 +680,7 @@ public interface IntroductionInfo {
         will conceal any implementation of the same interface by the
         target.</para>
 
-         
+
 
         <para>Thus LockMixin subclasses
         <literal>DelegatingIntroductionInterceptor</literal> and implements
@@ -690,16 +688,16 @@ public interface IntroductionInfo {
         can be supported for introduction, so we don't need to specify that.
         We could introduce any number of interfaces in this way.</para>
 
-         
+
 
         <para>Note the use of the <literal>locked</literal> instance variable.
         This effectively adds additional state to that held in the target
         object.</para>
 
-         
+
 
         <para>
-          <programlisting language="java">public class LockMixin extends DelegatingIntroductionInterceptor 
+          <programlisting language="java">public class LockMixin extends DelegatingIntroductionInterceptor
     implements Lockable {
 
     private boolean locked;
@@ -725,7 +723,7 @@ public interface IntroductionInfo {
 }</programlisting>
         </para>
 
-         
+
 
         <para>Often it isn't necessary to override the <literal>invoke()
         </literal>method: the
@@ -735,7 +733,7 @@ public interface IntroductionInfo {
         present case, we need to add a check: no setter method can be invoked
         if in locked mode.</para>
 
-         
+
 
         <para>The introduction advisor required is simple. All it needs to do
         is hold a distinct <literal>LockMixin</literal> instance, and specify
@@ -746,7 +744,7 @@ public interface IntroductionInfo {
         <literal>LockMixin</literal>, so we simply create it using
         <literal>new</literal>.</para>
 
-         
+
 
         <para>
           <programlisting language="java">public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
@@ -757,7 +755,7 @@ public interface IntroductionInfo {
 }</programlisting>
         </para>
 
-         
+
 
         <para>We can apply this advisor very simply: it requires no
         configuration. (However, it <emphasis>is</emphasis> necessary: It's
@@ -768,7 +766,7 @@ public interface IntroductionInfo {
         hence <literal>LockMixin</literal>, for each advised object. The
         advisor comprises part of the advised object's state.</para>
 
-         
+
 
         <para>We can apply this advisor programmatically, using the
         <literal>Advised.addAdvisor() </literal>method, or (the recommended
@@ -776,12 +774,12 @@ public interface IntroductionInfo {
         choices discussed below, including "auto proxy creators," correctly
         handle introductions and stateful mixins.</para>
 
-         
+
       </section>
     </section>
   </section>
 
-  <section id="aop-api-advisor">
+  <section xml:id="aop-api-advisor">
     <title>Advisor API in Spring</title>
 
     <para>In Spring, an Advisor is an aspect that contains just a single
@@ -800,7 +798,7 @@ public interface IntroductionInfo {
     automatically create the necessary interceptor chain.</para>
   </section>
 
-  <section id="aop-pfb">
+  <section xml:id="aop-pfb">
     <title>Using the ProxyFactoryBean to create AOP proxies</title>
 
     <para>If you're using the Spring IoC container (an ApplicationContext or
@@ -820,7 +818,7 @@ public interface IntroductionInfo {
     and their ordering. However, there are simpler options that are preferable
     if you don't need such control.</para>
 
-    <section id="aop-pfb-1">
+    <section xml:id="aop-pfb-1">
       <title>Basics</title>
 
       <para>The <literal>ProxyFactoryBean</literal>, like other Spring
@@ -843,7 +841,7 @@ public interface IntroductionInfo {
       pluggability provided by Dependency Injection.</para>
     </section>
 
-    <section id="aop-pfb-2">
+    <section xml:id="aop-pfb-2">
       <title>JavaBean properties</title>
 
       <para>In common with most <interfacename>FactoryBean</interfacename>
@@ -949,7 +947,7 @@ public interface IntroductionInfo {
       </itemizedlist>
     </section>
 
-    <section id="aop-pfb-proxy-types">
+    <section xml:id="aop-pfb-proxy-types">
       <title>JDK- and CGLIB-based proxies</title>
 
       <para>This section serves as the definitive documentation on how the
@@ -1018,7 +1016,7 @@ public interface IntroductionInfo {
       significantly less work, and less prone to typos.</para>
     </section>
 
-    <section id="aop-api-proxying-intf">
+    <section xml:id="aop-api-proxying-intf">
       <title>Proxying interfaces</title>
 
       <para>Let's look at a simple example of
@@ -1054,7 +1052,7 @@ public interface IntroductionInfo {
 &lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"&gt;
 &lt;/bean&gt;
 
-&lt;bean id="person" 
+&lt;bean id="person"
     class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
     &lt;property name="proxyInterfaces" value="com.mycompany.Person"/&gt;
 
@@ -1141,7 +1139,7 @@ public interface IntroductionInfo {
       example, in certain test scenarios.</para>
     </section>
 
-    <section id="aop-api-proxying-class">
+    <section xml:id="aop-api-proxying-class">
       <title>Proxying classes</title>
 
       <para>What if you need to proxy a class, rather than one or more
@@ -1190,7 +1188,7 @@ public interface IntroductionInfo {
       decisive consideration in this case.</para>
     </section>
 
-    <section id="aop-global-advisors">
+    <section xml:id="aop-global-advisors">
       <title>Using 'global' advisors</title>
 
       <para>By appending an asterisk to an interceptor name, all advisors with
@@ -1212,7 +1210,7 @@ public interface IntroductionInfo {
     </section>
   </section>
 
-  <section id="aop-concise-proxy">
+  <section xml:id="aop-concise-proxy">
     <title>Concise proxy definitions</title>
 
     <para>Especially when defining transactional proxies, you may end up with
@@ -1275,7 +1273,7 @@ public interface IntroductionInfo {
     it.</para>
   </section>
 
-  <section id="aop-prog">
+  <section xml:id="aop-prog">
     <title>Creating AOP proxies programmatically with the ProxyFactory</title>
 
     <para>It's easy to create AOP proxies programmatically using Spring. This
@@ -1312,7 +1310,7 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     </tip>
   </section>
 
-  <section id="aop-api-advised">
+  <section xml:id="aop-api-advised">
     <title>Manipulating advised objects</title>
 
     <para>However you create AOP proxies, you can manipulate them using the
@@ -1324,7 +1322,7 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
 
 void addAdvice(Advice advice) throws AopConfigException;
 
-void addAdvice(int pos, Advice advice) 
+void addAdvice(int pos, Advice advice)
         throws AopConfigException;
 
 void addAdvisor(Advisor advisor) throws AopConfigException;
@@ -1406,7 +1404,7 @@ assertEquals("Added two advisors",
     advice modification is known not to be required.</para>
   </section>
 
-  <section id="aop-autoproxy">
+  <section xml:id="aop-autoproxy">
     <title>Using the "autoproxy" facility</title>
 
     <para>So far we've considered explicit creation of AOP proxies using a
@@ -1437,13 +1435,13 @@ assertEquals("Added two advisors",
       </listitem>
     </itemizedlist>
 
-    <section id="aop-autoproxy-choices">
+    <section xml:id="aop-autoproxy-choices">
       <title>Autoproxy bean definitions</title>
 
       <para>The <literal>org.springframework.aop.framework.autoproxy</literal>
       package provides the following standard autoproxy creators.</para>
 
-      <section id="aop-api-autoproxy">
+      <section xml:id="aop-api-autoproxy">
         <title>BeanNameAutoProxyCreator</title>
 
         <para>The <literal>BeanNameAutoProxyCreator</literal> class is a
@@ -1480,7 +1478,7 @@ assertEquals("Added two advisors",
         differently to different beans.</para>
       </section>
 
-      <section id="aop-api-autoproxy-default">
+      <section xml:id="aop-api-autoproxy-default">
         <title>DefaultAdvisorAutoProxyCreator</title>
 
         <para>A more general and extremely powerful auto proxy creator is
@@ -1559,7 +1557,7 @@ assertEquals("Added two advisors",
         configurable order value; the default setting is unordered.</para>
       </section>
 
-      <section id="aop-api-autoproxy-abstract">
+      <section xml:id="aop-api-autoproxy-abstract">
         <title>AbstractAdvisorAutoProxyCreator</title>
 
         <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
@@ -1570,7 +1568,7 @@ assertEquals("Added two advisors",
       </section>
     </section>
 
-    <section id="aop-autoproxy-metadata">
+    <section xml:id="aop-autoproxy-metadata">
       <title>Using metadata-driven auto-proxying</title>
 
       <para>A particularly important type of autoproxying is driven by
@@ -1660,7 +1658,7 @@ assertEquals("Added two advisors",
       be specific to the application's transaction requirements (typically
       JTA, as in this example, or Hibernate, JDO or JDBC):</para>
 
-      <programlisting language="xml">&lt;bean id="transactionManager" 
+      <programlisting language="xml">&lt;bean id="transactionManager"
     class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
 
       <tip>
@@ -1718,7 +1716,7 @@ assertEquals("Added two advisors",
     </section>
   </section>
 
-  <section id="aop-targetsource">
+  <section xml:id="aop-targetsource">
     <title>Using TargetSources</title>
 
     <para>Spring offers the concept of a <emphasis>TargetSource</emphasis>,
@@ -1747,7 +1745,7 @@ assertEquals("Added two advisors",
       Spring to create a new target instance when required.</para>
     </tip>
 
-    <section id="aop-ts-swap">
+    <section xml:id="aop-ts-swap">
       <title>Hot swappable target sources</title>
 
       <para>The
@@ -1761,7 +1759,7 @@ assertEquals("Added two advisors",
       <para>You can change the target via the <literal>swap()</literal> method
       on HotSwappableTargetSource as follows:</para>
 
-      <para><programlisting language="java">HotSwappableTargetSource swapper = 
+      <para><programlisting language="java">HotSwappableTargetSource swapper =
     (HotSwappableTargetSource) beanFactory.getBean("swapper");
 Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
@@ -1788,7 +1786,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       with arbitrary advice.</para>
     </section>
 
-    <section id="aop-ts-pool">
+    <section xml:id="aop-ts-pool">
       <title>Pooling target sources</title>
 
       <para>Using a pooling target source provides a similar programming model
@@ -1809,7 +1807,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para>Sample configuration is shown below:</para>
 
-      <para><programlisting language="xml">&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject" 
+      <para><programlisting language="xml">&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject"
     scope="prototype"&gt;
   ... properties omitted
 &lt;/bean&gt;
@@ -1872,7 +1870,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting>
       set the TargetSources used by any autoproxy creator.</para>
     </section>
 
-    <section id="aop-ts-prototype">
+    <section xml:id="aop-ts-prototype">
       <title>Prototype target sources</title>
 
       <para>Setting up a "prototype" target source is similar to a pooling
@@ -1896,7 +1894,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting>
       must be a prototype bean definition.</para>
     </section>
 
-    <section id="aop-ts-threadlocal">
+    <section xml:id="aop-ts-threadlocal">
       <title><classname>ThreadLocal</classname> target sources</title>
 
       <para><classname>ThreadLocal</classname> target sources are useful if
@@ -1928,7 +1926,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting>
     </section>
   </section>
 
-  <section id="aop-extensibility">
+  <section xml:id="aop-extensibility">
     <title>Defining new <interfacename>Advice</interfacename> types</title>
 
     <para>Spring AOP is designed to be extensible. While the interception
@@ -1949,7 +1947,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting>
     Javadocs for further information.</para>
   </section>
 
-  <section id="aop-api-resources">
+  <section xml:id="aop-api-resources">
     <title>Further resources</title>
 
     <para>Please refer to the Spring sample applications for further examples

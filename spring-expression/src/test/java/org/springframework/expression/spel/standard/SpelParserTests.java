@@ -382,8 +382,7 @@ public class SpelParserTests {
 
 		checkNumberError("3.4L", SpelMessage.REAL_CANNOT_BE_LONG);
 
-		// Number is parsed as a float, but immediately promoted to a double
-		checkNumber("3.5f", 3.5d, Double.class);
+		checkNumber("3.5f", 3.5f, Float.class);
 
 		checkNumber("1.2e3", 1.2e3d, Double.class);
 		checkNumber("1.2e+3", 1.2e3d, Double.class);

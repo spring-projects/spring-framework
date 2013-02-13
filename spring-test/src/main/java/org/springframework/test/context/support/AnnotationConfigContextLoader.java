@@ -16,37 +16,31 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that loads
  * bean definitions from annotated classes.
- * 
+ *
  * <p>See the Javadoc for
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
  * for a definition of <em>annotated class</em>.
- * 
- * <p>Note: <code>AnnotationConfigContextLoader</code> supports <em>annotated classes</em>
+ *
+ * <p>Note: {@code AnnotationConfigContextLoader} supports <em>annotated classes</em>
  * rather than the String-based resource locations defined by the legacy
  * {@link org.springframework.test.context.ContextLoader ContextLoader} API. Thus,
- * although <code>AnnotationConfigContextLoader</code> extends
- * <code>AbstractGenericContextLoader</code>, <code>AnnotationConfigContextLoader</code>
+ * although {@code AnnotationConfigContextLoader} extends
+ * {@code AbstractGenericContextLoader}, {@code AnnotationConfigContextLoader}
  * does <em>not</em> support any String-based methods defined by
- * <code>AbstractContextLoader</code> or <code>AbstractGenericContextLoader</code>.
- * Consequently, <code>AnnotationConfigContextLoader</code> should chiefly be
+ * {@code AbstractContextLoader} or {@code AbstractGenericContextLoader}.
+ * Consequently, {@code AnnotationConfigContextLoader} should chiefly be
  * considered a {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
  * rather than a {@link org.springframework.test.context.ContextLoader ContextLoader}.
  *
@@ -66,15 +60,15 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * Process <em>annotated classes</em> in the supplied {@link ContextConfigurationAttributes}.
 	 *
-	 * <p>If the <em>annotated classes</em> are <code>null</code> or empty and
-	 * {@link #isGenerateDefaultLocations()} returns <code>true</code>, this
-	 * <code>SmartContextLoader</code> will attempt to {@link
+	 * <p>If the <em>annotated classes</em> are {@code null} or empty and
+	 * {@link #isGenerateDefaultLocations()} returns {@code true}, this
+	 * {@code SmartContextLoader} will attempt to {@link
 	 * #detectDefaultConfigurationClasses detect default configuration classes}.
 	 * If defaults are detected they will be
 	 * {@link ContextConfigurationAttributes#setClasses(Class[]) set} in the
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
-	 * 
+	 *
 	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #isGenerateDefaultLocations()
@@ -89,86 +83,25 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 	// --- AnnotationConfigContextLoader ---------------------------------------
 
-	private boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {
-		Assert.notNull(clazz, "Class must not be null");
-		int modifiers = clazz.getModifiers();
-		return (Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers));
-	}
-
-	/**
-	 * Determine if the supplied {@link Class} meets the criteria for being
-	 * considered a <em>default configuration class</em> candidate.
-	 *
-	 * <p>Specifically, such candidates:
-	 *
-	 * <ul>
-	 * <li>must not be <code>null</code></li>
-	 * <li>must not be <code>private</code></li>
-	 * <li>must not be <code>final</code></li>
-	 * <li>must be <code>static</code></li>
-	 * <li>must be annotated with {@code @Configuration}</li>
-	 * </ul>
-	 *
-	 * @param clazz the class to check
-	 * @return <code>true</code> if the supplied class meets the candidate criteria
-	 */
-	private boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
-		return clazz != null && isStaticNonPrivateAndNonFinal(clazz) && clazz.isAnnotationPresent(Configuration.class);
-	}
-
 	/**
 	 * Detect the default configuration classes for the supplied test class.
 	 *
-	 * <p>The returned class array will contain all static inner classes of
-	 * the supplied class that meet the requirements for {@code @Configuration}
-	 * class implementations as specified in the documentation for
-	 * {@link Configuration @Configuration}.
+	 * <p>The default implementation simply delegates to
+	 * {@link AnnotationConfigContextLoaderUtils#detectDefaultConfigurationClasses(Class)}.
 	 *
-	 * <p>The implementation of this method adheres to the contract defined in the
-	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
-	 * SPI. Specifically, this method uses introspection to detect default
-	 * configuration classes that comply with the constraints required of
-	 * {@code @Configuration} class implementations. If a potential candidate
-	 * configuration class does not meet these requirements, this method will log a
-	 * warning, and the potential candidate class will be ignored.
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @return an array of default configuration classes, potentially empty but
-	 * never <code>null</code>
+	 * never {@code null}
+	 * @see AnnotationConfigContextLoaderUtils
 	 */
 	protected Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
-		Assert.notNull(declaringClass, "Declaring class must not be null");
-
-		List<Class<?>> configClasses = new ArrayList<Class<?>>();
-
-		for (Class<?> candidate : declaringClass.getDeclaredClasses()) {
-			if (isDefaultConfigurationClassCandidate(candidate)) {
-				configClasses.add(candidate);
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format(
-						"Ignoring class [%s]; it must be static, non-private, non-final, and annotated "
-								+ "with @Configuration to be considered a default configuration class.",
-						candidate.getName()));
-				}
-			}
-		}
-
-		if (configClasses.isEmpty()) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Could not detect default configuration classes for test class [%s]: "
-						+ "%s does not declare any static, non-private, non-final, inner classes "
-						+ "annotated with @Configuration.", declaringClass.getName(), declaringClass.getSimpleName()));
-			}
-		}
-
-		return configClasses.toArray(new Class<?>[configClasses.size()]);
+		return AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses(declaringClass);
 	}
 
 	// --- AbstractContextLoader -----------------------------------------------
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -183,7 +116,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -198,7 +131,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -222,8 +155,8 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
 	 * bean definitions.
 	 *
-	 * <p>Note that this method does not call {@link #createBeanDefinitionReader()}
-	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
+	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
+	 * since {@code AnnotatedBeanDefinitionReader} is not an instance of
 	 * {@link BeanDefinitionReader}.
 	 *
 	 * @param context the context in which the annotated classes should be registered
@@ -241,7 +174,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.

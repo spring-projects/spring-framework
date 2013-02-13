@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http;
 
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents an HTTP request or response entity, consisting of headers and body.
@@ -123,6 +124,24 @@ public class HttpEntity<T> {
 	}
 
 	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof HttpEntity)) {
+			return false;
+		}
+		HttpEntity<?> otherEntity = (HttpEntity<?>) other;
+		return (ObjectUtils.nullSafeEquals(this.headers, otherEntity.headers) &&
+				ObjectUtils.nullSafeEquals(this.body, otherEntity.body));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.headers) * 29 + ObjectUtils.nullSafeHashCode(this.body);
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
 		if (body != null) {
@@ -137,4 +156,5 @@ public class HttpEntity<T> {
 		builder.append('>');
 		return builder.toString();
 	}
+
 }

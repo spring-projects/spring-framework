@@ -16,14 +16,13 @@
 
 package org.springframework.context.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -33,6 +32,8 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.env.MockEnvironment;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Arjen Poutsma
  * @author Dave Syer
@@ -40,6 +41,11 @@ import org.springframework.mock.env.MockEnvironment;
  * @since 2.5.6
  */
 public class ContextNamespaceHandlerTests {
+
+	@After
+	public void tearDown() {
+		System.getProperties().remove("foo");
+	}
 
 	@Test
 	public void propertyPlaceholder() throws Exception {

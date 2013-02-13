@@ -23,7 +23,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -42,9 +42,9 @@ public class ContentNegotiationConfigurerTests {
 
 	@Before
 	public void setup() {
-		this.configurer = new ContentNegotiationConfigurer();
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
+		this.configurer = new ContentNegotiationConfigurer(this.servletRequest.getServletContext());
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class ContentNegotiationConfigurerTests {
 
 	@Test
 	public void addMediaTypes() throws Exception {
-		this.configurer.addMediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
+		this.configurer.mediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		this.servletRequest.setRequestURI("/flower.json");
@@ -80,9 +80,9 @@ public class ContentNegotiationConfigurerTests {
 
 	@Test
 	public void favorParameter() throws Exception {
-		this.configurer.setFavorParameter(true);
-		this.configurer.setParameterName("f");
-		this.configurer.addMediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
+		this.configurer.favorParameter(true);
+		this.configurer.parameterName("f");
+		this.configurer.mediaTypes(Collections.singletonMap("json", MediaType.APPLICATION_JSON));
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		this.servletRequest.setRequestURI("/flower");
@@ -93,7 +93,7 @@ public class ContentNegotiationConfigurerTests {
 
 	@Test
 	public void ignoreAcceptHeader() throws Exception {
-		this.configurer.setIgnoreAcceptHeader(true);
+		this.configurer.ignoreAcceptHeader(true);
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		this.servletRequest.setRequestURI("/flower");
@@ -104,7 +104,7 @@ public class ContentNegotiationConfigurerTests {
 
 	@Test
 	public void setDefaultContentType() throws Exception {
-		this.configurer.setDefaultContentType(MediaType.APPLICATION_JSON);
+		this.configurer.defaultContentType(MediaType.APPLICATION_JSON);
 		ContentNegotiationManager manager = this.configurer.getContentNegotiationManager();
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));

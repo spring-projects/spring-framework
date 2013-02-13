@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xml:id="testing" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:ns5="http://www.w3.org/1999/xhtml"
-         xmlns:ns4="http://www.w3.org/2000/svg"
-         xmlns:ns3="http://www.w3.org/1998/Math/MathML"
-         xmlns:ns="http://docbook.org/ns/docbook">
+<chapter xml:id="testing"
+	xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Testing</title>
 
   <section xml:id="testing-introduction">
@@ -83,9 +84,9 @@
         usage with Spring's Web MVC framework, which are useful for testing
         web contexts and controllers. These mock objects are generally more
         convenient to use than dynamic mock objects such as <link
-        xlink:href="http://www.easymock.org">EasyMock</link> or existing
-        Servlet API mock objects such as <link
-        xlink:href="http://www.mockobjects.com">MockObjects</link>.</para>
+        xl:href="http://www.easymock.org">EasyMock</link> or existing Servlet
+        API mock objects such as <link
+        xl:href="http://www.mockobjects.com">MockObjects</link>.</para>
       </section>
 
       <section xml:id="mock-objects-portlet">
@@ -264,15 +265,16 @@
         <title>Context management and caching</title>
 
         <para>The Spring TestContext Framework provides consistent loading of
-        Spring <classname>ApplicationContext</classname>s and caching of those
-        contexts. Support for the caching of loaded contexts is important,
-        because startup time can become an issue — not because of the overhead
-        of Spring itself, but because the objects instantiated by the Spring
-        container take time to instantiate. For example, a project with 50 to
-        100 Hibernate mapping files might take 10 to 20 seconds to load the
-        mapping files, and incurring that cost before running every test in
-        every test fixture leads to slower overall test runs that reduce
-        developer productivity.</para>
+        Spring <classname>ApplicationContext</classname>s and
+        <classname>WebApplicationContext</classname>s as well as caching of
+        those contexts. Support for the caching of loaded contexts is
+        important, because startup time can become an issue — not because of
+        the overhead of Spring itself, but because the objects instantiated by
+        the Spring container take time to instantiate. For example, a project
+        with 50 to 100 Hibernate mapping files might take 10 to 20 seconds to
+        load the mapping files, and incurring that cost before running every
+        test in every test fixture leads to slower overall test runs that
+        reduce developer productivity.</para>
 
         <para>Test classes typically declare either an array of
         <emphasis>resource locations</emphasis> for XML configuration metadata
@@ -522,6 +524,55 @@ public class CustomLoaderXmlApplicationContextTests {
             <para>See <link linkend="testcontext-ctx-management">Context
             management and caching</link> and the Javadoc for
             <interfacename>@ContextConfiguration</interfacename> for further
+            details.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis
+            role="bold"><interfacename>@WebAppConfiguration</interfacename></emphasis></para>
+
+            <para>A class-level annotation that is used to declare that the
+            <interfacename>ApplicationContext</interfacename> loaded for an
+            integration test should be a
+            <interfacename>WebApplicationContext</interfacename>. The mere
+            presence of <interfacename>@WebAppConfiguration</interfacename> on
+            a test class ensures that a
+            <interfacename>WebApplicationContext</interfacename> will be
+            loaded for the test, using the default value of
+            <literal>"file:src/main/webapp"</literal> for the path to the root
+            of the web application (i.e., the <emphasis>resource base
+            path</emphasis>). The resource base path is used behind the scenes
+            to create a <classname>MockServletContext</classname> which serves
+            as the <interfacename>ServletContext</interfacename> for the
+            test's
+            <interfacename>WebApplicationContext</interfacename>.</para>
+
+            <programlisting language="java">@ContextConfiguration
+<emphasis role="bold">@WebAppConfiguration</emphasis>
+public class WebAppTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <para>To override the default, specify a different base resource
+            path via the <emphasis>implicit</emphasis>
+            <interfacename>value</interfacename> attribute. Both
+            <literal>classpath:</literal> and <literal>file:</literal>
+            resource prefixes are supported. If no resource prefix is supplied
+            the path is assumed to be a file system resource.</para>
+
+            <programlisting language="java">@ContextConfiguration
+<emphasis role="bold">@WebAppConfiguration("classpath:test-web-resources")</emphasis>
+public class WebAppTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <para>Note that
+            <interfacename>@WebAppConfiguration</interfacename> must be used
+            in conjunction with
+            <interfacename>@ContextConfiguration</interfacename>, either
+            within a single test class or within a test class hierarchy. See
+            the Javadoc for
+            <interfacename>@WebAppConfiguration</interfacename> for further
             details.</para>
           </listitem>
 
@@ -1106,14 +1157,16 @@ public void testProcessRepeatedly() {
             <classname>TestContextManager</classname> with which the listener
             is registered.</para>
 
-            <para>Spring provides three
+            <para>Spring provides four
             <interfacename>TestExecutionListener</interfacename>
             implementations that are configured by default:
+            <classname>ServletTestExecutionListener</classname>,
             <classname>DependencyInjectionTestExecutionListener</classname>,
             <classname>DirtiesContextTestExecutionListener</classname>, and
             <classname>TransactionalTestExecutionListener</classname>.
-            Respectively, they support dependency injection of the test
-            instance, handling of the
+            Respectively, they support Servlet API mocks for a
+            <interfacename>WebApplicationContext</interfacename>, dependency
+            injection of the test instance, handling of the
             <interfacename>@DirtiesContext</interfacename> annotation, and
             transactional test execution with default rollback
             semantics.</para>
@@ -1141,18 +1194,18 @@ public void testProcessRepeatedly() {
             supersedes the <interfacename>ContextLoader</interfacename> SPI
             that was introduced in Spring 2.5. Specifically, a
             <interfacename>SmartContextLoader</interfacename> can choose to
-            process either resource <varname>locations</varname> or annotated
-            <varname>classes</varname>. Furthermore, a
+            process resource <varname>locations</varname>, annotated
+            <varname>classes</varname>, or context
+            <varname>initializers</varname>. Furthermore, a
             <interfacename>SmartContextLoader</interfacename> can set active
             bean definition profiles in the context that it loads.</para>
 
-            <para>Spring provides the following out-of-the-box
-            implementations:</para>
+            <para>Spring provides the following implementations:</para>
 
             <itemizedlist>
               <listitem>
-                <para><classname>DelegatingSmartContextLoader</classname>: the
-                default loader which delegates internally to an
+                <para><classname>DelegatingSmartContextLoader</classname>: one
+                of two default loaders which delegates internally to an
                 <classname>AnnotationConfigContextLoader</classname> or a
                 <classname>GenericXmlContextLoader</classname> depending
                 either on the configuration declared for the test class or on
@@ -1161,21 +1214,48 @@ public void testProcessRepeatedly() {
               </listitem>
 
               <listitem>
-                <para><classname>AnnotationConfigContextLoader</classname>:
-                loads an application context from <emphasis>annotated
-                classes</emphasis>.</para>
+                <para><classname>WebDelegatingSmartContextLoader</classname>:
+                one of two default loaders which delegates internally to an
+                <classname>AnnotationConfigWebContextLoader</classname> or a
+                <classname>GenericXmlWebContextLoader</classname> depending
+                either on the configuration declared for the test class or on
+                the presence of default locations or default configuration
+                classes. A web <interfacename>ContextLoader</interfacename>
+                will only be used if
+                <interfacename>@WebAppConfiguration</interfacename> is present
+                on the test class.</para>
               </listitem>
 
               <listitem>
-                <para><classname>GenericXmlContextLoader</classname>: loads an
-                application context from XML <emphasis>resource
-                locations</emphasis>.</para>
+                <para><classname>AnnotationConfigContextLoader</classname>:
+                loads a standard
+                <interfacename>ApplicationContext</interfacename> from
+                <emphasis>annotated classes</emphasis>.</para>
+              </listitem>
+
+              <listitem>
+                <para><classname>AnnotationConfigWebContextLoader</classname>:
+                loads a <interfacename>WebApplicationContext</interfacename>
+                from <emphasis>annotated classes</emphasis>.</para>
+              </listitem>
+
+              <listitem>
+                <para><classname>GenericXmlContextLoader</classname>: loads a
+                standard <interfacename>ApplicationContext</interfacename>
+                from XML <emphasis>resource locations</emphasis>.</para>
+              </listitem>
+
+              <listitem>
+                <para><classname>GenericXmlWebContextLoader</classname>: loads
+                a <interfacename>WebApplicationContext</interfacename> from
+                XML <emphasis>resource locations</emphasis>.</para>
               </listitem>
 
               <listitem>
                 <para><classname>GenericPropertiesContextLoader</classname>:
-                loads an application context from Java Properties
-                files.</para>
+                loads a standard
+                <interfacename>ApplicationContext</interfacename> from Java
+                Properties files.</para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -1193,8 +1273,8 @@ public void testProcessRepeatedly() {
         <para>Each <classname>TestContext</classname> provides context
         management and caching support for the test instance it is responsible
         for. Test instances do not automatically receive access to the
-        configured <classname>ApplicationContext</classname>. However, if a
-        test class implements the
+        configured <interfacename>ApplicationContext</interfacename>. However,
+        if a test class implements the
         <interfacename>ApplicationContextAware</interfacename> interface, a
         reference to the <classname>ApplicationContext</classname> is supplied
         to the test instance. Note that
@@ -1202,7 +1282,7 @@ public void testProcessRepeatedly() {
         <classname>AbstractTestNGSpringContextTests</classname> implement
         <interfacename>ApplicationContextAware</interfacename> and therefore
         provide access to the <classname>ApplicationContext</classname>
-        out-of-the-box.</para>
+        automatically.</para>
 
         <tip>
           <title>@Autowired ApplicationContext</title>
@@ -1219,6 +1299,21 @@ public class MyTest {
 
     <emphasis role="bold">@Autowired</emphasis>
     private ApplicationContext applicationContext;
+
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+          <para>Similarly, if your test is configured to load a
+          <interfacename>WebApplicationContext</interfacename>, you can inject
+          the web application context into your test as follows:</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<emphasis role="bold">@WebAppConfiguration</emphasis>
+@ContextConfiguration
+public class MyWebAppTest {
+
+    <emphasis role="bold">@Autowired</emphasis>
+    private WebApplicationContext wac;
 
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1358,10 +1453,10 @@ public class MyTest {
 // static inner Config class</lineannotation>
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public class OrderServiceTest {
- 
+
     @Configuration
     static class Config {
- 
+
         <lineannotation>// this bean will be injected into the OrderServiceTest class</lineannotation>
         @Bean
         public OrderService orderService() {
@@ -1370,10 +1465,10 @@ public class OrderServiceTest {
             return orderService;
         }
     }
- 
+
     @Autowired
     private OrderService orderService;
- 
+
     @Test
     public void testOrderService() {
         <lineannotation>// test the orderService</lineannotation>
@@ -1780,12 +1875,207 @@ public class TransferServiceTest {
           <!-- TODO Consider documenting inheritance for active profiles. -->
         </section>
 
+        <section xml:id="testcontext-ctx-management-web">
+          <title>Loading a WebApplicationContext</title>
+
+          <para>Spring 3.2 introduces support for loading a
+          <interfacename>WebApplicationContext</interfacename> in integration
+          tests. To instruct the TestContext framework to load a
+          <interfacename>WebApplicationContext</interfacename> instead of a
+          standard <interfacename>ApplicationContext</interfacename>, simply
+          annotate the respective test class with
+          <interfacename>@WebAppConfiguration</interfacename>.</para>
+
+          <para>The presence of
+          <interfacename>@WebAppConfiguration</interfacename> on your test
+          class instructs the TestContext framework (TCF) that a
+          <interfacename>WebApplicationContext</interfacename> (WAC) should be
+          loaded for your integration tests. In the background the TCF makes
+          sure that a <interfacename>MockServletContext</interfacename> is
+          created and supplied to your test's WAC. By default the base
+          resource path for your
+          <interfacename>MockServletContext</interfacename> will be set to
+          <emphasis>"src/main/webapp"</emphasis>. This is interpreted as a
+          path relative to the root of your JVM (i.e., normally the path to
+          your project). If you're familiar with the directory structure of a
+          web application in a Maven project, you'll know that
+          <emphasis>"src/main/webapp"</emphasis> is the default location for
+          the root of your WAR. If you need to override this default, simply
+          provide an alternate path to the
+          <interfacename>@WebAppConfiguration</interfacename> annotation
+          (e.g.,
+          <interfacename>@WebAppConfiguration("src/test/webapp")</interfacename>).
+          If you wish to reference a base resource path from the classpath
+          instead of the file system, just use Spring's
+          <emphasis>classpath:</emphasis> prefix.</para>
+
+          <para>Please note that Spring's testing support for
+          <interfacename>WebApplicationContexts</interfacename> is on par with
+          its support for standard
+          <interfacename>ApplicationContexts</interfacename>. When testing
+          with a <interfacename>WebApplicationContext</interfacename> you are
+          free to declare either XML configuration files or
+          <interfacename>@Configuration</interfacename> classes via
+          <interfacename>@ContextConfiguration</interfacename>. You are of
+          course also free to use any other test annotations such as
+          <interfacename>@TestExecutionListeners</interfacename>,
+          <interfacename>@TransactionConfiguration</interfacename>,
+          <interfacename>@ActiveProfiles</interfacename>, etc.</para>
+
+          <para>The following examples demonstrate some of the various
+          configuration options for loading a
+          <interfacename>WebApplicationContext</interfacename>.</para>
+
+          <example>
+            <title>Conventions</title>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+
+// defaults to "file:src/main/webapp"
+@WebAppConfiguration
+
+// detects "WacTests-context.xml" in same package
+// or static nested @Configuration class
+@ContextConfiguration
+
+public class WacTests {
+    //...
+}</programlisting>
+          </example>
+
+          <para>The above example demonstrates the TestContext framework's
+          support for <emphasis>convention over configuration</emphasis>. If
+          you annotate a test class with
+          <interfacename>@WebAppConfiguration</interfacename> without
+          specifying a resource base path, the resource path will effectively
+          default to <emphasis>"file:src/main/webapp"</emphasis>. Similarly,
+          if you declare <interfacename>@ContextConfiguration</interfacename>
+          without specifying resource
+          <interfacename>locations</interfacename>, annotated
+          <interfacename>classes</interfacename>, or context
+          <interfacename>initializers</interfacename>, Spring will attempt to
+          detect the presence of your configuration using conventions (i.e.,
+          <emphasis>"WacTests-context.xml"</emphasis> in the same package as
+          the <interfacename>WacTests</interfacename> class or static nested
+          <interfacename>@Configuration</interfacename> classes).</para>
+
+          <example>
+            <title>Default Resource Semantics</title>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+
+// file system resource
+@WebAppConfiguration("webapp")
+
+// classpath resource
+@ContextConfiguration("/spring/test-servlet-config.xml")
+
+public class WacTests {
+    //...
+}</programlisting>
+          </example>
+
+          <para>This example demonstrates how to explicitly declare a resource
+          base path with <interfacename>@WebAppConfiguration</interfacename>
+          and an XML resource location with
+          <interfacename>@ContextConfiguration</interfacename>. The important
+          thing to note here is the different semantics for paths with these
+          two annotations. By default,
+          <interfacename>@WebAppConfiguration</interfacename> resource paths
+          are file system based; whereas,
+          <interfacename>@ContextConfiguration</interfacename> resource
+          locations are classpath based.</para>
+
+          <example>
+            <title>Explicit Resource Semantics</title>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+
+// classpath resource
+@WebAppConfiguration("classpath:test-web-resources")
+
+// file system resource
+@ContextConfiguration("file:src/main/webapp/WEB-INF/servlet-config.xml")
+
+public class WacTests {
+    //...
+}</programlisting>
+          </example>
+
+          <para>In this third example, we see that we can override the default
+          resource semantics for both annotations by specifying a Spring
+          resource prefix. Contrast the comments in this example with the
+          previous example.</para>
+
+          <section xml:id="testcontext-ctx-management-web-mocks">
+            <title>Working with Web Mocks</title>
+
+            <para>To provide comprehensive web testing support, Spring 3.2
+            introduces a new
+            <interfacename>ServletTestExecutionListener</interfacename> that
+            is enabled by default. When testing against a
+            <interfacename>WebApplicationContext</interfacename> this <link
+            linkend="testcontext-key-abstractions">TestExecutionListener</link>
+            sets up default thread-local state via Spring Web's
+            <interfacename>RequestContextHolder</interfacename> before each
+            test method and creates a
+            <interfacename>MockHttpServletRequest</interfacename>,
+            <interfacename>MockHttpServletResponse</interfacename>, and
+            <interfacename>ServletWebRequest</interfacename> based on the base
+            resource path configured via
+            <interfacename>@WebAppConfiguration</interfacename>.
+            <interfacename>ServletTestExecutionListener</interfacename> also
+            ensures that the
+            <interfacename>MockHttpServletResponse</interfacename> and
+            <interfacename>ServletWebRequest</interfacename> can be injected
+            into the test instance, and once the test is complete it cleans up
+            thread-local state.</para>
+
+            <para>Once you have a
+            <interfacename>WebApplicationContext</interfacename> loaded for
+            your test you might find that you need to interact with the web
+            mocks — for example, to set up your test fixture or to perform
+            assertions after invoking your web component. The following
+            example demonstrates which mocks can be autowired into your test
+            instance. Note that the
+            <interfacename>WebApplicationContext</interfacename> and
+            <interfacename>MockServletContext</interfacename> are both cached
+            across the test suite; whereas, the other mocks are managed per
+            test method by the
+            <interfacename>ServletTestExecutionListener</interfacename>.</para>
+
+            <example>
+              <title>Injecting Mocks</title>
+
+              <programlisting language="java">@WebAppConfiguration
+@ContextConfiguration
+public class WacTests {
+
+    @Autowired WebApplicationContext wac; // cached
+
+    @Autowired MockServletContext servletContext; // cached
+
+    @Autowired MockHttpSession session;
+
+    @Autowired MockHttpServletRequest request;
+
+    @Autowired MockHttpServletResponse response;
+
+    @Autowired ServletWebRequest webRequest;
+
+    //...
+}</programlisting>
+            </example>
+          </section>
+        </section>
+
         <section xml:id="testcontext-ctx-management-caching">
           <title>Context caching</title>
 
           <para>Once the TestContext framework loads an
-          <interfacename>ApplicationContext</interfacename> for a test, that
-          context will be cached and reused for <emphasis
+          <interfacename>ApplicationContext</interfacename> (or
+          <interfacename>WebApplicationContext</interfacename>) for a test,
+          that context will be cached and reused for <emphasis
           role="bold">all</emphasis> subsequent tests that declare the same
           unique context configuration within the same test suite. To
           understand how caching works, it is important to understand what is
@@ -1825,6 +2115,11 @@ public class TransferServiceTest {
               <para><varname>activeProfiles</varname> <emphasis>(from
               @ActiveProfiles)</emphasis></para>
             </listitem>
+
+            <listitem>
+              <para><varname>resourceBasePath</varname> <emphasis>(from
+              @WebAppConfiguration)</emphasis></para>
+            </listitem>
           </itemizedlist>
 
           <para>For example, if <classname>TestClassA</classname> specifies
@@ -1837,7 +2132,8 @@ public class TransferServiceTest {
           solely on those locations. So if <classname>TestClassB</classname>
           also defines <literal>{"app-config.xml",
           "test-config.xml"}</literal> for its locations (either explicitly or
-          implicitly through inheritance) and does not define a different
+          implicitly through inheritance) but does not define
+          <interfacename>@WebAppConfiguration</interfacename>, a different
           <interfacename>ContextLoader</interfacename>, different active
           profiles, or different context initializers, then the same
           <interfacename>ApplicationContext</interfacename> will be shared by
@@ -1862,7 +2158,7 @@ public class TransferServiceTest {
             Gradle it is important to make sure that the build framework does
             not <emphasis>fork</emphasis> between tests. For example, if the
             <link
-            xlink:href="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</link>
+            xl:href="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</link>
             for the Maven Surefire plug-in is set to <literal>always</literal>
             or <literal>pertest</literal>, the TestContext framework will not
             be able to cache application contexts between test classes and the
@@ -1964,7 +2260,7 @@ public class TransferServiceTest {
 public class HibernateTitleRepositoryTests {
 
     <lineannotation>// this instance will be dependency injected by type</lineannotation>
-    <emphasis role="bold">@Autowired</emphasis>    
+    <emphasis role="bold">@Autowired</emphasis>
     private HibernateTitleRepository titleRepository;
 
     @Test
@@ -2004,17 +2300,17 @@ public class HibernateTitleRepositoryTests {
         looks like this:</para>
 
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans" 
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans 
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean will be injected into the HibernateTitleRepositoryTests class --&gt;</lineannotation>
     &lt;bean id="<emphasis role="bold">titleRepository</emphasis>" class="<emphasis
             role="bold">com.foo.repository.hibernate.HibernateTitleRepository</emphasis>"&gt;
         &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
     &lt;/bean&gt;
-    
+
     &lt;bean id="sessionFactory"
             class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
         <lineannotation>&lt;!-- configuration elided for brevity --&gt;</lineannotation>
@@ -2052,6 +2348,170 @@ public class HibernateTitleRepositoryTests {
           also point to a specific bean by name there (as shown above,
           assuming that "myDataSource" is the bean id).</para>
         </note>
+      </section>
+
+      <section xml:id="testcontext-web-scoped-beans">
+        <title>Testing request and session scoped beans</title>
+
+        <para><link linkend="beans-factory-scopes-other">Request and session
+        scoped beans</link> have been supported by Spring for several years
+        now, but it's always been a bit non-trivial to test them. As of Spring
+        3.2 it's now a breeze to test your request-scoped and session-scoped
+        beans by following these steps.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Ensure that a
+            <interfacename>WebApplicationContext</interfacename> is loaded for
+            your test by annotating your test class with
+            <interfacename>@WebAppConfiguration</interfacename>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Inject the mock request or session into your test instance
+            and prepare your test fixture as appropriate.</para>
+          </listitem>
+
+          <listitem>
+            <para>Invoke your web component that you retrieved from the
+            configured <interfacename>WebApplicationContext</interfacename>
+            (i.e., via dependency injection).</para>
+          </listitem>
+
+          <listitem>
+            <para>Perform assertions against the mocks.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The following code snippet displays the XML configuration for a
+        login use case. Note that the <literal>userService</literal> bean has
+        a dependency on a request-scoped <literal>loginAction</literal> bean.
+        Also, the <classname>LoginAction</classname> is instantiated using
+        <link linkend="expressions">SpEL expressions</link> that retrieve the
+        username and password from the current HTTP request. In our test, we
+        will want to configure these request parameters via the mock managed
+        by the TestContext framework.</para>
+
+        <example>
+          <title>Request-scoped bean configuration</title>
+
+          <programlisting language="xml">&lt;beans&gt;
+
+  &lt;bean id="userService"
+      class="com.example.SimpleUserService"
+      c:loginAction-ref="loginAction" /&gt;
+
+  &lt;bean id="loginAction" class="com.example.LoginAction"
+      c:username="#{request.getParameter('user')}"
+      c:password="#{request.getParameter('pswd')}"
+      scope="request"&gt;
+    &lt;aop:scoped-proxy /&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+        </example>
+
+        <para>In <classname>RequestScopedBeanTests</classname> we inject both
+        the <classname>UserService</classname> (i.e., the subject under test)
+        and the <classname>MockHttpServletRequest</classname> into our test
+        instance. Within our <function>requestScope()</function> test method
+        we set up our test fixture by setting request parameters in the
+        provided <classname>MockHttpServletRequest</classname>. When the
+        <function>loginUser()</function> method is invoked on our
+        <literal>userService</literal> we are assured that the user service
+        has access to the request-scoped <literal>loginAction</literal> for
+        the current <classname>MockHttpServletRequest</classname> (i.e., the
+        one we just set parameters in). We can then perform assertions against
+        the results based on the known inputs for the username and
+        password.</para>
+
+        <example>
+          <title>Request-scoped bean test</title>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration
+@WebAppConfiguration
+public class RequestScopedBeanTests {
+
+    @Autowired UserService userService;
+    @Autowired MockHttpServletRequest request;
+
+    @Test
+    public void requestScope() {
+
+        request.setParameter("user", "enigma");
+        request.setParameter("pswd", "$pr!ng");
+
+        LoginResults results = userService.loginUser();
+
+        // assert results
+    }
+}</programlisting>
+        </example>
+
+        <para>The following code snippet is similar to the one we saw above
+        for a request-scoped bean; however, this time the
+        <literal>userService</literal> bean has a dependency on a
+        session-scoped <literal>userPreferences</literal> bean. Note that the
+        <classname>UserPreferences</classname> bean is instantiated using a
+        SpEL expression that retrieves the <emphasis>theme</emphasis> from the
+        current HTTP session. In our test, we will need to configure a theme
+        in the mock session managed by the TestContext framework.</para>
+
+        <example>
+          <title>Session-scoped bean configuration</title>
+
+          <programlisting language="xml">&lt;beans&gt;
+
+  &lt;bean id="userService"
+      class="com.example.SimpleUserService"
+      c:userPreferences-ref="userPreferences" /&gt;
+
+  &lt;bean id="userPreferences"
+      class="com.example.UserPreferences"
+      c:theme="#{session.getAttribute('theme')}"
+      scope="session"&gt;
+    &lt;aop:scoped-proxy /&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+        </example>
+
+        <para>In <classname>SessionScopedBeanTests</classname> we inject the
+        <classname>UserService</classname> and the
+        <classname>MockHttpSession</classname> into our test instance. Within
+        our <function>sessionScope()</function> test method we set up our test
+        fixture by setting the expected "theme" attribute in the provided
+        <classname>MockHttpSession</classname>. When the
+        <function>processUserPreferences()</function> method is invoked on our
+        <literal>userService</literal> we are assured that the user service
+        has access to the session-scoped <literal>userPreferences</literal>
+        for the current <classname>MockHttpSession</classname>, and we can
+        perform assertions against the results based on the configured
+        theme.</para>
+
+        <example>
+          <title>Session-scoped bean test</title>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration
+@WebAppConfiguration
+public class SessionScopedBeanTests {
+
+  @Autowired UserService userService;
+  @Autowired MockHttpSession session;
+
+  @Test
+  public void sessionScope() throws Exception {
+
+    session.setAttribute("theme", "blue");
+
+    Results results = userService.processUserPreferences();
+
+    // assert results
+  }
+}</programlisting>
+        </example>
       </section>
 
       <section xml:id="testcontext-tx">
@@ -2398,6 +2858,511 @@ public class SimpleTest {
       </section>
     </section>
 
+    <section xml:id="spring-mvc-test-framework">
+      <title>Spring MVC Test Framework</title>
+
+      <sidebar xml:id="spring-mvc-test-origins">
+        <title>Standalone project</title>
+
+        <para>Before inclusion in Spring Framework 3.2, the Spring MVC Test
+        framework had already existed as a separate project on GitHub where it
+        grew and evolved through actual use, feedback, and the contribution of
+        many.</para>
+
+        <para>The standalone <link
+        xl:href="https://github.com/SpringSource/spring-test-mvc">spring-test-mvc
+        project</link> is still available on GitHub and can be used in
+        conjunction with Spring Framework 3.1.x. Applications upgrading to 3.2
+        should replace the <filename>spring-test-mvc</filename> dependency
+        with a dependency on <filename>spring-test</filename>.</para>
+
+        <para>The <filename>spring-test</filename> module uses a different
+        package <classname>org.springframework.test.web</classname> but
+        otherwise is nearly identical with two exceptions. One is support for
+        features new in 3.2 (e.g. asynchronous web requests). The other
+        relates to the options for creating a <classname>MockMvc</classname>
+        instance. In Spring Framework 3.2, this can only be done through the
+        TestContext framework, which provides caching benefits for the loaded
+        configuration.</para>
+      </sidebar>
+
+      <para>The <emphasis>Spring MVC Test framework</emphasis> provides first
+      class JUnit support for testing client and server-side Spring MVC code
+      through a fluent API. Typically it loads the actual Spring configuration
+      through the <emphasis>TestContext framework</emphasis> and always uses
+      the <classname>DispatcherServlet</classname> to process requests thus
+      approximating full integration tests without requiring a running Servlet
+      container.</para>
+
+      <para>Client-side tests are <classname>RestTemplate</classname>-based
+      and allow tests for code that relies on the
+      <classname>RestTemplate</classname> without requiring a running server
+      to respond to the requests.</para>
+
+      <section xml:id="spring-mvc-test-server">
+        <title>Server-Side Tests</title>
+
+        <para>Before Spring Framework 3.2, the most likely way to test a
+        Spring MVC controller was to write a unit test that instantiates the
+        controller, injects it with mock or stub dependencies, and then calls
+        its methods directly, using a
+        <classname>MockHttpServletRequest</classname> and
+        <classname>MockHttpServletResponse</classname> where necessary.</para>
+
+        <para>Although this is pretty easy to do, controllers have many
+        annotations, and much remains untested. Request mappings, data
+        binding, type conversion, and validation are just a few examples of
+        what isn't tested. Furthermore, there are other types of annotated
+        methods such as <interfacename>@InitBinder</interfacename>,
+        <interfacename>@ModelAttribute</interfacename>, and
+        <interfacename>@ExceptionHandler</interfacename> that get invoked as
+        part of request processing.</para>
+
+        <para>The idea behind Spring MVC Test is to be able to re-write those
+        controller tests by performing actual requests and generating
+        responses, as they would be at runtime, along the way invoking
+        controllers through the Spring MVC
+        <classname>DispatcherServlet</classname>. Controllers can still be
+        injected with mock dependencies, so tests can remain focused on the
+        web layer.</para>
+
+        <para>Spring MVC Test builds on the familiar "mock" implementations of
+        the Servlet API available in the <filename>spring-test</filename>
+        module. This allows performing requests and generating responses
+        without the need for running in a Servlet container. For the most part
+        everything should work as it does at runtime with the exception of JSP
+        rendering, which is not available outside a Servlet container.
+        Furthermore, if you are familiar with how the
+        <classname>MockHttpServletResponse</classname> works, you'll know that
+        forwards and redirects are not actually executed. Instead "forwarded"
+        and "redirected" URLs are saved and can be asserted in tests. This
+        means if you are using JSPs, you can verify the JSP page to which the
+        request was forwarded.</para>
+
+        <para>All other means of rendering including
+        <interfacename>@ResponseBody</interfacename> methods and
+        <interfacename>View</interfacename> types (besides JSPs) such as
+        Freemarker, Velocity, Thymeleaf, and others for rendering HTML, JSON,
+        XML, and so on should work as expected, and the response will contain
+        the generated content.</para>
+
+        <para>Below is an example of a test requesting account information in
+        JSON format:</para>
+
+        <programlisting language="java">import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("test-servlet-context.xml")
+public class ExampleTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+    }
+
+    @Test
+    public void getAccount() throws Exception {
+        this.mockMvc.perform(get("/accounts/1").accept("application/json;charset=UTF-8"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentType("application/json"))
+          .andExpect(jsonPath("$.name").value("Lee");
+    }
+
+}</programlisting>
+
+        <para>The test relies on the
+        <interfacename>WebApplicationContext</interfacename> support of the
+        <emphasis>TestContext framework</emphasis>. It loads Spring
+        configuration from an XML configuration file located in the same
+        package as the test class (also supports JavaConfig) and injects the
+        created <interfacename>WebApplicationContext</interfacename> into the
+        test so a <classname>MockMvc</classname> instance can be created with
+        it.</para>
+
+        <para>The <classname>MockMvc</classname> is then used to perform a
+        request to <filename>"/accounts/1"</filename> and verify the resulting
+        response status is 200, the response content type is
+        <filename>"application/json"</filename>, and response content has a
+        JSON property called "name" with the value "Lee". JSON content is
+        inspected with the help of Jayway's <link
+        xl:href="https://github.com/jayway/JsonPath">JsonPath project</link>.
+        There are lots of other options for verifying the result of the
+        performed request and those will be discussed later.</para>
+
+        <section xml:id="spring-mvc-test-server-static-imports">
+          <title>Static Imports</title>
+
+          <para>The fluent API in the example above requires a few static
+          imports such as <classname>MockMvcRequestBuilders.*</classname>,
+          <classname>MockMvcResultMatchers.*</classname>, and
+          <classname>MockMvcBuilders.*</classname>. An easy way to find these
+          classes is to search for types matching
+          <emphasis>"MockMvc*"</emphasis>. If using Eclipse, be sure to add
+          them as "favorite static members" in the Eclipse preferences under
+          <emphasis>Java -&gt; Editor -&gt; Content Assist -&gt;
+          Favorites</emphasis>. That will allow use of content assist after
+          typing the first character of the static method name. Other IDEs
+          (e.g. IntelliJ) may not require any additional configuration. Just
+          check the support for code completion on static members.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-setup-options">
+          <title>Setup Options</title>
+
+          <para>The goal of server-side test setup is to create an instance of
+          <classname>MockMvc</classname> that can be used to perform requests.
+          There are two main options.</para>
+
+          <para>The first option is to point to Spring MVC configuration
+          through the <emphasis>TestContext framework</emphasis>, which loads
+          the Spring configuration and injects a
+          <interfacename>WebApplicationContext</interfacename> into the test
+          to use to create a <classname>MockMvc</classname>:</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("my-servlet-context.xml")
+public class MyWebTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+    }
+
+    // ...
+
+}</programlisting>
+
+          <para>The second option is to simply register a controller instance
+          without loading any Spring configuration. Instead basic Spring MVC
+          configuration suitable for testing annotated controllers is
+          automatically created. The created configuration is comparable to
+          that of the MVC JavaConfig (and the MVC namespace) and can be
+          customized to a degree through builder-style methods:</para>
+
+          <programlisting language="java">public class MyWebTests {
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
+    }
+
+    // ...
+
+}</programlisting>
+
+          <para>Which option should you use?</para>
+
+          <para>The <emphasis>"webAppContextSetup"</emphasis> loads the actual
+          Spring MVC configuration resulting in a more complete integration
+          test. Since the <emphasis>TestContext framework</emphasis> caches
+          the loaded Spring configuration, it helps to keep tests running fast
+          even as more tests get added. Furthermore, you can inject mock
+          services into controllers through Spring configuration, in order to
+          remain focused on testing the web layer. Here is an example of
+          declaring a mock service with Mockito:</para>
+
+          <programlisting language="xml">&lt;bean id="accountService" class="org.mockito.Mockito" factory-method="mock"&gt;
+    &lt;constructor-arg value="org.example.AccountService"/&gt;
+&lt;/bean&gt;
+</programlisting>
+
+          <para>Then you can inject the mock service into the test in order
+          set up and verify expectations:</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("test-servlet-context.xml")
+public class AccountTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Autowired
+    private AccountService accountService;
+
+    // ...
+
+}</programlisting>
+
+          <para>The <emphasis>"standaloneSetup"</emphasis> on the other hand
+          is a little closer to a unit test. It tests one controller at a
+          time, the controller can be injected with mock dependencies
+          manually, and it doesn't involve loading Spring configuration. Such
+          tests are more focused in style and make it easier to see which
+          controller is being tested, whether any specific Spring MVC
+          configuration is required to work, and so on. The "standaloneSetup"
+          is also a very convenient way to write ad-hoc tests to verify some
+          behavior or to debug an issue.</para>
+
+          <para>Just like with integration vs unit testing, there is no right
+          or wrong answer. Using the "standaloneSetup" does imply the need for
+          some additional "webAppContextSetup" tests to verify the Spring MVC
+          configuration. Alternatively, you can decide write all tests with
+          "webAppContextSetup" and always test against actual Spring MVC
+          configuration.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-performing-requests">
+          <title>Performing Requests</title>
+
+          <para>To perform requests, use the appropriate HTTP method and
+          additional builder-style methods corresponding to properties of
+          <classname>MockHttpServletRequest</classname>. For example:</para>
+
+          <programlisting language="java">mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));
+</programlisting>
+
+          <para>In addition to all the HTTP methods, you can also perform file
+          upload requests, which internally creates an instance of
+          <classname>MockMultipartHttpServletRequest</classname>:</para>
+
+          <programlisting language="java">mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));
+</programlisting>
+
+          <para>Query string parameters can be specified in the URI
+          template:</para>
+
+          <programlisting language="java">mockMvc.perform(get("/hotels?foo={foo}", "bar"));
+</programlisting>
+
+          <para>Or by adding Servlet request parameters:</para>
+
+          <programlisting language="java">mockMvc.perform(get("/hotels").param("foo", "bar"));
+</programlisting>
+
+          <para>If application code relies on Servlet request parameters, and
+          doesn't check the query string, as is most often the case, then it
+          doesn't matter how parameters are added. Keep in mind though that
+          parameters provided in the URI template will be decoded while
+          parameters provided through the <function>param(...)</function>
+          method are expected to be decoded.</para>
+
+          <para>In most cases it's preferable to leave out the context path
+          and the Servlet path from the request URI. If you must test with the
+          full request URI, be sure to set the
+          <function>contextPath</function> and
+          <function>servletPath</function> accordingly so that request
+          mappings will work:</para>
+
+          <programlisting language="java">mockMvc.perform(get("/app/main/hotels/{id}").contextPath("/app").servletPath("/main"))
+</programlisting>
+
+          <para>Looking at the above example, it would be cumbersome to set
+          the contextPath and servletPath with every performed request. That's
+          why you can define default request properties when building the
+          <classname>MockMvc</classname>:</para>
+
+          <programlisting language="java">public class MyWebTests {
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        mockMvc = standaloneSetup(new AccountController())
+            .defaultRequest(get("/")
+                .contextPath("/app").servletPath("/main")
+                .accept(MediaType.APPLICATION_JSON).build();
+    }
+
+}</programlisting>
+
+          <para>The above properties will apply to every request performed
+          through the <classname>MockMvc</classname>. If the same property is
+          also specified on a given request, it will override the default
+          value. That is why, the HTTP method and URI don't matter, when
+          setting default request properties, since they must be specified on
+          every request.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-defining-expectations">
+          <title>Defining Expectations</title>
+
+          <para>Expectations can be defined by appending one or more
+          <function>.andExpect(..)</function> after call to perform the
+          request:</para>
+
+          <programlisting language="java">mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
+</programlisting>
+
+          <para><literal>MockMvcResultMatchers.*</literal> defines a number of
+          static members, some of which return types with additional methods,
+          for asserting the result of the performed request. The assertions
+          fall in two general categories.</para>
+
+          <para>The first category of assertions verify properties of the
+          response, i.e the response status, headers, and content. Those are
+          the most important things to test for.</para>
+
+          <para>The second category of assertions go beyond the response, and
+          allow inspecting Spring MVC specific constructs such as which
+          controller method processed the request, whether an exception was
+          raised and handled, what the content of the model is, what view was
+          selected, what flash attributes were added, and so on. It is also
+          possible to verify Servlet specific constructs such as request and
+          session attributes. The following test asserts that
+          binding/validation failed:</para>
+
+          <programlisting language="java">
+mockMvc.perform(post("/persons"))
+  .andExpect(status().isOk())
+  .andExpect(model().attributeHasErrors("person"));
+</programlisting>
+
+          <para>Many times when writing tests, it's useful to dump the result
+          of the performed request. This can be done as follows, where
+          <function>print()</function> is a static import from
+          <classname>MockMvcResultHandlers</classname>:</para>
+
+          <programlisting language="java">mockMvc.perform(post("/persons"))
+  .andDo(print())
+  .andExpect(status().isOk())
+  .andExpect(model().attributeHasErrors("person"));</programlisting>
+
+          <para>As long as request processing causes an unhandled exception,
+          the <function>print()</function> method will print all the available
+          result data to <literal>System.out</literal>.</para>
+
+          <para>In some cases, you may want to get direct access to the result
+          and verify something that cannot be verified otherwise. This can be
+          done by appending <function>.andReturn()</function> at the end after
+          all expectations:</para>
+
+          <programlisting language="java">MvcResult mvcResult = mockMvc.perform(post("/persons")).andExpect(status().isOk()).andReturn();
+// ...</programlisting>
+
+          <para>When all tests repeat the same expectations, you can define
+          the common expectations once when building the
+          <classname>MockMvc</classname>:</para>
+
+          <programlisting language="java">standaloneSetup(new SimpleController())
+    .alwaysExpect(status().isOk())
+    .alwaysExpect(content().contentType("application/json;charset=UTF-8"))
+    .build()</programlisting>
+
+          <para>Note that the expectation is <emphasis>always</emphasis>
+          applied and cannot be overridden without creating a separate
+          <classname>MockMvc</classname> instance.</para>
+
+          <para>When JSON response content contains hypermedia links created
+          with <link
+          xl:href="https://github.com/SpringSource/spring-hateoas">Spring
+          HATEOAS</link>, the resulting links can be verified:</para>
+
+          <programlisting language="java">mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
+  .andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));</programlisting>
+
+          <para>When XML response content contains hypermedia links created
+          with <link
+          xl:href="https://github.com/SpringSource/spring-hateoas">Spring
+          HATEOAS</link>, the resulting links can be verified:</para>
+
+          <programlisting language="java">Map&lt;String, String&gt; ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
+mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
+  .andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));</programlisting>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-filters">
+          <title>Filter Registrations</title>
+
+          <para>When setting up a <classname>MockMvc</classname>, you can
+          register one or more <interfacename>Filter</interfacename>
+          instances:</para>
+
+          <programlisting language="java">mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();</programlisting>
+
+          <para>Registered filters will be invoked through
+          <classname>MockFilterChain</classname> from
+          <filename>spring-test</filename> and the last filter will delegates
+          to the <classname>DispatcherServlet</classname>.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-resources">
+          <title>Further Server-Side Test Examples</title>
+
+          <para>The framework's own tests include <link
+          xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/servlet/samples">many
+          sample tests</link> intended to demonstrate how to use Spring MVC
+          Test. Browse these examples for further ideas. Also the <link
+          xl:href="https://github.com/SpringSource/spring-mvc-showcase">spring-mvc-showcase</link>
+          has full test coverage based on Spring MVC Test.</para>
+        </section>
+      </section>
+
+      <section xml:id="spring-mvc-test-client">
+        <title>Client-Side REST Tests</title>
+
+        <para>Client-side tests are for code using the
+        <classname>RestTemplate</classname>. The goal is to define expected
+        requests and provide "stub" responses:</para>
+
+        <programlisting language="java">RestTemplate restTemplate = new RestTemplate();
+
+MockRestServiceServer mockServer =  MockRestServiceServer.createServer(restTemplate);
+mockServer.expect(requestTo("/greeting")).andRespond(withSuccess("Hello world", "text/plain"));
+
+// use RestTemplate ...
+
+mockServer.verify();</programlisting>
+
+        <para>In the above example,
+        <classname>MockRestServiceServer</classname> -- the central class for
+        client-side REST tests -- configures the
+        <classname>RestTemplate</classname> with a custom
+        <interfacename>ClientHttpRequestFactory</interfacename> that asserts
+        actual requests against expectations and returns "stub" responses. In
+        this case we expect a single request to "/greeting" and want to return
+        a 200 response with "text/plain" content. We could define as many
+        additional requests and stub responses as necessary.</para>
+
+        <para>Once expected requests and stub responses have been defined, the
+        <classname>RestTemplate</classname> can be used in client-side code as
+        usual. At the end of the tests <literal>mockServer.verify()</literal>
+        can be used to verify that all expected requests were
+        performed.</para>
+
+        <section xml:id="spring-mvc-test-client-static-imports">
+          <title>Static Imports</title>
+
+          <para>Just like with server-side tests, the fluent API for
+          client-side tests requires a few static imports. Those are easy to
+          find by searching <emphasis>"MockRest*"</emphasis>. Eclipse users
+          should add <classname>"MockRestRequestMatchers.*"</classname> and
+          <classname>"MockRestResponseCreators.*"</classname> as "favorite
+          static members" in the Eclipse preferences under <emphasis>Java
+          -&gt; Editor -&gt; Content Assist -&gt; Favorites</emphasis>. That
+          allows using content assist after typing the first character of the
+          static method name. Other IDEs (e.g. IntelliJ) may not require any
+          additional configuration. Just check the support for code completion
+          on static members.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-client-resources">
+          <title>Further Examples of Client-side REST Tests</title>
+
+          <para>Spring MVC Test's own tests include <link
+          xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/client/samples">example
+          tests</link> of client-side REST tests.</para>
+        </section>
+      </section>
+    </section>
+
     <section xml:id="testing-examples-petclinic">
       <title>PetClinic Example</title>
 
@@ -2543,60 +3508,59 @@ public class HibernateClinicTests extends AbstractClinicTests { }
 
     <itemizedlist>
       <listitem>
-        <para><link xlink:href="http://www.junit.org/">JUnit</link>: <quote>
+        <para><link xl:href="http://www.junit.org/">JUnit</link>: <quote>
         <emphasis>A programmer-oriented testing framework for Java</emphasis>
         </quote>. Used by the Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://testng.org/">TestNG</link>: A testing
+        <para><link xl:href="http://testng.org/">TestNG</link>: A testing
         framework inspired by JUnit with added support for Java 5 annotations,
         test groups, data-driven testing, distributed testing, etc.</para>
       </listitem>
 
       <listitem>
         <para><link
-        xlink:href="http://www.mockobjects.com/">MockObjects.com</link>: Web
-        site dedicated to mock objects, a technique for improving the design
-        of code within test-driven development.</para>
+        xl:href="http://www.mockobjects.com/">MockObjects.com</link>: Web site
+        dedicated to mock objects, a technique for improving the design of
+        code within test-driven development.</para>
       </listitem>
 
       <listitem>
-        <para><link
-        xlink:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
+        <para><link xl:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
         Objects"</link>: Article in Wikipedia.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://www.easymock.org/">EasyMock</link>:
-        Java library <quote> <emphasis>that provides Mock Objects for
-        interfaces (and objects through the class extension) by generating
-        them on the fly using Java's proxy mechanism.</emphasis> </quote> Used
-        by the Spring Framework in its test suite.</para>
+        <para><link xl:href="http://www.easymock.org/">EasyMock</link>: Java
+        library <quote> <emphasis>that provides Mock Objects for interfaces
+        (and objects through the class extension) by generating them on the
+        fly using Java's proxy mechanism.</emphasis> </quote> Used by the
+        Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://www.jmock.org/">JMock</link>: Library
-        that supports test-driven development of Java code with mock
+        <para><link xl:href="http://www.jmock.org/">JMock</link>: Library that
+        supports test-driven development of Java code with mock
         objects.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://mockito.org/">Mockito</link>: Java mock
+        <para><link xl:href="http://mockito.org/">Mockito</link>: Java mock
         library based on the <link
-        xlink:href="http://xunitpatterns.com/Test%20Spy.html">test spy</link>
+        xl:href="http://xunitpatterns.com/Test%20Spy.html">test spy</link>
         pattern.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://dbunit.sourceforge.net/">DbUnit</link>:
+        <para><link xl:href="http://dbunit.sourceforge.net/">DbUnit</link>:
         JUnit extension (also usable with Ant and Maven) targeted for
         database-driven projects that, among other things, puts your database
         into a known state between test runs.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://grinder.sourceforge.net/">The
+        <para><link xl:href="http://grinder.sourceforge.net/">The
         Grinder</link>: Java load testing framework.</para>
       </listitem>
     </itemizedlist>

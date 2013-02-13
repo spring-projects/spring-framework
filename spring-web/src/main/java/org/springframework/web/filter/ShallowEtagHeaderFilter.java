@@ -35,9 +35,9 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content on the response.
- * This ETag is compared to the <code>If-None-Match</code> header of the request. If these headers are equal,
- * the response content is not sent, but rather a <code>304 "Not Modified"</code> status instead.
+ * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the content on the response.
+ * This ETag is compared to the {@code If-None-Match} header of the request. If these headers are equal,
+ * the response content is not sent, but rather a {@code 304 "Not Modified"} status instead.
  *
  * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
  * is still rendered. As such, this filter only saves bandwidth, not server performance.
@@ -54,27 +54,25 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * The default value is "true" so that the filter may delay the generation of
+	 * The default value is "false" so that the filter may delay the generation of
 	 * an ETag until the last asynchronously dispatched thread.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		boolean isFirstRequest = !isAsyncDispatch(request);
-
-		if (isFirstRequest) {
+		if (!isAsyncDispatch(request)) {
 			response = new ShallowEtagResponseWrapper(response);
 		}
 
 		filterChain.doFilter(request, response);
 
-		if (isLastRequestThread(request)) {
+		if (!isAsyncStarted(request)) {
 			updateResponse(request, response);
 		}
 	}

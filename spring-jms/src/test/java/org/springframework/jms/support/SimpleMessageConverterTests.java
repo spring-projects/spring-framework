@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,12 +87,14 @@ public final class SimpleMessageConverterTests {
 		messageControl.setReturnValue(content.length, 1);
 		message.readBytes(new byte[content.length]);
 		messageControl.setMatcher(new ArgumentsMatcher() {
+			@Override
 			public boolean matches(Object[] arg0, Object[] arg1) {
 				byte[] one = (byte[]) arg0[0];
 				byte[] two = (byte[]) arg1[0];
 				return Arrays.equals(one, two);
 			}
 
+			@Override
 			public String toString(Object[] arg0) {
 				return "bla";
 			}

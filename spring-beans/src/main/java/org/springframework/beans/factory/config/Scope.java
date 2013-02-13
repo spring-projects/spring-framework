@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,14 @@ import org.springframework.beans.factory.ObjectFactory;
  * this SPI is completely generic: It provides the ability to get and put
  * objects from any underlying storage mechanism, such as an HTTP session
  * or a custom conversation mechanism. The name passed into this class's
- * <code>get</code> and <code>remove</code> methods will identify the
+ * {@code get} and {@code remove} methods will identify the
  * target object in the current scope.
  *
- * <p><code>Scope</code> implementations are expected to be thread-safe.
- * One <code>Scope</code> instance can be used with multiple bean factories
+ * <p>{@code Scope} implementations are expected to be thread-safe.
+ * One {@code Scope} instance can be used with multiple bean factories
  * at the same time, if desired (unless it explicitly wants to be aware of
  * the containing BeanFactory), with any number of threads accessing
- * the <code>Scope</code> concurrently from any number of factories.
+ * the {@code Scope} concurrently from any number of factories.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -67,14 +67,14 @@ public interface Scope {
 	 * @param name the name of the object to retrieve
 	 * @param objectFactory the {@link ObjectFactory} to use to create the scoped
 	 * object if it is not present in the underlying storage mechanism
-	 * @return the desired object (never <code>null</code>)
+	 * @return the desired object (never {@code null})
 	 */
 	Object get(String name, ObjectFactory<?> objectFactory);
 
 	/**
-	 * Remove the object with the given <code>name</code> from the underlying scope.
-	 * <p>Returns <code>null</code> if no object was found; otherwise
-	 * returns the removed <code>Object</code>.
+	 * Remove the object with the given {@code name} from the underlying scope.
+	 * <p>Returns {@code null} if no object was found; otherwise
+	 * returns the removed {@code Object}.
 	 * <p>Note that an implementation should also remove a registered destruction
 	 * callback for the specified object, if any. It does, however, <i>not</i>
 	 * need to <i>execute</i> a registered destruction callback in this case,
@@ -83,7 +83,7 @@ public interface Scope {
 	 * {@link UnsupportedOperationException} if they do not support explicitly
 	 * removing an object.
 	 * @param name the name of the object to remove
-	 * @return the removed object, or <code>null</code> if no object was present
+	 * @return the removed object, or {@code null} if no object was present
 	 * @see #registerDestructionCallback
 	 */
 	Object remove(String name);
@@ -122,7 +122,7 @@ public interface Scope {
 	 * Resolve the contextual object for the given key, if any.
 	 * E.g. the HttpServletRequest object for key "request".
 	 * @param key the contextual key
-	 * @return the corresponding object, or <code>null</code> if none found
+	 * @return the corresponding object, or {@code null} if none found
 	 */
 	Object resolveContextualObject(String key);
 
@@ -135,9 +135,9 @@ public interface Scope {
 	 * case of a custom conversation that sits within the overall session,
 	 * the specific ID for the current conversation would be appropriate.
 	 * <p><b>Note: This is an optional operation.</b> It is perfectly valid to
-	 * return <code>null</code> in an implementation of this method if the
+	 * return {@code null} in an implementation of this method if the
 	 * underlying storage mechanism has no obvious candidate for such an ID.
-	 * @return the conversation ID, or <code>null</code> if there is no
+	 * @return the conversation ID, or {@code null} if there is no
 	 * conversation ID for the current scope
 	 */
 	String getConversationId();

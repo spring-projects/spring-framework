@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import java.sql.Statement;
  * A {@link Jdbc4NativeJdbcExtractor} which comes pre-configured for Oracle's JDBC driver,
  * specifying the following vendor-specific API types for unwrapping:
  * <ul>
- * <li><code>oracle.jdbc.OracleConnection</code>
- * <li><code>oracle.jdbc.OracleStatement</code>
- * <li><code>oracle.jdbc.OraclePreparedStatement</code>
- * <li><code>oracle.jdbc.OracleCallableStatement</code>
- * <li><code>oracle.jdbc.OracleResultSet</code>
+ * <li>{@code oracle.jdbc.OracleConnection}
+ * <li>{@code oracle.jdbc.OracleStatement}
+ * <li>{@code oracle.jdbc.OraclePreparedStatement}
+ * <li>{@code oracle.jdbc.OracleCallableStatement}
+ * <li>{@code oracle.jdbc.OracleResultSet}
  * </ul>
  *
  * <p>Note: This will work with any JDBC 4.0 compliant connection pool, without a need for

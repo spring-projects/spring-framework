@@ -30,10 +30,10 @@ import java.net.URLConnection;
  *
  * <p>Consider using Spring's Resource abstraction in the core package
  * for handling all kinds of file resources in a uniform manner.
- * {@link org.springframework.core.io.ResourceLoader}'s <code>getResource</code>
+ * {@link org.springframework.core.io.ResourceLoader}'s {@code getResource}
  * method can resolve any location to a {@link org.springframework.core.io.Resource}
- * object, which in turn allows to obtain a <code>java.io.File</code> in the
- * file system through its <code>getFile()</code> method.
+ * object, which in turn allows to obtain a {@code java.io.File} in the
+ * file system through its {@code getFile()} method.
  *
  * <p>The main reason for these utility methods for resource location handling
  * is to support {@link Log4jConfigurer}, which must be able to resolve
@@ -107,7 +107,7 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource location to a <code>java.net.URL</code>.
+	 * Resolve the given resource location to a {@code java.net.URL}.
 	 * <p>Does not check whether the URL actually exists; simply returns
 	 * the URL that the given location would correspond to.
 	 * @param resourceLocation the resource location to resolve: either a
@@ -144,7 +144,7 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource location to a <code>java.io.File</code>,
+	 * Resolve the given resource location to a {@code java.io.File},
 	 * i.e. to a file in the file system.
 	 * <p>Does not check whether the fil actually exists; simply returns
 	 * the File that the given location would correspond to.
@@ -178,7 +178,7 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource URL to a <code>java.io.File</code>,
+	 * Resolve the given resource URL to a {@code java.io.File},
 	 * i.e. to a file in the file system.
 	 * @param resourceUrl the resource URL to resolve
 	 * @return a corresponding File object
@@ -190,7 +190,7 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource URL to a <code>java.io.File</code>,
+	 * Resolve the given resource URL to a {@code java.io.File},
 	 * i.e. to a file in the file system.
 	 * @param resourceUrl the resource URL to resolve
 	 * @param description a description of the original resource that
@@ -216,7 +216,7 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource URI to a <code>java.io.File</code>,
+	 * Resolve the given resource URI to a {@code java.io.File},
 	 * i.e. to a file in the file system.
 	 * @param resourceUri the resource URI to resolve
 	 * @return a corresponding File object
@@ -228,7 +228,7 @@ public abstract class ResourceUtils {
 	}
 
 	/**
-	 * Resolve the given resource URI to a <code>java.io.File</code>,
+	 * Resolve the given resource URI to a {@code java.io.File},
 	 * i.e. to a file in the file system.
 	 * @param resourceUri the resource URI to resolve
 	 * @param description a description of the original resource that
@@ -308,7 +308,7 @@ public abstract class ResourceUtils {
 	 * Create a URI instance for the given URL,
 	 * replacing spaces with "%20" quotes first.
 	 * <p>Furthermore, this method works on JDK 1.4 as well,
-	 * in contrast to the <code>URL.toURI()</code> method.
+	 * in contrast to the {@code URL.toURI()} method.
 	 * @param url the URL to convert into a URI instance
 	 * @return the URI instance
 	 * @throws URISyntaxException if the URL wasn't a valid URI
@@ -331,12 +331,12 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Set the {@link URLConnection#setUseCaches "useCaches"} flag on the
-	 * given connection, preferring <code>false</code> but leaving the
-	 * flag at <code>true</code> for JNLP based resources.
+	 * given connection, preferring {@code false} but leaving the
+	 * flag at {@code true} for JNLP based resources.
 	 * @param con the URLConnection to set the flag on
 	 */
 	public static void useCachesIfNecessary(URLConnection con) {
-		con.setUseCaches(con.getClass().getName().startsWith("JNLP"));
+		con.setUseCaches(con.getClass().getSimpleName().startsWith("JNLP"));
 	}
 
 }

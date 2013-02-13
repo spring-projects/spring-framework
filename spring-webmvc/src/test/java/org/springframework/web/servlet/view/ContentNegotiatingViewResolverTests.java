@@ -37,9 +37,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
@@ -271,6 +271,35 @@ public class ContentNegotiatingViewResolverTests {
 		assertSame("Invalid view", jsonViewMock, result);
 
 		verify(htmlViewResolver, jsonViewResolver, htmlView, jsonViewMock);
+	}
+
+	// SPR-9807
+
+	@Test
+	public void resolveViewNameAcceptHeaderWithSuffix() throws Exception {
+		request.addHeader("Accept", "application/vnd.example-v2+xml");
+
+		ViewResolver viewResolverMock = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock));
+
+		viewResolver.afterPropertiesSet();
+
+		View viewMock = createMock("application_xml", View.class);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(viewResolverMock.resolveViewName(viewName, locale)).andReturn(viewMock);
+		expect(viewMock.getContentType()).andReturn("application/*+xml").anyTimes();
+
+		replay(viewResolverMock, viewMock);
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+
+		assertSame("Invalid view", viewMock, result);
+		assertEquals(new MediaType("application", "vnd.example-v2+xml"), request.getAttribute(View.SELECTED_CONTENT_TYPE));
+
+		verify(viewResolverMock, viewMock);
 	}
 
 	@Test

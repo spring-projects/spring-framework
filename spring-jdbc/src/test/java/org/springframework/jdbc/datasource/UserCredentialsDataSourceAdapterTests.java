@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,68 +16,58 @@
 
 package org.springframework.jdbc.datasource;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
+import org.junit.Test;
 
 /**
  * @author Juergen Hoeller
  * @since 28.05.2004
  */
-public class UserCredentialsDataSourceAdapterTests extends TestCase {
+public class UserCredentialsDataSourceAdapterTests {
 
+	@Test
 	public void testStaticCredentials() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		ds.getConnection("user", "pw");
-		dsControl.setReturnValue(con);
-		dsControl.replay();
-		conControl.replay();
+		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock(Connection.class);
+		given(dataSource.getConnection("user", "pw")).willReturn(connection);
 
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
-		adapter.setTargetDataSource(ds);
+		adapter.setTargetDataSource(dataSource);
 		adapter.setUsername("user");
 		adapter.setPassword("pw");
-		assertEquals(con, adapter.getConnection());
+		assertEquals(connection, adapter.getConnection());
 	}
 
+	@Test
 	public void testNoCredentials() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con);
-		dsControl.replay();
-		conControl.replay();
-
+		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock(Connection.class);
+		given(dataSource.getConnection()).willReturn(connection);
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
-		adapter.setTargetDataSource(ds);
-		assertEquals(con, adapter.getConnection());
+		adapter.setTargetDataSource(dataSource);
+		assertEquals(connection, adapter.getConnection());
 	}
 
+	@Test
 	public void testThreadBoundCredentials() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		ds.getConnection("user", "pw");
-		dsControl.setReturnValue(con);
-		dsControl.replay();
-		conControl.replay();
+		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock(Connection.class);
+		given(dataSource.getConnection("user", "pw")).willReturn(connection);
 
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
-		adapter.setTargetDataSource(ds);
+		adapter.setTargetDataSource(dataSource);
 
 		adapter.setCredentialsForCurrentThread("user", "pw");
 		try {
-			assertEquals(con, adapter.getConnection());
+			assertEquals(connection, adapter.getConnection());
 		}
 		finally {
 			adapter.removeCredentialsFromCurrentThread();

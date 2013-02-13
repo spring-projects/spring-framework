@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ abstract class XStreamUtils {
 
 	/**
 	 * Convert the given XStream exception to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
+	 * {@code org.springframework.oxm} hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
 	 * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
 	 * @param ex XStream exception that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
-	 * or unmarshalling (<code>false</code>)
-	 * @return the corresponding <code>XmlMappingException</code>
+	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+	 * or unmarshalling ({@code false})
+	 * @return the corresponding {@code XmlMappingException}
 	 */
 	public static XmlMappingException convertXStreamException(Exception ex, boolean marshalling) {
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||

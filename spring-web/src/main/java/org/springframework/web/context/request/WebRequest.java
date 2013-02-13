@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import java.util.Map;
 public interface WebRequest extends RequestAttributes {
 
 	/**
-	 * Return the request header of the given name, or <code>null</code> if none.
+	 * Return the request header of the given name, or {@code null} if none.
 	 * <p>Retrieves the first header value in case of a multi-value header.
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeader(String)
@@ -42,7 +42,7 @@ public interface WebRequest extends RequestAttributes {
 
 	/**
 	 * Return the request header values for the given header name,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 * <p>A single-value header will be exposed as an array with a single element.
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
@@ -57,7 +57,7 @@ public interface WebRequest extends RequestAttributes {
 	Iterator<String> getHeaderNames();
 
 	/**
-	 * Return the request parameter of the given name, or <code>null</code> if none.
+	 * Return the request parameter of the given name, or {@code null} if none.
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)
 	 */
@@ -65,7 +65,7 @@ public interface WebRequest extends RequestAttributes {
 
 	/**
 	 * Return the request parameter values for the given parameter name,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see javax.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */
@@ -77,7 +77,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 */
 	Iterator<String> getParameterNames();
-	
+
 	/**
 	 * Return a immutable Map of the request parameters, with parameter names as map keys
 	 * and parameter values as map values. The map values will be of type String array.
@@ -174,7 +174,7 @@ public interface WebRequest extends RequestAttributes {
 	 * {@link #checkNotModified(long)}, but not both.
 	 * @param eTag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary.   
+	 * with quotes (") if necessary.
 	 * @return whether the request qualifies as not modified,
 	 * allowing to abort request processing and relying on the response
 	 * telling the client that the content has not been modified

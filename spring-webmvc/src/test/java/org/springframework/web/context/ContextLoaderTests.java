@@ -48,8 +48,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
-import org.springframework.mock.web.MockServletConfig;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletConfig;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -105,6 +105,7 @@ public final class ContextLoaderTests {
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		final ServletContextListener listener = new ContextLoaderListener() {
+			@Override
 			protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
 				assertNotNull("The ServletContext should not be null.", servletContext);
 				assertEquals("Verifying that we received the expected ServletContext.", sc, servletContext);
@@ -301,6 +302,7 @@ public final class ContextLoaderTests {
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml",
 				"/org/springframework/web/context/WEB-INF/fail.xml" }) {
 
+				@Override
 				public void refresh() throws BeansException {
 					try {
 						super.refresh();
@@ -320,6 +322,7 @@ public final class ContextLoaderTests {
 	}
 
 	private static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		@Override
 		public void initialize(ConfigurableApplicationContext applicationContext) {
 			ConfigurableEnvironment environment = applicationContext.getEnvironment();
 			environment.getPropertySources().addFirst(new PropertySource<Object>("testPropertySource") {
@@ -332,6 +335,7 @@ public final class ContextLoaderTests {
 	}
 
 	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
 			ServletContext ctx = applicationContext.getServletContext(); // type-safe access to servlet-specific methods
 			ctx.setAttribute("initialized", true);
@@ -339,6 +343,7 @@ public final class ContextLoaderTests {
 	}
 
 	private static class EnvApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
 			// test that ApplicationContextInitializers can access ServletContext properties
 			// via the environment (SPR-8991)
@@ -352,6 +357,7 @@ public final class ContextLoaderTests {
 	}
 
 	private static class UnknownContextInitializer implements ApplicationContextInitializer<UnknownApplicationContext> {
+		@Override
 		public void initialize(UnknownApplicationContext applicationContext) {
 			applicationContext.unheardOf();
 		}

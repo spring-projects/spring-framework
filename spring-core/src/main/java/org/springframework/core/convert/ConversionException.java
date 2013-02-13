@@ -22,7 +22,7 @@ import org.springframework.core.NestedRuntimeException;
  * Base class for exceptions thrown by the conversion system.
  *
  * @author Keith Donald
- * @since 3.0 
+ * @since 3.0
  */
 @SuppressWarnings("serial")
 public abstract class ConversionException extends NestedRuntimeException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * Abstract PreparedStatementCallback implementation that manages a LobCreator.
  * Typically used as inner class, with access to surrounding method arguments.
  *
- * <p>Delegates to the <code>setValues</code> template method for setting values
+ * <p>Delegates to the {@code setValues} template method for setting values
  * on the PreparedStatement, using a given LobCreator for BLOB/CLOB arguments.
  *
  * <p>A usage example with JdbcTemplate:

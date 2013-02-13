@@ -25,7 +25,7 @@ import javax.servlet.ServletContextListener;
  *
  * <p>This listener should be registered after
  * {@link org.springframework.web.util.Log4jConfigListener}
- * in <code>web.xml</code>, if the latter is used.
+ * in {@code web.xml}, if the latter is used.
  *
  * <p>As of Spring 3.1, {@code ContextLoaderListener} supports injecting the root web
  * application context via the {@link #ContextLoaderListener(WebApplicationContext)}

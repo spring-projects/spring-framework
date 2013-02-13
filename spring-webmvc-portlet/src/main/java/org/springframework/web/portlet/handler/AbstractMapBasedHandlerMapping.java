@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,16 +76,19 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 		if (handler instanceof Map) {
 			Map<PortletRequestMappingPredicate, Object> predicateMap =
 					(Map<PortletRequestMappingPredicate, Object>) handler;
-			List<PortletRequestMappingPredicate> predicates =
-					new LinkedList<PortletRequestMappingPredicate>(predicateMap.keySet());
-			Collections.sort(predicates);
-			for (PortletRequestMappingPredicate predicate : predicates) {
+			List<PortletRequestMappingPredicate> filtered = new LinkedList<PortletRequestMappingPredicate>();
+			for (PortletRequestMappingPredicate predicate : predicateMap.keySet()) {
 				if (predicate.match(request)) {
-					predicate.validate(request);
-					return predicateMap.get(predicate);
+					filtered.add(predicate);
 				}
 			}
-			return null;
+			if (filtered.isEmpty()) {
+				return null;
+			}
+			Collections.sort(filtered);
+			PortletRequestMappingPredicate predicate = filtered.get(0);
+			predicate.validate(request);
+			return predicateMap.get(predicate);
 		}
 		return handler;
 	}
@@ -93,7 +96,7 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 	/**
 	 * Build a lookup key for the given request.
 	 * @param request current portlet request
-	 * @return the lookup key (never <code>null</code>)
+	 * @return the lookup key (never {@code null})
 	 * @throws Exception if key computation failed
 	 */
 	protected abstract K getLookupKey(PortletRequest request) throws Exception;
@@ -128,7 +131,7 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 	 * @param lookupKey the key to map the handler onto
 	 * @param handler the handler instance or handler bean name String
 	 * (a bean name will automatically be resolved into the corresponding handler bean)
-	 * @param predicate a predicate object for this handler (may be <code>null</code>),
+	 * @param predicate a predicate object for this handler (may be {@code null}),
 	 * determining a match with the primary lookup key
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered

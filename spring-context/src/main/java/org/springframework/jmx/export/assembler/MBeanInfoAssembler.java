@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.management.modelmbean.ModelMBeanInfo;
  * Interface to be implemented by all classes that can
  * create management interface metadata for a managed resource.
  *
- * <p>Used by the <code>MBeanExporter</code> to generate the management
+ * <p>Used by the {@code MBeanExporter} to generate the management
  * interface for any bean that is not an MBean.
  *
  * @author Rob Harrop

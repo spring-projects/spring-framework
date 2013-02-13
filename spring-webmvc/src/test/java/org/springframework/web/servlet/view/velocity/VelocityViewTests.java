@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.junit.Test;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
@@ -100,17 +100,17 @@ public class VelocityViewTests {
 	public void testMergeTemplateSucceeds() throws Exception {
 		testValidTemplateName(null);
 	}
-	
+
 	@Test
 	public void testMergeTemplateFailureWithIOException() throws Exception {
 		testValidTemplateName(new IOException());
 	}
-	
+
 	@Test
 	public void testMergeTemplateFailureWithParseErrorException() throws Exception {
 		testValidTemplateName(new ParseErrorException(""));
 	}
-		
+
 	@Test
 	public void testMergeTemplateFailureWithUnspecifiedException() throws Exception {
 		testValidTemplateName(new Exception(""));
@@ -137,6 +137,7 @@ public class VelocityViewTests {
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
@@ -157,6 +158,7 @@ public class VelocityViewTests {
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 				assertTrue(template == expectedTemplate);
 				assertTrue(context.getKeys().length >= 1);
@@ -194,6 +196,7 @@ public class VelocityViewTests {
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
@@ -215,10 +218,12 @@ public class VelocityViewTests {
 		expectedResponse.setContentType("myContentType");
 
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				assertTrue(template == expectedTemplate);
 				assertTrue(response == expectedResponse);
 			}
+			@Override
 			protected void exposeHelpers(Map<String, Object> model, HttpServletRequest request) throws Exception {
 				model.put("myHelper", "myValue");
 			}
@@ -241,9 +246,10 @@ public class VelocityViewTests {
 		expectLastCall().andReturn(null);
 		wac.getServletContext();
 		expectLastCall().andReturn(new MockServletContext());
-		
+
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
@@ -268,6 +274,7 @@ public class VelocityViewTests {
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 				assertTrue(template == expectedTemplate);
 				assertTrue(response == expectedResponse);
@@ -284,6 +291,7 @@ public class VelocityViewTests {
 				assertTrue(numberTool.getLocale().equals(Locale.CANADA));
 			}
 
+			@Override
 			protected void exposeHelpers(Map<String, Object> model, HttpServletRequest request) throws Exception {
 				model.put("myHelper", "myValue");
 			}

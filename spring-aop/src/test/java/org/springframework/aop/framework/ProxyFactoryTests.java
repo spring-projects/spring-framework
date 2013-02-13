@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public final class ProxyFactoryTests {
 		assertEquals(1, pf.indexOf(advisor));
 		assertEquals(-1, advised.indexOf(new DefaultPointcutAdvisor(null)));
 	}
-	
+
 	@Test
 	public void testRemoveAdvisorByReference() {
 		TestBean target = new TestBean();
@@ -84,7 +84,7 @@ public final class ProxyFactoryTests {
 		assertEquals(2, nop.getCount());
 		assertFalse(pf.removeAdvisor(new DefaultPointcutAdvisor(null)));
 	}
-	
+
 	@Test
 	public void testRemoveAdvisorByIndex() {
 		TestBean target = new TestBean();
@@ -113,7 +113,7 @@ public final class ProxyFactoryTests {
 		assertEquals(1, cba.getCalls());
 		assertEquals(2, nop.getCount());
 		assertEquals(3, nop2.getCount());
-		
+
 		// Check out of bounds
 		try {
 			pf.removeAdvisor(-1);
@@ -121,14 +121,14 @@ public final class ProxyFactoryTests {
 		catch (AopConfigException ex) {
 			// Ok
 		}
-		
+
 		try {
 			pf.removeAdvisor(2);
 		}
 		catch (AopConfigException ex) {
 			// Ok
 		}
-		
+
 		assertEquals(5, proxied.getAge());
 		assertEquals(4, nop2.getCount());
 	}
@@ -165,6 +165,7 @@ public final class ProxyFactoryTests {
 	@Test
 	public void testAddRepeatedInterface() {
 		TimeStamped tst = new TimeStamped() {
+			@Override
 			public long getTimeStamp() {
 				throw new UnsupportedOperationException("getTimeStamp");
 			}
@@ -181,6 +182,7 @@ public final class ProxyFactoryTests {
 	public void testGetsAllInterfaces() throws Exception {
 		// Extend to get new interface
 		class TestBeanSubclass extends TestBean implements Comparable<Object> {
+			@Override
 			public int compareTo(Object arg0) {
 				throw new UnsupportedOperationException("compareTo");
 			}
@@ -191,17 +193,17 @@ public final class ProxyFactoryTests {
 		assertEquals("Found correct number of interfaces", 3, factory.getProxiedInterfaces().length);
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertThat("Picked up secondary interface", tb, instanceOf(IOther.class));
-				
+
 		raw.setAge(25);
 		assertTrue(tb.getAge() == raw.getAge());
 
 		long t = 555555L;
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(t);
-		
+
 		Class<?>[] oldProxiedInterfaces = factory.getProxiedInterfaces();
-		
+
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
-		
+
 		Class<?>[] newProxiedInterfaces = factory.getProxiedInterfaces();
 		assertEquals("Advisor proxies one more interface after introduction", oldProxiedInterfaces.length + 1, newProxiedInterfaces.length);
 
@@ -210,15 +212,16 @@ public final class ProxyFactoryTests {
 		// Shouldn't fail;
 		 ((IOther) ts).absquatulate();
 	}
-	
+
 	@Test
 	public void testInterceptorInclusionMethods() {
 		class MyInterceptor implements MethodInterceptor {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				throw new UnsupportedOperationException();
 			}
 		}
-		
+
 		NopInterceptor di = new NopInterceptor();
 		NopInterceptor diUnused = new NopInterceptor();
 		ProxyFactory factory = new ProxyFactory(new TestBean());
@@ -228,7 +231,7 @@ public final class ProxyFactoryTests {
 		assertTrue(!factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 1);
 		assertTrue(factory.countAdvicesOfType(MyInterceptor.class) == 0);
-	
+
 		factory.addAdvice(0, diUnused);
 		assertTrue(factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 2);
@@ -350,6 +353,7 @@ public final class ProxyFactoryTests {
 			this.ts = ts;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return ts;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.util.JDBCExceptionReporter;
 
+import org.springframework.jdbc.datasource.DataSourceUtils;
+
 /**
  * Hibernate connection provider for local DataSource instances
  * in an application context. This provider will be used if
@@ -47,7 +49,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
 			throw new HibernateException("No local DataSource found for configuration - " +
-			    "'dataSource' property must be set on LocalSessionFactoryBean");
+				"'dataSource' property must be set on LocalSessionFactoryBean");
 		}
 		this.dataSourceToUse = getDataSourceToUse(this.dataSource);
 	}
@@ -87,12 +89,12 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	}
 
 	/**
-	 * This implementation simply calls <code>Connection.close</code>.
-	 * @see java.sql.Connection#close()
+	 * This implementation calls {@link DataSourceUtils#doCloseConnection},
+	 * checking against a {@link org.springframework.jdbc.datasource.SmartDataSource}.
 	 */
 	public void closeConnection(Connection con) throws SQLException {
 		try {
-			con.close();
+			DataSourceUtils.doCloseConnection(con, this.dataSourceToUse);
 		}
 		catch (SQLException ex) {
 			JDBCExceptionReporter.logExceptions(ex);
@@ -108,7 +110,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	}
 
 	/**
-	 * This implementation returns <code>false</code>: We cannot guarantee
+	 * This implementation returns {@code false}: We cannot guarantee
 	 * to receive the same Connection within a transaction, not even when
 	 * dealing with a JNDI DataSource.
 	 */

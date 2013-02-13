@@ -26,6 +26,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -56,18 +57,28 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
+
 	/**
-	 * Creates a {@link ServletInvocableHandlerMethod} instance with the given bean and method.
-	 * @param handler the object handler
-	 * @param method the method
+	 * Creates an instance from the given handler and method.
 	 */
 	public ServletInvocableHandlerMethod(Object handler, Method method) {
 		super(handler, method);
+		initResponseStatus();
+	}
 
-		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
-		if (annotation != null) {
-			this.responseStatus = annotation.value();
-			this.responseReason = annotation.reason();
+	/**
+	 * Create an instance from a {@code HandlerMethod}.
+	 */
+	public ServletInvocableHandlerMethod(HandlerMethod handlerMethod) {
+		super(handlerMethod);
+		initResponseStatus();
+	}
+
+	private void initResponseStatus() {
+		ResponseStatus annot = getMethodAnnotation(ResponseStatus.class);
+		if (annot != null) {
+			this.responseStatus = annot.value();
+			this.responseReason = annot.reason();
 		}
 	}
 
@@ -185,7 +196,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 
 	/**
-	 * Wrap a Callable as a ServletInvocableHandlerMethod inheriting method-level annotations.
+	 * A ServletInvocableHandlerMethod sub-class that invokes a given
+	 * {@link Callable} and "inherits" the annotations of the containing class
+	 * instance, useful for invoking a Callable returned from a HandlerMethod.
 	 */
 	private class CallableHandlerMethod extends ServletInvocableHandlerMethod {
 

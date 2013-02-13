@@ -227,7 +227,7 @@ public class NamedParameterUtilsTests {
 		assertEquals(0, parsedSql.getParameterNames().size());
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 		assertEquals(expectedSql, finalSql);
-		
+
 		String expectedSql2 = "select foo from bar where baz = 'b:{p1}z'";
 		String sql2 = "select foo from bar where baz = 'b:{p1}z'";
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.mock.staticmock;
 
+import static org.junit.Assert.assertEquals;
+
 import java.rmi.RemoteException;
 
 import javax.persistence.PersistenceException;
-
-import junit.framework.Assert;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public class Delegate {
 		Person.findPerson(id);
 		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
 		AnnotationDrivenStaticEntityMockingControl.playback();
-		Assert.assertEquals(found, Person.findPerson(id + 1));
+		assertEquals(found, Person.findPerson(id + 1));
 	}
 
 	@Test
@@ -50,9 +50,9 @@ public class Delegate {
 		Person.findPerson(id);
 		AnnotationDrivenStaticEntityMockingControl.expectThrow(new PersistenceException());
 		AnnotationDrivenStaticEntityMockingControl.playback();
-		Assert.assertEquals(found, Person.findPerson(id + 1));
+		assertEquals(found, Person.findPerson(id + 1));
 	}
-	
+
 	@Test
 	public void failTooFewCalls() {
 		long id = 13;
@@ -62,14 +62,14 @@ public class Delegate {
 		Person.countPeople();
 		AnnotationDrivenStaticEntityMockingControl.expectReturn(25);
 		AnnotationDrivenStaticEntityMockingControl.playback();
-		Assert.assertEquals(found, Person.findPerson(id));
+		assertEquals(found, Person.findPerson(id));
 	}
 
 	@Test
 	public void doesntEverReplay() {
 		Person.countPeople();
 	}
-	
+
 	@Test
 	public void doesntEverSetReturn() {
 		Person.countPeople();
@@ -81,7 +81,7 @@ public class Delegate {
 		AnnotationDrivenStaticEntityMockingControl.playback();
 		Person.countPeople();
 	}
-	
+
 	@Test(expected=RemoteException.class)
 	public void testVerificationFailsEvenWhenTestFailsInExpectedManner() throws RemoteException {
 		Person.countPeople();

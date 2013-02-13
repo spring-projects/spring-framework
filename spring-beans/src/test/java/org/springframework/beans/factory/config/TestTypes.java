@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.ObjectFactory;
 
 /**
  * Shared test types for this package.
- * 
+ *
  * @author Chris Beams
  */
 final class TestTypes {}
@@ -30,21 +30,26 @@ final class TestTypes {}
  */
 class NoOpScope implements Scope {
 
+	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Object remove(String name) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 	}
 
+	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
+	@Override
 	public String getConversationId() {
 		return null;
 	}

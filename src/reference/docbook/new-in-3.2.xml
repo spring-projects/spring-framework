@@ -1,171 +1,322 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="new-in-3.2">
-  <title>New Features and Enhancements in Spring 3.2</title>
+<chapter version="5.0"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd"
+         xml:id="new-in-3.2" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xmlns:xl="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>New Features and Enhancements in Spring Framework 3.2</title>
 
-  <section id="new-in-3.2-features-overview">
-    <title>Overview of new features</title>
+  <para>This section covers what's new in Spring Framework 3.2. See also
+  <xref linkend="migration-3.2"/></para>
 
-    <section id="new-in-3.2-webmvc-async">
-      <title>Support for Servlet 3 based asynchronous request processing</title>
+  <section xml:id="new-in-3.2-webmvc-async">
+    <title>Support for Servlet 3 based asynchronous request processing</title>
 
-      <para>The Spring MVC programming model now provides explicit Servlet 3 async support.
-      <interfacename>@RequestMapping</interfacename> methods can return one of:</para>
-      
-      <itemizedlist>
-        <listitem>
-          <para><interfacename>java.util.concurrent.Callable</interfacename> to
-          complete processing in a separate thread managed by a task executor
-          within Spring MVC.</para>
-        </listitem>
-        <listitem>
-          <para><classname>org.springframework.web.context.request.async.DeferredResult</classname>
-          to complete processing at a later time from a thread not known to
-          Spring MVC, e.g. in response to some external event (JSM, AMQP, etc.)</para>
-        </listitem>
-        <listitem>
-          <para><classname>org.springframework.web.context.request.async.AsyncTask</classname>
-          to wrap a <interfacename>Callable</interfacename> and
-          customize the timeout value or the task executor to use.</para>
-        </listitem>
-      </itemizedlist>
-            
-      <para>See <ulink
-          url="http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">
-          Introducing Servlet 3 Async Support</ulink> (SpringSource team blog).</para>
-    
-    </section>
+    <para>The Spring MVC programming model now provides explicit Servlet 3
+    async support. <interfacename>@RequestMapping</interfacename> methods can
+    return one of:</para>
 
-    <section id="new-in-3.2-webmvc-content-negotiation">
-      <title>Content negotiation improvements</title>
+    <itemizedlist>
+      <listitem>
+        <para><interfacename>java.util.concurrent.Callable</interfacename> to
+        complete processing in a separate thread managed by a task executor
+        within Spring MVC.</para>
+      </listitem>
 
-      <para>A <interfacename>ContentNeogtiationStrategy</interfacename> is now
-      available for resolving the requested media types from an incoming request.
-      The available implementations are based on path extension, request parameter,
-      'Accept' header, and a fixed default content type. Equivalent options were
-      previously available only in the ContentNegotiatingViewResolver but are now
-      available throughout.</para>
+      <listitem>
+        <para><classname>org.springframework.web.context.request.async.DeferredResult</classname>
+        to complete processing at a later time from a thread not known to
+        Spring MVC — for example, in response to some external event (JMS,
+        AMQP, etc.)</para>
+      </listitem>
 
-      <para><classname>ContentNegotiationManager</classname> is the central class to
-      use when configuring content negotiation options. It accepts one or
-      more ContentNeogtiationStrategy instances and delegates to them. It can be
-      plugged into <classname>RequestMappingHandlerMapping</classname>,
-      <classname>RequestMappingHandlerAdapter</classname>,
-      <classname>ExceptionHandlerExceptionResolver</classname>,
-      and <classname>ContentNegotiatingViewResolver</classname>. The MVC
-      namespace and the MVC Java config provide convenient options to configure
-      all that.</para>
+      <listitem>
+        <para><classname>org.springframework.web.context.request.async.AsyncTask</classname>
+        to wrap a <interfacename>Callable</interfacename> and customize the
+        timeout value or the task executor to use.</para>
+      </listitem>
+    </itemizedlist>
 
-      <para>The introduction of <classname>ContentNegotiationManger</classname>
-      also enables smart suffix pattern matching for incoming requests.
-      See <ulink url="https://github.com/SpringSource/spring-framework/commit/4fd7645">
-      commit message</ulink></para>
-
-    </section>
-
-    <section id="new-in-3.2-webmvc-controller-advice">
-      <title>New <interfacename>@ControllerAdvice</interfacename> annotation</title>
-      
-      <para>Classes annotated with <interfacename>@ControllerAdvice</interfacename>
-      can contain <interfacename>@ExceptionHandler</interfacename>,
-      <interfacename>@InitBinder</interfacename>, and
-      <interfacename>@ModelAttribute</interfacename> methods and those will apply
-      to <interfacename>@RequestMapping</interfacename> methods across controller
-      hierarchies as opposed to the controller hierarchy within which they are declared.
-      <interfacename>@ControllerAdvice</interfacename> is
-      a component annotation allowing implementation classes to be auto-detected
-      through classpath scanning.</para>
-       
-    </section>
-
-    <section id="new-in-3.2-webmvc-exception-handler-support">
-      <title>New <classname>ResponseEntityExceptionHandler</classname> class</title>
-
-      <para>A convenient base class with an
-      <interfacename>@ExceptionHandler</interfacename>
-      method that handles standard Spring MVC exceptions and returns a
-      <classname>ResponseEntity</classname> that allowing customizing and writing
-      the response with HTTP message converters. This servers as an alternative
-      to the <classname>DefaultHandlerExceptionResolver</classname>, which does
-      the same but returns a <classname>ModelAndView</classname> instead.</para>
-
-      <para>See the revised <xref linkend="mvc-exceptionhandlers"/>
-      including information on customizing the default Servlet container error page.</para>
-
-    </section>
-
-    <section id="new-in-3.2-webmvc-generic-types-rest-template">
-      <title>Support for generic types in the <classname>RestTemplate</classname> and in
-        <interfacename>@RequestBody</interfacename> arguments</title>
-
-      <para>The <classname>RestTemplate</classname> can now read an HTTP
-      response to a generic type (e.g. <code>List&lt;Account&gt;</code>).
-      There are three new <code>exchange()</code> methods that accept
-      <classname>ParameterizedTypeReference</classname>, a
-      new class that enables capturing and passing generic type info.</para>
-
-      <para>In support of this feature, the <interfacename>HttpMessageConverter</interfacename>
-      is extended by <interfacename>GenericHttpMessageConverter</interfacename>
-      adding a method for reading content given a specified parameterized type.
-      The new interface is implemented by the
-      <classname>MappingJacksonHttpMessageConverter</classname> and also
-      by a new <classname>Jaxb2CollectionHttpMessageConverter</classname> that can
-      read read a generic <interfacename>Collection</interfacename> where the
-      generic type is a JAXB type annotated with
-      <interfacename>@XmlRootElement</interfacename> or
-      <interfacename>@XmlType</interfacename>.</para>
-      
-    </section>
-
-    <section id="new-in-3.2-webmvc-jackson-json">
-      <title>Jackson JSON 2 and related improvements</title>
-
-      <para>The Jackson Json 2 library is now supported. Due to packaging changes in
-      the Jackson library, there are separate classes in Spring MVC as well. Those are
-      <classname>MappingJackson2HttpMessageConverter</classname> and
-      <classname>MappingJackson2JsonView</classname>.
-      Other related configuration improvements include support for
-      pretty printing as well as a
-      <classname>JacksonObjectMapperFactoryBean</classname> for convenient
-      customization of an <classname>ObjectMapper</classname> in
-      XML configuration.</para>
-
-    </section>
-
-    <section id="new-in-3.2-webmvc-request-body-arg-with-binding-result">
-      <title><interfacename>@RequestBody</interfacename> improvements</title>
-
-      <para>An <interfacename>@RequestBody</interfacename> or an
-      <interfacename>@RequestPart</interfacename> argument can now be followed by an
-      <interfacename>Errors</interfacename> argument making it possible to handle
-      validation errors (as a result of an <interfacename>@Valid</interfacename>
-      annotation) locally within the <interfacename>@RequestMapping</interfacename> method.
-      <interfacename>@RequestBody</interfacename> now also supports
-      a required flag.</para>
-
-    </section>
-
-    <section id="new-in-3.2-webmvc-http-patch">
-      <title>HTTP PATCH method</title>
-
-      <para>The HTTP request method <code>PATCH</code> may now be used in
-      <interfacename>@RequestMapping</interfacename> methods as well as in
-      the <classname>RestTemplate</classname> in conjunction with
-      Apache HttpComponents HttpClient version 4.2 or later.
-      The JDK <classname>HttpURLConnection</classname> does not support the
-      <code>PATCH</code> method.</para>
-
-    </section>
-
-    <section id="new-in-3.2-webmvc-mapped-interceptor-exclude-patterns">
-      <title>Excluded patterns in mapped interceptors</title>
-
-      <para>Mapped interceptors now support URL patterns to be excluded.
-      The MVC namespace and the MVC Java config both expose these options.</para>
-
-    </section>
+    <para>See <xref linkend="mvc-ann-async"/>.</para>
 
   </section>
+
+  <section xml:id="new-in-3.2-spring-mvc-test">
+    <title>Spring MVC Test framework</title>
+
+    <para>First-class support for testing Spring MVC applications with a
+    fluent API and without a Servlet container. Server-side tests involve use
+    of the <classname>DispatcherServlet</classname> while client-side REST
+    tests rely on the <classname>RestTemplate</classname>. See <xref
+    linkend="spring-mvc-test-framework" />.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-content-negotiation">
+    <title>Content negotiation improvements</title>
+
+    <para>A <interfacename>ContentNeogtiationStrategy</interfacename> is now
+    available for resolving the requested media types from an incoming
+    request. The available implementations are based on the file extension,
+    query parameter, the 'Accept' header, or a fixed content type.
+    Equivalent options were previously available only in the
+    ContentNegotiatingViewResolver but are now available throughout.</para>
+
+    <para><classname>ContentNegotiationManager</classname> is the central
+    class to use when configuring content negotiation options.
+    For more details see <xref linkend="mvc-config-content-negotiation" />.</para>
+
+    <para>The introduction of <classname>ContentNegotiationManger</classname>
+    also enables selective suffix pattern matching for incoming requests.
+    For more details, see the Javadoc of
+    <link
+    xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.BUILD-SNAPSHOT/api/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)">RequestMappingHandlerMapping.setUseRegisteredSuffixPatternMatch</link>.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-controller-advice">
+    <title><interfacename>@ControllerAdvice</interfacename> annotation</title>
+
+    <para>Classes annotated with
+    <interfacename>@ControllerAdvice</interfacename> can contain
+    <interfacename>@ExceptionHandler</interfacename>,
+    <interfacename>@InitBinder</interfacename>, and
+    <interfacename>@ModelAttribute</interfacename> methods and those will
+    apply to <interfacename>@RequestMapping</interfacename> methods across
+    controller hierarchies as opposed to the controller hierarchy within which
+    they are declared. <interfacename>@ControllerAdvice</interfacename> is a
+    component annotation allowing implementation classes to be auto-detected
+    through classpath scanning.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-matrix-variables">
+    <title>Matrix variables</title>
+
+    <para>A new <interfacename>@MatrixVariable</interfacename> annotation adds
+    support for extracting matrix variables from the request URI. For more
+    details see <xref linkend="mvc-ann-matrix-variables" />.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-dispatcher-servlet-initializer">
+    <title>Abstract base class for code-based Servlet 3+ container
+    initialization</title>
+
+    <para>An abstract base class implementation of the
+    <interfacename>WebApplicationInitializer</interfacename> interface is
+    provided to simplify code-based registration of a DispatcherServlet and
+    filters mapped to it. The new class is named
+    <classname>AbstractDispatcherServletInitializer</classname> and its
+    sub-class
+    <classname>AbstractAnnotationConfigDispatcherServletInitializer</classname>
+    can be used with Java-based Spring configuration. For more details see
+    <xref linkend="mvc-container-config" />.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-exception-handler-support">
+    <title><classname>ResponseEntityExceptionHandler</classname> class</title>
+
+    <para>A convenient base class with an
+    <interfacename>@ExceptionHandler</interfacename> method that handles
+    standard Spring MVC exceptions and returns a
+    <classname>ResponseEntity</classname> that allowing customizing and
+    writing the response with HTTP message converters. This servers as an
+    alternative to the <classname>DefaultHandlerExceptionResolver</classname>,
+    which does the same but returns a <classname>ModelAndView</classname>
+    instead.</para>
+
+    <para>See the revised <xref linkend="mvc-exceptionhandlers" /> including
+    information on customizing the default Servlet container error
+    page.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-generic-types-rest-template">
+    <title>Support for generic types in the
+    <classname>RestTemplate</classname> and in
+    <interfacename>@RequestBody</interfacename> arguments</title>
+
+    <para>The <classname>RestTemplate</classname> can now read an HTTP
+    response to a generic type (e.g. <code>List&lt;Account&gt;</code>). There
+    are three new <code>exchange()</code> methods that accept
+    <classname>ParameterizedTypeReference</classname>, a new class that
+    enables capturing and passing generic type info.</para>
+
+    <para>In support of this feature, the
+    <interfacename>HttpMessageConverter</interfacename> is extended by
+    <interfacename>GenericHttpMessageConverter</interfacename> adding a method
+    for reading content given a specified parameterized type. The new
+    interface is implemented by the
+    <classname>MappingJacksonHttpMessageConverter</classname> and also by a
+    new <classname>Jaxb2CollectionHttpMessageConverter</classname> that can
+    read read a generic <interfacename>Collection</interfacename> where the
+    generic type is a JAXB type annotated with
+    <interfacename>@XmlRootElement</interfacename> or
+    <interfacename>@XmlType</interfacename>.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-jackson-json">
+    <title>Jackson JSON 2 and related improvements</title>
+
+    <para>The Jackson JSON 2 library is now supported. Due to packaging
+    changes in the Jackson library, there are separate classes in Spring MVC
+    as well. Those are
+    <classname>MappingJackson2HttpMessageConverter</classname> and
+    <classname>MappingJackson2JsonView</classname>. Other related
+    configuration improvements include support for pretty printing as well as
+    a <classname>JacksonObjectMapperFactoryBean</classname> for convenient
+    customization of an <classname>ObjectMapper</classname> in XML
+    configuration.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-tiles3">
+    <title>Tiles 3</title>
+
+    <para>Tiles 3 is now supported in addition to Tiles 2.x. Configuring
+    it should be very similar to the Tiles 2 configuration, i.e. the
+    combination of <classname>TilesConfigurer</classname>,
+    <classname>TilesViewResolver</classname> and <classname>TilesView</classname>
+    except using the <code>tiles3</code> instead of the <code>tiles2</code>
+    package.</para>
+
+    <para>Also note that besides the version number change, the tiles
+    dependencies have also changed. You will need to have a subset or all of
+    <filename>tiles-request-api</filename>, <filename>tiles-api</filename>,
+    <filename>tiles-core</filename>, <filename>tiles-servlet</filename>,
+    <filename>tiles-jsp</filename>, <filename>tiles-el</filename>.
+    </para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-request-body-arg-with-binding-result">
+    <title><interfacename>@RequestBody</interfacename> improvements</title>
+
+    <para>An <interfacename>@RequestBody</interfacename> or an
+    <interfacename>@RequestPart</interfacename> argument can now be followed
+    by an <interfacename>Errors</interfacename> argument making it possible to
+    handle validation errors (as a result of an
+    <interfacename>@Valid</interfacename> annotation) locally within the
+    <interfacename>@RequestMapping</interfacename> method.
+    <interfacename>@RequestBody</interfacename> now also supports a required
+    flag.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-http-patch">
+    <title>HTTP PATCH method</title>
+
+    <para>The HTTP request method <code>PATCH</code> may now be used in
+    <interfacename>@RequestMapping</interfacename> methods as well as in the
+    <classname>RestTemplate</classname> in conjunction with Apache
+    HttpComponents HttpClient version 4.2 or later. The JDK
+    <classname>HttpURLConnection</classname> does not support the
+    <code>PATCH</code> method.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-mapped-interceptor-exclude-patterns">
+    <title>Excluded patterns in mapped interceptors</title>
+
+    <para>Mapped interceptors now support URL patterns to be excluded. The MVC
+    namespace and the MVC JavaConfig both expose these options.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-meta-annotations">
+    <title>Using meta-annotations for injection points and for bean definition methods</title>
+
+    <para>As of 3.2, Spring allows for <interfacename>@Autowired</interfacename> and
+    <interfacename>@Value</interfacename> to be used as meta-annotations,
+    e.g. to build custom injection annotations in combination with specific qualifiers.
+    Analogously, you may build custom <interfacename>@Bean</interfacename> definition
+    annotations for <interfacename>@Configuration</interfacename> classes,
+    e.g. in combination with specific qualifiers, @Lazy, @Primary, etc.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-jcache">
+    <title>Initial support for JCache 0.5</title>
+
+    <para>Spring provides a CacheManager adapter for JCache, building against the JCache 0.5
+    preview release. Full JCache support is coming next year, along with Java EE 7 final.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-date-time-format-without-joda">
+    <title>Support for <interfacename>@DateTimeFormat</interfacename> without
+    Joda Time</title>
+
+    <para>The <interfacename>@DateTimeFormat</interfacename> annotation can
+    now be used without needing a dependency on the Joda Time library. If Joda
+    Time is not present the JDK <classname>SimpleDateFormat</classname> will
+    be used to parse and print date patterns. When Joda Time is present it
+    will continue to be used in preference to
+    <classname>SimpleDateFormat</classname>.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-global-date-time-format">
+    <title>Global date &amp; time formatting</title>
+
+    <para>It is now possible to define global formats that will be used when
+    parsing and printing date and time types. See <xref
+    linkend="format-configuring-formatting-globaldatetimeformat" /> for
+    details.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-testing">
+    <title>New Testing Features</title>
+
+    <para>In addition to the aforementioned inclusion of the <link
+    linkend="spring-mvc-test-framework">Spring MVC Test Framework</link> in
+    the <literal>spring-test</literal> module, the <emphasis>Spring
+    TestContext Framework</emphasis> has been revised with support for
+    integration testing web applications as well as configuring application
+    contexts with context initializers. For further details, consult the
+    following.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Configuring and <link
+        linkend="testcontext-ctx-management-web">loading a
+        WebApplicationContext</link> in integration tests</para>
+      </listitem>
+
+      <listitem>
+        <para>Testing <link linkend="testcontext-web-scoped-beans">request and
+        session scoped beans</link></para>
+      </listitem>
+
+      <listitem>
+        <para>Improvements to <link linkend="mock-objects-servlet">Servlet API
+        mocks</link></para>
+      </listitem>
+
+      <listitem>
+        <para>Configuring test application contexts with <link
+        linkend="testcontext-ctx-management-initializers">ApplicationContextInitializers</link></para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section xml:id="new-in-3.2-concurrency">
+    <title>Concurrency refinements across the framework</title>
+
+    <para>Spring Framework 3.2 includes fine-tuning of concurrent data structures
+    in many parts of the framework, minimizing locks and generally improving the
+    arrangements for highly concurrent creation of scoped/prototype beans.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-build">
+    <title>New Gradle-based build and move to GitHub</title>
+
+    <para>Building and contributing to the framework has never been simpler with
+    our move to a Gradle-based build system and source control at GitHub.
+    See the <link xl:href="https://github.com/SpringSource/spring-framework#building-from-source">
+    building from source</link> section of the README and the
+    <link xl:href="https://github.com/SpringSource/spring-framework/blob/master/CONTRIBUTING.md">
+    contributor guidelines</link> for complete details.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-java7">
+    <title>Refined Java SE 7 / OpenJDK 7 support</title>
+
+    <para>Last but not least, Spring Framework 3.2 comes with refined Java 7 support
+    within the framework as well as through upgraded third-party dependencies:
+    specifically, CGLIB 3.0, ASM 4.0 (both of which come as inlined dependencies with
+    Spring now) and AspectJ 1.7 support (next to the existing AspectJ 1.6 support).</para>
+  </section>
+
 </chapter>

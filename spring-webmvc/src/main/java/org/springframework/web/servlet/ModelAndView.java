@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class ModelAndView {
 
 	/**
 	 * Convenient constructor when there is no model data to expose.
-	 * Can also be used in conjunction with <code>addObject</code>.
+	 * Can also be used in conjunction with {@code addObject}.
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet's ViewResolver
 	 * @see #addObject
@@ -75,7 +75,7 @@ public class ModelAndView {
 
 	/**
 	 * Convenient constructor when there is no model data to expose.
-	 * Can also be used in conjunction with <code>addObject</code>.
+	 * Can also be used in conjunction with {@code addObject}.
 	 * @param view View object to render
 	 * @see #addObject
 	 */
@@ -88,8 +88,8 @@ public class ModelAndView {
 	 * @param viewName name of the View to render, to be resolved
 	 * by the DispatcherServlet's ViewResolver
 	 * @param model Map of model names (Strings) to model objects
-	 * (Objects). Model entries may not be <code>null</code>, but the
-	 * model Map may be <code>null</code> if there is no model data.
+	 * (Objects). Model entries may not be {@code null}, but the
+	 * model Map may be {@code null} if there is no model data.
 	 */
 	public ModelAndView(String viewName, Map<String, ?> model) {
 		this.view = viewName;
@@ -105,8 +105,8 @@ public class ModelAndView {
 	 * Map after supplying it to this class</emphasis>
 	 * @param view View object to render
 	 * @param model Map of model names (Strings) to model objects
-	 * (Objects). Model entries may not be <code>null</code>, but the
-	 * model Map may be <code>null</code> if there is no model data.
+	 * (Objects). Model entries may not be {@code null}, but the
+	 * model Map may be {@code null} if there is no model data.
 	 */
 	public ModelAndView(View view, Map<String, ?> model) {
 		this.view = view;
@@ -150,7 +150,7 @@ public class ModelAndView {
 
 	/**
 	 * Return the view name to be resolved by the DispatcherServlet
-	 * via a ViewResolver, or <code>null</code> if we are using a View object.
+	 * via a ViewResolver, or {@code null} if we are using a View object.
 	 */
 	public String getViewName() {
 		return (this.view instanceof String ? (String) this.view : null);
@@ -165,7 +165,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the View object, or <code>null</code> if we are using a view name
+	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
 	public View getView() {
@@ -173,7 +173,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Indicate whether or not this <code>ModelAndView</code> has a view, either
+	 * Indicate whether or not this {@code ModelAndView} has a view, either
 	 * as a view name or as a direct {@link View} instance.
 	 */
 	public boolean hasView() {
@@ -181,7 +181,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return whether we use a view reference, i.e. <code>true</code>
+	 * Return whether we use a view reference, i.e. {@code true}
 	 * if the view has been specified via a name to be resolved by the
 	 * DispatcherServlet via a ViewResolver.
 	 */
@@ -190,7 +190,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the model map. May return <code>null</code>.
+	 * Return the model map. May return {@code null}.
 	 * Called by DispatcherServlet for evaluation of the model.
 	 */
 	protected Map<String, Object> getModelInternal() {
@@ -198,7 +198,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the underlying <code>ModelMap</code> instance (never <code>null</code>).
+	 * Return the underlying {@code ModelMap} instance (never {@code null}).
 	 */
 	public ModelMap getModelMap() {
 		if (this.model == null) {
@@ -208,7 +208,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the model map. Never returns <code>null</code>.
+	 * Return the model map. Never returns {@code null}.
 	 * To be called by application code for modifying the model.
 	 */
 	public Map<String, Object> getModel() {
@@ -219,7 +219,7 @@ public class ModelAndView {
 	/**
 	 * Add an attribute to the model.
 	 * @param attributeName name of the object to add to the model
-	 * @param attributeValue object to add to the model (never <code>null</code>)
+	 * @param attributeValue object to add to the model (never {@code null})
 	 * @see ModelMap#addAttribute(String, Object)
 	 * @see #getModelMap()
 	 */
@@ -230,7 +230,7 @@ public class ModelAndView {
 
 	/**
 	 * Add an attribute to the model using parameter name generation.
-	 * @param attributeValue the object to add to the model (never <code>null</code>)
+	 * @param attributeValue the object to add to the model (never {@code null})
 	 * @see ModelMap#addAttribute(Object)
 	 * @see #getModelMap()
 	 */
@@ -255,7 +255,7 @@ public class ModelAndView {
 	 * Clear the state of this ModelAndView object.
 	 * The object will be empty afterwards.
 	 * <p>Can be used to suppress rendering of a given ModelAndView object
-	 * in the <code>postHandle</code> method of a HandlerInterceptor.
+	 * in the {@code postHandle} method of a HandlerInterceptor.
 	 * @see #isEmpty()
 	 * @see HandlerInterceptor#postHandle
 	 */
@@ -276,7 +276,7 @@ public class ModelAndView {
 	/**
 	 * Return whether this ModelAndView object is empty as a result of a call to {@link #clear}
 	 * i.e. whether it does not hold any view and does not contain a model.
-	 * <p>Returns <code>false</code> if any additional state was added to the instance
+	 * <p>Returns {@code false} if any additional state was added to the instance
 	 * <strong>after</strong> the call to {@link #clear}.
 	 * @see #clear()
 	 */
