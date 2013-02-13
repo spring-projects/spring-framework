@@ -44,10 +44,14 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 
 	private OutputStream body;
 
+	private final boolean outputStreaming;
 
-	SimpleStreamingClientHttpRequest(HttpURLConnection connection, int chunkSize) {
+
+	SimpleStreamingClientHttpRequest(HttpURLConnection connection, int chunkSize,
+			boolean outputStreaming) {
 		this.connection = connection;
 		this.chunkSize = chunkSize;
+		this.outputStreaming = outputStreaming;
 	}
 
 	public HttpMethod getMethod() {
@@ -66,12 +70,14 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
 		if (this.body == null) {
-			int contentLength = (int) headers.getContentLength();
-			if (contentLength >= 0) {
-				this.connection.setFixedLengthStreamingMode(contentLength);
-			}
-			else {
-				this.connection.setChunkedStreamingMode(this.chunkSize);
+			if(this.outputStreaming) {
+				int contentLength = (int) headers.getContentLength();
+				if (contentLength >= 0) {
+					this.connection.setFixedLengthStreamingMode(contentLength);
+				}
+				else {
+					this.connection.setChunkedStreamingMode(this.chunkSize);
+				}
 			}
 			writeHeaders(headers);
 			this.connection.connect();
