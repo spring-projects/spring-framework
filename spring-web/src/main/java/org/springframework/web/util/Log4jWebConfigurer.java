@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package org.springframework.web.util;
 
-import java.io.FileNotFoundException;
-
-import javax.servlet.ServletContext;
-
 import org.springframework.util.Log4jConfigurer;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.SystemPropertyUtils;
+
+import javax.servlet.ServletContext;
+import java.io.FileNotFoundException;
 
 /**
  * Convenience class that performs custom log4j initialization for web environments,
@@ -90,6 +88,7 @@ import org.springframework.util.SystemPropertyUtils;
  * context-param at all) without worrying.
  *
  * @author Juergen Hoeller
+ * @author Marten Deinum
  * @since 12.08.2003
  * @see org.springframework.util.Log4jConfigurer
  * @see Log4jConfigListener
@@ -122,9 +121,9 @@ public abstract class Log4jWebConfigurer {
 		if (location != null) {
 			// Perform actual log4j initialization; else rely on log4j's default initialization.
 			try {
-				// Resolve system property placeholders before potentially
+				// Resolve property placeholders before potentially
 				// resolving a real path.
-				location = SystemPropertyUtils.resolvePlaceholders(location);
+				location = ServletContextPropertyUtils.resolvePlaceholders(location, servletContext);
 
 				// Leave a URL (e.g. "classpath:" or "file:") as-is.
 				if (!ResourceUtils.isUrl(location)) {
