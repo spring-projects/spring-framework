@@ -2969,8 +2969,8 @@ public class AppConfig {
 
       <para>Instances of <interfacename>@Configurable</interfacename> objects
       created <emphasis>before</emphasis> the aspect has been configured will
-      result in a warning being issued to the log and no configuration of the
-      object taking place. An example might be a bean in the Spring
+      result in a message being issued to the debug log and no configuration
+      of the object taking place. An example might be a bean in the Spring
       configuration that creates domain objects when it is initialized by
       Spring. In this case you can use the "depends-on" bean attribute to
       manually specify that the bean depends on the configuration
