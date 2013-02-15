@@ -154,7 +154,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("order", 0);
-		handlerMappingDef.getPropertyValues().add("removeSemicolonContent", false);
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		String methodMappingName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
 

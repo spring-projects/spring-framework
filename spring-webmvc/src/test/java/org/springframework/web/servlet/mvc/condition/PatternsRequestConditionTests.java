@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rossen Stoyanchev
@@ -183,6 +184,16 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo.html"));
 
 		assertNull(match);
+	}
+
+	@Test
+	public void matchIgnorePathParams() {
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setRemoveSemicolonContent(false);
+		PatternsRequestCondition condition = new PatternsRequestCondition(new String[] {"/foo/bar"}, pathHelper, null, true, true);
+		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo;q=1/bar;s=1"));
+
+		assertNotNull(match);
 	}
 
 	@Test

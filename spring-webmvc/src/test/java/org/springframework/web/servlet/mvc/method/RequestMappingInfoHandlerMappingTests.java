@@ -90,7 +90,6 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(testController);
-		this.handlerMapping.setRemoveSemicolonContent(false);
 	}
 
 	@Test
