@@ -573,13 +573,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	@Override
 	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
-		Class beanClass;
-		if (mbd.getFactoryMethodName() != null) {
-			beanClass = getTypeForFactoryMethod(beanName, mbd, typesToMatch);
-		}
-		else {
-			beanClass = resolveBeanClass(mbd, beanName, typesToMatch);
-		}
+		Class beanClass = (mbd.getFactoryMethodName() != null ?
+				getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
+				resolveBeanClass(mbd, beanName, typesToMatch));
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
 		if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
@@ -587,7 +583,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
 					Class predictedType = ibp.predictBeanType(beanClass, beanName);
-					if (predictedType != null && (typesToMatch.length > 1 ||
+					if (predictedType != null && (typesToMatch.length != 1 ||
 							!FactoryBean.class.equals(typesToMatch[0]) || FactoryBean.class.isAssignableFrom(predictedType))) {
 						return predictedType;
 					}
