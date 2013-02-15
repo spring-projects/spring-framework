@@ -68,6 +68,7 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramMultipartFileList;
 	private MethodParameter paramServlet30Part;
 	private MethodParameter paramRequestPartAnnot;
+	private MethodParameter paramRequired;
 
 	private NativeWebRequest webRequest;
 
@@ -80,7 +81,7 @@ public class RequestParamMethodArgumentResolverTests {
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 		Method method = getClass().getMethod("params", String.class, String[].class, Map.class, MultipartFile.class,
-				Map.class, String.class, MultipartFile.class, List.class, Part.class, MultipartFile.class);
+				Map.class, String.class, MultipartFile.class, List.class, Part.class, MultipartFile.class, String.class);
 
 		paramNamedDefaultValueString = new MethodParameter(method, 0);
 		paramNamedStringArray = new MethodParameter(method, 1);
@@ -96,6 +97,7 @@ public class RequestParamMethodArgumentResolverTests {
 		paramServlet30Part = new MethodParameter(method, 8);
 		paramServlet30Part.initParameterNameDiscovery(paramNameDiscoverer);
 		paramRequestPartAnnot = new MethodParameter(method, 9);
+		paramRequired = new MethodParameter(method, 10);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -257,16 +259,41 @@ public class RequestParamMethodArgumentResolverTests {
 		assertNull(result);
 	}
 
+	// SPR-10180
+
+	@Test
+	public void resolveEmptyValueToDefault() throws Exception {
+		this.request.addParameter("name", "");
+		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
+		assertEquals("bar", result);
+	}
+
+	@Test
+	public void resolveEmptyValueWithoutDefault() throws Exception {
+		this.request.addParameter("stringNotAnnot", "");
+		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
+		assertEquals("", result);
+	}
+
+	@Test
+	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
+		this.request.addParameter("name", "");
+		Object result = resolver.resolveArgument(paramRequired, null, webRequest, null);
+		assertEquals("", result);
+	}
+
+
 	public void params(@RequestParam(value = "name", defaultValue = "bar") String param1,
-					   @RequestParam("name") String[] param2,
-					   @RequestParam("name") Map<?, ?> param3,
-					   @RequestParam(value = "file") MultipartFile param4,
-					   @RequestParam Map<?, ?> param5,
-					   String stringNotAnnot,
-					   MultipartFile multipartFileNotAnnot,
-					   List<MultipartFile> multipartFileList,
-					   Part servlet30Part,
-					   @RequestPart MultipartFile requestPartAnnot) {
+			@RequestParam("name") String[] param2,
+			@RequestParam("name") Map<?, ?> param3,
+			@RequestParam(value = "file") MultipartFile param4,
+			@RequestParam Map<?, ?> param5,
+			String stringNotAnnot,
+			MultipartFile multipartFileNotAnnot,
+			List<MultipartFile> multipartFileList,
+			Part servlet30Part,
+			@RequestPart MultipartFile requestPartAnnot,
+			@RequestParam(value = "name") String paramRequired) {
 	}
 
 }
