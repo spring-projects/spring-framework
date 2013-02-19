@@ -1062,7 +1062,7 @@ public class RelativePathUriTemplateController {
         example:</para>
 
         <programlisting language="java">
-@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}.{extension:\\.[a-z]}")
+@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
   public void handle(@PathVariable String version, @PathVariable String extension) {
     // ...
   }
