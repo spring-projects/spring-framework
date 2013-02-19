@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
  * Extension of {@link UriComponents} for hierarchical URIs.
  *
  * @author Arjen Poutsma
+ * @author Phillip Webb
  * @since 3.1.3
  * @see <a href="http://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -430,28 +431,15 @@ final class HierarchicalUriComponents extends UriComponents {
 			return false;
 		}
 		HierarchicalUriComponents other = (HierarchicalUriComponents) obj;
-		if (ObjectUtils.nullSafeEquals(getScheme(), other.getScheme())) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getUserInfo(), other.getUserInfo())) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getHost(), other.getHost())) {
-			return false;
-		}
-		if (this.port != other.port) {
-			return false;
-		}
-		if (!this.path.equals(other.path)) {
-			return false;
-		}
-		if (!this.queryParams.equals(other.queryParams)) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getFragment(), other.getFragment())) {
-			return false;
-		}
-		return true;
+		boolean rtn = true;
+		rtn &= ObjectUtils.nullSafeEquals(getScheme(), other.getScheme());
+		rtn &= ObjectUtils.nullSafeEquals(getUserInfo(), other.getUserInfo());
+		rtn &= ObjectUtils.nullSafeEquals(getHost(), other.getHost());
+		rtn &= getPort() == other.getPort();
+		rtn &= this.path.equals(other.path);
+		rtn &= this.queryParams.equals(other.queryParams);
+		rtn &= ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
+		return rtn;
 	}
 
 	@Override

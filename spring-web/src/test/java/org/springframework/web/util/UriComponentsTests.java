@@ -26,9 +26,14 @@ import java.net.URISyntaxException;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ * @author Phillip Webb
+ */
 public class UriComponentsTests {
 
 	@Test
@@ -90,6 +95,28 @@ public class UriComponentsTests {
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
 		UriComponents readObject = (UriComponents) ois.readObject();
 		assertThat(uriComponents.toString(), equalTo(readObject.toString()));
+	}
+
+	@Test
+	public void equalsHierarchicalUriComponents() throws Exception {
+		UriComponents uriComponents1 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bar={baz}").build();
+		UriComponents uriComponents2 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bar={baz}").build();
+		UriComponents uriComponents3 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bin={baz}").build();
+		assertThat(uriComponents1, instanceOf(HierarchicalUriComponents.class));
+		assertThat(uriComponents1, equalTo(uriComponents1));
+		assertThat(uriComponents1, equalTo(uriComponents2));
+		assertThat(uriComponents1, not(equalTo(uriComponents3)));
+	}
+
+	@Test
+	public void equalsOpaqueUriComponents() throws Exception {
+		UriComponents uriComponents1 = UriComponentsBuilder.fromUriString("http:example.com/foo/bar").build();
+		UriComponents uriComponents2 = UriComponentsBuilder.fromUriString("http:example.com/foo/bar").build();
+		UriComponents uriComponents3 = UriComponentsBuilder.fromUriString("http:example.com/foo/bin").build();
+		assertThat(uriComponents1, instanceOf(OpaqueUriComponents.class));
+		assertThat(uriComponents1, equalTo(uriComponents1));
+		assertThat(uriComponents1, equalTo(uriComponents2));
+		assertThat(uriComponents1, not(equalTo(uriComponents3)));
 	}
 
 }
