@@ -683,7 +683,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (factoryBeanName != null && factoryMethodName != null) {
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
-			if (fbDef instanceof AbstractBeanDefinition) {
+			if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
 				Class<?> fbClass = ((AbstractBeanDefinition) fbDef).getBeanClass();
 				if (ClassUtils.isCglibProxyClass(fbClass)) {
 					// CGLIB subclass methods hide generic parameters. look at the superclass.
