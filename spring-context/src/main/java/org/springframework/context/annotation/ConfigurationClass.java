@@ -41,6 +41,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  * @see BeanMethod
  * @see ConfigurationClassParser
@@ -58,7 +59,7 @@ final class ConfigurationClass {
 
 	private String beanName;
 
-	private final boolean imported;
+	private final ConfigurationClass importedBy;
 
 
 	/**
@@ -66,28 +67,28 @@ final class ConfigurationClass {
 	 * @param metadataReader reader used to parse the underlying {@link Class}
 	 * @param beanName must not be {@code null}
 	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
-	 * @see ConfigurationClass#ConfigurationClass(Class, boolean)
+	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
 		Assert.hasText(beanName, "bean name must not be null");
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.beanName = beanName;
-		this.imported = false;
+		this.importedBy = null;
 	}
 
 	/**
 	 * Create a new {@link ConfigurationClass} representing a class that was imported
 	 * using the {@link Import} annotation or automatically processed as a nested
-	 * configuration class (if imported is {@code true}).
+	 * configuration class (if importedBy is not {@code null}).
 	 * @param metadataReader reader used to parse the underlying {@link Class}
-	 * @param imported whether the given configuration class is being imported
+	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(MetadataReader metadataReader, boolean imported) {
+	public ConfigurationClass(MetadataReader metadataReader, ConfigurationClass importedBy) {
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
-		this.imported = imported;
+		this.importedBy = importedBy;
 	}
 
 	/**
@@ -95,14 +96,14 @@ final class ConfigurationClass {
 	 * @param clazz the underlying {@link Class} to represent
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
-	 * @see ConfigurationClass#ConfigurationClass(Class, boolean)
+	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.hasText(beanName, "bean name must not be null");
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.beanName = beanName;
-		this.imported = false;
+		this.importedBy = null;
 	}
 
 	/**
@@ -110,13 +111,13 @@ final class ConfigurationClass {
 	 * using the {@link Import} annotation or automatically processed as a nested
 	 * configuration class (if imported is {@code true}).
 	 * @param clazz the underlying {@link Class} to represent
-	 * @param imported whether the given configuration class is being imported
+	 * @param importedBy the configuration class importing this one or {@code null}
 	 * @since 3.1.1
 	 */
-	public ConfigurationClass(Class<?> clazz, boolean imported) {
+	public ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.toString());
-		this.imported = imported;
+		this.importedBy = importedBy;
 	}
 
 
@@ -136,9 +137,20 @@ final class ConfigurationClass {
 	 * Return whether this configuration class was registered via @{@link Import} or
 	 * automatically registered due to being nested within another configuration class.
 	 * @since 3.1.1
+	 * @see #getImportedBy()
 	 */
 	public boolean isImported() {
-		return this.imported;
+		return this.importedBy != null;
+	}
+
+	/**
+	 * Returns the configuration class that imported this class or {@code null} if
+	 * this configuration was not imported.
+	 * @since 4.0
+	 * @see #isImported()
+	 */
+	public ConfigurationClass getImportedBy() {
+		return importedBy;
 	}
 
 	public void setBeanName(String beanName) {
