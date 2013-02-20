@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,14 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-
 
 /**
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.1.1
  */
 abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
@@ -213,19 +214,20 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.0
  */
 final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttributesVisitor {
 
 	private final String annotationType;
 
-	private final Map<String, AnnotationAttributes> attributesMap;
+	private final MultiValueMap<String, AnnotationAttributes> attributesMap;
 
 	private final Map<String, Set<String>> metaAnnotationMap;
 
 
 	public AnnotationAttributesReadingVisitor(
-			String annotationType, Map<String, AnnotationAttributes> attributesMap,
+			String annotationType, MultiValueMap<String, AnnotationAttributes> attributesMap,
 			Map<String, Set<String>> metaAnnotationMap, ClassLoader classLoader) {
 
 		super(annotationType, new AnnotationAttributes(), classLoader);
@@ -237,25 +239,30 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 	@Override
 	public void doVisitEnd(Class<?> annotationClass) {
 		super.doVisitEnd(annotationClass);
-		this.attributesMap.put(this.annotationType, this.attributes);
-		registerMetaAnnotations(annotationClass);
-	}
-
-	private void registerMetaAnnotations(Class<?> annotationClass) {
-		// Register annotations that the annotation type is annotated with.
+		List<AnnotationAttributes> attributes = this.attributesMap.get(this.annotationType);
+		if(attributes == null) {
+			this.attributesMap.add(this.annotationType, this.attributes);
+		} else {
+			attributes.add(0, this.attributes);
+		}
 		Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
 		for (Annotation metaAnnotation : annotationClass.getAnnotations()) {
-			metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
-			if (!this.attributesMap.containsKey(metaAnnotation.annotationType().getName())) {
-				this.attributesMap.put(metaAnnotation.annotationType().getName(),
-						AnnotationUtils.getAnnotationAttributes(metaAnnotation, true, true));
-			}
-			for (Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
-				metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
-			}
+			recusivelyCollectMetaAnnotations(metaAnnotationTypeNames, metaAnnotation);
 		}
 		if (this.metaAnnotationMap != null) {
 			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
+		}
+	}
+
+
+
+	private void recusivelyCollectMetaAnnotations(Set<String> visited, Annotation annotation) {
+		if(visited.add(annotation.annotationType().getName())) {
+			this.attributesMap.add(annotation.annotationType().getName(),
+					AnnotationUtils.getAnnotationAttributes(annotation, true, true));
+			for (Annotation metaMetaAnnotation : annotation.annotationType().getAnnotations()) {
+				recusivelyCollectMetaAnnotations(visited, metaMetaAnnotation);
+			}
 		}
 	}
 }

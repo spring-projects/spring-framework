@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.asm.AnnotationVisitor;
@@ -26,6 +26,7 @@ import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -37,6 +38,7 @@ import org.springframework.util.MultiValueMap;
  * @author Mark Pollack
  * @author Costin Leau
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.0
  */
 final class MethodMetadataReadingVisitor extends MethodVisitor implements MethodMetadata {
@@ -51,7 +53,7 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 
 	private final MultiValueMap<String, MethodMetadata> methodMetadataMap;
 
-	private final Map<String, AnnotationAttributes> attributeMap = new LinkedHashMap<String, AnnotationAttributes>(2);
+	private final MultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(2);
 
 	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
 			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
@@ -90,8 +92,34 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 		return this.attributeMap.containsKey(annotationType);
 	}
 
-	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
-		return this.attributeMap.get(annotationType);
+	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+		return getAnnotationAttributes(annotationType, false);
+	}
+
+	public Map<String, Object> getAnnotationAttributes(String annotationType,
+			boolean classValuesAsString) {
+		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
+		return (attributes == null ? null : AnnotationReadingVisitorUtils.convertClassValues(
+				this.classLoader, attributes.get(0), classValuesAsString, false));
+	}
+
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
+		return getAllAnnotationAttributes(annotationType, false);
+	}
+
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(
+			String annotationType, boolean classValuesAsString) {
+		if(!this.attributeMap.containsKey(annotationType)) {
+			return null;
+		}
+		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
+		for (AnnotationAttributes annotationAttributes : this.attributeMap.get(annotationType)) {
+			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
+					this.classLoader, annotationAttributes, classValuesAsString, false).entrySet()) {
+				allAttributes.add(entry.getKey(), entry.getValue());
+			}
+		}
+		return allAttributes;
 	}
 
 	public String getDeclaringClassName() {

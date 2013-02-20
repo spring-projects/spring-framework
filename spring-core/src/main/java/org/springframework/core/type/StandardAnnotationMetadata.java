@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link AnnotationMetadata} implementation that uses standard reflection
@@ -32,6 +32,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 2.5
  */
 public class StandardAnnotationMetadata extends StandardClassMetadata implements AnnotationMetadata {
@@ -74,21 +75,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				Set<String> types = new LinkedHashSet<String>();
-				Annotation[] metaAnns = ann.annotationType().getAnnotations();
-				for (Annotation metaAnn : metaAnns) {
-					types.add(metaAnn.annotationType().getName());
-					for (Annotation metaMetaAnn : metaAnn.annotationType().getAnnotations()) {
-						types.add(metaMetaAnn.annotationType().getName());
-					}
-				}
-				return types;
-			}
-		}
-		return null;
+		return AnnotatedElementUtils.getMetaAnnotationTypes(getIntrospectedClass(), annotationType);
 	}
 
 	public boolean hasAnnotation(String annotationType) {
@@ -102,73 +89,38 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	public boolean hasMetaAnnotation(String annotationType) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			Annotation[] metaAnns = ann.annotationType().getAnnotations();
-			for (Annotation metaAnn : metaAnns) {
-				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return true;
-				}
-				for (Annotation metaMetaAnn : metaAnn.annotationType().getAnnotations()) {
-					if (metaMetaAnn.annotationType().getName().equals(annotationType)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+		return AnnotatedElementUtils.hasMetaAnnotationTypes(getIntrospectedClass(), annotationType);
 	}
 
 	public boolean isAnnotated(String annotationType) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				return true;
-			}
-			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return AnnotatedElementUtils.isAnnotated(getIntrospectedClass(), annotationType);
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.getAnnotationAttributes(annotationType, false);
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		Annotation[] anns = getIntrospectedClass().getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				return AnnotationUtils.getAnnotationAttributes(
-						ann, classValuesAsString, this.nestedAnnotationsAsMap);
-			}
-			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return AnnotationUtils.getAnnotationAttributes(
-							metaAnn, classValuesAsString, this.nestedAnnotationsAsMap);
-				}
-			}
-		}
-		return null;
+	public Map<String, Object> getAnnotationAttributes(String annotationType,
+			boolean classValuesAsString) {
+		return AnnotatedElementUtils.getAnnotationAttributes(getIntrospectedClass(),
+				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
+	}
+
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
+		return getAllAnnotationAttributes(annotationType, false);
+	}
+
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(
+			String annotationType, boolean classValuesAsString) {
+		return AnnotatedElementUtils.getAllAnnotationAttributes(getIntrospectedClass(),
+				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 	public boolean hasAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		for (Method method : methods) {
-			for (Annotation ann : method.getAnnotations()) {
-				if (ann.annotationType().getName().equals(annotationType)) {
-					return true;
-				}
-				else {
-					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-						if (metaAnn.annotationType().getName().equals(annotationType)) {
-							return true;
-						}
-					}
-				}
+			if(AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+				return true;
 			}
 		}
 		return false;
@@ -178,19 +130,8 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
-			for (Annotation ann : method.getAnnotations()) {
-				if (ann.annotationType().getName().equals(annotationType)) {
-					annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
-					break;
-				}
-				else {
-					for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-						if (metaAnn.annotationType().getName().equals(annotationType)) {
-							annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
-							break;
-						}
-					}
-				}
+			if(AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
 			}
 		}
 		return annotatedMethods;
