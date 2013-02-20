@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,33 +56,33 @@ public interface CallMetaDataProvider {
 
 	/**
 	 * Provide any modification of the procedure name passed in to match the meta data currently used.
-	 * This could include alterig the case.
+	 * This could include altering the case.
 	 */
 	String procedureNameToUse(String procedureName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
-	 * This could include alterig the case.
+	 * This could include altering the case.
 	 */
 	String catalogNameToUse(String catalogName);
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
-	 * This could include alterig the case.
+	 * This could include altering the case.
 	 */
 	String schemaNameToUse(String schemaName);
 
 	/**
 	 * Provide any modification of the catalog name passed in to match the meta data currently used.
-	 * The reyurned value will be used for meta data lookups. This could include alterig the case used
-	 * or providing a base catalog if mone provided.
+	 * The returned value will be used for meta data lookups. This could include altering the case used
+	 * or providing a base catalog if none is provided.
 	 */
 	String metaDataCatalogNameToUse(String catalogName) ;
 
 	/**
 	 * Provide any modification of the schema name passed in to match the meta data currently used.
-	 * The reyurned value will be used for meta data lookups. This could include alterig the case used
-	 * or providing a base schema if mone provided.
+	 * The returned value will be used for meta data lookups. This could include altering the case used
+	 * or providing a base schema if none is provided.
 	 */
 	String metaDataSchemaNameToUse(String schemaName) ;
 
