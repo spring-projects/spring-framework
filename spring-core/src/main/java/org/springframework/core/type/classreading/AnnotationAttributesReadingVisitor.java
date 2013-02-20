@@ -45,17 +45,19 @@ import org.springframework.util.ReflectionUtils;
  */
 abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final MetadataReaderLog logger;
 
 	protected final AnnotationAttributes attributes;
 
 	protected final ClassLoader classLoader;
 
 
-	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader, AnnotationAttributes attributes) {
+	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader,
+			AnnotationAttributes attributes, MetadataReaderLog logger) {
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.attributes = attributes;
+		this.logger = (logger == null ? new MetadataReaderLogAdapter() : logger);
 	}
 
 
@@ -67,11 +69,13 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 		String annotationType = Type.getType(asmTypeDescriptor).getClassName();
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
 		this.attributes.put(attributeName, nestedAttributes);
-		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
+		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes,
+				this.classLoader, this.logger);
 	}
 
 	public AnnotationVisitor visitArray(String attributeName) {
-		return new RecursiveAnnotationArrayVisitor(attributeName, this.attributes, this.classLoader);
+		return new RecursiveAnnotationArrayVisitor(attributeName, this.attributes,
+				this.classLoader, this.logger);
 	}
 
 	public void visitEnum(String attributeName, String asmTypeDescriptor, String attributeValue) {
@@ -84,10 +88,10 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to classload enum type while reading annotation metadata", ex);
+			this.logger.log("Failed to classload enum type while reading annotation metadata", ex);
 		}
 		catch (IllegalAccessException ex) {
-			this.logger.warn("Could not access enum value while reading annotation metadata", ex);
+			this.logger.log("Could not access enum value while reading annotation metadata", ex);
 		}
 		this.attributes.put(attributeName, valueToUse);
 	}
@@ -106,9 +110,10 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<AnnotationAttributes>();
 
 
-	public RecursiveAnnotationArrayVisitor(
-			String attributeName, AnnotationAttributes attributes, ClassLoader classLoader) {
-		super(classLoader, attributes);
+	public RecursiveAnnotationArrayVisitor(String attributeName,
+			AnnotationAttributes attributes, ClassLoader classLoader,
+			MetadataReaderLog logger) {
+		super(classLoader, attributes, logger);
 		this.attributeName = attributeName;
 	}
 
@@ -132,7 +137,8 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 		String annotationType = Type.getType(asmTypeDescriptor).getClassName();
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
 		this.allNestedAttributes.add(nestedAttributes);
-		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
+		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes,
+				this.classLoader, this.logger);
 	}
 
 	public void visitEnd() {
@@ -154,9 +160,10 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	private final String annotationType;
 
 
-	public RecursiveAnnotationAttributesVisitor(
-			String annotationType, AnnotationAttributes attributes, ClassLoader classLoader) {
-		super(classLoader, attributes);
+	public RecursiveAnnotationAttributesVisitor(String annotationType,
+			AnnotationAttributes attributes, ClassLoader classLoader,
+			MetadataReaderLog logger) {
+		super(classLoader, attributes, logger);
 		this.annotationType = annotationType;
 	}
 
@@ -167,7 +174,7 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 			this.doVisitEnd(annotationClass);
 		}
 		catch (ClassNotFoundException ex) {
-			this.logger.debug("Failed to classload type while reading annotation " +
+			this.logger.log("Failed to classload type while reading annotation " +
 					"metadata. This is a non-fatal error, but certain annotation " +
 					"metadata may be unavailable.", ex);
 		}
@@ -226,11 +233,11 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 	private final Map<String, Set<String>> metaAnnotationMap;
 
 
-	public AnnotationAttributesReadingVisitor(
-			String annotationType, MultiValueMap<String, AnnotationAttributes> attributesMap,
-			Map<String, Set<String>> metaAnnotationMap, ClassLoader classLoader) {
-
-		super(annotationType, new AnnotationAttributes(), classLoader);
+	public AnnotationAttributesReadingVisitor(String annotationType,
+			MultiValueMap<String, AnnotationAttributes> attributesMap,
+			Map<String, Set<String>> metaAnnotationMap, ClassLoader classLoader,
+			MetadataReaderLog logger) {
+		super(annotationType, new AnnotationAttributes(), classLoader, logger);
 		this.annotationType = annotationType;
 		this.attributesMap = attributesMap;
 		this.metaAnnotationMap = metaAnnotationMap;
@@ -264,5 +271,16 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 				recusivelyCollectMetaAnnotations(visited, metaMetaAnnotation);
 			}
 		}
+	}
+}
+
+
+class MetadataReaderLogAdapter implements MetadataReaderLog {
+
+	private Log logger = LogFactory.getLog(AnnotationAttributesReadingVisitor.class);
+
+	@Override
+	public void log(String message, Throwable t) {
+		logger.debug(message, t);
 	}
 }

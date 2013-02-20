@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,15 +69,22 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 		return this.resourceLoader;
 	}
 
-
 	public MetadataReader getMetadataReader(String className) throws IOException {
+		return getMetadataReader(className, null);
+	}
+
+	public MetadataReader getMetadataReader(String className, MetadataReaderLog logger) throws IOException {
 		String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
 				ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
-		return getMetadataReader(this.resourceLoader.getResource(resourcePath));
+		return getMetadataReader(this.resourceLoader.getResource(resourcePath), logger);
 	}
 
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
-		return new SimpleMetadataReader(resource, this.resourceLoader.getClassLoader());
+		return getMetadataReader(resource, null);
+	}
+
+	public MetadataReader getMetadataReader(Resource resource, MetadataReaderLog logger) throws IOException {
+		return new SimpleMetadataReader(resource, this.resourceLoader.getClassLoader(), logger);
 	}
 
 }

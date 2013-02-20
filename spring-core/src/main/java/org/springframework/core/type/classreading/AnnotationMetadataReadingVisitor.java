@@ -56,22 +56,27 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	private final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
 
+	private final MetadataReaderLog logger;
 
-	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {
+
+	public AnnotationMetadataReadingVisitor(ClassLoader classLoader, MetadataReaderLog logger) {
 		this.classLoader = classLoader;
+		this.logger = logger;
 	}
 
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		return new MethodMetadataReadingVisitor(name, access, this.getClassName(), this.classLoader, this.methodMetadataMap);
+		return new MethodMetadataReadingVisitor(name, access, this.getClassName(),
+				this.classLoader, this.methodMetadataMap, this.logger);
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
 		this.annotationSet.add(className);
-		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, this.metaAnnotationMap, this.classLoader);
+		return new AnnotationAttributesReadingVisitor(className, this.attributeMap,
+				this.metaAnnotationMap, this.classLoader, this.logger);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,14 +92,14 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 
 	@Override
-	public MetadataReader getMetadataReader(Resource resource) throws IOException {
+	public MetadataReader getMetadataReader(Resource resource, MetadataReaderLog logger) throws IOException {
 		if (getCacheLimit() <= 0) {
 			return super.getMetadataReader(resource);
 		}
 		synchronized (this.metadataReaderCache) {
 			MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 			if (metadataReader == null) {
-				metadataReader = super.getMetadataReader(resource);
+				metadataReader = super.getMetadataReader(resource, logger);
 				this.metadataReaderCache.put(resource, metadataReader);
 			}
 			return metadataReader;

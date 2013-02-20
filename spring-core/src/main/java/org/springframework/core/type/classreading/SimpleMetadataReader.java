@@ -46,7 +46,7 @@ final class SimpleMetadataReader implements MetadataReader {
 	private final AnnotationMetadata annotationMetadata;
 
 
-	SimpleMetadataReader(Resource resource, ClassLoader classLoader) throws IOException {
+	SimpleMetadataReader(Resource resource, ClassLoader classLoader, MetadataReaderLog logger) throws IOException {
 		InputStream is = new BufferedInputStream(resource.getInputStream());
 		ClassReader classReader;
 		try {
@@ -60,7 +60,7 @@ final class SimpleMetadataReader implements MetadataReader {
 			is.close();
 		}
 
-		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
+		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader, logger);
 		classReader.accept(visitor, ClassReader.SKIP_DEBUG);
 
 		this.annotationMetadata = visitor;

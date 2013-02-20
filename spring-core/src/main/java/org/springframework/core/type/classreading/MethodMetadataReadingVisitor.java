@@ -55,21 +55,25 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 
 	private final MultiValueMap<String, AnnotationAttributes> attributeMap = new LinkedMultiValueMap<String, AnnotationAttributes>(2);
 
+	private final MetadataReaderLog logger;
+
 	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
-			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
+			MultiValueMap<String, MethodMetadata> methodMetadataMap, MetadataReaderLog logger) {
 		super(SpringAsmInfo.ASM_VERSION);
 		this.name = name;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
 		this.methodMetadataMap = methodMetadataMap;
+		this.logger = logger;
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
 		methodMetadataMap.add(className, this);
-		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
+		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null,
+				this.classLoader, this.logger);
 	}
 
 	public String getMethodName() {
