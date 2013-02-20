@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import static org.springframework.context.annotation.MetadataUtils.attributesFor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,10 +27,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -55,6 +59,8 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderLog;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -79,6 +85,8 @@ import org.springframework.util.StringUtils;
  * @see ConfigurationClassBeanDefinitionReader
  */
 class ConfigurationClassParser {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
@@ -131,8 +139,8 @@ class ConfigurationClassParser {
 	 * (assumes that this configuration class was configured via XML)
 	 */
 	public void parse(String className, String beanName) throws IOException {
-		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-		processConfigurationClass(new ConfigurationClass(reader, beanName));
+		ConfigurationMetadataReader reader = new ConfigurationMetadataReader(className);
+		processConfigurationClass(reader.getConfigurationClass(beanName));
 	}
 
 	/**
@@ -175,10 +183,10 @@ class ConfigurationClassParser {
 
 		// recursively process any member (nested) classes first
 		for (String memberClassName : metadata.getMemberClassNames()) {
-			MetadataReader reader = this.metadataReaderFactory.getMetadataReader(memberClassName);
-			AnnotationMetadata memberClassMetadata = reader.getAnnotationMetadata();
+			ConfigurationMetadataReader reader = new ConfigurationMetadataReader(memberClassName);
+			AnnotationMetadata memberClassMetadata = reader.getReader().getAnnotationMetadata();
 			if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
-				processConfigurationClass(new ConfigurationClass(reader, configClass));
+				processConfigurationClass(reader.getConfigurationClass(configClass));
 			}
 		}
 
@@ -298,7 +306,8 @@ class ConfigurationClassParser {
 	 */
 	private Set<String> getImports(String className, Set<String> imports, Set<String> visited) throws IOException {
 		if (visited.add(className) && !className.startsWith("java")) {
-			AnnotationMetadata metadata = metadataReaderFactory.getMetadataReader(className).getAnnotationMetadata();
+			ConfigurationMetadataReader reader = new ConfigurationMetadataReader(className);
+			AnnotationMetadata metadata = reader.getReader().getAnnotationMetadata();
 			for (String annotationType : metadata.getAnnotationTypes()) {
 				imports = getImports(annotationType, imports, visited);
 			}
@@ -322,9 +331,10 @@ class ConfigurationClassParser {
 			this.importStack.push(configClass);
 			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			for (String candidate : classesToImport) {
-				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(candidate);
-				if (new AssignableTypeFilter(ImportSelector.class).match(reader, this.metadataReaderFactory)) {
+				ConfigurationMetadataReader reader = new ConfigurationMetadataReader(candidate);
+				if (reader.match(ImportSelector.class)) {
 					// the candidate class is an ImportSelector -> delegate to it to determine imports
+					reader.flushLog();
 					try {
 						ImportSelector selector = BeanUtils.instantiateClass(
 								this.resourceLoader.getClassLoader().loadClass(candidate), ImportSelector.class);
@@ -334,8 +344,9 @@ class ConfigurationClassParser {
 						throw new IllegalStateException(ex);
 					}
 				}
-				else if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader, this.metadataReaderFactory)) {
+				else if (reader.match(ImportBeanDefinitionRegistrar.class)) {
 					// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
+					reader.flushLog();
 					try {
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(
 								this.resourceLoader.getClassLoader().loadClass(candidate), ImportBeanDefinitionRegistrar.class);
@@ -349,7 +360,7 @@ class ConfigurationClassParser {
 				else {
 					// the candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
 					this.importStack.registerImport(importingClassMetadata.getClassName(), candidate);
-					processConfigurationClass(new ConfigurationClass(reader, configClass));
+					processConfigurationClass(reader.getConfigurationClass(configClass));
 				}
 			}
 			this.importStack.pop();
@@ -474,4 +485,90 @@ class ConfigurationClassParser {
 		}
 	}
 
+
+	private class ConfigurationMetadataReader {
+
+		private final MetadataReader reader;
+
+		private List<MetadataReaderLogEntry> logEntries;
+
+		public ConfigurationMetadataReader(String className) throws IOException {
+			MetadataReaderFactory factory = metadataReaderFactory;
+			if (factory instanceof SimpleMetadataReaderFactory) {
+				this.reader = ((SimpleMetadataReaderFactory) factory).getMetadataReader(
+						className, getLogger());
+			}
+			else {
+				this.reader = factory.getMetadataReader(className);
+			}
+		}
+
+		private MetadataReaderLog getLogger() {
+			return new MetadataReaderLog() {
+
+				public void log(String message, Throwable t) {
+					add(false, message, t);
+				}
+
+				private void add(boolean debug, String message, Throwable t) {
+					if (logEntries == null) {
+						logEntries = new ArrayList<MetadataReaderLogEntry>();
+					}
+					logEntries.add(new MetadataReaderLogEntry(debug, message, t));
+				}
+			};
+		}
+
+		public boolean match(Class<?> targetType) throws IOException {
+			return new AssignableTypeFilter(targetType).match(reader,
+					metadataReaderFactory);
+		}
+
+		public ConfigurationClass getConfigurationClass(ConfigurationClass importedBy) {
+			return flushLogIfNotSkipped(new ConfigurationClass(reader, importedBy));
+		}
+
+		public ConfigurationClass getConfigurationClass(String beanName) {
+			return flushLogIfNotSkipped(new ConfigurationClass(reader, beanName));
+		}
+
+		private ConfigurationClass flushLogIfNotSkipped(
+				ConfigurationClass configurationClass) {
+			if (!ConditionalAnnotationHelper.shouldSkip(configurationClass, registry,
+					environment, beanNameGenerator)) {
+				flushLog();
+			}
+			return configurationClass;
+		}
+
+		public MetadataReader getReader() {
+			return this.reader;
+		}
+
+		public void flushLog() {
+			if(this.logEntries != null) {
+				for (MetadataReaderLogEntry logEntry : logEntries) {
+					logEntry.log();
+				}
+				this.logEntries = null;
+			}
+		}
+	}
+
+
+	private class MetadataReaderLogEntry {
+
+		private String message;
+
+		private Throwable t;
+
+		public MetadataReaderLogEntry(boolean debug, String message, Throwable t) {
+			this.message = message;
+			this.t = t;
+		}
+
+		public void log() {
+			logger.debug(message, t);
+		}
+	}
 }
