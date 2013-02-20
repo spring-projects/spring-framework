@@ -317,6 +317,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (!ConditionalAnnotationHelper.shouldSkip(configurationClass, registry,
 					this.environment, this.importBeanNameGenerator)) {
 				reader.loadBeanDefinitionsForConfigurationClass(configurationClass);
+				afterLoadConfiguration(registry, configurationClass.getBeanName(), configurationClass.getMetadata());
 			}
 		}
 
@@ -330,6 +331,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
 			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
 		}
+	}
+
+	/**
+	 * Called immediately after a {@code @Configuration} bean has been loaded.  This
+	 * method will be called for all configuration beans, including {@code @Imported}
+	 * configurations.  Subclasses can perform additional processing.
+	 * @param registry the registry
+	 * @param beanName the name of the configuration bean
+	 * @param metadata the configuration meta-data
+	 * @since 3.2
+	 */
+	protected void afterLoadConfiguration(BeanDefinitionRegistry registry,
+			String beanName, AnnotationMetadata metadata) {
 	}
 
 	/**
@@ -372,6 +386,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
 			}
 		}
+	}
+
+
+	protected final MetadataReaderFactory getMetadataReaderFactory() {
+		return metadataReaderFactory;
 	}
 
 
