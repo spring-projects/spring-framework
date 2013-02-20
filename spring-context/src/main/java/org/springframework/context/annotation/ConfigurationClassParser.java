@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,8 +59,6 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * Parses a {@link Configuration} class definition, populating a collection of
  * {@link ConfigurationClass} objects (parsing a single Configuration class may result in
@@ -74,6 +74,7 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -101,6 +102,8 @@ class ConfigurationClassParser {
 
 	private final ComponentScanAnnotationParser componentScanParser;
 
+	private final BeanNameGenerator beanNameGenerator;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
@@ -115,6 +118,7 @@ class ConfigurationClassParser {
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
 		this.registry = registry;
+		this.beanNameGenerator = componentScanBeanNameGenerator;
 		this.componentScanParser = new ComponentScanAnnotationParser(
 				resourceLoader, environment, componentScanBeanNameGenerator, registry);
 	}
@@ -142,11 +146,10 @@ class ConfigurationClassParser {
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
 		AnnotationMetadata metadata = configClass.getMetadata();
-		if (this.environment != null && metadata.isAnnotated(Profile.class.getName())) {
-			AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
-			if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
-				return;
-			}
+
+		if (ConditionalAnnotationHelper.shouldSkip(configClass, this.registry,
+				this.environment, this.beanNameGenerator)) {
+			return;
 		}
 
 		// recursively process the configuration class and its superclass hierarchy
@@ -175,7 +178,7 @@ class ConfigurationClassParser {
 			MetadataReader reader = this.metadataReaderFactory.getMetadataReader(memberClassName);
 			AnnotationMetadata memberClassMetadata = reader.getAnnotationMetadata();
 			if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
-				processConfigurationClass(new ConfigurationClass(reader, true));
+				processConfigurationClass(new ConfigurationClass(reader, configClass));
 			}
 		}
 
@@ -346,7 +349,7 @@ class ConfigurationClassParser {
 				else {
 					// the candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
 					this.importStack.registerImport(importingClassMetadata.getClassName(), candidate);
-					processConfigurationClass(new ConfigurationClass(reader, true));
+					processConfigurationClass(new ConfigurationClass(reader, configClass));
 				}
 			}
 			this.importStack.pop();
