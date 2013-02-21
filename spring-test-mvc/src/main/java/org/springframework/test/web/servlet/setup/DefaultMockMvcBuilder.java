@@ -42,7 +42,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Rob Winch
  * @since 3.2
  */
-public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcBuilderSupport
+public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends MockMvcBuilderSupport
 		implements MockMvcBuilder {
 
 	private final WebApplicationContext webAppContext;
