@@ -379,6 +379,7 @@ class ConfigurationClassParser {
 						// the candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate : this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
+						invokeAwareMethods(selector);
 						processImport(configClass, Arrays.asList(selector.selectImports(importingClassMetadata)), false);
 					}
 					else if (checkAssignability(ImportBeanDefinitionRegistrar.class, candidateToCheck)) {
@@ -416,21 +417,21 @@ class ConfigurationClassParser {
 
 	/**
 	 * Invoke {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and
-	 * {@link BeanFactoryAware} contracts if implemented by the given {@code registrar}.
+	 * {@link BeanFactoryAware} contracts if implemented by the given {@code bean}.
 	 */
-	private void invokeAwareMethods(ImportBeanDefinitionRegistrar registrar) {
-		if (registrar instanceof Aware) {
-			if (registrar instanceof ResourceLoaderAware) {
-				((ResourceLoaderAware) registrar).setResourceLoader(this.resourceLoader);
+	private void invokeAwareMethods(Object importStrategyBean) {
+		if (importStrategyBean instanceof Aware) {
+			if (importStrategyBean instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) importStrategyBean).setResourceLoader(this.resourceLoader);
 			}
-			if (registrar instanceof BeanClassLoaderAware) {
+			if (importStrategyBean instanceof BeanClassLoaderAware) {
 				ClassLoader classLoader = (this.registry instanceof ConfigurableBeanFactory ?
 						((ConfigurableBeanFactory) this.registry).getBeanClassLoader() :
 						this.resourceLoader.getClassLoader());
-				((BeanClassLoaderAware) registrar).setBeanClassLoader(classLoader);
+				((BeanClassLoaderAware) importStrategyBean).setBeanClassLoader(classLoader);
 			}
-			if (registrar instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
-				((BeanFactoryAware) registrar).setBeanFactory((BeanFactory) this.registry);
+			if (importStrategyBean instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
+				((BeanFactoryAware) importStrategyBean).setBeanFactory((BeanFactory) this.registry);
 			}
 		}
 	}
