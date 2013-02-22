@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.filter.AbstractTypeHierarchyTraversingFilter;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
@@ -64,7 +65,7 @@ class ComponentScanAnnotationParser {
 	}
 
 
-	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, String declaringClass) {
+	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
 		ClassPathBeanDefinitionScanner scanner =
 				new ClassPathBeanDefinitionScanner(this.registry, componentScan.getBoolean("useDefaultFilters"));
 
@@ -120,6 +121,12 @@ class ComponentScanAnnotationParser {
 			basePackages.add(ClassUtils.getPackageName(declaringClass));
 		}
 
+		scanner.addExcludeFilter(new AbstractTypeHierarchyTraversingFilter(false, false) {
+			@Override
+			protected boolean matchClassName(String className) {
+				return declaringClass.equals(className);
+			}
+		});
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 
