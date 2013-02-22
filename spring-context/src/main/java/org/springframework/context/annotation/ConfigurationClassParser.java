@@ -338,6 +338,7 @@ class ConfigurationClassParser {
 					try {
 						ImportSelector selector = BeanUtils.instantiateClass(
 								this.resourceLoader.getClassLoader().loadClass(candidate), ImportSelector.class);
+						invokeAwareMethods(selector);
 						processImport(configClass, selector.selectImports(importingClassMetadata), false);
 					}
 					catch (ClassNotFoundException ex) {
@@ -369,21 +370,21 @@ class ConfigurationClassParser {
 
 	/**
 	 * Invoke {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and
-	 * {@link BeanFactoryAware} contracts if implemented by the given {@code registrar}.
+	 * {@link BeanFactoryAware} contracts if implemented by the given {@code bean}.
 	 */
-	private void invokeAwareMethods(ImportBeanDefinitionRegistrar registrar) {
-		if (registrar instanceof Aware) {
-			if (registrar instanceof ResourceLoaderAware) {
-				((ResourceLoaderAware) registrar).setResourceLoader(this.resourceLoader);
+	private void invokeAwareMethods(Object importStrategyBean) {
+		if (importStrategyBean instanceof Aware) {
+			if (importStrategyBean instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) importStrategyBean).setResourceLoader(this.resourceLoader);
 			}
-			if (registrar instanceof BeanClassLoaderAware) {
+			if (importStrategyBean instanceof BeanClassLoaderAware) {
 				ClassLoader classLoader = (this.registry instanceof ConfigurableBeanFactory ?
 						((ConfigurableBeanFactory) this.registry).getBeanClassLoader() :
 						this.resourceLoader.getClassLoader());
-				((BeanClassLoaderAware) registrar).setBeanClassLoader(classLoader);
+				((BeanClassLoaderAware) importStrategyBean).setBeanClassLoader(classLoader);
 			}
-			if (registrar instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
-				((BeanFactoryAware) registrar).setBeanFactory((BeanFactory) this.registry);
+			if (importStrategyBean instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
+				((BeanFactoryAware) importStrategyBean).setBeanFactory((BeanFactory) this.registry);
 			}
 		}
 	}
