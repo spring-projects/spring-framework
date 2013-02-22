@@ -276,20 +276,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
-		for (BeanDefinitionHolder holder : configCandidates) {
-			BeanDefinition bd = holder.getBeanDefinition();
-			try {
-				if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
-					parser.parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
-				}
-				else {
-					parser.parse(bd.getBeanClassName(), holder.getBeanName());
-				}
-			}
-			catch (IOException ex) {
-				throw new BeanDefinitionStoreException("Failed to load bean class: " + bd.getBeanClassName(), ex);
-			}
-		}
+		parser.parse(configCandidates);
 		parser.validate();
 
 		// Handle any @PropertySource annotations
