@@ -557,6 +557,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		nextToken();
 		SpelNodeImpl expr = eatExpression();
+		if(expr == null) {
+			raiseInternalException(toPos(t), SpelMessage.MISSING_SELECTION_EXPRESSION);
+		}
 		eatToken(TokenKind.RSQUARE);
 		if (t.kind==TokenKind.SELECT_FIRST) {
 			constructedNodes.push(new Selection(nullSafeNavigation,Selection.FIRST,toPos(t),expr));

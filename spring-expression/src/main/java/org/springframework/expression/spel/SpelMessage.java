@@ -109,7 +109,8 @@ public enum SpelMessage {
 	OPERAND_NOT_DECREMENTABLE(Kind.ERROR,1067,"the expression component ''{0}'' does not support decrement"), //
 	NOT_ASSIGNABLE(Kind.ERROR,1068,"the expression component ''{0}'' is not assignable"), //
 	MISSING_CHARACTER(Kind.ERROR,1069,"missing expected character ''{0}''"),
-	LEFT_OPERAND_PROBLEM(Kind.ERROR,1070, "Problem parsing left operand");
+	LEFT_OPERAND_PROBLEM(Kind.ERROR,1070, "Problem parsing left operand"),
+	MISSING_SELECTION_EXPRESSION(Kind.ERROR, 1071, "A required selection expression has not been specified");
 
 	private Kind kind;
 	private int code;

@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1742,6 +1743,14 @@ public class SpelReproTests extends ExpressionTestCase {
 		context.setVariable("bridgeExample", new org.springframework.expression.spel.spr10210.D());
 		Expression parseExpression = parser.parseExpression("#bridgeExample.bridgetMethod()");
 		parseExpression.getValue(context);
+	}
+
+	@Test
+	public void SPR_10328() throws Exception {
+		thrown.expect(SpelParseException.class);
+		thrown.expectMessage("EL1071E:(pos 2): A required selection expression has not been specified");
+		Expression exp = parser.parseExpression("$[]");
+		exp.getValue(Arrays.asList("foo", "bar", "baz"));
 	}
 
 	public static class BooleanHolder {

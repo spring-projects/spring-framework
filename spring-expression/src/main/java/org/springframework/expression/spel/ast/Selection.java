@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -54,7 +55,9 @@ public class Selection extends SpelNodeImpl {
 	private final boolean nullSafe;
 
 	public Selection(boolean nullSafe, int variant,int pos,SpelNodeImpl expression) {
-		super(pos,expression);
+		super(pos, expression != null ? new SpelNodeImpl[] { expression }
+				: new SpelNodeImpl[] {});
+		Assert.notNull(expression, "Expression must not be null");
 		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}
