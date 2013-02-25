@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -213,6 +214,11 @@ public class DefaultConversionTests {
 	}
 
 	@Test
+	public void testStringToEnumWithSubclss() throws Exception {
+		assertEquals(SubFoo.BAZ, conversionService.convert("BAZ", SubFoo.BAR.getClass()));
+	}
+
+	@Test
 	public void testStringToEnumEmptyString() {
 		assertEquals(null, conversionService.convert("", Foo.class));
 	}
@@ -224,6 +230,24 @@ public class DefaultConversionTests {
 
 	public static enum Foo {
 		BAR, BAZ;
+	}
+
+	public static enum SubFoo {
+
+		BAR {
+			@Override
+			String s() {
+				return "x";
+			}
+		},
+		BAZ {
+			@Override
+			String s() {
+				return "y";
+			}
+		};
+
+		abstract String s();
 	}
 
 	@Test
