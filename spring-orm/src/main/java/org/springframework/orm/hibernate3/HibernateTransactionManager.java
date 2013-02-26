@@ -887,6 +887,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.sessionHolder.getSession().flush();
