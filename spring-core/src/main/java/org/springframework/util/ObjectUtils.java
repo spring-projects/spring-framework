@@ -194,6 +194,31 @@ public abstract class ObjectUtils {
 		newArr[newArr.length - 1] = obj;
 		return newArr;
 	}
+	
+	/**
+	 * Utility function that merge two arrays.
+	 * @param array1 the first given array
+	 * @param array2 the second one
+	 * @return an array containing the elements from both
+	 */
+	public static <A> A[] mergeArrays(A[] array1, A[] array2) {
+
+		if (ObjectUtils.isEmpty(array1)) {
+			return array2;
+		}
+		if (ObjectUtils.isEmpty(array2)) {
+			return array1;
+		}
+
+		Class<?> compType = array1.getClass().getComponentType();
+
+		int newArrLength = array1.length + array2.length;
+		@SuppressWarnings("unchecked")
+		A[] newArr = (A[]) Array.newInstance(compType, newArrLength);
+		System.arraycopy(array1, 0, newArr, 0, array1.length);
+		System.arraycopy(array2, 0, newArr, array1.length, array2.length);
+		return newArr;
+	}
 
 	/**
 	 * Convert the given array (which may be a primitive array) to an

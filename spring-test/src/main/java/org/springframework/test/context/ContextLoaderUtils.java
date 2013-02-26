@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -185,7 +186,7 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Resolve the list of {@link ContextConfigurationAttributes configuration
-	 * attributes} for the supplied {@link Class class} and its superclasses.
+	 * attributes} for the supplied {@link Class class} and its superclasses, and the meta-annotations.
 	 *
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations
 	 * inheritLocations} and {@link ContextConfiguration#inheritInitializers()
@@ -196,8 +197,8 @@ abstract class ContextLoaderUtils {
 	 *
 	 * @param testClass the class for which to resolve the configuration attributes (must
 	 * not be {@code null})
-	 * @return the list of configuration attributes for the specified class, ordered <em>bottom-up</em>
-	 * (i.e., as if we were traversing up the class hierarchy); never {@code null}
+	 * @return the list of configuration attributes for the specified class (including the meta-annotations),
+	 *  ordered <em>bottom-up</em> (i.e., as if we were traversing up the class hierarchy); never {@code null}
 	 * @throws IllegalArgumentException if the supplied class is {@code null} or
 	 * if {@code @ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
@@ -207,27 +208,60 @@ abstract class ContextLoaderUtils {
 		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
+		Class<?> declaringClass = testClass;
 		Assert.notNull(declaringClass, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
 			annotationType.getName(), testClass.getName()));
 
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-					contextConfiguration, declaringClass.getName()));
+		while (declaringClass != null && declaringClass != Object.class) {
+
+			Map<Class<?>, ContextConfiguration> contextConfigurations = extractAnnotations(ContextConfiguration.class, declaringClass, true, false);
+
+			if (!contextConfigurations.isEmpty()) {
+
+				if (logger.isTraceEnabled()) {
+
+					if (contextConfigurations.containsKey(declaringClass)) {
+						logger.trace(String.format("Found @ContextConfiguration for declaring class [%s].",
+						declaringClass.getName()));
+					} else if (! contextConfigurations.isEmpty()) {
+						logger.trace(String.format("No @ContextConfiguration for declaring class [%s], but present in its annotations.",
+						declaringClass.getName()));
+					}
+
+					for (Class<?> key : contextConfigurations.keySet()) {
+						logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
+						contextConfigurations.get(key), key));
+					}
+				}
+
+				ContextConfigurationAttributes attributes = null;
+				ContextConfiguration contextConfigurationForDeclaringClass = contextConfigurations.remove(declaringClass);
+
+				if (contextConfigurationForDeclaringClass != null) {
+					// using standard constructor
+					attributes = new ContextConfigurationAttributes(declaringClass,	contextConfigurationForDeclaringClass);
+				} else {
+					// using defaults
+					//(this is the case with no direct @ContextConfiguration, but meta-annotations presents)
+					attributes = new ContextConfigurationAttributes(declaringClass, null, null, true, null, true, ContextLoader.class);
+				}
+
+				for (Class<?> key : contextConfigurations.keySet()) {
+					attributes.addConfigurationFromMetaAnnotations(key, contextConfigurations.get(key));
+				}
+
+				if (logger.isTraceEnabled()) {
+					logger.trace("Resolved context configuration attributes: " + attributes);
+				}
+
+				attributesList.add(attributes);
+
+			} else {
+				logger.trace(String.format("No @ContextConfiguration for declaring class [%s] or its annotations.", declaringClass.getName()));
 			}
 
-			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
-				contextConfiguration);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved context configuration attributes: " + attributes);
-			}
-
-			attributesList.add(attributes);
-
-			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
+			declaringClass = declaringClass.getSuperclass();
 		}
 
 		return attributesList;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -79,6 +80,8 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * processed locations are then
 	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
 	 * the supplied configuration attributes.
+	 * 
+	 * <p>This method also include the configurations from meta-annotations.
 	 *
 	 * <p>Can be overridden in subclasses &mdash; for example, to process
 	 * annotated classes instead of resource locations.
@@ -89,6 +92,16 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
 			configAttributes.getLocations());
+
+		Map<Class<?>, String[]> extendedLocations = configAttributes.getExtendedLocations();
+
+		for (Class<?> extraConfigurationClass : extendedLocations.keySet()) {
+			String[] extraLocations = extendedLocations.get(extraConfigurationClass);
+			String[] extraProcessedLocations = processLocations(extraConfigurationClass, extraLocations);
+			// TODO: is OK to not-checking possible duplications?
+			processedLocations = ObjectUtils.mergeArrays(processedLocations,  extraProcessedLocations);
+		}
+
 		configAttributes.setLocations(processedLocations);
 	}
 
