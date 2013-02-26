@@ -26,6 +26,9 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
 /**
  * @author Rob Harrop
  * @author Chris Beams
@@ -40,6 +43,9 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 
 	@Override
 	public void onSetUp() throws Exception {
+		runTests = false;
+		Assume.group(TestGroup.JMXMP);
+		runTests = true;
 		super.onSetUp();
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 		try {
@@ -65,8 +71,12 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		if (this.connector != null) {
 			this.connector.close();
 		}
-		this.connectorServer.stop();
-		super.tearDown();
+		if (this.connectorServer != null) {
+			this.connectorServer.stop();
+		}
+		if (runTests) {
+			super.tearDown();
+		}
 	}
 
 }

@@ -26,6 +26,10 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -45,6 +49,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 
 	@Test
 	public void testTestValidConnection() throws Exception {
+		Assume.group(TestGroup.JMXMP);
 		JMXConnectorServer connectorServer = getConnectorServer();
 		connectorServer.start();
 
@@ -78,7 +83,9 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		}
 	}
 
+	@Test
 	public void testTestWithLazyConnection() throws Exception {
+		Assume.group(TestGroup.JMXMP);
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
 		bean.setServiceUrl(SERVICE_URL);
 		bean.setConnectOnStartup(false);

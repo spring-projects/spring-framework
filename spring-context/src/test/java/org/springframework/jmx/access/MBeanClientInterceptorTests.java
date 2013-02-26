@@ -36,6 +36,10 @@ import org.springframework.jmx.JmxException;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -203,6 +207,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	public void testTestLazyConnectionToRemote() throws Exception {
 		if (!runTests)
 			return;
+
+		Assume.group(TestGroup.JMXMP);
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
 		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());

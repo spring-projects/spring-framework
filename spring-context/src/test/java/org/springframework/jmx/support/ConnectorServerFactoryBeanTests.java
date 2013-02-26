@@ -30,6 +30,10 @@ import javax.management.remote.JMXServiceURL;
 
 import org.junit.Test;
 import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -38,6 +42,20 @@ import org.springframework.jmx.AbstractMBeanServerTests;
 public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
+	private boolean runTests = false;
+
+	@Override
+	protected void onSetUp() throws Exception {
+		Assume.group(TestGroup.JMXMP);
+		runTests = true;
+	}
+
+	@Override
+	public void tearDown() throws Exception {
+		if (runTests) {
+			super.tearDown();
+		}
+	}
 
 	@Test
 	public void testStartupWithLocatedServer() throws Exception {
