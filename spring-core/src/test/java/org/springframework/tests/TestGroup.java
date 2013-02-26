@@ -48,7 +48,13 @@ public enum TestGroup {
 	 * {@code StopWatch}, etc. should be considered a candidate as their successful
 	 * execution is likely to be based on events occurring within a given time window.
 	 */
-	PERFORMANCE;
+	PERFORMANCE,
+
+	/**
+	 * Tests requiring the presence of jmxremote_optional.jar in jre/lib/ext in order to
+	 * avoid "Unsupported protocol: jmxmp" errors.
+	 */
+	JMXMP;
 
 
 	/**

@@ -22,13 +22,19 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTests {
 
 	protected static final String OBJECT_NAME = "bean:name=testBean4";
 
+	@Test
 	public void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
@@ -37,6 +43,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertFalse("Age is not writable", attr.isWritable());
 	}
 
+	@Test
 	public void testWithUnknownClass() throws Exception {
 		try {
 			getWithMapping("com.foo.bar.Unknown");
@@ -47,6 +54,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		}
 	}
 
+	@Test
 	public void testWithNonInterface() throws Exception {
 		try {
 			getWithMapping("JmxTestBean");
@@ -57,7 +65,8 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		}
 	}
 
-	public void ignoreTestWithFallThrough() throws Exception {
+	@Test
+	public void testWithFallThrough() throws Exception {
 		InterfaceBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "org.springframework.jmx.export.assembler.ICustomJmxBean");
 		assembler.setManagedInterfaces(new Class<?>[] {IAdditionalTestMethods.class});
@@ -68,6 +77,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertNickName(attr);
 	}
 
+	@Test
 	public void testNickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,23 +28,36 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
-// TODO [SPR-8089] Clean up ignored JMX tests.
-//
-// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
-// that tests on the CI server -- as well as those in Eclipse -- do in
-// fact get ignored. So we leave @Ignore here so that developers can
-// easily search for ignored tests.
-@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
-public class ConnectorServerFactoryBeanTestsIgnore extends AbstractMBeanServerTests {
+public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
+	private boolean runTests = false;
 
+	@Override
+	protected void onSetUp() throws Exception {
+		Assume.group(TestGroup.JMXMP);
+		runTests = true;
+	}
+
+	@Override
+	public void tearDown() throws Exception {
+		if (runTests) {
+			super.tearDown();
+		}
+	}
+
+	@Test
 	public void testStartupWithLocatedServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();
@@ -56,6 +69,7 @@ public class ConnectorServerFactoryBeanTestsIgnore extends AbstractMBeanServerTe
 		}
 	}
 
+	@Test
 	public void testStartupWithSuppliedServer() throws Exception {
 		//Added a brief snooze here - seems to fix occasional
 		//java.net.BindException: Address already in use errors
@@ -72,6 +86,7 @@ public class ConnectorServerFactoryBeanTestsIgnore extends AbstractMBeanServerTe
 		}
 	}
 
+	@Test
 	public void testRegisterWithMBeanServer() throws Exception {
 		//Added a brief snooze here - seems to fix occasional
 		//java.net.BindException: Address already in use errors
@@ -89,6 +104,7 @@ public class ConnectorServerFactoryBeanTestsIgnore extends AbstractMBeanServerTe
 		}
 	}
 
+	@Test
 	public void testNoRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();

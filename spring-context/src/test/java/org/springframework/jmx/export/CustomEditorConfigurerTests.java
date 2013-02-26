@@ -22,7 +22,10 @@ import java.util.Date;
 
 import javax.management.ObjectName;
 
+import org.junit.Test;
 import org.springframework.jmx.AbstractJmxTests;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -36,6 +39,7 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 		return "org/springframework/jmx/export/customConfigurer.xml";
 	}
 
+	@Test
 	public void testDatesInJmx() throws Exception {
 		// System.out.println(getServer().getClass().getName());
 		ObjectName oname = new ObjectName("bean:name=dateRange");
@@ -47,6 +51,7 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 		assertEquals("endDate ", getEndDate(), endJmx);
 	}
 
+	@Test
 	public void testGetDates() throws Exception {
 		DateRange dr = (DateRange) getContext().getBean("dateRange");
 
