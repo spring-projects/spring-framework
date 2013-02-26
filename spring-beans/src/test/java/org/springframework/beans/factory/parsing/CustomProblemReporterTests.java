@@ -29,7 +29,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
-
 /**
  * @author Rob Harrop
  * @author Chris Beams
@@ -78,7 +77,6 @@ public final class CustomProblemReporterTests {
 
 		@Override
 		public void error(Problem problem) {
-			System.out.println(problem);
 			this.errors.add(problem);
 		}
 
@@ -88,7 +86,6 @@ public final class CustomProblemReporterTests {
 
 		@Override
 		public void warning(Problem problem) {
-			System.out.println(problem);
 			this.warnings.add(problem);
 		}
 	}
