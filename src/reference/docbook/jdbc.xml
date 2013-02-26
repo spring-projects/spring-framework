@@ -160,18 +160,11 @@
         </listitem>
 
         <listitem>
-          <para><emphasis role="bold">SimpleJdbcTemplate</emphasis> combines
-          the most frequently used operations of JdbcTemplate and
-          NamedParameterJdbcTemplate.</para>
-        </listitem>
-
-        <listitem>
           <para><emphasis role="bold">SimpleJdbcInsert and
           SimpleJdbcCall</emphasis> optimize database metadata to limit the
           amount of necessary configuration. This approach simplifies coding
           so that you only need to provide the name of the table or procedure
-          and provide a map of parameters matching the column names. <!--Revise preceding to clarify: You *must* use this approach w/ SimpleJdbcTemplate, it is *recommended*, or you *can*?
-TR: OK. I removed the sentence since it isn;t entirely accurate. The implementation uses a plain JdbcTemplate internally.-->
+          and provide a map of parameters matching the column names.
           This only works if the database provides adequate metadata. If the
           database doesn't provide this metadata, you will have to provide
           explicit configuration of the parameters.</para>
@@ -201,8 +194,7 @@ TR: OK. I removed the sentence since it isn;t entirely accurate. The implementat
       contains the <classname>JdbcTemplate</classname> class and its various
       callback interfaces, plus a variety of related classes. A subpackage
       named <literal>org.springframework.jdbc.core.simple</literal> contains
-      the <classname>SimpleJdbcTemplate</classname> class and the related
-      <classname>SimpleJdbcInsert</classname> and
+      the <classname>SimpleJdbcInsert</classname> and
       <classname>SimpleJdbcCall</classname> classes. Another subpackage named
       <literal>org.springframework.jdbc.core.namedparam</literal> contains the
       <classname>NamedParameterJdbcTemplate</classname> class and the related
@@ -434,8 +426,6 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
 
         <para>A common practice when using the
         <classname>JdbcTemplate</classname> class (and the associated <link
-        linkend="jdbc-SimpleJdbcTemplate"><classname>SimpleJdbcTemplate</classname></link>
-        and <link
         linkend="jdbc-NamedParameterJdbcTemplate"><classname>NamedParameterJdbcTemplate</classname></link>
         classes) is to configure a <interfacename>DataSource</interfacename>
         in your Spring configuration file, and then dependency-inject that
@@ -691,107 +681,6 @@ public int countOfActors(Actor exampleActor) {
       guidelines on using the
       <classname>NamedParameterJdbcTemplate</classname> class in the context
       of an application.</para>
-    </section>
-
-    <section xml:id="jdbc-SimpleJdbcTemplate">
-      <title><classname>SimpleJdbcTemplate</classname></title>
-
-      <para>The <classname>SimpleJdbcTemplate</classname> class wraps the
-      classic <classname>JdbcTemplate</classname> and leverages Java 5
-      language features such as varargs and autoboxing.</para>
-
-      <note>
-        <para>In Spring 3.0, the original <classname>JdbcTemplate</classname>
-        also supports Java 5-enhanced syntax with generics and varargs.
-        However, the <classname>SimpleJdbcTemplate</classname> provides a
-        simpler API that works best when you do not need access to all the
-        methods that the JdbcTemplate offers. Also, because the
-        <classname>SimpleJdbcTemplate</classname> was designed for Java 5, it
-        has more methods that take advantage of varargs due to different
-        ordering of the parameters.</para>
-      </note>
-
-      <para>The value-add of the <classname>SimpleJdbcTemplate</classname>
-      class in the area of syntactic-sugar is best illustrated with a
-      before-and-after example. The next code snippet shows data access code
-      that uses the classic <classname>JdbcTemplate</classname>, followed by a
-      code snippet that does the same job with the
-      <classname>SimpleJdbcTemplate</classname>.</para>
-
-      <programlisting language="java"><lineannotation>// classic JdbcTemplate-style...</lineannotation>
-private JdbcTemplate jdbcTemplate;
-
-public void setDataSource(DataSource dataSource) {
-    this.jdbcTemplate = new JdbcTemplate(dataSource);
-}
-<!--How is the code shown below different from the code shown in the next example? It seems like they're the same.-->
-public Actor findActor(String specialty, int age) {
-
-    String sql = "select id, first_name, last_name from T_ACTOR" +
-            " where specialty = ? and age = ?";
-
-    RowMapper&lt;Actor&gt; mapper = new RowMapper&lt;Actor&gt;() {
-        public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Actor actor = new Actor();
-            actor.setId(rs.getLong("id"));
-            actor.setFirstName(rs.getString("first_name"));
-            actor.setLastName(rs.getString("last_name"));
-            return actor;
-        }
-    };
-
-
-    <lineannotation>// notice the wrapping up of the arguments in an array</lineannotation>
-    return (Actor) jdbcTemplate.queryForObject(sql, new Object[] {specialty, age}, mapper);
-}</programlisting>
-
-      <para>Here is the same method, with the
-      <classname>SimpleJdbcTemplate</classname>.<!--The code shown above is the same as the code shown below. What is the difference?
-TR: difference is in the way the parameters are passed in on the last line; no need to use an Objcet[].--></para>
-
-      <programlisting language="java"><lineannotation>// SimpleJdbcTemplate-style...</lineannotation>
-private SimpleJdbcTemplate simpleJdbcTemplate;
-
-public void setDataSource(DataSource dataSource) {
-    this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-}
-
-public Actor findActor(String specialty, int age) {
-
-    String sql = "select id, first_name, last_name from T_ACTOR" +
-            " where specialty = ? and age = ?";
-    RowMapper&lt;Actor&gt; mapper = new RowMapper&lt;Actor&gt;() {
-        public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Actor actor = new Actor();
-            actor.setId(rs.getLong("id"));
-            actor.setFirstName(rs.getString("first_name"));
-            actor.setLastName(rs.getString("last_name"));
-            return actor;
-        }
-    };
-
-    <lineannotation>// notice the use of varargs since the parameter values now come
-    // after the RowMapper parameter</lineannotation>
-    return this.simpleJdbcTemplate.queryForObject(sql, mapper, specialty, age);
-}</programlisting>
-
-      <para>See <xref linkend="jdbc-JdbcTemplate-idioms" /> for guidelines on
-      how to use the <classname>SimpleJdbcTemplate</classname> class in the
-      context of an application.</para>
-
-      <note>
-        <para>The <classname>SimpleJdbcTemplate</classname> class only offers
-        a subset of the methods exposed on the
-        <classname>JdbcTemplate</classname> class. If you need to use a method
-        from the <classname>JdbcTemplate</classname> that is not defined on
-        the <classname>SimpleJdbcTemplate</classname>, you can always access
-        the underlying <classname>JdbcTemplate</classname> by calling the
-        <methodname>getJdbcOperations()</methodname> method on the
-        <classname>SimpleJdbcTemplate</classname>, which then allows you to
-        invoke the method that you want. The only downside is that the methods
-        on the <interfacename>JdbcOperations</interfacename> interface are not
-        generic, so you are back to casting and so on.</para>
-      </note>
     </section>
 
     <section xml:id="jdbc-SQLExceptionTranslator">
@@ -1370,9 +1259,7 @@ dataSource.setPassword("");</programlisting>
 
     <para>Most JDBC drivers provide improved performance if you batch multiple
     calls to the same prepared statement. By grouping updates into batches you
-    limit the number of round trips to the database. This section covers batch
-    processing using both the <classname>JdbcTemplate</classname> and the
-    <classname>SimpleJdbcTemplate</classname>.</para>
+    limit the number of round trips to the database.</para>
 
     <section xml:id="jdbc-batch-classic">
       <title>Basic batch operations with the JdbcTemplate</title>
@@ -1579,11 +1466,11 @@ TR: Revised, please review.-->For this example, the initializing method is the
       you will see examples of multiple ones later.</para>
 
       <programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.insertActor =
                 new SimpleJdbcInsert(dataSource).withTableName("t_actor");
     }
@@ -1618,11 +1505,11 @@ TR: Revised, please review.-->For this example, the initializing method is the
       <classname>usingGeneratedKeyColumns</classname> method.</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.insertActor =
                 new SimpleJdbcInsert(dataSource)
                         .withTableName("t_actor")
@@ -1658,11 +1545,11 @@ TR: Revised, please review.-->For this example, the initializing method is the
       column names with the <classname>usingColumns</classname> method:</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.insertActor =
                 new SimpleJdbcInsert(dataSource)
                         .withTableName("t_actor")
@@ -1697,11 +1584,11 @@ TR: Revised, please review.-->For this example, the initializing method is the
       to extract the parameter values. Here is an example:</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.insertActor =
                 new SimpleJdbcInsert(dataSource)
                         .withTableName("t_actor")
@@ -1721,11 +1608,11 @@ TR: Revised, please review.-->For this example, the initializing method is the
       can be chained.</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcInsert insertActor;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.insertActor =
                 new SimpleJdbcInsert(dataSource)
                         .withTableName("t_actor")
@@ -1786,11 +1673,11 @@ END;</programlisting>The <code>in_id</code> parameter contains the
       procedure.<!--Indicate what the purpose of this example is (what it does) and identify the name of procedure. Also see next query. TR: Revised, please review.--></para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcCall procReadActor;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.procReadActor =
                 new SimpleJdbcCall(dataSource)
                         .withProcedureName("read_actor");
@@ -2004,11 +1891,11 @@ END;</programlisting></para>
       method.</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcCall funcGetActorName;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.setResultsMapCaseInsensitive(true);
         this.funcGetActorName =
@@ -2062,11 +1949,9 @@ END;</programlisting>To call this procedure you declare the
       <classname>newInstance</classname> method.</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
     private SimpleJdbcCall procReadAllActors;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.setResultsMapCaseInsensitive(true);
         this.procReadAllActors =
@@ -2679,7 +2564,7 @@ clobReader.close();]]></programlisting>
       or you need to generate the SQL string dynamically once you know how
       many placeholders are required. The named parameter support provided in
       the <classname>NamedParameterJdbcTemplate</classname> and
-      <classname>SimpleJdbcTemplate</classname> takes the latter approach.
+      <classname>JdbcTemplate</classname> takes the latter approach.
       Pass in the values as a <classname>java.util.List</classname> of
       primitive objects. This list will be used to insert the required
       placeholders and pass in the values during the statement
