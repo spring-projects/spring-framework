@@ -16,17 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -34,7 +23,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.jdo.Constants;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -48,6 +37,7 @@ import javax.transaction.UserTransaction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
@@ -55,7 +45,6 @@ import org.springframework.orm.jdo.support.SpringPersistenceManagerProxyBean;
 import org.springframework.orm.jdo.support.StandardPersistenceManagerProxyBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.transaction.MockJtaTransaction;
-import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -64,6 +53,12 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
@@ -620,24 +615,19 @@ public class JdoTransactionManagerTests {
 	}
 
 	@Test
-	public void testInvalidIsolation() {
+	public void testIsolationLevel() {
 		given(pmf.getPersistenceManager()).willReturn(pm);
 		given(pm.currentTransaction()).willReturn(tx);
 
 		PlatformTransactionManager tm = new JdoTransactionManager(pmf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
-		try {
-			tt.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-				}
-			});
-			fail("Should have thrown InvalidIsolationLevelException");
-		}
-		catch (InvalidIsolationLevelException ex) {
-			// expected
-		}
+		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+			}
+		});
+		verify(tx).setIsolationLevel(Constants.TX_SERIALIZABLE);
 		verify(pm).close();
 	}
 
