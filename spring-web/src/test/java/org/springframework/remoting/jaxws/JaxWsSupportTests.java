@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.remoting.jaxws;
 
-import static org.junit.Assert.*;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -28,7 +26,6 @@ import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceRef;
 import javax.xml.ws.soap.AddressingFeature;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -36,12 +33,12 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @since 2.5
  */
-// TODO [SPR-10074] see https://gist.github.com/1150858
-@Ignore("see https://gist.github.com/1150858")
 public class JaxWsSupportTests {
 
 	@Test

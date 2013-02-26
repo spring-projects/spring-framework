@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  * Toplink-specific JPA tests with multiple EntityManagerFactory instances.
  *
  * @author Costin Leau
+ * @author Chris Beams
  */
-// TODO [SPR-10074] this test causes gradle to hang. See OJEMFWAJWIT.
-@Ignore("this test causes gradle to hang. See OJEMFWAJWIT.")
+@Ignore("This test causes gradle to hang. See SPR-103333.")
 public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
