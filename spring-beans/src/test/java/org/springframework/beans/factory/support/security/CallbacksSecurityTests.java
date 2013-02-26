@@ -16,12 +16,6 @@
 
 package org.springframework.beans.factory.support.security;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.AccessControlContext;
@@ -39,8 +33,8 @@ import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
@@ -59,6 +53,8 @@ import org.springframework.beans.factory.support.security.support.CustomCallback
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
 
 /**
  * Security test case. Checks whether the container uses its privileges for its
@@ -456,9 +452,6 @@ public class CallbacksSecurityTests {
 	}
 
 	@Test
-	@Ignore("passes under Eclipse, but fails under Gradle with https://gist.github.com/1664133")
-	// TODO [SPR-10074] passes under Eclipse, but fails under Gradle with
-	// https://gist.github.com/1664133
 	public void testContainerPrivileges() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
 
