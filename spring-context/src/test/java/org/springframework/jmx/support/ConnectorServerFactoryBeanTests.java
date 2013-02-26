@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,20 +28,12 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Ignore;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 /**
  * @author Rob Harrop
  */
-// TODO [SPR-8089] Clean up ignored JMX tests.
-//
-// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
-// that tests on the CI server -- as well as those in Eclipse -- do in
-// fact get ignored. So we leave @Ignore here so that developers can
-// easily search for ignored tests.
-@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
-public class ConnectorServerFactoryBeanTestsIgnore extends AbstractMBeanServerTests {
+public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
