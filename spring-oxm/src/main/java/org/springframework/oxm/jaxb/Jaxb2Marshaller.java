@@ -417,7 +417,10 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	protected JAXBContext getJaxbContext() {
+	/**
+	 * Return the JAXBContext used by this marshaller, lazily building it if necessary.
+	 */
+	public JAXBContext getJaxbContext() {
 		if (this.jaxbContext != null) {
 			return this.jaxbContext;
 		}
@@ -525,10 +528,8 @@ public class Jaxb2Marshaller
 
 
 	public boolean supports(Class<?> clazz) {
-		if (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
-			return true;
-		}
-		return supportsInternal(clazz, this.checkForXmlRootElement);
+		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
+				supportsInternal(clazz, this.checkForXmlRootElement));
 	}
 
 	public boolean supports(Type genericType) {
