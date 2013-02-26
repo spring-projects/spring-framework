@@ -28,15 +28,18 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Test;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
+	@Test
 	public void testStartupWithLocatedServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();
@@ -48,6 +51,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testStartupWithSuppliedServer() throws Exception {
 		//Added a brief snooze here - seems to fix occasional
 		//java.net.BindException: Address already in use errors
@@ -64,6 +68,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testRegisterWithMBeanServer() throws Exception {
 		//Added a brief snooze here - seems to fix occasional
 		//java.net.BindException: Address already in use errors
@@ -81,6 +86,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testNoRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();

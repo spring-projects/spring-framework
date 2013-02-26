@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
-
+import org.junit.After;
+import org.junit.Before;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.MBeanTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * <strong>Note:</strong> the JMX test suite requires the presence of the
@@ -40,12 +42,13 @@ import org.springframework.util.MBeanTestUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Chris Beams
  */
-public abstract class AbstractMBeanServerTests extends TestCase {
+public abstract class AbstractMBeanServerTests {
 
 	protected MBeanServer server;
 
-	@Override
+	@Before
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
@@ -64,8 +67,8 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 		return ctx;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		releaseServer();
 		onTearDown();
 	}

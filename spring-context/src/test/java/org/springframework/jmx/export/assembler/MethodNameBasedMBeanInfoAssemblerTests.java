@@ -20,9 +20,14 @@ import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  * @author David Boden
+ * @author Chris Beams
  */
 public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
@@ -50,6 +55,7 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		return assembler;
 	}
 
+	@Test
 	public void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
@@ -58,6 +64,7 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		assertFalse(attr.isWritable());
 	}
 
+	@Test
 	public void testSetNameParameterIsNamed() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 

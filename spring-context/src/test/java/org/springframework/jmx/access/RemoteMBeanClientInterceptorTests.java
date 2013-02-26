@@ -28,6 +28,7 @@ import javax.management.remote.JMXServiceURL;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 

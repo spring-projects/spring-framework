@@ -23,6 +23,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
@@ -42,6 +43,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		return JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 	}
 
+	@Test
 	public void testTestValidConnection() throws Exception {
 		JMXConnectorServer connectorServer = getConnectorServer();
 		connectorServer.start();
@@ -65,6 +67,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		}
 	}
 
+	@Test
 	public void testWithNoServiceUrl() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
 		try {
@@ -97,6 +100,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		}
 	}
 
+	@Test
 	public void testWithLazyConnectionAndNoAccess() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
 		bean.setServiceUrl(SERVICE_URL);
