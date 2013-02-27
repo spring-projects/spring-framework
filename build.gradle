@@ -12,7 +12,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion  = "1.7.1"
+	ext.aspectjVersion  = "1.7.2"
 	ext.easymockVersion = "2.5.2"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"

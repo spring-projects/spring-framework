@@ -23,7 +23,7 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
  * Abstract superaspect for AspectJ transaction aspects. Concrete
- * subaspects will implement the <code>transactionalMethodExecution()</code>
+ * subaspects will implement the {@code transactionalMethodExecution()}
  * pointcut using a strategy such as Java 5 annotations.
  *
  * <p>Suitable for use inside or outside the Spring IoC container.

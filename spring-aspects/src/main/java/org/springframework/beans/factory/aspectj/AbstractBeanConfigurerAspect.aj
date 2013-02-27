@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.springframework.beans.factory.aspectj;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
@@ -23,12 +23,12 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * Abstract superaspect for AspectJ aspects that can perform Dependency
  * Injection on objects, however they may be created. Define the beanCreation()
  * pointcut in subaspects.
- * 
+ *
  * <p>Subaspects may also need a metadata resolution strategy, in the
- * <code>BeanWiringInfoResolver</code> interface. The default implementation
+ * {@code BeanWiringInfoResolver} interface. The default implementation
  * looks for a bean with the same name as the FQN. This is the default name
  * of a bean in a Spring container if the id value is not supplied explicitly.
- * 
+ *
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Adrian Colyer
@@ -62,7 +62,7 @@ public abstract aspect AbstractBeanConfigurerAspect extends BeanConfigurerSuppor
 
 	/**
 	 * The initialization of a new object.
-	 * 
+	 *
 	 * <p>WARNING: Although this pointcut is non-abstract for backwards
 	 * compatibility reasons, it is meant to be overridden to select
 	 * initialization of any configurable bean.
