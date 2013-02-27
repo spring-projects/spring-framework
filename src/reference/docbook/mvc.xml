@@ -2602,7 +2602,7 @@ deferredResult.setResult(data);
 
     ...
 
-  &lt;web-app&gt;
+  &lt;/web-app&gt;
   </programlisting>
 
           <para>The <classname>DispatcherServlet</classname> and any
@@ -3326,7 +3326,7 @@ public String upload(...) {
       the <classname>ContentNegotiatingViewResolver </classname>bean property
       <literal>mediaTypes</literal> to specify a mapping of file extensions to
       media types. For more information on the algorithm used to determine the
-      request media type, refer to the API documentation for
+      request media type, refer to the API documentationentry for
       <classname>ContentNegotiatingViewResolver</classname>.</para>
 
       <para>Here is an example configuration of a
