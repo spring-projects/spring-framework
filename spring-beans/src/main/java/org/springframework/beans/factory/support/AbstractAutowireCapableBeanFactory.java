@@ -74,6 +74,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -150,6 +151,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/** Cache of filtered PropertyDescriptors: bean Class -> PropertyDescriptor array */
 	private final Map<Class, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
 			new ConcurrentHashMap<Class, PropertyDescriptor[]>(64);
+
+	/** Cache of unique declared methods **/
+	private final ConcurrentReferenceHashMap<Class, Method[]> uniqueDeclaredMethodsCache =
+			new ConcurrentReferenceHashMap<Class, Method[]>();
 
 
 	/**
@@ -644,7 +649,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
 		int minNrOfArgs = mbd.getConstructorArgumentValues().getArgumentCount();
-		Method[] candidates = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
+		Method[] candidates = getUniqueDeclaredMethods(factoryClass);
 		Set<Class<?>> returnTypes = new HashSet<Class<?>>(1);
 		for (Method factoryMethod : candidates) {
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
@@ -665,6 +670,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Ambiguous return types found: return null to indicate "not determinable".
 			return null;
 		}
+	}
+
+	private Method[] getUniqueDeclaredMethods(Class factoryClass) {
+		Method[] methods = this.uniqueDeclaredMethodsCache.get(factoryClass);
+		if(methods == null) {
+			methods = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
+			this.uniqueDeclaredMethodsCache.put(factoryClass, methods);
+		}
+		return methods;
 	}
 
 	/**
