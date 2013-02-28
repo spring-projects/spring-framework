@@ -309,8 +309,8 @@
 	<@bind path />
     <#assign id="${status.expression?replace('[','')?replace(']','')}">
     <#assign isSelected = status.value?? && status.value?string=="true">
-	<input type="hidden" name="_${id}" value="on"/>
-	<input type="checkbox" id="${id}" name="${id}"<#if isSelected> checked="checked"</#if> ${attributes}/>
+	<input type="hidden" name="_${status.expression}" value="on"/>
+	<input type="checkbox" id="${id}" name="${status.expression}"<#if isSelected> checked="checked"</#if> ${attributes}/>
 </#macro>
 
 <#--
