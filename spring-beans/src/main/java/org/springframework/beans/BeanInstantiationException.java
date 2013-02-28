@@ -28,6 +28,15 @@ public class BeanInstantiationException extends FatalBeanException {
 
 	private Class beanClass;
 
+	private String firstChange;
+	
+	
+	/**
+	 * @return the firstChange
+	 */
+	public String getFirstChange() {
+		return firstChange;
+	}
 
 	/**
 	 * Create a new BeanInstantiationException.
