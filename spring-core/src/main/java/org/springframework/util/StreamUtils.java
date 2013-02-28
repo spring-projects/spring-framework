@@ -37,7 +37,7 @@ import java.nio.charset.Charset;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
- * @since 3.2
+ * @since 3.2.2
  * @see FileCopyUtils
  */
 public abstract class StreamUtils {
