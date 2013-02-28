@@ -25,7 +25,7 @@ import org.junit.Ignore;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-@Ignore("This test causes gradle to hang. See SPR-103333.")
+@Ignore("This test causes gradle to hang. See SPR-10333.")
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
 	@Override

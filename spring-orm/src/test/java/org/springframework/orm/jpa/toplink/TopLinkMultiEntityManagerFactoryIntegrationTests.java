@@ -28,7 +28,7 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  * @author Costin Leau
  * @author Chris Beams
  */
-@Ignore("This test causes gradle to hang. See SPR-103333.")
+@Ignore("This test causes gradle to hang. See SPR-10333.")
 public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
