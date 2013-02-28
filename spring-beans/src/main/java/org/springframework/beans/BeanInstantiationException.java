@@ -30,6 +30,7 @@ public class BeanInstantiationException extends FatalBeanException {
 
 	private String firstChange;
 	private String secondChange;
+	private String thirdChange;
 	
 	/**
 	 * @return the firstChange
@@ -46,6 +47,13 @@ public class BeanInstantiationException extends FatalBeanException {
 		return secondChange;
 	}
 
+	/**
+	 * @return the thirdChange
+	 */
+	public String getThirdChange() {
+		return thirdChange;
+	}
+	
 	/**
 	 * Create a new BeanInstantiationException.
 	 * @param beanClass the offending bean class
