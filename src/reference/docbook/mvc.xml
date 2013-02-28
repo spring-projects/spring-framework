@@ -2602,7 +2602,7 @@ deferredResult.setResult(data);
 
     ...
 
-  &lt;web-app&gt;
+  &lt;/web-app&gt;
   </programlisting>
 
           <para>The <classname>DispatcherServlet</classname> and any
