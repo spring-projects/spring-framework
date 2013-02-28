@@ -169,7 +169,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
 			new NamedThreadLocal<Object>("Prototype beans currently in creation");
 
-
 	/**
 	 * Create a new AbstractBeanFactory.
 	 */
@@ -398,7 +397,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return parentBeanFactory.isSingleton(originalBeanName(name));
 			}
 
-			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName, true);
 
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
 			if (mbd.isSingleton()) {
@@ -428,7 +427,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return parentBeanFactory.isPrototype(originalBeanName(name));
 		}
 
-		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName, true);
 		if (mbd.isPrototype()) {
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
 			return (!BeanFactoryUtils.isFactoryDereference(name) || isFactoryBean(beanName, mbd));
@@ -495,7 +494,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			// Retrieve corresponding bean definition.
-			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName, true);
 
 			Class[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
 					new Class[] {typeToMatch} : new Class[] {FactoryBean.class, typeToMatch});
@@ -560,13 +559,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return parentBeanFactory.getType(originalBeanName(name));
 			}
 
-			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName, true);
 
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
 			BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 			if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
-				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
+				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd, true);
 				Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd);
 				if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
 					return targetClass;
@@ -901,7 +900,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 		}
 
-		return isFactoryBean(beanName, getMergedLocalBeanDefinition(beanName));
+		return isFactoryBean(beanName, getMergedLocalBeanDefinition(beanName, true));
 	}
 
 	@Override
@@ -1094,12 +1093,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
 	protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
+		return getMergedLocalBeanDefinition(beanName, false);
+	}
+
+	protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName,
+			boolean forReadOnly) throws BeansException {
 		// Quick check on the concurrent map first, with minimal locking.
 		RootBeanDefinition mbd = this.mergedBeanDefinitions.get(beanName);
 		if (mbd != null) {
 			return mbd;
 		}
-		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
+		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName), null, forReadOnly);
 	}
 
 	/**
@@ -1129,6 +1133,27 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected RootBeanDefinition getMergedBeanDefinition(
 			String beanName, BeanDefinition bd, BeanDefinition containingBd)
 			throws BeanDefinitionStoreException {
+		return getMergedBeanDefinition(beanName, bd, containingBd, false);
+	}
+
+	/**
+	 * Return a RootBeanDefinition for the given bean, by merging with the
+	 * parent if the given bean's definition is a child bean definition.
+	 * @param beanName the name of the bean definition
+	 * @param bd the original bean definition (Root/ChildBeanDefinition)
+	 * @param containingBd the containing bean definition in case of inner bean,
+	 * or {@code null} in case of a top-level bean
+	 * @return a (potentially merged) RootBeanDefinition for the given bean
+	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
+	 */
+	protected RootBeanDefinition getMergedBeanDefinition(
+			String beanName, BeanDefinition bd, BeanDefinition containingBd,
+			boolean forReadOnly)
+			throws BeanDefinitionStoreException {
+
+		if(forReadOnly && bd.getParentName() == null && bd instanceof RootBeanDefinition) {
+			return (RootBeanDefinition) bd;
+		}
 
 		synchronized (this.mergedBeanDefinitions) {
 			RootBeanDefinition mbd = null;
