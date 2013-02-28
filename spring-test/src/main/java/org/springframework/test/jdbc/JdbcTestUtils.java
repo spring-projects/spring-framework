@@ -61,7 +61,7 @@ public class JdbcTestUtils {
 	 * @return the number of rows in the table
 	 */
 	public static int countRowsInTable(JdbcTemplate jdbcTemplate, String tableName) {
-		return jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, int.class);
+		return jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class JdbcTestUtils {
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
 		}
-		return jdbcTemplate.queryForObject(sql, int.class);
+		return jdbcTemplate.queryForObject(sql, Integer.class);
 	}
 
 	/**
