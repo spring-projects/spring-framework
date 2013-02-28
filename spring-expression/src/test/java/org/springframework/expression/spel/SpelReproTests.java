@@ -1741,7 +1741,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	public void SPR_10210() throws Exception {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setVariable("bridgeExample", new org.springframework.expression.spel.spr10210.D());
-		Expression parseExpression = parser.parseExpression("#bridgeExample.bridgetMethod()");
+		Expression parseExpression = parser.parseExpression("#bridgeExample.bridgeMethod()");
 		parseExpression.getValue(context);
 	}
 

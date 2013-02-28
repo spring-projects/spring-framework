@@ -21,7 +21,7 @@ import org.springframework.expression.spel.spr10210.infra.C;
 
 abstract class A extends B<C> {
 
-	public void bridgetMethod() {
+	public void bridgeMethod() {
 	}
 
 }
