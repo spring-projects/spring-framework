@@ -3,12 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2.2 (2013-03-07)
+Changes in version 3.2.2 (2013-03-11)
 --------------------------------------
 
 * official support for Hibernate 4.2 (SPR-10255)
 * fixed missing inter-dependencies in module POMs (SPR-10218)
 * marked spring-web module as 'distributable' in order for session replication to work on Tomcat (SPR-10219)
+* DefaultListableBeanFactory caches target type per bean definition and allows for specifying it in advance (SPR-10335)
 * ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK annotations via ASM (SPR-10249)
 * ConfigurationClassPostProcessor detects covariant return type mismatch, avoiding infinite recursion (SPR-10261)
 * ConfigurationClassPostProcessor allows for overriding of scoped-proxy bean definitions (SPR-10265)
@@ -21,10 +22,15 @@ Changes in version 3.2.2 (2013-03-07)
 * @Scheduled provides String variants of fixedDelay, fixedRate, initialDelay for placeholder support (SPR-8067)
 * refined CronSequenceGenerator's rounding up of seconds to address second-specific cron expressions (SPR-9459)
 * @Transactional in AspectJ mode works with CallbackPreferringPlatformTransactionManager (WebSphere) as well (SPR-9268)
+* LazyConnectionDataSourceProxy catches setReadOnly exception analogous to DataSourceUtils (SPR-10312)
 * SQLErrorCodeSQLExceptionTranslator tries to find SQLException with actual error code among causes (SPR-10260)
+* added "createTemporaryLob" flag to DefaultLobHandler, using JDBC 4.0's createBlob/Clob mechanism (SPR-10339)
+* deprecated OracleLobHandler in favor of DefaultLobHandler for the Oracle 10g driver and higher (SPR-10339)
 * deprecated (NamedParameter)JdbcTemplate's queryForInt/Long operations in favor of queryForObject (SPR-10257)
 * added useful query variants without parameters to NamedParameterJdbcTemplate, for convenience in DAOs (SPR-10256)
 * "packagesToScan" feature for Hibernate 3 and Hibernate 4 detects annotated packages as well (SPR-7748, SPR-10288)
+* HibernateTransactionManager for Hibernate 4 supports "entityInterceptor(BeanName)" property (SPR-10301)
+* DefaultJdoDialect supports the JDO 2.2+ isolation level feature out of the box (SPR-10323)
 * DefaultMessageListenerContainer invokes specified ExceptionListener for recovery exceptions as well (SPR-10230)
 * DefaultMessageListenerContainer logs recovery failures at error level and exposes "isRecovering()" method (SPR-10230)
 * added "mappedClass" property to Jaxb2Marshaller, introducing support for partial unmarshalling (SPR-10282)
