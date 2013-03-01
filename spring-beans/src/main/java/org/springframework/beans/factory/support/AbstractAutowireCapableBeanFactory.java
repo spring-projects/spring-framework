@@ -572,17 +572,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	@Override
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
-		Class beanClass = (mbd.getFactoryMethodName() != null ?
-				getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
-				resolveBeanClass(mbd, beanName, typesToMatch));
+	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
+		Class<?> targetType = mbd.getTargetType();
+		if (targetType == null) {
+			targetType = (mbd.getFactoryMethodName() != null ? getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
+					resolveBeanClass(mbd, beanName, typesToMatch));
+			if (ObjectUtils.isEmpty(typesToMatch) || getTempClassLoader() == null) {
+				mbd.setTargetType(targetType);
+			}
+		}
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
-		if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					Class predicted = ibp.predictBeanType(beanClass, beanName);
+					Class predicted = ibp.predictBeanType(targetType, beanName);
 					if (predicted != null && (typesToMatch.length != 1 || !FactoryBean.class.equals(typesToMatch[0]) ||
 							FactoryBean.class.isAssignableFrom(predicted))) {
 						return predicted;
@@ -590,7 +595,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 		}
-		return beanClass;
+		return targetType;
 	}
 
 	/**
@@ -607,8 +612,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the type for the bean if determinable, or {@code null} else
 	 * @see #createBean
 	 */
-	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
-		Class factoryClass;
+	protected Class<?> getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
+		Class<?> factoryClass;
 		boolean isStatic = true;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
