@@ -181,6 +181,19 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
+	public void testMediaTypeNotValue() throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
+			request.setContentType("bogus");
+			this.handlerMapping.getHandler(request);
+			fail("HttpMediaTypeNotSupportedException expected");
+		}
+		catch (HttpMediaTypeNotSupportedException ex) {
+			assertEquals("Invalid media type \"bogus\": does not contain '/'", ex.getMessage());
+		}
+	}
+
+	@Test
 	public void mediaTypeNotAccepted() throws Exception {
 		testMediaTypeNotAccepted("/persons");
 
