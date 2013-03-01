@@ -26,6 +26,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -866,9 +867,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				return;
 			}
 		}
-		super.doOptions(request, response);
-		String allowedMethods = response.getHeader("Allow");
-		allowedMethods += ", " + RequestMethod.PATCH.name();
+
+		AllowHeaderTrackingHttpServletResponseWrapper responseWrapper =
+				new AllowHeaderTrackingHttpServletResponseWrapper(response);
+		super.doOptions(request, responseWrapper);
+		String allowedMethods = responseWrapper.getAllowHeader();
+		allowedMethods = StringUtils.hasLength(allowedMethods) ? allowedMethods + ", " : "";
+		allowedMethods += RequestMethod.PATCH.name();
 		response.setHeader("Allow", allowedMethods);
 	}
 
@@ -1061,6 +1066,32 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			FrameworkServlet.this.onApplicationEvent(event);
+		}
+	}
+
+
+	/**
+	 * {@link HttpServletResponseWrapper} allowing us to grab 'Allow' headers in a
+	 * servlet 2.5 environment where the {@code getHeader()} method does not exist.
+	 */
+	private static class AllowHeaderTrackingHttpServletResponseWrapper extends
+			HttpServletResponseWrapper {
+
+		private String allowHeader;
+
+		public AllowHeaderTrackingHttpServletResponseWrapper(HttpServletResponse response) {
+			super(response);
+		}
+
+		@Override
+		public void setHeader(String name, String value) {
+			if("Allow".equals(name)) {
+				this.allowHeader = value;
+			}
+		}
+
+		public String getAllowHeader() {
+			return allowHeader;
 		}
 	}
 
