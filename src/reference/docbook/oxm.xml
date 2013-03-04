@@ -333,6 +333,9 @@ public class Application {
                     <para><link linkend="oxm-xmlbeans-xsd"><literal>xmlbeans-marshaller</literal></link></para>
                 </listitem>
                 <listitem>
+                    <para><link linkend="oxm-castor-xsd"><literal>castor-marshaller</literal></link></para>
+                </listitem>
+                <listitem>
                     <para><link linkend="oxm-jibx-xsd"><literal>jibx-marshaller</literal></link></para>
                 </listitem>
             </itemizedlist>
@@ -475,6 +478,86 @@ public class Application {
     </bean>
 </beans>
 ]]></programlisting>
+            <section xml:id="oxm-castor-xsd">
+                <title>XML Schema-based Configuration</title>
+                <para>
+                    The <literal>castor-marshaller</literal> tag configures a
+                    <classname>org.springframework.oxm.castor.CastorMarshaller</classname>.
+                    Here is an example:
+                </para>
+
+                <programlisting language="xml">
+                    <![CDATA[<oxm:castor-marshaller id="marshaller" mapping-location="classpath:org/springframework/oxm/castor/mapping.xml"/>]]></programlisting>
+
+                <para>
+                    The marshaller instance can be configured in two ways, by specifying either the location of
+                    a mapping file (through the <property>mapping-location</property> property), or by
+                    identifying Java POJOs (through the <property>target-class</property> or
+                    <property>target-package</property> properties) for which there exist corresponding
+                    XML descriptor classes. The latter way is usually used in conjunction with XML code generation
+                    from XML schemas.
+                </para>
+
+                <para>
+                    Available attributes are:
+                    <informaltable>
+                        <tgroup cols="3">
+                            <colspec colwidth="1.5*"/>
+                            <colspec colwidth="4*"/>
+                            <colspec colwidth="1*"/>
+                            <thead>
+                                <row>
+                                    <entry>Attribute</entry>
+                                    <entry>Description</entry>
+                                    <entry>Required</entry>
+                                </row>
+                            </thead>
+                            <tbody>
+                                <row>
+                                    <entry>
+                                        <literal>id</literal>
+                                    </entry>
+                                    <entry>the id of the marshaller</entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>encoding</literal>
+                                    </entry>
+                                    <entry>the encoding to use for unmarshalling from XML</entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>target-class</literal>
+                                    </entry>
+                                    <entry>a Java class name for a POJO for which an XML class descriptor is available (as
+                                        generated through code generation)
+                                    </entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>target-package</literal>
+                                    </entry>
+                                    <entry>a Java package name that identifies a package that contains POJOs and their
+                                        corresponding Castor
+                                        XML descriptor classes (as generated through code generation from XML schemas)
+                                    </entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>mapping-location</literal>
+                                    </entry>
+                                    <entry>location of a Castor XML mapping file</entry>
+                                    <entry>no</entry>
+                                </row>
+                            </tbody>
+                        </tgroup>
+                    </informaltable>
+                </para>
+            </section>
         </section>
     </section>
 

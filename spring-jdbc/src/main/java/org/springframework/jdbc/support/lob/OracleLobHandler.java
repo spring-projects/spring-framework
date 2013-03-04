@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,23 @@ import org.springframework.util.FileCopyUtils;
  * Note that this LobHandler requires Oracle JDBC driver 9i or higher!
  *
  * <p>While most databases are able to work with {@link DefaultLobHandler},
- * Oracle just accepts Blob/Clob instances created via its own proprietary
- * BLOB/CLOB API, and additionally doesn't accept large streams for
- * PreparedStatement's corresponding setter methods. Therefore, you need
- * to use a strategy like this LobHandler implementation.
+ * Oracle 9i (or more specifically, the Oracle 9i JDBC driver) just accepts
+ * Blob/Clob instances created via its own proprietary BLOB/CLOB API,
+ * and additionally doesn't accept large streams for PreparedStatement's
+ * corresponding setter methods. Therefore, you need to use a strategy like
+ * this LobHandler implementation, or upgrade to the Oracle 10g/11g driver
+ * (which still supports access to Oracle 9i databases).
+ *
+ * <p><b>NOTE: As of Oracle 10.2, {@link DefaultLobHandler} should work equally
+ * well out of the box. On Oracle 11g, JDBC 4.0 based options such as
+ * {@link DefaultLobHandler#setStreamAsLob} and {@link DefaultLobHandler#setCreateTemporaryLob}
+ * are available as well, rendering this proprietary OracleLobHandler obsolete.</b>
+ * Also, consider upgrading to a new driver even when accessing an older database.
+ * See the {@link LobHandler} interface javadoc for a summary of recommendations.
  *
  * <p>Needs to work on a native JDBC Connection, to be able to cast it to
  * {@code oracle.jdbc.OracleConnection}. If you pass in Connections from a
- * connection pool (the usual case in a J2EE environment), you need to set an
+ * connection pool (the usual case in a Java EE environment), you need to set an
  * appropriate {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
  * to allow for automatic retrieval of the underlying native JDBC Connection.
  * LobHandler and NativeJdbcExtractor are separate concerns, therefore they
@@ -72,8 +81,15 @@ import org.springframework.util.FileCopyUtils;
  * @author Juergen Hoeller
  * @author Thomas Risberg
  * @since 04.12.2003
+ * @see DefaultLobHandler
  * @see #setNativeJdbcExtractor
+ * @deprecated in favor of {@link DefaultLobHandler} for the Oracle 10g driver and
+ * higher. Consider using the 10g/11g driver even against an Oracle 9i database!
+ * {@link DefaultLobHandler#setCreateTemporaryLob} is the direct equivalent of this
+ * OracleLobHandler's implementation strategy, just using standard JDBC 4.0 API.
+ * That said, in most cases, regular DefaultLobHandler setup will work fine as well.
  */
+@Deprecated
 public class OracleLobHandler extends AbstractLobHandler {
 
 	private static final String BLOB_CLASS_NAME = "oracle.sql.BLOB";
@@ -143,7 +159,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	}
 
 	/**
-	 * Set whether to agressively release any resources used by the LOB. If set to {@code true}
+	 * Set whether to aggressively release any resources used by the LOB. If set to {@code true}
 	 * then you can only read the LOB values once. Any subsequent reads will fail since the resources
 	 * have been closed.
 	 * <p>Setting this property to {@code true} can be useful when your queries generates large
@@ -283,7 +299,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 					((BLOB) lob).open(BLOB.MODE_READONLY);
 					*/
 					Method open = lob.getClass().getMethod("open", int.class);
-					open.invoke(lob, modeReadOnlyConstants.get(lob.getClass()));
+					open.invoke(lob, this.modeReadOnlyConstants.get(lob.getClass()));
 				}
 			}
 			catch (InvocationTargetException ex) {
@@ -366,7 +382,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 */
 	protected class OracleLobCreator implements LobCreator {
 
-		private final List createdLobs = new LinkedList();
+		private final List<Object> temporaryLobs = new LinkedList<Object>();
 
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, final byte[] content)
 				throws SQLException {
@@ -495,7 +511,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				Object lob = prepareLob(con, clob ? clobClass : blobClass);
 				callback.populateLob(lob);
 				lob.getClass().getMethod("close", (Class[]) null).invoke(lob, (Object[]) null);
-				this.createdLobs.add(lob);
+				this.temporaryLobs.add(lob);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Created new Oracle " + (clob ? "CLOB" : "BLOB"));
 				}
@@ -556,7 +572,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		 */
 		public void close() {
 			try {
-				for (Iterator it = this.createdLobs.iterator(); it.hasNext();) {
+				for (Iterator it = this.temporaryLobs.iterator(); it.hasNext();) {
 					/*
 					BLOB blob = (BLOB) it.next();
 					blob.freeTemporary();

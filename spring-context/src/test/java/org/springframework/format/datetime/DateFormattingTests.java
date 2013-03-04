@@ -16,7 +16,10 @@
 
 package org.springframework.format.datetime;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,9 +53,12 @@ public class DateFormattingTests {
 
 	@Before
 	public void setUp() {
-		DefaultConversionService.addDefaultConverters(conversionService);
-
 		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+		setUp(registrar);
+	}
+
+	private void setUp(DateFormatterRegistrar registrar) {
+		DefaultConversionService.addDefaultConverters(conversionService);
 		registrar.registerFormatters(conversionService);
 
 		SimpleDateBean bean = new SimpleDateBean();
@@ -187,12 +193,47 @@ public class DateFormattingTests {
 	}
 
 	@Test
-	public void dateToString() throws Exception {
+	public void dateToStringWithoutGlobalFormat() throws Exception {
+		Date date = new Date();
+		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
+		String expected = date.toString();
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void dateToStringWithGlobalFormat() throws Exception {
+		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+		registrar.setFormatter(new DateFormatter());
+		setUp(registrar);
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = new DateFormatter().print(date, Locale.US);
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void stringToDateWithoutGlobalFormat() throws Exception {
+		// SPR-10105
+		String string = "Sat, 12 Aug 1995 13:30:00 GM";
+		Date date = this.conversionService.convert(string, Date.class);
+		assertThat(date, equalTo(new Date(string)));
+	}
+
+	@Test
+	public void stringToDateWithGlobalFormat() throws Exception {
+		// SPR-10105
+		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+		DateFormatter dateFormatter = new DateFormatter();
+		dateFormatter.setIso(ISO.DATE_TIME);
+		registrar.setFormatter(dateFormatter);
+		setUp(registrar);
+		// This is a format that cannot be parsed by new Date(String)
+		String string = "2009-06-01T14:23:05.003+0000";
+		Date date = this.conversionService.convert(string, Date.class);
+		assertNotNull(date);
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class SimpleDateBean {

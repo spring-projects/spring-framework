@@ -26,6 +26,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -866,10 +867,18 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				return;
 			}
 		}
-		super.doOptions(request, response);
-		String allowedMethods = response.getHeader("Allow");
-		allowedMethods += ", " + RequestMethod.PATCH.name();
-		response.setHeader("Allow", allowedMethods);
+
+		// Use response wrapper for Servlet 2.5 compatibility where
+		// the getHeader() method does not exist
+		super.doOptions(request, new HttpServletResponseWrapper(response) {
+			@Override
+			public void setHeader(String name, String value) {
+				if("Allow".equals(name)) {
+					value = (StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+				}
+				super.setHeader(name, value);
+			}
+		});
 	}
 
 	/**

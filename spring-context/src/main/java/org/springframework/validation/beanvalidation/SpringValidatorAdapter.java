@@ -130,7 +130,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						}
 						else {
 							Object invalidValue = violation.getInvalidValue();
-							if (field.contains(".") && !field.contains("[]")) {
+							if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
+									(field.contains(".") && !field.contains("[]")))) {
 								// Possibly a bean constraint with property path: retrieve the actual property value.
 								// However, explicitly avoid this for "address[]" style paths that we can't handle.
 								invalidValue = bindingResult.getRawFieldValue(field);

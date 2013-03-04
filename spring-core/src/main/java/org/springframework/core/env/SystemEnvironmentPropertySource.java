@@ -88,10 +88,6 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	public Object getProperty(String name) {
 		Assert.notNull(name, "property name must not be null");
 		String actualName = resolvePropertyName(name);
-		if (actualName == null) {
-			// at this point we know the property does not exist
-			return null;
-		}
 		if (logger.isDebugEnabled() && !name.equals(actualName)) {
 			logger.debug(String.format(
 					"PropertySource [%s] does not contain '%s', but found equivalent '%s'",

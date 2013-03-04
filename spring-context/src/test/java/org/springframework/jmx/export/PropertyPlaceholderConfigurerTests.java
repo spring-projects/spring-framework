@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,11 +18,15 @@ package org.springframework.jmx.export;
 
 import javax.management.ObjectName;
 
+import org.junit.Test;
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 
@@ -31,6 +35,7 @@ public class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 		return "org/springframework/jmx/export/propertyPlaceholderConfigurer.xml";
 	}
 
+	@Test
 	public void testPropertiesReplaced() {
 		IJmxTestBean bean = (IJmxTestBean) getContext().getBean("testBean");
 
@@ -38,6 +43,7 @@ public class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 		assertEquals("Age is incorrect", 100, bean.getAge());
 	}
 
+	@Test
 	public void testPropertiesCorrectInJmx() throws Exception {
 		ObjectName oname = new ObjectName("bean:name=proxyTestBean1");
 		Object name = getServer().getAttribute(oname, "Name");

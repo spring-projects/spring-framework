@@ -727,8 +727,7 @@ public class ExampleBean {
         container ignores these values. It also ignores the
         <literal>scope</literal> flag. Inner beans are
         <emphasis>always</emphasis> anonymous and they are
-        <emphasis>always</emphasis> scoped as <link
-        linkend="beans-factory-scopes-prototype">prototypes</link>. It is
+        <emphasis>always</emphasis> created with the outer bean. It is
         <emphasis>not</emphasis> possible to inject inner beans into
         collaborating beans other than into the enclosing bean.</para>
     </section>

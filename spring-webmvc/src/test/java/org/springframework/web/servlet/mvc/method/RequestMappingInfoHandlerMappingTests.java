@@ -90,7 +90,6 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(testController);
-		this.handlerMapping.setRemoveSemicolonContent(false);
 	}
 
 	@Test
@@ -178,6 +177,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		catch (HttpMediaTypeNotSupportedException ex) {
 			assertEquals("Invalid supported consumable media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
+		}
+	}
+
+	@Test
+	public void testMediaTypeNotValue() throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
+			request.setContentType("bogus");
+			this.handlerMapping.getHandler(request);
+			fail("HttpMediaTypeNotSupportedException expected");
+		}
+		catch (HttpMediaTypeNotSupportedException ex) {
+			assertEquals("Invalid media type \"bogus\": does not contain '/'", ex.getMessage());
 		}
 	}
 

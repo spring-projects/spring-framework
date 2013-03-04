@@ -205,7 +205,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		if (!consumableMediaTypes.isEmpty()) {
 			MediaType contentType = null;
 			if (StringUtils.hasLength(request.getContentType())) {
-				contentType = MediaType.parseMediaType(request.getContentType());
+				try {
+					contentType = MediaType.parseMediaType(request.getContentType());
+				}
+				catch (IllegalArgumentException ex) {
+					throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+				}
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<MediaType>(consumableMediaTypes));
 		}

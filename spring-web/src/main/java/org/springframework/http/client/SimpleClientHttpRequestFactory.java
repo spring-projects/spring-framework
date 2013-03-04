@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
+
+	private boolean outputStreaming = true;
 
 
 	/**
@@ -104,15 +106,31 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		this.readTimeout = readTimeout;
 	}
 
+	/**
+	 * Set if the underlying URLConnection can be set to 'output streaming' mode. When
+	 * output streaming is enabled, authentication and redirection cannot be handled
+	 * automatically. If output streaming is disabled the
+	 * {@link HttpURLConnection#setFixedLengthStreamingMode(int)
+	 * setFixedLengthStreamingMode} and
+	 * {@link HttpURLConnection#setChunkedStreamingMode(int) setChunkedStreamingMode}
+	 * methods of the underlying connection will never be called.
+	 * <p>Default is {@code true}.
+	 * @param outputStreaming if output streaming is enabled
+	 */
+	public void setOutputStreaming(boolean outputStreaming) {
+		this.outputStreaming = outputStreaming;
+	}
+
 
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
 		if (this.bufferRequestBody) {
-			return new SimpleBufferingClientHttpRequest(connection);
+			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
 		}
 		else {
-			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize);
+			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize,
+					this.outputStreaming);
 		}
 	}
 

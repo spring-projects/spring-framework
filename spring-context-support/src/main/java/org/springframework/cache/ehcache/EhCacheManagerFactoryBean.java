@@ -35,19 +35,20 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link FactoryBean} that exposes an EHCache {@link net.sf.ehcache.CacheManager}
+ * {@link FactoryBean} that exposes an EhCache {@link net.sf.ehcache.CacheManager}
  * instance (independent or shared), configured from a specified config location.
  *
  * <p>If no config location is specified, a CacheManager will be configured from
- * "ehcache.xml" in the root of the class path (that is, default EHCache initialization
- * - as defined in the EHCache docs - will apply).
+ * "ehcache.xml" in the root of the class path (that is, default EhCache initialization
+ * - as defined in the EhCache docs - will apply).
  *
  * <p>Setting up a separate EhCacheManagerFactoryBean is also advisable when using
  * EhCacheFactoryBean, as it provides a (by default) independent CacheManager instance
  * and cares for proper shutdown of the CacheManager. EhCacheManagerFactoryBean is
- * also necessary for loading EHCache configuration from a non-default config location.
+ * also necessary for loading EhCache configuration from a non-default config location.
  *
- * <p>Note: As of Spring 3.0, Spring's EHCache support requires EHCache 1.3 or higher.
+ * <p>Note: As of Spring 3.0, Spring's EhCache support requires EhCache 1.3 or higher.
+ * As of Spring 3.2, we recommend using EhCache 2.1 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -59,7 +60,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, InitializingBean, DisposableBean {
 
-	// Check whether EHCache 2.1+ CacheManager.create(Configuration) method is available...
+	// Check whether EhCache 2.1+ CacheManager.create(Configuration) method is available...
 	private static final Method createWithConfiguration =
 			ClassUtils.getMethodIfAvailable(CacheManager.class, "create", Configuration.class);
 
@@ -75,9 +76,9 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 
 	/**
-	 * Set the location of the EHCache config file. A typical value is "/WEB-INF/ehcache.xml".
+	 * Set the location of the EhCache config file. A typical value is "/WEB-INF/ehcache.xml".
 	 * <p>Default is "ehcache.xml" in the root of the class path, or if not found,
-	 * "ehcache-failsafe.xml" in the EHCache jar (default EHCache initialization).
+	 * "ehcache-failsafe.xml" in the EhCache jar (default EhCache initialization).
 	 * @see net.sf.ehcache.CacheManager#create(java.io.InputStream)
 	 * @see net.sf.ehcache.CacheManager#CacheManager(java.io.InputStream)
 	 */
@@ -86,7 +87,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	}
 
 	/**
-	 * Set whether the EHCache CacheManager should be shared (as a singleton at the VM level)
+	 * Set whether the EhCache CacheManager should be shared (as a singleton at the VM level)
 	 * or independent (typically local within the application). Default is "false", creating
 	 * an independent instance.
 	 * @see net.sf.ehcache.CacheManager#create()
@@ -97,7 +98,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	}
 
 	/**
-	 * Set the name of the EHCache CacheManager (if a specific name is desired).
+	 * Set the name of the EhCache CacheManager (if a specific name is desired).
 	 * @see net.sf.ehcache.CacheManager#setName(String)
 	 */
 	public void setCacheManagerName(String cacheManagerName) {
@@ -106,14 +107,14 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 
 	public void afterPropertiesSet() throws IOException, CacheException {
-		logger.info("Initializing EHCache CacheManager");
+		logger.info("Initializing EhCache CacheManager");
 		InputStream is = (this.configLocation != null ? this.configLocation.getInputStream() : null);
 		try {
-			// A bit convoluted for EHCache 1.x/2.0 compatibility.
-			// To be much simpler once we require EHCache 2.1+
+			// A bit convoluted for EhCache 1.x/2.0 compatibility.
+			// To be much simpler once we require EhCache 2.1+
 			if (this.cacheManagerName != null) {
 				if (this.shared && createWithConfiguration == null) {
-					// No CacheManager.create(Configuration) method available before EHCache 2.1;
+					// No CacheManager.create(Configuration) method available before EhCache 2.1;
 					// can only set CacheManager name after creation.
 					this.cacheManager = (is != null ? CacheManager.create(is) : CacheManager.create());
 					this.cacheManager.setName(this.cacheManagerName);
@@ -160,7 +161,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 
 	public void destroy() {
-		logger.info("Shutting down EHCache CacheManager");
+		logger.info("Shutting down EhCache CacheManager");
 		this.cacheManager.shutdown();
 	}
 

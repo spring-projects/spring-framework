@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,12 +201,19 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 		return this;
 	}
 
-
 	/**
-	 * Set the HandlerExceptionResolver types to use.
+	 * Set the HandlerExceptionResolver types to use as a list.
 	 */
 	public StandaloneMockMvcBuilder setHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.handlerExceptionResolvers = exceptionResolvers;
+		return this;
+	}
+
+	/**
+	 * Set the HandlerExceptionResolver types to use as an array.
+	 */
+	public StandaloneMockMvcBuilder setHandlerExceptionResolvers(HandlerExceptionResolver... exceptionResolvers) {
+		this.handlerExceptionResolvers = Arrays.asList(exceptionResolvers);
 		return this;
 	}
 

@@ -62,7 +62,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 			}
 		};
 
-		return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());	
+		return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
 	}
 
 	/**

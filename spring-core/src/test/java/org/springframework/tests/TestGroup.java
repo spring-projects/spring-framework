@@ -21,6 +21,10 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.util.StringUtils;
+
+import static java.lang.String.*;
+
 /**
  * A test group used to limit when certain tests are run.
  *
@@ -44,7 +48,13 @@ public enum TestGroup {
 	 * {@code StopWatch}, etc. should be considered a candidate as their successful
 	 * execution is likely to be based on events occurring within a given time window.
 	 */
-	PERFORMANCE;
+	PERFORMANCE,
+
+	/**
+	 * Tests requiring the presence of jmxremote_optional.jar in jre/lib/ext in order to
+	 * avoid "Unsupported protocol: jmxmp" errors.
+	 */
+	JMXMP;
 
 
 	/**
@@ -64,8 +74,10 @@ public enum TestGroup {
 			try {
 				groups.add(valueOf(group.trim().toUpperCase()));
 			} catch (IllegalArgumentException e) {
-				throw new IllegalArgumentException("Unable to find test group '" + group.trim()
-						+ "' when parsing '" + value + "'");
+				throw new IllegalArgumentException(format(
+						"Unable to find test group '%s' when parsing testGroups value: '%s'. " +
+						"Available groups include: [%s]", group.trim(), value,
+						StringUtils.arrayToCommaDelimitedString(TestGroup.values())));
 			}
 		}
 		return groups;

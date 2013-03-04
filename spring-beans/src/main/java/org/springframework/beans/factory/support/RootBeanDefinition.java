@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,11 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	boolean allowCaching = true;
 
+	private volatile Class<?> targetType;
+
 	boolean isFactoryMethodUnique = false;
+
+	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	Object resolvedConstructorOrFactoryMethod;
@@ -75,15 +79,13 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching partly prepared constructor arguments */
 	Object[] preparedConstructorArguments;
 
-	final Object constructorArgumentLock = new Object();
-
-	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
-	volatile Boolean beforeInstantiationResolved;
+	final Object postProcessingLock = new Object();
 
 	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
 	boolean postProcessed = false;
 
-	final Object postProcessingLock = new Object();
+	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
+	volatile Boolean beforeInstantiationResolved;
 
 
 	/**
@@ -236,6 +238,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (original instanceof RootBeanDefinition) {
 			RootBeanDefinition originalRbd = (RootBeanDefinition) original;
 			this.decoratedDefinition = originalRbd.decoratedDefinition;
+			this.allowCaching = originalRbd.allowCaching;
+			this.targetType = originalRbd.targetType;
 			this.isFactoryMethodUnique = originalRbd.isFactoryMethodUnique;
 		}
 	}
@@ -249,6 +253,21 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
 		}
+	}
+
+	/**
+	 * Specify the target type of this bean definition, if known in advance.
+	 */
+	public void setTargetType(Class<?> targetType) {
+		this.targetType = targetType;
+	}
+
+	/**
+	 * Return the target type of this bean definition, if known
+	 * (either specified in advance or resolved on first instantiation).
+	 */
+	public Class<?> getTargetType() {
+		return this.targetType;
 	}
 
 	/**

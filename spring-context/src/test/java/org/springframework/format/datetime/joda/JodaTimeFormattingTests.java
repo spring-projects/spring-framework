@@ -16,6 +16,11 @@
 
 package org.springframework.format.datetime.joda;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +37,6 @@ import org.joda.time.MutableDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.TypeDescriptor;
@@ -41,8 +45,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -459,12 +461,39 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
-	public void dateToString() throws Exception {
+	public void dateToStringWithFormat() throws Exception {
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		registrar.setDateTimeFormatter(org.joda.time.format.DateTimeFormat.shortDateTime());
+		setUp(registrar);
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = JodaTimeContextHolder.getFormatter(org.joda.time.format.DateTimeFormat.shortDateTime(), Locale.US).print(new DateTime(date));
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void stringToDateWithoutGlobalFormat() throws Exception {
+		// SPR-10105
+		String string = "Sat, 12 Aug 1995 13:30:00 GM";
+		Date date = this.conversionService.convert(string, Date.class);
+		assertThat(date, equalTo(new Date(string)));
+	}
+
+	@Test
+	public void stringToDateWithGlobalFormat() throws Exception {
+		// SPR-10105
+		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
+		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
+		factory.setIso(ISO.DATE_TIME);
+		registrar.setDateTimeFormatter(factory.createDateTimeFormatter());
+		setUp(registrar);
+		// This is a format that cannot be parsed by new Date(String)
+		String string = "2009-10-31T07:00:00.000-05:00";
+		Date date = this.conversionService.convert(string, Date.class);
+		assertNotNull(date);
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class JodaTimeBean {

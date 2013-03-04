@@ -412,6 +412,7 @@ public class AntPathMatcherTests {
 		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
 		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));	// SPR-8858
 		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));	// SPR-7970
+		assertEquals("/{foo:.*[^0-9].*}/edit/", pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
 	}
 
 	@Test

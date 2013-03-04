@@ -32,11 +32,14 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationListener;
 import javax.management.ReflectionException;
 
+import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.export.notification.NotificationPublisher;
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.support.ObjectNameManager;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for the Spring JMX {@link NotificationPublisher} functionality.
@@ -48,6 +51,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 	private CountingNotificationListener listener = new CountingNotificationListener();
 
+	@Test
 	public void testSimpleBean() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherTests.xml");
@@ -60,6 +64,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 		assertEquals("Notification not sent", 1, listener.count);
 	}
 
+	@Test
 	public void testSimpleBeanRegisteredManually() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherTests.xml");
@@ -74,6 +79,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 		assertEquals("Notification not sent", 1, listener.count);
 	}
 
+	@Test
 	public void testMBean() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherTests.xml");
@@ -86,6 +92,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 	}
 
 	/*
+	@Test
 	public void testStandardMBean() throws Exception {
 		// start the MBeanExporter
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/notificationPublisherTests.xml");
@@ -97,6 +104,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 	}
 	*/
 
+	@Test
 	public void testLazyInit() throws Exception {
 		// start the MBeanExporter
 		ConfigurableApplicationContext ctx = loadContext("org/springframework/jmx/export/notificationPublisherLazyTests.xml");

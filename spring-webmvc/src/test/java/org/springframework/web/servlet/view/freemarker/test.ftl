@@ -89,3 +89,6 @@ FORM16
 
 FORM17
 <@spring.formInput "command.spouses[0].name", ""/>
+
+FORM18
+<@spring.formCheckbox "command.spouses[0].jedi" />

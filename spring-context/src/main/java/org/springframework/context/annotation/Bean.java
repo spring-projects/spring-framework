@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * @see org.springframework.beans.factory.annotation.Autowired
  * @see org.springframework.beans.factory.annotation.Value
  */
-@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Bean {
@@ -190,7 +190,7 @@ public @interface Bean {
 	String[] name() default {};
 
 	/**
-	 * Are dependencies to be injected via autowiring?
+	 * Are dependencies to be injected via convention-based autowiring by name or type?
 	 */
 	Autowire autowire() default Autowire.NO;
 

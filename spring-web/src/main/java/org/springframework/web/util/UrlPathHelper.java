@@ -441,10 +441,8 @@ public class UrlPathHelper {
 	 * @return the updated URI string
 	 */
 	public String removeSemicolonContent(String requestUri) {
-		if (this.removeSemicolonContent) {
-			return removeSemicolonContentInternal(requestUri);
-		}
-		return removeJsessionid(requestUri);
+		return this.removeSemicolonContent ?
+				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri);
 	}
 
 	private String removeSemicolonContentInternal(String requestUri) {

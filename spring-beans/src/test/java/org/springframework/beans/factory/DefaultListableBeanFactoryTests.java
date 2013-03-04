@@ -591,7 +591,6 @@ public class DefaultListableBeanFactoryTests {
 			fail("Should throw exception on invalid property");
 		}
 		catch (BeanCreationException ex) {
-			ex.printStackTrace();
 			assertTrue(ex.getCause() instanceof NotWritablePropertyException);
 			NotWritablePropertyException cause = (NotWritablePropertyException) ex.getCause();
 			// expected

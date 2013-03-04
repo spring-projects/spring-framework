@@ -42,6 +42,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -100,6 +101,20 @@ public class ValidatorFactoryTests {
 		ConstraintViolation<?> cv = iterator.next();
 		assertEquals("", cv.getPropertyPath().toString());
 		assertTrue(cv.getConstraintDescriptor().getAnnotation() instanceof NameAddressValid);
+	}
+
+	@Test
+	public void testSpringValidationFieldType() throws Exception {
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		validator.afterPropertiesSet();
+		ValidPerson person = new ValidPerson();
+		person.setName("Phil");
+		person.getAddress().setStreet("Phil's Street");
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(person, "person");
+		validator.validate(person, errors);
+		assertEquals(1, errors.getErrorCount());
+		assertThat("Field/Value type mismatch", errors.getFieldError("address").getRejectedValue(),
+				instanceOf(ValidAddress.class));
 	}
 
 	@Test
@@ -289,8 +304,13 @@ public class ValidatorFactoryTests {
 		}
 
 		@Override
-		public boolean isValid(ValidPerson value, ConstraintValidatorContext constraintValidatorContext) {
-			return (value.name == null || !value.address.street.contains(value.name));
+		public boolean isValid(ValidPerson value, ConstraintValidatorContext context) {
+			boolean valid = (value.name == null || !value.address.street.contains(value.name));
+			if (!valid && "Phil".equals(value.name)) {
+				context.buildConstraintViolationWithTemplate(
+						context.getDefaultConstraintMessageTemplate()).addNode("address").addConstraintViolation().disableDefaultConstraintViolation();
+			}
+			return valid;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,6 +39,7 @@ import org.springframework.util.StringUtils;
  * Extension of {@link UriComponents} for hierarchical URIs.
  *
  * @author Arjen Poutsma
+ * @author Phillip Webb
  * @since 3.1.3
  * @see <a href="http://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
@@ -406,7 +408,10 @@ final class HierarchicalUriComponents extends UriComponents {
 			else {
 				String path = getPath();
 				if (StringUtils.hasLength(path) && path.charAt(0) != PATH_DELIMITER) {
-					path = PATH_DELIMITER + path;
+					// Only prefix the path delimiter if something exists before it
+					if(getScheme() != null || getUserInfo() != null || getHost() != null || getPort() != -1) {
+						path = PATH_DELIMITER + path;
+					}
 				}
 				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(),
 						getFragment());
@@ -426,28 +431,15 @@ final class HierarchicalUriComponents extends UriComponents {
 			return false;
 		}
 		HierarchicalUriComponents other = (HierarchicalUriComponents) obj;
-		if (ObjectUtils.nullSafeEquals(getScheme(), other.getScheme())) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getUserInfo(), other.getUserInfo())) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getHost(), other.getHost())) {
-			return false;
-		}
-		if (this.port != other.port) {
-			return false;
-		}
-		if (!this.path.equals(other.path)) {
-			return false;
-		}
-		if (!this.queryParams.equals(other.queryParams)) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getFragment(), other.getFragment())) {
-			return false;
-		}
-		return true;
+		boolean rtn = true;
+		rtn &= ObjectUtils.nullSafeEquals(getScheme(), other.getScheme());
+		rtn &= ObjectUtils.nullSafeEquals(getUserInfo(), other.getUserInfo());
+		rtn &= ObjectUtils.nullSafeEquals(getHost(), other.getHost());
+		rtn &= getPort() == other.getPort();
+		rtn &= this.path.equals(other.path);
+		rtn &= this.queryParams.equals(other.queryParams);
+		rtn &= ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
+		return rtn;
 	}
 
 	@Override
@@ -615,7 +607,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Defines the contract for path (segments).
 	 */
-	interface PathComponent {
+	interface PathComponent extends Serializable {
 
 		String getPath();
 

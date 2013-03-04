@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class CronTriggerTests {
 
-	private Calendar calendar = new GregorianCalendar();
+	private final Calendar calendar = new GregorianCalendar();
 
 	private final Date date;
 
@@ -49,8 +49,8 @@ public class CronTriggerTests {
 
 
 	public CronTriggerTests(Date date, TimeZone timeZone) {
-		this.timeZone = timeZone;
 		this.date = date;
+		this.timeZone = timeZone;
 	}
 
 	@Parameters
@@ -65,6 +65,7 @@ public class CronTriggerTests {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
 	}
+
 
 	@Before
 	public void setUp() {

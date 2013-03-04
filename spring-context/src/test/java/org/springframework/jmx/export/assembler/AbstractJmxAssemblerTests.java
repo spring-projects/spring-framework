@@ -28,12 +28,16 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
+import org.junit.Test;
 import org.springframework.jmx.AbstractJmxTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.support.ObjectNameManager;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
@@ -43,12 +47,14 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 	protected abstract String getObjectName();
 
+	@Test
 	public void testMBeanRegistration() throws Exception {
 		// beans are registered at this point - just grab them from the server
 		ObjectInstance instance = getObjectInstance();
 		assertNotNull("Bean should not be null", instance);
 	}
 
+	@Test
 	public void testRegisterOperations() throws Exception {
 		IJmxTestBean bean = getBean();
 		assertNotNull(bean);
@@ -57,6 +63,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 				getExpectedOperationCount(), inf.getOperations().length);
 	}
 
+	@Test
 	public void testRegisterAttributes() throws Exception {
 		IJmxTestBean bean = getBean();
 		assertNotNull(bean);
@@ -65,11 +72,13 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 				getExpectedAttributeCount(), inf.getAttributes().length);
 	}
 
+	@Test
 	public void testGetMBeanInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		assertNotNull("MBeanInfo should not be null", info);
 	}
 
+	@Test
 	public void testGetMBeanAttributeInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		MBeanAttributeInfo[] inf = info.getAttributes();
@@ -84,6 +93,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		}
 	}
 
+	@Test
 	public void testGetMBeanOperationInfo() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		MBeanOperationInfo[] inf = info.getOperations();
@@ -98,6 +108,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		}
 	}
 
+	@Test
 	public void testDescriptionNotNull() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
@@ -105,6 +116,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 				info.getDescription());
 	}
 
+	@Test
 	public void testSetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		getServer().setAttribute(objectName, new Attribute(NAME_ATTRIBUTE, "Rob Harrop"));
@@ -112,6 +124,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
+	@Test
 	public void testGetAttribute() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		getBean().setName("John Smith");
@@ -119,6 +132,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		assertEquals("Incorrect result", "John Smith", val);
 	}
 
+	@Test
 	public void testOperationInvocation() throws Exception{
 		ObjectName objectName = ObjectNameManager.getInstance(getObjectName());
 		Object result = getServer().invoke(objectName, "add",
@@ -126,6 +140,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	assertEquals("Incorrect result", new Integer(50), result);
 	}
 
+	@Test
 	public void testAttributeInfoHasDescriptors() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
@@ -141,6 +156,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 				desc.getFieldValue("setMethod"));
 	}
 
+	@Test
 	public void testAttributeHasCorrespondingOperations() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
@@ -159,6 +175,7 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		assertEquals("set operation should have role \"setter\"", "setter", set.getDescriptor().getFieldValue("role"));
 	}
 
+	@Test
 	public void testNotificationMetadata() throws Exception {
 		ModelMBeanInfo info = (ModelMBeanInfo) getMBeanInfo();
 		MBeanNotificationInfo[] notifications = info.getNotifications();

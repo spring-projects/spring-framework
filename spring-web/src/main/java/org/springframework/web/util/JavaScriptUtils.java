@@ -80,6 +80,20 @@ public class JavaScriptUtils {
 			else if (c == '\013') {
 				filtered.append("\\v");
 			}
+			else if (c == '<') {
+				filtered.append("\\u003C");
+			}
+			else if (c == '>') {
+				filtered.append("\\u003E");
+			}
+			// Unicode for PS (line terminator in ECMA-262)
+			else if (c == '\u2028') {
+				filtered.append("\\u2028");
+			}
+			// Unicode for LS (line terminator in ECMA-262)
+			else if (c == '\u2029') {
+				filtered.append("\\u2029");
+			}
 			else {
 				filtered.append(c);
 			}
