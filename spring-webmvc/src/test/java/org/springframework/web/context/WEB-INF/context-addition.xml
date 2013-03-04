@@ -14,15 +14,15 @@
 		<property name="age"><value>31</value></property>
 	</bean>
 
-	<bean id="kathy" class="org.springframework.beans.TestBean" scope="prototype"/>
+	<bean id="kathy" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
 
-	<bean id="kerry" class="org.springframework.beans.TestBean">
+	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
-	<bean id="typeMismatch" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="typeMismatch" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
 		<property name="spouse"><ref bean="rod"/></property>
@@ -31,20 +31,20 @@
 	<!-- Factory beans are automatically treated
 		differently -->
 	<bean id="singletonFactory"
-		class="org.springframework.beans.factory.DummyFactory">
+		class="org.springframework.tests.sample.beans.factory.DummyFactory">
 	</bean>
 
 	<bean id="prototypeFactory"
-		class="org.springframework.beans.factory.DummyFactory">
+		class="org.springframework.tests.sample.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 	
-	<bean id="listenerVeto" class="org.springframework.beans.TestBean">
+	<bean id="listenerVeto" class="org.springframework.tests.sample.beans.TestBean">
 		<!--	<listener property="age" beanRef="agistListener" /> -->
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>
 	</bean>
 
-	<bean id="validEmpty" class="org.springframework.beans.TestBean"/>
+	<bean id="validEmpty" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

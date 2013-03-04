@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Date;
 import junit.framework.TestCase;
 
 import org.junit.Ignore;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 /**
  * @author Adrian Colyer
@@ -35,14 +35,14 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	private LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	public void testMethodParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
-		Method getName = TestBean.class.getMethod("getName", new Class[0]);
+		Method getName = TestObject.class.getMethod("getName", new Class[0]);
 		String[] names = discoverer.getParameterNames(getName);
 		assertNotNull("should find method info", names);
 		assertEquals("no argument names", 0, names.length);
 	}
 
 	public void testMethodParameterNameDiscoveryWithArgs() throws NoSuchMethodException {
-		Method setName = TestBean.class.getMethod("setName", new Class[] { String.class });
+		Method setName = TestObject.class.getMethod("setName", new Class[] { String.class });
 		String[] names = discoverer.getParameterNames(setName);
 		assertNotNull("should find method info", names);
 		assertEquals("one argument", 1, names.length);
@@ -50,14 +50,14 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testConsParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
-		Constructor<TestBean> noArgsCons = TestBean.class.getConstructor(new Class[0]);
+		Constructor<TestObject> noArgsCons = TestObject.class.getConstructor(new Class[0]);
 		String[] names = discoverer.getParameterNames(noArgsCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("no argument names", 0, names.length);
 	}
 
 	public void testConsParameterNameDiscoveryArgs() throws NoSuchMethodException {
-		Constructor<TestBean> twoArgCons = TestBean.class.getConstructor(new Class[] { String.class, int.class });
+		Constructor<TestObject> twoArgCons = TestObject.class.getConstructor(new Class[] { String.class, int.class });
 		String[] names = discoverer.getParameterNames(twoArgCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("one argument", 2, names.length);

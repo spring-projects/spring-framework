@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2010-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cache.config;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
@@ -33,6 +35,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author Costin Leau
  * @author Chris Beams
+ * @author Phillip Webb
  */
 public abstract class AbstractAnnotationTests {
 
@@ -185,6 +188,15 @@ public abstract class AbstractAnnotationTests {
 		Object r4 = service.conditional(3);
 
 		assertSame(r3, r4);
+	}
+
+	public void testUnlessExpression(CacheableService<?> service) throws Exception {
+		Cache cache = cm.getCache("default");
+		cache.clear();
+		service.unless(10);
+		service.unless(11);
+		assertThat(cache.get(10).get(), equalTo((Object) 10L));
+		assertThat(cache.get(11), nullValue());
 	}
 
 	public void testKeyExpression(CacheableService<?> service) throws Exception {
@@ -439,6 +451,16 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testConditionalExpression() throws Exception {
 		testConditionalExpression(cs);
+	}
+
+	@Test
+	public void testUnlessExpression() throws Exception {
+		testUnlessExpression(cs);
+	}
+
+	@Test
+	public void testClassCacheUnlessExpression() throws Exception {
+		testUnlessExpression(cs);
 	}
 
 	@Test

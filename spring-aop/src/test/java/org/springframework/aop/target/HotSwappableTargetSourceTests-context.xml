@@ -4,15 +4,15 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target1" class="test.beans.SideEffectBean">	
+	<bean id="target1" class="org.springframework.tests.sample.beans.SideEffectBean">
 		<property name="count"><value>10</value></property>
 	</bean>
 
-	<bean id="target2" class="test.beans.SideEffectBean" scope="singleton">
+	<bean id="target2" class="org.springframework.tests.sample.beans.SideEffectBean" scope="singleton">
 		<property name="count"><value>20</value></property>
 	</bean>
-	
-	<!-- 
+
+	<!--
 		Hot swappable target source. Note the use of Type 3 IoC.
 	-->
 	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
@@ -23,5 +23,4 @@
 		<property name="targetSource"><ref local="swapper"/></property>
 	</bean>
 
-</beans>		
-	
+</beans>

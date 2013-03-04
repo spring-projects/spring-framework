@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.w3c.dom.Document;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.env.Environment;
-
-import org.w3c.dom.Document;
 
 /**
  * SPI for parsing an XML document that contains Spring bean definitions.
@@ -38,20 +38,21 @@ import org.w3c.dom.Document;
 public interface BeanDefinitionDocumentReader {
 
 	/**
-	 * Read bean definitions from the given DOM document,
-	 * and register them with the given bean factory.
+	 * Set the Environment to use when reading bean definitions.
+	 * <p>Used for evaluating profile information to determine whether a
+	 * {@code <beans/>} document/element should be included or ignored.
+	 */
+	void setEnvironment(Environment environment);
+
+	/**
+	 * Read bean definitions from the given DOM document and
+	 * register them with the registry in the given reader context.
 	 * @param doc the DOM document
-	 * @param readerContext the current context of the reader. Includes the resource being parsed
+	 * @param readerContext the current context of the reader
+	 * (includes the target registry and the resource being parsed)
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
 	void registerBeanDefinitions(Document doc, XmlReaderContext readerContext)
 			throws BeanDefinitionStoreException;
-
-	/**
-	 * Set the Environment to use when reading bean definitions. Used for evaluating
-	 * profile information to determine whether a {@code <beans/>} document/element should
-	 * be included or omitted.
-	 */
-	void setEnvironment(Environment environment);
 
 }

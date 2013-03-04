@@ -867,7 +867,10 @@ public class ClinicController {
         <interfacename>@Transactional</interfacename> methods). Usually you
         will introduce an interface for the controller in order to use JDK
         dynamic proxies. To make this work you must move the
-        <interfacename>@RequestMapping</interfacename> annotations to the
+        <interfacename>@RequestMapping</interfacename> annotations, as well as
+        any other type and method-level annotations (e.g.
+        <interfacename>@ModelAttribute</interfacename>,
+        <interfacename>@InitBinder</interfacename>) to the
         interface as well as the mapping mechanism can only "see" the
         interface exposed by the proxy. Alternatively, you could activate
         <code>proxy-target-class="true"</code> in the configuration for the
@@ -876,6 +879,10 @@ public class ClinicController {
         that CGLIB-based subclass proxies should be used instead of
         interface-based JDK proxies. For more information on various proxying
         mechanisms see <xref linkend="aop-proxying" />.</para>
+
+        <para>Note however that method argument annotations, e.g.
+        <interfacename>@RequestParam</interfacename>, must be present in
+        the method signatures of the controller class.</para>
       </tip>
 
       <section xml:id="mvc-ann-requestmapping-31-vs-30">
@@ -1055,7 +1062,7 @@ public class RelativePathUriTemplateController {
         example:</para>
 
         <programlisting language="java">
-@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\d\.\d\.\d}.{extension:\.[a-z]}")
+@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
   public void handle(@PathVariable String version, @PathVariable String extension) {
     // ...
   }
@@ -1071,6 +1078,18 @@ public class RelativePathUriTemplateController {
         <filename>/myPath/*.do</filename>). A combination of URI templates and
         Ant-style globs is also supported (for example,
         <filename>/owners/*/pets/{petId}</filename>).</para>
+      </section>
+
+      <section xml:id="mvc-ann-requestmapping-placeholders">
+        <title>Patterns with Placeholders</title>
+
+        <para>Patterns in <interfacename>@RequestMapping</interfacename> annotations
+        support ${...} placeholders against local properties and/or system properties
+        and environment variables. This may be useful in cases where the path a
+        controller is mapped to may need to be customized through configuration.
+        For more information on placeholders see the Javadoc for
+        <classname>PropertyPlaceholderConfigurer</classname>.</para>
+
       </section>
 
       <section xml:id="mvc-ann-matrix-variables">
@@ -2138,6 +2157,14 @@ public class EditPetForm {
         available through the
         <literal>ServletRequest.getParameter*()</literal> family of
         methods.</para>
+
+        <note>
+          <para>As <classname>HttpPutFormContentFilter</classname> consumes the body of the
+          request, it should not be configured for PUT or PATCH URLs that rely on other
+          converters for <literal>application/x-www-form-urlencoded</literal>. This includes
+          <literal>@RequestBody MultiValueMap&lt;String, String&gt;</literal> and
+          <literal>HttpEntity&lt;MultiValueMap&lt;String, String&gt;&gt;</literal>.</para>
+        </note>
       </section>
 
       <section xml:id="mvc-ann-cookievalue">
@@ -2575,7 +2602,7 @@ deferredResult.setResult(data);
 
     ...
 
-  &lt;web-app&gt;
+  &lt;/web-app&gt;
   </programlisting>
 
           <para>The <classname>DispatcherServlet</classname> and any
@@ -5091,7 +5118,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-    configurer.setFavorPathExtension(false).setFavorParameter(true);
+    configurer.favorPathExtension(false).favorParameter(true);
   }
 }</programlisting>
 

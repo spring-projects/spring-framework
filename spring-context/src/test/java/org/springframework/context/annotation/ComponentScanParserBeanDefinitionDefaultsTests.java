@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,6 +214,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class DefaultsTestBean {
 
 		static int INIT_COUNT;
@@ -276,6 +277,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PropertyDependencyTestBean {
 
 		private String name;
@@ -290,6 +292,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ConstructorDependencyTestBean {
 
 		private String name;

@@ -11,16 +11,16 @@
 	<bean id="target1" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
 		autowire="constructor"/>
 
-	<bean id="toBeFoundByType" class="org.springframework.beans.TestBean"/>
+	<bean id="toBeFoundByType" class="org.springframework.tests.sample.beans.TestBean"/>
 
 	<bean id="proxy2" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces" value="org.springframework.beans.ITestBean"/>
+		<property name="proxyInterfaces" value="org.springframework.tests.sample.beans.ITestBean"/>
 		<property name="targetName" value="target2"/>
 	</bean>
 	
-	<bean id="target2" class="org.springframework.beans.factory.xml.DependenciesBean">
+	<bean id="target2" class="org.springframework.tests.sample.beans.DependenciesBean">
 		<property name="spouse">
-			<bean class="org.springframework.beans.TestBean">
+			<bean class="org.springframework.tests.sample.beans.TestBean">
 				<property name="someSet">
 					<set>
 						<ref local="proxy1"/>

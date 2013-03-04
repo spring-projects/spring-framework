@@ -20,7 +20,7 @@
 
 	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
 
-	<bean id="testBean" class="test.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 	<bean id="countingAdvice" class="org.springframework.aop.config.CountingAspectJAdvice"/>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.mock.web;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link MockHttpServletRequest}.
@@ -103,6 +103,12 @@ public class MockHttpServletRequestTests {
 		Enumeration<String> requestHeaders = request.getHeaderNames();
 		assertNotNull(requestHeaders);
 		assertEquals("HTTP header casing not being preserved", headerName, requestHeaders.nextElement());
+	}
+
+	@Test
+	public void nullParameterName() {
+		assertNull(request.getParameter(null));
+		assertNull(request.getParameterValues(null));
 	}
 
 	@Test

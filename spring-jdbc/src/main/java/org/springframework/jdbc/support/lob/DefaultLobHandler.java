@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,18 +32,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Default implementation of the {@link LobHandler} interface. Invokes
- * the direct accessor methods that {@code java.sql.ResultSet}
+ * Default implementation of the {@link LobHandler} interface.
+ * Invokes the direct accessor methods that {@code java.sql.ResultSet}
  * and {@code java.sql.PreparedStatement} offer.
  *
  * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
- * This does not apply to Oracle 9i, and only to a limited degree to Oracle 10g!
- * As a consequence, use {@link OracleLobHandler} for accessing Oracle BLOBs/CLOBs.
+ * This does not apply to Oracle 9i's drivers at all; as of Oracle 10g,
+ * it does work but may still come with LOB size limitations. Consider using
+ * recent Oracle drivers even when working against an older database server.
+ * See the {@link LobHandler} javadoc for the full set of recommendations.
  *
  * <p>Some JDBC drivers require values with a BLOB/CLOB target column to be
- * explicitly set through the JDBC {@code setBlob} / {@code setClob}
- * API: for example, PostgreSQL's driver. Switch the {@link #setWrapAsLob "wrapAsLob"}
+ * explicitly set through the JDBC {@code setBlob} / {@code setClob} API:
+ * for example, PostgreSQL's driver. Switch the {@link #setWrapAsLob "wrapAsLob"}
  * property to "true" when operating against such a driver.
  *
  * <p>On JDBC 4.0, this LobHandler also supports streaming the BLOB/CLOB content
@@ -51,11 +53,15 @@ import org.apache.commons.logging.LogFactory;
  * argument directly. Consider switching the {@link #setStreamAsLob "streamAsLob"}
  * property to "true" when operating against a fully compliant JDBC 4.0 driver.
  *
- * <p>See the {@link LobHandler} javadoc for a summary of recommendations.
+ * <p>Finally, primarily as a direct equivalent to {@link OracleLobHandler},
+ * this LobHandler also supports the creation of temporary BLOB/CLOB objects.
+ * Consider switching the {@link #setCreateTemporaryLob "createTemporaryLob"}
+ * property to "true" when "streamAsLob" happens to run into LOB size limitations.
+ *
+ * <p>See the {@link LobHandler} interface javadoc for a summary of recommendations.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @see #setStreamAsLob
  * @see java.sql.ResultSet#getBytes
  * @see java.sql.ResultSet#getBinaryStream
  * @see java.sql.ResultSet#getString
@@ -75,15 +81,18 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 	private boolean streamAsLob = false;
 
+	private boolean createTemporaryLob = false;
+
 
 	/**
 	 * Specify whether to submit a byte array / String to the JDBC driver
 	 * wrapped in a JDBC Blob / Clob object, using the JDBC {@code setBlob} /
 	 * {@code setClob} method with a Blob / Clob argument.
 	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
-	 * / {@code setCharacterStream} method for setting the content.
-	 * Switch this to "true" for explicit Blob / Clob wrapping against
-	 * JDBC drivers that are known to require such wrapping (e.g. PostgreSQL's).
+	 * / {@code setCharacterStream} method for setting the content. Switch this
+	 * to "true" for explicit Blob / Clob wrapping against JDBC drivers that
+	 * are known to require such wrapping (e.g. PostgreSQL's for access to OID
+	 * columns, whereas BYTEA columns need to be accessed the standard way).
 	 * <p>This setting affects byte array / String arguments as well as stream
 	 * arguments, unless {@link #setStreamAsLob "streamAsLob"} overrides this
 	 * handling to use JDBC 4.0's new explicit streaming support (if available).
@@ -100,7 +109,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	 * {@code setClob} method with a stream argument.
 	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
 	 * / {@code setCharacterStream} method for setting the content.
-	 * Switch this to "true" for explicit JDBC 4.0 usage, provided that your
+	 * Switch this to "true" for explicit JDBC 4.0 streaming, provided that your
 	 * JDBC driver actually supports those JDBC 4.0 operations (e.g. Derby's).
 	 * <p>This setting affects stream arguments as well as byte array / String
 	 * arguments, requiring JDBC 4.0 support. For supporting LOB content against
@@ -110,6 +119,23 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	 */
 	public void setStreamAsLob(boolean streamAsLob) {
 		this.streamAsLob = streamAsLob;
+	}
+
+	/**
+	 * Specify whether to copy a byte array / String into a temporary JDBC
+	 * Blob / Clob object created through the JDBC 4.0 {@code createBlob} /
+	 * {@code createClob} methods.
+	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
+	 * / {@code setCharacterStream} method for setting the content. Switch this
+	 * to "true" for explicit Blob / Clob creation using JDBC 4.0.
+	 * <p>This setting affects stream arguments as well as byte array / String
+	 * arguments, requiring JDBC 4.0 support. For supporting LOB content against
+	 * JDBC 3.0, check out the {@link #setWrapAsLob "wrapAsLob"} setting.
+	 * @see java.sql.Connection#createBlob()
+	 * @see java.sql.Connection#createClob()
+	 */
+	public void setCreateTemporaryLob(boolean createTemporaryLob) {
+		this.createTemporaryLob = createTemporaryLob;
 	}
 
 
@@ -169,12 +195,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 	public LobCreator getLobCreator() {
-		return new DefaultLobCreator();
+		return (this.createTemporaryLob ? new TemporaryLobCreator() : new DefaultLobCreator());
 	}
 
 
 	/**
-	 * Default LobCreator implementation as inner class.
+	 * Default LobCreator implementation as an inner class.
 	 * Can be subclassed in DefaultLobHandler extensions.
 	 */
 	protected class DefaultLobCreator implements LobCreator {
@@ -268,19 +294,22 @@ public class DefaultLobHandler extends AbstractLobHandler {
 				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 				throws SQLException {
 
-			if (streamAsLob || wrapAsLob) {
+			if (streamAsLob) {
 				if (asciiStream != null) {
 					try {
-						if (streamAsLob) {
-							ps.setClob(paramIndex, new InputStreamReader(asciiStream, "US-ASCII"), contentLength);
-						}
-						else {
-							ps.setClob(paramIndex, new PassThroughClob(asciiStream, contentLength));
-						}
+						ps.setClob(paramIndex, new InputStreamReader(asciiStream, "US-ASCII"), contentLength);
 					}
 					catch (UnsupportedEncodingException ex) {
 						throw new SQLException("US-ASCII encoding not supported: " + ex);
 					}
+				}
+				else {
+					ps.setClob(paramIndex, (Clob) null);
+				}
+			}
+			else if (wrapAsLob) {
+				if (asciiStream != null) {
+					ps.setClob(paramIndex, new PassThroughClob(asciiStream, contentLength));
 				}
 				else {
 					ps.setClob(paramIndex, (Clob) null);
@@ -325,7 +354,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 
 		public void close() {
-			// nothing to do here
+			// nothing to do when not creating temporary LOBs
 		}
 	}
 

@@ -43,7 +43,7 @@ class TestSourceSetDependenciesPlugin implements Plugin<Project> {
 
 	private void collectProjectDependencies(Set<ProjectDependency> projectDependencies,
 			Project project) {
-		for(def configurationName in ["compile", "optional", "provided"]) {
+		for(def configurationName in ["compile", "optional", "provided", "testCompile"]) {
 			Configuration configuration = project.getConfigurations().findByName(configurationName)
 			if(configuration) {
 				configuration.dependencies.findAll { it instanceof ProjectDependency }.each {

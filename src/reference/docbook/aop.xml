@@ -2847,8 +2847,8 @@ public class Account {
 
       <para>When used as a marker interface in this way, Spring will configure
       new instances of the annotated type (<classname>Account</classname> in
-      this case) using a prototype-scoped bean definition with the same name
-      as the fully-qualified type name
+      this case) using a bean definition (typically prototype-scoped) with the
+      same name as the fully-qualified type name
       (<classname>com.xyz.myapp.domain.Account</classname>). Since the default
       name for a bean is the fully-qualified name of its type, a convenient
       way to declare the prototype definition is simply to omit the
@@ -2875,7 +2875,7 @@ public class Account {
       new <classname>Account</classname> instances.</para>
 
       <para>You can also use autowiring to avoid having to specify a
-      prototype-scoped bean definition at all. To have Spring apply autowiring
+      dedicated bean definition at all. To have Spring apply autowiring
       use the '<literal>autowire</literal>' property of the
       <interfacename>@Configurable</interfacename> annotation: specify either
       <literal>@Configurable(autowire=Autowire.BY_TYPE)</literal> or
@@ -2969,8 +2969,8 @@ public class AppConfig {
 
       <para>Instances of <interfacename>@Configurable</interfacename> objects
       created <emphasis>before</emphasis> the aspect has been configured will
-      result in a warning being issued to the log and no configuration of the
-      object taking place. An example might be a bean in the Spring
+      result in a message being issued to the debug log and no configuration
+      of the object taking place. An example might be a bean in the Spring
       configuration that creates domain objects when it is initialized by
       Spring. In this case you can use the "depends-on" bean attribute to
       manually specify that the bean depends on the configuration

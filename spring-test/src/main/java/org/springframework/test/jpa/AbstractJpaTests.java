@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -326,6 +326,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final LoadTimeWeaver ltw;
 
+		@SuppressWarnings("unused")
 		public LoadTimeWeaverInjectingBeanPostProcessor(LoadTimeWeaver ltw) {
 			this.ltw = ltw;
 		}
@@ -346,6 +347,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final ClassLoader shadowingClassLoader;
 
+		@SuppressWarnings("unused")
 		public ShadowingLoadTimeWeaver(ClassLoader shadowingClassLoader) {
 			this.shadowingClassLoader = shadowingClassLoader;
 		}

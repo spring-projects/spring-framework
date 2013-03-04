@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,17 @@ public abstract class MockMvcRequestBuilders {
 	public static MockHttpServletRequestBuilder delete(String urlTemplate, Object... urlVariables) {
 		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, urlTemplate, urlVariables);
 	}
+
+	/**
+     * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
+     *
+     * @param urlTemplate a URL template; the resulting URL will be encoded
+     * @param urlVariables zero or more URL variables
+     */
+    public static MockHttpServletRequestBuilder options(String urlTemplate, Object... urlVariables) {
+        return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, urlVariables);
+    }
+
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.

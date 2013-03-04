@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.jdo;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.jdo.Constants;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -32,7 +33,6 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.util.ClassUtils;
@@ -40,13 +40,13 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Default implementation of the {@link JdoDialect} interface.
- * Updated to build on JDO 2.0 or higher, as of Spring 2.5.
+ * Requires JDO 2.0; explicitly supports JDO API features up until 3.0.
  * Used as default dialect by {@link JdoAccessor} and {@link JdoTransactionManager}.
  *
  * <p>Simply begins a standard JDO transaction in {@code beginTransaction}.
  * Returns a handle for a JDO2 DataStoreConnection on {@code getJdbcConnection}.
  * Calls the corresponding JDO2 PersistenceManager operation on {@code flush}
- * Ignores a given query timeout in {@code applyQueryTimeout}.
+ * Translates {@code applyQueryTimeout} to JDO 3.0's {@code setTimeoutMillis}.
  * Uses a Spring SQLExceptionTranslator for exception translation, if applicable.
  *
  * <p>Note that, even with JDO2, vendor-specific subclasses are still necessary
@@ -122,22 +122,47 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	//-------------------------------------------------------------------------
 
 	/**
-	 * This implementation invokes the standard JDO {@code Transaction.begin}
-	 * method. Throws an InvalidIsolationLevelException if a non-default isolation
-	 * level is set.
+	 * This implementation invokes the standard JDO {@link Transaction#begin()}
+	 * method and also {@link Transaction#setIsolationLevel(String)} if necessary.
 	 * @see javax.jdo.Transaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
 	 */
 	public Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
 
-		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationLevelException(
-					"Standard JDO does not support custom isolation levels: " +
-					"use a special JdoDialect implementation for your JDO provider");
+		String jdoIsolationLevel = getJdoIsolationLevel(definition);
+		if (jdoIsolationLevel != null) {
+			transaction.setIsolationLevel(jdoIsolationLevel);
 		}
 		transaction.begin();
 		return null;
+	}
+
+	/**
+	 * Determine the JDO isolation level String to use for the given
+	 * Spring transaction definition.
+	 * @param definition the Spring transaction definition
+	 * @return the corresponding JDO isolation level String, or {@code null}
+	 * to indicate that no isolation level should be set explicitly
+	 * @see Transaction#setIsolationLevel(String)
+	 * @see Constants#TX_SERIALIZABLE
+	 * @see Constants#TX_REPEATABLE_READ
+	 * @see Constants#TX_READ_COMMITTED
+	 * @see Constants#TX_READ_UNCOMMITTED
+	 */
+	protected String getJdoIsolationLevel(TransactionDefinition definition) {
+		switch (definition.getIsolationLevel()) {
+			case TransactionDefinition.ISOLATION_SERIALIZABLE:
+				return Constants.TX_SERIALIZABLE;
+			case TransactionDefinition.ISOLATION_REPEATABLE_READ:
+				return Constants.TX_REPEATABLE_READ;
+			case TransactionDefinition.ISOLATION_READ_COMMITTED:
+				return Constants.TX_READ_COMMITTED;
+			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED:
+				return Constants.TX_READ_UNCOMMITTED;
+			default:
+				return null;
+		}
 	}
 
 	/**

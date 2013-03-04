@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,10 +76,12 @@ public abstract class EntityManagerFactoryUtils {
 	 * Find an EntityManagerFactory with the given name in the given
 	 * Spring application context (represented as ListableBeanFactory).
 	 * <p>The specified unit name will be matched against the configured
-	 * peristence unit, provided that a discovered EntityManagerFactory
+	 * persistence unit, provided that a discovered EntityManagerFactory
 	 * implements the {@link EntityManagerFactoryInfo} interface. If not,
 	 * the persistence unit name will be matched against the Spring bean name,
 	 * assuming that the EntityManagerFactory bean names follow that convention.
+	 * <p>If no unit name has been given, this method will search for a default
+	 * EntityManagerFactory through {@link ListableBeanFactory#getBean(Class)}.
 	 * @param beanFactory the ListableBeanFactory to search
 	 * @param unitName the name of the persistence unit (may be {@code null} or empty,
 	 * in which case a single bean of type EntityManagerFactory will be searched for)
@@ -108,7 +110,8 @@ public abstract class EntityManagerFactoryUtils {
 			return beanFactory.getBean(unitName, EntityManagerFactory.class);
 		}
 		else {
-			return BeanFactoryUtils.beanOfType(beanFactory, EntityManagerFactory.class);
+			// Find unique EntityManagerFactory bean in the context, falling back to parent contexts.
+			return beanFactory.getBean(EntityManagerFactory.class);
 		}
 	}
 

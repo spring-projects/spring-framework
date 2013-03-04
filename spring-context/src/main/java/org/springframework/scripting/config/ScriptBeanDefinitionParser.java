@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
@@ -63,6 +64,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
 
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
+
+	private static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
 
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
 
@@ -137,6 +140,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Determine dependency check setting.
 		String dependencyCheck = element.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 		bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
+
+		// Parse depends-on list of bean names.
+		String dependsOn = element.getAttribute(DEPENDS_ON_ATTRIBUTE);
+		if (StringUtils.hasLength(dependsOn)) {
+			bd.setDependsOn(StringUtils.tokenizeToStringArray(
+					dependsOn, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS));
+		}
 
 		// Retrieve the defaults for bean definitions within this parser context
 		BeanDefinitionDefaults beanDefinitionDefaults = parserContext.getDelegate().getBeanDefinitionDefaults();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
@@ -960,7 +961,7 @@ public class MimeMessageHelper {
 	 * @see #addInline(String, javax.activation.DataSource)
 	 */
 	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
-		throws MessagingException {
+			throws MessagingException {
 
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
@@ -989,11 +990,16 @@ public class MimeMessageHelper {
 	public void addAttachment(String attachmentFilename, DataSource dataSource) throws MessagingException {
 		Assert.notNull(attachmentFilename, "Attachment filename must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
-		MimeBodyPart mimeBodyPart = new MimeBodyPart();
-		mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-		mimeBodyPart.setFileName(attachmentFilename);
-		mimeBodyPart.setDataHandler(new DataHandler(dataSource));
-		getRootMimeMultipart().addBodyPart(mimeBodyPart);
+		try {
+			MimeBodyPart mimeBodyPart = new MimeBodyPart();
+			mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
+			mimeBodyPart.setFileName(MimeUtility.encodeText(attachmentFilename));
+			mimeBodyPart.setDataHandler(new DataHandler(dataSource));
+			getRootMimeMultipart().addBodyPart(mimeBodyPart);
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new MessagingException("Failed to encode attachment filename", ex);
+		}
 	}
 
 	/**
@@ -1035,7 +1041,7 @@ public class MimeMessageHelper {
 	 * @see org.springframework.core.io.Resource
 	 */
 	public void addAttachment(String attachmentFilename, InputStreamSource inputStreamSource)
-		throws MessagingException {
+			throws MessagingException {
 
 		String contentType = getFileTypeMap().getContentType(attachmentFilename);
 		addAttachment(attachmentFilename, inputStreamSource, contentType);
@@ -1059,7 +1065,7 @@ public class MimeMessageHelper {
 	 */
 	public void addAttachment(
 			String attachmentFilename, InputStreamSource inputStreamSource, String contentType)
-		throws MessagingException {
+			throws MessagingException {
 
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {

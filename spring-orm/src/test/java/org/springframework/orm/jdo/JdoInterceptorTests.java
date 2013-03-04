@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,34 @@
 
 package org.springframework.orm.jdo;
 
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
-import junit.framework.TestCase;
-
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.MockControl;
+import org.junit.Test;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
-public class JdoInterceptorTests extends TestCase {
+public class JdoInterceptorTests {
 
+	@Test
 	public void testInterceptor() {
-		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
-		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		pmf.getPersistenceManager();
-		pmfControl.setReturnValue(pm, 1);
-		pm.close();
-		pmControl.setVoidCallable(1);
-		pmfControl.replay();
-		pmControl.replay();
+		PersistenceManagerFactory pmf = mock(PersistenceManagerFactory.class);
+		PersistenceManager pm = mock(PersistenceManager.class);
+		given(pmf.getPersistenceManager()).willReturn(pm);
 
 		JdoInterceptor interceptor = new JdoInterceptor();
 		interceptor.setPersistenceManagerFactory(pmf);
@@ -56,17 +54,13 @@ public class JdoInterceptorTests extends TestCase {
 			fail("Should not have thrown Throwable: " + t.getMessage());
 		}
 
-		pmfControl.verify();
-		pmControl.verify();
+		verify(pm).close();
 	}
 
+	@Test
 	public void testInterceptorWithPrebound() {
-		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
-		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
-		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
-		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
-		pmfControl.replay();
-		pmControl.replay();
+		PersistenceManagerFactory pmf = mock(PersistenceManagerFactory.class);
+		PersistenceManager pm = mock(PersistenceManager.class);
 
 		TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
 		JdoInterceptor interceptor = new JdoInterceptor();
@@ -80,12 +74,10 @@ public class JdoInterceptorTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.unbindResource(pmf);
 		}
-
-		pmfControl.verify();
-		pmControl.verify();
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestInvocation implements MethodInvocation {
 
 		private PersistenceManagerFactory persistenceManagerFactory;

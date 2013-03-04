@@ -76,5 +76,4 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	public ClassLoader getThrowawayClassLoader() {
 		return this.classLoader.getThrowawayClassLoader();
 	}
-
 }

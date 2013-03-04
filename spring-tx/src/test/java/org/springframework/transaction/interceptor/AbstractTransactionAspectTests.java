@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.lang.reflect.Method;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.MockCallbackPreferringTransactionManager;
@@ -539,7 +539,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		Method m = setNameMethod;
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
-		Method m2 = getNameMethod;
+		// Method m2 = getNameMethod;
 		// No attributes for m2
 
 		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);

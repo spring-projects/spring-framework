@@ -92,7 +92,7 @@ public class DelegatingEntityResolver implements EntityResolver {
 	@Override
 	public String toString() {
 		return "EntityResolver delegating " + XSD_SUFFIX + " to " + this.schemaResolver +
-				" and " + DTD_SUFFIX +  " to " + this.dtdResolver;
+				" and " + DTD_SUFFIX + " to " + this.dtdResolver;
 	}
 
 }

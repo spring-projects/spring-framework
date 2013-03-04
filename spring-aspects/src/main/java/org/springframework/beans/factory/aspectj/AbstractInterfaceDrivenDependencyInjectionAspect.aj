@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import java.io.Serializable;
  *       introduced implementation). There are a few choices for the chosen method:
  *       <ul>
  *       <li>readObject(ObjectOutputStream): Java requires that the method must be
- *           {@code private}. Since aspects cannot introduce a private member,
+ *           {@code private}</p>. Since aspects cannot introduce a private member,
  *           while preserving its name, this option is ruled out.</li>
- *       <li>readResolve(): Java doesn't pose any restriction on an access specifier.
+ * 		 <li>readResolve(): Java doesn't pose any restriction on an access specifier.
  *           Problem solved! There is one (minor) limitation of this approach in
  *           that if a user class already has this method, that method must be
  *           {@code public}. However, this shouldn't be a big burden, since

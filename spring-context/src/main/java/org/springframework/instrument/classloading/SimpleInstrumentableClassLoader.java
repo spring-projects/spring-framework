@@ -29,7 +29,7 @@ import org.springframework.core.OverridingClassLoader;
  * @author Costin Leau
  * @since 2.0
  */
-public class SimpleInstrumentableClassLoader extends OverridingClassLoader  {
+public class SimpleInstrumentableClassLoader extends OverridingClassLoader {
 
 	private final WeavingTransformer weavingTransformer;
 

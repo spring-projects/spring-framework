@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,15 @@ import java.util.Properties;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
+import org.junit.Test;
 import org.springframework.jmx.JmxTestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Chris Beams
  */
 public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
@@ -60,6 +64,7 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		return assembler;
 	}
 
+	@Test
 	public void testSupermanIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
@@ -71,6 +76,7 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	/*
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
 	 */
+	@Test
 	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
 		final String beanKey = "myTestBean";
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,14 +50,14 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Note that the second strategy also supports the use of submit buttons of
  * type 'image'. That is, an image submit button named 'reset' will normally be
- * submitted by the browser as two request paramters called 'reset.x', and
- * 'reset.y'. When checking for the existence of a paramter from the
+ * submitted by the browser as two request parameters called 'reset.x', and
+ * 'reset.y'. When checking for the existence of a parameter from the
  * {@code methodParamNames} list, to indicate that a specific method should
- * be called, the code will look for request parameter in the "reset" form
- * (exactly as spcified in the list), and in the "reset.x" form ('.x' appended to
- * the name in the list). In this way it can handle both normal and image submit
- * buttons. The actual method name resolved if there is a match will always be
- * the bare form without the ".x".
+ * be called, the code will look for a request parameter in the "reset" form
+ * (exactly as specified in the list), and in the "reset.x" form ('.x' appended
+ * to the name in the list). In this way it can handle both normal and image
+ * submit buttons. The actual method name resolved, if there is a match, will
+ * always be the bare form without the ".x".
  *
  * <p><b>Note:</b> If both strategies are configured, i.e. both "paramName"
  * and "methodParamNames" are specified, then both will be checked for any given
@@ -69,7 +69,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>For both resolution strategies, the method name is of course coming from
  * some sort of view code, (such as a JSP page). While this may be acceptable,
- * it is sometimes desireable to treat this only as a 'logical' method name,
+ * it is sometimes desirable to treat this only as a 'logical' method name,
  * with a further mapping to a 'real' method name. As such, an optional
  * 'logical' mapping may be specified for this purpose.
  *

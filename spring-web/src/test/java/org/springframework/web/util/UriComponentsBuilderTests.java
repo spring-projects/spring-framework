@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,12 @@ import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Phillip Webb
  */
 public class UriComponentsBuilderTests {
 
@@ -55,7 +57,9 @@ public class UriComponentsBuilderTests {
 		assertEquals("bar", result.getQuery());
 		assertEquals("baz", result.getFragment());
 
-		URI expected = new URI("/foo?bar#baz");
+		assertEquals("Invalid result URI String", "foo?bar#baz", result.toUriString());
+
+		URI expected = new URI("foo?bar#baz");
 		assertEquals("Invalid result URI", expected, result.toUri());
 
 		result = UriComponentsBuilder.fromPath("/foo").build();
@@ -312,4 +316,42 @@ public class UriComponentsBuilderTests {
 		assertEquals("mailto:foo@example.com", result.toUriString());
 	}
 
+	@Test
+	public void queryParamWithValueWithEquals() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=baz").build();
+		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar=baz"));
+	}
+
+	@Test
+	public void queryParamWithoutValueWithEquals() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=").build();
+		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar="));
+	}
+
+	@Test
+	public void queryParamWithoutValueWithoutEquals() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar").build();
+		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar"));
+	}
+
+	@Test
+	public void relativeUrls() throws Exception {
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toUriString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build().toUri().getPath(), equalTo("/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toString(), equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUriString(), equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath(), equalTo("../../"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toUriString(), equalTo("http://example.com/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com").path("foo/../bar").build().toUri().getPath(), equalTo("/foo/../bar"));
+	}
+
+	@Test
+	public void emptySegments() throws Exception {
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").path("/x/y/z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
+	    assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").pathSegment("x", "y", "z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").path("/x/").path("/y/z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
+		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").pathSegment("x").path("y").build().toString(), equalTo("http://example.com/abc/x/y"));
+	}
 }

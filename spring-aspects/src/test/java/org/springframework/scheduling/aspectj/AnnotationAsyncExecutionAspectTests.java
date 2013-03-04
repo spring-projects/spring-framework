@@ -49,14 +49,14 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@Before
 	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		executor = new CountingExecutor();
 		AnnotationAsyncExecutionAspect.aspectOf().setExecutor(executor);
 	}
 
 	@Test
 	public void asyncMethodGetsRoutedAsynchronously() {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		obj.incrementAsync();
 		executor.waitForCompletion();
@@ -107,6 +107,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertEquals(1, executor.submitCompleteCounter);
 	}
 
+	/*
 	@Test
 	public void methodReturningNonVoidNonFutureInAsyncClassGetsRoutedSynchronously() {
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
@@ -115,6 +116,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertEquals(0, executor.submitStartCounter);
 		assertEquals(0, executor.submitCompleteCounter);
 	}
+	*/
 
 	@Test
 	public void qualifiedAsyncMethodsAreRoutedToCorrectExecutor() throws InterruptedException, ExecutionException {
@@ -198,9 +200,11 @@ public class AnnotationAsyncExecutionAspectTests {
 
 		// Manually check that there is a warning from the 'declare warning' statement in
 		// AnnotationAsyncExecutionAspect
+		/*
 		public int return5() {
 			return 5;
 		}
+		*/
 
 		public Future<Integer> incrementReturningAFuture() {
 			counter++;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,21 @@
 package org.springframework.core.env;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.Assert;
 
 /**
- * Read-only {@code Map<String, String>} implementation that is backed by system properties or environment
- * variables.
+ * Read-only {@code Map<String, String>} implementation that is backed by system
+ * properties or environment variables.
  *
- * <p>Used by {@link AbstractApplicationContext} when a {@link SecurityManager} prohibits access to {@link
- * System#getProperties()} or {@link System#getenv()}.
+ * <p>Used by {@link AbstractApplicationContext} when a {@link SecurityManager} prohibits
+ * access to {@link System#getProperties()} or {@link System#getenv()}. It is for this
+ * reason that the implementations of {@link #keySet()}, {@link #entrySet()}, and
+ * {@link #values()} always return empty even though {@link #get(Object)} may in fact
+ * return non-null if the current security manager allows access to individual keys.
  *
  * @author Arjen Poutsma
  * @author Chris Beams
@@ -85,7 +89,7 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	}
 
 	public Set<String> keySet() {
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
 	public void putAll(Map<? extends String, ? extends String> m) {
@@ -93,11 +97,11 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	}
 
 	public Collection<String> values() {
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
 	public Set<Entry<String, String>> entrySet() {
-		throw new UnsupportedOperationException();
+		return Collections.emptySet();
 	}
 
 }

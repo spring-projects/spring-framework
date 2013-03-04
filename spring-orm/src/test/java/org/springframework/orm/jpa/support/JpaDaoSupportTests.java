@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.orm.jpa.support;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,21 +27,18 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
+import org.junit.Test;
 import org.springframework.orm.jpa.JpaTemplate;
 
 /**
  * @author Costin Leau
- *
+ * @author Phillip Webb
  */
-public class JpaDaoSupportTests extends TestCase {
+public class JpaDaoSupportTests {
 
+	@Test
 	public void testJpaDaoSupportWithEntityManager() throws Exception {
-		MockControl mockControl = MockControl.createControl(EntityManager.class);
-		EntityManager entityManager = (EntityManager) mockControl.getMock();
-		mockControl.replay();
+		EntityManager entityManager = mock(EntityManager.class);
 		final List test = new ArrayList();
 		JpaDaoSupport dao = new JpaDaoSupport() {
 			@Override
@@ -48,13 +51,11 @@ public class JpaDaoSupportTests extends TestCase {
 		assertNotNull("jpa template not created", dao.getJpaTemplate());
 		assertEquals("incorrect entity manager", entityManager, dao.getJpaTemplate().getEntityManager());
 		assertEquals("initDao not called", test.size(), 1);
-		mockControl.verify();
 	}
 
+	@Test
 	public void testJpaDaoSupportWithEntityManagerFactory() throws Exception {
-		MockControl mockControl = MockControl.createControl(EntityManagerFactory.class);
-		EntityManagerFactory entityManagerFactory = (EntityManagerFactory) mockControl.getMock();
-		mockControl.replay();
+		EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
 		final List test = new ArrayList();
 		JpaDaoSupport dao = new JpaDaoSupport() {
 			@Override
@@ -68,9 +69,9 @@ public class JpaDaoSupportTests extends TestCase {
 		assertEquals("incorrect entity manager factory", entityManagerFactory,
 				dao.getJpaTemplate().getEntityManagerFactory());
 		assertEquals("initDao not called", test.size(), 1);
-		mockControl.verify();
 	}
 
+	@Test
 	public void testJpaDaoSupportWithJpaTemplate() throws Exception {
 		JpaTemplate template = new JpaTemplate();
 		final List test = new ArrayList();
@@ -87,6 +88,7 @@ public class JpaDaoSupportTests extends TestCase {
 		assertEquals("initDao not called", test.size(), 1);
 	}
 
+	@Test
 	public void testInvalidJpaTemplate() throws Exception {
 		JpaDaoSupport dao = new JpaDaoSupport() {
 		};

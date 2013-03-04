@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,15 +20,22 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
+import org.junit.Test;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.export.assembler.AbstractMetadataAssemblerTests;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 
-/** @author Rob Harrop */
+import static org.junit.Assert.*;
+
+/**
+ * @author Rob Harrop
+ * @author Chris Beams
+ */
 public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerTests {
 
 	private static final String OBJECT_NAME = "bean:name=testBean4";
 
+	@Test
 	public void testAttributeFromInterface() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute("Colour");
@@ -36,12 +43,14 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 		assertTrue("The name attribute should be readable", attr.isReadable());
 	}
 
+	@Test
 	public void testOperationFromInterface() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanOperationInfo op = inf.getOperation("fromInterface");
 		assertNotNull(op);
 	}
 
+	@Test
 	public void testOperationOnGetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanOperationInfo op = inf.getOperation("getExpensiveToCalculate");

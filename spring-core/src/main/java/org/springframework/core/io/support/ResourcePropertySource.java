@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,51 @@
 package org.springframework.core.io.support;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Subclass of {@link PropertiesPropertySource} that loads a {@link Properties}
  * object from a given {@link org.springframework.core.io.Resource} or resource location such as
- * {@code "classpath:/com/myco/foo.properties"} or {@code "file:/path/to/file.properties"}.
+ * {@code "classpath:/com/myco/foo.properties"} or {@code "file:/path/to/file.xml"}.
+ * Both traditional and XML-based properties file formats are supported, however in order
+ * for XML processing to take effect, the underlying {@code Resource}'s
+ * {@link org.springframework.core.io.Resource#getFilename() getFilename()} method must
+ * return non-{@code null} and end in ".xml".
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ResourcePropertySource extends PropertiesPropertySource {
 
 	/**
 	 * Create a PropertySource having the given name based on Properties
-	 * loaded from the given resource.
+	 * loaded from the given encoded resource.
+	 */
+	public ResourcePropertySource(String name, EncodedResource resource) throws IOException {
+		super(name, PropertiesLoaderUtils.loadProperties(resource));
+	}
+
+	/**
+	 * Create a PropertySource based on Properties loaded from the given resource.
+	 * The name of the PropertySource will be generated based on the
+	 * {@link Resource#getDescription() description} of the given resource.
+	 */
+	public ResourcePropertySource(EncodedResource resource) throws IOException {
+		this(getNameForResource(resource.getResource()), resource);
+	}
+
+	/**
+	 * Create a PropertySource having the given name based on Properties
+	 * loaded from the given encoded resource.
 	 */
 	public ResourcePropertySource(String name, Resource resource) throws IOException {
-		super(name, loadPropertiesForResource(resource));
+		super(name, PropertiesLoaderUtils.loadProperties(new EncodedResource(resource)));
 	}
 
 	/**
@@ -58,17 +79,7 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * resource (assuming it is prefixed with {@code classpath:}).
 	 */
 	public ResourcePropertySource(String name, String location, ClassLoader classLoader) throws IOException {
-		this(name, getResourceForLocation(location, classLoader));
-	}
-
-	/**
-	 * Create a PropertySource having the given name based on Properties loaded from
-	 * the given resource location. The default thread context class loader will be
-	 * used to load the resource (assuming the location string is prefixed with
-	 * {@code classpath:}.
-	 */
-	public ResourcePropertySource(String name, String location) throws IOException {
-		this(name, location, ClassUtils.getDefaultClassLoader());
+		this(name, new DefaultResourceLoader(classLoader).getResource(location));
 	}
 
 	/**
@@ -79,7 +90,17 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * resource.
 	 */
 	public ResourcePropertySource(String location, ClassLoader classLoader) throws IOException {
-		this(getResourceForLocation(location, classLoader));
+		this(new DefaultResourceLoader(classLoader).getResource(location));
+	}
+
+	/**
+	 * Create a PropertySource having the given name based on Properties loaded from
+	 * the given resource location. The default thread context class loader will be
+	 * used to load the resource (assuming the location string is prefixed with
+	 * {@code classpath:}.
+	 */
+	public ResourcePropertySource(String name, String location) throws IOException {
+		this(name, new DefaultResourceLoader().getResource(location));
 	}
 
 	/**
@@ -88,28 +109,12 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	 * {@link Resource#getDescription() description} of the resource.
 	 */
 	public ResourcePropertySource(String location) throws IOException {
-		this(getResourceForLocation(location, ClassUtils.getDefaultClassLoader()));
+		this(new DefaultResourceLoader().getResource(location));
 	}
 
-
-	private static Resource getResourceForLocation(String location, ClassLoader classLoader) {
-		return new PathMatchingResourcePatternResolver(classLoader).getResource(location);
-	}
-
-	private static Properties loadPropertiesForResource(Resource resource) throws IOException {
-		Properties props = new Properties();
-		InputStream is = resource.getInputStream();
-		props.load(is);
-		try {
-			is.close();
-		} catch (IOException ex) {
-			// ignore
-		}
-		return props;
-	}
 
 	/**
-	 * Returns the description string for the resource, and if empty returns
+	 * Return the description string for the resource, and if empty returns
 	 * the class name of the resource plus its identity hash code.
 	 */
 	private static String getNameForResource(Resource resource) {

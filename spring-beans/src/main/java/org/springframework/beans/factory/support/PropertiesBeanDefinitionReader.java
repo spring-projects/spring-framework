@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * class can still override this.
 	 * <p>Strictly speaking, the rule that a default parent setting does
 	 * not apply to a bean definition that carries a class is there for
-	 * backwards compatiblity reasons. It still matches the typical use case.
+	 * backwards compatibility reasons. It still matches the typical use case.
 	 */
 	public void setDefaultParentBean(String defaultParentBean) {
 		this.defaultParentBean = defaultParentBean;

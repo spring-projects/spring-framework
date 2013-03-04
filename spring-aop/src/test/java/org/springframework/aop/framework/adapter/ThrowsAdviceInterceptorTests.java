@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,23 @@
 
 package org.springframework.aop.framework.adapter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+
 import javax.transaction.TransactionRolledbackException;
 
 import org.aopalliance.intercept.MethodInvocation;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Test;
-import test.aop.MethodCounter;
-
 import org.springframework.aop.ThrowsAdvice;
+import org.springframework.tests.aop.advice.MethodCounter;
+
 
 /**
  * @author Rod Johnson
@@ -142,7 +144,7 @@ public final class ThrowsAdviceInterceptorTests {
 	}
 
 	@SuppressWarnings("serial")
-	private static class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
+	static class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
 		// Full method signature
 		public void afterThrowing(Method m, Object[] args, Object target, IOException ex) {
 			count("ioException");

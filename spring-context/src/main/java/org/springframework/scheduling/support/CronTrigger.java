@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.scheduling.support;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
+
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * {@link Trigger} implementation for cron expressions.
@@ -41,7 +41,7 @@ public class CronTrigger implements Trigger {
 	 * following cron expression conventions
 	 */
 	public CronTrigger(String cronExpression) {
-		this(cronExpression, TimeZone.getDefault());
+		this.sequenceGenerator = new CronSequenceGenerator(cronExpression);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class CronTrigger implements Trigger {
 
 	@Override
 	public String toString() {
-		return sequenceGenerator.toString();
+		return this.sequenceGenerator.toString();
 	}
 
 }

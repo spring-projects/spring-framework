@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
@@ -39,6 +37,9 @@ import org.hibernate.classic.Session;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
+import org.junit.After;
+import org.junit.Test;
+import org.mockito.InOrder;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -56,65 +57,43 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 05.03.2005
  */
-public class HibernateTransactionManagerTests extends TestCase {
+public class HibernateTransactionManagerTests {
 
+	@After
+	public void tearDown() {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+	}
+
+	@Test
 	public void testTransactionCommit() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		final DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
+		Query query = mock(Query.class);
 
 		final List list = new ArrayList();
 		list.add("test");
-		con.getTransactionIsolation();
-		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
-		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-		conControl.setVoidCallable(1);
-		con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-		conControl.setVoidCallable(1);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		tx.setTimeout(10);
-		txControl.setVoidCallable(1);
-		tx.begin();
-		txControl.setVoidCallable(1);
-		session.connection();
-		sessionControl.setReturnValue(con, 3);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-
-		dsControl.replay();
-		conControl.replay();
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		queryControl.replay();
+		given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+		given(sf.openSession()).willReturn(session);
+		given(session.getTransaction()).willReturn(tx);
+		given(session.connection()).willReturn(con);
+		given(session.isOpen()).willReturn(true);
+		given(session.createQuery("some query string")).willReturn(query);
+		given(query.list()).willReturn(list);
+		given(session.isConnected()).willReturn(true);
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
 			@Override
@@ -152,44 +131,27 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		dsControl.verify();
-		conControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		queryControl.verify();
+
+		verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		verify(tx).setTimeout(10);
+		verify(tx).begin();
+		verify(tx).commit();
+		verify(session).close();
 	}
 
+	@Test
 	public void testTransactionRollback() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.rollback();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -218,44 +180,23 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		verify(session).close();
+		verify(tx).rollback();
 	}
 
+	@Test
 	public void testTransactionRollbackOnly() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.rollback();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -279,70 +220,31 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		verify(session).flush();
+		verify(session).close();
+		verify(tx).rollback();
 	}
 
+	@Test
 	public void testTransactionCommitWithEarlyFlush() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		final DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
+		Query query = mock(Query.class);
 
 		final List list = new ArrayList();
 		list.add("test");
-		con.getTransactionIsolation();
-		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
-		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-		conControl.setVoidCallable(1);
-		con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-		conControl.setVoidCallable(1);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		tx.setTimeout(10);
-		txControl.setVoidCallable(1);
-		tx.begin();
-		txControl.setVoidCallable(1);
-		session.connection();
-		sessionControl.setReturnValue(con, 3);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.MANUAL);
-		sessionControl.setVoidCallable(1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-
-		dsControl.replay();
-		conControl.replay();
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		queryControl.replay();
+		given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+		given(sf.openSession()).willReturn(session);
+		given(session.getTransaction()).willReturn(tx);
+		given(session.connection()).willReturn(con);
+		given(session.isOpen()).willReturn(true);
+		given(session.createQuery("some query string")).willReturn(query);
+		given(query.list()).willReturn(list);
+		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session.isConnected()).willReturn(true);
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
 			@Override
@@ -381,47 +283,30 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		dsControl.verify();
-		conControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		queryControl.verify();
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		verify(tx).setTimeout(10);
+		verify(tx).begin();
+		verify(session).flush();
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(tx).commit();
+		verify(session).close();
 	}
 
+	@Test
 	public void testParticipatingTransactionWithCommit() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
 			@Override
@@ -457,42 +342,24 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 		assertTrue("Correct result list", result == l);
 
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		verify(session).flush();
+		verify(session).close();
+		verify(tx).commit();
 	}
 
+	@Test
 	public void testParticipatingTransactionWithRollback() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.rollback();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -521,40 +388,22 @@ public class HibernateTransactionManagerTests extends TestCase {
 			// expected
 		}
 
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		verify(session).close();
+		verify(tx).rollback();
 	}
 
+	@Test
 	public void testParticipatingTransactionWithRollbackOnly() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.rollback();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -587,61 +436,28 @@ public class HibernateTransactionManagerTests extends TestCase {
 			// expected
 		}
 
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		verify(session).close();
+		verify(tx).rollback();
 	}
 
-	public void testParticipatingTransactionWithWithRequiresNew() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl session1Control = MockControl.createControl(Session.class);
-		Session session1 = (Session) session1Control.getMock();
-		MockControl session2Control = MockControl.createControl(Session.class);
-		Session session2 = (Session) session2Control.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+	@Test
+	public void testParticipatingTransactionWithRequiresNew() throws Exception {
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session1 = mock(Session.class);
+		Session session2 = mock(Session.class);
+		Connection con = mock(Connection.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session1, 1);
-		sf.openSession();
-		sfControl.setReturnValue(session2, 1);
-		session1.beginTransaction();
-		session1Control.setReturnValue(tx, 1);
-		session1.isOpen();
-		session1Control.setReturnValue(true, 1);
-		session2.beginTransaction();
-		session2Control.setReturnValue(tx, 1);
-		session2.isOpen();
-		session2Control.setReturnValue(true, 1);
-		session2.getFlushMode();
-		session2Control.setReturnValue(FlushMode.AUTO, 1);
-		session2.flush();
-		session2Control.setVoidCallable(1);
-		session1.close();
-		session1Control.setReturnValue(null, 1);
-		session2.close();
-		session2Control.setReturnValue(null, 1);
-		tx.commit();
-		txControl.setVoidCallable(2);
-		session1.isConnected();
-		session1Control.setReturnValue(true, 1);
-		session1.connection();
-		session1Control.setReturnValue(con, 2);
-		session2.isConnected();
-		session2Control.setReturnValue(true, 1);
-		session2.connection();
-		session2Control.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 2);
-
-		sfControl.replay();
-		session1Control.replay();
-		session2Control.replay();
-		conControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session1, session2);
+		given(session1.beginTransaction()).willReturn(tx);
+		given(session1.isOpen()).willReturn(true);
+		given(session2.beginTransaction()).willReturn(tx);
+		given(session2.isOpen()).willReturn(true);
+		given(session2.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session1.isConnected()).willReturn(true);
+		given(session1.connection()).willReturn(con);
+		given(session2.isConnected()).willReturn(true);
+		given(session2.connection()).willReturn(con);
 
 		PlatformTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -680,50 +496,26 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
-		sfControl.verify();
-		session1Control.verify();
-		session2Control.verify();
-		conControl.verify();
-		txControl.verify();
+		verify(session2).flush();
+		verify(session1).close();
+		verify(session2).close();
+		verify(tx, times(2)).commit();
 	}
 
-	public void testParticipatingTransactionWithWithNotSupported() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+	@Test
+	public void testParticipatingTransactionWithNotSupported() throws Exception {
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Connection con = mock(Connection.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 2);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 2);
-		session.flush();
-		sessionControl.setVoidCallable(2);
-		session.close();
-		sessionControl.setReturnValue(null, 2);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-
-		sfControl.replay();
-		sessionControl.replay();
-		conControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -763,35 +555,19 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		verify(session, times(2)).flush();
+		verify(session, times(2)).close();
+		verify(tx).commit();
 	}
 
+	@Test
 	public void testTransactionWithPropagationSupports() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
-		session.setFlushMode(FlushMode.AUTO);
-		sessionControl.setVoidCallable(1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.MANUAL);
-		sessionControl.setVoidCallable(1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		sfControl.replay();
-		sessionControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
 			@Override
@@ -828,57 +604,29 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
-		sfControl.verify();
-		sessionControl.verify();
+		InOrder ordered = inOrder(session);
+		ordered.verify(session).setFlushMode(FlushMode.AUTO);
+		ordered.verify(session).flush();
+		ordered.verify(session).setFlushMode(FlushMode.MANUAL);
+		ordered.verify(session).close();
 	}
 
+	@Test
 	public void testTransactionWithPropagationSupportsAndInnerTransaction() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl session1Control = MockControl.createControl(Session.class);
-		final Session session1 = (Session) session1Control.getMock();
-		MockControl session2Control = MockControl.createControl(Session.class);
-		final Session session2 = (Session) session2Control.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session1 = mock(Session.class);
+		final Session session2 = mock(Session.class);
+		Connection con = mock(Connection.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session1, 1);
-		session1.getSessionFactory();
-		session1Control.setReturnValue(sf, 1);
-		session1.getFlushMode();
-		session1Control.setReturnValue(FlushMode.AUTO, 2);
-		session1.flush();
-		session1Control.setVoidCallable(2);
-		session1.disconnect();
-		session1Control.setReturnValue(null, 1);
-		session1.close();
-		session1Control.setReturnValue(null, 1);
-
-		sf.openSession();
-		sfControl.setReturnValue(session2, 1);
-		session2.beginTransaction();
-		session2Control.setReturnValue(tx, 1);
-		session2.connection();
-		session2Control.setReturnValue(con, 2);
-		session2.getFlushMode();
-		session2Control.setReturnValue(FlushMode.AUTO, 1);
-		session2.flush();
-		session2Control.setVoidCallable(1);
-		session2.isOpen();
-		session2Control.setReturnValue(true, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session2.isConnected();
-		session2Control.setReturnValue(true, 1);
-		session2.close();
-		session2Control.setReturnValue(null, 1);
-		sfControl.replay();
-		session1Control.replay();
-		session2Control.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session1, session2);
+		given(session1.getSessionFactory()).willReturn(sf);
+		given(session1.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session2.beginTransaction()).willReturn(tx);
+		given(session2.connection()).willReturn(con);
+		given(session2.getFlushMode()).willReturn(FlushMode.AUTO);
+		given(session2.isOpen()).willReturn(true);
+		given(session2.isConnected()).willReturn(true);
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
 			@Override
@@ -936,46 +684,27 @@ public class HibernateTransactionManagerTests extends TestCase {
 		});
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
-		sfControl.verify();
-		session1Control.verify();
-		session2Control.verify();
-		txControl.verify();
+		verify(session1, times(2)).flush();
+		verify(session1).disconnect();
+		verify(session1).close();
+		verify(session2).flush();
+		verify(session2).close();
+		verify(tx).commit();
 	}
 
+	@Test
 	public void testTransactionCommitWithEntityInterceptor() throws Exception {
-		MockControl interceptorControl = MockControl.createControl(org.hibernate.Interceptor.class);
-		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
-		interceptorControl.replay();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Interceptor entityInterceptor = mock(Interceptor.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession(entityInterceptor);
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		conControl.replay();
+		given(sf.openSession(entityInterceptor)).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptor(entityInterceptor);
@@ -1003,61 +732,30 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		interceptorControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		conControl.verify();
+
+		verify(session).close();
+		verify(tx).commit();
 	}
 
+	@Test
 	public void testTransactionCommitWithEntityInterceptorBeanName() throws Exception {
-		MockControl interceptorControl = MockControl.createControl(org.hibernate.Interceptor.class);
-		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
-		interceptorControl.replay();
-		MockControl interceptor2Control = MockControl.createControl(org.hibernate.Interceptor.class);
-		Interceptor entityInterceptor2 = (Interceptor) interceptor2Control.getMock();
-		interceptor2Control.replay();
+		Interceptor entityInterceptor = mock(Interceptor.class);
+		Interceptor entityInterceptor2 = mock(Interceptor.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		given(sf.openSession(entityInterceptor)).willReturn(session);
+		given(sf.openSession(entityInterceptor2)).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
-		sf.openSession(entityInterceptor);
-		sfControl.setReturnValue(session, 1);
-		sf.openSession(entityInterceptor2);
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 2);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 2);
-		session.close();
-		sessionControl.setReturnValue(null, 2);
-		tx.commit();
-		txControl.setVoidCallable(2);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 2);
-		session.connection();
-		sessionControl.setReturnValue(con, 4);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 2);
-
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		conControl.replay();
-
-		MockControl beanFactoryControl = MockControl.createControl(BeanFactory.class);
-		BeanFactory beanFactory = (BeanFactory) beanFactoryControl.getMock();
-		beanFactory.getBean("entityInterceptor", Interceptor.class);
-		beanFactoryControl.setReturnValue(entityInterceptor, 1);
-		beanFactory.getBean("entityInterceptor", Interceptor.class);
-		beanFactoryControl.setReturnValue(entityInterceptor2, 1);
-		beanFactoryControl.replay();
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		given(beanFactory.getBean("entityInterceptor", Interceptor.class)).willReturn(
+				entityInterceptor, entityInterceptor2);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptorBeanName("entityInterceptor");
@@ -1086,61 +784,29 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		interceptorControl.verify();
-		interceptor2Control.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		conControl.verify();
-		beanFactoryControl.verify();
+
+		verify(session, times(2)).close();
+		verify(tx, times(2)).commit();
 	}
 
+	@Test
 	public void testTransactionCommitWithReadOnly() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
+		Query query = mock(Query.class);
 
 		final List list = new ArrayList();
 		list.add("test");
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.setFlushMode(FlushMode.MANUAL);
-		sessionControl.setVoidCallable(1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.setReadOnly(true);
-		conControl.setVoidCallable(1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		con.isReadOnly();
-		conControl.setReturnValue(true, 1);
-		con.setReadOnly(false);
-		conControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-
-		conControl.replay();
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		queryControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.connection()).willReturn(con);
+		given(session.isOpen()).willReturn(true);
+		given(session.createQuery("some query string")).willReturn(query);
+		given(query.list()).willReturn(list);
+		given(session.isConnected()).willReturn(true);
+		given(con.isReadOnly()).willReturn(true);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1163,65 +829,46 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		conControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		queryControl.verify();
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(con).setReadOnly(true);
+		verify(tx).commit();
+		verify(con).setReadOnly(false);
+		verify(session).close();
 	}
 
+	@Test
 	public void testTransactionCommitWithFlushFailure() throws Exception {
 		doTestTransactionCommitWithFlushFailure(false);
 	}
 
+	@Test
 	public void testTransactionCommitWithFlushFailureAndFallbackTranslation() throws Exception {
 		doTestTransactionCommitWithFlushFailure(true);
 	}
 
 	private void doTestTransactionCommitWithFlushFailure(boolean fallbackTranslation) throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		tx.commit();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
 		SQLException sqlEx = new SQLException("argh", "27");
 		Exception rootCause = null;
 		if (fallbackTranslation) {
 			GenericJDBCException jdbcEx = new GenericJDBCException("mymsg", sqlEx);
-			txControl.setThrowable(jdbcEx, 1);
 			rootCause = sqlEx;
+			willThrow(jdbcEx).given(tx).commit();
 		}
 		else {
 			ConstraintViolationException jdbcEx = new ConstraintViolationException("mymsg", sqlEx, null);
-			txControl.setThrowable(jdbcEx, 1);
 			rootCause = jdbcEx;
+			willThrow(jdbcEx).given(tx).commit();
 		}
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.rollback();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		conControl.replay();
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -1254,56 +901,25 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		conControl.verify();
+
+		verify(session).close();
+		verify(tx).rollback();
 	}
 
+	@Test
 	public void testTransactionCommitWithPreBound() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		final DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
-		session.setFlushMode(FlushMode.AUTO);
-		sessionControl.setVoidCallable(1);
-		session.setFlushMode(FlushMode.MANUAL);
-		sessionControl.setVoidCallable(1);
-		session.connection();
-		sessionControl.setReturnValue(con, 3);
-		con.getTransactionIsolation();
-		conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED);
-		con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-		conControl.setVoidCallable(1);
-		con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-		conControl.setVoidCallable(1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		session.disconnect();
-		sessionControl.setReturnValue(null, 1);
-
-		dsControl.replay();
-		conControl.replay();
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
+		given(session.connection()).willReturn(con);
+		given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+		given(session.isConnected()).willReturn(true);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setSessionFactory(sf);
@@ -1344,61 +960,29 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		dsControl.verify();
-		conControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
+		InOrder ordered = inOrder(session, con);
+		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		ordered.verify(session).setFlushMode(FlushMode.AUTO);
+		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		ordered.verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(tx).commit();
+		verify(session).disconnect();
 	}
 
+	@Test
 	public void testTransactionRollbackWithPreBound() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl tx1Control = MockControl.createControl(Transaction.class);
-		final Transaction tx1 = (Transaction) tx1Control.getMock();
-		MockControl tx2Control = MockControl.createControl(Transaction.class);
-		final Transaction tx2 = (Transaction) tx2Control.getMock();
+		final DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		final Transaction tx1 = mock(Transaction.class);
+		final Transaction tx2 = mock(Transaction.class);
 
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx1, 1);
-		tx1.rollback();
-		tx1Control.setVoidCallable(1);
-		session.clear();
-		sessionControl.setVoidCallable(1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx2, 1);
-		tx2.commit();
-		tx2Control.setVoidCallable(1);
-
-		session.isOpen();
-		sessionControl.setReturnValue(true, 2);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.MANUAL, 2);
-		session.setFlushMode(FlushMode.AUTO);
-		sessionControl.setVoidCallable(2);
-		session.setFlushMode(FlushMode.MANUAL);
-		sessionControl.setVoidCallable(2);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 2);
-		session.connection();
-		sessionControl.setReturnValue(con, 6);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 2);
-		session.disconnect();
-		sessionControl.setReturnValue(null, 2);
-
-		dsControl.replay();
-		conControl.replay();
-		sfControl.replay();
-		sessionControl.replay();
-		tx1Control.replay();
-		tx2Control.replay();
+		given(session.beginTransaction()).willReturn(tx1, tx2);
+		given(session.isOpen()).willReturn(true);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
+		given(session.isConnected()).willReturn(true);
+		given(session.connection()).willReturn(con);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setSessionFactory(sf);
@@ -1470,56 +1054,27 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		dsControl.verify();
-		conControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		tx1Control.verify();
-		tx2Control.verify();
+		verify(tx1).rollback();
+		verify(tx2).commit();
+		InOrder ordered = inOrder(session);
+		ordered.verify(session).clear();
+		ordered.verify(session).setFlushMode(FlushMode.AUTO);
+		ordered.verify(session).setFlushMode(FlushMode.MANUAL);
+		ordered.verify(session).disconnect();
 	}
 
+	@Test
 	public void testTransactionRollbackWithHibernateManagedSession() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl tx1Control = MockControl.createControl(Transaction.class);
-		final Transaction tx1 = (Transaction) tx1Control.getMock();
-		MockControl tx2Control = MockControl.createControl(Transaction.class);
-		final Transaction tx2 = (Transaction) tx2Control.getMock();
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		final Transaction tx1 = mock(Transaction.class);
+		final Transaction tx2 = mock(Transaction.class);
 
-		sf.getCurrentSession();
-		sfControl.setReturnValue(session, 2);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 2);
-		session.getTransaction();
-		sessionControl.setReturnValue(tx1, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx1, 1);
-		tx1.isActive();
-		tx1Control.setReturnValue(false, 1);
-		tx1.rollback();
-		tx1Control.setVoidCallable(1);
-		session.getTransaction();
-		sessionControl.setReturnValue(tx2, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx2, 1);
-		tx2.isActive();
-		tx2Control.setReturnValue(false, 1);
-		tx2.commit();
-		tx2Control.setVoidCallable(1);
-
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.MANUAL, 2);
-		session.setFlushMode(FlushMode.AUTO);
-		sessionControl.setVoidCallable(2);
-		session.setFlushMode(FlushMode.MANUAL);
-		sessionControl.setVoidCallable(2);
-
-		sfControl.replay();
-		sessionControl.replay();
-		tx1Control.replay();
-		tx2Control.replay();
+		given(sf.getCurrentSession()).willReturn(session);
+		given(session.isOpen()).willReturn(true);
+		given(session.getTransaction()).willReturn(tx1, tx2);
+		given(session.beginTransaction()).willReturn(tx1, tx2);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setSessionFactory(sf);
@@ -1577,16 +1132,19 @@ public class HibernateTransactionManagerTests extends TestCase {
 			}
 		});
 
-		sfControl.verify();
-		sessionControl.verify();
-		tx1Control.verify();
-		tx2Control.verify();
+		verify(tx1).rollback();
+		verify(tx2).commit();
+		InOrder ordered = inOrder(session);
+		ordered.verify(session).setFlushMode(FlushMode.AUTO);
+		ordered.verify(session).setFlushMode(FlushMode.MANUAL);
 	}
 
+	@Test
 	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
 		doTestExistingTransactionWithPropagationNestedAndRollback(false);
 	}
 
+	@Test
 	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
 		doTestExistingTransactionWithPropagationNestedAndRollback(true);
 	}
@@ -1594,62 +1152,27 @@ public class HibernateTransactionManagerTests extends TestCase {
 	private void doTestExistingTransactionWithPropagationNestedAndRollback(final boolean manualSavepoint)
 			throws Exception {
 
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		final DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
-		MockControl spControl = MockControl.createControl(Savepoint.class);
-		Savepoint sp = (Savepoint) spControl.getMock();
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		final DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		DatabaseMetaData md = mock(DatabaseMetaData.class);
+		Savepoint sp = mock(Savepoint.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
+		Query query = mock(Query.class);
 
 		final List list = new ArrayList();
 		list.add("test");
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.connection();
-		sessionControl.setReturnValue(con, 3);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
-		md.supportsSavepoints();
-		mdControl.setReturnValue(true, 1);
-		con.getMetaData();
-		conControl.setReturnValue(md, 1);
-		con.setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + 1);
-		conControl.setReturnValue(sp, 1);
-		con.rollback(sp);
-		conControl.setVoidCallable(1);
-		session.createQuery("some query string");
-		sessionControl.setReturnValue(query, 1);
-		query.list();
-		queryControl.setReturnValue(list, 1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-
-		dsControl.replay();
-		conControl.replay();
-		mdControl.replay();
-		spControl.replay();
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
-		queryControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
+		given(session.connection()).willReturn(con);
+		given(session.isOpen()).willReturn(true);
+		given(md.supportsSavepoints()).willReturn(true);
+		given(con.getMetaData()).willReturn(md);
+		given(con.setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + 1)).willReturn(sp);
+		given(session.createQuery("some query string")).willReturn(query);
+		given(query.list()).willReturn(list);
+		given(session.isConnected()).willReturn(true);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager();
 		tm.setJdbcExceptionTranslator(new SQLStateSQLExceptionTranslator());
@@ -1690,16 +1213,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		dsControl.verify();
-		conControl.verify();
-		mdControl.verify();
-		spControl.verify();
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-		queryControl.verify();
+
+		verify(con).setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + 1);
+		verify(con).rollback(sp);
+		verify(session).close();
+		verify(tx).commit();
 	}
 
+	@Test
 	public void testTransactionCommitWithNonExistingDatabase() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
@@ -1742,6 +1263,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
+	@Test
 	public void testTransactionCommitWithPreBoundSessionAndNonExistingDatabase() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
@@ -1792,6 +1314,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
+	@Test
 	public void testTransactionCommitWithNonExistingDatabaseAndLazyConnection() throws Exception {
 		DriverManagerDataSource dsTarget = new DriverManagerDataSource();
 		final LazyConnectionDataSourceProxy ds = new LazyConnectionDataSourceProxy();
@@ -1835,28 +1358,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
+	@Test
 	public void testTransactionFlush() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
-		MockControl txControl = MockControl.createControl(Transaction.class);
-		Transaction tx = (Transaction) txControl.getMock();
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
+		Transaction tx = mock(Transaction.class);
 
-		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.flush();
-		sessionControl.setVoidCallable(1);
-		tx.commit();
-		txControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setReturnValue(null, 1);
-
-		sfControl.replay();
-		sessionControl.replay();
-		txControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.beginTransaction()).willReturn(tx);
 
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setPrepareConnection(false);
@@ -1876,17 +1385,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-		sfControl.verify();
-		sessionControl.verify();
-		txControl.verify();
-	}
 
-	@Override
-	protected void tearDown() {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+		verify(session).flush();
+		verify(tx).commit();
+		verify(session).close();
 	}
 
 }

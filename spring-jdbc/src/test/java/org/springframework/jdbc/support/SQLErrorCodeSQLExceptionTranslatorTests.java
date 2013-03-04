@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLException;
 import java.sql.BatchUpdateException;
+import java.sql.DataTruncation;
+import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
@@ -33,6 +34,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 
@@ -92,13 +94,21 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException badSqlEx = new SQLException("", "", 1);
-		BatchUpdateException batchUdateEx = new BatchUpdateException();
-		batchUdateEx.setNextException(badSqlEx);
-		BadSqlGrammarException bsgex = (BadSqlGrammarException) sext.translate("task", "SQL", batchUdateEx);
+		BatchUpdateException batchUpdateEx = new BatchUpdateException();
+		batchUpdateEx.setNextException(badSqlEx);
+		BadSqlGrammarException bsgex = (BadSqlGrammarException) sext.translate("task", "SQL", batchUpdateEx);
 		assertEquals("SQL", bsgex.getSql());
 		assertEquals(badSqlEx, bsgex.getSQLException());
 	}
 
+	public void testDataTruncationTranslation() {
+		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
+
+		SQLException dataAccessEx = new SQLException("", "", 5);
+		DataTruncation dataTruncation = new DataTruncation(1, true, true, 1, 1, dataAccessEx);
+		DataAccessResourceFailureException daex = (DataAccessResourceFailureException) sext.translate("task", "SQL", dataTruncation);
+		assertEquals(dataTruncation, daex.getCause());
+	}
 
 	@SuppressWarnings("serial")
 	public void testCustomTranslateMethodTranslation() {

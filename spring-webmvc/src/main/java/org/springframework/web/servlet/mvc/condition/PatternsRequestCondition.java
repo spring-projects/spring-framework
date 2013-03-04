@@ -42,9 +42,16 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
+	private static UrlPathHelper pathHelperNoSemicolonContent;
+
+	static {
+		pathHelperNoSemicolonContent = new UrlPathHelper();
+		pathHelperNoSemicolonContent.setRemoveSemicolonContent(true);
+	}
+
 	private final Set<String> patterns;
 
-	private final UrlPathHelper urlPathHelper;
+	private final UrlPathHelper pathHelper;
 
 	private final PathMatcher pathMatcher;
 
@@ -105,7 +112,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			List<String> fileExtensions) {
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
-		this.urlPathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
+		this.pathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
 		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
@@ -179,7 +186,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this.urlPathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
 				this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
@@ -206,17 +213,24 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		String lookupPathNoSemicolonContent = (lookupPath.indexOf(';') != -1) ?
+				pathHelperNoSemicolonContent.getLookupPathForRequest(request) : null;
+
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
+			if (match == null && lookupPathNoSemicolonContent != null) {
+				match = getMatchingPattern(pattern, lookupPathNoSemicolonContent);
+			}
 			if (match != null) {
 				matches.add(match);
 			}
 		}
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
 		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.urlPathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
 					this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
@@ -225,7 +239,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return pattern;
 		}
 		if (this.useSuffixPatternMatch) {
-			if (useSmartSuffixPatternMatch(pattern, lookupPath)) {
+			if (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) {
 				for (String extension : this.fileExtensions) {
 					if (this.pathMatcher.match(pattern + extension, lookupPath)) {
 						return pattern + extension;
@@ -252,14 +266,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 	/**
-	 * Whether to match by known file extensions. Return "true" if file extensions
-	 * are configured, and the lookup path has a suffix.
-	 */
-	private boolean useSmartSuffixPatternMatch(String pattern, String lookupPath) {
-		return (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) ;
-	}
-
-	/**
 	 * Compare the two conditions based on the URL patterns they contain.
 	 * Patterns are compared one at a time, from top to bottom via
 	 * {@link PathMatcher#getPatternComparator(String)}. If all compared
@@ -272,7 +278,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * the best matches on top.
 	 */
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
 
 		Iterator<String> iterator = patterns.iterator();

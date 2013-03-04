@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.accept;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -55,6 +56,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	private final Set<MediaTypeFileExtensionResolver> fileExtensionResolvers =
 			new LinkedHashSet<MediaTypeFileExtensionResolver>();
 
+
 	/**
 	 * Create an instance with the given ContentNegotiationStrategy instances.
 	 * <p>Each instance is checked to see if it is also an implementation of
@@ -72,11 +74,28 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	}
 
 	/**
-	 * Create an instance with a {@link HeaderContentNegotiationStrategy}.
+	 * Create an instance with the given ContentNegotiationStrategy instances.
+	 * <p>Each instance is checked to see if it is also an implementation of
+	 * MediaTypeFileExtensionResolver, and if so it is registered as such.
+	 * @param strategies one more more ContentNegotiationStrategy instances
+	 */
+	public ContentNegotiationManager(Collection<ContentNegotiationStrategy> strategies) {
+		Assert.notEmpty(strategies, "At least one ContentNegotiationStrategy is expected");
+		this.contentNegotiationStrategies.addAll(strategies);
+		for (ContentNegotiationStrategy strategy : this.contentNegotiationStrategies) {
+			if (strategy instanceof MediaTypeFileExtensionResolver) {
+				this.fileExtensionResolvers.add((MediaTypeFileExtensionResolver) strategy);
+			}
+		}
+	}
+
+	/**
+	 * Create a default instance with a {@link HeaderContentNegotiationStrategy}.
 	 */
 	public ContentNegotiationManager() {
 		this(new HeaderContentNegotiationStrategy());
 	}
+
 
 	/**
 	 * Add MediaTypeFileExtensionResolver instances.

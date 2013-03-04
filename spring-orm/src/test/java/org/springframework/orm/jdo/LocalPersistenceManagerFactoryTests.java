@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.orm.jdo;
 
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -23,19 +28,18 @@ import java.util.Properties;
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.PersistenceManagerFactory;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
-public class LocalPersistenceManagerFactoryTests extends TestCase {
+public class LocalPersistenceManagerFactoryTests {
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBean() throws IOException {
-		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
-		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		final PersistenceManagerFactory pmf = mock(PersistenceManagerFactory.class);
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
 			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
@@ -47,6 +51,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		assertSame(pmf, pmfb.getObject());
 	}
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidSettings() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean();
 		try {
@@ -58,6 +63,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBeanWithIncompleteProperties() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean();
 		Properties props = new Properties();
@@ -72,6 +78,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidProperty() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
 			@Override
@@ -92,6 +99,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBeanWithFile() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
 			@Override
@@ -110,6 +118,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBeanWithName() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
 			@Override
@@ -128,6 +137,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalPersistenceManagerFactoryBeanWithNameAndProperties() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
 			@Override

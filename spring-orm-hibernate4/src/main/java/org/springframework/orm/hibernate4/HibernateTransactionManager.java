@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,16 @@ import javax.sql.DataSource;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.engine.transaction.spi.TransactionContext;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -100,7 +104,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
-		implements ResourceTransactionManager, InitializingBean {
+		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
 	private SessionFactory sessionFactory;
 
@@ -111,6 +115,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean prepareConnection = true;
 
 	private boolean hibernateManagedSession = false;
+
+	private Object entityInterceptor;
+
+	/**
+	 * Just needed for entityInterceptorBeanName.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -150,8 +162,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * The DataSource should match the one used by the Hibernate SessionFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the SessionFactory was configured with LocalDataSourceConnectionProvider,
-	 * i.e. by Spring's SessionFactoryBuilder with a specified "dataSource",
-	 * the DataSource will be auto-detected: You can still explictly specify the
+	 * i.e. by Spring's LocalSessionFactoryBean with a specified "dataSource",
+	 * the DataSource will be auto-detected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -188,7 +200,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
-	 * if set via SessionFactoryBuilder's {@code setDataSource}. Default is "true".
+	 * if set via LocalSessionFactoryBean's {@code setDataSource}. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource, in order
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
@@ -229,7 +241,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * to always return a proper Session when called for a Spring-managed transaction;
 	 * transaction begin will fail if the {@code getCurrentSession()} call fails.
 	 * <p>This mode will typically be used in combination with a custom Hibernate
-	 * {@link org.hibernate.context.CurrentSessionContext} implementation that stores
+	 * {@link org.hibernate.context.spi.CurrentSessionContext} implementation that stores
 	 * Sessions in a place other than Spring's TransactionSynchronizationManager.
 	 * It may also be used in combination with Spring's Open-Session-in-View support
 	 * (using Spring's default {@link SpringSessionContext}), in which case it subtly
@@ -242,9 +254,80 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		this.hibernateManagedSession = hibernateManagedSession;
 	}
 
+	/**
+	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
+	 * and change property values before writing to and reading from the database.
+	 * Will get applied to any new Session created by this transaction manager.
+	 * <p>Requires the bean factory to be known, to be able to resolve the bean
+	 * name to an interceptor instance on session creation. Typically used for
+	 * prototype interceptors, i.e. a new interceptor instance per session.
+	 * <p>Can also be used for shared interceptor instances, but it is recommended
+	 * to set the interceptor reference directly in such a scenario.
+	 * @param entityInterceptorBeanName the name of the entity interceptor in
+	 * the bean factory
+	 * @see #setBeanFactory
+	 * @see #setEntityInterceptor
+	 */
+	public void setEntityInterceptorBeanName(String entityInterceptorBeanName) {
+		this.entityInterceptor = entityInterceptorBeanName;
+	}
+
+	/**
+	 * Set a Hibernate entity interceptor that allows to inspect and change
+	 * property values before writing to and reading from the database.
+	 * Will get applied to any new Session created by this transaction manager.
+	 * <p>Such an interceptor can either be set at the SessionFactory level,
+	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
+	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
+	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
+	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
+	 * @see LocalSessionFactoryBean#setEntityInterceptor
+	 */
+	public void setEntityInterceptor(Interceptor entityInterceptor) {
+		this.entityInterceptor = entityInterceptor;
+	}
+
+	/**
+	 * Return the current Hibernate entity interceptor, or {@code null} if none.
+	 * Resolves an entity interceptor bean name via the bean factory,
+	 * if necessary.
+	 * @throws IllegalStateException if bean name specified but no bean factory set
+	 * @throws BeansException if bean name resolution via the bean factory failed
+	 * @see #setEntityInterceptor
+	 * @see #setEntityInterceptorBeanName
+	 * @see #setBeanFactory
+	 */
+	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
+		if (this.entityInterceptor instanceof Interceptor) {
+			return (Interceptor) entityInterceptor;
+		}
+		else if (this.entityInterceptor instanceof String) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
+			}
+			String beanName = (String) this.entityInterceptor;
+			return this.beanFactory.getBean(beanName, Interceptor.class);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * The bean factory just needs to be known for resolving entity interceptor
+	 * bean names. It does not need to be set for any other mode of operation.
+	 * @see #setEntityInterceptorBeanName
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");
+		}
+		if (this.entityInterceptor instanceof String && this.beanFactory == null) {
+			throw new IllegalArgumentException("Property 'beanFactory' is required for 'entityInterceptorBeanName'");
 		}
 
 		// Check for SessionFactory's DataSource.
@@ -325,7 +408,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		try {
 			if (txObject.getSessionHolder() == null || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
-				Session newSession = getSessionFactory().openSession();
+				Interceptor entityInterceptor = getEntityInterceptor();
+				Session newSession = (entityInterceptor != null ?
+						getSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
+						getSessionFactory().openSession());
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}
@@ -358,7 +444,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 
 			if (definition.isReadOnly() && txObject.isNewSession()) {
-				// Just set to NEVER in case of a new Session for this transaction.
+				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
 			}
 
@@ -586,7 +672,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occured
+	 * @param ex HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */

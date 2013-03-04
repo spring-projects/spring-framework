@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.transaction.aspectj;
-
-import java.lang.reflect.Method;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -42,45 +40,42 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract aspect AbstractTransactionAspect extends TransactionAspectSupport {
 
 	/**
-	 * Construct object using the given transaction metadata retrieval strategy.
+	 * Construct the aspect using the given transaction metadata retrieval strategy.
 	 * @param tas TransactionAttributeSource implementation, retrieving Spring
-	 * transaction metadata for each joinpoint. Write the subclass to pass in null
-	 * if it's intended to be configured by Setter Injection.
+	 * transaction metadata for each joinpoint. Implement the subclass to pass in
+	 * {@code null} if it is intended to be configured through Setter Injection.
 	 */
 	protected AbstractTransactionAspect(TransactionAttributeSource tas) {
 		setTransactionAttributeSource(tas);
 	}
 
 	@SuppressAjWarnings("adviceDidNotMatch")
-	before(Object txObject) : transactionalMethodExecution(txObject) {
+	Object around(final Object txObject): transactionalMethodExecution(txObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
-		Method method = methodSignature.getMethod();
-		TransactionInfo txInfo = createTransactionIfNecessary(method, txObject.getClass());
-	}
-
-	@SuppressAjWarnings("adviceDidNotMatch")
-	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
+		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
 		try {
-			completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
+			return invokeWithinTransaction(methodSignature.getMethod(), txObject.getClass(), new InvocationCallback() {
+				public Object proceedWithInvocation() throws Throwable {
+					return proceed(txObject);
+				}
+			});
 		}
-		catch (Throwable t2) {
-			logger.error("Failed to close transaction after throwing in a transactional method", t2);
+		catch (RuntimeException ex) {
+			throw ex;
 		}
-	}
-
-	@SuppressAjWarnings("adviceDidNotMatch")
-	after(Object txObject) returning() : transactionalMethodExecution(txObject) {
-		commitTransactionAfterReturning(TransactionAspectSupport.currentTransactionInfo());
-	}
-
-	@SuppressAjWarnings("adviceDidNotMatch")
-	after(Object txObject) : transactionalMethodExecution(txObject) {
-		cleanupTransactionInfo(TransactionAspectSupport.currentTransactionInfo());
+		catch (Error err) {
+			throw err;
+		}
+		catch (Throwable thr) {
+			Rethrower.rethrow(thr);
+			throw new IllegalStateException("Should never get here", thr);
+		}
 	}
 
 	/**
@@ -89,5 +84,23 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	 * will be retrieved using Spring's TransactionAttributeSource interface.
 	 */
 	protected abstract pointcut transactionalMethodExecution(Object txObject);
+
+
+	/**
+	 * Ugly but safe workaround: We need to be able to propagate checked exceptions,
+	 * despite AspectJ around advice supporting specifically declared exceptions only.
+	 */
+	private static class Rethrower {
+
+		public static void rethrow(final Throwable exception) {
+			class CheckedExceptionRethrower<T extends Throwable> {
+				@SuppressWarnings("unchecked")
+				private void rethrow(Throwable exception) throws T {
+					throw (T) exception;
+				}
+			}
+			new CheckedExceptionRethrower<RuntimeException>().rethrow(exception);
+		}
+	}
 
 }

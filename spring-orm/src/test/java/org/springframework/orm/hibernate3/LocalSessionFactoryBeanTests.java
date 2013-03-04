@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,13 @@
 
 package org.springframework.orm.hibernate3;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +38,6 @@ import java.util.Set;
 
 import javax.transaction.TransactionManager;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
@@ -51,6 +55,7 @@ import org.hibernate.engine.FilterDefinition;
 import org.hibernate.event.MergeEvent;
 import org.hibernate.event.MergeEventListener;
 import org.hibernate.mapping.TypeDef;
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -60,10 +65,12 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 05.03.2005
  */
-public class LocalSessionFactoryBeanTests extends TestCase {
+public class LocalSessionFactoryBeanTests {
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSource() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
@@ -99,6 +106,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheRegionFactory() throws Exception {
 		final RegionFactory regionFactory = new NoCachingRegionFactory(null);
@@ -134,6 +142,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheProvider() throws Exception {
 		final CacheProvider cacheProvider = new NoCacheProvider();
@@ -170,6 +179,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithTransactionAwareDataSource() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
@@ -207,11 +217,11 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResources() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
-		MockControl tmControl = MockControl.createControl(TransactionManager.class);
-		final TransactionManager tm = (TransactionManager) tmControl.getMock();
+		final TransactionManager tm = mock(TransactionManager.class);
 		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			@Override
@@ -254,6 +264,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(2));
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSourceAndMappingJarLocations() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
@@ -289,6 +300,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSourceAndProperties() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
@@ -333,6 +345,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
+	@Test
 	public void testLocalSessionFactoryBeanWithValidProperties() throws Exception {
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
@@ -354,6 +367,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
+	@Test
 	public void testLocalSessionFactoryBeanWithInvalidProperties() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean();
 		sfb.setMappingResources(new String[0]);
@@ -368,6 +382,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalSessionFactoryBeanWithInvalidMappings() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean();
 		sfb.setMappingResources(new String[]{"mapping.hbm.xml"});
@@ -379,12 +394,9 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLocalSessionFactoryBeanWithCustomSessionFactory() throws Exception {
-		MockControl factoryControl = MockControl.createControl(SessionFactory.class);
-		final SessionFactory sessionFactory = (SessionFactory) factoryControl.getMock();
-		sessionFactory.close();
-		factoryControl.setVoidCallable(1);
-		factoryControl.replay();
+		final SessionFactory sessionFactory = mock(SessionFactory.class);
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			@Override
 			protected SessionFactory newSessionFactory(Configuration config) {
@@ -397,9 +409,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.afterPropertiesSet();
 		assertTrue(sessionFactory == sfb.getObject());
 		sfb.destroy();
-		factoryControl.verify();
+		verify(sessionFactory).close();
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithEntityInterceptor() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
@@ -415,9 +428,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		};
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
-		MockControl interceptorControl = MockControl.createControl(Interceptor.class);
-		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
-		interceptorControl.replay();
+		Interceptor entityInterceptor = mock(Interceptor.class);
 		sfb.setEntityInterceptor(entityInterceptor);
 		try {
 			sfb.afterPropertiesSet();
@@ -429,6 +440,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithNamingStrategy() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
@@ -455,6 +467,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheStrategies() throws Exception {
 		final Properties registeredClassCache = new Properties();
@@ -484,10 +497,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
 		Properties classCache = new Properties();
-		classCache.setProperty("org.springframework.beans.TestBean", "read-write");
+		classCache.setProperty("org.springframework.tests.sample.beans.TestBean", "read-write");
 		sfb.setEntityCacheStrategies(classCache);
 		Properties collectionCache = new Properties();
-		collectionCache.setProperty("org.springframework.beans.TestBean.friends", "read-only");
+		collectionCache.setProperty("org.springframework.tests.sample.beans.TestBean.friends", "read-only");
 		sfb.setCollectionCacheStrategies(collectionCache);
 		sfb.afterPropertiesSet();
 
@@ -495,6 +508,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(collectionCache, registeredCollectionCache);
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheStrategiesAndRegions() throws Exception {
 		final Properties registeredClassCache = new Properties();
@@ -523,10 +537,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
 		Properties classCache = new Properties();
-		classCache.setProperty("org.springframework.beans.TestBean", "read-write,myRegion");
+		classCache.setProperty("org.springframework.tests.sample.beans.TestBean", "read-write,myRegion");
 		sfb.setEntityCacheStrategies(classCache);
 		Properties collectionCache = new Properties();
-		collectionCache.setProperty("org.springframework.beans.TestBean.friends", "read-only,myRegion");
+		collectionCache.setProperty("org.springframework.tests.sample.beans.TestBean.friends", "read-only,myRegion");
 		sfb.setCollectionCacheStrategies(collectionCache);
 		sfb.afterPropertiesSet();
 
@@ -534,6 +548,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(collectionCache, registeredCollectionCache);
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithEventListeners() throws Exception {
 		final Map registeredListeners = new HashMap();
@@ -562,6 +577,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(listeners, registeredListeners);
 	}
 
+	@Test
 	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithEventListenerSet() throws Exception {
 		final Map registeredListeners = new HashMap();
@@ -594,6 +610,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	}
 
 	/*
+	@Test
 	public void testLocalSessionFactoryBeanWithFilterDefinitions() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("filterDefinitions.xml", getClass()));
 		FilterTestLocalSessionFactoryBean sf = (FilterTestLocalSessionFactoryBean) xbf.getBean("&sessionFactory");
@@ -613,6 +630,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	}
 	*/
 
+	@Test
 	public void testLocalSessionFactoryBeanWithTypeDefinitions() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new ClassPathResource("typeDefinitions.xml", getClass()));

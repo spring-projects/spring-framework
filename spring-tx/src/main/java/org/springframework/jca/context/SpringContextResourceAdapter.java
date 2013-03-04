@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -226,6 +227,19 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof SpringContextResourceAdapter &&
+				ObjectUtils.nullSafeEquals(getContextConfigLocation(),
+						((SpringContextResourceAdapter) obj).getContextConfigLocation()));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(getContextConfigLocation());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,9 +70,9 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 	 * Returns {@code null} if the message could not be resolved.
 	 */
 	@Override
-	protected Object handleGetObject(String code) {
+	protected Object handleGetObject(String key) {
 		try {
-			return this.messageSource.getMessage(code, null, this.locale);
+			return this.messageSource.getMessage(key, null, this.locale);
 		}
 		catch (NoSuchMessageException ex) {
 			return null;
@@ -80,12 +80,29 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 	}
 
 	/**
-	 * This implementation returns {@code null}, as a MessageSource does
-	 * not allow for enumerating the defined message codes.
+	 * This implementation checks whether the target MessageSource can resolve
+	 * a message for the given key, translating {@code NoSuchMessageException}
+	 * accordingly. In contrast to ResourceBundle's default implementation in
+	 * JDK 1.6, this does not rely on the capability to enumerate message keys.
+	 */
+	@Override
+	public boolean containsKey(String key) {
+		try {
+			this.messageSource.getMessage(key, null, this.locale);
+			return true;
+		}
+		catch (NoSuchMessageException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation throws {@code UnsupportedOperationException},
+	 * as a MessageSource does not allow for enumerating the defined message codes.
 	 */
 	@Override
 	public Enumeration<String> getKeys() {
-		return null;
+		throw new UnsupportedOperationException("MessageSourceResourceBundle does not support enumerating its keys");
 	}
 
 	/**

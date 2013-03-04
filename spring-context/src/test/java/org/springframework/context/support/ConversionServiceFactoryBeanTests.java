@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import org.springframework.beans.ResourceTestBean;
+import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -33,6 +33,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.*;
 
 /**
@@ -136,8 +137,8 @@ public class ConversionServiceFactoryBeanTests {
 
 		public ComplexConstructorArgument(Map<String, Class<?>> map) {
 			assertTrue(!map.isEmpty());
-			assertTrue(map.keySet().iterator().next() instanceof String);
-			assertTrue(map.values().iterator().next() instanceof Class);
+			assertThat(map.keySet().iterator().next(), instanceOf(String.class));
+			assertThat(map.values().iterator().next(), instanceOf(Class.class));
 		}
 	}
 

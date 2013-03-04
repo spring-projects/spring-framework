@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,13 @@ package org.springframework.orm.jpa.openjpa;
 import org.junit.Ignore;
 
 /**
- * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA (see SPR-3873 for more details).
+ * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA
+ * (see SPR-3873 for more details).
  *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  */
-// TODO [SPR-10074] this test causes gradle to hang.
-// When run independently e.g. `./gradlew :spring-orm:test -Dtest.single=OpenJpaEntity...`
-// it works fine. When run together with all other tests e.g. `./gradlew :spring-orm:test`
-// it hangs on the 'testCanSerializeProxies' test method. Note that this test DOES pass in
-// Eclipse, even when the entire 'spring-orm' module is run. Run gradle with '-i' to
-// get more details when reproducing the hanging test.
-@Ignore("this test causes gradle to hang")
+@Ignore("This test causes gradle to hang. See SPR-10333.")
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
 	@Override

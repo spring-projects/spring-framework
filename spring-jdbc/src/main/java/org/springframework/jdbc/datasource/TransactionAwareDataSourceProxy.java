@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,10 @@ import org.springframework.util.Assert;
  * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections
  * (which implement the {@link ConnectionProxy} interface) in order to handle
  * close calls properly. Therefore, the returned Connections cannot be cast
- * to a native JDBC Connection type like OracleConnection or to a connection
+ * to a native JDBC Connection type such as OracleConnection or to a connection
  * pool implementation type. Use a corresponding
  * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
- * to retrieve the native JDBC Connection.
+ * or JDBC 4's {@link Connection#unwrap} to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
  * @since 1.1

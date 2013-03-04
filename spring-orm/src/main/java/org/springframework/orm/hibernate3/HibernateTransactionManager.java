@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,7 +196,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the SessionFactory was configured with LocalDataSourceConnectionProvider,
 	 * i.e. by Spring's LocalSessionFactoryBean with a specified "dataSource",
-	 * the DataSource will be auto-detected: You can still explictly specify the
+	 * the DataSource will be auto-detected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -527,7 +527,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 
 			if (definition.isReadOnly() && txObject.isNewSession()) {
-				// Just set to NEVER in case of a new Session for this transaction.
+				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setFlushMode(FlushMode.MANUAL);
 			}
 
@@ -779,7 +779,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occured
+	 * @param ex HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 * @see #setJdbcExceptionTranslator
@@ -798,7 +798,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Convert the given Hibernate JDBCException to an appropriate exception
 	 * from the {@code org.springframework.dao} hierarchy, using the
 	 * given SQLExceptionTranslator.
-	 * @param ex Hibernate JDBCException that occured
+	 * @param ex Hibernate JDBCException that occurred
 	 * @param translator the SQLExceptionTranslator to use
 	 * @return a corresponding DataAccessException
 	 */
@@ -887,6 +887,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.sessionHolder.getSession().flush();

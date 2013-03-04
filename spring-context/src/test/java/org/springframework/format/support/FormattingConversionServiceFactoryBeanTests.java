@@ -130,7 +130,6 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 	private static class TestBean {
 
-		@SuppressWarnings("unused")
 		@NumberFormat(style = Style.PERCENT)
 		private double percent;
 

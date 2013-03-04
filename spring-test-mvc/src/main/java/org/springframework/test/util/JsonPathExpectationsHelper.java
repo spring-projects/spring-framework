@@ -17,7 +17,8 @@
 package org.springframework.test.util;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.text.ParseException;
@@ -95,6 +96,10 @@ public class JsonPathExpectationsHelper {
 				fail("Got a list of values " + actualValue + " instead of the value " + expectedValue);
 			}
 			actualValue = actualValueList.get(0);
+		}
+		else if (actualValue != null && expectedValue != null) {
+			assertEquals("For JSON path " + this.expression + " type of value",
+					expectedValue.getClass(), actualValue.getClass());
 		}
 		assertEquals("JSON path" + this.expression, expectedValue, actualValue);
 	}

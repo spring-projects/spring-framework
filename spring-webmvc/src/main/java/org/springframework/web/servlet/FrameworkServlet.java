@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -39,11 +40,13 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
@@ -638,7 +641,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		// the context is refreshed; do it eagerly here to ensure servlet property sources
 		// are in place for use in any post-processing or initialization that occurs
 		// below prior to #refresh
-		wac.getEnvironment().initPropertySources(getServletContext(), getServletConfig());
+		ConfigurableEnvironment env = wac.getEnvironment();
+		if (env instanceof ConfigurableWebEnvironment) {
+			((ConfigurableWebEnvironment)env).initPropertySources(getServletContext(), getServletConfig());
+		}
 
 		postProcessWebApplicationContext(wac);
 
@@ -861,10 +867,18 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				return;
 			}
 		}
-		super.doOptions(request, response);
-		String allowedMethods = response.getHeader("Allow");
-		allowedMethods += ", " + RequestMethod.PATCH.name();
-		response.setHeader("Allow", allowedMethods);
+
+		// Use response wrapper for Servlet 2.5 compatibility where
+		// the getHeader() method does not exist
+		super.doOptions(request, new HttpServletResponseWrapper(response) {
+			@Override
+			public void setHeader(String name, String value) {
+				if("Allow".equals(name)) {
+					value = (StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+				}
+				super.setHeader(name, value);
+			}
+		});
 	}
 
 	/**

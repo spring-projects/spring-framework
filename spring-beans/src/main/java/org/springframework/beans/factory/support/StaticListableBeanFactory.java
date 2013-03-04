@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
@@ -117,8 +118,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		if (beanNames.length == 1) {
 			return getBean(beanNames[0], requiredType);
 		}
+		else if (beanNames.length > 1) {
+			throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+		}
 		else {
-			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " + beanNames.length);
+			throw new NoSuchBeanDefinitionException(requiredType);
 		}
 	}
 

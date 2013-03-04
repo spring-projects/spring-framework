@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import org.easymock.MockControl;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
-import org.springframework.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -163,6 +163,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	public void testGetBeansOfTypeWithAbstract() {
 		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
+		assertNotNull(beansOfType);
 	}
 
 	/**
@@ -172,7 +173,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		try {
 			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
-			ITestBean testBean = (ITestBean) bf.getBean("noTransactionAttributeSource");
+			bf.getBean("noTransactionAttributeSource");
 			fail("Should require TransactionAttributeSource to be set");
 		}
 		catch (FatalBeanException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,6 @@
 
 package org.springframework.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,9 +24,17 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.hamcrest.Matchers;
+
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.objects.TestObject;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -47,19 +46,19 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void findField() {
-		Field field = ReflectionUtils.findField(TestBeanSubclassWithPublicField.class, "publicField", String.class);
+		Field field = ReflectionUtils.findField(TestObjectSubclassWithPublicField.class, "publicField", String.class);
 		assertNotNull(field);
 		assertEquals("publicField", field.getName());
 		assertEquals(String.class, field.getType());
 		assertTrue("Field should be public.", Modifier.isPublic(field.getModifiers()));
 
-		field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "prot", String.class);
+		field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "prot", String.class);
 		assertNotNull(field);
 		assertEquals("prot", field.getName());
 		assertEquals(String.class, field.getType());
 		assertTrue("Field should be protected.", Modifier.isProtected(field.getModifiers()));
 
-		field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 		assertNotNull(field);
 		assertEquals("name", field.getName());
 		assertEquals(String.class, field.getType());
@@ -68,8 +67,8 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void setField() {
-		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
-		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		final TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
+		final Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 
 		ReflectionUtils.makeAccessible(field);
 
@@ -83,8 +82,8 @@ public class ReflectionUtilsTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void setFieldIllegal() {
-		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
-		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		final TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
+		final Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 		ReflectionUtils.setField(field, testBean, "FooBar");
 	}
 
@@ -92,11 +91,11 @@ public class ReflectionUtilsTests {
 	public void invokeMethod() throws Exception {
 		String rob = "Rob Harrop";
 
-		TestBean bean = new TestBean();
+		TestObject bean = new TestObject();
 		bean.setName(rob);
 
-		Method getName = TestBean.class.getMethod("getName", (Class[]) null);
-		Method setName = TestBean.class.getMethod("setName", new Class[] { String.class });
+		Method getName = TestObject.class.getMethod("getName", (Class[]) null);
+		Method setName = TestObject.class.getMethod("setName", new Class[] { String.class });
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
 		assertEquals("Incorrect name returned", rob, name);
@@ -123,7 +122,7 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void copySrcToDestinationOfIncorrectClass() {
-		TestBean src = new TestBean();
+		TestObject src = new TestObject();
 		String dest = new String();
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
@@ -135,7 +134,7 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void rejectsNullSrc() {
-		TestBean src = null;
+		TestObject src = null;
 		String dest = new String();
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
@@ -147,7 +146,7 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void rejectsNullDest() {
-		TestBean src = new TestBean();
+		TestObject src = new TestObject();
 		String dest = null;
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
@@ -159,15 +158,15 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void validCopy() {
-		TestBean src = new TestBean();
-		TestBean dest = new TestBean();
+		TestObject src = new TestObject();
+		TestObject dest = new TestObject();
 		testValidCopy(src, dest);
 	}
 
 	@Test
 	public void validCopyOnSubTypeWithNewField() {
-		TestBeanSubclassWithNewField src = new TestBeanSubclassWithNewField();
-		TestBeanSubclassWithNewField dest = new TestBeanSubclassWithNewField();
+		TestObjectSubclassWithNewField src = new TestObjectSubclassWithNewField();
+		TestObjectSubclassWithNewField dest = new TestObjectSubclassWithNewField();
 		src.magic = 11;
 
 		// Will check inherited fields are copied
@@ -180,8 +179,8 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void validCopyToSubType() {
-		TestBean src = new TestBean();
-		TestBeanSubclassWithNewField dest = new TestBeanSubclassWithNewField();
+		TestObject src = new TestObject();
+		TestObjectSubclassWithNewField dest = new TestObjectSubclassWithNewField();
 		dest.magic = 11;
 		testValidCopy(src, dest);
 		// Should have left this one alone
@@ -190,28 +189,27 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void validCopyToSubTypeWithFinalField() {
-		TestBeanSubclassWithFinalField src = new TestBeanSubclassWithFinalField();
-		TestBeanSubclassWithFinalField dest = new TestBeanSubclassWithFinalField();
+		TestObjectSubclassWithFinalField src = new TestObjectSubclassWithFinalField();
+		TestObjectSubclassWithFinalField dest = new TestObjectSubclassWithFinalField();
 		// Check that this doesn't fail due to attempt to assign final
 		testValidCopy(src, dest);
 	}
 
-	private void testValidCopy(TestBean src, TestBean dest) {
+	private void testValidCopy(TestObject src, TestObject dest) {
 		src.setName("freddie");
 		src.setAge(15);
-		src.setSpouse(new TestBean());
+		src.setSpouse(new TestObject());
 		assertFalse(src.getAge() == dest.getAge());
 
 		ReflectionUtils.shallowCopyFieldState(src, dest);
 		assertEquals(src.getAge(), dest.getAge());
 		assertEquals(src.getSpouse(), dest.getSpouse());
-		assertEquals(src.getDoctor(), dest.getDoctor());
 	}
 
 	@Test
 	public void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
-		ReflectionUtils.doWithMethods(TestBean.class, mc, new ReflectionUtils.MethodFilter() {
+		ReflectionUtils.doWithMethods(TestObject.class, mc, new ReflectionUtils.MethodFilter() {
 			@Override
 			public boolean matches(Method m) {
 				return Modifier.isProtected(m.getModifiers());
@@ -227,7 +225,7 @@ public class ReflectionUtilsTests {
 	@Test
 	public void duplicatesFound() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
-		ReflectionUtils.doWithMethods(TestBeanSubclass.class, mc);
+		ReflectionUtils.doWithMethods(TestObjectSubclass.class, mc);
 		int absquatulateCount = 0;
 		for (String name : mc.getMethodNames()) {
 			if (name.equals("absquatulate")) {
@@ -348,6 +346,43 @@ public class ReflectionUtilsTests {
 		assertFalse(ObjectUtils.containsElement(methods, Parent.class.getMethod("m1")));
 	}
 
+	@Test
+	public void getUniqueDeclaredMethods_isFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
+
+		@SuppressWarnings("unused")
+		class C {
+			void m00() { } void m01() { } void m02() { } void m03() { } void m04() { }
+			void m05() { } void m06() { } void m07() { } void m08() { } void m09() { }
+			void m10() { } void m11() { } void m12() { } void m13() { } void m14() { }
+			void m15() { } void m16() { } void m17() { } void m18() { } void m19() { }
+			void m20() { } void m21() { } void m22() { } void m23() { } void m24() { }
+			void m25() { } void m26() { } void m27() { } void m28() { } void m29() { }
+			void m30() { } void m31() { } void m32() { } void m33() { } void m34() { }
+			void m35() { } void m36() { } void m37() { } void m38() { } void m39() { }
+			void m40() { } void m41() { } void m42() { } void m43() { } void m44() { }
+			void m45() { } void m46() { } void m47() { } void m48() { } void m49() { }
+			void m50() { } void m51() { } void m52() { } void m53() { } void m54() { }
+			void m55() { } void m56() { } void m57() { } void m58() { } void m59() { }
+			void m60() { } void m61() { } void m62() { } void m63() { } void m64() { }
+			void m65() { } void m66() { } void m67() { } void m68() { } void m69() { }
+			void m70() { } void m71() { } void m72() { } void m73() { } void m74() { }
+			void m75() { } void m76() { } void m77() { } void m78() { } void m79() { }
+			void m80() { } void m81() { } void m82() { } void m83() { } void m84() { }
+			void m85() { } void m86() { } void m87() { } void m88() { } void m89() { }
+			void m90() { } void m91() { } void m92() { } void m93() { } void m94() { }
+			void m95() { } void m96() { } void m97() { } void m98() { } void m99() { }
+		}
+
+		StopWatch sw = new StopWatch();
+		sw.start();
+		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(C.class);
+		sw.stop();
+		long totalMs = sw.getTotalTimeMillis();
+		assertThat(methods.length, Matchers.greaterThan(100));
+		assertThat(totalMs, Matchers.lessThan(10L));
+	}
+
 	private static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
 
 		private List<String> methodNames = new LinkedList<String>();
@@ -370,7 +405,7 @@ public class ReflectionUtilsTests {
 		}
 	}
 
-	private static class TestBeanSubclass extends TestBean {
+	private static class TestObjectSubclass extends TestObject {
 
 		@Override
 		public void absquatulate() {
@@ -378,20 +413,20 @@ public class ReflectionUtilsTests {
 		}
 	}
 
-	private static class TestBeanSubclassWithPublicField extends TestBean {
+	private static class TestObjectSubclassWithPublicField extends TestObject {
 
 		@SuppressWarnings("unused")
 		public String publicField = "foo";
 	}
 
-	private static class TestBeanSubclassWithNewField extends TestBean {
+	private static class TestObjectSubclassWithNewField extends TestObject {
 
 		private int magic;
 
 		protected String prot = "foo";
 	}
 
-	private static class TestBeanSubclassWithFinalField extends TestBean {
+	private static class TestObjectSubclassWithFinalField extends TestObject {
 
 		@SuppressWarnings("unused")
 		private final String foo = "will break naive copy that doesn't exclude statics";

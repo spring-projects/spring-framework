@@ -3,8 +3,8 @@
 
 <beans>
 
-	<bean id="foo" class="org.springframework.beans.TestBean"/>
+	<bean id="foo" class="org.springframework.tests.sample.beans.TestBean"/>
 
-	<bean name="otherFoo,foo" class="org.springframework.beans.TestBean"/>
+	<bean name="otherFoo,foo" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

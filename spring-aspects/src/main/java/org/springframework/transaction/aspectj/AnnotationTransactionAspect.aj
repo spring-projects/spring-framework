@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,16 +49,14 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	}
 
 	/**
-	 * Matches the execution of any public method in a type with the
-	 * Transactional annotation, or any subtype of a type with the
-	 * Transactional annotation.
+	 * Matches the execution of any public method in a type with the Transactional
+	 * annotation, or any subtype of a type with the Transactional annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtTransactionalType() :
 		execution(public * ((@Transactional *)+).*(..)) && within(@Transactional *);
 
 	/**
-	 * Matches the execution of any method with the
-	 * Transactional annotation.
+	 * Matches the execution of any method with the Transactional annotation.
 	 */
 	private pointcut executionOfTransactionalMethod() :
 		execution(@Transactional * *(..));

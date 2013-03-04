@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import javax.activation.FileTypeMap;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequestDispatcher;
@@ -210,7 +209,7 @@ public class MockPortletContext implements PortletContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return new Vector<String>(this.attributes.keySet()).elements();
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	public void setAttribute(String name, Object value) {

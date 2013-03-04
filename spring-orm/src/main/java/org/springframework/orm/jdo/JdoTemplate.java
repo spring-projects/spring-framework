@@ -481,7 +481,6 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 	public Collection find(final String queryString) throws DataAccessException {
 		return execute(new JdoCallback<Collection>() {
-			@SuppressWarnings("unchecked")
 			public Collection doInJdo(PersistenceManager pm) throws JDOException {
 				Query query = pm.newQuery(queryString);
 				prepareQuery(query);

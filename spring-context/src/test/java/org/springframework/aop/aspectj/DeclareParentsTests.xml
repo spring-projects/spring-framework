@@ -8,7 +8,7 @@
 	<aop:config>
 		<aop:aspect id="beforeAdviceBindingTests" ref="introduction">
 			<aop:declare-parents
-					types-matching="org.springframework.beans..*"
+					types-matching="org.springframework.tests.sample.beans..*"
 			    implement-interface="test.mixin.Lockable"
 					default-impl="test.mixin.DefaultLockable"
 			/>
@@ -17,11 +17,11 @@
 					pointcut="execution(* set*(*)) and this(mixin)"
 					arg-names="mixin"
 			/>
-		</aop:aspect>		
+		</aop:aspect>
 	</aop:config>
 
 	<bean id="introduction" class="org.springframework.aop.aspectj.NonAnnotatedMakeLockable"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

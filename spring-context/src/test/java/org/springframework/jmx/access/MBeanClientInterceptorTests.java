@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,18 +29,23 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxException;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Chris Beams
  */
 public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
@@ -78,6 +83,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		return (IJmxTestBean) factory.getObject();
 	}
 
+	@Test
 	public void testProxyClassIsDifferent() throws Exception {
 		if (!runTests)
 			return;
@@ -85,6 +91,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertTrue("The proxy class should be different than the base class", (proxy.getClass() != IJmxTestBean.class));
 	}
 
+	@Test
 	public void testDifferentProxiesSameClass() throws Exception {
 		if (!runTests)
 			return;
@@ -95,6 +102,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertSame("The proxy classes should be the same", proxy1.getClass(), proxy2.getClass());
 	}
 
+	@Test
 	public void testGetAttributeValue() throws Exception {
 		if (!runTests)
 			return;
@@ -103,6 +111,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The age should be 100", 100, age);
 	}
 
+	@Test
 	public void testSetAttributeValue() throws Exception {
 		if (!runTests)
 			return;
@@ -111,6 +120,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
 	}
 
+	@Test
 	public void testSetAttributeValueWithRuntimeException() throws Exception {
 		if (!runTests)
 			return;
@@ -123,6 +133,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testSetAttributeValueWithCheckedException() throws Exception {
 		if (!runTests)
 			return;
@@ -135,6 +146,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testSetAttributeValueWithIOException() throws Exception {
 		if (!runTests)
 			return;
@@ -147,6 +159,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testSetReadOnlyAttribute() throws Exception {
 		if (!runTests)
 			return;
@@ -159,6 +172,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	@Test
 	public void testInvokeNoArgs() throws Exception {
 		if (!runTests)
 			return;
@@ -167,6 +181,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The operation should return 1", 1, result);
 	}
 
+	@Test
 	public void testInvokeArgs() throws Exception {
 		if (!runTests)
 			return;
@@ -175,6 +190,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The operation should return 3", 3, result);
 	}
 
+	@Test
 	public void testInvokeUnexposedMethodWithException() throws Exception {
 		if (!runTests)
 			return;
@@ -187,18 +203,12 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
-	// TODO [SPR-8089] Clean up ignored JMX tests.
-	//
-	// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
-	// that tests on the CI server -- as well as those in Eclipse -- do in
-	// fact get ignored. So we leave @Ignore here so that developers can
-	// easily search for ignored tests.
-	//
-	// Once fixed, renamed to test* instead of ignore*.
-	@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
-	public void ignoreTestLazyConnectionToRemote() throws Exception {
+	@Test
+	public void testTestLazyConnectionToRemote() throws Exception {
 		if (!runTests)
 			return;
+
+		Assume.group(TestGroup.JMXMP);
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
 		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import java.math.BigDecimal;
 import org.junit.Test;
 
 import org.springframework.core.JdkVersion;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
 
-import test.beans.TestBean;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
@@ -193,7 +193,6 @@ public class ExtendedBeanInfoTests {
 			}
 		}
 		class Child extends Parent {
-			@Override
 			public Integer getProperty1() {
 				return 2;
 			}
@@ -215,7 +214,6 @@ public class ExtendedBeanInfoTests {
 	@Test
 	public void cornerSpr9453() throws IntrospectionException {
 		final class Bean implements Spr9453<Class<?>> {
-			@Override
 			public Class<?> getProp() {
 				return null;
 			}
@@ -605,9 +603,7 @@ public class ExtendedBeanInfoTests {
 			public Number setFoo(String foo) { return null; }
 		}
 		class C extends B {
-			@Override
 			public String getFoo() { return null; }
-			@Override
 			public Integer setFoo(String foo) { return null; }
 		}
 
@@ -879,7 +875,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	interface TextBookOperations extends BookOperations {
-		@Override
 		TextBook getBook();
 	}
 
@@ -889,7 +884,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	class LawLibrary extends Library implements TextBookOperations {
-		@Override
 		public LawBook getBook() { return null; }
 	}
 
@@ -904,7 +898,6 @@ public class ExtendedBeanInfoTests {
 		}
 
 		class B extends A {
-			@Override
 			public boolean isTargetMethod() {
 				return false;
 			}
@@ -981,7 +974,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	static class WithStaticWriteMethod {
-		@SuppressWarnings("unused")
 		public static void setProp1(String prop1) {
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.scheduling.timer;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -23,7 +26,7 @@ import java.util.TimerTask;
 
 import junit.framework.TestCase;
 
-import org.springframework.scheduling.TestMethodInvokingTask;
+import org.springframework.tests.context.TestMethodInvokingTask;
 
 /**
  * @author Juergen Hoeller
@@ -84,7 +87,7 @@ public class TimerSupportTests extends TestCase {
 		try {
 			timerFactoryBean.setScheduledTimerTasks(tasks);
 			timerFactoryBean.afterPropertiesSet();
-			assertTrue(timerFactoryBean.getObject() instanceof Timer);
+			assertThat(timerFactoryBean.getObject(), instanceOf(Timer.class));
 			timerTask0.run();
 			timerTask1.run();
 			timerTask2.run();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.aspectj;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
+import org.aspectj.lang.annotation.control.CodeGenerationHint;
 
 /**
  * Abstract base aspect that can perform Dependency
@@ -51,6 +52,7 @@ public abstract aspect AbstractDependencyInjectionAspect {
 	 * Select the most-specific initialization join point
 	 * (most concrete class) for the initialization of an instance.
 	 */
+	@CodeGenerationHint(ifNameSuffix="6f1")
 	public pointcut mostSpecificSubTypeConstruction() :
 		if(thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
 

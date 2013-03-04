@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import static org.junit.Assert.assertEquals;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.util.SerializationTestUtils;
+
 import test.aop.PerThisAspect;
-import test.util.SerializationTestUtils;
 
 /**
  * @author Rob Harrop

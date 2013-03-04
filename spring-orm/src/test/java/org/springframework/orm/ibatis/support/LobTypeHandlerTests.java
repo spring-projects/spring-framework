@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,29 @@
 
 package org.springframework.orm.ibatis.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.easymock.ArgumentsMatcher;
-import org.easymock.MockControl;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -41,42 +49,33 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 27.02.2005
  */
-public class LobTypeHandlerTests extends TestCase {
+public class LobTypeHandlerTests {
 
-	private MockControl rsControl = MockControl.createControl(ResultSet.class);
-	private ResultSet rs = (ResultSet) rsControl.getMock();
-	private MockControl psControl = MockControl.createControl(PreparedStatement.class);
-	private PreparedStatement ps = (PreparedStatement) psControl.getMock();
+	private ResultSet rs = mock(ResultSet.class);
+	private PreparedStatement ps = mock(PreparedStatement.class);
 
-	private MockControl lobHandlerControl = MockControl.createControl(LobHandler.class);
-	private LobHandler lobHandler = (LobHandler) lobHandlerControl.getMock();
-	private MockControl lobCreatorControl = MockControl.createControl(LobCreator.class);
-	private LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
+	private LobHandler lobHandler = mock(LobHandler.class);
+	private LobCreator lobCreator = mock(LobCreator.class);
 
-	@Override
-	protected void setUp() throws SQLException {
-		rs.findColumn("column");
-		rsControl.setReturnValue(1);
-
-		lobHandler.getLobCreator();
-		lobHandlerControl.setReturnValue(lobCreator);
-		lobCreator.close();
-		lobCreatorControl.setVoidCallable(1);
-
-		rsControl.replay();
-		psControl.replay();
+	@Before
+	public void setUp() throws Exception {
+		given(rs.findColumn("column")).willReturn(1);
+		given(lobHandler.getLobCreator()).willReturn(lobCreator);
 	}
 
-	public void testClobStringTypeHandler() throws Exception {
-		lobHandler.getClobAsString(rs, 1);
-		lobHandlerControl.setReturnValue("content", 2);
-		lobCreator.setClobAsString(ps, 1, "content");
-		lobCreatorControl.setVoidCallable(1);
+	@After
+	public void tearDown() throws Exception {
+		verify(lobCreator).close();
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+	}
 
-		lobHandlerControl.replay();
-		lobCreatorControl.replay();
+	@Test
+	public void testClobStringTypeHandler() throws Exception {
+		given(lobHandler.getClobAsString(rs, 1)).willReturn("content");
 
 		ClobStringTypeHandler type = new ClobStringTypeHandler(lobHandler);
 		assertEquals("content", type.valueOf("content"));
@@ -95,19 +94,15 @@ public class LobTypeHandlerTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+		verify(lobCreator).setClobAsString(ps, 1, "content");
 	}
 
+	@Test
 	public void testClobStringTypeWithSynchronizedConnection() throws Exception {
 		DataSource dsTarget = new DriverManagerDataSource();
 		DataSource ds = new LazyConnectionDataSourceProxy(dsTarget);
 
-		lobHandler.getClobAsString(rs, 1);
-		lobHandlerControl.setReturnValue("content", 2);
-		lobCreator.setClobAsString(ps, 1, "content");
-		lobCreatorControl.setVoidCallable(1);
-
-		lobHandlerControl.replay();
-		lobCreatorControl.replay();
+		given(lobHandler.getClobAsString(rs, 1)).willReturn("content");
 
 		ClobStringTypeHandler type = new ClobStringTypeHandler(lobHandler);
 		assertEquals("content", type.valueOf("content"));
@@ -129,17 +124,13 @@ public class LobTypeHandlerTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+		verify(lobCreator).setClobAsString(ps, 1, "content");
 	}
 
+	@Test
 	public void testBlobByteArrayType() throws Exception {
 		byte[] content = "content".getBytes();
-		lobHandler.getBlobAsBytes(rs, 1);
-		lobHandlerControl.setReturnValue(content, 2);
-		lobCreator.setBlobAsBytes(ps, 1, content);
-		lobCreatorControl.setVoidCallable(1);
-
-		lobHandlerControl.replay();
-		lobCreatorControl.replay();
+		given(lobHandler.getBlobAsBytes(rs, 1)).willReturn(content);
 
 		BlobByteArrayTypeHandler type = new BlobByteArrayTypeHandler(lobHandler);
 		assertTrue(Arrays.equals(content, (byte[]) type.valueOf("content")));
@@ -157,32 +148,23 @@ public class LobTypeHandlerTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+		verify(lobCreator).setBlobAsBytes(ps, 1, content);
 	}
 
+	@Test
 	public void testBlobSerializableType() throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
 		oos.writeObject("content");
 		oos.close();
 
-		lobHandler.getBlobAsBinaryStream(rs, 1);
-		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()), 1);
-		lobHandler.getBlobAsBinaryStream(rs, 1);
-		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()), 1);
-		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+		given(lobHandler.getBlobAsBinaryStream(rs, 1)).willAnswer(new Answer<InputStream>() {
 			@Override
-			public boolean matches(Object[] o1, Object[] o2) {
-				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
-			}
-			@Override
-			public String toString(Object[] objects) {
-				return null;
+			public InputStream answer(InvocationOnMock invocation)
+					throws Throwable {
+				return new ByteArrayInputStream(baos.toByteArray());
 			}
 		});
-
-		lobHandlerControl.replay();
-		lobCreatorControl.replay();
 
 		BlobSerializableTypeHandler type = new BlobSerializableTypeHandler(lobHandler);
 		assertEquals("content", type.valueOf("content"));
@@ -200,15 +182,12 @@ public class LobTypeHandlerTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+		verify(lobCreator).setBlobAsBytes(ps, 1, baos.toByteArray());
 	}
 
+	@Test
 	public void testBlobSerializableTypeWithNull() throws Exception {
-		lobHandler.getBlobAsBinaryStream(rs, 1);
-		lobHandlerControl.setReturnValue(null, 2);
-		lobCreator.setBlobAsBytes(ps, 1, null);
-
-		lobHandlerControl.replay();
-		lobCreatorControl.replay();
+		given(lobHandler.getBlobAsBinaryStream(rs, 1)).willReturn(null);
 
 		BlobSerializableTypeHandler type = new BlobSerializableTypeHandler(lobHandler);
 		assertEquals(null, type.valueOf(null));
@@ -225,21 +204,6 @@ public class LobTypeHandlerTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+		verify(lobCreator).setBlobAsBytes(ps, 1, null);
 	}
-
-	@Override
-	protected void tearDown() {
-		try {
-			rsControl.verify();
-			psControl.verify();
-			lobHandlerControl.verify();
-			lobCreatorControl.verify();
-		}
-		catch (IllegalStateException ex) {
-			// ignore: test method didn't call replay
-		}
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-	}
-
 }
