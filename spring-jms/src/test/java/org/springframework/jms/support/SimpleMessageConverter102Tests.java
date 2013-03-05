@@ -16,12 +16,6 @@
 
 package org.springframework.jms.support;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-
 import java.io.ByteArrayInputStream;
 import java.util.Random;
 
@@ -34,6 +28,10 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for the {@link SimpleMessageConverter102} class.
@@ -53,7 +51,7 @@ public final class SimpleMessageConverter102Tests {
 
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
 		given(session.createBytesMessage()).willReturn(message);
-		given(message.readBytes(any(byte[].class))).willAnswer(new Answer<Integer>() {
+		given(message.readBytes((byte[]) anyObject())).willAnswer(new Answer<Integer>() {
 			@Override
 			public Integer answer(InvocationOnMock invocation) throws Throwable {
 				return byteArrayInputStream.read((byte[])invocation.getArguments()[0]);

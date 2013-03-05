@@ -16,11 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +25,9 @@ import javax.jdo.PersistenceManagerFactory;
 
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller

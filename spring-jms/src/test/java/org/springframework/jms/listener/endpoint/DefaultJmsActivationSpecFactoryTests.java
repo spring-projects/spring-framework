@@ -16,9 +16,6 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import javax.jms.Destination;
 import javax.jms.Session;
 
@@ -27,6 +24,8 @@ import junit.framework.TestCase;
 import org.springframework.jca.StubResourceAdapter;
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.support.destination.DestinationResolver;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Agim Emruli

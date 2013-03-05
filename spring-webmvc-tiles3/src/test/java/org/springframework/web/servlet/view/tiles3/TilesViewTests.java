@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,9 @@
  */
 package org.springframework.web.servlet.view.tiles3;
 
-import static org.easymock.EasyMock.and;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.tiles.request.ApplicationContext;
 import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
 import org.junit.Before;
@@ -36,6 +27,10 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link TilesView}.
@@ -67,7 +62,7 @@ public class TilesViewTests {
 
 		response = new MockHttpServletResponse();
 
-		renderer = createMock(Renderer.class);
+		renderer = mock(Renderer.class);
 
 		view = new TilesView();
 		view.setServletContext(servletContext);
@@ -80,16 +75,9 @@ public class TilesViewTests {
 	public void testRender() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("modelAttribute", "modelValue");
-
-		ApplicationContext tilesContext = createMock(ApplicationContext.class);
-
-		renderer.render(eq(VIEW_PATH), and(isA(Request.class), isA(Request.class)));
-		replay(tilesContext, renderer);
-
 		view.render(model, request, response);
-
 		assertEquals("modelValue", request.getAttribute("modelAttribute"));
-		verify(tilesContext, renderer);
+		verify(renderer).render(eq(VIEW_PATH), isA(Request.class));
 	}
 
 }

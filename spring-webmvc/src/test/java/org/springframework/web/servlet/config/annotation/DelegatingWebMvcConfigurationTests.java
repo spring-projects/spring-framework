@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,17 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.easymock.Capture;
-import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -48,6 +42,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * A test fixture for {@link DelegatingWebMvcConfiguration} tests.
  *
@@ -57,46 +54,59 @@ public class DelegatingWebMvcConfigurationTests {
 
 	private DelegatingWebMvcConfiguration delegatingConfig;
 
+	@Mock
 	private WebMvcConfigurer webMvcConfigurer;
+
+	@Captor
+	private ArgumentCaptor<List<HttpMessageConverter<?>>> converters;
+
+	@Captor
+	private ArgumentCaptor<ContentNegotiationConfigurer> contentNegotiationConfigurer;
+
+	@Captor
+	private ArgumentCaptor<FormattingConversionService> conversionService;
+
+	@Captor
+	private ArgumentCaptor<List<HandlerMethodArgumentResolver>> resolvers;
+
+	@Captor
+	private ArgumentCaptor<List<HandlerMethodReturnValueHandler>> handlers;
+
+	@Captor
+	private ArgumentCaptor<AsyncSupportConfigurer> asyncConfigurer;
+
+	@Captor
+	private ArgumentCaptor<List<HandlerExceptionResolver>> exceptionResolvers;
+
 
 	@Before
 	public void setUp() {
-		webMvcConfigurer = EasyMock.createMock(WebMvcConfigurer.class);
+		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebMvcConfiguration();
 	}
 
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
-		Capture<ContentNegotiationConfigurer> contentNegotiationConfigurer = new Capture<ContentNegotiationConfigurer>();
-		Capture<FormattingConversionService> conversionService = new Capture<FormattingConversionService>();
-		Capture<List<HandlerMethodArgumentResolver>> resolvers = new Capture<List<HandlerMethodArgumentResolver>>();
-		Capture<List<HandlerMethodReturnValueHandler>> handlers = new Capture<List<HandlerMethodReturnValueHandler>>();
-		Capture<AsyncSupportConfigurer> asyncConfigurer = new Capture<AsyncSupportConfigurer>();
-
-		webMvcConfigurer.configureMessageConverters(capture(converters));
-		webMvcConfigurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
-		expect(webMvcConfigurer.getValidator()).andReturn(null);
-		expect(webMvcConfigurer.getMessageCodesResolver()).andReturn(null);
-		webMvcConfigurer.addFormatters(capture(conversionService));
-		webMvcConfigurer.addArgumentResolvers(capture(resolvers));
-		webMvcConfigurer.addReturnValueHandlers(capture(handlers));
-		webMvcConfigurer.configureAsyncSupport(capture(asyncConfigurer));
-		replay(webMvcConfigurer);
 
 		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
 		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
-		assertSame(conversionService.getValue(), initializer.getConversionService());
+		ConversionService initializerConversionService = initializer.getConversionService();
 		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 
+		verify(webMvcConfigurer).configureMessageConverters(converters.capture());
+		verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
+		verify(webMvcConfigurer).addFormatters(conversionService.capture());
+		verify(webMvcConfigurer).addArgumentResolvers(resolvers.capture());
+		verify(webMvcConfigurer).addReturnValueHandlers(handlers.capture());
+		verify(webMvcConfigurer).configureAsyncSupport(asyncConfigurer.capture());
+
+		assertSame(conversionService.getValue(), initializerConversionService);
 		assertEquals(0, resolvers.getValue().size());
 		assertEquals(0, handlers.getValue().size());
 		assertEquals(converters.getValue(), adapter.getMessageConverters());
 		assertNotNull(asyncConfigurer);
-
-		verify(webMvcConfigurer);
 	}
 
 	@Test
@@ -117,47 +127,39 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void getCustomValidator() {
-		expect(webMvcConfigurer.getValidator()).andReturn(new LocalValidatorFactoryBean());
-		replay(webMvcConfigurer);
+		given(webMvcConfigurer.getValidator()).willReturn(new LocalValidatorFactoryBean());
 
 		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
 		delegatingConfig.mvcValidator();
 
-		verify(webMvcConfigurer);
+		verify(webMvcConfigurer).getValidator();
 	}
 
 	@Test
 	public void getCustomMessageCodesResolver() {
-		expect(webMvcConfigurer.getMessageCodesResolver()).andReturn(new DefaultMessageCodesResolver());
-		replay(webMvcConfigurer);
+		given(webMvcConfigurer.getMessageCodesResolver()).willReturn(new DefaultMessageCodesResolver());
 
 		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
 		delegatingConfig.getMessageCodesResolver();
 
-		verify(webMvcConfigurer);
+		verify(webMvcConfigurer).getMessageCodesResolver();
 	}
 
 	@Test
 	public void handlerExceptionResolver() throws Exception {
-		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
-		Capture<List<HandlerExceptionResolver>> exceptionResolvers = new Capture<List<HandlerExceptionResolver>>();
-		Capture<ContentNegotiationConfigurer> contentNegotiationConfigurer = new Capture<ContentNegotiationConfigurer>();
-
-		webMvcConfigurer.configureMessageConverters(capture(converters));
-		webMvcConfigurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
-		webMvcConfigurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
-		replay(webMvcConfigurer);
 
 		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
 		delegatingConfig.handlerExceptionResolver();
+
+		verify(webMvcConfigurer).configureMessageConverters(converters.capture());
+		verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
+		verify(webMvcConfigurer).configureHandlerExceptionResolvers(exceptionResolvers.capture());
 
 		assertEquals(3, exceptionResolvers.getValue().size());
 		assertTrue(exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver);
 		assertTrue(exceptionResolvers.getValue().get(1) instanceof ResponseStatusExceptionResolver);
 		assertTrue(exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver);
 		assertTrue(converters.getValue().size() > 0);
-
-		verify(webMvcConfigurer);
 	}
 
 	@Test

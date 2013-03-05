@@ -16,13 +16,6 @@
 
 package org.springframework.jms.support.converter;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import javax.jms.BytesMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -33,6 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma

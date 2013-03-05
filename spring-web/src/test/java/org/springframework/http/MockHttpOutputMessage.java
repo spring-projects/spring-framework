@@ -16,12 +16,12 @@
 
 package org.springframework.http;
 
-import static org.mockito.Mockito.spy;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma

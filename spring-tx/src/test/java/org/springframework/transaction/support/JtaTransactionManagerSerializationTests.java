@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.support;
 
-import static org.easymock.EasyMock.createMock;
-
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
@@ -27,15 +25,17 @@ import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rod Johnson
  */
 public class JtaTransactionManagerSerializationTests extends TestCase {
 
 	public void testSerializable() throws Exception {
-		UserTransaction ut1 = createMock(UserTransaction.class);
-		UserTransaction ut2 = createMock(UserTransaction.class);
-		TransactionManager tm = createMock(TransactionManager.class);
+		UserTransaction ut1 = mock(UserTransaction.class);
+		UserTransaction ut2 = mock(UserTransaction.class);
+		TransactionManager tm = mock(TransactionManager.class);
 
 		JtaTransactionManager jtam = new JtaTransactionManager();
 		jtam.setUserTransaction(ut1);

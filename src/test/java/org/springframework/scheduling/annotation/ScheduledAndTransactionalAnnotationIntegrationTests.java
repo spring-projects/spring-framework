@@ -16,14 +16,6 @@
 
 package org.springframework.scheduling.annotation;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
@@ -42,6 +34,10 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -81,7 +77,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isAopProxy(repository), is(true));
+		assertThat("repository is not a proxy", AopUtils.isAopProxy(repository), equalTo(true));
 		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
 		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
 	}
@@ -142,8 +138,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		@Bean
 		public PersistenceExceptionTranslator peTranslator() {
-			PersistenceExceptionTranslator txlator = createMock(PersistenceExceptionTranslator.class);
-			replay(txlator);
+			PersistenceExceptionTranslator txlator = mock(PersistenceExceptionTranslator.class);
 			return txlator;
 		}
 	}

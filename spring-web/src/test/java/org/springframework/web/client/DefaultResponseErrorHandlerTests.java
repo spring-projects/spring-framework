@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,13 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
-import static org.easymock.EasyMock.*;
-
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link DefaultResponseErrorHandler}.
@@ -45,27 +43,19 @@ public class DefaultResponseErrorHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		handler = new DefaultResponseErrorHandler();
-		response = createMock(ClientHttpResponse.class);
+		response = mock(ClientHttpResponse.class);
 	}
 
 	@Test
 	public void hasErrorTrue() throws Exception {
-		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
-
-		replay(response);
+		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
 		assertTrue(handler.hasError(response));
-
-		verify(response);
 	}
 
 	@Test
 	public void hasErrorFalse() throws Exception {
-		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
-
-		replay(response);
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		assertFalse(handler.hasError(response));
-
-		verify(response);
 	}
 
 	@Test
@@ -73,12 +63,10 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
-		expect(response.getStatusText()).andReturn("Not Found");
-		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
-		expect(response.getBody()).andReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
-
-		replay(response);
+		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getStatusText()).willReturn("Not Found");
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
 
 		try {
 			handler.handleError(response);
@@ -87,8 +75,6 @@ public class DefaultResponseErrorHandlerTests {
 		catch (HttpClientErrorException e) {
 			assertSame(headers, e.getResponseHeaders());
 		}
-
-		verify(response);
 	}
 
 	@Test(expected = HttpClientErrorException.class)
@@ -96,16 +82,12 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
-		expect(response.getStatusText()).andReturn("Not Found");
-		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
-		expect(response.getBody()).andThrow(new IOException());
-
-		replay(response);
+		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getStatusText()).willReturn("Not Found");
+		given(response.getHeaders()).willReturn(headers);
+		given(response.getBody()).willThrow(new IOException());
 
 		handler.handleError(response);
-
-		verify(response);
 	}
 
 	@Test(expected = HttpClientErrorException.class)
@@ -113,16 +95,11 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
-		expect(response.getStatusText()).andReturn("Not Found");
-		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
-		expect(response.getBody()).andReturn(null);
-
-		replay(response);
+		given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+		given(response.getStatusText()).willReturn("Not Found");
+		given(response.getHeaders()).willReturn(headers);
 
 		handler.handleError(response);
-
-		verify(response);
 	}
 
 	// SPR-9406
@@ -132,13 +109,10 @@ public class DefaultResponseErrorHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 
-		expect(response.getStatusCode()).andThrow(new IllegalArgumentException("No matching constant for 999"));
-		expect(response.getRawStatusCode()).andReturn(999);
-		expect(response.getStatusText()).andReturn("Custom status code");
-		expect(response.getHeaders()).andReturn(headers).atLeastOnce();
-		expect(response.getBody()).andReturn(null);
-
-		replay(response);
+		given(response.getStatusCode()).willThrow(new IllegalArgumentException("No matching constant for 999"));
+		given(response.getRawStatusCode()).willReturn(999);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
 
 		handler.handleError(response);
 	}

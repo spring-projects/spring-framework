@@ -16,13 +16,12 @@
 
 package org.springframework.jms.support.destination;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-
 import javax.jms.ConnectionFactory;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
