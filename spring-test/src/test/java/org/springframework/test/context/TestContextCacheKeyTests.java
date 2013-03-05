@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,8 @@ public class TestContextCacheKeyTests {
 		loadAppCtxAndAssertCacheStats(FooBarProfilesTestCase.class, 1, 3, 1);
 		loadAppCtxAndAssertCacheStats(FooBarProfilesTestCase.class, 1, 4, 1);
 		loadAppCtxAndAssertCacheStats(BarFooProfilesTestCase.class, 1, 5, 1);
+		// Profiles loaded using resolver should be used in hash
+		loadAppCtxAndAssertCacheStats(BarFooProfilesResolvedTestCase.class, 1, 6, 1);
 	}
 
 
@@ -97,6 +99,18 @@ public class TestContextCacheKeyTests {
 	@ActiveProfiles({ "bar", "foo" })
 	@ContextConfiguration(classes = Config.class, loader = AnnotationConfigContextLoader.class)
 	private static class BarFooProfilesTestCase {
+	}
+
+	public static class FooBarActiveProfilesResolver implements ActiveProfilesResolver {
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return new String[] {"foo", "bar"};
+		}
+	}
+
+	@ActiveProfiles(resolver = FooBarActiveProfilesResolver.class)
+	@ContextConfiguration(classes = Config.class, loader = AnnotationConfigContextLoader.class)
+	private static class BarFooProfilesResolvedTestCase {
 	}
 
 }

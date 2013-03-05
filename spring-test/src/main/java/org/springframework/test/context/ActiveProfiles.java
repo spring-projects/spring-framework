@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
  * @see SmartContextLoader
  * @see MergedContextConfiguration
  * @see ContextConfiguration
+ * @see ActiveProfilesResolver
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.Profile
  */
@@ -47,8 +48,8 @@ public @interface ActiveProfiles {
 	 * Alias for {@link #profiles}.
 	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
-	 * with {@link #profiles}, but it may be used <em>instead</em> of
-	 * {@link #profiles}.
+	 * with {@link #profiles} neither {@link #resolver}, but it may be used
+	 * <em>instead</em> of {@link #profiles}.
 	 */
 	String[] value() default {};
 
@@ -56,8 +57,8 @@ public @interface ActiveProfiles {
 	 * The bean definition profiles to activate.
 	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
-	 * with {@link #value}, but it may be used <em>instead</em> of
-	 * {@link #value}.
+	 * with {@link #value} neither {@link #resolver}, but it may be used <em>instead</em>
+	 * of {@link #value}.
 	 */
 	String[] profiles() default {};
 
@@ -105,5 +106,22 @@ public @interface ActiveProfiles {
 	 * @see ContextConfiguration#inheritLocations
 	 */
 	boolean inheritProfiles() default true;
+
+	/**
+	 * {@link ActiveProfilesResolver} implementation class to use for resolving active
+	 * profiles for the test at runtime.
+	 *
+	 * <p>Implementation of {@link ActiveProfilesResolver} will not be registered as bean
+	 * and may <strong>not</strong> access {@code ApplicationContext} in any way.
+	 *
+	 * <p>This attribute may <strong>not</strong> be used in conjunction
+	 * with {@link #value} neither {@link #profiles}, but it may be used <em>instead</em>
+	 * of them.
+	 *
+	 * @since 3.2.2
+	 * @see ActiveProfilesResolver
+	 * @see ActiveProfilesResolver#resolve(Class)
+	 */
+	Class<? extends ActiveProfilesResolver> resolver() default ActiveProfilesResolver.class;
 
 }
