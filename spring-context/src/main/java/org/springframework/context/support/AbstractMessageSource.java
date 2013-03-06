@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 
 import org.springframework.context.HierarchicalMessageSource;
 import org.springframework.context.MessageSource;
@@ -64,6 +65,8 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 	private MessageSource parentMessageSource;
 
+	private Properties commonMessages;
+
 	private boolean useCodeAsDefaultMessage = false;
 
 
@@ -73,6 +76,23 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 	public MessageSource getParentMessageSource() {
 		return this.parentMessageSource;
+	}
+
+	/**
+	 * Specify locale-independent common messages, with the message code as key
+	 * and the full message String (may contain argument placeholders) as value.
+	 * <p>May also link to an externally defined Properties object, e.g. defined
+	 * through a {@link org.springframework.beans.factory.config.PropertiesFactoryBean}.
+	 */
+	public void setCommonMessages(Properties commonMessages) {
+		this.commonMessages = commonMessages;
+	}
+
+	/**
+	 * Return a Properties object defining locale-independent common messages, if any.
+	 */
+	protected Properties getCommonMessages() {
+		return this.commonMessages;
 	}
 
 	/**
@@ -207,6 +227,15 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 				synchronized (messageFormat) {
 					return messageFormat.format(argsToUse);
 				}
+			}
+		}
+
+		// Check locale-independent common messages for the given message code.
+		Properties commonMessages = getCommonMessages();
+		if (commonMessages != null) {
+			String commonMessage = commonMessages.getProperty(code);
+			if (commonMessage != null) {
+				return formatMessage(commonMessage, args, locale);
 			}
 		}
 
