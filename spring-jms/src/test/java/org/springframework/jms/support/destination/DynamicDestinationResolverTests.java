@@ -16,9 +16,6 @@
 
 package org.springframework.jms.support.destination;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
@@ -31,6 +28,8 @@ import junit.framework.TestCase;
 
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.StubTopic;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans

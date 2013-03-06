@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
 import java.lang.instrument.ClassFileTransformer;
 
 import org.junit.Test;
 import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for @EnableLoadTimeWeaving

@@ -24,22 +24,23 @@ import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.MockControl;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
-import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test cases for AOP transaction management.
@@ -116,19 +117,16 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	private void doTestGetsAreNotTransactional(final ITestBean testBean) {
 		// Install facade
-		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
-		// Expect no methods
-		ptmControl.replay();
+		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
 		PlatformTransactionManagerFacade.delegate = ptm;
 
 		assertTrue("Age should not be " + testBean.getAge(), testBean.getAge() == 666);
-		// Check no calls
-		ptmControl.verify();
+
+		// Expect no methods
+		verifyZeroInteractions(ptm);
 
 		// Install facade expecting a call
-		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
-		final TransactionStatus ts = (TransactionStatus) statusControl.getMock();
+		final TransactionStatus ts = mock(TransactionStatus.class);
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
 			@Override
@@ -158,7 +156,6 @@ public class BeanFactoryTransactionTests extends TestCase {
 		int age = 666;
 		testBean.setAge(age);
 		assertTrue(testBean.getAge() == age);
-		ptmControl.verify();
 	}
 
 	public void testGetBeansOfTypeWithAbstract() {

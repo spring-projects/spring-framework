@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,6 @@
  */
 
 package org.springframework.web.method.annotation;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -47,6 +37,9 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Text fixture for {@link ModelFactory} tests.
@@ -153,9 +146,8 @@ public class ModelFactoryTests {
 		mavContainer.addAttribute(attrName, attrValue);
 
 		WebDataBinder dataBinder = new WebDataBinder(attrValue, attrName);
-		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
-		expect(binderFactory.createBinder(webRequest, attrValue, attrName)).andReturn(dataBinder);
-		replay(binderFactory);
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, attrValue, attrName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler);
 		modelFactory.updateModel(webRequest, mavContainer);
@@ -163,8 +155,6 @@ public class ModelFactoryTests {
 		assertEquals(attrValue, mavContainer.getModel().remove(attrName));
 		assertSame(dataBinder.getBindingResult(), mavContainer.getModel().remove(bindingResultKey(attrName)));
 		assertEquals(0, mavContainer.getModel().size());
-
-		verify(binderFactory);
 	}
 
 	@Test
@@ -181,17 +171,14 @@ public class ModelFactoryTests {
 		assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName, null));
 
 		WebDataBinder dataBinder = new WebDataBinder(attrValue, attrName);
-		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
-		expect(binderFactory.createBinder(webRequest, attrValue, attrName)).andReturn(dataBinder);
-		replay(binderFactory);
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, attrValue, attrName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler);
 		modelFactory.updateModel(webRequest, mavContainer);
 
 		assertEquals(attrValue, mavContainer.getModel().get(attrName));
 		assertNull(sessionAttributeStore.retrieveAttribute(webRequest, attrName));
-
-		verify(binderFactory);
 	}
 
 	private String bindingResultKey(String key) {

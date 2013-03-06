@@ -16,13 +16,6 @@
 
 package org.springframework.jms.listener.adapter;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.io.ByteArrayInputStream;
 
 import javax.jms.BytesMessage;
@@ -41,6 +34,9 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for the {@link MessageListenerAdapter102} class.

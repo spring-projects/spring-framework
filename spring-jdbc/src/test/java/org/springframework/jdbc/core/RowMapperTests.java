@@ -16,11 +16,6 @@
 
 package org.springframework.jdbc.core;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,9 +29,11 @@ import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
