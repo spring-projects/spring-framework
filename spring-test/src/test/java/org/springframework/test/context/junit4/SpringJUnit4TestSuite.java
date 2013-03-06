@@ -37,7 +37,9 @@ import org.springframework.test.context.junit4.annotation.ExplicitConfigClassesI
 import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
 import org.springframework.test.context.junit4.profile.annotation.DefaultProfileAnnotationConfigTests;
 import org.springframework.test.context.junit4.profile.annotation.DevProfileAnnotationConfigTests;
+import org.springframework.test.context.junit4.profile.annotation.DevProfileResolverAnnotationConfigTests;
 import org.springframework.test.context.junit4.profile.xml.DefaultProfileXmlConfigTests;
+import org.springframework.test.context.junit4.profile.xml.DevProfileResolverXmlConfigTests;
 import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTests;
 
 /**
@@ -77,8 +79,10 @@ StandardJUnit4FeaturesTests.class,//
 	DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests.class,//
 	DefaultProfileAnnotationConfigTests.class,//
 	DevProfileAnnotationConfigTests.class,//
+	DevProfileResolverAnnotationConfigTests.class,//
 	DefaultProfileXmlConfigTests.class,//
 	DevProfileXmlConfigTests.class,//
+	DevProfileResolverXmlConfigTests.class,//
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
 	RepeatedSpringRunnerTests.class,//

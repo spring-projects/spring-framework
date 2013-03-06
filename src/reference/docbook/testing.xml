@@ -56,8 +56,8 @@
         <interfacename>Environment</interfacename> and
         <interfacename>PropertySource</interfacename> abstractions introduced
         in Spring 3.1 (see <xref
-        linkend="new-in-3.1-environment-abstraction" /> and <xref
-        linkend="new-in-3.1-property-source-abstraction" />).
+        linkend="new-in-3.1-environment-abstraction"/> and <xref
+        linkend="new-in-3.1-property-source-abstraction"/>).
         <classname>MockEnvironment</classname> and
         <classname>MockPropertySource</classname> are useful for developing
         <emphasis>out-of-container</emphasis> tests for code that depends on
@@ -435,8 +435,8 @@
       <para>The <literal>spring-jdbc</literal> module provides support for
       configuring and launching an embedded database which can be used in
       integration tests that interact with a database. For details, see <xref
-      linkend="jdbc-embedded-database-support" /> and <xref
-      linkend="jdbc-embedded-database-dao-testing" />.</para>
+      linkend="jdbc-embedded-database-support"/> and <xref
+      linkend="jdbc-embedded-database-dao-testing"/>.</para>
     </section>
 
     <section xml:id="integration-testing-annotations">
@@ -600,7 +600,11 @@ public class DeveloperIntegrationTests {
             <note>
               <para><interfacename>@ActiveProfiles</interfacename> provides
               support for <emphasis>inheriting</emphasis> active bean
-              definition profiles declared by superclasses by default.</para>
+              definition profiles declared by superclasses by default. Also,
+              it is possible to determine active profiles at
+              <emphasis>runtime</emphasis> by providing
+              <interfacename>ActiveProfilesResolver</interfacename>
+              implementation.</para>
             </note>
 
             <para>See <link
@@ -1322,7 +1326,7 @@ public class MyWebAppTest {
           <interfacename>@Autowired</interfacename> is provided by the
           <classname>DependencyInjectionTestExecutionListener</classname>
           which is configured by default (see <xref
-          linkend="testcontext-fixture-di" />).</para>
+          linkend="testcontext-fixture-di"/>).</para>
         </tip>
 
         <para>Test classes that use the TestContext framework do not need to
@@ -1420,7 +1424,7 @@ public class MyTest {
 
           <para>To load an <interfacename>ApplicationContext</interfacename>
           for your tests using <emphasis>annotated classes</emphasis> (see
-          <xref linkend="beans-java" />), annotate your test class with
+          <xref linkend="beans-java"/>), annotate your test class with
           <interfacename>@ContextConfiguration</interfacename> and configure
           the <literal>classes</literal> attribute with an array that contains
           references to annotated classes.</para>
@@ -1489,7 +1493,7 @@ public class OrderServiceTest {
           <interfacename>@Configuration</interfacename> classes to configure
           specific Spring-managed components for your tests, or vice versa. As
           mentioned in <xref
-          linkend="integration-testing-annotations-spring" /> the TestContext
+          linkend="integration-testing-annotations-spring"/> the TestContext
           framework does not allow you to declare <emphasis>both</emphasis>
           via <interfacename>@ContextConfiguration</interfacename>, but this
           does not mean that you cannot use both.</para>
@@ -1872,7 +1876,114 @@ public class TransferServiceTest {
           <interfacename>@ContextConfiguration </interfacename>annotation. The
           body of the test class itself remains completely unchanged.</para>
 
-          <!-- TODO Consider documenting inheritance for active profiles. -->
+            <para>Often the same profiles are used for most of test classes in
+                a project. To avoid duplicating
+                <interfacename>@ActiveProfiles</interfacename>
+                annotation it is
+                possible to move declaration to the base class for tests.
+            </para>
+
+            <programlisting language="java">package com.bank.service;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(
+    classes = {
+        TransferServiceConfig.class,
+        StandaloneDataConfig.class,
+        JndiDataConfig.class})
+@ActiveProfiles("dev")
+public abstract class AbstractIntegrationTest {
+}
+            </programlisting>
+
+            <programlisting language="java">package com.bank.service;
+
+public class TransferServiceTest extend AbstractIntegrationTest {
+    @Autowired // "dev" profile inherited
+    private TransferService transferService;
+
+    @Test
+    public void testTransferService() {
+        // test the transferService
+    }
+}
+            </programlisting>
+
+            <para>Also
+                <interfacename>@ActiveProfiles</interfacename>
+                supports
+                <methodname>inheritProfiles</methodname>
+                property to disable active
+                profiles inheritance for some test.
+            </para>
+
+            <programlisting language="java">package com.bank.service;
+
+@ActiveProfiles(profiles = "production", inheritProfiles = false)
+public class ProductionTransferServiceTest extend AbstractIntegrationTest {
+    // "dev" provife overridden to "production"
+}
+            </programlisting>
+
+            <para>Furthermore, sometimes it is required to resolve active
+                profiles for test at runtime. There are several possible reasons for it:
+            </para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Usage of different active profiles for different operation
+                        systems
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Usage of special active profiles for continuous integration
+                        building servers
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Resolving profiles using different environment settings,
+                        custom class-level, package-level annotations and so
+                        on
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <para>
+                <interfacename>ActiveProfilesResolver</interfacename>
+                and
+                <methodname>resolver</methodname>
+                attribute in
+                <interfacename>@ActiveProfiles</interfacename>
+                allow to specify
+                concrete
+                <interfacename>@ActiveProfiles</interfacename>
+                implementation instead of using
+                <methodname>profiles</methodname>
+                attribute. Refer to the respective
+                Javadoc for further information.
+                <programlisting language="java">package com.bank.service;
+
+@ActiveProfiles(resolver = OperationSystemActiveProfilesResolver.class, inheritProfiles = false)
+public class ProductionTransferServiceTest extend AbstractIntegrationTest {
+    // "dev" provife overridden to current operation system name
+}
+                </programlisting>
+                <programlisting language="java">package com.bank.service.test;
+
+public class OperationSystemActiveProfilesResolver implements ActiveProfilesResolver {
+    @Override
+    String[] resolve(Class&lt;?&gt; testClass) {
+        // ...
+        return new String[] {operationSystem};
+    }
+}
+                </programlisting>
+            </para>
         </section>
 
         <section xml:id="testcontext-ctx-management-web">
@@ -2171,7 +2282,7 @@ public class WacTests {
           your test class or test method with
           <interfacename>@DirtiesContext</interfacename> (see the discussion
           of <interfacename>@DirtiesContext</interfacename> in <xref
-          linkend="integration-testing-annotations-spring" />). This instructs
+          linkend="integration-testing-annotations-spring"/>). This instructs
           Spring to remove the context from the cache and rebuild the
           application context before executing the next test. Note that
           support for the <interfacename>@DirtiesContext</interfacename>
@@ -2623,7 +2734,7 @@ public class FictitiousTransactionalTest {
 
 }</programlisting>
 
-        <anchor xml:id="testcontext-tx-false-positives" />
+        <anchor xml:id="testcontext-tx-false-positives"/>
 
         <note>
           <title>Avoid false positives when testing ORM code</title>

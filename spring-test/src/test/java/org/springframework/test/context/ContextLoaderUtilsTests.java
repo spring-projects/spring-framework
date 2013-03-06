@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -376,6 +376,70 @@ public class ContextLoaderUtilsTests {
 		assertTrue(list.contains("cat"));
 	}
 
+	@Test
+	public void resolveActiveProfilesUsingResolver() {
+		String[] profiles = resolveActiveProfiles(FooActiveProfilesTest.class);
+		assertNotNull(profiles);
+		assertEquals(1, profiles.length);
+		assertArrayEquals(new String[]{"foo"}, profiles);
+	}
+
+	@Test
+	public void resolveActiveProfilesUsingInheritedResolver() {
+		String[] profiles = resolveActiveProfiles(InheritedFooActiveProfilesTest.class);
+		assertNotNull(profiles);
+		assertEquals(1, profiles.length);
+		assertArrayEquals(new String[] { "foo" }, profiles);
+	}
+
+	@Test
+	public void resolveActiveProfilesUsingMergeInheritedResolver() {
+		String[] profiles = resolveActiveProfiles(MergeInheritedFooActiveProfilesTest.class);
+		assertNotNull(profiles);
+		assertEquals(2, profiles.length);
+		List<String> list = Arrays.asList(profiles);
+		assertTrue(list.contains("foo"));
+		assertTrue(list.contains("bar"));
+	}
+
+	@Test
+	public void resolveActiveProfilesUsingOverrideInheritedResolver() {
+		String[] profiles = resolveActiveProfiles(OverrideInheritedFooActiveProfilesTest.class);
+		assertNotNull(profiles);
+		assertEquals(1, profiles.length);
+		assertArrayEquals(new String[] { "bar" }, profiles);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void resolveConficting1ActiveProfiles() {
+		resolveActiveProfiles(Conficting1ActiveProfilesTest.class);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void resolveConficting2ActiveProfiles() {
+		resolveActiveProfiles(Conficting2ActiveProfilesTest.class);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void resolveConficting3ActiveProfiles() {
+		resolveActiveProfiles(Conficting3ActiveProfilesTest.class);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void resolvePrivateActiveProfiles() {
+		resolveActiveProfiles(PrivateActiveProfilesTest.class);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void resolveNoDefaultConstuctorActiveProfiles() {
+		resolveActiveProfiles(NoDefaultConstructorActiveProfilesTest.class);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void resolveNullActiveProfiles() {
+		resolveActiveProfiles(NullActiveProfilesTest.class);
+	}
+
 
 	private static class Enigma {
 	}
@@ -474,5 +538,83 @@ public class ContextLoaderUtilsTests {
 	@ContextConfiguration(classes = BarConfig.class, inheritLocations = false, initializers = BarInitializer.class, inheritInitializers = false)
 	private static class OverriddenInitializersAndClassesBar extends InitializersFoo {
 	}
+
+	public static class FooActiveProfilesResolver implements ActiveProfilesResolver {
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return new String[] {"foo"};
+		}
+	}
+
+	public static class BarActiveProfilesResolver implements ActiveProfilesResolver {
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return new String[] {"bar"};
+		}
+	}
+
+	public static class NullActiveProfilesResolver implements ActiveProfilesResolver {
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return null;
+		}
+	}
+
+	@ActiveProfiles(resolver = NullActiveProfilesResolver.class)
+	private static class NullActiveProfilesTest {
+	}
+
+	private static class PrivateActiveProfilesResolver implements ActiveProfilesResolver {
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return null;
+		}
+	}
+
+	public static class NoDefaultConstructorActiveProfilesResolver implements ActiveProfilesResolver {
+		public NoDefaultConstructorActiveProfilesResolver(Object agument) {}
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return null;
+		}
+	}
+
+	@ActiveProfiles(resolver = NoDefaultConstructorActiveProfilesResolver.class)
+	private static class NoDefaultConstructorActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = PrivateActiveProfilesResolver.class)
+	private static class PrivateActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = FooActiveProfilesResolver.class)
+	private static class FooActiveProfilesTest {
+	}
+
+	private static class InheritedFooActiveProfilesTest extends FooActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class)
+	private static class MergeInheritedFooActiveProfilesTest extends InheritedFooActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, inheritProfiles = false)
+	private static class OverrideInheritedFooActiveProfilesTest extends InheritedFooActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, profiles = "confict")
+	private static class Conficting1ActiveProfilesTest extends MergeInheritedFooActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, value = "confict")
+	private static class Conficting2ActiveProfilesTest extends FooActiveProfilesTest {
+	}
+
+	@ActiveProfiles(resolver = BarActiveProfilesResolver.class,
+			value = "confict", profiles = "conflict")
+	private static class Conficting3ActiveProfilesTest extends InheritedFooActiveProfilesTest {
+	}
+
+
 
 }
