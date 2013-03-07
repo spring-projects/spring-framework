@@ -33,21 +33,21 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
 /**
  * <p>
  * JUnit 4 based test class, which verifies the expected functionality of
- * {@link SpringJUnit4ClassRunner} in conjunction with support for application
- * contexts loaded from Java {@link Properties} files. Specifically, the
- * {@link ContextConfiguration#loader() loaderClass} and
- * {@link ContextConfiguration#resourceSuffix() resourceSuffix} attributes of
- * &#064;ContextConfiguration are tested.
+ * {@link SpringJUnit4ClassRunner} in conjunction with support for application contexts
+ * loaded from Java {@link Properties} files. Specifically, the
+ * {@link ContextConfiguration#loader() loader} attribute of {@code ContextConfiguration}
+ * and the
+ * {@link org.springframework.test.context.support.GenericPropertiesContextLoader#getResourceSuffix()
+ * resourceSuffix} property of {@code GenericPropertiesContextLoader} are tested.
  * </p>
  * <p>
- * Since no {@link ContextConfiguration#locations() locations} are explicitly
- * defined, the {@link ContextConfiguration#resourceSuffix() resourceSuffix} is
- * set to &quot;-context.properties&quot;, and
- * {@link ContextConfiguration#generateDefaultLocations() generateDefaultLocations}
- * is left set to its default value of {@code true}, this test class's
- * dependencies will be injected via
- * {@link Autowired annotation-based autowiring} from beans defined in the
- * {@link ApplicationContext} loaded from the default classpath resource: &quot;{@code /org/springframework/test/junit4/PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests-context.properties}&quot;.
+ * Since no {@link ContextConfiguration#locations() locations} are explicitly defined, the
+ * {@code resourceSuffix} is set to &quot;-context.properties&quot;, and since default
+ * resource locations will be detected by default, this test class's dependencies will be
+ * injected via {@link Autowired annotation-based autowiring} from beans defined in the
+ * {@link ApplicationContext} loaded from the default classpath resource: &quot;
+ * {@code /org/springframework/test/junit4/PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests-context.properties}
+ * &quot;.
  * </p>
  *
  * @author Sam Brannen

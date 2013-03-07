@@ -40,9 +40,9 @@ import org.springframework.util.ClassUtils;
  *
  * <p>There are various choices for DataSource implementations:
  * <ul>
- * <li>SingleConnectionDataSource (using the same Connection for all getConnection calls);
- * <li>DriverManagerDataSource (creating a new Connection on each getConnection call);
- * <li>Apache's Jakarta Commons DBCP offers BasicDataSource (a real pool).
+ * <li>{@code SingleConnectionDataSource} (using the same Connection for all getConnection calls)
+ * <li>{@code DriverManagerDataSource} (creating a new Connection on each getConnection call)
+ * <li>Apache's Jakarta Commons DBCP offers {@code org.apache.commons.dbcp.BasicDataSource} (a real pool)
  * </ul>
  *
  * <p>Typical usage in bootstrap code:
@@ -77,7 +77,6 @@ import org.springframework.util.ClassUtils;
  * @see SimpleNamingContext
  * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
- * @see org.apache.commons.dbcp.BasicDataSource
  */
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 

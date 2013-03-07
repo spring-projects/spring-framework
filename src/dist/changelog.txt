@@ -41,6 +41,8 @@ Changes in version 3.2.2 (2013-03-11)
 * MappingJackson(2)JsonView allows subclasses to access the ObjectMapper and to override content writing (SPR-7619)
 * Log4jWebConfigurer supports resolving placeholders against ServletContext init-parameters as well (SPR-10284)
 * consistent use of LinkedHashMaps and independent getAttributeNames Enumeration in Servlet/Portlet mocks (SPR-10224)
+* introduced support for context hierarchies in the TestContext framework (SPR-5613)
+* introduced support for WebApplicationContext hierarchies in the TestContext framework (SPR-9863)
 
 
 Changes in version 3.2.1 (2013-01-24)

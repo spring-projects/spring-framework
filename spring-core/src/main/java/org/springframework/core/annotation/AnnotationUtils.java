@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -240,14 +241,58 @@ public abstract class AnnotationUtils {
 	 * if not found
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
+	 * @see #findAnnotationDeclaringClassForTypes(List, Class)
+	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 */
 	public static Class<?> findAnnotationDeclaringClass(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || clazz.equals(Object.class)) {
 			return null;
 		}
-		return (isAnnotationDeclaredLocally(annotationType, clazz)) ? clazz :
-				findAnnotationDeclaringClass(annotationType, clazz.getSuperclass());
+		return (isAnnotationDeclaredLocally(annotationType, clazz)) ? clazz : findAnnotationDeclaringClass(
+			annotationType, clazz.getSuperclass());
+	}
+
+	/**
+	 * Find the first {@link Class} in the inheritance hierarchy of the specified
+	 * {@code clazz} (including the specified {@code clazz} itself) which declares
+	 * at least one of the specified {@code annotationTypes}, or {@code null} if
+	 * none of the specified annotation types could be found.
+	 * <p>If the supplied {@code clazz} is {@code null}, {@code null} will be
+	 * returned.
+	 * <p>If the supplied {@code clazz} is an interface, only the interface itself
+	 * will be checked; the inheritance hierarchy for interfaces will not be traversed.
+	 * <p>The standard {@link Class} API does not provide a mechanism for determining
+	 * which class in an inheritance hierarchy actually declares one of several
+	 * candidate {@linkplain Annotation annotations}, so we need to handle this
+	 * explicitly.
+	 * @param annotationTypes the list of Class objects corresponding to the
+	 * annotation types
+	 * @param clazz the Class object corresponding to the class on which to check
+	 * for the annotations, or {@code null}
+	 * @return the first {@link Class} in the inheritance hierarchy of the specified
+	 * {@code clazz} which declares an annotation of at least one of the specified
+	 * {@code annotationTypes}, or {@code null} if not found
+	 * @see Class#isAnnotationPresent(Class)
+	 * @see Class#getDeclaredAnnotations()
+	 * @see #findAnnotationDeclaringClass(Class, Class)
+	 * @see #isAnnotationDeclaredLocally(Class, Class)
+	 * @since 3.2.2
+	 */
+	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes,
+			Class<?> clazz) {
+		Assert.notEmpty(annotationTypes, "The list of annotation types must not be empty");
+		if (clazz == null || clazz.equals(Object.class)) {
+			return null;
+		}
+
+		for (Class<? extends Annotation> annotationType : annotationTypes) {
+			if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+				return clazz;
+			}
+		}
+
+		return findAnnotationDeclaringClassForTypes(annotationTypes, clazz.getSuperclass());
 	}
 
 	/**
@@ -348,8 +393,8 @@ public abstract class AnnotationUtils {
 	 * and corresponding attribute values as values
 	 * @since 3.1.1
 	 */
-	public static AnnotationAttributes getAnnotationAttributes(
-			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+	public static AnnotationAttributes getAnnotationAttributes(Annotation annotation, boolean classValuesAsString,
+			boolean nestedAnnotationsAsMap) {
 
 		AnnotationAttributes attrs = new AnnotationAttributes();
 		Method[] methods = annotation.annotationType().getDeclaredMethods();
@@ -371,15 +416,15 @@ public abstract class AnnotationUtils {
 						}
 					}
 					if (nestedAnnotationsAsMap && value instanceof Annotation) {
-						attrs.put(method.getName(), getAnnotationAttributes(
-								(Annotation)value, classValuesAsString, nestedAnnotationsAsMap));
+						attrs.put(method.getName(),
+							getAnnotationAttributes((Annotation) value, classValuesAsString, nestedAnnotationsAsMap));
 					}
 					else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
-						Annotation[] realAnnotations = (Annotation[])value;
+						Annotation[] realAnnotations = (Annotation[]) value;
 						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
 						for (int i = 0; i < realAnnotations.length; i++) {
-							mappedAnnotations[i] = getAnnotationAttributes(
-									realAnnotations[i], classValuesAsString, nestedAnnotationsAsMap);
+							mappedAnnotations[i] = getAnnotationAttributes(realAnnotations[i], classValuesAsString,
+								nestedAnnotationsAsMap);
 						}
 						attrs.put(method.getName(), mappedAnnotations);
 					}

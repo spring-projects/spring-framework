@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,11 +66,12 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see ContextHierarchy
+ * @see ActiveProfiles
  * @see ContextLoader
  * @see SmartContextLoader
  * @see ContextConfigurationAttributes
  * @see MergedContextConfiguration
- * @see ActiveProfiles
  * @see org.springframework.context.ApplicationContext
  */
 @Documented
@@ -282,5 +283,20 @@ public @interface ContextConfiguration {
 	 * @since 2.5
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
+
+	/**
+	 * The name of the context hierarchy level represented by this configuration.
+	 *
+	 * <p>If not specified the name will be inferred based on the numerical level within all
+	 * declared contexts within the hierarchy.
+	 *
+	 * <p>This attribute is only applicable when used within a test class hierarchy that is
+	 * configured using {@link ContextHierarchy @ContextHierarchy}, in which case the name
+	 * can be used for merging or overriding this configuration with configuration of the
+	 * same name in hierarchy levels defined in superclasses.
+	 *
+	 * @since 3.2.2
+	 */
+	String name() default "";
 
 }
