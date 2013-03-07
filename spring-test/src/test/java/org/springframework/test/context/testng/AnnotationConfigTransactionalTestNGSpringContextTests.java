@@ -43,10 +43,11 @@ import org.testng.annotations.Test;
 
 /**
  * Integration tests that verify support for
- * {@link import org.springframework.context.annotation.Configuration @Configuration}
- * classes with TestNG-based tests.
+ * {@link org.springframework.context.annotation.Configuration @Configuration} classes
+ * with TestNG-based tests.
  *
- * <p>Configuration will be loaded from
+ * <p>
+ * Configuration will be loaded from
  * {@link AnnotationConfigTransactionalTestNGSpringContextTests.ContextConfiguration}.
  *
  * @author Sam Brannen

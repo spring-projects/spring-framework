@@ -104,15 +104,14 @@ public class TestContextManager {
 	}
 
 	/**
-	 * Constructs a new {@code TestContextManager} for the specified {@link Class test class}
-	 * and automatically {@link #registerTestExecutionListeners registers} the
+	 * Constructs a new {@code TestContextManager} for the specified {@linkplain Class
+	 * test class} and automatically {@link #registerTestExecutionListeners registers} the
 	 * {@link TestExecutionListener TestExecutionListeners} configured for the test class
 	 * via the {@link TestExecutionListeners &#064;TestExecutionListeners} annotation.
 	 * @param testClass the test class to be managed
-	 * @param defaultContextLoaderClassName the name of the default
-	 * {@code ContextLoader} class to use (may be {@code null})
+	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
+	 * class to use (may be {@code null})
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
-	 * @see #retrieveTestExecutionListeners(Class)
 	 */
 	public TestContextManager(Class<?> testClass, String defaultContextLoaderClassName) {
 		this.testContext = new TestContext(testClass, contextCache, defaultContextLoaderClassName);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.test.context.support;
 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
@@ -66,6 +69,12 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 *
 	 * <ul>
 	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
+	 * <li>If the supplied {@code MergedContextConfiguration} references a
+	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
+	 * the corresponding {@link MergedContextConfiguration#getParentApplicationContext()
+	 * ApplicationContext} will be retrieved and
+	 * {@linkplain GenericApplicationContext#setParent(ApplicationContext) set as the parent}
+	 * for the context created by this method.</li>
 	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} for backwards
 	 * compatibility with the {@link org.springframework.test.context.ContextLoader
 	 * ContextLoader} SPI.</li>
@@ -97,6 +106,11 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		}
 
 		GenericApplicationContext context = new GenericApplicationContext();
+
+		ApplicationContext parent = mergedConfig.getParentApplicationContext();
+		if (parent != null) {
+			context.setParent(parent);
+		}
 		prepareContext(context);
 		prepareContext(context, mergedConfig);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
