@@ -28,11 +28,11 @@ import java.lang.annotation.Target;
  * a hierarchy of {@link org.springframework.context.ApplicationContext
  * ApplicationContexts} for integration tests.
  *
- * <h2>Examples</h2>
+ * <h3>Examples</h3>
  * <p>The following JUnit-based examples demonstrate common configuration
  * scenarios for integration tests that require the use of context hierarchies.
  *
- * <h3>Single Test Class with Context Hierarchy</h3>
+ * <h4>Single Test Class with Context Hierarchy</h4>
  * <p>{@code ControllerIntegrationTests} represents a typical integration testing
  * scenario for a Spring MVC web application by declaring a context hierarchy
  * consisting of two levels, one for the <em>root</em> {@code WebApplicationContext}
@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  *     // ...
  * }</pre>
  *
- * <h3>Class Hierarchy with Implicit Parent Context</h3>
+ * <h4>Class Hierarchy with Implicit Parent Context</h4>
  * <p>The following test classes define a context hierarchy within a test class
  * hierarchy. {@code AbstractWebTests} declares the configuration for a root
  * {@code WebApplicationContext} in a Spring-powered web application. Note,
@@ -82,7 +82,7 @@ import java.lang.annotation.Target;
  * &#064;ContextHierarchy(&#064;ContextConfiguration("/spring/rest-ws-config.xml")
  * public class RestWebServiceTests extends AbstractWebTests {}</pre>
  *
- * <h3>Class Hierarchy with Merged Context Hierarchy Configuration</h3>
+ * <h4>Class Hierarchy with Merged Context Hierarchy Configuration</h4>
  * <p>The following classes demonstrate the use of <em>named</em> hierarchy levels
  * in order to <em>merge</em> the configuration for specific levels in a context
  * hierarchy. {@code BaseTests} defines two levels in the hierarchy, {@code parent}
@@ -110,7 +110,7 @@ import java.lang.annotation.Target;
  * )
  * public class ExtendedTests extends BaseTests {}</pre>
  *
- * <h3>Class Hierarchy with Overridden Context Hierarchy Configuration</h3>
+ * <h4>Class Hierarchy with Overridden Context Hierarchy Configuration</h4>
  * <p>In contrast to the previous example, this example demonstrates how to
  * <em>override</em> the configuration for a given named level in a context hierarchy
  * by setting the {@link ContextConfiguration#inheritLocations} flag to {@code false}.
