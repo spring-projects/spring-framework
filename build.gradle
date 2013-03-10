@@ -509,6 +509,22 @@ project("spring-orm-hibernate4") {
 	}
 }
 
+project("spring-websocket") {
+	description = "Spring WebSocket support"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-context"))
+		compile(project(":spring-web"))
+		optional("javax.websocket:javax.websocket-api:1.0-b14")
+	}
+
+	repositories {
+		maven { url "http://repo.springsource.org/libs-release" }
+		maven { url "https://repository.apache.org" } // tomcat-websocket snapshot
+		maven { url "https://maven.java.net/content/groups/public/" } // javax.websocket-*
+	}
+}
+
 project("spring-webmvc") {
 	description = "Spring Web MVC"
 	dependencies {
