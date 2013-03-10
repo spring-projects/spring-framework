@@ -422,8 +422,8 @@ public class CronTriggerTests {
 
 	@Test
 	public void testSpecificHourSecond() throws Exception {
-		CronTrigger trigger = new CronTrigger("55 * 2 * * *", timeZone);
-		calendar.set(Calendar.HOUR_OF_DAY, 1);
+		CronTrigger trigger = new CronTrigger("55 * 10 * * *", timeZone);
+		calendar.set(Calendar.HOUR_OF_DAY, 9);
 		calendar.set(Calendar.SECOND, 54);
 		Date date = calendar.getTime();
 		TriggerContext context1 = getTriggerContext(date);
