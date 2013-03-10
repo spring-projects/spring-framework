@@ -287,13 +287,14 @@ public @interface ContextConfiguration {
 	/**
 	 * The name of the context hierarchy level represented by this configuration.
 	 *
-	 * <p>If not specified the name will be inferred based on the numerical level within all
-	 * declared contexts within the hierarchy.
+	 * <p>If not specified the name will be inferred based on the numerical level
+	 * within all declared contexts within the hierarchy.
 	 *
-	 * <p>This attribute is only applicable when used within a test class hierarchy that is
-	 * configured using {@link ContextHierarchy @ContextHierarchy}, in which case the name
-	 * can be used for merging or overriding this configuration with configuration of the
-	 * same name in hierarchy levels defined in superclasses.
+	 * <p>This attribute is only applicable when used within a test class hierarchy
+	 * that is configured using {@code @ContextHierarchy}, in which case the name
+	 * can be used for <em>merging</em> or <em>overriding</em> this configuration
+	 * with configuration of the same name in hierarchy levels defined in superclasses.
+	 * See the Javadoc for {@link ContextHierarchy @ContextHierarchy} for details.
 	 *
 	 * @since 3.2.2
 	 */
