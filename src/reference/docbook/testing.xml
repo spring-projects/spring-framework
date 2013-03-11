@@ -291,9 +291,9 @@
         framework can be configured to reload the configuration and rebuild the
         application context before executing the next test.</para>
 
-        <para>See context management and caching with the <link
-        linkend="testcontext-ctx-management">TestContext
-        framework</link>.</para>
+        <para>See <xref linkend="testcontext-ctx-management"/> and <xref
+        linkend="testcontext-ctx-management-caching"/> with the TestContext
+        framework.</para>
       </section>
 
       <section xml:id="testing-fixture-di">
@@ -511,10 +511,9 @@ public class CustomLoaderXmlApplicationContextTests {
               declared by superclasses by default.</para>
             </note>
 
-            <para>See <link linkend="testcontext-ctx-management">Context
-            management and caching</link> and the Javadoc for
-            <interfacename>@ContextConfiguration</interfacename> for further
-            details.</para>
+            <para>See <xref linkend="testcontext-ctx-management"/> and the
+            Javadoc for <interfacename>@ContextConfiguration</interfacename> for
+            further details.</para>
           </listitem>
 
           <listitem>
@@ -565,6 +564,50 @@ public class WebAppTests {
 
           <listitem>
             <para><emphasis role="bold">
+            <interfacename>@ContextHierarchy</interfacename></emphasis></para>
+
+            <para>A class-level annotation that is used to define a hierarchy of
+            <interfacename>ApplicationContext</interfacename>s for integration
+            tests. <interfacename>@ContextHierarchy</interfacename> should be
+            declared with a list of one or more
+            <interfacename>@ContextConfiguration</interfacename> instances, each
+            of which defines a level in the context hierarchy. The following
+            examples demonstrate the use of
+            <interfacename>@ContextHierarchy</interfacename> within a single
+            test class; however,
+            <interfacename>@ContextHierarchy</interfacename> can also be used
+            within a test class hierarchy.</para>
+
+            <programlisting language="java">@ContextHierarchy({
+    @ContextConfiguration("/parent-config.xml"),
+    @ContextConfiguration("/child-config.xml")
+})
+public class ContextHierarchyTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <programlisting language="java">@WebAppConfiguration
+@ContextHierarchy({
+    @ContextConfiguration(classes = AppConfig.class),
+    @ContextConfiguration(classes = WebConfig.class)
+})
+public class WebIntegrationTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <para>If you need to merge or override the configuration for a given
+            level of the context hierarchy within a test class hierarchy, you
+            must explicitly name that level by supplying the same value to the
+            <varname>name</varname> attribute in
+            <interfacename>@ContextConfiguration</interfacename> at each
+            corresponding level in the class hierarchy. See <xref
+            linkend="testcontext-ctx-management-ctx-hierarchies"/> and the
+            Javadoc for <interfacename>@ContextHierarchy</interfacename> for
+            further examples.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis role="bold">
             <interfacename>@ActiveProfiles</interfacename> </emphasis></para>
 
             <para>A class-level annotation that is used to declare which
@@ -590,11 +633,9 @@ public class DeveloperIntegrationTests {
               profiles declared by superclasses by default.</para>
             </note>
 
-            <para>See <link
-            linkend="testcontext-ctx-management-env-profiles">Context
-            configuration with environment profiles</link> and the Javadoc for
-            <interfacename>@ActiveProfiles</interfacename> for examples and
-            further details.</para>
+            <para>See <xref linkend="testcontext-ctx-management-env-profiles"/>
+            and the Javadoc for <interfacename>@ActiveProfiles</interfacename>
+            for examples and further details.</para>
           </listitem>
 
           <listitem>
@@ -603,66 +644,98 @@ public class DeveloperIntegrationTests {
 
             <para>Indicates that the underlying Spring
             <interfacename>ApplicationContext</interfacename> has been
-            <emphasis>dirtied</emphasis> (i.e., modified or corrupted in some
-            manner) during the execution of a test and should be closed,
-            regardless of whether the test passed.
-            <interfacename>@DirtiesContext</interfacename> is supported in the
-            following scenarios:</para>
+            <emphasis>dirtied</emphasis> during the execution of a test (i.e.,
+            modified or corrupted in some manner — for example, by changing the
+            state of a singleton bean) and should be closed, regardless of
+            whether the test passed. When an application context is marked
+            <emphasis>dirty</emphasis>, it is removed from the testing
+            framework's cache and closed. As a consequence, the underlying
+            Spring container will be rebuilt for any subsequent test that
+            requires a context with the same configuration metadata.</para>
+
+            <para><interfacename>@DirtiesContext</interfacename> can be used as
+            both a class-level and method-level annotation within the same test
+            class. In such scenarios, the
+            <interfacename>ApplicationContext</interfacename> is marked as
+            <emphasis>dirty</emphasis> after any such annotated method as well
+            as after the entire class. If the <classname>ClassMode</classname>
+            is set to <literal>AFTER_EACH_TEST_METHOD</literal>, the context is
+            marked dirty after each test method in the class.</para>
+
+            <para>The following examples explain when the context would be
+            dirtied for various configuration scenarios:</para>
 
             <itemizedlist>
               <listitem>
                 <para>After the current test class, when declared on a class
-                with class mode set to <literal>AFTER_CLASS</literal>, which is
-                the default class mode.</para>
+                with class mode set to <literal>AFTER_CLASS</literal> (i.e., the
+                default class mode).</para>
+
+                <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
+public class ContextDirtyingTests {
+    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
+}</programlisting>
               </listitem>
 
               <listitem>
                 <para>After each test method in the current test class, when
                 declared on a class with class mode set to
-                <literal>AFTER_EACH_TEST_METHOD.</literal></para>
+                <literal>AFTER_EACH_TEST_METHOD.</literal><programlisting
+                language="java"><emphasis role="bold">@DirtiesContext</emphasis>(<emphasis
+                      role="bold">classMode</emphasis> = ClassMode.AFTER_EACH_TEST_METHOD)
+public class ContextDirtyingTests {
+    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
+}</programlisting></para>
               </listitem>
 
               <listitem>
                 <para>After the current test, when declared on a method.</para>
-              </listitem>
-            </itemizedlist>
 
-            <para>Use this annotation if a test has modified the context (for
-            example, by replacing a bean definition). Subsequent tests are
-            supplied a new context.</para>
-
-            <para>With JUnit 4.5+ or TestNG you can use
-            <interfacename>@DirtiesContext</interfacename> as both a class-level
-            and method-level annotation within the same test class. In such
-            scenarios, the <interfacename>ApplicationContext</interfacename> is
-            marked as <emphasis>dirty</emphasis> after any such annotated method
-            as well as after the entire class. If the
-            <classname>ClassMode</classname> is set to
-            <literal>AFTER_EACH_TEST_METHOD</literal>, the context is marked
-            dirty after each test method in the class.</para>
-
-            <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
-public class ContextDirtyingTests {
-    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
-}</programlisting>
-
-            <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>(<emphasis
-                role="bold">classMode</emphasis> = ClassMode.AFTER_EACH_TEST_METHOD)
-public class ContextDirtyingTests {
-    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
-}</programlisting>
-
-            <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
+                <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
 @Test
 public void testProcessWhichDirtiesAppCtx() {
     <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
 }</programlisting>
+              </listitem>
+            </itemizedlist>
 
-            <para>When an application context is marked
-            <emphasis>dirty</emphasis>, it is removed from the testing
-            framework's cache and closed; thus the underlying Spring container
-            is rebuilt for any subsequent test that requires a context with the
-            same configuration metadata.</para>
+            <para>If <interfacename>@DirtiesContext</interfacename> is used in a
+            test whose context is configured as part of a context hierarchy via
+            <interfacename>@ContextHierarchy</interfacename>, the
+            <varname>hierarchyMode</varname> flag can be used to control how the
+            context cache is cleared. By default an
+            <emphasis>exhaustive</emphasis> algorithm will be used that clears
+            the context cache including not only the current level but also all
+            other context hierarchies that share an ancestor context common to
+            the current test; all
+            <interfacename>ApplicationContext</interfacename>s that reside in a
+            sub-hierarchy of the common ancestor context will be removed from
+            the context cache and closed. If the <emphasis>exhaustive</emphasis>
+            algorithm is overkill for a particular use case, the simpler
+            <emphasis>current level</emphasis> algorithm can be specified
+            instead, as seen below.</para>
+
+            <programlisting language="java">@ContextHierarchy({
+    @ContextConfiguration("/parent-config.xml"),
+    @ContextConfiguration("/child-config.xml")
+})
+public class BaseTests {
+    <lineannotation>// class body...</lineannotation>
+}
+
+public class ExtendedTests extends BaseTests {
+
+    @Test
+    @DirtiesContext(<emphasis role="bold">hierarchyMode = HierarchyMode.CURRENT_LEVEL</emphasis>)
+    public void test() {
+        <lineannotation>// some logic that results in the child context being dirtied</lineannotation>
+    }
+}</programlisting>
+
+            <para>For further details regarding the
+            <constant>EXHAUSTIVE</constant> and
+            <constant>CURRENT_LEVEL</constant> algorithms see the Javadoc for
+            <interfacename>DirtiesContext.HierarchyMode</interfacename>.</para>
           </listitem>
 
           <listitem>
@@ -1918,7 +1991,7 @@ public class WacTests {
           <interfacename>@Configuration</interfacename> classes).</para>
 
           <example>
-            <title>Default Resource Semantics</title>
+            <title>Default resource semantics</title>
 
             <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 
@@ -1945,7 +2018,7 @@ public class WacTests {
           locations are classpath based.</para>
 
           <example>
-            <title>Explicit Resource Semantics</title>
+            <title>Explicit resource semantics</title>
 
             <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 
@@ -2002,7 +2075,7 @@ public class WacTests {
             <interfacename>ServletTestExecutionListener</interfacename>.</para>
 
             <example>
-              <title>Injecting Mocks</title>
+              <title>Injecting mocks</title>
 
               <programlisting language="java">@WebAppConfiguration
 @ContextConfiguration
@@ -2134,6 +2207,198 @@ public class WacTests {
           provided by the
           <classname>DirtiesContextTestExecutionListener</classname> which is
           enabled by default.</para>
+        </section>
+
+        <section xml:id="testcontext-ctx-management-ctx-hierarchies">
+          <title>Context hierarchies</title>
+
+          <para>When writing integration tests that rely on a loaded Spring
+          <interfacename>ApplicationContext</interfacename>, it is often
+          sufficient to test against a single context; however, there are times
+          when it is beneficial or even necessary to test against a hierarchy of
+          <interfacename>ApplicationContext</interfacename>s. For example, if
+          you are developing a Spring MVC web application you will typically
+          have a root <interfacename>WebApplicationContext</interfacename>
+          loaded via Spring's <classname>ContextLoaderListener</classname> and a
+          child <interfacename>WebApplicationContext</interfacename> loaded via
+          Spring's <classname>DispatcherServlet</classname>. This results in a
+          parent-child context hierarchy where shared components and
+          infrastructure configuration are declared in the root context and
+          consumed in the child context by web-specific components. Another use
+          case can be found in Spring Batch applications where you often have a
+          parent context that provides configuration for shared batch
+          infrastructure and a child context for the configuration of a specific
+          batch job.</para>
+
+          <para>As of Spring Framework 3.2.2, it is possible to write
+          integration tests that use context hierarchies by declaring context
+          configuration via the <interfacename>@ContextHierarchy</interfacename>
+          annotation, either on an individual test class or within a test class
+          hierarchy. If a context hierarchy is declared on multiple classes
+          within a test class hierarchy it is also possible to merge or override
+          the context configuration for a specific, named level in the context
+          hierarchy. When merging configuration for a given level in the
+          hierarchy the configuration resource type (i.e., XML configuration
+          files or annotated classes) must be consistent; otherwise, it is
+          perfectly acceptable to have different levels in a context hierarchy
+          configured using different resource types.</para>
+
+          <para>The following JUnit-based examples demonstrate common
+          configuration scenarios for integration tests that require the use of
+          context hierarchies.</para>
+
+          <example>
+            <title>Single test class with context hierarchy</title>
+
+            <para><classname>ControllerIntegrationTests</classname> represents a
+            typical integration testing scenario for a Spring MVC web
+            application by declaring a context hierarchy consisting of two
+            levels, one for the <emphasis>root</emphasis> WebApplicationContext
+            (loaded using the <classname>TestAppConfig</classname>
+            <interfacename>@Configuration</interfacename> class) and one for the
+            <emphasis>dispatcher servlet</emphasis>
+            <interfacename>WebApplicationContext</interfacename> (loaded using
+            the <classname>WebConfig</classname>
+            <interfacename>@Configuration</interfacename> class). The
+            <interfacename>WebApplicationContext</interfacename> that is
+            <emphasis>autowired</emphasis> into the test instance is the one for
+            the child context (i.e., the lowest context in the
+            hierarchy).</para>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextHierarchy({
+    @ContextConfiguration(classes = TestAppConfig.class),
+    @ContextConfiguration(classes = WebConfig.class)
+})
+public class ControllerIntegrationTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    // ...
+}</programlisting>
+          </example>
+
+          <example>
+            <title>Class hierarchy with implicit parent context</title>
+
+            <para>The following test classes define a context hierarchy within a
+            test class hierarchy. <classname>AbstractWebTests</classname>
+            declares the configuration for a root
+            <interfacename>WebApplicationContext</interfacename> in a
+            Spring-powered web application. Note, however, that
+            <classname>AbstractWebTests</classname> does not declare
+            <interfacename>@ContextHierarchy</interfacename>; consequently,
+            subclasses of <classname>AbstractWebTests</classname> can optionally
+            participate in a context hierarchy or simply follow the standard
+            semantics for <interfacename>@ContextConfiguration</interfacename>.
+            <classname>SoapWebServiceTests</classname> and
+            <classname>RestWebServiceTests</classname> both extend
+            <classname>AbstractWebTests</classname> and define a context
+            hierarchy via <interfacename>@ContextHierarchy</interfacename>. The
+            result is that three application contexts will be loaded (one for
+            each declaration of
+            <interfacename>@ContextConfiguration</interfacename>), and the
+            application context loaded based on the configuration in
+            <classname>AbstractWebTests</classname> will be set as the parent
+            context for each of the contexts loaded for the concrete
+            subclasses.</para>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
+public abstract class AbstractWebTests {}
+
+@ContextHierarchy(@ContextConfiguration("/spring/soap-ws-config.xml")
+public class SoapWebServiceTests extends AbstractWebTests {}
+
+@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml")
+public class RestWebServiceTests extends AbstractWebTests {}</programlisting>
+          </example>
+
+          <example>
+            <title>Class hierarchy with merged context hierarchy
+            configuration</title>
+
+            <para>The following classes demonstrate the use of
+            <emphasis>named</emphasis> hierarchy levels in order to
+            <emphasis>merge</emphasis> the configuration for specific levels in
+            a context hierarchy. <classname>BaseTests</classname> defines two
+            levels in the hierarchy, <literal>parent</literal> and
+            <literal>child</literal>. <classname>ExtendedTests</classname>
+            extends <classname>BaseTests</classname> and instructs the Spring
+            TestContext Framework to merge the context configuration for the
+            <literal>child</literal> hierarchy level, simply by ensuring that
+            the names declared via
+            <interfacename>ContextConfiguration</interfacename>'s
+            <varname>name</varname> attribute are both
+            <literal>"child"</literal>. The result is that three application
+            contexts will be loaded: one for
+            <literal>"/app-config.xml"</literal>, one for
+            <literal>"/user-config.xml"</literal>, and one for
+            <literal>{"/user-config.xml", "/order-config.xml"}</literal>. As
+            with the previous example, the application context loaded from
+            <literal>"/app-config.xml"</literal> will be set as the parent
+            context for the contexts loaded from
+            <literal>"/user-config.xml"</literal> and
+            <literal>{"/user-config.xml", "/order-config.xml"}</literal>.</para>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextHierarchy({
+    @ContextConfiguration(name = "parent", locations = "/app-config.xml"),
+    @ContextConfiguration(name = "child",  locations = "/user-config.xml")
+})
+public class BaseTests {}
+
+@ContextHierarchy(
+    @ContextConfiguration(name = "child",  locations = "/order-config.xml")
+)
+public class ExtendedTests extends BaseTests {}</programlisting>
+          </example>
+
+          <example>
+            <title>Class hierarchy with overridden context hierarchy
+            configuration</title>
+
+            <para>In contrast to the previous example, this example demonstrates
+            how to <emphasis>override</emphasis> the configuration for a given
+            named level in a context hierarchy by setting
+            <interfacename>ContextConfiguration</interfacename>'s
+            <varname>inheritLocations</varname> flag to
+            <literal>false</literal>. Consequently, the application context for
+            <classname>ExtendedTests</classname> will be loaded only from
+            <literal>"/test-user-config.xml"</literal> and will have its parent
+            set to the context loaded from
+            <literal>"/app-config.xml"</literal>.</para>
+
+            <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@ContextHierarchy({
+    @ContextConfiguration(name = "parent", locations = "/app-config.xml"),
+    @ContextConfiguration(name = "child",  locations = "/user-config.xml")
+})
+public class BaseTests {}
+
+@ContextHierarchy(
+    @ContextConfiguration(
+        name = "child",
+        locations = "/test-user-config.xml",
+        inheritLocations = false
+))
+public class ExtendedTests extends BaseTests {}</programlisting>
+          </example>
+
+          <note>
+            <title>Dirtying a context within a context hierarchy</title>
+
+            <para>If <interfacename>@DirtiesContext</interfacename> is used in a
+            test whose context is configured as part of a context hierarchy, the
+            <varname>hierarchyMode</varname> flag can be used to control how the
+            context cache is cleared. For further details consult the discussion
+            of <interfacename>@DirtiesContext</interfacename> in <xref
+            linkend="integration-testing-annotations-spring"/> and the Javadoc
+            for <interfacename>@DirtiesContext</interfacename>.</para>
+          </note>
         </section>
       </section>
 
