@@ -1268,6 +1268,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
 	 */
+	@SuppressWarnings("unchecked")
 	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?,?> attributesSnapshot) {
 		logger.debug("Restoring snapshot of request attributes after include");
 
@@ -1281,6 +1282,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				attrsToCheck.add(attrName);
 			}
 		}
+
+		// Add attributes that may have been removed
+		attrsToCheck.addAll((Set<String>) attributesSnapshot.keySet());
 
 		// Iterate over the attributes to check, restoring the original value
 		// or removing the attribute, respectively, if appropriate.
