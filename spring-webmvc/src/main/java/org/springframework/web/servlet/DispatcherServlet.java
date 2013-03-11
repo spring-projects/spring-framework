@@ -1282,6 +1282,11 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
+		// Need to add attributes that were removed in inlude.
+		for(Object o : attributesSnapshot.keySet()) {
+			attrsToCheck.add(o.toString());
+		}
+
 		// Iterate over the attributes to check, restoring the original value
 		// or removing the attribute, respectively, if appropriate.
 		for (String attrName : attrsToCheck) {
