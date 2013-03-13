@@ -374,12 +374,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	private class SpringCompleteAutoloadTilesContainerFactory extends CompleteAutoloadTilesContainerFactory {
 
 		@Override
-		protected AttributeEvaluatorFactory createAttributeEvaluatorFactory(
-				ApplicationContext applicationContext, LocaleResolver resolver) {
-			return new BasicAttributeEvaluatorFactory(new DirectAttributeEvaluator());
-		}
-
-		@Override
 		public TilesContainer createContainer(ApplicationContext applicationContext) {
 			CachingTilesContainer cachingContainer = (CachingTilesContainer) super.createContainer(applicationContext);
 			BasicTilesContainer tilesContainer = (BasicTilesContainer) cachingContainer.getWrappedContainer();
