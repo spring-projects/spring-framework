@@ -17,6 +17,7 @@
 package org.springframework.test.context.web;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,7 @@ import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
@@ -123,7 +125,13 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 				MockServletContext mockServletContext = (MockServletContext) servletContext;
 				MockHttpServletRequest request = new MockHttpServletRequest(mockServletContext);
 				MockHttpServletResponse response = new MockHttpServletResponse();
-				ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
+				ServletWebRequest servletWebRequest = new ServletWebRequest(request, response) {
+					@Override
+					public ServletRequestAttributes getSubsequentRequestAttributes(HttpServletRequest request) {
+						// Always replace the initial request (SPR-10025)
+						return new ServletRequestAttributes(request);
+					}
+				};
 
 				RequestContextHolder.setRequestAttributes(servletWebRequest);
 

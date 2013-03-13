@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -259,4 +259,21 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		return this.request.toString();
 	}
 
+	/**
+	 * Returns the {@link ServletRequestAttributes} that should be used for any
+	 * {@link HttpServletRequest} that occurs after this one. This method determines how
+	 * any subsequent requests are handled and what attributes are exposed. By default
+	 * this method will return a new {@link ServletRequestAttributes} only if this
+	 * instance class equals {@link ServletRequestAttributes}. In other words, custom
+	 * subclasses of {@link ServletRequestAttributes} will never be replaced unless
+	 * they override this method.
+	 * @return A new {@link ServletRequestAttributes}, the current instance or {@code null}
+	 * @since 3.2.2
+	 */
+	public ServletRequestAttributes getSubsequentRequestAttributes(HttpServletRequest request) {
+		if(getClass().equals(ServletRequestAttributes.class)) {
+			return new ServletRequestAttributes(request);
+		}
+		return this;
+	}
 }

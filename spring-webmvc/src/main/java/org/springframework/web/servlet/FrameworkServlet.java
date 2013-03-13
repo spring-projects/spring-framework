@@ -916,8 +916,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		ServletRequestAttributes requestAttributes = null;
-		if (previousAttributes == null || (previousAttributes instanceof ServletRequestAttributes)) {
+		if (previousAttributes == null) {
 			requestAttributes = new ServletRequestAttributes(request);
+		}
+		else if (previousAttributes instanceof ServletRequestAttributes) {
+			requestAttributes = ((ServletRequestAttributes) previousAttributes).getSubsequentRequestAttributes(request);
 		}
 
 		initContextHolders(request, localeContext, requestAttributes);
