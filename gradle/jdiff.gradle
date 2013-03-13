@@ -45,7 +45,7 @@ task jdiff {
 				destdir: outputDir,
 				verbose: "off",
 				stats: "on",
-				docchanges: "on") {
+				docchanges: "off") {
 			old(name: "Spring Framework ${oldVersion}") {
 				oldVersionRoot.eachDirMatch( {
 						def candidate = new File(it)
