@@ -38,6 +38,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Sam Brannen
  * @since 3.2
  */
+@SuppressWarnings("javadoc")
 @RunWith(Suite.class)
 @SuiteClasses({ TestClass1.class, TestClass2.class })
 public class Spr8849Tests {

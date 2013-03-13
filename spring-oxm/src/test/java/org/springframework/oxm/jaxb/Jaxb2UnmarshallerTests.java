@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.oxm.jaxb;
 
 import java.io.StringReader;
+
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
@@ -25,10 +26,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
@@ -37,6 +35,9 @@ import org.springframework.oxm.jaxb.test.FlightType;
 import org.springframework.oxm.jaxb.test.Flights;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.xml.StaxUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests {
 
@@ -60,19 +61,15 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests {
 		unmarshaller.setClassesToBeBound(BinaryObject.class);
 		unmarshaller.setMtomEnabled(true);
 		unmarshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = createMock(MimeContainer.class);
+		MimeContainer mimeContainer = mock(MimeContainer.class);
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
 
-		expect(mimeContainer.isXopPackage()).andReturn(true);
-		expect(mimeContainer.getAttachment(
-				"<6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws>")).andReturn(dataHandler);
-		expect(mimeContainer.getAttachment(
-				"<99bd1592-0521-41a2-9688-a8bfb40192fb@http://springframework.org/spring-ws>")).andReturn(dataHandler);
-		expect(mimeContainer.getAttachment("696cfb9a-4d2d-402f-bb5c-59fa69e7f0b3@spring-ws.png"))
-				.andReturn(dataHandler);
-		replay(mimeContainer);
+		given(mimeContainer.isXopPackage()).willReturn(true);
+		given(mimeContainer.getAttachment("<6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws>")).willReturn(dataHandler);
+		given(mimeContainer.getAttachment("<99bd1592-0521-41a2-9688-a8bfb40192fb@http://springframework.org/spring-ws>")).willReturn(dataHandler);
+		given(mimeContainer.getAttachment("696cfb9a-4d2d-402f-bb5c-59fa69e7f0b3@spring-ws.png")).willReturn(dataHandler);
 		String content = "<binaryObject xmlns='http://springframework.org/spring-ws'>" + "<bytes>" +
 				"<xop:Include href='cid:6b76528d-7a9c-4def-8e13-095ab89e9bb7@http://springframework.org/spring-ws' xmlns:xop='http://www.w3.org/2004/08/xop/include'/>" +
 				"</bytes>" + "<dataHandler>" +
@@ -84,7 +81,6 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests {
 		StringReader reader = new StringReader(content);
 		Object result = unmarshaller.unmarshal(new StreamSource(reader), mimeContainer);
 		assertTrue("Result is not a BinaryObject", result instanceof BinaryObject);
-		verify(mimeContainer);
 		BinaryObject object = (BinaryObject) result;
 		assertNotNull("bytes property not set", object.getBytes());
 		assertTrue("bytes property not set", object.getBytes().length > 0);

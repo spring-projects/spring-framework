@@ -39,6 +39,8 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 
 	protected Advisor advisor;
 
+	protected boolean beforeExistingAdvisors = false;
+
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
@@ -49,6 +51,19 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 
 	private final Map<Class, Boolean> eligibleBeans = new ConcurrentHashMap<Class, Boolean>(64);
 
+
+	/**
+	 * Set whether this post-processor's advisor is supposed to apply before
+	 * existing advisors when encountering a pre-advised object.
+	 * <p>Default is "false", applying the advisor after existing advisors, i.e.
+	 * as close as possible to the target method. Switch this to "true" in order
+	 * for this post-processor's advisor to wrap existing advisors as well.
+	 * <p>Note: Check the concrete post-processor's javadoc whether it possibly
+	 * changes this flag by default, depending on the nature of its advisor.
+	 */
+	public void setBeforeExistingAdvisors(boolean beforeExistingAdvisors) {
+		this.beforeExistingAdvisors = beforeExistingAdvisors;
+	}
 
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
@@ -74,7 +89,13 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 		}
 		if (isEligible(bean, beanName)) {
 			if (bean instanceof Advised) {
-				((Advised) bean).addAdvisor(0, this.advisor);
+				Advised advised = (Advised) bean;
+				if (this.beforeExistingAdvisors) {
+					advised.addAdvisor(0, this.advisor);
+				}
+				else {
+					advised.addAdvisor(this.advisor);
+				}
 				return bean;
 			}
 			else {

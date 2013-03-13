@@ -16,9 +16,9 @@
 
 package org.springframework.orm.jpa;
 
-import static org.mockito.Mockito.verify;
-
 import org.junit.Test;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson

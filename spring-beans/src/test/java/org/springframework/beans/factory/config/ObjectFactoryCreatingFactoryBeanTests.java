@@ -16,14 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import java.util.Date;
 
 import javax.inject.Provider;
@@ -37,6 +29,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Colin Sampaleanu

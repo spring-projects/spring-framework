@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.web.portlet.context;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
 
 import javax.portlet.PortletRequest;
@@ -27,6 +24,9 @@ import org.junit.Test;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.mock.web.portlet.MockPortletSession;
 import org.springframework.web.context.request.RequestAttributes;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -136,15 +136,13 @@ public class PortletRequestAttributesTests {
 
 	@Test
 	public void testGetSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
-		PortletRequest request = createMock(PortletRequest.class);
-		expect(request.getPortletSession(false)).andReturn(null);
-		replay(request);
+		PortletRequest request = mock(PortletRequest.class);
 
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		assertNull(value);
 
-		verify(request);
+		verify(request).getPortletSession(false);
 	}
 
 	@Test
@@ -161,14 +159,12 @@ public class PortletRequestAttributesTests {
 
 	@Test
 	public void testRemoveSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
-		PortletRequest request = createMock(PortletRequest.class);
-		expect(request.getPortletSession(false)).andReturn(null);
-		replay(request);
+		PortletRequest request = mock(PortletRequest.class);
 
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
 		attrs.removeAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 
-		verify(request);
+		verify(request).getPortletSession(false);
 	}
 
 }

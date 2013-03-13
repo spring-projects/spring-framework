@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.scripting.support;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -26,6 +23,8 @@ import junit.framework.TestCase;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans

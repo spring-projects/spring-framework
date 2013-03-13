@@ -275,6 +275,12 @@
       </listitem>
 
       <listitem>
+        <para>Configuring <link
+        linkend="testcontext-ctx-management-ctx-hierarchies">context hierarchies</link>
+        in integration tests</para>
+      </listitem>
+
+      <listitem>
         <para>Testing <link linkend="testcontext-web-scoped-beans">request and
         session scoped beans</link></para>
       </listitem>

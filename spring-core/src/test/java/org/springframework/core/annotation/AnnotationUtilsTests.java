@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,26 @@
 
 package org.springframework.core.annotation;
 
+import static org.junit.Assert.*;
+import static org.springframework.core.annotation.AnnotationUtils.*;
+
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.*;
-
-import static org.springframework.core.annotation.AnnotationUtils.*;
-
 /**
+ * Unit tests for {@link AnnotationUtils}.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -102,23 +107,91 @@ public class AnnotationUtilsTests {
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedClass.class));
 
 		// inherited class-level annotation; note: @Transactional is inherited
-		assertEquals(InheritedAnnotationInterface.class, findAnnotationDeclaringClass(Transactional.class,
-				InheritedAnnotationInterface.class));
+		assertEquals(InheritedAnnotationInterface.class,
+			findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationInterface.class));
-		assertEquals(InheritedAnnotationClass.class, findAnnotationDeclaringClass(Transactional.class,
-				InheritedAnnotationClass.class));
-		assertEquals(InheritedAnnotationClass.class, findAnnotationDeclaringClass(Transactional.class,
-				SubInheritedAnnotationClass.class));
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationClass.class));
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationClass.class));
 
 		// non-inherited class-level annotation; note: @Order is not inherited,
-		// but findAnnotationDeclaringClass() should still find it.
-		assertEquals(NonInheritedAnnotationInterface.class, findAnnotationDeclaringClass(Order.class,
-				NonInheritedAnnotationInterface.class));
+		// but findAnnotationDeclaringClass() should still find it on classes.
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationInterface.class));
-		assertEquals(NonInheritedAnnotationClass.class, findAnnotationDeclaringClass(Order.class,
-				NonInheritedAnnotationClass.class));
-		assertEquals(NonInheritedAnnotationClass.class, findAnnotationDeclaringClass(Order.class,
-				SubNonInheritedAnnotationClass.class));
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationClass.class));
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationClass.class));
+	}
+
+	@Test
+	public void findAnnotationDeclaringClassForTypesWithSingleCandidateType() {
+
+		// no class-level annotation
+		List<Class<? extends Annotation>> transactionalCandidateList = Arrays.<Class<? extends Annotation>> asList(Transactional.class);
+		assertNull(findAnnotationDeclaringClassForTypes(transactionalCandidateList, NonAnnotatedInterface.class));
+		assertNull(findAnnotationDeclaringClassForTypes(transactionalCandidateList, NonAnnotatedClass.class));
+
+		// inherited class-level annotation; note: @Transactional is inherited
+		assertEquals(InheritedAnnotationInterface.class,
+			findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationInterface.class));
+		assertNull(findAnnotationDeclaringClassForTypes(transactionalCandidateList,
+			SubInheritedAnnotationInterface.class));
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationClass.class));
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(transactionalCandidateList, SubInheritedAnnotationClass.class));
+
+		// non-inherited class-level annotation; note: @Order is not inherited,
+		// but findAnnotationDeclaringClassForTypes() should still find it on classes.
+		List<Class<? extends Annotation>> orderCandidateList = Arrays.<Class<? extends Annotation>> asList(Order.class);
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDeclaringClassForTypes(orderCandidateList, NonInheritedAnnotationInterface.class));
+		assertNull(findAnnotationDeclaringClassForTypes(orderCandidateList, SubNonInheritedAnnotationInterface.class));
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(orderCandidateList, NonInheritedAnnotationClass.class));
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(orderCandidateList, SubNonInheritedAnnotationClass.class));
+	}
+
+	@Test
+	public void findAnnotationDeclaringClassForTypesWithMultipleCandidateTypes() {
+
+		List<Class<? extends Annotation>> candidates = Arrays.<Class<? extends Annotation>> asList(Transactional.class,
+			Order.class);
+
+		// no class-level annotation
+		assertNull(findAnnotationDeclaringClassForTypes(candidates, NonAnnotatedInterface.class));
+		assertNull(findAnnotationDeclaringClassForTypes(candidates, NonAnnotatedClass.class));
+
+		// inherited class-level annotation; note: @Transactional is inherited
+		assertEquals(InheritedAnnotationInterface.class,
+			findAnnotationDeclaringClassForTypes(candidates, InheritedAnnotationInterface.class));
+		assertNull(findAnnotationDeclaringClassForTypes(candidates, SubInheritedAnnotationInterface.class));
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, InheritedAnnotationClass.class));
+		assertEquals(InheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, SubInheritedAnnotationClass.class));
+
+		// non-inherited class-level annotation; note: @Order is not inherited,
+		// but findAnnotationDeclaringClassForTypes() should still find it on classes.
+		assertEquals(NonInheritedAnnotationInterface.class,
+			findAnnotationDeclaringClassForTypes(candidates, NonInheritedAnnotationInterface.class));
+		assertNull(findAnnotationDeclaringClassForTypes(candidates, SubNonInheritedAnnotationInterface.class));
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, NonInheritedAnnotationClass.class));
+		assertEquals(NonInheritedAnnotationClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, SubNonInheritedAnnotationClass.class));
+
+		// class hierarchy mixed with @Transactional and @Order declarations
+		assertEquals(TransactionalClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, TransactionalClass.class));
+		assertEquals(TransactionalAndOrderedClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, TransactionalAndOrderedClass.class));
+		assertEquals(TransactionalAndOrderedClass.class,
+			findAnnotationDeclaringClassForTypes(candidates, SubTransactionalAndOrderedClass.class));
 	}
 
 	@Test
@@ -216,18 +289,18 @@ public class AnnotationUtilsTests {
 	}
 
 
-	@Component(value="meta1")
+	@Component(value = "meta1")
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Meta1 {
 	}
 
-	@Component(value="meta2")
+	@Component(value = "meta2")
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Meta2 {
 	}
 
 	@Meta1
-	@Component(value="local")
+	@Component(value = "local")
 	@Meta2
 	static class HasLocalAndMetaComponentAnnotation {
 	}
@@ -332,6 +405,16 @@ public class AnnotationUtilsTests {
 	public static class SubNonInheritedAnnotationClass extends NonInheritedAnnotationClass {
 	}
 
+	@Transactional
+	public static class TransactionalClass {
+	}
+
+	@Order
+	public static class TransactionalAndOrderedClass {
+	}
+
+	public static class SubTransactionalAndOrderedClass extends TransactionalAndOrderedClass {
+	}
 
 	public static interface InterfaceWithAnnotatedMethod {
 
@@ -353,10 +436,12 @@ public class AnnotationUtilsTests {
 		}
 	}
 
-	public abstract static class AbstractDoesNotImplementInterfaceWithAnnotatedMethod implements InterfaceWithAnnotatedMethod {
+	public abstract static class AbstractDoesNotImplementInterfaceWithAnnotatedMethod implements
+			InterfaceWithAnnotatedMethod {
 	}
 
-	public static class SubOfAbstractImplementsInterfaceWithAnnotatedMethod extends AbstractDoesNotImplementInterfaceWithAnnotatedMethod {
+	public static class SubOfAbstractImplementsInterfaceWithAnnotatedMethod extends
+			AbstractDoesNotImplementInterfaceWithAnnotatedMethod {
 
 		@Override
 		public void foo() {

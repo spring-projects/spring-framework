@@ -23,16 +23,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  * @author Phillip Webb
+ * @author Oliver Gierke
  */
 public class UriComponentsBuilderTests {
 
@@ -353,5 +353,12 @@ public class UriComponentsBuilderTests {
 	    assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").pathSegment("x", "y", "z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
 		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").path("/x/").path("/y/z").build().toString(), equalTo("http://example.com/abc/x/y/z"));
 		assertThat(UriComponentsBuilder.fromUriString("http://example.com/abc/").pathSegment("x").path("y").build().toString(), equalTo("http://example.com/abc/x/y"));
+	}
+
+	@Test
+	public void parsesEmptyFragment() {
+		UriComponents components = UriComponentsBuilder.fromUriString("/example#").build();
+		assertThat(components.getFragment(), is(nullValue()));
+		assertThat(components.toString(), equalTo("/example"));
 	}
 }

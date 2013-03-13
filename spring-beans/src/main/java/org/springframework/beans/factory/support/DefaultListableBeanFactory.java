@@ -135,11 +135,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
 
-	/** Map of singleton bean names keyed by bean class */
-	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
+	/** Map of singleton and non-singleton bean names keyed by dependency type */
+	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
 
-	/** Map of non-singleton bean names keyed by bean class */
-	private final Map<Class<?>, String[]> nonSingletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
+	/** Map of singleton-only bean names keyed by dependency type */
+	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
 
 	/** List of bean definition names, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>();
@@ -326,8 +326,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (!isConfigurationFrozen()  || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
-		Map<Class<?>, String[]> cache = includeNonSingletons ?
-				this.nonSingletonBeanNamesByType : this.singletonBeanNamesByType;
+		Map<Class<?>, String[]> cache =
+				(includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
 		String[] resolvedBeanNames = cache.get(type);
 		if (resolvedBeanNames != null) {
 			return resolvedBeanNames;
@@ -707,9 +707,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
 		destroySingleton(beanName);
 
-		// Remove any assumptions about by-type mappings
-		this.singletonBeanNamesByType.clear();
-		this.nonSingletonBeanNamesByType.clear();
+		// Remove any assumptions about by-type mappings.
+		clearByTypeCache();
 
 		// Reset all bean definitions that have the given bean as parent (recursively).
 		for (String bdName : this.beanDefinitionNames) {
@@ -728,6 +727,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	protected boolean allowAliasOverriding() {
 		return this.allowBeanDefinitionOverriding;
+	}
+
+	@Override
+	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
+		super.registerSingleton(beanName, singletonObject);
+		clearByTypeCache();
+	}
+
+	@Override
+	public void destroySingleton(String beanName) {
+		super.destroySingleton(beanName);
+		clearByTypeCache();
+	}
+
+	/**
+	 * Remove any assumptions about by-type mappings.
+	 */
+	private void clearByTypeCache() {
+		this.allBeanNamesByType.clear();
+		this.singletonBeanNamesByType.clear();
 	}
 
 

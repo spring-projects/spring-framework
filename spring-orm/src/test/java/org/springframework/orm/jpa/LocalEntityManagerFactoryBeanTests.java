@@ -16,10 +16,6 @@
 
 package org.springframework.orm.jpa;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.verify;
-
 import java.util.Map;
 import java.util.Properties;
 
@@ -29,6 +25,9 @@ import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.junit.After;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson

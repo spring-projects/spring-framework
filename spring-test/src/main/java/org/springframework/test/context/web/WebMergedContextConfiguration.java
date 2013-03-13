@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Set;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
@@ -77,7 +78,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param resourceBasePath the resource path to the root directory of the web application
 	 * @param contextLoader the resolved {@code ContextLoader}
+	 * @see #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)
+	 * @deprecated as of Spring 3.2.2, use
+	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)} instead.
 	 */
+	@Deprecated
 	public WebMergedContextConfiguration(
 			Class<?> testClass,
 			String[] locations,
@@ -85,7 +90,45 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader) {
 
-		super(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader);
+		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, resourceBasePath, contextLoader,
+			null, null);
+	}
+
+	/**
+	 * Create a new {@code WebMergedContextConfiguration} instance for the
+	 * supplied test class, resource locations, annotated classes, context
+	 * initializers, active profiles, resource base path, and {@code ContextLoader}.
+	 *
+	 * <p>If a {@code null} value is supplied for {@code locations},
+	 * {@code classes}, or {@code activeProfiles} an empty array will
+	 * be stored instead. If a {@code null} value is supplied for the
+	 * {@code contextInitializerClasses} an empty set will be stored instead.
+	 * If an <em>empty</em> value is supplied for the {@code resourceBasePath}
+	 * an empty string will be used. Furthermore, active profiles will be sorted,
+	 * and duplicate profiles will be removed.
+	 *
+	 * @param testClass the test class for which the configuration was merged
+	 * @param locations the merged resource locations
+	 * @param classes the merged annotated classes
+	 * @param contextInitializerClasses the merged context initializer classes
+	 * @param activeProfiles the merged active bean definition profiles
+	 * @param resourceBasePath the resource path to the root directory of the web application
+	 * @param contextLoader the resolved {@code ContextLoader}
+	 * @param cacheAwareContextLoaderDelegate a cache-aware context loader
+	 * delegate with which to retrieve the parent context
+	 * @param parent the parent configuration or {@code null} if there is no parent
+	 * @since 3.2.2
+	 */
+	public WebMergedContextConfiguration(
+			Class<?> testClass,
+			String[] locations,
+			Class<?>[] classes,
+			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
+			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+
+		super(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader,
+			cacheAwareContextLoaderDelegate, parent);
 
 		this.resourceBasePath = !StringUtils.hasText(resourceBasePath) ? "" : resourceBasePath;
 	}
@@ -118,8 +161,9 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@linkplain #getClasses() annotated classes},
 	 * {@linkplain #getContextInitializerClasses() context initializer classes},
 	 * {@linkplain #getActiveProfiles() active profiles},
-	 * {@linkplain #getResourceBasePath() resource base path}, and the fully
-	 * qualified names of their {@link #getContextLoader() ContextLoaders}.
+	 * {@linkplain #getResourceBasePath() resource base path},
+	 * {@linkplain #getParent() parents}, and the fully qualified names of their
+	 * {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -141,8 +185,9 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * {@linkplain #getLocations() locations}, {@linkplain #getClasses() annotated classes},
 	 * {@linkplain #getContextInitializerClasses() context initializer classes},
 	 * {@linkplain #getActiveProfiles() active profiles},
-	 * {@linkplain #getResourceBasePath() resource base path}, and the name of the
-	 * {@link #getContextLoader() ContextLoader}.
+	 * {@linkplain #getResourceBasePath() resource base path}, the name of the
+	 * {@link #getContextLoader() ContextLoader}, and the
+	 * {@linkplain #getParent() parent configuration}.
 	 */
 	@Override
 	public String toString() {
@@ -154,6 +199,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 		.append("activeProfiles", ObjectUtils.nullSafeToString(getActiveProfiles()))//
 		.append("resourceBasePath", getResourceBasePath())//
 		.append("contextLoader", nullSafeToString(getContextLoader()))//
+		.append("parent", getParent())//
 		.toString();
 	}
 

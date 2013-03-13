@@ -48,6 +48,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Oliver Gierke
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -204,7 +205,10 @@ public class UriComponentsBuilder {
 				builder.path(path);
 				builder.query(query);
 			}
-			builder.fragment(fragment);
+
+			if (StringUtils.hasText(fragment)) {
+				builder.fragment(fragment);
+			}
 
 			return builder;
 		}

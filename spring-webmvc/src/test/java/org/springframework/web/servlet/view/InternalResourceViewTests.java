@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -35,6 +30,8 @@ import org.springframework.mock.web.test.MockRequestDispatcher;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.WebUtils;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson
@@ -150,19 +147,9 @@ public class InternalResourceViewTests extends TestCase {
 
 		String url = "forward-to";
 
-		HttpServletRequest request = createMock(HttpServletRequest.class);
-		request.getAttribute(View.PATH_VARIABLES);
-		expectLastCall().andReturn(null);
-		Set<String> keys = model.keySet();
-		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = iter.next();
-			request.setAttribute(key, model.get(key));
-			expectLastCall().times(1);
-		}
-
-		request.getRequestDispatcher(url);
-		expectLastCall().andReturn(new MockRequestDispatcher(url));
-		replay(request);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		given(request.getAttribute(View.PATH_VARIABLES)).willReturn(null);
+		given(request.getRequestDispatcher(url)).willReturn(new MockRequestDispatcher(url));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		InternalResourceView v = new InternalResourceView();
@@ -172,7 +159,12 @@ public class InternalResourceViewTests extends TestCase {
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		verify(request);
+
+		Set<String> keys = model.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
+			String key = iter.next();
+			verify(request).setAttribute(key, model.get(key));
+		}
 	}
 
 	public void testIncludeOnAttribute() throws Exception {
@@ -183,21 +175,11 @@ public class InternalResourceViewTests extends TestCase {
 
 		String url = "forward-to";
 
-		HttpServletRequest request = createMock(HttpServletRequest.class);
-		request.getAttribute(View.PATH_VARIABLES);
-		expectLastCall().andReturn(null);
-		Set<String> keys = model.keySet();
-		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = iter.next();
-			request.setAttribute(key, model.get(key));
-			expectLastCall().times(1);
-		}
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		given(request.getAttribute(View.PATH_VARIABLES)).willReturn(null);
 
-		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-		expectLastCall().andReturn("somepath");
-		request.getRequestDispatcher(url);
-		expectLastCall().andReturn(new MockRequestDispatcher(url));
-		replay(request);
+		given(request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE)).willReturn("somepath");
+		given(request.getRequestDispatcher(url)).willReturn(new MockRequestDispatcher(url));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		InternalResourceView v = new InternalResourceView();
@@ -206,7 +188,12 @@ public class InternalResourceViewTests extends TestCase {
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		verify(request);
+
+		Set<String> keys = model.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
+			String key = iter.next();
+			verify(request).setAttribute(key, model.get(key));
+		}
 	}
 
 	public void testIncludeOnCommitted() throws Exception {
@@ -217,21 +204,11 @@ public class InternalResourceViewTests extends TestCase {
 
 		String url = "forward-to";
 
-		HttpServletRequest request = createMock(HttpServletRequest.class);
-		request.getAttribute(View.PATH_VARIABLES);
-		expectLastCall().andReturn(null);
-		Set<String> keys = model.keySet();
-		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = iter.next();
-			request.setAttribute(key, model.get(key));
-			expectLastCall().times(1);
-		}
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		given(request.getAttribute(View.PATH_VARIABLES)).willReturn(null);
 
-		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-		expectLastCall().andReturn(null);
-		request.getRequestDispatcher(url);
-		expectLastCall().andReturn(new MockRequestDispatcher(url));
-		replay(request);
+		given(request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE)).willReturn(null);
+		given(request.getRequestDispatcher(url)).willReturn(new MockRequestDispatcher(url));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setCommitted(true);
@@ -241,7 +218,12 @@ public class InternalResourceViewTests extends TestCase {
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		verify(request);
+
+		Set<String> keys = model.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
+			String key = iter.next();
+			verify(request).setAttribute(key, model.get(key));
+		}
 	}
 
 }

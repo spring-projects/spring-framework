@@ -163,6 +163,7 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
+	@SuppressWarnings("javadoc")
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
@@ -241,8 +242,16 @@ public class MockServletContext implements ServletContext {
 		return this.effectiveMinorVersion;
 	}
 
+	/**
+	 * This method uses the Java Activation framework, which returns
+	 * "application/octet-stream" when the mime type is unknown (i.e. it never returns
+	 * {@code null}). In order to maintain the {@link ServletContext#getMimeType(String)
+	 * contract, as of version 3.2.2, this method returns null if the mimeType is
+	 * "application/octet-stream".
+	 */
 	public String getMimeType(String filePath) {
-		return MimeTypeResolver.getMimeType(filePath);
+		String mimeType = MimeTypeResolver.getMimeType(filePath);
+		return ("application/octet-stream".equals(mimeType)) ? null : mimeType;
 	}
 
 	public Set<String> getResourcePaths(String path) {
@@ -344,6 +353,7 @@ public class MockServletContext implements ServletContext {
 	 * <p>Defaults to {@linkplain #COMMON_DEFAULT_SERVLET_NAME "default"}.
 	 * @see #setDefaultServletName
 	 */
+	@SuppressWarnings("javadoc")
 	public String getDefaultServletName() {
 		return this.defaultServletName;
 	}

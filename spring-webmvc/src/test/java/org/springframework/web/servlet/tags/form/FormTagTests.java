@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
 import java.util.Collections;
 
 import javax.servlet.jsp.PageContext;
@@ -27,6 +23,8 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rob Harrop
@@ -328,9 +326,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	public void testRequestDataValueProcessorHooks() throws Exception {
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
-		expect(processor.processAction(this.request, action)).andReturn(action);
-		expect(processor.getExtraHiddenFields(this.request)).andReturn(Collections.singletonMap("key", "value"));
-		replay(processor);
+		given(processor.processAction(this.request, action)).willReturn(action);
+		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key", "value"));
 
 		this.tag.doStartTag();
 		this.tag.doEndTag();
@@ -341,8 +338,6 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\" />", getInputTag(output));
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
-
-		verify(processor);
 	}
 
 	private String getFormTag(String output) {

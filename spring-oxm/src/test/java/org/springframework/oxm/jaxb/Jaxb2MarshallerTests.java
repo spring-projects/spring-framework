@@ -16,19 +16,6 @@
 
 package org.springframework.oxm.jaxb;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -47,6 +34,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractMarshallerTests;
@@ -62,6 +50,10 @@ import org.springframework.util.ReflectionUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
+
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
@@ -90,27 +82,22 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void marshalSAXResult() throws Exception {
-		ContentHandler handlerMock = createStrictMock(ContentHandler.class);
-		handlerMock.setDocumentLocator(isA(Locator.class));
-		handlerMock.startDocument();
-		handlerMock.startPrefixMapping("", "http://samples.springframework.org/flight");
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("flights"),
-				isA(Attributes.class));
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("flight"),
-				isA(Attributes.class));
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("number"),
-				isA(Attributes.class));
-		handlerMock.characters(isA(char[].class), eq(0), eq(2));
-		handlerMock.endElement("http://samples.springframework.org/flight", "number", "number");
-		handlerMock.endElement("http://samples.springframework.org/flight", "flight", "flight");
-		handlerMock.endElement("http://samples.springframework.org/flight", "flights", "flights");
-		handlerMock.endPrefixMapping("");
-		handlerMock.endDocument();
-		replay(handlerMock);
-
-		SAXResult result = new SAXResult(handlerMock);
+		ContentHandler contentHandler = mock(ContentHandler.class);
+		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flights, result);
-		verify(handlerMock);
+		InOrder ordered = inOrder(contentHandler);
+		ordered.verify(contentHandler).setDocumentLocator(isA(Locator.class));
+		ordered.verify(contentHandler).startDocument();
+		ordered.verify(contentHandler).startPrefixMapping("", "http://samples.springframework.org/flight");
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("flights"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("number"), isA(Attributes.class));
+		ordered.verify(contentHandler).characters(isA(char[].class), eq(0), eq(2));
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "number", "number");
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flight", "flight");
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flights", "flights");
+		ordered.verify(contentHandler).endPrefixMapping("");
+		ordered.verify(contentHandler).endDocument();
 	}
 
 	@Test
@@ -280,25 +267,22 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.setClassesToBeBound(BinaryObject.class);
 		marshaller.setMtomEnabled(true);
 		marshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = createMock(MimeContainer.class);
+		MimeContainer mimeContainer = mock(MimeContainer.class);
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
 
-		expect(mimeContainer.convertToXopPackage()).andReturn(true);
-		mimeContainer.addAttachment(isA(String.class), isA(DataHandler.class));
-		expectLastCall().times(3);
-
-		replay(mimeContainer);
+		given(mimeContainer.convertToXopPackage()).willReturn(true);
 		byte[] bytes = FileCopyUtils.copyToByteArray(logo.getInputStream());
 		BinaryObject object = new BinaryObject(bytes, dataHandler);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
-		verify(mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
+		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
 	}
 
 	@XmlRootElement
+	@SuppressWarnings("unused")
 	public static class DummyRootElement {
 
 		private DummyType t = new DummyType();
@@ -306,9 +290,11 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@XmlType
+	@SuppressWarnings("unused")
 	public static class DummyType {
 
 		private String s = "Hello";
+
 	}
 
 	@SuppressWarnings("unused")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ import java.lang.annotation.Target;
 /**
  * {@code TestExecutionListeners} defines class-level metadata for
  * configuring which {@link TestExecutionListener TestExecutionListeners} should
- * be registered with a {@link TestContextManager}. Typically,
- * {@code &#064;TestExecutionListeners} will be used in conjunction with
- * {@link ContextConfiguration &#064;ContextConfiguration}.
+ * be registered with a {@link TestContextManager}.
+ *
+ * <p>Typically, {@code @TestExecutionListeners} will be used in conjunction with
+ * {@link ContextConfiguration @ContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -43,11 +44,10 @@ import java.lang.annotation.Target;
 public @interface TestExecutionListeners {
 
 	/**
-	 * <p>
 	 * The {@link TestExecutionListener TestExecutionListeners} to register with
 	 * a {@link TestContextManager}.
-	 * </p>
 	 *
+	 * @see org.springframework.test.context.web.ServletTestExecutionListener
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
@@ -60,10 +60,8 @@ public @interface TestExecutionListeners {
 	Class<? extends TestExecutionListener>[] value() default {};
 
 	/**
-	 * <p>
 	 * Whether or not {@link #value() TestExecutionListeners} from superclasses
 	 * should be <em>inherited</em>.
-	 * </p>
 	 * <p>
 	 * The default value is {@code true}, which means that an annotated
 	 * class will <em>inherit</em> the listeners defined by an annotated
@@ -77,11 +75,12 @@ public @interface TestExecutionListeners {
 	 * {@code DependencyInjectionTestExecutionListener},
 	 * {@code DirtiesContextTestExecutionListener}, <strong>and</strong>
 	 * {@code TransactionalTestExecutionListener}, in that order.
-	 * </p>
 	 *
 	 * <pre class="code">
-	 * &#064;TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
-	 *    DirtiesContextTestExecutionListener.class })
+	 * &#064;TestExecutionListeners({
+	 *    DependencyInjectionTestExecutionListener.class,
+	 *    DirtiesContextTestExecutionListener.class
+	 * })
 	 * public abstract class AbstractBaseTest {
 	 * 	// ...
 	 * }
@@ -89,14 +88,12 @@ public @interface TestExecutionListeners {
 	 * &#064;TestExecutionListeners(TransactionalTestExecutionListener.class)
 	 * public class TransactionalTest extends AbstractBaseTest {
 	 * 	// ...
-	 * }
-	 * </pre>
+	 * }</pre>
 	 *
 	 * <p>
-	 * If {@code inheritListeners} is set to {@code false}, the
-	 * listeners for the annotated class will <em>shadow</em> and effectively
-	 * replace any listeners defined by a superclass.
-	 * </p>
+	 * If {@code inheritListeners} is set to {@code false}, the listeners for the
+	 * annotated class will <em>shadow</em> and effectively replace any listeners
+	 * defined by a superclass.
 	 */
 	boolean inheritListeners() default true;
 

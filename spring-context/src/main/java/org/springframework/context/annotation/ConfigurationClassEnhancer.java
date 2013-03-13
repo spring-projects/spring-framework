@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,24 +52,12 @@ class ConfigurationClassEnhancer {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
-	private static final Class<?>[] CALLBACK_TYPES = {BeanMethodInterceptor.class,
-			DisposableBeanMethodInterceptor.class, NoOp.class};
-
-	private static final CallbackFilter CALLBACK_FILTER = new CallbackFilter() {
-		public int accept(Method candidateMethod) {
-			// Set up the callback filter to return the index of the BeanMethodInterceptor when
-			// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
-			if (BeanAnnotationHelper.isBeanAnnotated(candidateMethod)) {
-				return 0;
-			}
-			if (DisposableBeanMethodInterceptor.isDestroyMethod(candidateMethod)) {
-				return 1;
-			}
-			return 2;
-		}
-	};
+	private static final CallbackFilter CALLBACK_FILTER = new ConfigurationClassCallbackFilter();
 
 	private static final Callback DISPOSABLE_BEAN_METHOD_INTERCEPTOR = new DisposableBeanMethodInterceptor();
+
+	private static final Class<?>[] CALLBACK_TYPES =
+			{BeanMethodInterceptor.class, DisposableBeanMethodInterceptor.class, NoOp.class};
 
 	private final Callback[] callbackInstances;
 
@@ -110,21 +98,6 @@ class ConfigurationClassEnhancer {
 	}
 
 	/**
-	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
-	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
-	 * through checking to see if candidate classes are already assignable to it, e.g.
-	 * have already been enhanced.
-	 * <p>Also extends {@link DisposableBean}, as all enhanced
-	 * {@code @Configuration} classes must de-register static CGLIB callbacks on
-	 * destruction, which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
-	 * <p>Note that this interface is intended for framework-internal use only, however
-	 * must remain public in order to allow access to subclasses generated from other
-	 * packages (i.e. user code).
-	 */
-	public interface EnhancedConfiguration extends DisposableBean {
-	}
-
-	/**
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
 	private Enhancer newEnhancer(Class<?> superclass) {
@@ -146,6 +119,43 @@ class ConfigurationClassEnhancer {
 		// registering callbacks statically (as opposed to threadlocal) is critical for usage in an OSGi env (SPR-5932)
 		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances);
 		return subclass;
+	}
+
+
+
+	/**
+	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
+	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
+	 * through checking to see if candidate classes are already assignable to it, e.g.
+	 * have already been enhanced.
+	 * <p>Also extends {@link DisposableBean}, as all enhanced
+	 * {@code @Configuration} classes must de-register static CGLIB callbacks on
+	 * destruction, which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
+	 * <p>Note that this interface is intended for framework-internal use only, however
+	 * must remain public in order to allow access to subclasses generated from other
+	 * packages (i.e. user code).
+	 */
+	public interface EnhancedConfiguration extends DisposableBean {
+	}
+
+
+	/**
+	 * CGLIB CallbackFilter implementation that points to BeanMethodInterceptor and
+	 * DisposableBeanMethodInterceptor.
+	 */
+	private static class ConfigurationClassCallbackFilter implements CallbackFilter {
+
+		public int accept(Method candidateMethod) {
+			// Set up the callback filter to return the index of the BeanMethodInterceptor when
+			// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
+			if (BeanAnnotationHelper.isBeanAnnotated(candidateMethod)) {
+				return 0;
+			}
+			if (DisposableBeanMethodInterceptor.isDestroyMethod(candidateMethod)) {
+				return 1;
+			}
+			return 2;
+		}
 	}
 
 
@@ -175,7 +185,7 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
 	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
-	 * garbage collection issues See SPR-7901.
+	 * garbage collection issues. See SPR-7901.
 	 * @see EnhancedConfiguration
 	 */
 	private static class DisposableBeanMethodInterceptor implements MethodInterceptor {
