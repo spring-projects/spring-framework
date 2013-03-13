@@ -16,17 +16,32 @@
 
 package org.springframework.websocket;
 
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-
+import java.io.InputStream;
 
 /**
  *
  * @author Rossen Stoyanchev
  */
-public interface HandshakeRequestHandler {
+public class WebSocketHandlerAdapter implements WebSocketHandler {
 
+	@Override
+	public void newSession(Session session) throws Exception {
+	}
 
-	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response);
+	@Override
+	public void handleTextMessage(Session session, String message) throws Exception {
+	}
+
+	@Override
+	public void handleBinaryMessage(Session session, InputStream message) throws Exception {
+	}
+
+	@Override
+	public void handleException(Session session, Throwable exception) {
+	}
+
+	@Override
+	public void sessionClosed(Session session, int statusCode, String reason) throws Exception {
+	}
 
 }
