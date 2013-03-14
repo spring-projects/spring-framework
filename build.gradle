@@ -74,7 +74,7 @@ configure(allprojects) { project ->
 		"http://docs.oracle.com/javase/6/docs/api",
 		"http://docs.oracle.com/javaee/6/api",
 		"http://portals.apache.org/pluto/portlet-2.0-apidocs/",
-		"http://commons.apache.org/lang/api-2.5",
+		"http://commons.apache.org/lang/javadocs/api-2.5",
 		"http://commons.apache.org/codec/apidocs",
 		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector",
 		"http://docs.jboss.org/jbossas/javadoc/7.1.2.Final",
@@ -89,7 +89,7 @@ configure(allprojects) { project ->
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs",
 		"http://ibatis.apache.org/docs/java/dev",
 		"http://tiles.apache.org/framework/apidocs",
-		"http://commons.apache.org/dbcp/api-1.2.2",
+		"http://commons.apache.org/dbcp/javadocs/api-1.2.2",
 	] as String[]
 }
 

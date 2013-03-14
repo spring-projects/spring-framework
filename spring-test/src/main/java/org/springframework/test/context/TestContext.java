@@ -167,7 +167,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * context} associated with this test context is <em>dirty</em> and should be
 	 * discarded. Do this if a test has modified the context &mdash; for example,
 	 * by replacing a bean definition or modifying the state of a singleton bean.
-	 * @deprecated As of Spring 3.2.2, use {@link #markApplicationContextDirty(HierarchyMode)} instead.
+	 * @deprecated As of Spring 3.2.2, use {@link #markApplicationContextDirty(DirtiesContext.HierarchyMode)} instead.
 	 */
 	@Deprecated
 	public void markApplicationContextDirty() {
