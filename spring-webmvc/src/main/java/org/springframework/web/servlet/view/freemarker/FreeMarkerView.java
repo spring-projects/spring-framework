@@ -345,9 +345,13 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * @throws IOException if the template file could not be retrieved
 	 */
 	protected Template getTemplate(String name, Locale locale) throws IOException {
-		return (getEncoding() != null ?
-				getConfiguration().getTemplate(name, locale, getEncoding()) :
-				getConfiguration().getTemplate(name, locale));
+        final Template template;
+        synchronized (this) {
+               template = getEncoding() != null ?
+                    getConfiguration().getTemplate(name, locale, getEncoding()) :
+                    getConfiguration().getTemplate(name, locale);
+        }
+        return template;
 	}
 
 	/**
