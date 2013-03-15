@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set whether to explictly expose the Servlet 2.4 forward request attributes
+	 * Set whether to explicitly expose the Servlet 2.4 forward request attributes
 	 * when forwarding to the underlying view resource.
 	 * <p>Default is "true" on Servlet containers up until 2.4, and "false" for
 	 * Servlet 2.5 and above. Note that Servlet containers at 2.4 level and above

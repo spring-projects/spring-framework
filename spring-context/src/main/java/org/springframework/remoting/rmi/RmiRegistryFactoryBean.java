@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 			throws RemoteException {
 
 		if (registryHost != null) {
-			// Host explictly specified: only lookup possible.
+			// Host explicitly specified: only lookup possible.
 			if (logger.isInfoEnabled()) {
 				logger.info("Looking for RMI registry at port '" + registryPort + "' of host [" + registryHost + "]");
 			}
