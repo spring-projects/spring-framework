@@ -2420,7 +2420,7 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
 public Callable&lt;String&gt; processUpload(final MultipartFile file) {
 
   return new Callable&lt;String&gt;() {
-    public Object call() throws Exception {
+    public String call() throws Exception {
       // ...
       return "someView";
     }
