@@ -3177,10 +3177,10 @@ public class ExampleTests {
 
     @Test
     public void getAccount() throws Exception {
-        this.mockMvc.perform(get("/accounts/1").accept("application/json;charset=UTF-8"))
+        this.mockMvc.perform(get("/accounts/1").accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
           .andExpect(status().isOk())
           .andExpect(content().contentType("application/json"))
-          .andExpect(jsonPath("$.name").value("Lee");
+          .andExpect(jsonPath("$.name").value("Lee"));
     }
 
 }</programlisting>
