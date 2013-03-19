@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,7 @@ public abstract class JRubyScriptUtils {
 		Ruby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parseEval(scriptSource, "", null, 0);
-		// keep using the deprecated runNormally variant for JRuby 1.1/1.2 compatibility...
-        IRubyObject rubyObject = ruby.runNormally(scriptRootNode, false);
+        IRubyObject rubyObject = ruby.runNormally(scriptRootNode);
 
 		if (rubyObject instanceof RubyNil) {
 			String className = findClassName(scriptRootNode);
