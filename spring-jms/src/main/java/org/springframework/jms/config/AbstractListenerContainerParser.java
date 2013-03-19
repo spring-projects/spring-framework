@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,10 @@ package org.springframework.jms.config;
 
 import javax.jms.Session;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -26,9 +30,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Abstract parser for JMS listener container elements, providing support for
@@ -156,10 +157,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			}
 		}
 
-		// Remain JMS 1.0.2 compatible for the adapter if the container class indicates this.
-		boolean jms102 = indicatesJms102(containerDef);
-		listenerDef.setBeanClassName(
-				"org.springframework.jms.listener.adapter.MessageListenerAdapter" + (jms102 ? "102" : ""));
+		listenerDef.setBeanClassName("org.springframework.jms.listener.adapter.MessageListenerAdapter");
 
 		containerDef.getPropertyValues().add("messageListener", listenerDef);
 
@@ -177,10 +175,6 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			Element listenerEle, Element containerEle, ParserContext parserContext);
 
 	protected boolean indicatesPubSub(BeanDefinition containerDef) {
-		return false;
-	}
-
-	protected boolean indicatesJms102(BeanDefinition containerDef) {
 		return false;
 	}
 
