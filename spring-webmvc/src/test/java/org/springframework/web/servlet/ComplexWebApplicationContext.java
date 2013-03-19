@@ -60,7 +60,6 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
-import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
@@ -111,7 +110,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		pvs = new MutablePropertyValues();
 		pvs.add(
-				"mappings", "/form.do=formHandler\n/head.do=headController\n" +
+				"mappings", "/head.do=headController\n" +
 				"body.do=bodyController\n/noview*=noviewController\n/noview/simple*=noviewController");
 		pvs.add("order", "1");
 		registerSingleton("handlerMapping", SimpleUrlHandlerMapping.class, pvs);
@@ -129,11 +128,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("suffix", ".jsp");
 		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
-
-		pvs = new MutablePropertyValues();
-		pvs.add("commandClass", "org.springframework.tests.sample.beans.TestBean");
-		pvs.add("formView", "form");
-		registerSingleton("formHandler", SimpleFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();
 		pvs.add("viewName", "form");
