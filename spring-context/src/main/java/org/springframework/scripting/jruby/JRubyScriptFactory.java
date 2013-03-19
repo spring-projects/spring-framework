@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import org.springframework.util.ClassUtils;
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's javadoc for a configuration example.
+ *
+ * <p>Note: Spring 4.0 supports JRuby 1.5 and higher.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop

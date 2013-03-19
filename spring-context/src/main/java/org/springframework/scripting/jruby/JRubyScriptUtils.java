@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for handling JRuby-scripted objects.
  *
- * <p>As of Spring 3.0, this class requires JRuby 1.1 or higher.
+ * <p>Note: Spring 4.0 supports JRuby 1.5 and higher.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
