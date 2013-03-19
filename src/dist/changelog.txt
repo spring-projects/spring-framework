@@ -8,6 +8,8 @@ Changes in version 3.2.3 (2013-05-02)
 
 * fixed ReflectiveMethodResolver to avoid potential UnsupportedOperationException on sort (SPR-10392)
 * fixed Jaxb2Marshaller's partial unmarshalling feature to consistently apply to all sources (SPR-10282)
+* JdbcTemplate defensively uses JDBC 3.0 getParameterType call for Oracle driver compatibility (SPR-10385)
+* introduced public ArgumentPreparedStatementSetter and ArgumentTypePreparedStatementSetter classes (SPR-10375)
 
 
 Changes in version 3.2.2 (2013-03-14)
