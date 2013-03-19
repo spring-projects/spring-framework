@@ -7,6 +7,10 @@
 
     <mvc:annotation-driven />
 
+    <bean class="org.springframework.test.web.servlet.samples.context.PersonController">
+        <constructor-arg ref="personDao"/>
+    </bean>
+
     <mvc:view-controller path="/" view-name="home" />
 
     <mvc:resources mapping="/resources/**" location="/resources/" />

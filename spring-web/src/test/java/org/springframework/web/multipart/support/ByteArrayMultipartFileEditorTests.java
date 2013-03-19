@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.web.multipart.support;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -63,30 +64,22 @@ public final class ByteArrayMultipartFileEditorTests extends TestCase {
 	public void testSetValueAsMultipartFile() throws Exception {
 		String expectedValue = "That is comforting to know";
 		ByteArrayMultipartFileEditor editor = new ByteArrayMultipartFileEditor();
-		MockControl mock = MockControl.createControl(MultipartFile.class);
-		MultipartFile file = (MultipartFile) mock.getMock();
-		file.getBytes();
-		mock.setReturnValue(expectedValue.getBytes());
-		mock.replay();
+		MultipartFile file = mock(MultipartFile.class);
+		given(file.getBytes()).willReturn(expectedValue.getBytes());
 		editor.setValue(file);
 		assertEquals(expectedValue, editor.getAsText());
-		mock.verify();
 	}
 
 	public void testSetValueAsMultipartFileWithBadBytes() throws Exception {
 		ByteArrayMultipartFileEditor editor = new ByteArrayMultipartFileEditor();
-		MockControl mock = MockControl.createControl(MultipartFile.class);
-		MultipartFile file = (MultipartFile) mock.getMock();
-		file.getBytes();
-		mock.setThrowable(new IOException());
-		mock.replay();
+		MultipartFile file = mock(MultipartFile.class);
+		given(file.getBytes()).willThrow(new IOException());
 		try {
 			editor.setValue(file);
 			fail("Must have thrown an IllegalArgumentException: IOException thrown when reading MultipartFile bytes");
 		}
 		catch (IllegalArgumentException expected) {
 		}
-		mock.verify();
 	}
 
 }

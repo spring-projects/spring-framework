@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,13 +26,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -52,6 +43,9 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Tests for redirect view, and query string construction.
@@ -156,7 +150,7 @@ public class RedirectViewTests {
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
 
-		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
+		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
 		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 
 		RedirectView rv = new RedirectView();
@@ -167,12 +161,11 @@ public class RedirectViewTests {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		HttpServletResponse response = new MockHttpServletResponse();
 
-		EasyMock.expect(mockProcessor.processUrl(request, "/path")).andReturn("/path?key=123");
-		EasyMock.replay(mockProcessor);
+		given(mockProcessor.processUrl(request, "/path")).willReturn("/path?key=123");
 
 		rv.render(new ModelMap(), request, response);
 
-		EasyMock.verify(mockProcessor);
+		verify(mockProcessor).processUrl(request, "/path");
 	}
 
 
@@ -186,7 +179,7 @@ public class RedirectViewTests {
 		contextLoader.initWebApplicationContext(servletContext);
 
 		try {
-			RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
+			RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
 			wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 
 			RedirectView rv = new RedirectView();
@@ -195,12 +188,11 @@ public class RedirectViewTests {
 			MockHttpServletRequest request = createRequest();
 			HttpServletResponse response = new MockHttpServletResponse();
 
-			EasyMock.expect(mockProcessor.processUrl(request, "/path")).andReturn("/path?key=123");
-			EasyMock.replay(mockProcessor);
+			given(mockProcessor.processUrl(request, "/path")).willReturn("/path?key=123");
 
 			rv.render(new ModelMap(), request, response);
 
-			EasyMock.verify(mockProcessor);
+			verify(mockProcessor).processUrl(request, "/path");
 		}
 		finally {
 			contextLoader.closeWebApplicationContext(servletContext);
@@ -363,32 +355,28 @@ public class RedirectViewTests {
 		rv.setContextRelative(contextRelative);
 		rv.setExposeModelAttributes(exposeModelAttributes);
 
-		HttpServletRequest request = createNiceMock("request", HttpServletRequest.class);
+		HttpServletRequest request = mock(HttpServletRequest.class, "request");
 		if (exposeModelAttributes) {
-			expect(request.getCharacterEncoding()).andReturn(WebUtils.DEFAULT_CHARACTER_ENCODING);
+			given(request.getCharacterEncoding()).willReturn(WebUtils.DEFAULT_CHARACTER_ENCODING);
 		}
 		if (contextRelative) {
 			expectedUrlForEncoding = "/context" + expectedUrlForEncoding;
-			expect(request.getContextPath()).andReturn("/context");
+			given(request.getContextPath()).willReturn("/context");
 		}
 
-		expect(request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE)).andReturn(new FlashMap());
+		given(request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE)).willReturn(new FlashMap());
 
 		FlashMapManager flashMapManager = new SessionFlashMapManager();
-		expect(request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE)).andReturn(flashMapManager);
+		given(request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE)).willReturn(flashMapManager);
 
-		HttpServletResponse response = createMock("response", HttpServletResponse.class);
-		expect(response.encodeRedirectURL(expectedUrlForEncoding)).andReturn(expectedUrlForEncoding);
+		HttpServletResponse response = mock(HttpServletResponse.class, "response");
+		given(response.encodeRedirectURL(expectedUrlForEncoding)).willReturn(expectedUrlForEncoding);
 		response.sendRedirect(expectedUrlForEncoding);
-
-		replay(request, response);
 
 		rv.render(map, request, response);
 		if (exposeModelAttributes) {
 			assertTrue("queryProperties() should have been called.", rv.queryPropertiesCalled);
 		}
-
-		verify(request, response);
 	}
 
 }

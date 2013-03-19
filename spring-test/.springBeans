@@ -10,6 +10,7 @@
 		<config>src/test/java/org/springframework/test/context/junit4/profile/xml/DefaultProfileXmlConfigTests-context.xml</config>
 		<config>src/test/java/org/springframework/test/context/junit4/aci/xml/MultipleInitializersXmlConfigTests-context.xml</config>
 		<config>src/test/resources/org/springframework/test/context/web/RequestAndSessionScopedBeansWacTests-context.xml</config>
+		<config>src/test/resources/org/springframework/test/context/hierarchies/web/DispatcherWacRootWacEarTests-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

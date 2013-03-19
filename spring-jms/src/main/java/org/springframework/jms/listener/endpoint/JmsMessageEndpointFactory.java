@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,11 +109,11 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 
 
 	/**
-	 * Internal exception thrown when a ResourceExeption has been encountered
+	 * Internal exception thrown when a ResourceException has been encountered
 	 * during the endpoint invocation.
 	 * <p>Will only be used if the ResourceAdapter does not invoke the
 	 * endpoint's {@code beforeDelivery} and {@code afterDelivery}
-	 * directly, leavng it up to the concrete endpoint to apply those -
+	 * directly, leaving it up to the concrete endpoint to apply those -
 	 * and to handle any ResourceExceptions thrown from them.
 	 */
 	@SuppressWarnings("serial")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -560,6 +560,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class StringGenericParameter implements GenericParameter<String> {
 
 		@Override
@@ -1048,7 +1049,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public class GenericSqlMapIntegerDao<T extends Integer> extends GenericSqlMapDao<T> {
+	public class GenericSqlMapIntegerDao<T extends Number> extends GenericSqlMapDao<T> {
 
 		@Override
 		public void saveOrUpdate(T t) {
@@ -1163,6 +1164,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
 
 		public void receive(NewMegaMessageEvent event) {
@@ -1198,6 +1200,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
 
 		@Override

@@ -116,7 +116,7 @@ public class FormattingConversionServiceFactoryBean
 	/**
 	 * Indicate whether default formatters should be registered or not.
 	 * <p>By default, built-in formatters are registered. This flag can be used
-	 * to  turn that off and rely on explicitly registered formatters only.
+	 * to turn that off and rely on explicitly registered formatters only.
 	 * @see #setFormatters(Set)
 	 * @see #setFormatterRegistrars(Set)
 	 */

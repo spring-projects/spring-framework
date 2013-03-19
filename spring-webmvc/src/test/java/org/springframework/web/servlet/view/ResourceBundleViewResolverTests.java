@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,14 +72,14 @@ public class ResourceBundleViewResolverTests extends TestCase {
 
 	public void testParentsAreAbstract() throws Exception {
 		try {
-			View v = rb.resolveViewName("debug.Parent", Locale.ENGLISH);
+			rb.resolveViewName("debug.Parent", Locale.ENGLISH);
 			fail("Should have thrown BeanIsAbstractException");
 		}
 		catch (BeanIsAbstractException ex) {
 			// expected
 		}
 		try {
-			View v = rb.resolveViewName("testParent", Locale.ENGLISH);
+			rb.resolveViewName("testParent", Locale.ENGLISH);
 			fail("Should have thrown BeanIsAbstractException");
 		}
 		catch (BeanIsAbstractException ex) {
@@ -152,7 +152,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	public void testNoSuchBasename() throws Exception {
 		try {
 			rb.setBasename("weoriwoierqupowiuer");
-			View v = rb.resolveViewName("debugView", Locale.ENGLISH);
+			rb.resolveViewName("debugView", Locale.ENGLISH);
 			fail("No such basename: all requests should fail with exception");
 		}
 		catch (MissingResourceException ex) {

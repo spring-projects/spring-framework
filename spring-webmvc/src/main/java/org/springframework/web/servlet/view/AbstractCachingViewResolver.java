@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.web.servlet.view;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
@@ -42,19 +45,38 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Default maximum number of entries for the view cache: 1024 */
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
 
+	/** Dummy marker object for unresolved views in the cache Maps */
+	private static final View UNRESOLVED_VIEW = new View() {
+		public String getContentType() {
+			return null;
+		}
+		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		}
+	};
 
+
+	/** The maximum number of entries in the cache */
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	/** Whether we should refrain from resolving views again if unresolved once */
 	private boolean cacheUnresolved = true;
 
-	/** Map from view key to View instance */
+	/** Fast access cache for Views, returning already cached instances without a global lock */
+	private final Map<Object, View> viewAccessCache = new ConcurrentHashMap<Object, View>(DEFAULT_CACHE_LIMIT);
+
+	/** Map from view key to View instance, synchronized for View creation */
 	@SuppressWarnings("serial")
-	private final Map<Object, View> viewCache =
+	private final Map<Object, View> viewCreationCache =
 			new LinkedHashMap<Object, View>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override
 				protected boolean removeEldestEntry(Map.Entry<Object, View> eldest) {
-					return size() > getCacheLimit();
+					if (size() > getCacheLimit()) {
+						viewAccessCache.remove(eldest.getKey());
+						return true;
+					}
+					else {
+						return false;
+					}
 				}
 			};
 
@@ -122,20 +144,27 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		}
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
-			synchronized (this.viewCache) {
-				View view = this.viewCache.get(cacheKey);
-				if (view == null && (!this.cacheUnresolved || !this.viewCache.containsKey(cacheKey))) {
-					// Ask the subclass to create the View object.
-					view = createView(viewName, locale);
-					if (view != null || this.cacheUnresolved) {
-						this.viewCache.put(cacheKey, view);
-						if (logger.isTraceEnabled()) {
-							logger.trace("Cached view [" + cacheKey + "]");
+			View view = this.viewAccessCache.get(cacheKey);
+			if (view == null) {
+				synchronized (this.viewCreationCache) {
+					view = this.viewCreationCache.get(cacheKey);
+					if (view == null) {
+						// Ask the subclass to create the View object.
+						view = createView(viewName, locale);
+						if (view == null && this.cacheUnresolved) {
+							view = UNRESOLVED_VIEW;
+						}
+						if (view != null) {
+							this.viewAccessCache.put(cacheKey, view);
+							this.viewCreationCache.put(cacheKey, view);
+							if (logger.isTraceEnabled()) {
+								logger.trace("Cached view [" + cacheKey + "]");
+							}
 						}
 					}
 				}
-				return view;
 			}
+			return (view != UNRESOLVED_VIEW ? view : null);
 		}
 	}
 
@@ -166,17 +195,16 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
 			Object cachedView;
-			synchronized (this.viewCache) {
-				cachedView = this.viewCache.remove(cacheKey);
+			synchronized (this.viewCreationCache) {
+				this.viewAccessCache.remove(cacheKey);
+				cachedView = this.viewCreationCache.remove(cacheKey);
 			}
-			if (cachedView == null) {
+			if (logger.isDebugEnabled()) {
 				// Some debug output might be useful...
-				if (logger.isDebugEnabled()) {
+				if (cachedView == null) {
 					logger.debug("No cached instance for view '" + cacheKey + "' was found");
 				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
+				else {
 					logger.debug("Cache for view " + cacheKey + " has been cleared");
 				}
 			}
@@ -189,8 +217,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 */
 	public void clearCache() {
 		logger.debug("Clearing entire view cache");
-		synchronized (this.viewCache) {
-			this.viewCache.clear();
+		synchronized (this.viewCreationCache) {
+			this.viewAccessCache.clear();
+			this.viewCreationCache.clear();
 		}
 	}
 

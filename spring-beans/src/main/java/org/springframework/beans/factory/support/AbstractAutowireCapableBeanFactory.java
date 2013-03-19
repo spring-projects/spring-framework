@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -572,28 +572,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	@Override
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
-		Class beanClass;
-		if (mbd.getFactoryMethodName() != null) {
-			beanClass = getTypeForFactoryMethod(beanName, mbd, typesToMatch);
-		}
-		else {
-			beanClass = resolveBeanClass(mbd, beanName, typesToMatch);
+	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
+		Class<?> targetType = mbd.getTargetType();
+		if (targetType == null) {
+			targetType = (mbd.getFactoryMethodName() != null ? getTypeForFactoryMethod(beanName, mbd, typesToMatch) :
+					resolveBeanClass(mbd, beanName, typesToMatch));
+			if (ObjectUtils.isEmpty(typesToMatch) || getTempClassLoader() == null) {
+				mbd.setTargetType(targetType);
+			}
 		}
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
-		if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+		if (targetType != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
-					Class processedType = ibp.predictBeanType(beanClass, beanName);
-					if (processedType != null) {
-						return processedType;
+					Class predicted = ibp.predictBeanType(targetType, beanName);
+					if (predicted != null && (typesToMatch.length != 1 || !FactoryBean.class.equals(typesToMatch[0]) ||
+							FactoryBean.class.isAssignableFrom(predicted))) {
+						return predicted;
 					}
 				}
 			}
 		}
-		return beanClass;
+		return targetType;
 	}
 
 	/**
@@ -610,8 +612,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the type for the bean if determinable, or {@code null} else
 	 * @see #createBean
 	 */
-	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
-		Class factoryClass;
+	protected Class<?> getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
+		Class<?> factoryClass;
 		boolean isStatic = true;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
@@ -685,7 +687,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (factoryBeanName != null && factoryMethodName != null) {
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
-			if (fbDef instanceof AbstractBeanDefinition) {
+			if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
 				Class<?> fbClass = ((AbstractBeanDefinition) fbDef).getBeanClass();
 				if (ClassUtils.isCglibProxyClass(fbClass)) {
 					// CGLIB subclass methods hide generic parameters. look at the superclass.

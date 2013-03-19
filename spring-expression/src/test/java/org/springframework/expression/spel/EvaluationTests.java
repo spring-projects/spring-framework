@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,14 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
@@ -48,6 +54,7 @@ import org.springframework.expression.spel.testresources.TestPerson;
  * @author Andy Clement
  * @author Mark Fisher
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.0
  */
 public class EvaluationTests extends ExpressionTestCase {
@@ -705,6 +712,23 @@ public class EvaluationTests extends ExpressionTestCase {
 			fail();
 		} catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,see.getMessageCode());
+		}
+	}
+
+	@Test
+	public void limitCollectionGrowing() throws Exception {
+		TestClass instance = new TestClass();
+		StandardEvaluationContext ctx = new StandardEvaluationContext(instance);
+		SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
+		Expression expression = parser.parseExpression("foo[2]");
+		expression.setValue(ctx, "2");
+		assertThat(instance.getFoo().size(), equalTo(3));
+		expression = parser.parseExpression("foo[3]");
+		try {
+			expression.setValue(ctx, "3");
+		} catch(SpelEvaluationException see) {
+			assertEquals(SpelMessage.UNABLE_TO_GROW_COLLECTION, see.getMessageCode());
+			assertThat(instance.getFoo().size(), equalTo(3));
 		}
 	}
 

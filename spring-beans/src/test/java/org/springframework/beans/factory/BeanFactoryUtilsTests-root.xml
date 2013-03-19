@@ -6,19 +6,19 @@
 	<!--
 		Just included for the count: not to mean anything in particular
 	-->
-	<bean id="something" class="test.beans.GenericIntegerBean"/>
+	<bean id="something" class="org.springframework.tests.sample.beans.GenericIntegerBean"/>
 
-	<bean id="indexedBean" class="test.beans.IndexedTestBean"/>
+	<bean id="indexedBean" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
 
 	<!-- Overridden by next factory -->
-	<bean id="test" class="test.beans.TestBean">
+	<bean id="test" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>25</value></property>
 	</bean>
 
-	<bean id="testFactory1" class="test.beans.DummyFactory"/>
+	<bean id="testFactory1" class="org.springframework.tests.sample.beans.factory.DummyFactory"/>
 
-	<bean id="testFactory2" class="test.beans.DummyFactory">
+	<bean id="testFactory2" class="org.springframework.tests.sample.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 

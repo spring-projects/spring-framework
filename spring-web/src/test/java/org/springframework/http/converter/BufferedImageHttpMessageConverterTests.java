@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ public class BufferedImageHttpMessageConverterTests {
 	public void canWrite() {
 		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, null));
 		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, new MediaType("image", "png")));
+		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, new MediaType("*", "*")));
 	}
 
 	@Test
@@ -85,7 +86,7 @@ public class BufferedImageHttpMessageConverterTests {
 		converter.setDefaultContentType(contentType);
 		BufferedImage body = ImageIO.read(logo.getFile());
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(body, contentType, outputMessage);
+		converter.write(body, new MediaType("*", "*"), outputMessage);
 		assertEquals("Invalid content type", contentType, outputMessage.getHeaders().getContentType());
 		assertTrue("Invalid size", outputMessage.getBodyAsBytes().length > 0);
 		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));

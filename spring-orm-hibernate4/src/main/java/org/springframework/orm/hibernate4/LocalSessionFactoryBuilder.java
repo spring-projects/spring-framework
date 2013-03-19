@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ import org.springframework.util.ClassUtils;
 public class LocalSessionFactoryBuilder extends Configuration {
 
 	private static final String RESOURCE_PATTERN = "/**/*.class";
+
+	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
 	private static final TypeFilter[] ENTITY_TYPE_FILTERS = new TypeFilter[] {
 			new AnnotationTypeFilter(Entity.class, false),
@@ -194,8 +196,11 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					if (resource.isReadable()) {
 						MetadataReader reader = readerFactory.getMetadataReader(resource);
 						String className = reader.getClassMetadata().getClassName();
-						if (matchesFilter(reader, readerFactory)) {
-							addAnnotatedClasses(this.resourcePatternResolver.getClassLoader().loadClass(className));
+						if (matchesEntityTypeFilter(reader, readerFactory)) {
+							addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+						}
+						else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+							addPackage(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 						}
 					}
 				}
@@ -214,7 +219,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
 	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
+	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
 		for (TypeFilter filter : ENTITY_TYPE_FILTERS) {
 			if (filter.match(reader, readerFactory)) {
 				return true;

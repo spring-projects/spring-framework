@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,6 +249,18 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
+	public void testReloadableResourceBundleMessageSourceWithCommonMessages() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		Properties commonMessages = new Properties();
+		commonMessages.setProperty("warning", "Do not do {0}");
+		ms.setCommonMessages(commonMessages);
+		ms.setBasename("org/springframework/context/support/messages");
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
+		assertEquals("Do not do this", ms.getMessage("warning", new Object[] {"this"}, Locale.ENGLISH));
+		assertEquals("Do not do that", ms.getMessage("warning", new Object[] {"that"}, Locale.GERMAN));
+	}
+
 	public void testReloadableResourceBundleMessageSourceWithWhitespaceInBasename() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("  org/springframework/context/support/messages  ");
@@ -338,6 +350,17 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
 		assertEquals(0, filenames.size());
+	}
+
+	public void testMessageSourceResourceBundle() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		MessageSourceResourceBundle rbe = new MessageSourceResourceBundle(ms, Locale.ENGLISH);
+		assertEquals("message1", rbe.getString("code1"));
+		assertTrue(rbe.containsKey("code1"));
+		MessageSourceResourceBundle rbg = new MessageSourceResourceBundle(ms, Locale.GERMAN);
+		assertEquals("nachricht2", rbg.getString("code2"));
+		assertTrue(rbg.containsKey("code2"));
 	}
 
 	@Override

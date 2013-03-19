@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import org.springframework.core.MethodParameter;
 /**
  * Interface that defines type conversion methods. Typically (but not necessarily)
  * implemented in conjunction with the {@link PropertyEditorRegistry} interface.
+ *
+ * <p><b>Note:</b> Since TypeConverter implementations are typically based on
+ * {@link java.beans.PropertyEditor PropertyEditors} which aren't thread-safe,
+ * TypeConverters themselves are <em>not</em> to be considered as thread-safe either.
  *
  * @author Juergen Hoeller
  * @since 2.0

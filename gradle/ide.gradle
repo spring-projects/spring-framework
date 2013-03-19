@@ -1,7 +1,12 @@
 import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
+
+apply plugin: "propdeps-eclipse"
+apply plugin: "propdeps-idea"
+
+// Replace classpath entries with project dependencies (GRADLE-1116)
 eclipse.classpath.file.whenMerged { classpath ->
-	// GRADLE-1116
 	def regexp = /.*?\/([^\/]+)\/build\/[^\/]+\/(?:main|test)/ // only match those that end in main or test (avoids removing necessary entries like build/classes/jaxb)
 	def projectOutputDependencies = classpath.entries.findAll { entry -> entry.path =~ regexp }
 	projectOutputDependencies.each { entry ->
@@ -18,4 +23,77 @@ eclipse.classpath.file.whenMerged { classpath ->
 		}
 	}
 	classpath.entries.removeAll { entry -> (entry.path =~ /(?!.*?repack.*\.jar).*?\/([^\/]+)\/build\/libs\/[^\/]+\.jar/) }
+}
+
+
+// Use separate main/test outputs (prevents WTP from packaging test classes)
+eclipse.classpath.defaultOutputDir = file(project.name+"/bin/eclipse")
+eclipse.classpath.file.beforeMerged { classpath ->
+	classpath.entries.findAll{ it instanceof SourceFolder }.each {
+		if(it.output.startsWith("bin/")) {
+			it.output = null
+		}
+	}
+}
+eclipse.classpath.file.whenMerged { classpath ->
+	classpath.entries.findAll{ it instanceof SourceFolder }.each {
+		it.output = "bin/" + it.path.split("/")[1]
+	}
+}
+
+// Allow projects to be used as WPT modules
+eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
+
+
+// Include project specific settings
+task eclipseSettings(type: Copy) {
+	from rootProject.files(
+		"src/eclipse/org.eclipse.jdt.ui.prefs",
+		"src/eclipse/org.eclipse.wst.common.project.facet.core.xml")
+	into project.file('.settings/')
+	outputs.upToDateWhen { false }
+}
+
+task eclipseWstComponent(type: Copy) {
+	from rootProject.files(
+		"src/eclipse/org.eclipse.wst.common.component")
+	into project.file('.settings/')
+	expand(deployname: project.name)
+	outputs.upToDateWhen { false }
+}
+
+task eclipseJdtPrepare(type: Copy) {
+	from rootProject.file("src/eclipse/org.eclipse.jdt.core.prefs")
+	into project.file(".settings/")
+	outputs.upToDateWhen { false }
+}
+
+task cleanEclipseJdtUi(type: Delete) {
+	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
+	delete project.file("org.eclipse.jdt.core.prefs")
+	delete project.file(".settings/org.eclipse.wst.common.component")
+	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
+}
+
+tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
+tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
+tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
+
+
+// Filter 'build' folder
+
+eclipse.project.file.withXml {
+	def node = it.asNode()
+
+	def filteredResources = node.get("filteredResources")
+	if(filteredResources) {
+		node.remove(filteredResources)
+	}
+	def filterNode = node.appendNode("filteredResources").appendNode("filter")
+	filterNode.appendNode("id", "1359048889071")
+	filterNode.appendNode("name", "")
+	filterNode.appendNode("type", "30")
+	def matcherNode = filterNode.appendNode("matcher")
+	matcherNode.appendNode("id", "org.eclipse.ui.ide.multiFilter")
+	matcherNode.appendNode("arguments", "1.0-projectRelativePath-matches-false-false-build")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,9 @@ public enum SpelMessage {
 	OPERAND_NOT_INCREMENTABLE(Kind.ERROR,1066,"the expression component ''{0}'' does not support increment"), //
 	OPERAND_NOT_DECREMENTABLE(Kind.ERROR,1067,"the expression component ''{0}'' does not support decrement"), //
 	NOT_ASSIGNABLE(Kind.ERROR,1068,"the expression component ''{0}'' is not assignable"), //
-	;
+	MISSING_CHARACTER(Kind.ERROR,1069,"missing expected character ''{0}''"),
+	LEFT_OPERAND_PROBLEM(Kind.ERROR,1070, "Problem parsing left operand"),
+	MISSING_SELECTION_EXPRESSION(Kind.ERROR, 1071, "A required selection expression has not been specified");
 
 	private Kind kind;
 	private int code;

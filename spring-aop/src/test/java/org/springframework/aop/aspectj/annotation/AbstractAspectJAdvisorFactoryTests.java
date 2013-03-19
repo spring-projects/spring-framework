@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,14 @@
  */
 package org.springframework.aop.aspectj.annotation;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
@@ -39,9 +46,7 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.junit.Test;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
@@ -52,14 +57,14 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
 import test.aop.DefaultLockable;
 import test.aop.Lockable;
 import test.aop.PerTargetAspect;
 import test.aop.TwoAdviceAspect;
-import test.beans.ITestBean;
-import test.beans.TestBean;
 
 /**
  * Abstract tests for AspectJAdvisorFactory.
@@ -385,7 +390,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 						CannotBeUnlocked.class
 				),
 				CannotBeUnlocked.class);
-		assertTrue(proxy instanceof Lockable);
+		assertThat(proxy, instanceOf(Lockable.class));
 		Lockable lockable = proxy;
 		assertTrue("Already locked", lockable.locked());
 		lockable.lock();
@@ -399,7 +404,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
 		LinkedList target = new LinkedList();
@@ -442,7 +446,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		Modifiable modifiable = (Modifiable) createProxy(target,
 				advisors,
 				ITestBean.class);
-		assertTrue(modifiable instanceof Modifiable);
+		assertThat(modifiable, instanceOf(Modifiable.class));
 		Lockable lockable = (Lockable) modifiable;
 		assertFalse(lockable.locked());
 
@@ -650,7 +654,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 
-	@Aspect("pertypewithin(test.beans.IOther+)")
+	@Aspect("pertypewithin(org.springframework.tests.sample.beans.IOther+)")
 	public static class PerTypeWithinAspect {
 
 		public int count;
@@ -936,7 +940,7 @@ abstract class AbstractMakeModifiable {
 		}
 
 		// Find the current raw value, by invoking the corresponding setter
-		Method correspondingGetter =  getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
+		Method correspondingGetter = getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
 		boolean modified = true;
 		if (correspondingGetter != null) {
 			try {
@@ -979,7 +983,7 @@ abstract class AbstractMakeModifiable {
 @Aspect
 class MakeITestBeanModifiable extends AbstractMakeModifiable {
 
-	@DeclareParents(value = "test.beans.ITestBean+",
+	@DeclareParents(value = "org.springframework.tests.sample.beans.ITestBean+",
 			defaultImpl=ModifiableImpl.class)
 	public static MutableModifable mixin;
 

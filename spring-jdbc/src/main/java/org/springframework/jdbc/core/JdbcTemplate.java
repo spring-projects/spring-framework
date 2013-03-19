@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -477,11 +477,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, getSingleColumnRowMapper(requiredType));
 	}
 
+	@Deprecated
 	public long queryForLong(String sql) throws DataAccessException {
 		Number number = queryForObject(sql, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql) throws DataAccessException {
 		Number number = queryForObject(sql, Integer.class);
 		return (number != null ? number.intValue() : 0);
@@ -757,21 +759,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, getColumnMapRowMapper());
 	}
 
+	@Deprecated
 	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		Number number = queryForObject(sql, args, argTypes, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		Number number = queryForObject(sql, args, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		Number number = queryForObject(sql, args, argTypes, Integer.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		Number number = queryForObject(sql, args, Integer.class);
 		return (number != null ? number.intValue() : 0);

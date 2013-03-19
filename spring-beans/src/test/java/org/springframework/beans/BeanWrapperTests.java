@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,11 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.BooleanTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NumberTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -58,11 +63,6 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -1569,6 +1569,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Foo {
 
 		private List list;
@@ -1598,6 +1599,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NoRead {
 
 		public void setAge(int age) {
@@ -1605,6 +1607,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class EnumTester {
 
 		private Autowire autowire;
@@ -1619,6 +1622,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PropsTester {
 
 		private Properties props;
@@ -1647,6 +1651,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class GetterBean {
 
 		private String name;
@@ -1664,6 +1669,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ThrowsException {
 
 		public void doSomething(Throwable t) throws Throwable {
@@ -1672,6 +1678,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PrimitiveArrayBean {
 
 		private int[] array;
@@ -1686,6 +1693,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NumberPropertyBean {
 
 		private byte myPrimitiveByte;
@@ -1804,6 +1812,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class IntelliBean {
 
 		public void setName(String name) {}
@@ -1818,6 +1827,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Employee extends TestBean {
 
 		private String co;

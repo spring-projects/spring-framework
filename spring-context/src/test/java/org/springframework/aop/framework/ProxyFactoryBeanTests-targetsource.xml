@@ -8,18 +8,18 @@
 <beans>
 
 	<!-- Simple target -->
-	<bean id="target" class="org.springframework.beans.TestBean">	
+	<bean id="target" class="org.springframework.tests.sample.beans.TestBean">
 		<!-- initial value :-) -->
 		<property name="name"><value>Adam</value></property>
 	</bean>
-	
-	<bean id="nopInterceptor" class="test.interceptor.NopInterceptor">
+
+	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor">
 	</bean>
-	
+
 	<bean id="countingBeforeAdvice"
-		class="test.advice.CountingBeforeAdvice"
+		class="org.springframework.tests.aop.advice.CountingBeforeAdvice"
 	/>
-	
+
 	<!--
 		Note that there's normally no reason to create objects of this type
 		in a BeanFactory. If for some strange reason you want to, use Type 3 IoC.
@@ -29,30 +29,30 @@
 	</bean>
 
 	<bean id="directTarget"
-		class="org.springframework.aop.framework.ProxyFactoryBean"> 
+		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames" value="countingBeforeAdvice,nopInterceptor,target"/>
 		<property name="proxyTargetClass" value="true"/>
 	</bean>
-	
+
 	<bean id="viaTargetSource"
-		class="org.springframework.aop.framework.ProxyFactoryBean"> 
+		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames"><value>nopInterceptor,targetSource</value></property>
-		<property name="proxyTargetClass" value="true"/>		
+		<property name="proxyTargetClass" value="true"/>
 	</bean>
-	
+
 	<bean id ="unsupportedInterceptor"
 		class="org.springframework.aop.framework.UnsupportedInterceptor"
 	/>
-	
+
 	<!--
 		No target or target source, just the interceptor
 	-->
 	<bean id="noTarget"
-		class="org.springframework.aop.framework.ProxyFactoryBean"> 
-		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
 		<property name="interceptorNames"><value>nopInterceptor,unsupportedInterceptor</value></property>
 	</bean>
 
-</beans>		
-	
-	
+</beans>
+
+

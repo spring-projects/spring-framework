@@ -109,11 +109,11 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 

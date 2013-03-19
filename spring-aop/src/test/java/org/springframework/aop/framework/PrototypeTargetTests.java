@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.aop.framework;
 
 import static org.junit.Assert.assertEquals;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -62,7 +62,6 @@ public final class PrototypeTargetTests {
 		assertEquals(1, TestBeanImpl.constructionCount);
 		assertEquals(10, interceptor.invocationCount);
 	}
-
 
 	public static interface TestBean {
 		public void doSomething();

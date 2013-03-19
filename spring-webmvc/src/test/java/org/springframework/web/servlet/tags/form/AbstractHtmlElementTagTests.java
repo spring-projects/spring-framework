@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import static org.easymock.EasyMock.createMock;
-
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
@@ -32,13 +30,15 @@ import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
+import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.tags.AbstractTagTests;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rob Harrop
@@ -102,7 +102,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	}
 
 	protected RequestDataValueProcessor getMockRequestDataValueProcessor() {
-		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
+		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
 		ServletRequest request = getPageContext().getRequest();
 		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
 		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);

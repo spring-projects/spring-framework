@@ -37,6 +37,7 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define a
@@ -60,6 +61,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
 
+
+	public AbstractHandlerMethodMapping() {
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setRemoveSemicolonContent(false);
+		setUrlPathHelper(pathHelper);
+	}
 
 	/**
 	 * Whether to detect handler methods in beans in ancestor ApplicationContexts.
@@ -165,25 +172,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
-		HandlerMethod handlerMethod;
-		if (handler instanceof String) {
-			String beanName = (String) handler;
-			handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
-		}
-		else {
-			handlerMethod = new HandlerMethod(handler, method);
-		}
-
+		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = handlerMethods.get(mapping);
-		if (oldHandlerMethod != null && !oldHandlerMethod.equals(handlerMethod)) {
-			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean()
-					+ "' bean method \n" + handlerMethod + "\nto " + mapping + ": There is already '"
+		if (oldHandlerMethod != null && !oldHandlerMethod.equals(newHandlerMethod)) {
+			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + newHandlerMethod.getBean()
+					+ "' bean method \n" + newHandlerMethod + "\nto " + mapping + ": There is already '"
 					+ oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
 
-		this.handlerMethods.put(mapping, handlerMethod);
+		this.handlerMethods.put(mapping, newHandlerMethod);
 		if (logger.isInfoEnabled()) {
-			logger.info("Mapped \"" + mapping + "\" onto " + handlerMethod);
+			logger.info("Mapped \"" + mapping + "\" onto " + newHandlerMethod);
 		}
 
 		Set<String> patterns = getMappingPathPatterns(mapping);
@@ -192,6 +191,24 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				this.urlMap.add(pattern, mapping);
 			}
 		}
+	}
+
+	/**
+	 * Create the HandlerMethod instance.
+	 * @param handler either a bean name or an actual handler instance
+	 * @param method the target method
+	 * @return the created HandlerMethod
+	 */
+	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+		HandlerMethod handlerMethod;
+		if (handler instanceof String) {
+			String beanName = (String) handler;
+			handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
+		}
+		else {
+			handlerMethod = new HandlerMethod(handler, method);
+		}
+		return handlerMethod;
 	}
 
 	/**

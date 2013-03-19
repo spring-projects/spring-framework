@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * An concrete implementation of {@link MockMvcBuilder} with methods for
@@ -41,7 +42,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Rob Winch
  * @since 3.2
  */
-public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcBuilderSupport
+public class DefaultMockMvcBuilder<Self extends DefaultMockMvcBuilder> extends MockMvcBuilderSupport
 		implements MockMvcBuilder {
 
 	private final WebApplicationContext webAppContext;
@@ -53,6 +54,8 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 	private final List<ResultMatcher> globalResultMatchers = new ArrayList<ResultMatcher>();
 
 	private final List<ResultHandler> globalResultHandlers = new ArrayList<ResultHandler>();
+
+	private Boolean dispatchOptions = Boolean.FALSE;
 
 
 	/**
@@ -179,6 +182,17 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 	}
 
 	/**
+	 * Should the {@link DispatcherServlet} dispatch OPTIONS request to controllers.
+	 * @param dispatchOptions
+	 * @see DispatcherServlet#setDispatchOptionsRequest(boolean)
+	 */
+	@SuppressWarnings("unchecked")
+	public final <T extends Self> T dispatchOptions(boolean dispatchOptions) {
+		this.dispatchOptions = dispatchOptions;
+		return (T) this;
+	}
+
+	/**
 	 * Build a {@link MockMvc} instance.
 	 */
 	public final MockMvc build() {
@@ -191,7 +205,7 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 		Filter[] filterArray = this.filters.toArray(new Filter[this.filters.size()]);
 
 		return super.createMockMvc(filterArray, mockServletConfig, this.webAppContext,
-				this.defaultRequestBuilder, this.globalResultMatchers, this.globalResultHandlers);
+				this.defaultRequestBuilder, this.globalResultMatchers, this.globalResultHandlers,this.dispatchOptions);
 	}
 
 	/**

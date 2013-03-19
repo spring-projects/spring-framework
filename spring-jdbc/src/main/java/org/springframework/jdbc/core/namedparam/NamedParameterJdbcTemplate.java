@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return execute(sql, new MapSqlParameterSource(paramMap), action);
 	}
 
+	public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
+		return execute(sql, EmptySqlParameterSource.INSTANCE, action);
+	}
+
 	public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
@@ -147,6 +151,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rse);
+	}
+
+	public <T> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
+		return query(sql, EmptySqlParameterSource.INSTANCE, rse);
 	}
 
 	public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
@@ -161,6 +169,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		query(sql, new MapSqlParameterSource(paramMap), rch);
 	}
 
+	public void query(String sql, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, EmptySqlParameterSource.INSTANCE, rch);
+	}
+
 	public <T> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
@@ -171,6 +183,10 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rowMapper);
+	}
+
+	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+		return query(sql, EmptySqlParameterSource.INSTANCE, rowMapper);
 	}
 
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
@@ -206,20 +222,24 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
 	}
 
+	@Deprecated
 	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		Number number = queryForObject(sql, paramSource, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForLong(sql, new MapSqlParameterSource(paramMap));
 	}
 
+	@Deprecated
 	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		Number number = queryForObject(sql, paramSource, Integer.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForInt(sql, new MapSqlParameterSource(paramMap));
 	}

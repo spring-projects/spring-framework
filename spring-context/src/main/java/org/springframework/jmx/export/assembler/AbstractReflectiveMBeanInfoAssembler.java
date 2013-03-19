@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
@@ -49,6 +51,7 @@ import org.springframework.jmx.support.JmxUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author David Boden
  * @since 1.2
  * @see #includeOperation
  * @see #includeReadAttribute
@@ -177,6 +180,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	private boolean exposeClassDescriptor = false;
 
+	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+
 
 	/**
 	 * Set the default for the JMX field "currencyTimeLimit".
@@ -252,6 +257,23 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected boolean isExposeClassDescriptor() {
 		return this.exposeClassDescriptor;
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed (e.g. for parameter names of MBean operation methods).
+	 * <p>The default is {@link LocalVariableTableParameterNameDiscoverer}.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
+	/**
+	 * Return the ParameterNameDiscoverer to use for resolving method parameter
+	 * names if needed (may be {@code null} in order to skip parameter detection).
+	 */
+	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
 	}
 
 
@@ -381,7 +403,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Creates an instance of {@code ModelMBeanOperationInfo} for the
 	 * given method. Populates the parameter info for the operation.
 	 * @param method the {@code Method} to create a {@code ModelMBeanOperationInfo} for
-	 * @param name the name for the operation info
+	 * @param name the logical name for the operation (method name or property name);
+	 * not used by the default implementation but possibly by subclasses
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * of the {@code MBeanExporter}
 	 * @return the {@code ModelMBeanOperationInfo}
@@ -392,7 +415,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 			return new ModelMBeanOperationInfo(getOperationDescription(method, beanKey), method);
 		}
 		else {
-			return new ModelMBeanOperationInfo(name,
+			return new ModelMBeanOperationInfo(method.getName(),
 				getOperationDescription(method, beanKey),
 				getOperationParameters(method, beanKey),
 				method.getReturnType().getName(),
@@ -476,16 +499,27 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	/**
 	 * Create parameter info for the given method.
-	 * <p>The default implementation returns an empty arry of {@code MBeanParameterInfo}.
+	 * <p>The default implementation returns an empty array of {@code MBeanParameterInfo}.
 	 * @param method the {@code Method} to get the parameter information for
 	 * @param beanKey the key associated with the MBean in the beans map
 	 * of the {@code MBeanExporter}
 	 * @return the {@code MBeanParameterInfo} array
 	 */
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
-		return new MBeanParameterInfo[0];
-	}
+		ParameterNameDiscoverer paramNameDiscoverer = getParameterNameDiscoverer();
+		String[] paramNames = (paramNameDiscoverer != null ? paramNameDiscoverer.getParameterNames(method) : null);
+		if (paramNames == null) {
+			return new MBeanParameterInfo[0];
+		}
 
+		MBeanParameterInfo[] info = new MBeanParameterInfo[paramNames.length];
+		Class<?>[] typeParameters = method.getParameterTypes();
+		for(int i = 0; i < info.length; i++) {
+			info[i] = new MBeanParameterInfo(paramNames[i], typeParameters[i].getName(), paramNames[i]);
+		}
+
+		return info;
+	}
 
 	/**
 	 * Allows subclasses to add extra fields to the {@code Descriptor} for an MBean.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,34 +156,34 @@ public class RepeatedSpringRunnerTests {
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {
 
 		@Test
-		@Timed(millis = 10000)
+		@Timed(millis = 1000)
 		@Repeat(5)
 		public void repeatedFiveTimesButDoesNotExceedTimeout() throws Exception {
 			incrementInvocationCount();
 		}
 
 		@Test
-		@Timed(millis = 100)
+		@Timed(millis = 10)
 		@Repeat(1)
 		public void singleRepetitionExceedsTimeout() throws Exception {
 			incrementInvocationCount();
-			Thread.sleep(250);
+			Thread.sleep(15);
 		}
 
 		@Test
-		@Timed(millis = 200)
+		@Timed(millis = 20)
 		@Repeat(4)
 		public void firstRepetitionOfManyExceedsTimeout() throws Exception {
 			incrementInvocationCount();
-			Thread.sleep(250);
+			Thread.sleep(25);
 		}
 
 		@Test
-		@Timed(millis = 1000)
+		@Timed(millis = 100)
 		@Repeat(10)
 		public void collectiveRepetitionsExceedTimeout() throws Exception {
 			incrementInvocationCount();
-			Thread.sleep(150);
+			Thread.sleep(11);
 		}
 	}
 

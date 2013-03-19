@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,12 +60,18 @@ public class AntPathMatcher implements PathMatcher {
 	private final Map<String, AntPathStringMatcher> stringMatcherCache =
 			new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
+	private boolean trimTokens = true;
+
 
 	/** Set the path separator to use for pattern parsing. Default is "/", as in Ant. */
 	public void setPathSeparator(String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
 
+	/** Whether to trim tokenized paths and patterns. */
+	public void setTrimTokens(boolean trimTokens) {
+		this.trimTokens  = trimTokens;
+	}
 
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
@@ -95,8 +101,8 @@ public class AntPathMatcher implements PathMatcher {
 			return false;
 		}
 
-		String[] pattDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
+		String[] pattDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
+		String[] pathDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -246,8 +252,8 @@ public class AntPathMatcher implements PathMatcher {
 	 * does <strong>not</strong> enforce this.
 	 */
 	public String extractPathWithinPattern(String pattern, String path) {
-		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
+		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
+		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
 
 		StringBuilder builder = new StringBuilder();
 
@@ -311,7 +317,9 @@ public class AntPathMatcher implements PathMatcher {
 		else if (!StringUtils.hasText(pattern2)) {
 			return pattern1;
 		}
-		else if (!pattern1.equals(pattern2) && !pattern1.contains("{") && match(pattern1, pattern2)) {
+
+		boolean pattern1ContainsUriVar = pattern1.indexOf('{') != -1;
+		if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1, pattern2)) {
 			// /* + /hotel -> /hotel ; "/*.*" + "/*.html" -> /*.html
 			// However /user + /user -> /usr/user ; /{foo} + /bar -> /{foo}/bar
 			return pattern2;
@@ -338,7 +346,7 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		else {
 			int dotPos1 = pattern1.indexOf('.');
-			if (dotPos1 == -1) {
+			if (dotPos1 == -1 || pattern1ContainsUriVar) {
 				// simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;

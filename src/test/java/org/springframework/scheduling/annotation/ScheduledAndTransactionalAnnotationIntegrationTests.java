@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -31,15 +30,14 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.easymock.EasyMock.*;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -79,7 +77,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isAopProxy(repository), is(true));
+		assertThat("repository is not a proxy", AopUtils.isAopProxy(repository), equalTo(true));
 		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
 		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
 	}
@@ -140,8 +138,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		@Bean
 		public PersistenceExceptionTranslator peTranslator() {
-			PersistenceExceptionTranslator txlator = createMock(PersistenceExceptionTranslator.class);
-			replay(txlator);
+			PersistenceExceptionTranslator txlator = mock(PersistenceExceptionTranslator.class);
 			return txlator;
 		}
 	}

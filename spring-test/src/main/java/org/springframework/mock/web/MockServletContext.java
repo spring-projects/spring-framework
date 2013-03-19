@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.activation.FileTypeMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -164,6 +163,7 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
+	@SuppressWarnings("javadoc")
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
@@ -242,8 +242,16 @@ public class MockServletContext implements ServletContext {
 		return this.effectiveMinorVersion;
 	}
 
+	/**
+	 * This method uses the Java Activation framework, which returns
+	 * "application/octet-stream" when the mime type is unknown (i.e. it never returns
+	 * {@code null}). In order to maintain the {@link ServletContext#getMimeType(String)
+	 * contract, as of version 3.2.2, this method returns null if the mimeType is
+	 * "application/octet-stream".
+	 */
 	public String getMimeType(String filePath) {
-		return MimeTypeResolver.getMimeType(filePath);
+		String mimeType = MimeTypeResolver.getMimeType(filePath);
+		return ("application/octet-stream".equals(mimeType)) ? null : mimeType;
 	}
 
 	public Set<String> getResourcePaths(String path) {
@@ -345,6 +353,7 @@ public class MockServletContext implements ServletContext {
 	 * <p>Defaults to {@linkplain #COMMON_DEFAULT_SERVLET_NAME "default"}.
 	 * @see #setDefaultServletName
 	 */
+	@SuppressWarnings("javadoc")
 	public String getDefaultServletName() {
 		return this.defaultServletName;
 	}
@@ -434,7 +443,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.attributes.keySet());
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	public void setAttribute(String name, Object value) {

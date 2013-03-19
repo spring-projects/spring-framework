@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
 import org.apache.tiles.request.servlet.ServletRequest;
 import org.apache.tiles.request.servlet.ServletUtil;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -95,7 +98,12 @@ public class TilesView extends AbstractUrlBasedView {
 
 	@Override
 	public boolean checkResource(final Locale locale) throws Exception {
-		Request request = new ServletRequest(this.applicationContext, null, null) {
+		HttpServletRequest servletRequest = null;
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		if(requestAttributes != null && requestAttributes instanceof ServletRequestAttributes) {
+			servletRequest = ((ServletRequestAttributes)requestAttributes).getRequest();
+		}
+		Request request = new ServletRequest(this.applicationContext, servletRequest, null) {
 			@Override
 			public Locale getRequestLocale() {
 				return locale;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -27,16 +23,19 @@ import org.junit.Test;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.tests.TimeStamped;
+import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
+import org.springframework.tests.sample.beans.INestedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.Person;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
-import test.aop.SerializableNopInterceptor;
-import test.beans.INestedTestBean;
-import test.beans.ITestBean;
-import test.beans.NestedTestBean;
-import test.beans.Person;
-import test.beans.SerializablePerson;
-import test.beans.TestBean;
-import test.util.SerializationTestUtils;
-import test.util.TimeStamped;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson
@@ -156,7 +155,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		//assertTrue(Arrays.binarySearch(pf.getProxiedInterfaces(), TimeStamped.class) != -1);
 		TimeStamped ts = (TimeStamped) pf.getProxy();
 
-		assertTrue(ts instanceof TimeStamped);
+		assertThat(ts, instanceOf(TimeStamped.class));
 		// Shoulnd't proxy framework interfaces
 		assertTrue(!(ts instanceof MethodInterceptor));
 		assertTrue(!(ts instanceof IntroductionInterceptor));

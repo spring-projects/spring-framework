@@ -11,21 +11,13 @@
 		</layout>
 	</appender>
 
-	<logger name="org.springframework.beans">
-		<level value="warn" />
-	</logger>
-
-	<logger name="org.springframework.binding">
-		<level value="debug" />
-	</logger>
-
-	<logger name="org.springframework.core.GenericTypeResolver">
+	<logger name="org.springframework.beans.factory.config.DeprecatedBeanWarnerTests$MyDeprecatedBeanWarner">
 		<level value="warn" />
 	</logger>
 
 	<!-- Root Logger -->
 	<root>
-		<priority value="warn" />
+		<priority value="error" />
 		<appender-ref ref="console" />
 	</root>
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Test;
-
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -39,6 +31,10 @@ import org.springframework.context.BeanThatBroadcasts;
 import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit and integration tests for the ApplicationContext event support.

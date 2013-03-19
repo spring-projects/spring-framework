@@ -41,7 +41,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.*;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
  * @author Guillaume Poirier

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,24 +40,28 @@ import org.springframework.util.Assert;
 public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
-	private DateFormatter dateFormatter = new DateFormatter();
+	private DateFormatter dateFormatter;
 
 
 	public void registerFormatters(FormatterRegistry registry) {
 		addDateConverters(registry);
-		registry.addFormatter(dateFormatter);
-		registry.addFormatterForFieldType(Calendar.class, dateFormatter);
 		registry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+
+		// In order to retain back compatibility we only register Date/Calendar
+		// types when a user defined formatter is specified (see SPR-10105)
+		if(this.dateFormatter != null) {
+			registry.addFormatter(this.dateFormatter);
+			registry.addFormatterForFieldType(Calendar.class, this.dateFormatter);
+		}
 	}
 
 	/**
-	 * Set the date formatter to register. If not specified the default {@link DateFormatter}
-	 * will be used. This method can be used if additional formatter configuration is
-	 * required.
+	 * Set the date formatter to register. If not specified no formatter is registered.
+	 * This method can be used if global formatter configuration is required.
 	 * @param dateFormatter the date formatter
 	 */
 	public void setFormatter(DateFormatter dateFormatter) {
-		Assert.notNull(dateFormatter,"DateFormatter must not be null");
+		Assert.notNull(dateFormatter, "DateFormatter must not be null");
 		this.dateFormatter = dateFormatter;
 	}
 
@@ -117,7 +121,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 		private DateToCalendarConverter dateToCalendarConverter = new DateToCalendarConverter();
 
 		public Calendar convert(Long source) {
-			return dateToCalendarConverter.convert(new Date(source));
+			return this.dateToCalendarConverter.convert(new Date(source));
 		}
 	}
 }

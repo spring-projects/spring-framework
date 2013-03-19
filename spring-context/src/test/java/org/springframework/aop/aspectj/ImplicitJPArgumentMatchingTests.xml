@@ -8,12 +8,12 @@
 	<aop:config proxy-target-class="true">
 		<aop:aspect ref="counterAspect">
 			<aop:pointcut id="anyOperation" 
-				expression="execution(* org.springframework.beans.TestBean.*(..)) and this(bean) and args(argument)"/>
+				expression="execution(* org.springframework.tests.sample.beans.TestBean.*(..)) and this(bean) and args(argument)"/>
 			<aop:around pointcut-ref="anyOperation" method="increment" arg-names="bean,argument"/>
 		</aop:aspect>
 	</aop:config>
 	
-	<bean id="testBean" class="org.springframework.beans.TestBean">
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name" value="aTestBean"/>
 	</bean>
 

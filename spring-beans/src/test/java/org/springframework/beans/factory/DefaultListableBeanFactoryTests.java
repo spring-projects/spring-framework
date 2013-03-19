@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
-import test.beans.DerivedTestBean;
-import test.beans.DummyFactory;
-import test.beans.ITestBean;
-import test.beans.LifecycleBean;
-import test.beans.NestedTestBean;
-import test.beans.TestBean;
-
+import org.junit.rules.ExpectedException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -70,20 +66,29 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
-import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.DependenciesBean;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.LifecycleBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.SideEffectBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.StopWatch;
+import org.springframework.util.StringValueResolver;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Tests properties population and autowire behavior.
@@ -93,11 +98,14 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Phillip Webb
  */
 public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testUnreferencedSingletonWasInstantiated() {
@@ -569,7 +577,6 @@ public class DefaultListableBeanFactoryTests {
 			fail("Should throw exception on invalid property");
 		}
 		catch (BeanCreationException ex) {
-			ex.printStackTrace();
 			assertTrue(ex.getCause() instanceof NotWritablePropertyException);
 			NotWritablePropertyException cause = (NotWritablePropertyException) ex.getCause();
 			// expected
@@ -1261,12 +1268,44 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test(expected=NoSuchBeanDefinitionException.class)
+	public void testGetBeanByTypeWithNoneFound() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test(expected=NoUniqueBeanDefinitionException.class)
 	public void testGetBeanByTypeWithAmbiguity() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test
+	public void testGetBeanByTypeWithPrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd2"));
+	}
+
+	@Test
+	public void testGetBeanByTypeWithMultiplePrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setPrimary(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		thrown.expect(NoUniqueBeanDefinitionException.class);
+		thrown.expectMessage(containsString("more than one 'primary'"));
 		lbf.getBean(TestBean.class);
 	}
 
@@ -1287,7 +1326,8 @@ public class DefaultListableBeanFactoryTests {
 		try {
 			lbf.getBean(TestBean.class);
 			fail("Should have thrown NoSuchBeanDefinitionException");
-		} catch (NoSuchBeanDefinitionException ex) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
@@ -2145,7 +2185,6 @@ public class DefaultListableBeanFactoryTests {
 		doTestFieldSettingWithInstantiationAwarePostProcessor(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
@@ -2208,8 +2247,28 @@ public class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("abs", BeanDefinitionBuilder
 				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
-		assertThat(bf.containsBean("abs"), is(true));
-		assertThat(bf.containsBean("bogus"), is(false));
+		assertThat(bf.containsBean("abs"), equalTo(true));
+		assertThat(bf.containsBean("bogus"), equalTo(false));
+	}
+
+	@Test
+	public void resolveEmbeddedValue() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		StringValueResolver r1 = mock(StringValueResolver.class);
+		StringValueResolver r2 = mock(StringValueResolver.class);
+		StringValueResolver r3 = mock(StringValueResolver.class);
+		bf.addEmbeddedValueResolver(r1);
+		bf.addEmbeddedValueResolver(r2);
+		bf.addEmbeddedValueResolver(r3);
+		given(r1.resolveStringValue("A")).willReturn("B");
+		given(r2.resolveStringValue("B")).willReturn(null);
+		given(r3.resolveStringValue(isNull(String.class))).willThrow(new IllegalArgumentException());
+
+		bf.resolveEmbeddedValue("A");
+
+		verify(r1).resolveStringValue("A");
+		verify(r2).resolveStringValue("B");
+		verify(r3, never()).resolveStringValue(isNull(String.class));
 	}
 
 
@@ -2259,6 +2318,7 @@ public class DefaultListableBeanFactoryTests {
 			this.spouse = spouse;
 		}
 
+		@SuppressWarnings("unused")
 		private ConstructorDependency(TestBean spouse, TestBean otherSpouse) {
 			throw new IllegalArgumentException("Should never be called");
 		}
@@ -2485,6 +2545,7 @@ public class DefaultListableBeanFactoryTests {
 	/**
 	 * Bean with a dependency on a {@link FactoryBean}.
 	 */
+	@SuppressWarnings("unused")
 	private static class FactoryBeanDependentBean {
 
 		private FactoryBean<?> factoryBean;
@@ -2571,6 +2632,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestSecuredBean {
 
 		private String userName;
@@ -2600,29 +2662,7 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
-	/**
-	 * Bean that changes state on a business invocation, so that
-	 * we can check whether it's been invoked
-	 * @author Rod Johnson
-	 */
-	private static class SideEffectBean {
-
-		private int count;
-
-		public void setCount(int count) {
-			this.count = count;
-		}
-
-		public int getCount() {
-			return this.count;
-		}
-
-		public void doWork() {
-			++count;
-		}
-
-	}
-
+	@SuppressWarnings("unused")
 	private static class KnowsIfInstantiated {
 
 		private static boolean instantiated;

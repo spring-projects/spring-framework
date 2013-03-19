@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
 
 package org.springframework.aop.framework;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -29,25 +37,13 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import test.advice.CountingAfterReturningAdvice;
-import test.advice.CountingBeforeAdvice;
-import test.advice.MethodCounter;
-import test.advice.MyThrowsHandler;
-import test.interceptor.NopInterceptor;
-import test.interceptor.SerializableNopInterceptor;
-import test.interceptor.TimestampIntroductionInterceptor;
-import test.mixin.LockMixin;
-import test.mixin.LockMixinAdvisor;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
-import test.util.TimeStamped;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -66,15 +62,28 @@ import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.aop.target.HotSwappableTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.Person;
-import org.springframework.beans.SerializablePerson;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.TimeStamped;
+import org.springframework.tests.aop.advice.CountingAfterReturningAdvice;
+import org.springframework.tests.aop.advice.CountingBeforeAdvice;
+import org.springframework.tests.aop.advice.MethodCounter;
+import org.springframework.tests.aop.advice.MyThrowsHandler;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
+import org.springframework.tests.aop.interceptor.TimestampIntroductionInterceptor;
+import org.springframework.tests.sample.beans.IOther;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.Person;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
-import static org.junit.Assert.*;
+import test.mixin.LockMixin;
+import test.mixin.LockMixinAdvisor;
+import test.mixin.Lockable;
+import test.mixin.LockedException;
 
 /**
  * @author Rod Johnson
@@ -163,6 +172,7 @@ public abstract class AbstractAopProxyTests {
 	 */
 	@Test
 	public void testManyProxies() {
+		Assume.group(TestGroup.PERFORMANCE);
 		int howMany = 10000;
 		StopWatch sw = new StopWatch();
 		sw.start("Create " + howMany + " proxies");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ import org.springframework.util.MultiValueMap;
  * @since 3.1
  * @see UriComponentsBuilder
  */
-public abstract class UriComponents {
+public abstract class UriComponents implements Serializable {
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
 

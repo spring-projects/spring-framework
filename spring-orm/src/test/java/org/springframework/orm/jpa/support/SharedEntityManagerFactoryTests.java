@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,18 @@ package org.springframework.orm.jpa.support;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.easymock.MockControl;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class SharedEntityManagerFactoryTests {
 
@@ -37,22 +38,11 @@ public class SharedEntityManagerFactoryTests {
 	public void testValidUsage() {
 		Object o = new Object();
 
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
+		EntityManager mockEm = mock(EntityManager.class);
+		given(mockEm.isOpen()).willReturn(true);
 
-		mockEm.contains(o);
-		emMc.setReturnValue(false, 1);
-
-		emMc.expectAndReturn(mockEm.isOpen(), true);
-		mockEm.close();
-		emMc.setVoidCallable(1);
-		emMc.replay();
-
-		MockControl emfMc = MockControl.createControl(EntityManagerFactory.class);
-		EntityManagerFactory mockEmf = (EntityManagerFactory) emfMc.getMock();
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(mockEm, 1);
-		emfMc.replay();
+		EntityManagerFactory mockEmf = mock(EntityManagerFactory.class);
+		given(mockEmf.createEntityManager()).willReturn(mockEm);
 
 		SharedEntityManagerBean proxyFactoryBean = new SharedEntityManagerBean();
 		proxyFactoryBean.setEntityManagerFactory(mockEmf);
@@ -83,10 +73,9 @@ public class SharedEntityManagerFactoryTests {
 			TransactionSynchronizationManager.unbindResource(mockEmf);
 		}
 
-		emfMc.verify();
-		emMc.verify();
-
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		verify(mockEm).contains(o);
+		verify(mockEm).close();
 	}
 
 }

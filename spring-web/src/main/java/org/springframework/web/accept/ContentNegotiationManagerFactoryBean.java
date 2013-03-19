@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.accept;
 
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.FactoryBean;
@@ -39,13 +39,13 @@ import org.springframework.web.context.ServletContextAware;
  * <p>By default strategies for checking the extension of the request path and
  * the {@code Accept} header are registered. The path extension check will perform
  * lookups through the {@link ServletContext} and the Java Activation Framework
- * (if present) unless {@linkplain #setMediaTypes(Properties) media types} are configured.
+ * (if present) unless {@linkplain #setMediaTypes media types} are configured.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class ContentNegotiationManagerFactoryBean
-		implements FactoryBean<ContentNegotiationManager>, InitializingBean, ServletContextAware {
+		implements FactoryBean<ContentNegotiationManager>, ServletContextAware, InitializingBean {
 
 	private boolean favorPathExtension = true;
 
@@ -65,6 +65,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private ServletContext servletContext;
 
+
 	/**
 	 * Indicate whether the extension of the request path should be used to determine
 	 * the requested media type with the <em>highest priority</em>.
@@ -81,7 +82,6 @@ public class ContentNegotiationManagerFactoryBean
 	 * <p>When this mapping is not set or when an extension is not found, the Java
 	 * Action Framework, if available, may be used if enabled via
 	 * {@link #setFavorPathExtension(boolean)}.
-	 *
 	 * @see #addMediaType(String, MediaType)
 	 * @see #addMediaTypes(Map)
 	 */
@@ -121,9 +121,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * to map from file extensions to media types. This is used only when
 	 * {@link #setFavorPathExtension(boolean)} is set to {@code true}.
 	 * <p>The default value is {@code true}.
-	 *
-	 * @see #parameterName
-	 * @see #setMediaTypes(Properties)
+	 * @see #setParameterName
+	 * @see #setMediaTypes
 	 */
 	public void setUseJaf(boolean useJaf) {
 		this.useJaf = useJaf;
@@ -138,8 +137,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * {@code "application/pdf"} regardless of the {@code Accept} header.
 	 * <p>To use this option effectively you must also configure the MediaType
 	 * type mappings via {@link #setMediaTypes(Properties)}.
-	 *
-	 * @see #setParameterName(String)
+	 * @see #setParameterName
 	 */
 	public void setFavorParameter(boolean favorParameter) {
 		this.favorParameter = favorParameter;
@@ -180,7 +178,8 @@ public class ContentNegotiationManagerFactoryBean
 		this.servletContext = servletContext;
 	}
 
-	public void afterPropertiesSet() throws Exception {
+
+	public void afterPropertiesSet() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
 
 		if (this.favorPathExtension) {
@@ -210,8 +209,12 @@ public class ContentNegotiationManagerFactoryBean
 			strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
 		}
 
-		ContentNegotiationStrategy[] array = strategies.toArray(new ContentNegotiationStrategy[strategies.size()]);
-		this.contentNegotiationManager = new ContentNegotiationManager(array);
+		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
+	}
+
+
+	public ContentNegotiationManager getObject() {
+		return this.contentNegotiationManager;
 	}
 
 	public Class<?> getObjectType() {
@@ -220,10 +223,6 @@ public class ContentNegotiationManagerFactoryBean
 
 	public boolean isSingleton() {
 		return true;
-	}
-
-	public ContentNegotiationManager getObject() throws Exception {
-		return this.contentNegotiationManager;
 	}
 
 }

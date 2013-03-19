@@ -7,5 +7,5 @@ This is a top level block comment
 				the parser now --> <!-- <beans>
 				-->
 <!-- more trickery--><beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"><!-- end -->
-	<bean id="testBean" class="test.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 </beans>

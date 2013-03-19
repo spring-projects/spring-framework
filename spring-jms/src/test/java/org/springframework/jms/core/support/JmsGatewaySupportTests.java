@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ import java.util.List;
 
 import javax.jms.ConnectionFactory;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.jms.core.JmsTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Mark Pollack
  * @since 24.9.2004
  */
-public class JmsGatewaySupportTests extends TestCase {
+public class JmsGatewaySupportTests {
 
+	@Test
 	public void testJmsGatewaySupportWithConnectionFactory() throws Exception {
-		MockControl connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
-		ConnectionFactory mockConnectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
-		connectionFactoryControl.replay();
+		ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
 		final List test = new ArrayList();
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
 			@Override
@@ -47,9 +47,9 @@ public class JmsGatewaySupportTests extends TestCase {
 		assertEquals("Correct ConnectionFactory", mockConnectionFactory, gateway.getConnectionFactory());
 		assertEquals("Correct JmsTemplate", mockConnectionFactory, gateway.getJmsTemplate().getConnectionFactory());
 		assertEquals("initGatway called", test.size(), 1);
-		connectionFactoryControl.verify();
-
 	}
+
+	@Test
 	public void testJmsGatewaySupportWithJmsTemplate() throws Exception {
 		JmsTemplate template = new JmsTemplate();
 		final List test = new ArrayList();

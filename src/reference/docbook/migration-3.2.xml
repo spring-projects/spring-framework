@@ -138,16 +138,14 @@
     depend on JUnit 4.11 (<literal>junit:junit</literal>), TestNG 6.5.2
     (<literal>org.testng:testng</literal>), and Hamcrest Core 1.3
     (<literal>org.hamcrest:hamcrest-core</literal>). Each of these
-    dependencies is declared as an <emphasis>optional</emphasis> dependency
-    in the Maven POM. Furthermore, it is important to note that the JUnit
-    team has stopped inlining Hamcrest Core within the
-    <literal>junit:junit</literal> Maven artifact as of JUnit 4.11. Thus, if
-    your existing JUnit-based tests make use of Hamcrest matchers that were
-    previously available directly within the <literal>junit:junit</literal>
-    JAR, you will now need to explicitly declare a dependency on
-    <literal>org.hamcrest:hamcrest-core</literal>,
-    <literal>org.hamcrest:hamcrest-library</literal>, or
-    <literal>org.hamcrest:hamcrest-all</literal>.</para>
+    dependencies is declared as an <emphasis>optional</emphasis> dependency in
+    the Maven POM. Furthermore, it is important to note that the JUnit team
+    has stopped inlining Hamcrest Core within the
+    <literal>junit:junit</literal> Maven artifact as of JUnit 4.11. Hamcrest
+    Core is now a <emphasis>required</emphasis> transitive dependency of
+    <literal>junit</literal>, and users may therefore need to remove any
+    exclusions on <literal>hamcrest-core</literal> that they had previously
+    configured for their build.</para>
   </section>
 
   <section xml:id="migration-3.2-changes">

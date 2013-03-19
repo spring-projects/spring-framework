@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 
@@ -42,6 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 2.5.4
  */
 public class JdbcTestUtils {
@@ -60,7 +61,7 @@ public class JdbcTestUtils {
 	 * @return the number of rows in the table
 	 */
 	public static int countRowsInTable(JdbcTemplate jdbcTemplate, String tableName) {
-		return jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
+		return jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
 	}
 
 	/**
@@ -82,7 +83,7 @@ public class JdbcTestUtils {
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
 		}
-		return jdbcTemplate.queryForInt(sql);
+		return jdbcTemplate.queryForObject(sql, Integer.class);
 	}
 
 	/**
@@ -101,6 +102,39 @@ public class JdbcTestUtils {
 			}
 		}
 		return totalRowCount;
+	}
+
+	/**
+	 * Delete rows from the given table, using the provided {@code WHERE} clause.
+	 * <p>If the provided {@code WHERE} clause contains text, it will be prefixed
+	 * with {@code " WHERE "} and then appended to the generated {@code DELETE}
+	 * statement. For example, if the provided table name is {@code "person"} and
+	 * the provided where clause is {@code "name = 'Bob' and age > 25"}, the
+	 * resulting SQL statement to execute will be
+	 * {@code "DELETE FROM person WHERE name = 'Bob' and age > 25"}.
+	 * <p>As an alternative to hard-coded values, the {@code "?"} placeholder can
+	 * be used within the {@code WHERE} clause, binding to the given arguments.
+	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
+	 * @param tableName the name of the table to delete rows from
+	 * @param whereClause the {@code WHERE} clause to append to the query
+	 * @param args arguments to bind to the query (leaving it to the PreparedStatement
+	 * to guess the corresponding SQL type); may also contain {@link SqlParameterValue}
+	 * objects which indicate not only the argument value but also the SQL type and
+	 * optionally the scale.
+	 * @return the number of rows deleted from the table
+	 */
+	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName,
+			String whereClause, Object... args) {
+		String sql = "DELETE FROM " + tableName;
+		if (StringUtils.hasText(whereClause)) {
+			sql += " WHERE " + whereClause;
+		}
+		int rowCount = (args != null && args.length > 0 ? jdbcTemplate.update(sql, args)
+				: jdbcTemplate.update(sql));
+		if (logger.isInfoEnabled()) {
+			logger.info("Deleted " + rowCount + " rows from table " + tableName);
+		}
+		return rowCount;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,17 @@
 package org.springframework.web.context.request.async;
 
 
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import javax.servlet.AsyncEvent;
 
-import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * A test fixture with a {@link StandardServletAsyncWebRequest}.
@@ -124,14 +116,12 @@ public class StandardServletAsyncWebRequestTests {
 
 	@Test
 	public void onTimeoutTimeoutHandler() throws Exception {
-		Runnable timeoutHandler = EasyMock.createMock(Runnable.class);
-		timeoutHandler.run();
-		replay(timeoutHandler);
+		Runnable timeoutHandler = mock(Runnable.class);
 
 		this.asyncRequest.addTimeoutHandler(timeoutHandler);
 		this.asyncRequest.onTimeout(new AsyncEvent(null));
 
-		verify(timeoutHandler);
+		verify(timeoutHandler).run();
 	}
 
 	@Test(expected=IllegalStateException.class)

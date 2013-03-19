@@ -26,8 +26,8 @@
 		</tx:attributes>
 	</tx:advice>
 
-	<bean id="transactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
+	<bean id="transactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

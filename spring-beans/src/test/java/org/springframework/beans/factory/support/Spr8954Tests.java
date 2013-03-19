@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import static org.junit.Assert.*;
 import java.util.Map;
 
 import org.junit.Test;
+
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -49,6 +51,8 @@ public class Spr8954Tests {
 		assertThat(bf.getBean("foo"), instanceOf(Foo.class));
 		assertThat(bf.getBean("&foo"), instanceOf(FooFactoryBean.class));
 
+		assertThat(bf.isTypeMatch("&foo", FactoryBean.class), is(true));
+
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
 		assertThat(1, equalTo(fbBeans.size()));
@@ -58,6 +62,25 @@ public class Spr8954Tests {
 		assertThat(1, equalTo(aiBeans.size()));
 		assertThat("&foo", equalTo(aiBeans.keySet().iterator().next()));
 	}
+
+	@Test
+	public void findsBeansByTypeIfNotInstantiated() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("foo", new RootBeanDefinition(FooFactoryBean.class));
+		bf.addBeanPostProcessor(new PredictingBPP());
+
+		assertThat(bf.isTypeMatch("&foo", FactoryBean.class), is(true));
+
+		@SuppressWarnings("rawtypes")
+		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
+		assertThat(1, equalTo(fbBeans.size()));
+		assertThat("&foo", equalTo(fbBeans.keySet().iterator().next()));
+
+		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
+		assertThat(1, equalTo(aiBeans.size()));
+		assertThat("&foo", equalTo(aiBeans.keySet().iterator().next()));
+	}
+
 
 	static class FooFactoryBean implements FactoryBean<Foo>, AnInterface {
 
@@ -84,7 +107,9 @@ public class Spr8954Tests {
 	}
 
 	interface PredictedType {
+	}
 
+	static class PredictedTypeImpl implements PredictedType {
 	}
 
 	static class PredictingBPP extends InstantiationAwareBeanPostProcessorAdapter {
@@ -92,8 +117,8 @@ public class Spr8954Tests {
 		@Override
 		public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 			return FactoryBean.class.isAssignableFrom(beanClass) ?
-					PredictedType.class :
-					super.predictBeanType(beanClass, beanName);
+					PredictedType.class : null;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.TilesContainer;
 import org.apache.tiles.TilesException;
-import org.apache.tiles.access.TilesAccess;
 import org.apache.tiles.definition.DefinitionsFactory;
 import org.apache.tiles.definition.DefinitionsReader;
 import org.apache.tiles.definition.dao.BaseLocaleUrlDefinitionDAO;
 import org.apache.tiles.definition.dao.CachingLocaleUrlDefinitionDAO;
 import org.apache.tiles.definition.digester.DigesterDefinitionsReader;
 import org.apache.tiles.el.ELAttributeEvaluator;
+import org.apache.tiles.el.ScopeELResolver;
 import org.apache.tiles.el.TilesContextBeanELResolver;
 import org.apache.tiles.el.TilesContextELResolver;
 import org.apache.tiles.evaluator.AttributeEvaluator;
 import org.apache.tiles.evaluator.AttributeEvaluatorFactory;
 import org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory;
 import org.apache.tiles.evaluator.impl.DirectAttributeEvaluator;
+import org.apache.tiles.extras.complete.CompleteAutoloadTilesContainerFactory;
+import org.apache.tiles.extras.complete.CompleteAutoloadTilesInitializer;
 import org.apache.tiles.factory.AbstractTilesContainerFactory;
 import org.apache.tiles.factory.BasicTilesContainerFactory;
 import org.apache.tiles.impl.BasicTilesContainer;
@@ -72,7 +74,9 @@ import org.springframework.web.context.ServletContextAware;
  * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
  * containing definitions, to be accessed by {@link TilesView} instances. This is a
  * Spring-based alternative (for usage in Spring configuration) to the Tiles-provided
- * {@link org.apache.tiles.web.startup.TilesListener} (for usage in {@code web.xml}).
+ * {@code ServletContextListener}
+ * (e.g. {@link org.apache.tiles.extras.complete.CompleteAutoloadTilesListener}
+ * for usage in {@code web.xml}.
  *
  * <p>TilesViews can be managed by any {@link org.springframework.web.servlet.ViewResolver}.
  * For simple convention-based view resolution, consider using {@link TilesViewResolver}.
@@ -109,8 +113,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private TilesInitializer tilesInitializer;
-
-	private boolean completeAutoload = false;
 
 	private String[] definitions;
 
@@ -154,17 +156,14 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	public void setCompleteAutoload(boolean completeAutoload) {
 		if (completeAutoload) {
 			try {
-				Class<?> clazz = getClass().getClassLoader().loadClass(
-						"org.apache.tiles.extras.complete.CompleteAutoloadTilesInitializer");
-				this.tilesInitializer = (TilesInitializer) clazz.newInstance();
+				this.tilesInitializer = new SpringCompleteAutoloadTilesInitializer();
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("Tiles-Extras 3.0 not available", ex);
+				throw new IllegalStateException("tiles-extras 3.x not available", ex);
 			}
 		} else {
 			this.tilesInitializer = null;
 		}
-		this.completeAutoload = completeAutoload;
 	}
 
 	/**
@@ -192,7 +191,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 
 	/**
 	 * Set the {@link org.apache.tiles.definition.DefinitionsFactory} implementation to use.
-	 * Default is {@link org.apache.tiles.definition.UrlDefinitionsFactory},
+	 * Default is {@link org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory},
 	 * operating on definition resource URLs.
 	 * <p>Specify a custom DefinitionsFactory, e.g. a UrlDefinitionsFactory subclass,
 	 * to customize the creation of Tiles Definition objects. Note that such a
@@ -204,8 +203,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	}
 
 	/**
-	 * Set the {@link org.apache.tiles.preparer.PreparerFactory} implementation to use.
-	 * Default is {@link org.apache.tiles.preparer.BasicPreparerFactory}, creating
+	 * Set the {@link org.apache.tiles.preparer.factory.PreparerFactory} implementation to use.
+	 * Default is {@link org.apache.tiles.preparer.factory.BasicPreparerFactory}, creating
 	 * shared instances for specified preparer classes.
 	 * <p>Specify {@link SimpleSpringPreparerFactory} to autowire
 	 * {@link org.apache.tiles.preparer.ViewPreparer} instances based on specified
@@ -230,7 +229,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Set whether to use a MutableTilesContainer (typically the CachingTilesContainer
 	 * implementation) for this application. Default is "false".
 	 * @see org.apache.tiles.mgmt.MutableTilesContainer
-	 * @see org.apache.tiles.mgmt.CachingTilesContainer
+	 * @see org.apache.tiles.impl.mgmt.CachingTilesContainer
 	 */
 	public void setUseMutableTilesContainer(boolean useMutableTilesContainer) {
 		this.useMutableTilesContainer = useMutableTilesContainer;
@@ -246,26 +245,11 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * @throws TilesException in case of setup failure
 	 */
 	public void afterPropertiesSet() throws TilesException {
-
-		SpringWildcardServletTilesApplicationContext preliminaryContext =
-				new SpringWildcardServletTilesApplicationContext(this.servletContext);
-
+		ApplicationContext preliminaryContext = new SpringWildcardServletTilesApplicationContext(this.servletContext);
 		if (this.tilesInitializer == null) {
 			this.tilesInitializer = new SpringTilesInitializer();
 		}
 		this.tilesInitializer.initialize(preliminaryContext);
-
-		if (this.completeAutoload) {
-			// We need to do this after initialization simply because we're reusing the
-			// original CompleteAutoloadTilesInitializer above. We cannot subclass
-			// CompleteAutoloadTilesInitializer when compiling against Tiles 2.1...
-			logger.debug("Registering Tiles 3.0 SpringLocaleResolver for complete-autoload setup");
-			BasicTilesContainer container = (BasicTilesContainer) TilesAccess.getContainer(preliminaryContext);
-			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(container.getDefinitionsFactory());
-			if (bw.isWritableProperty("localeResolver")) {
-				bw.setPropertyValue("localeResolver", new SpringLocaleResolver());
-			}
-		}
 	}
 
 	/**
@@ -332,8 +316,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			if (definitionsFactoryClass != null) {
 				DefinitionsFactory factory = BeanUtils.instantiate(definitionsFactoryClass);
 				if (factory instanceof org.apache.tiles.request.ApplicationContextAware) {
-					((org.apache.tiles.request.ApplicationContextAware) factory)
-							.setApplicationContext(applicationContext);
+					((org.apache.tiles.request.ApplicationContextAware) factory).setApplicationContext(applicationContext);
 				}
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(factory);
 				if (bw.isWritableProperty("localeResolver")) {
@@ -380,6 +363,28 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		}
 	}
 
+	private class SpringCompleteAutoloadTilesInitializer extends CompleteAutoloadTilesInitializer {
+
+		@Override
+		protected AbstractTilesContainerFactory createContainerFactory(ApplicationContext context) {
+			return new SpringCompleteAutoloadTilesContainerFactory();
+		}
+	}
+
+	private class SpringCompleteAutoloadTilesContainerFactory extends CompleteAutoloadTilesContainerFactory {
+
+		@Override
+		public TilesContainer createContainer(ApplicationContext applicationContext) {
+			CachingTilesContainer cachingContainer = (CachingTilesContainer) super.createContainer(applicationContext);
+			BasicTilesContainer tilesContainer = (BasicTilesContainer) cachingContainer.getWrappedContainer();
+			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(tilesContainer.getDefinitionsFactory());
+			if (bw.isWritableProperty("localeResolver")) {
+				bw.setPropertyValue("localeResolver", new SpringLocaleResolver());
+			}
+			return tilesContainer;
+		}
+	}
+
 
 	private class TilesElActivator {
 
@@ -405,6 +410,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	private static class CompositeELResolverImpl extends CompositeELResolver {
 
 		public CompositeELResolverImpl() {
+			add(new ScopeELResolver());
 			add(new TilesContextELResolver(new TilesContextBeanELResolver()));
 			add(new TilesContextBeanELResolver());
 			add(new ArrayELResolver(false));

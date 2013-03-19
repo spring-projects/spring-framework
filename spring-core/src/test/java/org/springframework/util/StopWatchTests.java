@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ public class StopWatchTests extends TestCase {
 		String name1 = "Task 1";
 		String name2 = "Task 2";
 
-		long fudgeFactor = 5L;
 		assertFalse(sw.isRunning());
 		sw.start(name1);
 		Thread.sleep(int1);
@@ -44,6 +43,7 @@ public class StopWatchTests extends TestCase {
 		// TODO are timings off in JUnit? Why do these assertions sometimes fail
 		// under both Ant and Eclipse?
 
+		//long fudgeFactor = 5L;
 		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1);
 		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + fudgeFactor);
 		sw.start(name2);
@@ -72,7 +72,6 @@ public class StopWatchTests extends TestCase {
 		String name1 = "Task 1";
 		String name2 = "Task 2";
 
-		long fudgeFactor = 5L;
 		assertFalse(sw.isRunning());
 		sw.start(name1);
 		Thread.sleep(int1);
@@ -82,6 +81,7 @@ public class StopWatchTests extends TestCase {
 		// TODO are timings off in JUnit? Why do these assertions sometimes fail
 		// under both Ant and Eclipse?
 
+		//long fudgeFactor = 5L;
 		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1);
 		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + fudgeFactor);
 		sw.start(name2);

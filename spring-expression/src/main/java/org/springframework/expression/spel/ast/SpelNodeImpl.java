@@ -149,5 +149,4 @@ public abstract class SpelNodeImpl implements SpelNode {
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		throw new SpelEvaluationException(pos,SpelMessage.NOT_ASSIGNABLE,toStringAST());
 	}
-
 }

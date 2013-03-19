@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.jdbc.core.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -28,8 +23,11 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.junit.Test;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson
@@ -48,7 +46,7 @@ public class JdbcBeanDefinitionReaderTests {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(1)).willReturn("one", "one");
 		given(resultSet.getString(2)).willReturn("(class)", "age");
-		given(resultSet.getString(3)).willReturn("org.springframework.beans.TestBean", "53");
+		given(resultSet.getString(3)).willReturn("org.springframework.tests.sample.beans.TestBean", "53");
 
 		Statement statement = mock(Statement.class);
 		given(statement.executeQuery(sql)).willReturn(resultSet);

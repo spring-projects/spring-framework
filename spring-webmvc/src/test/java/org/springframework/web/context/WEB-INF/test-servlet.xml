@@ -15,7 +15,7 @@
 
 	<bean id="aca-prototype" class="org.springframework.context.ACATester" scope="prototype"/>
 
-	<bean id="rod" class="org.springframework.beans.TestBean">
+	<bean id="rod" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>31</value></property>
 		<property name="spouse"><ref bean="father"/></property>
@@ -28,32 +28,32 @@
 		<property name="age"><value>31</value></property>
 	</bean>
 
-	<bean id="kathy" class="org.springframework.beans.TestBean" scope="prototype"/>
+	<bean id="kathy" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
 
-	<bean id="kerry" class="org.springframework.beans.TestBean">
+	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref local="rod"/></property>
 	</bean>
 
-	<bean id="typeMismatch" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="typeMismatch" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
 		<property name="spouse"><ref local="rod"/></property>
 	</bean>
 
-	<bean id="singletonFactory" class="org.springframework.beans.factory.DummyFactory">
+	<bean id="singletonFactory" class="org.springframework.tests.sample.beans.factory.DummyFactory">
 	</bean>
 
-	<bean id="prototypeFactory" class="org.springframework.beans.factory.DummyFactory">
+	<bean id="prototypeFactory" class="org.springframework.tests.sample.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 	
-	<bean id="listenerVeto" class="org.springframework.beans.TestBean">
+	<bean id="listenerVeto" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>
 	</bean>
 
-	<bean id="validEmpty" class="org.springframework.beans.TestBean"/>
+	<bean id="validEmpty" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

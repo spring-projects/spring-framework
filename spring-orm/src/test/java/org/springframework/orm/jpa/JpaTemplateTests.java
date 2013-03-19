@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,57 +20,49 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Costin Leau
+ * @author Phillip Webb
  */
-public class JpaTemplateTests extends TestCase {
+public class JpaTemplateTests {
 
 	private JpaTemplate template;
-
-	private MockControl factoryControl, managerControl;
 
 	private EntityManager manager;
 
 	private EntityManagerFactory factory;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		template = new JpaTemplate();
 
-		factoryControl = MockControl.createControl(EntityManagerFactory.class);
-		factory = (EntityManagerFactory) factoryControl.getMock();
-		managerControl = MockControl.createControl(EntityManager.class);
-		manager = (EntityManager) managerControl.getMock();
+		factory = mock(EntityManagerFactory.class);
+		manager = mock(EntityManager.class);
 
 		template.setEntityManager(manager);
 		template.afterPropertiesSet();
 
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		template = null;
-		factoryControl = null;
-		managerControl = null;
-		manager = null;
-		factory = null;
-	}
-
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.JpaTemplate(EntityManagerFactory)'
 	 */
+	@Test
 	public void testJpaTemplateEntityManagerFactory() {
 
 	}
@@ -79,6 +71,7 @@ public class JpaTemplateTests extends TestCase {
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.JpaTemplate(EntityManager)'
 	 */
+	@Test
 	public void testJpaTemplateEntityManager() {
 
 	}
@@ -87,13 +80,11 @@ public class JpaTemplateTests extends TestCase {
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.execute(JpaCallback)'
 	 */
+	@Test
 	public void testExecuteJpaCallback() {
 		template.setExposeNativeEntityManager(true);
 		template.setEntityManager(manager);
 		template.afterPropertiesSet();
-
-		managerControl.replay();
-		factoryControl.replay();
 
 		template.execute(new JpaCallback() {
 
@@ -113,21 +104,17 @@ public class JpaTemplateTests extends TestCase {
 				return null;
 			}
 		});
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.executeFind(JpaCallback)'
 	 */
+	@Test
 	public void testExecuteFind() {
 		template.setEntityManager(manager);
 		template.setExposeNativeEntityManager(true);
 		template.afterPropertiesSet();
-
-		managerControl.replay();
-		factoryControl.replay();
 
 		try {
 			template.executeFind(new JpaCallback() {
@@ -143,27 +130,22 @@ public class JpaTemplateTests extends TestCase {
 		catch (DataAccessException e) {
 			// expected
 		}
-
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.execute(JpaCallback, boolean)'
 	 */
+	@Test
 	public void testExecuteJpaCallbackBoolean() {
 		template = new JpaTemplate();
 		template.setExposeNativeEntityManager(false);
 		template.setEntityManagerFactory(factory);
 		template.afterPropertiesSet();
 
-		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
-		managerControl.expectAndReturn(manager.isOpen(), true);
+		given(factory.createEntityManager()).willReturn(manager);
+		given(manager.isOpen()).willReturn(true);
 		manager.close();
-
-		managerControl.replay();
-		factoryControl.replay();
 
 		template.execute(new JpaCallback() {
 			@Override
@@ -172,19 +154,15 @@ public class JpaTemplateTests extends TestCase {
 				return null;
 			}
 		}, true);
-
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
+	@Test
 	public void testExecuteJpaCallbackBooleanWithPrebound() {
 		template.setExposeNativeEntityManager(false);
 		template.setEntityManagerFactory(factory);
 		template.afterPropertiesSet();
 
 		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
-		managerControl.replay();
-		factoryControl.replay();
 
 		try {
 			template.execute(new JpaCallback() {
@@ -195,9 +173,6 @@ public class JpaTemplateTests extends TestCase {
 					return null;
 				}
 			}, true);
-
-			managerControl.verify();
-			factoryControl.verify();
 		}
 		finally {
 			TransactionSynchronizationManager.unbindResource(factory);
@@ -208,9 +183,8 @@ public class JpaTemplateTests extends TestCase {
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.createSharedEntityManager(EntityManager)'
 	 */
+	@Test
 	public void testCreateEntityManagerProxy() {
-		manager.clear();
-		managerControl.replay();
 
 		EntityManager proxy = template.createEntityManagerProxy(manager);
 		assertNotSame(manager, proxy);
@@ -220,24 +194,20 @@ public class JpaTemplateTests extends TestCase {
 		proxy.close();
 		proxy.clear();
 
-		managerControl.verify();
+		verify(manager).clear();
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.find(Class<T>,
 	 * Object) <T>'
 	 */
+	@Test
 	public void testFindClassOfTObject() {
 		Integer result = new Integer(1);
 		Object id = new Object();
-		managerControl.expectAndReturn(manager.find(Number.class, id), result);
-		managerControl.replay();
-		factoryControl.replay();
+		given(manager.find(Number.class, id)).willReturn(result);
 
 		assertSame(result, template.find(Number.class, id));
-
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
 	/*
@@ -245,172 +215,122 @@ public class JpaTemplateTests extends TestCase {
 	 * 'org.springframework.orm.jpa.JpaTemplate.getReference(Class<T>, Object)
 	 * <T>'
 	 */
+	@Test
 	public void testGetReference() {
 		Integer reference = new Integer(1);
 		Object id = new Object();
-		managerControl.expectAndReturn(manager.getReference(Number.class, id), reference);
-		managerControl.replay();
-		factoryControl.replay();
+		given(manager.getReference(Number.class, id)).willReturn(reference);
 
 		assertSame(reference, template.getReference(Number.class, id));
-
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.contains(Object)'
 	 */
+	@Test
 	public void testContains() {
 		boolean result = true;
 		Object entity = new Object();
-		managerControl.expectAndReturn(manager.contains(entity), result);
-		managerControl.replay();
-		factoryControl.replay();
+		given(manager.contains(entity)).willReturn(result);
 
 		assertSame(result, template.contains(entity));
-
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.refresh(Object)'
 	 */
+	@Test
 	public void testRefresh() {
 		Object entity = new Object();
-		manager.refresh(entity);
-		managerControl.replay();
-		factoryControl.replay();
-
 		template.refresh(entity);
-
-		managerControl.verify();
-		factoryControl.verify();
+		verify(manager).refresh(entity);
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.persist(Object)'
 	 */
+	@Test
 	public void testPersist() {
 		Object entity = new Object();
-		manager.persist(entity);
-		managerControl.replay();
-		factoryControl.replay();
-
 		template.persist(entity);
-
-		managerControl.verify();
-		factoryControl.verify();
+		verify(manager).persist(entity);
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.merge(T) <T>'
 	 */
+	@Test
 	public void testMerge() {
 		Object result = new Object();
 		Object entity = new Object();
-		managerControl.expectAndReturn(manager.merge(entity), result);
-		managerControl.replay();
-		factoryControl.replay();
-
+		given(manager.merge(entity)).willReturn(result);
 		assertSame(result, template.merge(entity));
-
-		managerControl.verify();
-		factoryControl.verify();
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.remove(Object)'
 	 */
+	@Test
 	public void testRemove() {
 		Object entity = new Object();
-		manager.remove(entity);
-		managerControl.replay();
-		factoryControl.replay();
-
 		template.remove(entity);
-
-		managerControl.verify();
-		factoryControl.verify();
+		verify(manager).remove(entity);
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.flush()'
 	 */
+	@Test
 	public void testFlush() {
-		manager.flush();
-		managerControl.replay();
-		factoryControl.replay();
-
 		template.flush();
-
-		managerControl.verify();
-		factoryControl.verify();
+		verify(manager).flush();
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.find(String)'
 	 */
+	@Test
 	public void testFindString() {
 		String queryString = "some query";
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Query query = mock(Query.class);
 		List result = new ArrayList();
 
-		managerControl.expectAndReturn(manager.createQuery(queryString), query);
-		queryControl.expectAndReturn(query.getResultList(), result);
-
-		managerControl.replay();
-		factoryControl.replay();
-		queryControl.replay();
-
+		given(manager.createQuery(queryString)).willReturn(query);
+		given(query.getResultList()).willReturn(result);
 		assertSame(result, template.find(queryString));
-
-		managerControl.verify();
-		factoryControl.verify();
-		queryControl.verify();
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.find(String,
 	 * Object...)'
 	 */
+	@Test
 	public void testFindStringObjectArray() {
 		String queryString = "some query";
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Query query = mock(Query.class);
 		List result = new ArrayList();
 		Object param1 = new Object();
 		Object param2 = new Object();
 		Object[] params = new Object[] { param1, param2 };
 
-		managerControl.expectAndReturn(manager.createQuery(queryString), query);
-		queryControl.expectAndReturn(query.setParameter(1, param1), null);
-		queryControl.expectAndReturn(query.setParameter(2, param2), null);
-
-		queryControl.expectAndReturn(query.getResultList(), result);
-
-		managerControl.replay();
-		factoryControl.replay();
-		queryControl.replay();
+		given(manager.createQuery(queryString)).willReturn(query);
+		given(query.getResultList()).willReturn(result);
 
 		assertSame(result, template.find(queryString, params));
 
-		managerControl.verify();
-		factoryControl.verify();
-		queryControl.verify();
+		verify(query).setParameter(1, param1);
+		verify(query).setParameter(2, param2);
 	}
 
 	/*
 	 * Test method for 'org.springframework.orm.jpa.JpaTemplate.find(String, Map<String,
 	 * Object>)'
 	 */
+	@Test
 	public void testFindStringMapOfStringObject() {
 		String queryString = "some query";
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Query query = mock(Query.class);
 		List result = new ArrayList();
 		Object param1 = new Object();
 		Object param2 = new Object();
@@ -418,46 +338,29 @@ public class JpaTemplateTests extends TestCase {
 		params.put("param1", param1);
 		params.put("param2", param2);
 
-		managerControl.expectAndReturn(manager.createQuery(queryString), query);
-		queryControl.expectAndReturn(query.setParameter("param1", param1), null);
-		queryControl.expectAndReturn(query.setParameter("param2", param2), null);
-
-		queryControl.expectAndReturn(query.getResultList(), result);
-
-		managerControl.replay();
-		factoryControl.replay();
-		queryControl.replay();
+		given(manager.createQuery(queryString)).willReturn(query);
+		given(query.getResultList()).willReturn(result);
 
 		assertSame(result, template.findByNamedParams(queryString, params));
 
-		managerControl.verify();
-		factoryControl.verify();
-		queryControl.verify();
+		verify(query).setParameter("param1", param1);
+		verify(query).setParameter("param2", param2);
 	}
 
 	/*
 	 * Test method for
 	 * 'org.springframework.orm.jpa.JpaTemplate.findByNamedQuery(String)'
 	 */
+	@Test
 	public void testFindByNamedQueryString() {
 		String queryName = "some query name";
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Query query = mock(Query.class);
 		List result = new ArrayList();
 
-		managerControl.expectAndReturn(manager.createNamedQuery(queryName), query);
-
-		queryControl.expectAndReturn(query.getResultList(), result);
-
-		managerControl.replay();
-		factoryControl.replay();
-		queryControl.replay();
+		given(manager.createNamedQuery(queryName)).willReturn(query);
+		given(query.getResultList()).willReturn(result);
 
 		assertSame(result, template.findByNamedQuery(queryName));
-
-		managerControl.verify();
-		factoryControl.verify();
-		queryControl.verify();
 	}
 
 	/*
@@ -465,30 +368,22 @@ public class JpaTemplateTests extends TestCase {
 	 * 'org.springframework.orm.jpa.JpaTemplate.findByNamedQuery(String,
 	 * Object...)'
 	 */
+	@Test
 	public void testFindByNamedQueryStringObjectArray() {
 		String queryName = "some query name";
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Query query = mock(Query.class);
 		List result = new ArrayList();
 		Object param1 = new Object();
 		Object param2 = new Object();
 		Object[] params = new Object[] { param1, param2 };
 
-		managerControl.expectAndReturn(manager.createNamedQuery(queryName), query);
-		queryControl.expectAndReturn(query.setParameter(1, param1), null);
-		queryControl.expectAndReturn(query.setParameter(2, param2), null);
-
-		queryControl.expectAndReturn(query.getResultList(), result);
-
-		managerControl.replay();
-		factoryControl.replay();
-		queryControl.replay();
+		given(manager.createNamedQuery(queryName)).willReturn(query);
+		given(query.getResultList()).willReturn(result);
 
 		assertSame(result, template.findByNamedQuery(queryName, params));
 
-		managerControl.verify();
-		factoryControl.verify();
-		queryControl.verify();
+		verify(query).setParameter(1, param1);
+		verify(query).setParameter(2, param2);
 	}
 
 	/*
@@ -496,10 +391,10 @@ public class JpaTemplateTests extends TestCase {
 	 * 'org.springframework.orm.jpa.JpaTemplate.findByNamedQuery(String, Map<String,
 	 * Object>)'
 	 */
+	@Test
 	public void testFindByNamedQueryStringMapOfStringObject() {
 		String queryName = "some query name";
-		MockControl queryControl = MockControl.createControl(Query.class);
-		Query query = (Query) queryControl.getMock();
+		Query query = mock(Query.class);
 		List result = new ArrayList();
 		Object param1 = new Object();
 		Object param2 = new Object();
@@ -507,21 +402,11 @@ public class JpaTemplateTests extends TestCase {
 		params.put("param1", param1);
 		params.put("param2", param2);
 
-		managerControl.expectAndReturn(manager.createNamedQuery(queryName), query);
-		queryControl.expectAndReturn(query.setParameter("param1", param1), null);
-		queryControl.expectAndReturn(query.setParameter("param2", param2), null);
-
-		queryControl.expectAndReturn(query.getResultList(), result);
-
-		managerControl.replay();
-		factoryControl.replay();
-		queryControl.replay();
+		given(manager.createNamedQuery(queryName)).willReturn(query);
+		given(query.getResultList()).willReturn(result);
 
 		assertSame(result, template.findByNamedQueryAndNamedParams(queryName, params));
-
-		managerControl.verify();
-		factoryControl.verify();
-		queryControl.verify();
+		verify(query).setParameter("param1", param1);
+		verify(query).setParameter("param2", param2);
 	}
-
 }

@@ -282,8 +282,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return false;
 		}
 		else {
-		  // the maybe case
-		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
+			// the maybe case
+			return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
 		}
 	}
 

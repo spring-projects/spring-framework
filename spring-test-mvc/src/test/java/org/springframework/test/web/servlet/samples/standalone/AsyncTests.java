@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -58,6 +59,7 @@ public class AsyncTests {
 	}
 
 	@Test
+	@Ignore
 	public void testCallable() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
 			.andDo(print())
@@ -73,6 +75,7 @@ public class AsyncTests {
 	}
 
 	@Test
+	@Ignore
 	public void testDeferredResult() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
 			.andExpect(request().asyncStarted())

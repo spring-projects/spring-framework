@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.
@@ -49,14 +49,9 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	@Override
 	public byte[] readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
 		long contentLength = inputMessage.getHeaders().getContentLength();
-		if (contentLength >= 0) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream((int) contentLength);
-			FileCopyUtils.copy(inputMessage.getBody(), bos);
-			return bos.toByteArray();
-		}
-		else {
-			return FileCopyUtils.copyToByteArray(inputMessage.getBody());
-		}
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(contentLength >= 0 ? (int) contentLength : StreamUtils.BUFFER_SIZE);
+		StreamUtils.copy(inputMessage.getBody(), bos);
+		return bos.toByteArray();
 	}
 
 	@Override
@@ -66,7 +61,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 
 	@Override
 	protected void writeInternal(byte[] bytes, HttpOutputMessage outputMessage) throws IOException {
-		FileCopyUtils.copy(bytes, outputMessage.getBody());
+		StreamUtils.copy(bytes, outputMessage.getBody());
 	}
 
 }

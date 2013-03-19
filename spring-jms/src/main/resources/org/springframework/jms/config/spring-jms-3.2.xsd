@@ -225,7 +225,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="prefetch" type="xsd:int">
+			<xsd:attribute name="prefetch" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The maximum number of messages to load into a single session.
@@ -233,7 +233,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="receive-timeout" type="xsd:int">
+			<xsd:attribute name="receive-timeout" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The timeout to use for receive calls (in milliseconds).
@@ -391,7 +391,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="prefetch" type="xsd:int">
+			<xsd:attribute name="prefetch" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The maximum number of messages to load into a single session.

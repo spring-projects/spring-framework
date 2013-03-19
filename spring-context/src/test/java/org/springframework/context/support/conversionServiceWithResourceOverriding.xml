@@ -9,7 +9,7 @@
 		</property>
 	</bean>
 
-	<bean id="resourceTestBean" class="org.springframework.beans.ResourceTestBean">
+	<bean id="resourceTestBean" class="org.springframework.tests.sample.beans.ResourceTestBean">
 		<property name="resource" value="org/springframework/context/support/conversionService.xml"/>
 		<property name="resourceArray" value="org/springframework/context/support/conversionService.xml"/>
  		<property name="resourceMap">

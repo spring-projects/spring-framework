@@ -205,18 +205,14 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	public String getDescription() {
 		StringBuilder builder = new StringBuilder("class path resource [");
-
 		String pathToUse = path;
-
 		if (this.clazz != null && !pathToUse.startsWith("/")) {
 			builder.append(ClassUtils.classPackageAsResourcePath(this.clazz));
 			builder.append('/');
 		}
-
 		if (pathToUse.startsWith("/")) {
 			pathToUse = pathToUse.substring(1);
 		}
-
 		builder.append(pathToUse);
 		builder.append(']');
 		return builder.toString();
@@ -232,9 +228,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		}
 		if (obj instanceof ClassPathResource) {
 			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path)
-					&& ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) && ObjectUtils.nullSafeEquals(
-				this.clazz, otherRes.clazz));
+			return (this.path.equals(otherRes.path) &&
+					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
+					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
 		}
 		return false;
 	}

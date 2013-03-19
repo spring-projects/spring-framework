@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 
 package org.springframework.web.servlet.view;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +35,8 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.View;
 
+import static org.mockito.BDDMockito.*;
+
 /**
  * Tests for AbstractView. Not called AbstractViewTests as
  * would otherwise be excluded by Ant build script wildcard.
@@ -49,11 +46,8 @@ import org.springframework.web.servlet.View;
 public class BaseViewTests extends TestCase {
 
 	public void testRenderWithoutStaticAttributes() throws Exception {
-
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getServletContext();
-		expectLastCall().andReturn(new MockServletContext());
-		replay(wac);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -72,17 +66,14 @@ public class BaseViewTests extends TestCase {
 		checkContainsAll(model, tv.model);
 
 		assertTrue(tv.inited);
-		verify(wac);
 	}
 
 	/**
 	 * Test attribute passing, NOT CSV parsing.
 	 */
 	public void testRenderWithStaticAttributesNoCollision() throws Exception {
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getServletContext();
-		expectLastCall().andReturn(new MockServletContext());
-		replay(wac);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -104,14 +95,11 @@ public class BaseViewTests extends TestCase {
 		checkContainsAll(p, tv.model);
 
 		assertTrue(tv.inited);
-		verify(wac);
 	}
 
 	public void testPathVarsOverrideStaticAttributes() throws Exception {
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getServletContext();
-		expectLastCall().andReturn(new MockServletContext());
-		replay(wac);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -138,14 +126,11 @@ public class BaseViewTests extends TestCase {
 		assertTrue(tv.model.get("something").equals("else"));
 
 		assertTrue(tv.inited);
-		verify(wac);
 	}
 
 	public void testDynamicModelOverridesStaticAttributesIfCollision() throws Exception {
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getServletContext();
-		expectLastCall().andReturn(new MockServletContext());
-		replay(wac);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -169,14 +154,11 @@ public class BaseViewTests extends TestCase {
 		assertTrue(tv.model.get("something").equals("else"));
 
 		assertTrue(tv.inited);
-		verify(wac);
 	}
 
 	public void testDynamicModelOverridesPathVariables() throws Exception {
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getServletContext();
-		expectLastCall().andReturn(new MockServletContext());
-		replay(wac);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		TestView tv = new TestView(wac);
 		tv.setApplicationContext(wac);
@@ -202,7 +184,6 @@ public class BaseViewTests extends TestCase {
 		assertTrue(tv.model.get("something").equals("else"));
 
 		assertTrue(tv.inited);
-		verify(wac);
 	}
 
 	public void testIgnoresNullAttributes() {

@@ -57,7 +57,7 @@
     <para>Note that just like other services in Spring Framework, the caching service is an abstraction (not a cache implementation) and requires
     the use of an actual storage to store the cache data - that is, the abstraction frees the developer from having to write the caching
     logic but does not provide the actual stores. There are two integrations available out of the box, for JDK <literal>java.util.concurrent.ConcurrentMap</literal>
-    and <link xl:href="http://ehcache.org/">Ehcache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
+    and <link xl:href="http://ehcache.org/">EhCache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
     </section>
 
     <section xml:id="cache-annotations">
@@ -152,6 +152,13 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)</pr
 
             <programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32")
 public Book findBook(String name)]]></programlisting>
+
+            <para>In addition the <literal>conditional</literal> parameter, the <literal>unless</literal> parameter can be used to veto the adding of a value to the cache. Unlike
+            <literal>conditional</literal>, <literal>unless</literal> <literal>SpEL</literal> expressions are evalulated <emphasis>after</emphasis> the method has been called. Expanding
+            on the previous example - perhaps we only want to cache paperback books:</para>
+
+            <programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32", unless="#result.hardback")
+public Book findBook(String name)]]></programlisting>
         </section>
 
         <section xml:id="cache-spel-context">
@@ -217,6 +224,13 @@ public Book findBook(String name)]]></programlisting>
                             the argument names are also available under the <literal><![CDATA[a<#arg>]]></literal> where
                             <emphasis><![CDATA[#arg]]></emphasis> stands for the argument index (starting from 0).</entry>
                             <entry><screen>iban</screen> or <screen>a0</screen> (one can also use <screen>p0</screen> or <literal><![CDATA[p<#arg>]]></literal> notation as an alias).</entry>
+                        </row>
+                        <row>
+                            <entry>result</entry>
+                            <entry>evaluation context</entry>
+                            <entry>The result of the method call (the value to be cached). Only available in '<literal>unless</literal>' expressions and '<literal>cache evict</literal>'
+                            expression (when <literal>beforeInvocation</literal> is <literal>false</literal>).</entry>
+                            <entry><screen>#result</screen></entry>
                         </row>
                     </tbody>
                  </tgroup>
@@ -544,18 +558,26 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
     </section>
 
     <section xml:id="cache-store-configuration-ehcache">
-        <title>Ehcache-based <interfacename>Cache</interfacename></title>
+        <title>EhCache-based <interfacename>Cache</interfacename></title>
 
-        <para>The Ehcache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate
+        <para>The EhCache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate
         <interfacename>CacheManager</interfacename>:</para>
 
         <programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
-<!-- Ehcache library setup -->
+<!-- EhCache library setup -->
 <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>]]></programlisting>
 
         <para>This setup bootstraps ehcache library inside Spring IoC (through bean <literal>ehcache</literal>) which is then wired into the dedicated <interfacename>CacheManager</interfacename>
         implementation. Note the entire ehcache-specific configuration is read from the resource <literal>ehcache.xml</literal>.</para>
+    </section>
+
+    <section xml:id="cache-store-configuration-gemfire">
+        <title>GemFire-based <interfacename>Cache</interfacename></title>
+
+        <para>GemFire is a memory-oriented/disk-backed, elastically scalable, continuously available, active (with built-in pattern-based subscription notifications),
+        globally replicated database and provides fully-featured edge caching. For further information on how to use GemFire as a CacheManager (and more), please refer
+        to the <link xl:href="http://static.springsource.org/spring-gemfire/docs/1.0.0.RELEASE/reference/html/">Spring GemFire reference documentation</link>.</para>
     </section>
 
     <section xml:id="cache-store-configuration-noop">
@@ -570,10 +592,10 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
         <ref bean="jdkCache"/>
         <ref bean="gemfireCache"/>
     </list></property>
-    <property name="addNoOpCache" value="true"/>
+    <property name="fallbackToNoOpCache" value="true"/>
 </bean>]]></programlisting>
 
-        <para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and additionally, through the <literal>addNoOpManager</literal> flag, adds a
+        <para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and additionally, through the <literal>fallbackToNoOpCache</literal> flag, adds a
         <emphasis>no op</emphasis> cache that for all the definitions not handled by the configured cache managers. That is, every cache definition not found in either <literal>jdkCache</literal>
         or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
         </para>

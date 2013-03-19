@@ -2,19 +2,19 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<bean id="employee1" class="org.springframework.beans.Employee">
+	<bean id="employee1" class="org.springframework.tests.sample.beans.Employee">
 		<property name="name" value="John Smith" />
 		<property name="age" value="42" />
 		<property name="company" value="Acme Widgets, Inc." />
 	</bean>
 
-	<bean id="employee2" class="org.springframework.beans.Employee">
+	<bean id="employee2" class="org.springframework.tests.sample.beans.Employee">
 		<property name="name" value="Jane Smith" />
 		<property name="age" value="38" />
 		<property name="company" value="Acme Widgets, Inc." />
 	</bean>
 
-	<bean id="pet" class="org.springframework.beans.Pet">
+	<bean id="pet" class="org.springframework.tests.sample.beans.Pet">
 		<constructor-arg value="Fido" />
 	</bean>
 

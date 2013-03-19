@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -37,9 +36,9 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -170,7 +169,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
-		String body = FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
+		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
 
@@ -246,7 +245,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 		byte[] bytes = builder.toString().getBytes(charset.name());
 		outputMessage.getHeaders().setContentLength(bytes.length);
-		FileCopyUtils.copy(bytes, outputMessage.getBody());
+		StreamUtils.copy(bytes, outputMessage.getBody());
 	}
 
 	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
@@ -265,10 +264,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		for (Map.Entry<String, List<Object>> entry : parts.entrySet()) {
 			String name = entry.getKey();
 			for (Object part : entry.getValue()) {
-				writeBoundary(boundary, os);
-				HttpEntity entity = getEntity(part);
-				writePart(name, entity, os);
-				writeNewLine(os);
+				if (part != null) {
+					writeBoundary(boundary, os);
+					HttpEntity entity = getEntity(part);
+					writePart(name, entity, os);
+					writeNewLine(os);
+				}
 			}
 		}
 	}

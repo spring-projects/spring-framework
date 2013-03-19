@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,31 +20,23 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.OptimisticLockException;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
+import org.junit.Test;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
- *
  * @author Costin Leau
- *
+ * @author Phillip Webb
  */
-public class DefaultJpaDialectTests extends TestCase {
-	JpaDialect dialect;
+public class DefaultJpaDialectTests {
 
-	@Override
-	protected void setUp() throws Exception {
-		dialect = new DefaultJpaDialect();
-	}
+	private JpaDialect dialect = new DefaultJpaDialect();
 
-	@Override
-	protected void tearDown() throws Exception {
-		dialect = null;
-	}
-
+	@Test
 	public void testDefaultTransactionDefinition() throws Exception {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
@@ -58,26 +50,18 @@ public class DefaultJpaDialectTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDefaultBeginTransaction() throws Exception {
 		TransactionDefinition definition = new DefaultTransactionDefinition();
-		MockControl entityControl = MockControl.createControl(EntityManager.class);
-		EntityManager entityManager = (EntityManager) entityControl.getMock();
+		EntityManager entityManager = mock(EntityManager.class);
+		EntityTransaction entityTx = mock(EntityTransaction.class);
 
-		MockControl txControl = MockControl.createControl(EntityTransaction.class);
-		EntityTransaction entityTx = (EntityTransaction) txControl.getMock();
-
-		entityControl.expectAndReturn(entityManager.getTransaction(), entityTx);
-		entityTx.begin();
-
-		entityControl.replay();
-		txControl.replay();
+		given(entityManager.getTransaction()).willReturn(entityTx);
 
 		dialect.beginTransaction(entityManager, definition);
-
-		entityControl.verify();
-		txControl.verify();
 	}
 
+	@Test
 	public void testTranslateException() {
 		OptimisticLockException ex = new OptimisticLockException();
 		assertEquals(

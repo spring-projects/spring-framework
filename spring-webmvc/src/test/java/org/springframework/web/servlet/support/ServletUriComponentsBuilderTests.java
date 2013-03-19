@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,16 @@ public class ServletUriComponentsBuilderTests {
 		String result = ServletUriComponentsBuilder.fromRequestUri(request).build().toUriString();
 
 		assertEquals("http://localhost/mvc-showcase/data/param", result);
+	}
+
+	@Test
+	public void fromRequestWithForwardedHostHeader() {
+		request.addHeader("X-Forwarded-Host", "anotherHost");
+		request.setRequestURI("/mvc-showcase/data/param");
+		request.setQueryString("foo=123");
+		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
+
+		assertEquals("http://anotherHost/mvc-showcase/data/param?foo=123", result);
 	}
 
 	@Test

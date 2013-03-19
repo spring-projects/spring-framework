@@ -75,7 +75,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * Default is {@link DateTimeFormat#shortDate()}.
 	 */
 	public void setDateStyle(String dateStyle) {
-		factories.get(Type.DATE).setStyle(dateStyle+"-");
+		this.factories.get(Type.DATE).setStyle(dateStyle+"-");
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * Default is {@link DateTimeFormat#shortTime()}.
 	 */
 	public void setTimeStyle(String timeStyle) {
-		factories.get(Type.TIME).setStyle("-"+timeStyle);
+		this.factories.get(Type.TIME).setStyle("-"+timeStyle);
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * Default is {@link DateTimeFormat#shortDateTime()}.
 	 */
 	public void setDateTimeStyle(String dateTimeStyle) {
-		factories.get(Type.DATE_TIME).setStyle(dateTimeStyle);
+		this.factories.get(Type.DATE_TIME).setStyle(dateTimeStyle);
 	}
 
 	/**
@@ -101,9 +101,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * If set to true, the dateStyle, timeStyle, and dateTimeStyle properties are ignored.
 	 */
 	public void setUseIsoFormat(boolean useIsoFormat) {
-		factories.get(Type.DATE).setIso(useIsoFormat ? ISO.DATE : null);
-		factories.get(Type.TIME).setIso(useIsoFormat ? ISO.TIME : null);
-		factories.get(Type.DATE_TIME).setIso(useIsoFormat ? ISO.DATE_TIME : null);
+		this.factories.get(Type.DATE).setIso(useIsoFormat ? ISO.DATE : null);
+		this.factories.get(Type.TIME).setIso(useIsoFormat ? ISO.TIME : null);
+		this.factories.get(Type.DATE_TIME).setIso(useIsoFormat ? ISO.DATE_TIME : null);
 	}
 
 	/**
@@ -174,19 +174,28 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 		addFormatterForFields(registry,
 				new ReadableInstantPrinter(dateTimeFormatter),
 				new DateTimeParser(dateTimeFormatter),
-				ReadableInstant.class, Date.class, Calendar.class);
+				ReadableInstant.class);
+
+		// In order to retain back compatibility we only register Date/Calendar
+		// types when a user defined formatter is specified (see SPR-10105)
+		if(this.formatters.containsKey(Type.DATE_TIME)) {
+			addFormatterForFields(registry,
+					new ReadableInstantPrinter(dateTimeFormatter),
+					new DateTimeParser(dateTimeFormatter),
+					Date.class, Calendar.class);
+		}
 
 		registry.addFormatterForFieldAnnotation(
 				new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
 
 	private DateTimeFormatter getFormatter(Type type) {
-		DateTimeFormatter formatter = formatters.get(type);
+		DateTimeFormatter formatter = this.formatters.get(type);
 		if(formatter != null) {
 			return formatter;
 		}
 		DateTimeFormatter fallbackFormatter = getFallbackFormatter(type);
-		return factories.get(type).createDateTimeFormatter(fallbackFormatter );
+		return this.factories.get(type).createDateTimeFormatter(fallbackFormatter );
 	}
 
 	private DateTimeFormatter getFallbackFormatter(Type type) {

@@ -65,8 +65,7 @@
         />.</para>
     </note>
 
-    <para>The
-      <interfacename>org.springframework.beans.factory.config.BeanPostProcessor</interfacename>
+    <para>The <interfacename>org.springframework.beans.factory.config.BeanPostProcessor</interfacename>
       interface consists of exactly two callback methods. When such a class is
       registered as a post-processor with the container, for each bean instance
       that is created by the container, the post-processor gets a callback from
@@ -93,8 +92,7 @@
     <note>
       <title>Programmatically registering <interfacename>BeanPostProcessors
         </interfacename></title>
-      <para>
-         While the recommended approach for <interfacename>BeanPostProcessor
+      <para>While the recommended approach for <interfacename>BeanPostProcessor
          </interfacename> registration is through <interfacename>ApplicationContext
          </interfacename> auto-detection (as described above), it is also
          possible to register them <emphasis>programmatically</emphasis>
@@ -108,8 +106,7 @@
          registration</emphasis> that dictates the order of execution.  Note also
          that <interfacename>BeanPostProcessors</interfacename> registered
          programmatically are always processed before those registered through
-         auto-detection, regardless of any explicit ordering.
-      </para>
+         auto-detection, regardless of any explicit ordering.</para>
     </note>
 
     <note>
@@ -135,6 +132,14 @@
         <quote><emphasis>Bean foo is not eligible for getting processed by all
         BeanPostProcessor interfaces (for example: not eligible for
         auto-proxying)</emphasis></quote>.</para>
+
+      <para>Note that if you have beans wired into your <interfacename>BeanPostProcessor</interfacename>
+        using autowiring or <interfacename>@Resource</interfacename> (which may fall back to autowiring),
+        Spring might access unexpected beans when searching for type-matching dependency candidates,
+        and therefore make them ineligible for auto-proxying or other kinds of bean post-processing.
+        For example, if you have a dependency annotated with <interfacename>@Resource</interfacename>
+        where the field/setter name does not directly correspond to the declared name of a bean and
+        no name attribute is used, then Spring will access other beans for matching them by type.</para>
     </note>
 
     <para>The following examples show how to write, register, and use
