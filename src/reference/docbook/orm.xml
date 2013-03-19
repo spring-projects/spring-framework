@@ -1474,14 +1474,14 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
 
         <para>Refer to <xref linkend="aop-aj-ltw-spring" /> in the AOP chapter for more insight regarding the
         <interfacename>LoadTimeWeaver</interfacename> implementations and their setup, either generic or customized to
-        various platforms (such as Tomcat, WebLogic, OC4J, GlassFish, Resin and JBoss).</para>
+        various platforms (such as Tomcat, WebLogic, GlassFish, Resin and JBoss).</para>
 
 
         <para>As described in the aforementioned section, you can configure a context-wide <interfacename>LoadTimeWeaver</interfacename>
         using the <interfacename>@EnableLoadTimeWeaving</interfacename> annotation of <literal>context:load-time-weaver</literal> XML element.
         Such a global weaver is picked up by all JPA <classname>LocalContainerEntityManagerFactoryBeans</classname>
         automatically. This is the preferred way of setting up a load-time weaver, delivering autodetection of the platform
-        (WebLogic, OC4J, GlassFish, Tomcat, Resin, JBoss or VM agent) and automatic propagation of the weaver to all weaver-aware beans:</para>
+        (WebLogic, GlassFish, Tomcat, Resin, JBoss or VM agent) and automatic propagation of the weaver to all weaver-aware beans:</para>
 
         <programlisting language="xml">&lt;context:load-time-weaver/&gt;
 &lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;

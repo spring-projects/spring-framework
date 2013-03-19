@@ -79,21 +79,20 @@ import org.springframework.util.StringUtils;
  * Almost all Java EE servers expose it, but do so as extension to EE. There might be some
  * issues with compatibility, despite the TransactionManager interface being part of JTA.
  * As a consequence, Spring provides various vendor-specific PlatformTransactionManagers,
- * which are recommended to be used if appropriate: {@link WebLogicJtaTransactionManager},
- * {@link WebSphereUowTransactionManager} and {@link OC4JJtaTransactionManager}.
- * For all other Java EE servers, the standard JtaTransactionManager is sufficient.
+ * which are recommended to be used if appropriate: {@link WebLogicJtaTransactionManager}
+ * and {@link WebSphereUowTransactionManager}. For all other Java EE servers, the
+ * standard JtaTransactionManager is sufficient.
  *
  * <p>This pure JtaTransactionManager class supports timeouts but not per-transaction
  * isolation levels. Custom subclasses may override the {@link #doJtaBegin} method for
- * specific JTA extensions in order to provide this functionality; Spring includes
- * corresponding {@link WebLogicJtaTransactionManager} and {@link OC4JJtaTransactionManager}
- * classes, for BEA's WebLogic Server and Oracle's OC4J, respectively. Such adapters
- * for specific Java EE transaction coordinators may also expose transaction names for
- * monitoring; with standard JTA, transaction names will simply be ignored.
+ * specific JTA extensions in order to provide this functionality; Spring includes a
+ * corresponding {@link WebLogicJtaTransactionManager} class for WebLogic Server. Such
+ * adapters for specific Java EE transaction coordinators may also expose transaction
+ * names for monitoring; with standard JTA, transaction names will simply be ignored.
  *
  * <p><b>Consider using Spring's {@code tx:jta-transaction-manager} configuration
  * element for automatically picking the appropriate JTA platform transaction manager
- * (automatically detecting WebLogic, WebSphere and OC4J).</b>
+ * (automatically detecting WebLogic and WebSphere).</b>
  *
  * <p>JTA 1.1 adds the TransactionSynchronizationRegistry facility, as public Java EE 5
  * API in addition to the standard JTA UserTransaction handle. As of Spring 2.5, this

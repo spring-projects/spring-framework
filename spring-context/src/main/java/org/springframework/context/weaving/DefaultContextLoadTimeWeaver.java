@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver;
-import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
 import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
 import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWeaver;
 
@@ -43,12 +42,11 @@ import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWe
  *
  * <p>This class implements a runtime environment check for obtaining
  * the appropriate weaver implementation: As of Spring 3.1, it detects
- * Oracle WebLogic 10, Oracle OC4J 10, GlassFish 3, JBoss AS 5, 6 and 7,
- * IBM WebSphere 7 and 8, {@link InstrumentationSavingAgent Spring's VM agent}
- * and any {@link ClassLoader} supported by Spring's {@link ReflectiveLoadTimeWeaver}
- * (for example the
+ * Oracle WebLogic 10, GlassFish 3, JBoss AS 5, 6 and 7, IBM WebSphere 7 and 8,
+ * {@link InstrumentationSavingAgent Spring's VM agent}, and any {@link ClassLoader}
+ * supported by Spring's {@link ReflectiveLoadTimeWeaver} (for example the
  * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}
- * for Tomcat 5, 6 and 7).
+ * for Tomcat 6 and 7).
  *
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
@@ -111,9 +109,6 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		try {
 			if (name.startsWith("weblogic")) {
 				return new WebLogicLoadTimeWeaver(classLoader);
-			}
-			else if (name.startsWith("oracle")) {
-				return new OC4JLoadTimeWeaver(classLoader);
 			}
 			else if (name.startsWith("com.sun.enterprise") || name.startsWith("org.glassfish")) {
 				return new GlassFishLoadTimeWeaver(classLoader);
