@@ -2470,6 +2470,7 @@ txManager.commit(status);</programlisting>
       names, per-transaction isolation levels, and proper resuming of
       transactions in all cases.</para>
     </section>
+  </section>
 
   <section xml:id="transaction-solutions-to-common-problems">
     <title>Solutions to common problems</title>
