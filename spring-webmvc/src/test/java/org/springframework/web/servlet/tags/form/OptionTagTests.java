@@ -185,57 +185,10 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		try {
 			tag.doStartTag();
 			fail("Must not be able to use <option> tag without exposed context.");
-		}  catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
-	}
-
-	public void testWithEnum() throws Exception {
-		String selectName = "testBean.favouriteColour";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
-
-		String value = Colour.GREEN.getCode().toString();
-		String label = Colour.GREEN.getLabel();
-
-		this.tag.setValue(value);
-		this.tag.setLabel(label);
-
-		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
-		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
-
-		String output = getOutput();
-
-		assertOptionTagOpened(output);
-		assertOptionTagClosed(output);
-		assertContainsAttribute(output, "value", value);
-		assertContainsAttribute(output, "selected", "selected");
-		assertBlockTagContains(output, label);
-	}
-
-	public void testWithEnumNotSelected() throws Exception {
-		String selectName = "testBean.favouriteColour";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
-
-		String value = Colour.BLUE.getCode().toString();
-		String label = Colour.BLUE.getLabel();
-
-		this.tag.setValue(value);
-		this.tag.setLabel(label);
-
-		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
-		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
-
-		String output = getOutput();
-
-		assertOptionTagOpened(output);
-		assertOptionTagClosed(output);
-		assertContainsAttribute(output, "value", value);
-		assertAttributeNotPresent(output, "selected");
-		assertBlockTagContains(output, label);
 	}
 
 	public void testWithPropertyEditor() throws Exception {
