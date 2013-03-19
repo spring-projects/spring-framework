@@ -596,7 +596,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 	public void testHiddenElementOmittedOnDisabled() throws Exception {
 		this.tag.setPath("someBoolean");
-		this.tag.setDisabled("true");
+		this.tag.setDisabled(true);
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();

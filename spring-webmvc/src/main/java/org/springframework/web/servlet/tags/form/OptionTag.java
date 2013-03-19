@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,12 +89,11 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	private Object oldDisplayValue;
 
-	private String disabled;
+	private boolean disabled;
 
 
 	/**
 	 * Set the 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
-	 * <p>May be a runtime expression.
 	 */
 	public void setValue(Object value) {
 		this.value = value;
@@ -109,26 +108,16 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Set the value of the '{@code disabled}' attribute.
-	 * <p>May be a runtime expression.
-	 * @param disabled the value of the '{@code disabled}' attribute
 	 */
-	public void setDisabled(String disabled) {
+	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
 
 	/**
 	 * Get the value of the '{@code disabled}' attribute.
 	 */
-	protected String getDisabled() {
+	protected boolean isDisabled() {
 		return this.disabled;
-	}
-
-	/**
-	 * Is the current HTML tag disabled?
-	 * @return {@code true} if this tag is disabled
-	 */
-	protected boolean isDisabled() throws JspException {
-		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
 	}
 
 	/**

@@ -21,15 +21,14 @@ import java.beans.PropertyEditorSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.tests.sample.beans.Colour;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.sample.beans.Colour;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
@@ -78,7 +77,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
-		this.tag.setDisabled("true");
+		this.tag.setDisabled(true);
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
 		result = this.tag.doEndTag();
@@ -297,8 +296,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testWithCustomObjectSelected() throws Exception {
 		String selectName = "testBean.someNumber";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
-		this.tag.setValue("${myNumber}");
-		this.tag.setLabel("GBP ${myNumber}");
+		this.tag.setValue(new Float(12.34));
+		this.tag.setLabel("GBP 12.34");
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
 		result = this.tag.doEndTag();
@@ -316,8 +315,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testWithCustomObjectNotSelected() throws Exception {
 		String selectName = "testBean.someNumber";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
-		this.tag.setValue("${myOtherNumber}");
-		this.tag.setLabel("GBP ${myOtherNumber}");
+		this.tag.setValue(new Float(12.35));
+		this.tag.setLabel("GBP 12.35");
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
 		result = this.tag.doEndTag();
@@ -344,8 +343,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		};
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 
-		this.tag.setValue("${myNumber}");
-		this.tag.setLabel("${myNumber}");
+		this.tag.setValue(new Float(12.34));
+		this.tag.setLabel("12.34f");
 
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
@@ -370,8 +369,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		};
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 
-		this.tag.setValue("${myOtherNumber}");
-		this.tag.setLabel("${myOtherNumber}");
+		this.tag.setValue(new Float(12.35));
+		this.tag.setLabel("12.35f");
 
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
@@ -458,9 +457,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 
 		RulesVariant rulesVariant = new RulesVariant("someRules", "someVariant");
-		getPageContext().getRequest().setAttribute("rule", rulesVariant);
-
-		this.tag.setValue("${rule}");
+		this.tag.setValue(rulesVariant);
 
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
@@ -522,8 +519,6 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		bean.setFriends(friends);
 
 		request.setAttribute("testBean", bean);
-		request.setAttribute("myNumber", new Float(12.34));
-		request.setAttribute("myOtherNumber", new Float(12.35));
 	}
 
 

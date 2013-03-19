@@ -55,7 +55,7 @@ public class ButtonTagTests extends AbstractFormTagTests {
 	}
 
 	public void testDisabled() throws Exception {
-		this.tag.setDisabled("true");
+		this.tag.setDisabled(true);
 
 		this.tag.doStartTag();
 		this.tag.doEndTag();

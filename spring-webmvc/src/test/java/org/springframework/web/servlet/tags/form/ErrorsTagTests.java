@@ -225,7 +225,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	public void testWithNonEscapedErrors() throws Exception {
-		this.tag.setHtmlEscape("false");
+		this.tag.setHtmlEscape(false);
 
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();

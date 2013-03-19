@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class MessageTagTests extends AbstractTagTests {
 
 	@SuppressWarnings("serial")
-	public void testMessageTagWithMessageSourceResolvable1() throws JspException {
+	public void testMessageTagWithMessageSourceResolvable() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -55,24 +55,7 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@SuppressWarnings("serial")
-	public void testMessageTagWithMessageSourceResolvable2() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		pc.setAttribute("myattr", new DefaultMessageSourceResolvable("test"));
-		tag.setMessage("${myattr}");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test message", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCode1() throws JspException {
+	public void testMessageTagWithCode() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -85,26 +68,6 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("test");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "test message", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCode2() throws JspException {
-		PageContext pc = createPageContext();
-		MockHttpServletRequest request = (MockHttpServletRequest) pc.getRequest();
-		request.addPreferredLocale(Locale.CANADA);
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		pc.setAttribute("myattr", "test");
-		tag.setCode("${myattr}");
-		tag.setHtmlEscape("true");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "Canadian &amp; test message", message.toString());
 	}
 
 	@SuppressWarnings("serial")
@@ -210,81 +173,7 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndExpressionArgument() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		tag.setCode("testArgs");
-		tag.setArguments("${arg1}");
-		pc.setAttribute("arg1", "my,value");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test my,value message {1}", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndExpressionArguments() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		tag.setCode("testArgs");
-		tag.setArguments("${arg1},${arg2}");
-		pc.setAttribute("arg1", "my,value");
-		pc.setAttribute("arg2", new Integer(5));
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test my,value message 5", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndExpressionArgumentArray() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		tag.setCode("testArgs");
-		tag.setArguments("${argArray}");
-		pc.setAttribute("argArray", new Object[] {"my,value", new Integer(5)});
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test my,value message 5", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndExpressionArgumentFormat() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		tag.setCode("testArgsFormat");
-		tag.setArguments("${arg1},${arg2}");
-		pc.setAttribute("arg1", "my,value");
-		pc.setAttribute("arg2", new Float(5.145));
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test my,value message 5.14 X", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndText1() throws JspException {
+	public void testMessageTagWithCodeAndText() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -301,24 +190,6 @@ public class MessageTagTests extends AbstractTagTests {
 	}
 
 	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndText2() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		pc.setAttribute("myattr", "test & text");
-		tag.setCode("test2");
-		tag.setText("${myattr}");
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test & text", message.toString());
-	}
-
-	@SuppressWarnings("serial")
 	public void testMessageTagWithText() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
@@ -330,28 +201,9 @@ public class MessageTagTests extends AbstractTagTests {
 		};
 		tag.setPageContext(pc);
 		tag.setText("test & text");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "test &amp; text", message.toString());
-	}
-
-	@SuppressWarnings("serial")
-	public void testMessageTagWithTextAndExpressionArgumentFormat() throws JspException {
-		PageContext pc = createPageContext();
-		final StringBuffer message = new StringBuffer();
-		MessageTag tag = new MessageTag() {
-			@Override
-			protected void writeMessage(String msg) {
-				message.append(msg);
-			}
-		};
-		tag.setPageContext(pc);
-		tag.setText("test {0} message {1,number,#.##} X");
-		tag.setArguments("${arg1},${arg2}");
-		pc.setAttribute("arg1", "my,value");
-		pc.setAttribute("arg2", new Float(5.145));
-		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "test my,value message 5.14 X", message.toString());
 	}
 
 	@SuppressWarnings("serial")
@@ -366,7 +218,7 @@ public class MessageTagTests extends AbstractTagTests {
 		};
 		tag.setPageContext(pc);
 		tag.setText("' test & text \\");
-		tag.setJavaScriptEscape("true");
+		tag.setJavaScriptEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "\\' test & text \\\\", message.toString());
 	}
@@ -383,8 +235,8 @@ public class MessageTagTests extends AbstractTagTests {
 		};
 		tag.setPageContext(pc);
 		tag.setText("' test & text \\");
-		tag.setHtmlEscape("true");
-		tag.setJavaScriptEscape("true");
+		tag.setHtmlEscape(true);
+		tag.setJavaScriptEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "&#39; test &amp; text \\\\", message.toString());
 	}

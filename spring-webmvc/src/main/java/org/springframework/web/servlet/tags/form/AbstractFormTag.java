@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * Base class for all JSP form tags. Provides utility methods for
@@ -42,29 +41,11 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
 	/**
-	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
-	 * is {@code null} then {@code null} is returned, otherwise evaluation is
-	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)}.
+	 * Evaluate the supplied value for the supplied attribute name.
+	 * <p>The default implementation simply returns the given value as-is.
 	 */
 	protected Object evaluate(String attributeName, Object value) throws JspException {
-		if (value instanceof String) {
-			return ExpressionEvaluationUtils.evaluate(attributeName, (String) value, this.pageContext);
-		}
-		else {
-			return value;
-		}
-	}
-
-	/**
-	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
-	 * is {@code null} then {@code false} is returned, otherwise evaluation is
-	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)},
-	 * with subsequent matching against {@code Boolean.TRUE} and {@code Boolean.valueOf}.
-	 */
-	protected boolean evaluateBoolean(String attributeName, String value) throws JspException {
-		Object evaluated = ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
-		return (Boolean.TRUE.equals(evaluated) ||
-				(evaluated instanceof String && Boolean.valueOf((String) evaluated)));
+		return value;
 	}
 
 	/**

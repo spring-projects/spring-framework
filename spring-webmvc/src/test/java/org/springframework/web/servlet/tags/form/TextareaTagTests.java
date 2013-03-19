@@ -47,7 +47,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 	public void testSimpleBind() throws Exception {
 		this.tag.setPath("name");
-		this.tag.setReadonly("true");
+		this.tag.setReadonly(true);
 
 		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 		String output = getOutput();
@@ -61,7 +61,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		String dynamicAttribute2 = "attr2";
 
 		this.tag.setPath("name");
-		this.tag.setReadonly("true");
+		this.tag.setReadonly(true);
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 
