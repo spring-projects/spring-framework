@@ -103,13 +103,15 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 
 			// Sort methods into a sensible order
-			Collections.sort(methods, new Comparator<Method>() {
-				public int compare(Method m1, Method m2) {
-					int m1pl = m1.getParameterTypes().length;
-					int m2pl = m2.getParameterTypes().length;
-					return (new Integer(m1pl)).compareTo(m2pl);
-				}
-			});
+			if (methods.size() > 1) {
+				Collections.sort(methods, new Comparator<Method>() {
+					public int compare(Method m1, Method m2) {
+						int m1pl = m1.getParameterTypes().length;
+						int m2pl = m2.getParameterTypes().length;
+						return (new Integer(m1pl)).compareTo(m2pl);
+					}
+				});
+			}
 
 			// Resolve any bridge methods
 			for (int i = 0; i < methods.size(); i++) {
