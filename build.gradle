@@ -87,7 +87,6 @@ configure(allprojects) { project ->
 		"http://fasterxml.github.com/jackson-core/javadoc/2.0.0",
 		"http://jackson.codehaus.org/1.4.2/javadoc",
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs",
-		"http://ibatis.apache.org/docs/java/dev",
 		"http://tiles.apache.org/framework/apidocs",
 		"http://commons.apache.org/dbcp/api-1.2.2",
 	] as String[]
@@ -301,7 +300,6 @@ project("spring-context") {
 		compile(project(":spring-expression"))
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
-		optional("backport-util-concurrent:backport-util-concurrent:3.0")
 		optional("javax.ejb:ejb-api:3.0")
 		optional("javax.inject:javax.inject:1")
 		optional("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
@@ -415,10 +413,12 @@ project("spring-context-support") {
 		optional(project(":spring-tx")) // for Quartz support
 		optional("javax.mail:mail:1.4")
 		optional("javax.cache:cache-api:0.5")
-		optional("net.sf.ehcache:ehcache-core:2.0.0")
-		optional("opensymphony:quartz:1.6.2")
+		optional("net.sf.ehcache:ehcache-core:2.6.3")
+		optional("org.quartz-scheduler:quartz:1.8.3") {
+			exclude group: "org.slf4j", module: "slf4j-log4j12"
+		}
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
-		optional("velocity:velocity:1.5")
+		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:2.3.15")
 		optional("com.lowagie:itext:2.1.7")
 		optional("jasperreports:jasperreports:2.0.5")
@@ -527,7 +527,6 @@ project("spring-webmvc") {
 		optional("org.apache.tiles:tiles-core:2.1.2")
 		optional("org.apache.tiles:tiles-jsp:2.1.2")
 		optional("org.apache.tiles:tiles-servlet:2.1.2")
-		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
 		optional("org.apache.poi:poi:3.0.2-FINAL")
 		optional("com.lowagie:itext:2.1.7")
@@ -535,7 +534,8 @@ project("spring-webmvc") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
 		optional("rome:rome:1.0")
-		optional("velocity:velocity:1.5")
+		optional("org.apache.velocity:velocity:1.7")
+		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.15")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")

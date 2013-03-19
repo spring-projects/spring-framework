@@ -1035,6 +1035,26 @@ public class QuartzSupportTests {
 		@Override
 		public void schedulerShutdown() {
 		}
+
+		@Override
+		public void jobAdded(JobDetail jobDetail) {
+		}
+
+		@Override
+		public void jobDeleted(String s, String s1) {
+		}
+
+		@Override
+		public void schedulerInStandbyMode() {
+		}
+
+		@Override
+		public void schedulerStarted() {
+		}
+
+		@Override
+		public void schedulerShuttingdown() {
+		}
 	}
 
 
