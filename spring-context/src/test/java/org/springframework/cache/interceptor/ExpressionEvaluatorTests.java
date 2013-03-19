@@ -16,20 +16,15 @@
 
 package org.springframework.cache.interceptor;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.cache.Cache;
+
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -38,7 +33,8 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
@@ -80,9 +76,9 @@ public class ExpressionEvaluatorTests {
 		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
-		Collection<Cache> map = Collections.singleton(new ConcurrentMapCache("test"));
+		Collection caches = Collections.singleton(new ConcurrentMapCache("test"));
 
-		EvaluationContext evalCtx = eval.createEvaluationContext(map, method, args, target, target.getClass());
+		EvaluationContext evalCtx = eval.createEvaluationContext(caches, method, args, target, target.getClass());
 		Collection<CacheOperation> ops = getOps("multipleCaching");
 
 		Iterator<CacheOperation> it = ops.iterator();
@@ -121,14 +117,17 @@ public class ExpressionEvaluatorTests {
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
 		@SuppressWarnings("unchecked")
-		Collection<Cache> map = Collections.singleton(new ConcurrentMapCache("test"));
-		EvaluationContext context = eval.createEvaluationContext(map, method, args, target, target.getClass(), result);
+		Collection caches = Collections.singleton(new ConcurrentMapCache("test"));
+		EvaluationContext context = eval.createEvaluationContext(caches, method, args, target, target.getClass(), result);
 		return context;
 	}
 
+
 	private static class AnnotatedClass {
+
 		@Caching(cacheable = { @Cacheable(value = "test", key = "#a"), @Cacheable(value = "test", key = "#b") })
 		public void multipleCaching(Object a, Object b) {
 		}
 	}
+
 }
