@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.engine.FilterDefinition;
 import org.hibernate.type.Type;
-import org.hibernate.type.TypeFactory;
+import org.hibernate.type.TypeResolver;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Convenient FactoryBean for defining Hibernate FilterDefinitions.
@@ -66,29 +64,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition>, BeanNameAware, InitializingBean {
 
-	private static Method heuristicTypeMethod;
-
-	private static Object typeResolver;
-
-	static {
-		// Hibernate 3.6 TypeResolver class available?
-		try {
-			Class<?> trClass = FilterDefinitionFactoryBean.class.getClassLoader().loadClass(
-					"org.hibernate.type.TypeResolver");
-			heuristicTypeMethod = trClass.getMethod("heuristicType", String.class);
-			typeResolver = trClass.newInstance();
-		}
-		catch (Exception ex) {
-			try {
-				heuristicTypeMethod = TypeFactory.class.getMethod("heuristicType", String.class);
-				typeResolver = null;
-			}
-			catch (Exception ex2) {
-				throw new IllegalStateException("Cannot find Hibernate's heuristicType method", ex2);
-			}
-		}
-	}
-
+	private final TypeResolver typeResolver = new TypeResolver();
 
 	private String filterName;
 
@@ -116,8 +92,7 @@ public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition
 		if (parameterTypes != null) {
 			this.parameterTypeMap = new HashMap<String, Type>(parameterTypes.size());
 			for (Map.Entry<String, String> entry : parameterTypes.entrySet()) {
-				this.parameterTypeMap.put(entry.getKey(),
-						(Type) ReflectionUtils.invokeMethod(heuristicTypeMethod, typeResolver, entry.getValue()));
+				this.parameterTypeMap.put(entry.getKey(), this.typeResolver.heuristicType(entry.getValue()));
 			}
 		}
 		else {

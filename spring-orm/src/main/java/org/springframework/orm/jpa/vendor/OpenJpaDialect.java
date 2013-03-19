@@ -34,7 +34,7 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Apache OpenJPA.
- * Developed and tested against OpenJPA 1.1 as well as 2.0/2.1.
+ * Developed and tested against OpenJPA 2.2.
  *
  * @author Costin Leau
  * @author Juergen Hoeller

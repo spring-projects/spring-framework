@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
@@ -61,9 +63,13 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private boolean excludeUnlistedClasses = false;
 
+	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
+
+	private ValidationMode validationMode = ValidationMode.AUTO;
+
 	private Properties properties = new Properties();
 
-	private String persistenceXMLSchemaVersion = "1.0";
+	private String persistenceXMLSchemaVersion = "2.0";
 
 	private String persistenceProviderPackageName;
 
@@ -152,6 +158,22 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	public boolean excludeUnlistedClasses() {
 		return this.excludeUnlistedClasses;
+	}
+
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.sharedCacheMode = sharedCacheMode;
+	}
+
+	public SharedCacheMode getSharedCacheMode() {
+		return this.sharedCacheMode;
+	}
+
+	public void setValidationMode(ValidationMode validationMode) {
+		this.validationMode = validationMode;
+	}
+
+	public ValidationMode getValidationMode() {
+		return this.validationMode;
 	}
 
 	public void addProperty(String name, String value) {

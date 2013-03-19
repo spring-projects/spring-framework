@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink
- * 1.0 as well as 2.0-2.3.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
  *
  * <p>By default, this class acquires a EclipseLink transaction to get the JDBC Connection
  * early. This allows mixing JDBC and JPA/EclipseLink operations in the same transaction.
@@ -45,10 +44,6 @@ import org.springframework.transaction.TransactionException;
  * use a {@link org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy}
  * to ensure that the cost of connection acquisition is near zero until code actually
  * needs a JDBC Connection.
- *
- * <p>This class is very analogous to {@link TopLinkJpaDialect}, since
- * EclipseLink is effectively the next generation of the TopLink product.
- * Thanks to Mike Keith for the original EclipseLink support prototype!
  *
  * @author Juergen Hoeller
  * @since 2.5.2

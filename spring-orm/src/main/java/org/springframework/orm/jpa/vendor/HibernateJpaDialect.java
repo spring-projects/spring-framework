@@ -39,9 +39,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed against Hibernate 3.3;
- * tested against 3.3, 3.5, 3.6 and 4.0 (with the latter including
- * Hibernate EntityManager in the Hibernate core distribution).
+ * Hibernate EntityManager. Developed against Hibernate 3.6 and 4.2.
  *
  * @author Costin Leau
  * @author Juergen Hoeller

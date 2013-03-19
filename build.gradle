@@ -305,7 +305,7 @@ project("spring-context") {
 		optional("javax.ejb:ejb-api:3.0")
 		optional("javax.inject:javax.inject:1")
 		optional("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
-		optional("javax.persistence:persistence-api:1.0")
+		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.beanshell:bsh:2.0b4")
 		optional("org.codehaus.groovy:groovy-all:1.8.8")
@@ -336,7 +336,7 @@ project("spring-tx") {
 		optional("javax.resource:connector-api:1.5")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.ejb:ejb-api:3.0")
-		testCompile("javax.persistence:persistence-api:1.0")
+		testCompile("org.eclipse.persistence:javax.persistence:2.0.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}
 }
@@ -478,31 +478,19 @@ project("spring-web") {
 project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
 
-	compileTestJava {
-		// necessary to avoid java.lang.VerifyError on toplink compilation
-		// TODO: remove this block when we remove toplink
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
-	}
-
 	dependencies {
 		compile("aopalliance:aopalliance:1.0")
-		optional("org.hibernate:hibernate-core:3.3.2.GA")
-		optional("org.hibernate:hibernate-annotations:3.4.0.GA")
-		optional("org.hibernate:hibernate-entitymanager:3.4.0.GA")
-		optional("org.apache.openjpa:openjpa:1.1.0")
-		optional("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1")
-		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1")
-		optional("toplink.essentials:toplink-essentials:2.0-41b")
+		optional("org.eclipse.persistence:javax.persistence:2.0.0")
+		optional("org.eclipse.persistence:org.eclipse.persistence.core:2.4.0")
+		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:2.4.0")
+		optional("org.hibernate:hibernate-core:3.6.9.Final")
+		optional("org.hibernate:hibernate-entitymanager:3.6.9.Final")
+		optional("org.apache.openjpa:openjpa:2.2.1")
 		optional("javax.jdo:jdo-api:3.0")
-		optional("org.apache.ibatis:ibatis-sqlmap:2.3.4.726")
-		optional("javax.persistence:persistence-api:1.0")
 		provided("javax.servlet:servlet-api:2.5")
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
-		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1")
-		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -520,8 +508,8 @@ project("spring-orm-hibernate4") {
 	dependencies {
 		provided(project(":spring-tx"))
 		provided(project(":spring-jdbc"))
-		optional("org.hibernate:hibernate-core:4.1.0.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.1.0.Final")
+		optional("org.hibernate:hibernate-core:4.1.9.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.1.9.Final")
 		optional(project(":spring-web"))
 		optional("javax.servlet:servlet-api:2.5")
 	}
@@ -666,9 +654,9 @@ project("spring-test") {
 		optional("javax.servlet:servlet-api:2.5")
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.portlet:portlet-api:2.0")
-		optional("javax.persistence:persistence-api:1.0")
+		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.hibernate:hibernate-core:3.3.2.GA")
+		testCompile("org.hibernate:hibernate-core:3.6.9.Final")
 		provided("javax.inject:javax.inject:1")
 		provided("javax.activation:activation:1.1")
 		provided("javax.servlet:jstl:1.2")
@@ -738,7 +726,7 @@ project("spring-aspects") {
 		optional(project(":spring-tx")) // for JPA, @Transactional support
 		optional(project(":spring-orm")) // for JPA exception translation support
 		aspects(project(":spring-orm"))
-		provided("javax.persistence:persistence-api:1.0")
+		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		testCompile("javax.mail:mail:1.4")
 		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")
@@ -786,7 +774,7 @@ configure(rootProject) {
 		testCompile(project(":spring-web"))
 		testCompile(project(":spring-webmvc-portlet"))
 		testCompile(project(":spring-orm"))
-		testCompile("org.hibernate:hibernate-core:4.1.0.Final")
+		testCompile("org.hibernate:hibernate-core:4.1.9.Final")
 		testCompile("javax.servlet:servlet-api:2.5")
 		testCompile("javax.portlet:portlet-api:2.0")
 		testCompile("javax.inject:javax.inject:1")

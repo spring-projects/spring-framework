@@ -34,6 +34,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cache.RegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
@@ -160,19 +161,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
-	 * Return the CacheProvider for the currently configured Hibernate SessionFactory,
-	 * to be used by LocalCacheProviderProxy.
-	 * <p>This instance will be set before initialization of the corresponding
-	 * SessionFactory, and reset immediately afterwards. It is thus only available
-	 * during configuration.
-	 * @see #setCacheProvider
-	 */
-	@SuppressWarnings("deprecation")
-	public static org.hibernate.cache.CacheProvider getConfigTimeCacheProvider() {
-		return configTimeCacheProviderHolder.get();
-	}
-
-	/**
 	 * Return the LobHandler for the currently configured Hibernate SessionFactory,
 	 * to be used by UserType implementations like ClobStringType.
 	 * <p>This instance will be set before initialization of the corresponding
@@ -206,10 +194,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private TransactionManager jtaTransactionManager;
 
-	private Object cacheRegionFactory;
-
-	@SuppressWarnings("deprecation")
-	private org.hibernate.cache.CacheProvider cacheProvider;
+	private RegionFactory cacheRegionFactory;
 
 	private LobHandler lobHandler;
 
@@ -381,30 +366,12 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	/**
 	 * Set the Hibernate RegionFactory to use for the SessionFactory.
 	 * Allows for using a Spring-managed RegionFactory instance.
-	 * <p>As of Hibernate 3.3, this is the preferred mechanism for configuring
-	 * caches, superseding the {@link #setCacheProvider CacheProvider SPI}.
-	 * For Hibernate 3.2 compatibility purposes, the accepted reference is of type
-	 * Object: the actual type is {@code org.hibernate.cache.RegionFactory}.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * cache provider to avoid meaningless double configuration.
 	 * @see org.hibernate.cache.RegionFactory
 	 */
-	public void setCacheRegionFactory(Object cacheRegionFactory) {
+	public void setCacheRegionFactory(RegionFactory cacheRegionFactory) {
 		this.cacheRegionFactory = cacheRegionFactory;
-	}
-
-	/**
-	 * Set the Hibernate CacheProvider to use for the SessionFactory.
-	 * Allows for using a Spring-managed CacheProvider instance.
-	 * <p>Note: If this is set, the Hibernate settings should not define a
-	 * cache provider to avoid meaningless double configuration.
-	 * @deprecated as of Spring 3.0, following Hibernate 3.3's deprecation
-	 * of the CacheProvider SPI
-	 * @see #setCacheRegionFactory
-	 */
-	@Deprecated
-	public void setCacheProvider(org.hibernate.cache.CacheProvider cacheProvider) {
-		this.cacheProvider = cacheProvider;
 	}
 
 	/**
@@ -564,10 +531,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			// Make Spring-provided Hibernate RegionFactory available.
 			configTimeRegionFactoryHolder.set(this.cacheRegionFactory);
 		}
-		if (this.cacheProvider != null) {
-			// Make Spring-provided Hibernate CacheProvider available.
-			configTimeCacheProviderHolder.set(this.cacheProvider);
-		}
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SessionFactory configuration.
 			// Do early because because mapping resource might refer to custom types.
@@ -667,10 +630,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				// Expose Spring-provided Hibernate RegionFactory.
 				config.setProperty(Environment.CACHE_REGION_FACTORY,
 						"org.springframework.orm.hibernate3.LocalRegionFactoryProxy");
-			}
-			else if (this.cacheProvider != null) {
-				// Expose Spring-provided Hibernate CacheProvider.
-				config.setProperty(Environment.CACHE_PROVIDER, LocalCacheProviderProxy.class.getName());
 			}
 
 			if (this.mappingResources != null) {
@@ -791,9 +750,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			}
 			if (this.cacheRegionFactory != null) {
 				configTimeRegionFactoryHolder.remove();
-			}
-			if (this.cacheProvider != null) {
-				configTimeCacheProviderHolder.remove();
 			}
 			if (this.lobHandler != null) {
 				configTimeLobHandlerHolder.remove();

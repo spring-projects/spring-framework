@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -27,8 +26,10 @@ import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.persistence.spi.ProviderUtil;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -315,6 +316,11 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		@Override
 		public EntityManagerFactory createEntityManagerFactory(String emfName, Map properties) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ProviderUtil getProviderUtil() {
 			throw new UnsupportedOperationException();
 		}
 	}
