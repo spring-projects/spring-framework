@@ -81,6 +81,7 @@ public class EhCacheSupportTests extends TestCase {
 	private void doTestEhCacheFactoryBean(boolean useCacheManagerFb) throws Exception {
 		Cache cache;
 		EhCacheManagerFactoryBean cacheManagerFb = null;
+		boolean cacheManagerFbInitialized = false;
 		try {
 			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
 			Class<? extends Ehcache> objectType = cacheFb.getObjectType();
@@ -90,6 +91,7 @@ public class EhCacheSupportTests extends TestCase {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
 				cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
 				cacheManagerFb.afterPropertiesSet();
+				cacheManagerFbInitialized = true;
 				cacheFb.setCacheManager(cacheManagerFb.getObject());
 			}
 
@@ -144,7 +146,7 @@ public class EhCacheSupportTests extends TestCase {
 			assertTrue("overridden diskExpiryThreadIntervalSeconds is correct", config.getDiskExpiryThreadIntervalSeconds() == 10);
 		}
 		finally {
-			if (useCacheManagerFb && cacheManagerFb != null) {
+			if (cacheManagerFbInitialized) {
 				cacheManagerFb.destroy();
 			}
 			else {
