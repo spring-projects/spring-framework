@@ -603,7 +603,7 @@ project("spring-webmvc-tiles3") {
 project("spring-webmvc-portlet") {
 	description = "Spring Web Portlet"
 	dependencies {
-		provided("javax.servlet:servlet-api:2.5")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.portlet:portlet-api:2.0")
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -754,7 +754,7 @@ configure(rootProject) {
 		testCompile(project(":spring-webmvc-portlet"))
 		testCompile(project(":spring-orm"))
 		testCompile("org.hibernate:hibernate-core:4.1.9.Final")
-		testCompile("javax.servlet:servlet-api:2.5")
+		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("javax.portlet:portlet-api:2.0")
 		testCompile("javax.inject:javax.inject:1")
 		testCompile("javax.resource:connector-api:1.5")
