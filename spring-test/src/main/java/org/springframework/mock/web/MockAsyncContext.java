@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.mock.web.test;
+package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,17 +56,14 @@ public class MockAsyncContext implements AsyncContext {
 	}
 
 
-	@Override
 	public ServletRequest getRequest() {
 		return this.request;
 	}
 
-	@Override
 	public ServletResponse getResponse() {
 		return this.response;
 	}
 
-	@Override
 	public boolean hasOriginalRequestAndResponse() {
 		return (this.request instanceof MockHttpServletRequest) && (this.response instanceof MockHttpServletResponse);
 	}
@@ -75,12 +72,10 @@ public class MockAsyncContext implements AsyncContext {
 		dispatch(this.request.getRequestURI());
  	}
 
-	@Override
 	public void dispatch(String path) {
 		dispatch(null, path);
 	}
 
-	@Override
 	public void dispatch(ServletContext context, String path) {
 		this.dispatchedPath = path;
 	}
@@ -104,7 +99,6 @@ public class MockAsyncContext implements AsyncContext {
 		}
 	}
 
-	@Override
 	public void start(Runnable runnable) {
 		runnable.run();
 	}
@@ -113,7 +107,6 @@ public class MockAsyncContext implements AsyncContext {
 		this.listeners.add(listener);
 	}
 
-	@Override
 	public void addListener(AsyncListener listener, ServletRequest request, ServletResponse response) {
 		this.listeners.add(listener);
 	}

@@ -484,8 +484,7 @@ project("spring-orm") {
 		optional("org.hibernate:hibernate-entitymanager:3.6.9.Final")
 		optional("org.apache.openjpa:openjpa:2.2.1")
 		optional("javax.jdo:jdo-api:3.0")
-		provided("javax.servlet:servlet-api:2.5")
-		testCompile("javax.servlet:javax.servlet-api:3.0.1")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
@@ -508,7 +507,7 @@ project("spring-orm-hibernate4") {
 		optional("org.hibernate:hibernate-core:4.1.9.Final")
 		optional("org.hibernate:hibernate-entitymanager:4.1.9.Final")
 		optional(project(":spring-web"))
-		optional("javax.servlet:servlet-api:2.5")
+		optional("javax.servlet:javax.servlet-api:3.0.1")
 	}
 }
 
@@ -648,7 +647,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc-portlet"), )
 		optional("junit:junit:${junitVersion}")
 		optional("org.testng:testng:6.5.2")
-		optional("javax.servlet:servlet-api:2.5")
+		optional("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.portlet:portlet-api:2.0")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")

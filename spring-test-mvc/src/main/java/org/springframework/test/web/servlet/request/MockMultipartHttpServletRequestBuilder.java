@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,15 @@
 
 package org.springframework.test.web.servlet.request;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
-import org.springframework.util.ClassUtils;
 
 /**
  * Default builder for {@link MockMultipartHttpServletRequest}.
@@ -99,24 +95,11 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 
 	@Override
 	protected final MockHttpServletRequest createServletRequest(ServletContext servletContext) {
-		MockMultipartHttpServletRequest request = servlet3Present ?
-				createServlet3Request() : new MockMultipartHttpServletRequest();
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest(servletContext);
 		for (MockMultipartFile file : this.files) {
 			request.addFile(file);
 		}
 		return request;
-	}
-
-	private MockMultipartHttpServletRequest createServlet3Request() {
-		try {
-			String className = "org.springframework.test.web.servlet.request.Servlet3MockMultipartHttpServletRequest";
-			Class<?> clazz = ClassUtils.forName(className, MockMultipartHttpServletRequestBuilder.class.getClassLoader());
-			Constructor<?> constructor = clazz.getDeclaredConstructor();
-			return (MockMultipartHttpServletRequest) BeanUtils.instantiateClass(constructor);
-		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate MockHttpServletRequest", t);
-		}
 	}
 
 }

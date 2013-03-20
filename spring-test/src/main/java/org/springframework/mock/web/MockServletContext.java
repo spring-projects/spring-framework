@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -30,9 +31,16 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.activation.FileTypeMap;
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
+import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,10 +56,10 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.ServletContext} interface.
  *
- * <p>Compatible with Servlet 2.5 and partially with Servlet 3.0. Can be configured to
- * expose a specific version through {@link #setMajorVersion}/{@link #setMinorVersion};
- * default is 2.5. Note that Servlet 3.0 support is limited: servlet, filter and listener
- * registration methods are not supported; neither is cookie or JSP configuration.
+ * <p>Compatible with Servlet 3.0. Can be configured to expose a specific version
+ * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.0.
+ * Note that Servlet 3.0 support is limited: servlet, filter and listener
+ * registration methods are not supported; neither is JSP configuration.
  * We generally do not recommend to unit-test your ServletContainerInitializers and
  * WebApplicationInitializers which is where those registration methods would be used.
  *
@@ -96,17 +104,17 @@ public class MockServletContext implements ServletContext {
 
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
 
+	private static final Set<SessionTrackingMode> DEFAULT_SESSION_TRACKING_MODES =
+			new LinkedHashSet<SessionTrackingMode>(3);
+
+	static {
+		DEFAULT_SESSION_TRACKING_MODES.add(SessionTrackingMode.COOKIE);
+		DEFAULT_SESSION_TRACKING_MODES.add(SessionTrackingMode.URL);
+		DEFAULT_SESSION_TRACKING_MODES.add(SessionTrackingMode.SSL);
+	}
+
+
 	private final Log logger = LogFactory.getLog(getClass());
-
-	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
-
-	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
-
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
-
-	private final Set<String> declaredRoles = new HashSet<String>();
-
-	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<String, RequestDispatcher>();
 
 	private final ResourceLoader resourceLoader;
 
@@ -114,17 +122,31 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
-	private int majorVersion = 2;
+	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
 
-	private int minorVersion = 5;
+	private int majorVersion = 3;
 
-	private int effectiveMajorVersion = 2;
+	private int minorVersion = 0;
 
-	private int effectiveMinorVersion = 5;
+	private int effectiveMajorVersion = 3;
+
+	private int effectiveMinorVersion = 0;
+
+	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<String, RequestDispatcher>();
+
+	private String defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
+
+	private final Map<String, String> initParameters = new LinkedHashMap<String, String>();
+
+	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private String servletContextName = "MockServletContext";
 
-	private String defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
+	private final Set<String> declaredRoles = new HashSet<String>();
+
+	private Set<SessionTrackingMode> sessionTrackingModes;
+
+	private final SessionCookieConfig sessionCookieConfig = new MockSessionCookieConfig();
 
 
 	/**
@@ -158,12 +180,11 @@ public class MockServletContext implements ServletContext {
 	 * Create a new MockServletContext using the supplied resource base path and
 	 * resource loader.
 	 * <p>Registers a {@link MockRequestDispatcher} for the Servlet named
-	 * {@linkplain #COMMON_DEFAULT_SERVLET_NAME "default"}.
+	 * {@value #COMMON_DEFAULT_SERVLET_NAME}.
 	 * @param resourceBasePath the root directory of the WAR (should not end with a slash)
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
-	@SuppressWarnings("javadoc")
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
@@ -194,7 +215,6 @@ public class MockServletContext implements ServletContext {
 		this.contextPath = (contextPath != null ? contextPath : "");
 	}
 
-	/* This is a Servlet API 2.5 method. */
 	public String getContextPath() {
 		return this.contextPath;
 	}
@@ -251,7 +271,7 @@ public class MockServletContext implements ServletContext {
 	 */
 	public String getMimeType(String filePath) {
 		String mimeType = MimeTypeResolver.getMimeType(filePath);
-		return ("application/octet-stream".equals(mimeType)) ? null : mimeType;
+		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
 	}
 
 	public Set<String> getResourcePaths(String path) {
@@ -350,10 +370,9 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * Get the name of the <em>default</em> {@code Servlet}.
-	 * <p>Defaults to {@linkplain #COMMON_DEFAULT_SERVLET_NAME "default"}.
+	 * <p>Defaults to {@value #COMMON_DEFAULT_SERVLET_NAME}.
 	 * @see #setDefaultServletName
 	 */
-	@SuppressWarnings("javadoc")
 	public String getDefaultServletName() {
 		return this.defaultServletName;
 	}
@@ -483,6 +502,97 @@ public class MockServletContext implements ServletContext {
 
 	public Set<String> getDeclaredRoles() {
 		return Collections.unmodifiableSet(this.declaredRoles);
+	}
+
+	public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes)
+			throws IllegalStateException, IllegalArgumentException {
+		this.sessionTrackingModes = sessionTrackingModes;
+	}
+
+	public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
+		return DEFAULT_SESSION_TRACKING_MODES;
+	}
+
+	public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
+		return (this.sessionTrackingModes != null ?
+				Collections.unmodifiableSet(this.sessionTrackingModes) : DEFAULT_SESSION_TRACKING_MODES);
+	}
+
+	public SessionCookieConfig getSessionCookieConfig() {
+		return this.sessionCookieConfig;
+	}
+
+
+	//---------------------------------------------------------------------
+	// Unsupported Servlet 3.0 registration methods
+	//---------------------------------------------------------------------
+
+	public JspConfigDescriptor getJspConfigDescriptor() {
+		throw new UnsupportedOperationException();
+	}
+
+	public ServletRegistration.Dynamic addServlet(String servletName, String className) {
+		throw new UnsupportedOperationException();
+	}
+
+	public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet) {
+		throw new UnsupportedOperationException();
+	}
+
+	public ServletRegistration.Dynamic addServlet(String servletName, Class<? extends Servlet> servletClass) {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends Servlet> T createServlet(Class<T> c) throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	public ServletRegistration getServletRegistration(String servletName) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
+		throw new UnsupportedOperationException();
+	}
+
+	public FilterRegistration.Dynamic addFilter(String filterName, String className) {
+		throw new UnsupportedOperationException();
+	}
+
+	public FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
+		throw new UnsupportedOperationException();
+	}
+
+	public FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass) {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends Filter> T createFilter(Class<T> c) throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	public FilterRegistration getFilterRegistration(String filterName) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void addListener(Class<? extends EventListener> listenerClass) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void addListener(String className) {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends EventListener> void addListener(T t) {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
+		throw new UnsupportedOperationException();
 	}
 
 
