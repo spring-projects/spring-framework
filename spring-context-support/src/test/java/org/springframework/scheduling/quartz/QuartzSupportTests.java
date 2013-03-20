@@ -876,7 +876,6 @@ public class QuartzSupportTests {
 		SchedulerFactoryBean bean = new SchedulerFactoryBean();
 		bean.setJobFactory(new SpringBeanJobFactory());
 		bean.setJobSchedulingDataLocation("org/springframework/scheduling/quartz/job-scheduling-data.xml");
-		bean.setResourceLoader(new FileSystemResourceLoader());
 		bean.afterPropertiesSet();
 		bean.start();
 
