@@ -90,6 +90,7 @@ public class EhCacheSupportTests extends TestCase {
 			if (useCacheManagerFb) {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
 				cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
+				cacheManagerFb.setCacheManagerName("cache");
 				cacheManagerFb.afterPropertiesSet();
 				cacheManagerFbInitialized = true;
 				cacheFb.setCacheManager(cacheManagerFb.getObject());
