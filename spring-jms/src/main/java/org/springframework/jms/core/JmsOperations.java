@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import javax.jms.Queue;
 
 import org.springframework.jms.JmsException;
 import org.springframework.lang.Nullable;
+import org.springframework.jms.support.converter.MessageDecoder;
+import org.springframework.jms.support.converter.MessageEncoder;
 
 /**
  * Specifies a basic set of JMS operations.
@@ -39,6 +41,7 @@ import org.springframework.lang.Nullable;
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Philippe Marschall
  * @since 1.1
  * @see JmsTemplate
  * @see javax.jms.Destination
@@ -136,6 +139,18 @@ public interface JmsOperations {
 	 * @throws JmsException converted checked JMSException to unchecked
 	 */
 	void convertAndSend(Object message) throws JmsException;
+	
+	/**
+	 * Send the given object to the default destination, converting the object
+	 * to a JMS message with a given MessageEncoder.
+	 * <p>This will only work with a default destination specified!
+	 * @param message the object to convert to a message
+	 * @param encoder the object doing the conversion
+	 * @throws JmsException converted checked JMSException to unchecked
+	 * @since 5.3
+	 */
+	<T> void convertAndSend(T message, MessageEncoder<? super T> encoder)
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -145,6 +160,18 @@ public interface JmsOperations {
 	 * @throws JmsException converted checked JMSException to unchecked
 	 */
 	void convertAndSend(Destination destination, Object message) throws JmsException;
+	
+	/**
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a given MessageConverter.
+	 * @param destination the destination to send this message to
+	 * @param message the object to convert to a message
+	 * @param encoder the object doing the conversion
+	 * @throws JmsException converted checked JMSException to unchecked
+	 * @since 5.3
+	 */
+	<T> void convertAndSend(Destination destination, T message, MessageEncoder<? super T> encoder)
+			throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -155,6 +182,19 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(String destinationName, Object message) throws JmsException;
+	
+	/**
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a given MessageConverter.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param message the object to convert to a message
+	 * @param encoder the object doing the conversion
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	<T> void convertAndSend(String destinationName, T message, MessageEncoder<? super T> encoder)
+			throws JmsException;
 
 	/**
 	 * Send the given object to the default destination, converting the object
@@ -167,6 +207,20 @@ public interface JmsOperations {
 	 */
 	void convertAndSend(Object message, MessagePostProcessor postProcessor)
 		throws JmsException;
+	
+	/**
+	 * Send the given object to the default destination, converting the object
+	 * to a JMS message with a given MessageConverter. The MessagePostProcessor
+	 * callback allows for modification of the message after conversion.
+	 * <p>This will only work with a default destination specified!
+	 * @param message the object to convert to a message
+	 * @param postProcessor the callback to modify the message
+	 * @param encoder the object doing the conversion
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	<T> void convertAndSend(T message, MessagePostProcessor postProcessor, MessageEncoder<? super T> encoder)
+			throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -179,6 +233,20 @@ public interface JmsOperations {
 	 */
 	void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
 		throws JmsException;
+	
+	/**
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a given MessageConverter. The MessagePostProcessor
+	 * callback allows for modification of the message after conversion.
+	 * @param destination the destination to send this message to
+	 * @param message the object to convert to a message
+	 * @param postProcessor the callback to modify the message
+	 * @param encoder the object doing the conversion
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	<T> void convertAndSend(Destination destination, T message, MessagePostProcessor postProcessor, MessageEncoder<? super T> encoder)
+			throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -192,6 +260,21 @@ public interface JmsOperations {
 	 */
 	void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
 		throws JmsException;
+	
+	/**
+	 * Send the given object to the specified destination, converting the object
+	 * to a JMS message with a configured MessageConverter. The MessagePostProcessor
+	 * callback allows for modification of the message after conversion.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param message the object to convert to a message.
+	 * @param postProcessor the callback to modify the message
+	 * @param encoder the object doing the conversion
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	<T> void convertAndSend(String destinationName, T message, MessagePostProcessor postProcessor, MessageEncoder<? super T> encoder)
+			throws JmsException;
 
 
 	//---------------------------------------------------------------------------------------
@@ -295,6 +378,21 @@ public interface JmsOperations {
 	 */
 	@Nullable
 	Object receiveAndConvert() throws JmsException;
+	
+	/**
+	 * Receive a message synchronously from the default destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a given MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * <p>This will only work with a default destination specified!
+	 * @param decoder the object doing the conversion
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	@Nullable
+	<T> T receiveAndConvert(MessageDecoder<? extends T> decoder) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -308,6 +406,22 @@ public interface JmsOperations {
 	 */
 	@Nullable
 	Object receiveAndConvert(Destination destination) throws JmsException;
+	
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a given MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destination the destination to receive a message from
+	 * @param decoder the object doing the conversion
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	@Nullable
+	<T> T receiveAndConvert(Destination destination, MessageDecoder<? extends T> decoder)
+		throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -322,6 +436,23 @@ public interface JmsOperations {
 	 */
 	@Nullable
 	Object receiveAndConvert(String destinationName) throws JmsException;
+	
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a given MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param decoder the object doing the conversion
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	@Nullable
+	<T> T receiveAndConvert(String destinationName, MessageDecoder<? extends T> decoder)
+		throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the default destination, but only
@@ -337,6 +468,24 @@ public interface JmsOperations {
 	 */
 	@Nullable
 	Object receiveSelectedAndConvert(String messageSelector) throws JmsException;
+	
+	/**
+	 * Receive a message synchronously from the default destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a given MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * <p>This will only work with a default destination specified!
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @param decoder the object doing the conversion
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	@Nullable
+	<T> T receiveSelectedAndConvert(String messageSelector, MessageDecoder<? extends T> decoder)
+			throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -352,6 +501,24 @@ public interface JmsOperations {
 	 */
 	@Nullable
 	Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException;
+	
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a given MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destination the destination to receive a message from
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @param decoder the object doing the conversion
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	@Nullable
+	<T> T receiveSelectedAndConvert(Destination destination, String messageSelector, MessageDecoder<? extends T> decoder)
+			throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -368,6 +535,25 @@ public interface JmsOperations {
 	 */
 	@Nullable
 	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
+	
+	/**
+	 * Receive a message synchronously from the specified destination, but only
+	 * wait up to a specified time for delivery. Convert the message into an
+	 * object with a given MessageConverter.
+	 * <p>This method should be used carefully, since it will block the thread
+	 * until the message becomes available or until the timeout value is exceeded.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
+	 * See the JMS specification for a detailed definition of selector expressions.
+	 * @param decoder the object doing the conversion
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 5.3
+	 */
+	@Nullable
+	<T> T receiveSelectedAndConvert(String destinationName, String messageSelector, MessageDecoder<? extends T> decoder)
+			throws JmsException;
 
 
 	//---------------------------------------------------------------------------------------

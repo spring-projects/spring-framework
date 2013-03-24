@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.QosSettings;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessageDecoder;
+import org.springframework.jms.support.converter.MessageEncoder;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.lang.Nullable;
@@ -78,6 +80,7 @@ import org.springframework.util.Assert;
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Philippe Marschall
  * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
@@ -642,12 +645,17 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	public void convertAndSend(Object message) throws JmsException {
+		convertAndSend(message, getRequiredMessageConverter());
+	}
+
+	@Override
+	public <T> void convertAndSend(final T message, final MessageEncoder<? super T> encoder) throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
-			convertAndSend(defaultDestination, message);
+			convertAndSend(defaultDestination, message, encoder);
 		}
 		else {
-			convertAndSend(getRequiredDefaultDestinationName(), message);
+			convertAndSend(getRequiredDefaultDestinationName(), message, encoder);
 		}
 	}
 
@@ -657,18 +665,35 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
+	public <T> void convertAndSend(Destination destination, final T message, final MessageEncoder<? super T> encoder)
+			throws JmsException {
+		send(destination, session -> encoder.toMessage(message, session));
+	}
+
+	@Override
 	public void convertAndSend(String destinationName, final Object message) throws JmsException {
 		send(destinationName, session -> getRequiredMessageConverter().toMessage(message, session));
+	}
+	
+	public <T> void convertAndSend(String destinationName, final T message, final MessageEncoder<? super T> encoder)
+			throws JmsException {
+		send(destinationName, session -> encoder.toMessage(message, session));
 	}
 
 	@Override
 	public void convertAndSend(Object message, MessagePostProcessor postProcessor) throws JmsException {
+		convertAndSend(message, postProcessor, getRequiredMessageConverter());
+	}
+
+	@Override
+	public <T> void convertAndSend(T message, MessagePostProcessor postProcessor, MessageEncoder<? super T> encoder)
+			throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
-			convertAndSend(defaultDestination, message, postProcessor);
+			convertAndSend(defaultDestination, message, postProcessor, encoder);
 		}
 		else {
-			convertAndSend(getRequiredDefaultDestinationName(), message, postProcessor);
+			convertAndSend(getRequiredDefaultDestinationName(), message, postProcessor, encoder);
 		}
 	}
 
@@ -684,12 +709,34 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
+	public <T> void convertAndSend(
+			Destination destination, final T message, final MessagePostProcessor postProcessor, final MessageEncoder<? super T> encoder)
+					throws JmsException {
+		
+		send(destination, session -> {
+			Message msg = encoder.toMessage(message, session);
+			return postProcessor.postProcessMessage(msg);
+		});
+	}
+
+	@Override
 	public void convertAndSend(
 			String destinationName, final Object message, final MessagePostProcessor postProcessor)
 		throws JmsException {
 
 		send(destinationName, session -> {
 			Message msg = getRequiredMessageConverter().toMessage(message, session);
+			return postProcessor.postProcessMessage(msg);
+		});
+	}
+
+	@Override
+	public <T> void convertAndSend(
+			String destinationName, final T message, final MessagePostProcessor postProcessor, final MessageEncoder<? super T> encoder)
+					throws JmsException {
+
+		send(destinationName, session -> {
+			Message msg = encoder.toMessage(message, session);
 			return postProcessor.postProcessMessage(msg);
 		});
 	}
@@ -818,15 +865,35 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
+	@Nullable	
+	public <T> T receiveAndConvert(MessageDecoder<? extends T> decoder) throws JmsException {
+		return doConvertFromMessage(receive(), decoder);
+	}
+
+	@Override
 	@Nullable
 	public Object receiveAndConvert(Destination destination) throws JmsException {
 		return doConvertFromMessage(receive(destination));
 	}
 
 	@Override
+	@Nullable	
+	public <T> T receiveAndConvert(Destination destination, MessageDecoder<? extends T> decoder)
+			throws JmsException {
+		return doConvertFromMessage(receive(destination), decoder);
+	}
+
+	@Override
 	@Nullable
 	public Object receiveAndConvert(String destinationName) throws JmsException {
 		return doConvertFromMessage(receive(destinationName));
+	}
+
+	@Override
+	@Nullable	
+	public <T> T receiveAndConvert(String destinationName, MessageDecoder<? extends T> decoder)
+			throws JmsException {
+		return doConvertFromMessage(receive(destinationName), decoder);
 	}
 
 	@Override
@@ -837,14 +904,35 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
+	public <T> T receiveSelectedAndConvert(String messageSelector, MessageDecoder<? extends T> decoder)
+			throws JmsException {
+		return doConvertFromMessage(receiveSelected(messageSelector), decoder);
+	}
+
+	@Override
+	@Nullable
 	public Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(destination, messageSelector));
 	}
 
 	@Override
 	@Nullable
+	public <T> T receiveSelectedAndConvert(Destination destination, String messageSelector, MessageDecoder<? extends T> decoder)
+			throws JmsException {
+		return doConvertFromMessage(receiveSelected(destination, messageSelector), decoder);
+	}
+
+	@Override
+	@Nullable
 	public Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
+	}
+
+	@Override
+	@Nullable
+	public <T> T receiveSelectedAndConvert(String destinationName, String messageSelector, MessageDecoder<? extends T> decoder)
+			throws JmsException {
+		return doConvertFromMessage(receiveSelected(destinationName, messageSelector), decoder);
 	}
 
 	/**
@@ -854,9 +942,21 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	@Nullable
 	protected Object doConvertFromMessage(@Nullable Message message) {
+		return doConvertFromMessage(message, getMessageConverter());
+	}
+	
+	/**
+	 * Extract the content from the given JMS message.
+	 * @param message the JMS Message to convert (can be {@code null})
+	 * @param decoder the object doing the conversion (can be only be {@code null} when
+	 * 	the message is {@code null})
+	 * @return the content of the message, or {@code null} if none
+	 */
+	@Nullable
+	protected <T> T doConvertFromMessage(@Nullable Message message, MessageDecoder<? extends T> decoder) {
 		if (message != null) {
 			try {
-				return getRequiredMessageConverter().fromMessage(message);
+				return decoder.fromMessage(message);
 			}
 			catch (JMSException ex) {
 				throw convertJmsAccessException(ex);
