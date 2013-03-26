@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.aop;
 
@@ -25,6 +25,7 @@ public class PerTargetAspect implements Ordered {
 		++count;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}

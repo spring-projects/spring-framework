@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,14 +43,14 @@ public class MethodInvokerTests extends TestCase {
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
+		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello"});
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", "bogus"});
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
@@ -58,7 +58,7 @@ public class MethodInvokerTests extends TestCase {
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", Boolean.TRUE});
+		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE});
 		try {
 			mi.prepare();
 			fail("Shouldn't have matched without argument conversion");
@@ -169,28 +169,29 @@ public class MethodInvokerTests extends TestCase {
 		public static void intArguments(int[] arg) {
 		}
 
-		public static String supertypes(Collection c, Integer i) {
+		public static String supertypes(Collection<?> c, Integer i) {
 			return i.toString();
 		}
 
-		public static String supertypes(Collection c, List l, String s) {
+		public static String supertypes(Collection<?> c, List<?> l, String s) {
 			return s;
 		}
 
-		public static String supertypes2(Collection c, List l, Integer i) {
+		public static String supertypes2(Collection<?> c, List<?> l, Integer i) {
 			return i.toString();
 		}
 
-		public static String supertypes2(Collection c, List l, String s, Integer i) {
+		public static String supertypes2(Collection<?> c, List<?> l, String s, Integer i) {
 			return s;
 		}
 
-		public static String supertypes2(Collection c, List l, String s, String s2) {
+		public static String supertypes2(Collection<?> c, List<?> l, String s, String s2) {
 			return s;
 		}
 	}
 
 
+	@SuppressWarnings("unused")
 	public static class Greeter {
 
 		// should handle Salesman (only interface)
@@ -227,6 +228,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Purchaser implements Greetable {
 
+		@Override
 		public String getGreeting() {
 			return "hello";
 		}
@@ -235,6 +237,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Shopper extends Purchaser implements Person {
 
+		@Override
 		public String getGreeting() {
 			return "may I help you?";
 		}
@@ -243,6 +246,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Salesman implements Person {
 
+		@Override
 		public String getGreeting() {
 			return "how are sales?";
 		}
@@ -251,6 +255,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Customer extends Shopper {
 
+		@Override
 		public String getGreeting() {
 			return "good day";
 		}
@@ -265,6 +270,7 @@ public class MethodInvokerTests extends TestCase {
 			this.name = name;
 		}
 
+		@Override
 		public String getGreeting() {
 			return "welcome back " + name ;
 		}
@@ -277,6 +283,7 @@ public class MethodInvokerTests extends TestCase {
 			super(name);
 		}
 
+		@Override
 		public String getGreeting() {
 			return "whassup dude?";
 		}

@@ -28,7 +28,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * Converts an Array to a comma-delimited String.
  * This implementation first adapts the source Array to a List, then delegates to {@link CollectionToStringConverter} to perform the target String conversion.
- * 
+ *
  * @author Keith Donald
  * @since 3.0
  */

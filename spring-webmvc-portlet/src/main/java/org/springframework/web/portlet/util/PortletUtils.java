@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ public abstract class PortletUtils {
 	 * <p>Prepends a slash if the path does not already start with a slash,
 	 * and throws a {@link java.io.FileNotFoundException} if the path cannot
 	 * be resolved to a resource (in contrast to
-	 * {@link javax.portlet.PortletContext#getRealPath PortletContext's <code>getRealPath</code>},
-	 * which simply returns <code>null</code>).
+	 * {@link javax.portlet.PortletContext#getRealPath PortletContext's {@code getRealPath}},
+	 * which simply returns {@code null}).
 	 * @param portletContext the portlet context of the web application
 	 * @param path the relative path within the web application
 	 * @return the corresponding real path
@@ -96,11 +96,11 @@ public abstract class PortletUtils {
 	/**
 	 * Check the given request for a session attribute of the given name under the
 	 * {@link javax.portlet.PortletSession#PORTLET_SCOPE}.
-	 * Returns <code>null</code> if there is no session or if the session has no such attribute in that scope.
+	 * Returns {@code null} if there is no session or if the session has no such attribute in that scope.
 	 * Does not create a new session if none has existed before!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
-	 * @return the value of the session attribute, or <code>null</code> if not found
+	 * @return the value of the session attribute, or {@code null} if not found
 	 */
 	public static Object getSessionAttribute(PortletRequest request, String name) {
 		return getSessionAttribute(request, name, PortletSession.PORTLET_SCOPE);
@@ -108,12 +108,12 @@ public abstract class PortletUtils {
 
 	/**
 	 * Check the given request for a session attribute of the given name in the given scope.
-	 * Returns <code>null</code> if there is no session or if the session has no such attribute in that scope.
+	 * Returns {@code null} if there is no session or if the session has no such attribute in that scope.
 	 * Does not create a new session if none has existed before!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
 	 * @param scope session scope of this attribute
-	 * @return the value of the session attribute, or <code>null</code> if not found
+	 * @return the value of the session attribute, or {@code null} if not found
 	 */
 	public static Object getSessionAttribute(PortletRequest request, String name, int scope) {
 		Assert.notNull(request, "Request must not be null");
@@ -160,7 +160,7 @@ public abstract class PortletUtils {
 
 	/**
 	 * Set the session attribute with the given name to the given value under the {@link javax.portlet.PortletSession#PORTLET_SCOPE}.
-	 * Removes the session attribute if value is <code>null</code>, if a session existed at all.
+	 * Removes the session attribute if value is {@code null}, if a session existed at all.
 	 * Does not create a new session if not necessary!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
@@ -172,7 +172,7 @@ public abstract class PortletUtils {
 
 	/**
 	 * Set the session attribute with the given name to the given value in the given scope.
-	 * Removes the session attribute if value is <code>null</code>, if a session existed at all.
+	 * Removes the session attribute if value is {@code null}, if a session existed at all.
 	 * Does not create a new session if not necessary!
 	 * @param request current portlet request
 	 * @param name the name of the session attribute
@@ -194,7 +194,7 @@ public abstract class PortletUtils {
 
 	/**
 	 * Get the specified session attribute under the {@link javax.portlet.PortletSession#PORTLET_SCOPE},
-	 * creating and setting a new attribute if no existing found. The given class 
+	 * creating and setting a new attribute if no existing found. The given class
 	 * needs to have a public no-arg constructor.
 	 * Useful for on-demand state objects in a web tier, like shopping carts.
 	 * @param session current portlet session
@@ -211,7 +211,7 @@ public abstract class PortletUtils {
 
 	/**
 	 * Get the specified session attribute in the given scope,
-	 * creating and setting a new attribute if no existing found. The given class 
+	 * creating and setting a new attribute if no existing found. The given class
 	 * needs to have a public no-arg constructor.
 	 * Useful for on-demand state objects in a web tier, like shopping carts.
 	 * @param session current portlet session
@@ -252,7 +252,7 @@ public abstract class PortletUtils {
 	 * <p>Returns the session mutex attribute if available; usually,
 	 * this means that the
 	 * {@link org.springframework.web.util.HttpSessionMutexListener}
-	 * needs to be defined in <code>web.xml</code>. Falls back to the
+	 * needs to be defined in {@code web.xml}. Falls back to the
 	 * {@link javax.portlet.PortletSession} itself if no mutex attribute found.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
@@ -265,7 +265,7 @@ public abstract class PortletUtils {
 	 * not guaranteed across different servlet containers; the only 100% safe
 	 * way is a session mutex.
 	 * @param session the HttpSession to find a mutex for
-	 * @return the mutex object (never <code>null</code>)
+	 * @return the mutex object (never {@code null})
 	 * @see org.springframework.web.util.WebUtils#SESSION_MUTEX_ATTRIBUTE
 	 * @see org.springframework.web.util.HttpSessionMutexListener
 	 */
@@ -284,7 +284,7 @@ public abstract class PortletUtils {
 	 * unwrapping the given request as far as necessary.
 	 * @param request the portlet request to introspect
 	 * @param requiredType the desired type of request object
-	 * @return the matching request object, or <code>null</code> if none
+	 * @return the matching request object, or {@code null} if none
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
@@ -305,7 +305,7 @@ public abstract class PortletUtils {
 	 * unwrapping the given response as far as necessary.
 	 * @param response the portlet response to introspect
 	 * @param requiredType the desired type of response object
-	 * @return the matching response object, or <code>null</code> if none
+	 * @return the matching response object, or {@code null} if none
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
@@ -340,7 +340,7 @@ public abstract class PortletUtils {
 	 * cookies can have the same name but different paths or domains.
 	 * @param request current portlet request
 	 * @param name cookie name
-	 * @return the first cookie with the given name, or <code>null</code> if none is found
+	 * @return the first cookie with the given name, or {@code null} if none is found
 	 */
 	public static Cookie getCookie(PortletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
@@ -369,7 +369,7 @@ public abstract class PortletUtils {
 	}
 
 	/**
-	 * Return the full name of a specific input type="submit" parameter 
+	 * Return the full name of a specific input type="submit" parameter
 	 * if it was sent in the request, either via a button (directly with name)
 	 * or via an image (name + ".x" or name + ".y").
 	 * @param request current portlet request
@@ -402,7 +402,7 @@ public abstract class PortletUtils {
 	 * but more flexible.
 	 * @param request portlet request in which to look for parameters
 	 * @param prefix the beginning of parameter names
-	 * (if this is <code>null</code> or the empty string, all parameters will match)
+	 * (if this is {@code null} or the empty string, all parameters will match)
 	 * @return map containing request parameters <b>without the prefix</b>,
 	 * containing either a String or a String array as values
 	 * @see javax.portlet.PortletRequest#getParameterNames

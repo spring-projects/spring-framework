@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -107,7 +107,7 @@ public class FreeMarkerMacroTests {
 		fv.setApplicationContext(wac);
 		fv.setExposeSpringMacroHelpers(true);
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("tb", new TestBean("juergen", 99));
 		fv.render(model, request, response);
 	}
@@ -126,7 +126,7 @@ public class FreeMarkerMacroTests {
 		fv.setApplicationContext(wac);
 		fv.setExposeSpringMacroHelpers(true);
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
 
 		try {
@@ -265,6 +265,13 @@ public class FreeMarkerMacroTests {
 		assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\"     >", getMacroOutput("FORM17"));
 	}
 
+	@Test
+	public void testForm18() throws Exception {
+		String output = getMacroOutput("FORM18");
+		assertTrue("Wrong output: " + output, output.startsWith("<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>"));
+		assertTrue("Wrong output: " + output, output.contains("<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />"));
+	}
+
 	private String getMacroOutput(String name) throws Exception {
 
 		String macro = fetchMacro(name);
@@ -274,30 +281,32 @@ public class FreeMarkerMacroTests {
 		FileCopyUtils.copy("<#import \"spring.ftl\" as spring />\n" + macro, new FileWriter(resource.getPath()));
 
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
-		Map msgMap = new HashMap();
+		Map<String, String> msgMap = new HashMap<String, String>();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
 		rc.setMessageMap(msgMap);
-		Map themeMsgMap = new HashMap();
+		Map<String, String> themeMsgMap = new HashMap<String, String>();
 		themeMsgMap.put("hello", "Howdy!");
 		themeMsgMap.put("world", "Mundo!");
 		rc.setThemeMessageMap(themeMsgMap);
 		rc.setContextPath("/springtest");
 
-		TestBean tb = new TestBean("Darren", 99);
-		tb.setSpouse(new TestBean("Fred"));
-		tb.setJedi(true);
-		request.setAttribute("command", tb);
+		TestBean darren = new TestBean("Darren", 99);
+		TestBean fred = new TestBean("Fred");
+		fred.setJedi(true);
+		darren.setSpouse(fred);
+		darren.setJedi(true);
+		request.setAttribute("command", darren);
 
-		HashMap names = new HashMap();
+		Map<String, String> names = new HashMap<String, String>();
 		names.put("Darren", "Darren Davison");
 		names.put("John", "John Doe");
 		names.put("Fred", "Fred Bloggs");
 		names.put("Rob&Harrop", "Rob Harrop");
 
 		Configuration config = fc.getConfiguration();
-		Map model = new HashMap();
-		model.put("command", tb);
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("command", darren);
 		model.put("springMacroRequestContext", rc);
 		model.put("msgArgs", new Object[] { "World" });
 		model.put("nameOptionMap", names);

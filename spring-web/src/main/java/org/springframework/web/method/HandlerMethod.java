@@ -54,7 +54,7 @@ public class HandlerMethod {
 
 	private final BeanFactory beanFactory;
 
-	private MethodParameter[] parameters;
+	private final MethodParameter[] parameters;
 
 	private final Method bridgedMethod;
 
@@ -69,6 +69,16 @@ public class HandlerMethod {
 		this.beanFactory = null;
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		this.parameters = initMethodParameters();
+	}
+
+	private MethodParameter[] initMethodParameters() {
+		int count = this.bridgedMethod.getParameterTypes().length;
+		MethodParameter[] result = new MethodParameter[count];
+		for (int i = 0; i < count; i++) {
+			result[i] = new HandlerMethodParameter(i);
+		}
+		return result;
 	}
 
 	/**
@@ -82,6 +92,7 @@ public class HandlerMethod {
 		this.beanFactory = null;
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		this.parameters = initMethodParameters();
 	}
 
 	/**
@@ -99,14 +110,28 @@ public class HandlerMethod {
 		this.beanFactory = beanFactory;
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		this.parameters = initMethodParameters();
 	}
 
 	/**
-	 * Create an instance from another {@code HandlerMethod}.
+	 * Copy constructor for use in sub-classes.
 	 */
 	protected HandlerMethod(HandlerMethod handlerMethod) {
 		Assert.notNull(handlerMethod, "HandlerMethod is required");
 		this.bean = handlerMethod.bean;
+		this.beanFactory = handlerMethod.beanFactory;
+		this.method = handlerMethod.method;
+		this.bridgedMethod = handlerMethod.bridgedMethod;
+		this.parameters = handlerMethod.parameters;
+	}
+
+	/**
+	 * Re-create HandlerMethod with the resolved handler.
+	 */
+	private HandlerMethod(HandlerMethod handlerMethod, Object handler) {
+		Assert.notNull(handlerMethod, "handlerMethod is required");
+		Assert.notNull(handler, "handler is required");
+		this.bean = handler;
 		this.beanFactory = handlerMethod.beanFactory;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
@@ -150,13 +175,6 @@ public class HandlerMethod {
 	 * Returns the method parameters for this handler method.
 	 */
 	public MethodParameter[] getMethodParameters() {
-		if (this.parameters == null) {
-			int parameterCount = this.bridgedMethod.getParameterTypes().length;
-			this.parameters = new MethodParameter[parameterCount];
-			for (int i = 0; i < parameterCount; i++) {
-				this.parameters[i] = new HandlerMethodParameter(i);
-			}
-		}
 		return this.parameters;
 	}
 
@@ -201,9 +219,7 @@ public class HandlerMethod {
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
-		HandlerMethod handlerMethod = new HandlerMethod(handler, this.method);
-		handlerMethod.parameters = getMethodParameters();
-		return handlerMethod;
+		return new HandlerMethod(this, handler);
 	}
 
 	@Override

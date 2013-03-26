@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,24 +24,24 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * Implementation of {@link org.springframework.web.servlet.HandlerMapping} that
  * follows a simple convention for generating URL path mappings from the <i>class names</i>
  * of registered {@link org.springframework.web.servlet.mvc.Controller} beans
- * as well as <code>@Controller</code> annotated beans.
+ * as well as {@code @Controller} annotated beans.
  *
  * <p>For simple {@link org.springframework.web.servlet.mvc.Controller} implementations
  * (those that handle a single request type), the convention is to take the
- * {@link ClassUtils#getShortName short name} of the <code>Class</code>,
+ * {@link ClassUtils#getShortName short name} of the {@code Class},
  * remove the 'Controller' suffix if it exists and return the remaining text, lower-cased,
- * as the mapping, with a leading <code>/</code>. For example:
+ * as the mapping, with a leading {@code /}. For example:
  * <ul>
- * <li><code>WelcomeController</code> -> <code>/welcome*</code></li>
- * <li><code>HomeController</code> -> <code>/home*</code></li>
+ * <li>{@code WelcomeController} -> {@code /welcome*}</li>
+ * <li>{@code HomeController} -> {@code /home*}</li>
  * </ul>
  *
- * <p>For {@link MultiActionController MultiActionControllers} and <code>@Controller</code>
+ * <p>For {@link MultiActionController MultiActionControllers} and {@code @Controller}
  * beans, a similar mapping is registered, except that all sub-paths are registered
- * using the trailing wildcard pattern <code>/*</code>. For example:
+ * using the trailing wildcard pattern {@code /*}. For example:
  * <ul>
- * <li><code>WelcomeController</code> -> <code>/welcome</code>, <code>/welcome/*</code></li>
- * <li><code>CatalogController</code> -> <code>/catalog</code>, <code>/catalog/*</code></li>
+ * <li>{@code WelcomeController} -> {@code /welcome}, {@code /welcome/*}</li>
+ * <li>{@code CatalogController} -> {@code /catalog}, {@code /catalog/*}</li>
  * </ul>
  *
  * <p>For {@link MultiActionController} it is often useful to use
@@ -104,7 +104,7 @@ public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHand
 	/**
 	 * Set the base package to be used for generating path mappings,
 	 * including all subpackages underneath this packages as path elements.
-	 * <p>Default is <code>null</code>, using the short class name for the
+	 * <p>Default is {@code null}, using the short class name for the
 	 * generated path, with the controller's package not represented in the path.
 	 * Specify a base package like "com.mycompany.myapp" to include subpackages
 	 * within that base package as path elements, e.g. generating the path

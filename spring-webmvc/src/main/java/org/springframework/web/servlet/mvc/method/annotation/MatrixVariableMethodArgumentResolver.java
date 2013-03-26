@@ -116,7 +116,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 	protected void handleMissingValue(String name, MethodParameter param) throws ServletRequestBindingException {
 		String paramType = param.getParameterType().getName();
 		throw new ServletRequestBindingException(
-				"Missing URI path parameter '" + name + "' for method parameter type [" + paramType + "]");
+				"Missing matrix variable '" + name + "' for method parameter type [" + paramType + "]");
 	}
 
 

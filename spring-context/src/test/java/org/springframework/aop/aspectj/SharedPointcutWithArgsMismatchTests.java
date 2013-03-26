@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * See SPR-1682.
- * 
+ *
  * @author Adrian Colyer
  * @author Chris Beams
  */
@@ -30,7 +30,7 @@ public final class SharedPointcutWithArgsMismatchTests {
 
 	private ToBeAdvised toBeAdvised;
 
-	
+
 	@Before
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =

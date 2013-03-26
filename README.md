@@ -36,7 +36,7 @@ simple step-by-step instructions.
 The Spring Framework uses a [Gradle][]-based build system. In the instructions
 below, [`./gradlew`][] is invoked from the root of the source tree and serves as
 a cross-platform, self-contained bootstrap mechanism for the build. The only
-prerequisites are [Git][] and JDK 1.6+.
+prerequisites are [Git][] and JDK 1.7+.
 
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
@@ -88,7 +88,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Git]: http://help.github.com/set-up-git-redirect
 [Gradle build and release FAQ]: https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ
 [Pull requests]: http://help.github.com/send-pull-requests
-[contributor guidelines]: https://github.com/SpringSource/spring-framework/wiki/Contributor-guidelines
+[contributor guidelines]: https://github.com/SpringSource/spring-framework/blob/master/CONTRIBUTING.md
 [@springframework]: http://twitter.com/springframework
 [team members]: http://twitter.com/springframework/team/members
 [team blog]: http://blog.springsource.org

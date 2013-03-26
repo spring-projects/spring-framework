@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.BooleanTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NumberTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -56,11 +63,6 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -329,6 +331,7 @@ public final class BeanWrapperTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				super.setValue(value.toString());
 			}
@@ -500,6 +503,7 @@ public final class BeanWrapperTests {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) {
 				setValue(text.substring(1));
 			}
@@ -559,6 +563,7 @@ public final class BeanWrapperTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof String[]) {
 					setValue(StringUtils.arrayToDelimitedString(((String[]) value), "-"));
@@ -636,6 +641,7 @@ public final class BeanWrapperTests {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(int.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) {
 				setValue(new Integer(Integer.parseInt(text) + 1));
 			}
@@ -995,15 +1001,15 @@ public final class BeanWrapperTests {
 		bw.setPropertyValues(pvs);
 		assertEquals(tb5, bean.getArray()[0]);
 		assertEquals(tb4, bean.getArray()[1]);
-		assertEquals(tb3, ((TestBean) bean.getList().get(0)));
-		assertEquals(tb2, ((TestBean) bean.getList().get(1)));
-		assertEquals(tb0, ((TestBean) bean.getList().get(2)));
-		assertEquals(null, ((TestBean) bean.getList().get(3)));
-		assertEquals(tb1, ((TestBean) bean.getList().get(4)));
-		assertEquals(tb1, ((TestBean) bean.getMap().get("key1")));
-		assertEquals(tb0, ((TestBean) bean.getMap().get("key2")));
-		assertEquals(tb4, ((TestBean) bean.getMap().get("key5")));
-		assertEquals(tb5, ((TestBean) bean.getMap().get("key9")));
+		assertEquals(tb3, (bean.getList().get(0)));
+		assertEquals(tb2, (bean.getList().get(1)));
+		assertEquals(tb0, (bean.getList().get(2)));
+		assertEquals(null, (bean.getList().get(3)));
+		assertEquals(tb1, (bean.getList().get(4)));
+		assertEquals(tb1, (bean.getMap().get("key1")));
+		assertEquals(tb0, (bean.getMap().get("key2")));
+		assertEquals(tb4, (bean.getMap().get("key5")));
+		assertEquals(tb5, (bean.getMap().get("key9")));
 		assertEquals(tb5, bw.getPropertyValue("array[0]"));
 		assertEquals(tb4, bw.getPropertyValue("array[1]"));
 		assertEquals(tb3, bw.getPropertyValue("list[0]"));
@@ -1022,6 +1028,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1055,6 +1062,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1078,6 +1086,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1132,10 +1141,8 @@ public final class BeanWrapperTests {
 
 	@Test
 	public void testLargeMatchingPrimitiveArray() {
-		if (LogFactory.getLog(BeanWrapperTests.class).isTraceEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(LogFactory.getLog(BeanWrapperTests.class));
 
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1191,6 +1198,7 @@ public final class BeanWrapperTests {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(int.class, "array", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
 					super.setValue(new Integer(((Integer) value).intValue() + 1));
@@ -1209,6 +1217,7 @@ public final class BeanWrapperTests {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(int.class, "array[1]", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
 					super.setValue(new Integer(((Integer) value).intValue() + 1));
@@ -1541,7 +1550,26 @@ public final class BeanWrapperTests {
 		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
 	}
 
+	@Test
+	public void cornerSpr10115() {
+		Spr10115Bean foo = new Spr10115Bean();
+		BeanWrapperImpl bwi = new BeanWrapperImpl();
+		bwi.setWrappedInstance(foo);
+		bwi.setPropertyValue("prop1", "val1");
+		assertEquals("val1", Spr10115Bean.prop1);
+	}
 
+
+	static class Spr10115Bean {
+		private static String prop1;
+
+		public static void setProp1(String prop1) {
+			Spr10115Bean.prop1 = prop1;
+		}
+	}
+
+
+	@SuppressWarnings("unused")
 	private static class Foo {
 
 		private List list;
@@ -1571,6 +1599,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NoRead {
 
 		public void setAge(int age) {
@@ -1578,6 +1607,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class EnumTester {
 
 		private Autowire autowire;
@@ -1592,6 +1622,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PropsTester {
 
 		private Properties props;
@@ -1620,6 +1651,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class GetterBean {
 
 		private String name;
@@ -1637,6 +1669,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ThrowsException {
 
 		public void doSomething(Throwable t) throws Throwable {
@@ -1645,6 +1678,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PrimitiveArrayBean {
 
 		private int[] array;
@@ -1659,6 +1693,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NumberPropertyBean {
 
 		private byte myPrimitiveByte;
@@ -1777,6 +1812,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class IntelliBean {
 
 		public void setName(String name) {}
@@ -1791,6 +1827,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Employee extends TestBean {
 
 		private String co;
@@ -1821,6 +1858,7 @@ public final class BeanWrapperTests {
 			this.frozen = true;
 		}
 
+		@Override
 		public V put(K key, V value) {
 			if (this.frozen) {
 				throw new UnsupportedOperationException();
@@ -1830,16 +1868,19 @@ public final class BeanWrapperTests {
 			}
 		}
 
+		@Override
 		public Set<Map.Entry<K, V>> entrySet() {
 			this.accessed = true;
 			return super.entrySet();
 		}
 
+		@Override
 		public Set<K> keySet() {
 			this.accessed = true;
 			return super.keySet();
 		}
 
+		@Override
 		public int size() {
 			this.accessed = true;
 			return super.size();
@@ -1851,6 +1892,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TypedReadOnlyMap extends ReadOnlyMap<String, TestBean> {
 
 		public TypedReadOnlyMap() {

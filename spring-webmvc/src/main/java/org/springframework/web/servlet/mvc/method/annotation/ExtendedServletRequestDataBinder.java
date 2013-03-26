@@ -36,7 +36,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 
 	/**
 	 * Create a new instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -46,7 +46,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 
 	/**
 	 * Create a new instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 * @see #DEFAULT_OBJECT_NAME

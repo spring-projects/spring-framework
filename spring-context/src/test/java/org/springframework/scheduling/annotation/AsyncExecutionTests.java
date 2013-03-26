@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Future;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -26,6 +29,8 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +46,10 @@ public class AsyncExecutionTests {
 
 	private static int listenerConstructed = 0;
 
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
 	@Test
 	public void asyncMethods() throws Exception {
@@ -51,6 +60,21 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
 		AsyncMethodBean asyncTest = context.getBean("asyncTest", AsyncMethodBean.class);
+		asyncTest.doNothing(5);
+		asyncTest.doSomething(10);
+		Future<String> future = asyncTest.returnSomething(20);
+		assertEquals("20", future.get());
+	}
+
+	@Test
+	public void asyncMethodsThroughInterface() throws Exception {
+		originalThreadName = Thread.currentThread().getName();
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(SimpleAsyncMethodBean.class));
+		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
+		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		context.refresh();
+		SimpleInterface asyncTest = context.getBean("asyncTest", SimpleInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -69,6 +93,26 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("e2", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
 		context.refresh();
 		AsyncMethodWithQualifierBean asyncTest = context.getBean("asyncTest", AsyncMethodWithQualifierBean.class);
+		asyncTest.doNothing(5);
+		asyncTest.doSomething(10);
+		Future<String> future = asyncTest.returnSomething(20);
+		assertEquals("20", future.get());
+		Future<String> future2 = asyncTest.returnSomething2(30);
+		assertEquals("30", future2.get());
+	}
+
+	@Test
+	public void asyncMethodsWithQualifierThroughInterface() throws Exception {
+		originalThreadName = Thread.currentThread().getName();
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(SimpleAsyncMethodWithQualifierBean.class));
+		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
+		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		context.registerBeanDefinition("e0", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		context.registerBeanDefinition("e1", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		context.registerBeanDefinition("e2", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		context.refresh();
+		SimpleInterface asyncTest = context.getBean("asyncTest", SimpleInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -168,6 +212,18 @@ public class AsyncExecutionTests {
 	}
 
 
+	public interface SimpleInterface {
+
+		void doNothing(int i);
+
+		void doSomething(int i);
+
+		Future<String> returnSomething(int i);
+
+		Future<String> returnSomething2(int i);
+	}
+
+
 	public static class AsyncMethodBean {
 
 		public void doNothing(int i) {
@@ -187,6 +243,15 @@ public class AsyncExecutionTests {
 	}
 
 
+	public static class SimpleAsyncMethodBean extends AsyncMethodBean implements SimpleInterface {
+
+		@Override
+		public Future<String> returnSomething2(int i) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+
 	@Async("e0")
 	public static class AsyncMethodWithQualifierBean {
 
@@ -200,7 +265,7 @@ public class AsyncExecutionTests {
 			assertTrue(Thread.currentThread().getName().startsWith("e1-"));
 		}
 
-		@Async("e2")
+		@MyAsync
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			assertTrue(Thread.currentThread().getName().startsWith("e2-"));
@@ -212,6 +277,16 @@ public class AsyncExecutionTests {
 			assertTrue(Thread.currentThread().getName().startsWith("e0-"));
 			return new AsyncResult<String>(Integer.toString(i));
 		}
+	}
+
+
+	public static class SimpleAsyncMethodWithQualifierBean extends AsyncMethodWithQualifierBean implements SimpleInterface {
+	}
+
+
+	@Async("e2")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyAsync {
 	}
 
 
@@ -240,10 +315,12 @@ public class AsyncExecutionTests {
 
 	public static class AsyncInterfaceBean implements AsyncInterface {
 
+		@Override
 		public void doSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
+		@Override
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
@@ -265,14 +342,17 @@ public class AsyncExecutionTests {
 
 	public static class AsyncMethodsInterfaceBean implements AsyncMethodsInterface {
 
+		@Override
 		public void doNothing(int i) {
 			assertTrue(Thread.currentThread().getName().equals(originalThreadName));
 		}
 
+		@Override
 		public void doSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
+		@Override
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
@@ -282,6 +362,7 @@ public class AsyncExecutionTests {
 
 	public static class AsyncMethodListener implements ApplicationListener<ApplicationEvent> {
 
+		@Override
 		@Async
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
@@ -297,6 +378,7 @@ public class AsyncExecutionTests {
 			listenerConstructed++;
 		}
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));

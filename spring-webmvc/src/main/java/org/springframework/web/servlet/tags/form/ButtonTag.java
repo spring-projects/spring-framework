@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.servlet.jsp.JspException;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
- * An HTML button tag. This tag is provided for completeness if the application 
+ * An HTML button tag. This tag is provided for completeness if the application
  * relies on a {@link RequestDataValueProcessor}.
  *
  * @author Rossen Stoyanchev
@@ -31,55 +31,55 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
 public class ButtonTag extends AbstractHtmlElementTag {
 
 	/**
-	 * The name of the '<code>disabled</code>' attribute.
+	 * The name of the '{@code disabled}' attribute.
 	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
 	private TagWriter tagWriter;
 
 	private String name;
-	
+
 	private String value;
 
 	private String disabled;
 
 	/**
-	 * Set the value of the '<code>name</code>' attribute.
+	 * Set the value of the '{@code name}' attribute.
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Get the value of the '<code>name</code>' attribute.
+	 * Get the value of the '{@code name}' attribute.
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * Get the value of the '<code>value</code>' attribute.
+	 * Get the value of the '{@code value}' attribute.
 	 */
 	public String getValue() {
 		return this.value;
 	}
-	
+
 	/**
-	 * Set the value of the '<code>value</code>' attribute.
+	 * Set the value of the '{@code value}' attribute.
 	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
 	/**
-	 * Get the value of the '<code>disabled</code>' attribute.
+	 * Get the value of the '{@code disabled}' attribute.
 	 */
 	public String getDisabled() {
 		return this.disabled;
 	}
-	
+
 	/**
-	 * Set the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '{@code disabled}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setDisabled(String disabled) {
@@ -108,7 +108,7 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Writes the '<code>value</code>' attribute to the supplied {@link TagWriter}.
+	 * Writes the '{@code value}' attribute to the supplied {@link TagWriter}.
 	 * Subclasses may choose to override this implementation to control exactly
 	 * when the value is written.
 	 */
@@ -117,26 +117,26 @@ public class ButtonTag extends AbstractHtmlElementTag {
 		tagWriter.writeAttribute("value", processFieldValue(getName(), valueToUse, getType()));
 	}
 
-    /**
-     * Return the default value.
-     *
-     * @return The default value if none supplied.
-     */
-    protected String getDefaultValue() {
-        return "Submit";
-    }
+	/**
+	 * Return the default value.
+	 *
+	 * @return The default value if none supplied.
+	 */
+	protected String getDefaultValue() {
+		return "Submit";
+	}
 
 	/**
-	 * Get the value of the '<code>type</code>' attribute. Subclasses
-	 * can override this to change the type of '<code>input</code>' element
-	 * rendered. Default value is '<code>submit</code>'.
+	 * Get the value of the '{@code type}' attribute. Subclasses
+	 * can override this to change the type of '{@code input}' element
+	 * rendered. Default value is '{@code submit}'.
 	 */
 	protected String getType() {
 		return "submit";
 	}
 
 	/**
-	 * Closes the '<code>button</code>' block tag.
+	 * Closes the '{@code button}' block tag.
 	 */
 	@Override
 	public int doEndTag() throws JspException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.test.context;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,6 +26,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code ContextConfigurationAttributes} encapsulates the context
@@ -54,6 +57,8 @@ public class ContextConfigurationAttributes {
 
 	private final boolean inheritInitializers;
 
+	private final String name;
+
 
 	/**
 	 * Resolve resource locations from the {@link ContextConfiguration#locations() locations}
@@ -75,7 +80,8 @@ public class ContextConfigurationAttributes {
 				ObjectUtils.nullSafeToString(valueLocations), ObjectUtils.nullSafeToString(locations));
 			logger.error(msg);
 			throw new IllegalStateException(msg);
-		} else if (!ObjectUtils.isEmpty(valueLocations)) {
+		}
+		else if (!ObjectUtils.isEmpty(valueLocations)) {
 			locations = valueLocations;
 		}
 
@@ -92,7 +98,7 @@ public class ContextConfigurationAttributes {
 	public ContextConfigurationAttributes(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
 		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
 			contextConfiguration.inheritLocations(), contextConfiguration.initializers(),
-			contextConfiguration.inheritInitializers(), contextConfiguration.loader());
+			contextConfiguration.inheritInitializers(), contextConfiguration.name(), contextConfiguration.loader());
 	}
 
 	/**
@@ -109,13 +115,13 @@ public class ContextConfigurationAttributes {
 	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
 	 * {@code null}, or if the {@code locations} and {@code classes} are both non-empty
 	 * @deprecated as of Spring 3.2, use
-	 * {@link #ContextConfigurationAttributes(Class, String[], Class[], boolean, Class[], boolean, Class)}
+	 * {@link #ContextConfigurationAttributes(Class, String[], Class[], boolean, Class[], boolean, String, Class)}
 	 * instead
 	 */
 	@Deprecated
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
 			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
-		this(declaringClass, locations, classes, inheritLocations, null, true, contextLoaderClass);
+		this(declaringClass, locations, classes, inheritLocations, null, true, null, contextLoaderClass);
 	}
 
 	/**
@@ -138,6 +144,31 @@ public class ContextConfigurationAttributes {
 			boolean inheritLocations,
 			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers,
 			boolean inheritInitializers, Class<? extends ContextLoader> contextLoaderClass) {
+		this(declaringClass, locations, classes, inheritLocations, initializers, inheritInitializers, null,
+			contextLoaderClass);
+	}
+
+	/**
+	 * Construct a new {@link ContextConfigurationAttributes} instance for the
+	 * {@linkplain Class test class} that declared the
+	 * {@link ContextConfiguration @ContextConfiguration} annotation and its
+	 * corresponding attributes.
+	 *
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
+	 * @param locations the resource locations declared via {@code @ContextConfiguration}
+	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
+	 * @param inheritLocations the {@code inheritLocations} flag declared via {@code @ContextConfiguration}
+	 * @param initializers the context initializers declared via {@code @ContextConfiguration}
+	 * @param inheritInitializers the {@code inheritInitializers} flag declared via {@code @ContextConfiguration}
+	 * @param name the name of level in the context hierarchy, or {@code null} if not applicable
+	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}
+	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
+	 * {@code null}, or if the {@code locations} and {@code classes} are both non-empty
+	 */
+	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
+			boolean inheritLocations,
+			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers,
+			boolean inheritInitializers, String name, Class<? extends ContextLoader> contextLoaderClass) {
 
 		Assert.notNull(declaringClass, "declaringClass must not be null");
 		Assert.notNull(contextLoaderClass, "contextLoaderClass must not be null");
@@ -158,6 +189,7 @@ public class ContextConfigurationAttributes {
 		this.inheritLocations = inheritLocations;
 		this.initializers = initializers;
 		this.inheritInitializers = inheritInitializers;
+		this.name = StringUtils.hasText(name) ? name : null;
 		this.contextLoaderClass = contextLoaderClass;
 	}
 
@@ -306,6 +338,101 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
+	 * Get the name of the context hierarchy level that was declared via
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
+	 * @return the name of the context hierarchy level or {@code null} if not applicable
+	 * @see ContextConfiguration#name()
+	 * @since 3.2.2
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * Generate a unique hash code for all properties of this
+	 * {@code ContextConfigurationAttributes} instance excluding the
+	 * {@linkplain #getName() name}.
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + declaringClass.hashCode();
+		result = prime * result + Arrays.hashCode(locations);
+		result = prime * result + Arrays.hashCode(classes);
+		result = prime * result + (inheritLocations ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(initializers);
+		result = prime * result + (inheritInitializers ? 1231 : 1237);
+		result = prime * result + contextLoaderClass.hashCode();
+		return result;
+	}
+
+	/**
+	 * Determine if the supplied object is equal to this
+	 * {@code ContextConfigurationAttributes} instance by comparing both object's
+	 * {@linkplain #getDeclaringClass() declaring class},
+	 * {@linkplain #getLocations() locations},
+	 * {@linkplain #getClasses() annotated classes},
+	 * {@linkplain #isInheritLocations() inheritLocations flag},
+	 * {@linkplain #getInitializers() context initializer classes},
+	 * {@linkplain #isInheritInitializers() inheritInitializers flag}, and the
+	 * {@link #getContextLoaderClass() ContextLoader class}.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof ContextConfigurationAttributes)) {
+			return false;
+		}
+
+		final ContextConfigurationAttributes that = (ContextConfigurationAttributes) obj;
+
+		if (this.declaringClass == null) {
+			if (that.declaringClass != null) {
+				return false;
+			}
+		}
+		else if (!this.declaringClass.equals(that.declaringClass)) {
+			return false;
+		}
+
+		if (!Arrays.equals(this.locations, that.locations)) {
+			return false;
+		}
+
+		if (!Arrays.equals(this.classes, that.classes)) {
+			return false;
+		}
+
+		if (this.inheritLocations != that.inheritLocations) {
+			return false;
+		}
+
+		if (!Arrays.equals(this.initializers, that.initializers)) {
+			return false;
+		}
+
+		if (this.inheritInitializers != that.inheritInitializers) {
+			return false;
+		}
+
+		if (this.contextLoaderClass == null) {
+			if (that.contextLoaderClass != null) {
+				return false;
+			}
+		}
+		else if (!this.contextLoaderClass.equals(that.contextLoaderClass)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Provide a String representation of the context configuration attributes
 	 * and declaring class.
 	 */
@@ -318,6 +445,7 @@ public class ContextConfigurationAttributes {
 		.append("inheritLocations", inheritLocations)//
 		.append("initializers", ObjectUtils.nullSafeToString(initializers))//
 		.append("inheritInitializers", inheritInitializers)//
+		.append("name", name)//
 		.append("contextLoaderClass", contextLoaderClass.getName())//
 		.toString();
 	}

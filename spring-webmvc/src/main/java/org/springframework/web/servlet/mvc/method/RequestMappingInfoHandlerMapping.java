@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
+import org.springframework.web.servlet.mvc.condition.NameValueExpression;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -100,7 +104,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
 
 		if (isMatrixVariableContentAvailable()) {
-			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, extractMatrixVariables(uriVariables));
+			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, extractMatrixVariables(request, uriVariables));
 		}
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
@@ -113,7 +117,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return !getUrlPathHelper().shouldRemoveSemicolonContent();
 	}
 
-	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(Map<String, String> uriVariables) {
+	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(
+			HttpServletRequest request, Map<String, String> uriVariables) {
+
 		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<String, MultiValueMap<String, String>>();
 		for (Entry<String, String> uriVar : uriVariables.entrySet()) {
 			String uriVarValue = uriVar.getValue();
@@ -134,7 +140,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
 
-			result.put(uriVar.getKey(), WebUtils.parseMatrixVariables(matrixVariables));
+			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
+			result.put(uriVar.getKey(), getUrlPathHelper().decodeMatrixVariables(request, vars));
 		}
 		return result;
 	}
@@ -182,25 +189,37 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		Set<MediaType> consumableMediaTypes;
 		Set<MediaType> producibleMediaTypes;
+		Set<String> paramConditions;
 
 		if (patternAndMethodMatches.isEmpty()) {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternMatches);
 			producibleMediaTypes = getProdicubleMediaTypes(request, patternMatches);
+			paramConditions = getRequestParams(request, patternMatches);
 		}
 		else {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternAndMethodMatches);
 			producibleMediaTypes = getProdicubleMediaTypes(request, patternAndMethodMatches);
+			paramConditions = getRequestParams(request, patternAndMethodMatches);
 		}
 
 		if (!consumableMediaTypes.isEmpty()) {
 			MediaType contentType = null;
 			if (StringUtils.hasLength(request.getContentType())) {
-				contentType = MediaType.parseMediaType(request.getContentType());
+				try {
+					contentType = MediaType.parseMediaType(request.getContentType());
+				}
+				catch (IllegalArgumentException ex) {
+					throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+				}
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<MediaType>(consumableMediaTypes));
 		}
 		else if (!producibleMediaTypes.isEmpty()) {
 			throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(producibleMediaTypes));
+		}
+		else if (!CollectionUtils.isEmpty(paramConditions)) {
+			String[] params = paramConditions.toArray(new String[paramConditions.size()]);
+			throw new UnsatisfiedServletRequestParameterException(params, request.getParameterMap());
 		}
 		else {
 			return null;
@@ -225,6 +244,20 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			}
 		}
 		return result;
+	}
+
+	private Set<String> getRequestParams(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+		for (RequestMappingInfo partialMatch : partialMatches) {
+			ParamsRequestCondition condition = partialMatch.getParamsCondition();
+			if (!CollectionUtils.isEmpty(condition.getExpressions()) && (condition.getMatchingCondition(request) == null)) {
+				Set<String> expressions = new HashSet<String>();
+				for (NameValueExpression expr : condition.getExpressions()) {
+					expressions.add(expr.toString());
+				}
+				return expressions;
+			}
+		}
+		return null;
 	}
 
 }

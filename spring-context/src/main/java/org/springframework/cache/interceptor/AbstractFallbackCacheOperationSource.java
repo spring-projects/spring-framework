@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -48,6 +49,7 @@ import org.springframework.util.ObjectUtils;
  * configurable.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class AbstractFallbackCacheOperationSource implements CacheOperationSource {
@@ -70,7 +72,8 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, Collection<CacheOperation>> attributeCache = new ConcurrentHashMap<Object, Collection<CacheOperation>>();
+	final Map<Object, Collection<CacheOperation>> attributeCache =
+			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
 
 
 	/**

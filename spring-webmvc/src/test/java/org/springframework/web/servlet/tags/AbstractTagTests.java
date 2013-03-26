@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.web.servlet.tags;
 
 import junit.framework.TestCase;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockPageContext;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
@@ -31,15 +31,17 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
 /**
- * Abstract base class for testing tags: provides createPageContext.
+ * Abstract base class for testing tags; provides {@link #createPageContext()}.
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public abstract class AbstractTagTests extends TestCase {
-	
+
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
 		wac.setServletContext(sc);
 		wac.setNamespace("test");

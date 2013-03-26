@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 
 	private DataSource resolvedDefaultDataSource;
 
+
 	/**
 	 * Specify the map of target DataSources, with the lookup key as key.
 	 * The mapped value can either be a corresponding {@link javax.sql.DataSource}
@@ -85,7 +86,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * in the target DataSource map - simply falling back to the default DataSource
 	 * in that case.
 	 * <p>Switch this flag to "false" if you would prefer the fallback to only apply
-	 * if the lookup key was <code>null</code>. Lookup keys without a DataSource
+	 * if the lookup key was {@code null}. Lookup keys without a DataSource
 	 * entry will then lead to an IllegalStateException.
 	 * @see #setTargetDataSources
 	 * @see #setDefaultTargetDataSource
@@ -122,12 +123,25 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	}
 
 	/**
+	 * Resolve the given lookup key object, as specified in the
+	 * {@link #setTargetDataSources targetDataSources} map, into
+	 * the actual lookup key to be used for matching with the
+	 * {@link #determineCurrentLookupKey() current lookup key}.
+	 * <p>The default implementation simply returns the given key as-is.
+	 * @param lookupKey the lookup key object as specified by the user
+	 * @return the lookup key as needed for matching
+	 */
+	protected Object resolveSpecifiedLookupKey(Object lookupKey) {
+		return lookupKey;
+	}
+
+	/**
 	 * Resolve the specified data source object into a DataSource instance.
 	 * <p>The default implementation handles DataSource instances and data source
 	 * names (to be resolved via a {@link #setDataSourceLookup DataSourceLookup}).
 	 * @param dataSource the data source value object as specified in the
 	 * {@link #setTargetDataSources targetDataSources} map
-	 * @return the resolved DataSource (never <code>null</code>)
+	 * @return the resolved DataSource (never {@code null})
 	 * @throws IllegalArgumentException in case of an unsupported value type
 	 */
 	protected DataSource resolveSpecifiedDataSource(Object dataSource) throws IllegalArgumentException {
@@ -152,6 +166,20 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 		return determineTargetDataSource().getConnection(username, password);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		if (iface.isInstance(this)) {
+			return (T) this;
+		}
+		return determineTargetDataSource().unwrap(iface);
+	}
+
+	@Override
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		return (iface.isInstance(this) || determineTargetDataSource().isWrapperFor(iface));
+	}
+
 	/**
 	 * Retrieve the current target DataSource. Determines the
 	 * {@link #determineCurrentLookupKey() current lookup key}, performs
@@ -171,20 +199,6 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 			throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + lookupKey + "]");
 		}
 		return dataSource;
-	}
-
-
-	/**
-	 * Resolve the given lookup key object, as specified in the
-	 * {@link #setTargetDataSources targetDataSources} map, into
-	 * the actual lookup key to be used for matching with the
-	 * {@link #determineCurrentLookupKey() current lookup key}.
-	 * <p>The default implementation simply returns the given key as-is.
-	 * @param lookupKey the lookup key object as specified by the user
-	 * @return the lookup key as needed for matching
-	 */
-	protected Object resolveSpecifiedLookupKey(Object lookupKey) {
-		return lookupKey;
 	}
 
 	/**

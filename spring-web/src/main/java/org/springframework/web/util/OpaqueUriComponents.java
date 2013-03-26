@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,11 @@ import org.springframework.util.ObjectUtils;
  * Extension of {@link UriComponents} for opaque URIs.
  *
  * @author Arjen Poutsma
+ * @author Phillip Webb
  * @since 3.2
  * @see <a href="http://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical vs Opaque URIs</a>
  */
+@SuppressWarnings("serial")
 final class OpaqueUriComponents extends UriComponents {
 
 	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<String, String>(0);
@@ -44,6 +46,7 @@ final class OpaqueUriComponents extends UriComponents {
 		super(scheme, fragment);
 		this.ssp = schemeSpecificPart;
 	}
+
 
 	@Override
 	public String getSchemeSpecificPart() {
@@ -134,27 +137,20 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(o instanceof OpaqueUriComponents)) {
+		if (!(obj instanceof OpaqueUriComponents)) {
 			return false;
 		}
 
-		OpaqueUriComponents other = (OpaqueUriComponents) o;
-
-		if (ObjectUtils.nullSafeEquals(getScheme(), other.getScheme())) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(this.ssp, other.ssp)) {
-			return false;
-		}
-		if (ObjectUtils.nullSafeEquals(getFragment(), other.getFragment())) {
-			return false;
-		}
-
-		return true;
+		OpaqueUriComponents other = (OpaqueUriComponents) obj;
+		boolean rtn = true;
+		rtn &= ObjectUtils.nullSafeEquals(getScheme(), other.getScheme());
+		rtn &= ObjectUtils.nullSafeEquals(this.ssp, other.ssp);
+		rtn &= ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
+		return rtn;
 	}
 
 	@Override

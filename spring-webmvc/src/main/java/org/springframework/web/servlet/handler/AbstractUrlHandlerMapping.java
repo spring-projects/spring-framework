@@ -63,7 +63,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Set the root handler for this handler mapping, that is,
 	 * the handler to be registered for the root path ("/").
-	 * <p>Default is <code>null</code>, indicating no root handler.
+	 * <p>Default is {@code null}, indicating no root handler.
 	 */
 	public void setRootHandler(Object rootHandler) {
 		this.rootHandler = rootHandler;
@@ -71,7 +71,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Return the root handler for this handler mapping (registered for "/"),
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 */
 	public Object getRootHandler() {
 		return this.rootHandler;
@@ -94,7 +94,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Look up a handler for the URL path of the given request.
 	 * @param request current HTTP request
-	 * @return the handler instance, or <code>null</code> if none found
+	 * @return the handler instance, or {@code null} if none found
 	 */
 	@Override
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
@@ -138,7 +138,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * the longest path pattern.
 	 * @param urlPath URL the bean is mapped to
 	 * @param request current HTTP request (to expose the path within the mapping to)
-	 * @return the associated handler instance, or <code>null</code> if not found
+	 * @return the associated handler instance, or {@code null} if not found
 	 * @see #exposePathWithinMapping
 	 * @see org.springframework.util.AntPathMatcher
 	 */
@@ -218,7 +218,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * with a special interceptor that exposes the path attribute and uri template variables
 	 * @param rawHandler the raw handler to expose
 	 * @param pathWithinMapping the path to expose before executing the handler
-	 * @param uriTemplateVariables the URI template variables, can be <code>null</code> if no variables found
+	 * @param uriTemplateVariables the URI template variables, can be {@code null} if no variables found
 	 * @return the final handler object
 	 */
 	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,

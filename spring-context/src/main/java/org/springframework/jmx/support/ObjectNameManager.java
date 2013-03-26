@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import javax.management.ObjectName;
 public class ObjectNameManager {
 
 	/**
-	 * Retrieve the <code>ObjectName</code> instance corresponding to the supplied name.
-	 * @param objectName the <code>ObjectName</code> in <code>ObjectName</code> or
-	 * <code>String</code> format
-	 * @return the <code>ObjectName</code> instance
+	 * Retrieve the {@code ObjectName} instance corresponding to the supplied name.
+	 * @param objectName the {@code ObjectName} in {@code ObjectName} or
+	 * {@code String} format
+	 * @return the {@code ObjectName} instance
 	 * @throws MalformedObjectNameException in case of an invalid object name specification
 	 * @see ObjectName#ObjectName(String)
 	 * @see ObjectName#getInstance(String)
@@ -51,9 +51,9 @@ public class ObjectNameManager {
 	}
 
 	/**
-	 * Retrieve the <code>ObjectName</code> instance corresponding to the supplied name.
-	 * @param objectName the <code>ObjectName</code> in <code>String</code> format
-	 * @return the <code>ObjectName</code> instance
+	 * Retrieve the {@code ObjectName} instance corresponding to the supplied name.
+	 * @param objectName the {@code ObjectName} in {@code String} format
+	 * @return the {@code ObjectName} instance
 	 * @throws MalformedObjectNameException in case of an invalid object name specification
 	 * @see ObjectName#ObjectName(String)
 	 * @see ObjectName#getInstance(String)
@@ -63,12 +63,12 @@ public class ObjectNameManager {
 	}
 
 	/**
-	 * Retrieve an <code>ObjectName</code> instance for the specified domain and a
+	 * Retrieve an {@code ObjectName} instance for the specified domain and a
 	 * single property with the supplied key and value.
-	 * @param domainName the domain name for the <code>ObjectName</code>
-	 * @param key the key for the single property in the <code>ObjectName</code>
-	 * @param value the value for the single property in the <code>ObjectName</code>
-	 * @return the <code>ObjectName</code> instance
+	 * @param domainName the domain name for the {@code ObjectName}
+	 * @param key the key for the single property in the {@code ObjectName}
+	 * @param value the value for the single property in the {@code ObjectName}
+	 * @return the {@code ObjectName} instance
 	 * @throws MalformedObjectNameException in case of an invalid object name specification
 	 * @see ObjectName#ObjectName(String, String, String)
 	 * @see ObjectName#getInstance(String, String, String)
@@ -80,11 +80,11 @@ public class ObjectNameManager {
 	}
 
 	/**
-	 * Retrieve an <code>ObjectName</code> instance with the specified domain name
+	 * Retrieve an {@code ObjectName} instance with the specified domain name
 	 * and the supplied key/name properties.
-	 * @param domainName the domain name for the <code>ObjectName</code>
-	 * @param properties the properties for the <code>ObjectName</code>
-	 * @return the <code>ObjectName</code> instance
+	 * @param domainName the domain name for the {@code ObjectName}
+	 * @param properties the properties for the {@code ObjectName}
+	 * @return the {@code ObjectName} instance
 	 * @throws MalformedObjectNameException in case of an invalid object name specification
 	 * @see ObjectName#ObjectName(String, java.util.Hashtable)
 	 * @see ObjectName#getInstance(String, java.util.Hashtable)

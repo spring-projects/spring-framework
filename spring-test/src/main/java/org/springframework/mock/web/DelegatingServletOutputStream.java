@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 	/**
 	 * Create a DelegatingServletOutputStream for the given target stream.
-	 * @param targetStream the target stream (never <code>null</code>)
+	 * @param targetStream the target stream (never {@code null})
 	 */
 	public DelegatingServletOutputStream(OutputStream targetStream) {
 		Assert.notNull(targetStream, "Target OutputStream must not be null");
@@ -47,7 +47,7 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 	}
 
 	/**
-	 * Return the underlying target stream (never <code>null</code>).
+	 * Return the underlying target stream (never {@code null}).
 	 */
 	public final OutputStream getTargetStream() {
 		return this.targetStream;

@@ -7,16 +7,16 @@
 
 	<context:mbean-export server="server" registration="replaceExisting"/>
 
-	<context:mbean-export server="server" registration="replaceExisting"/>
+    <context:property-placeholder/>
 
-	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+    <bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
 
-	<bean name="bean:name=testBean4" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
+	<bean name="testBean4" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
 		<property name="name" value="TEST"/>
 		<property name="age" value="100"/>
 	</bean>
 
-	<bean name="bean:name=testBean5" class="org.springframework.jmx.export.annotation.AnnotationTestBeanFactory"/>
+	<bean name="testBean5" class="org.springframework.jmx.export.annotation.AnnotationTestBeanFactory"/>
 
 	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean" lazy-init="true"/>
 

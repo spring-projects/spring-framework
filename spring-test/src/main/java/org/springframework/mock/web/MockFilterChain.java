@@ -18,7 +18,9 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -28,17 +30,24 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.springframework.mock.web.MockFilterConfig;
+import org.springframework.mock.web.PassThroughFilterChain;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.FilterChain} interface.
+ * <p>Mock implementation of the {@link javax.servlet.FilterChain} interface. Used
+ * for testing the web framework; also useful for testing custom
+ * {@link javax.servlet.Filter} implementations.
  *
- * <p>Used for testing the web framework; also useful for testing
- * custom {@link javax.servlet.Filter} implementations.
+ * <p>A {@link MockFilterChain} can be configured with one or more filters and a
+ * Servlet to invoke. The first time the chain is called, it invokes all filters
+ * and the Servlet, and saves the request and response. Subsequent invocations
+ * raise an {@link IllegalStateException} unless {@link #reset()} is called.
  *
  * @author Juergen Hoeller
  * @author Rob Winch
+ * @author Rossen Stoyanchev
  *
  * @since 2.0.3
  * @see MockFilterConfig
@@ -50,71 +59,46 @@ public class MockFilterChain implements FilterChain {
 
 	private ServletResponse response;
 
-	private final Iterator<Filter> iterator;
+	private final List<Filter> filters;
+
+	private Iterator<Filter> iterator;
 
 
 	/**
 	 * Register a single do-nothing {@link Filter} implementation. The first
 	 * invocation saves the request and response. Subsequent invocations raise
-	 * an {@link IllegalStateException}.
+	 * an {@link IllegalStateException} unless {@link #reset()} is called.
 	 */
 	public MockFilterChain() {
-		this.iterator = null;
+		this.filters = Collections.emptyList();
 	}
 
 	/**
-	 * Create a FilterChain with a {@link Servlet} but without filters.
+	 * Create a FilterChain with a Servlet.
 	 *
-	 * @param servlet the {@link Servlet} to use in this {@link FilterChain}
+	 * @param servlet the Servlet to invoke
 	 * @since 3.2
 	 */
 	public MockFilterChain(Servlet servlet) {
-		this(new ServletFilterProxy(servlet));
+		this.filters = initFilterList(servlet);
 	}
 
 	/**
-	 * Create a FilterChain with one or more {@link Filter} instances and a {@link Servlet}.
+	 * Create a {@code FilterChain} with Filter's and a Servlet.
 	 *
-	 * @param servlet the {@link Servlet} to use in this {@link FilterChain}
-	 * @param filters the {@link Filter}'s to use in this {@link FilterChain}
+	 * @param servlet the {@link Servlet} to invoke in this {@link FilterChain}
+	 * @param filters the {@link Filter}'s to invoke in this {@link FilterChain}
 	 * @since 3.2
 	 */
 	public MockFilterChain(Servlet servlet, Filter... filters) {
-		this(ObjectUtils.addObjectToArray(filters, new ServletFilterProxy(servlet)));
-	}
-
-	/**
-	 * Create a {@link FilterChain} with one or more {@link Filter} instances.
-	 *
-	 * @param filters the {@link Filter}'s to use in this {@link FilterChain}
-	 * @since 3.2
-	 */
-	private MockFilterChain(Filter... filters) {
 		Assert.notNull(filters, "filters cannot be null");
-		Assert.notEmpty(filters, "filters cannot be empty");
 		Assert.noNullElements(filters, "filters cannot contain null values");
-		this.iterator = Arrays.asList(filters).iterator();
+		this.filters = initFilterList(servlet, filters);
 	}
 
-	/**
-	 * Invoke registered {@link Filter}s and/or {@link Servlet} also saving the
-	 * request and response.
-	 */
-	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-		Assert.notNull(request, "Request must not be null");
-		Assert.notNull(response, "Response must not be null");
-
-		if (this.request != null) {
-			 throw new IllegalStateException("This FilterChain has already been called!");
-		}
-
-		if ((this.iterator != null) && (this.iterator.hasNext())) {
-			Filter nextFilter = this.iterator.next();
-			nextFilter.doFilter(request, response, this);
-		}
-
-		this.request = request;
-		this.response = response;
+	private static List<Filter> initFilterList(Servlet servlet, Filter... filters) {
+		Filter[] allFilters = ObjectUtils.addObjectToArray(filters, new ServletFilterProxy(servlet));
+		return Arrays.asList(allFilters);
 	}
 
 	/**
@@ -129,6 +113,40 @@ public class MockFilterChain implements FilterChain {
 	 */
 	public ServletResponse getResponse() {
 		return this.response;
+	}
+
+	/**
+	 * Invoke registered {@link Filter}s and/or {@link Servlet} also saving the
+	 * request and response.
+	 */
+	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(response, "Response must not be null");
+
+		if (this.request != null) {
+			 throw new IllegalStateException("This FilterChain has already been called!");
+		}
+
+		if (this.iterator == null) {
+			this.iterator = this.filters.iterator();
+		}
+
+		if (this.iterator.hasNext()) {
+			Filter nextFilter = this.iterator.next();
+			nextFilter.doFilter(request, response, this);
+		}
+
+		this.request = request;
+		this.response = response;
+	}
+
+	/**
+	 * Reset the {@link MockFilterChain} allowing it to be invoked again.
+	 */
+	public void reset() {
+		this.request = null;
+		this.response = null;
+		this.iterator = null;
 	}
 
 

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.accept;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,11 +38,12 @@ import org.springframework.util.MultiValueMap;
  */
 public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExtensionResolver {
 
-	private final ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
+	private final ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>(64);
 
 	private final MultiValueMap<MediaType, String> fileExtensions = new LinkedMultiValueMap<MediaType, String>();
 
-	private final List<String> allFileExtensions = new ArrayList<String>();
+	private final List<String> allFileExtensions = new LinkedList<String>();
+
 
 	/**
 	 * Create an instance with the given mappings between extensions and media types.

@@ -37,12 +37,16 @@ import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.context.MessageSource} implementation that
- * accesses resource bundles using specified basenames. This class uses
- * {@link java.util.Properties} instances as its custom data structure for
- * messages, loading them via a {@link org.springframework.util.PropertiesPersister}
- * strategy: The default strategy is capable of loading properties files
- * with a specific character encoding, if desired.
+ * Spring-specific {@link org.springframework.context.MessageSource} implementation
+ * that accesses resource bundles using specified basenames, participating in the
+ * Spring {@link org.springframework.context.ApplicationContext}'s resource loading.
+ *
+ * <p>In contrast to the JDK-based {@link ResourceBundleMessageSource}, this class uses
+ * {@link java.util.Properties} instances as its custom data structure for messages,
+ * loading them via a {@link org.springframework.util.PropertiesPersister} strategy
+ * from Spring {@link Resource} handles. This strategy is not only capable of
+ * reloading files based on timestamp changes, but also of loading properties files
+ * with a specific character encoding. It will detect XML property files as well.
  *
  * <p>In contrast to {@link ResourceBundleMessageSource}, this class supports
  * reloading of properties files through the {@link #setCacheSeconds "cacheSeconds"}
@@ -170,8 +174,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	/**
 	 * Set the default charset to use for parsing properties files.
 	 * Used if no file-specific charset is specified for a file.
-	 * <p>Default is none, using the <code>java.util.Properties</code>
-	 * default encoding.
+	 * <p>Default is none, using the {@code java.util.Properties}
+	 * default encoding: ISO-8859-1.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
 	 * @see #setFileEncodings
@@ -201,10 +205,9 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * fallback will be the default file (e.g. "messages.properties" for
 	 * basename "messages").
 	 * <p>Falling back to the system Locale is the default behavior of
-	 * <code>java.util.ResourceBundle</code>. However, this is often not
-	 * desirable in an application server environment, where the system Locale
-	 * is not relevant to the application at all: Set this flag to "false"
-	 * in such a scenario.
+	 * {@code java.util.ResourceBundle}. However, this is often not desirable
+	 * in an application server environment, where the system Locale is not relevant
+	 * to the application at all: Set this flag to "false" in such a scenario.
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -214,7 +217,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Set the number of seconds to cache loaded properties files.
 	 * <ul>
 	 * <li>Default is "-1", indicating to cache forever (just like
-	 * <code>java.util.ResourceBundle</code>).
+	 * {@code java.util.ResourceBundle}).
 	 * <li>A positive number will cache loaded properties files for the given
 	 * number of seconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp
@@ -442,13 +445,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Refresh the PropertiesHolder for the given bundle filename.
-	 * The holder can be <code>null</code> if not cached before, or a timed-out cache entry
+	 * The holder can be {@code null} if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle
 	 */
 	protected PropertiesHolder refreshProperties(String filename, PropertiesHolder propHolder) {
-		long refreshTimestamp = (this.cacheMillis < 0) ? -1 : System.currentTimeMillis();
+		long refreshTimestamp = (this.cacheMillis < 0 ? -1 : System.currentTimeMillis());
 
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
 		if (!resource.exists()) {

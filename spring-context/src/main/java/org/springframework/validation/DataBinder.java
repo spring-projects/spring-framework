@@ -18,7 +18,11 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditor;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -141,14 +145,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
-	private Validator validator;
+	private final List<Validator> validators = new ArrayList<Validator>();
 
 	private ConversionService conversionService;
 
 
 	/**
 	 * Create a new DataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -158,7 +162,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Create a new DataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
@@ -383,7 +387,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>disallowed</i> fields.
 	 * @param allowedFields array of field names
 	 * @see #setDisallowedFields
@@ -407,7 +411,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Mark fields as disallowed for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> fields.
 	 * @param disallowedFields array of field names
 	 * @see #setAllowedFields
@@ -475,7 +479,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
-	 * required field errors and <code>PropertyAccessException</code>s.
+	 * required field errors and {@code PropertyAccessException}s.
 	 * <p>Default is a DefaultBindingErrorProcessor.
 	 * @see DefaultBindingErrorProcessor
 	 */
@@ -493,21 +497,58 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the Validator to apply after each binding step.
+	 * @see #addValidators(Validator...)
+	 * @see #replaceValidators(Validator...)
 	 */
 	public void setValidator(Validator validator) {
-		if (validator != null && (getTarget() != null && !validator.supports(getTarget().getClass()))) {
-			throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + getTarget());
+		assertValidators(validator);
+		this.validators.clear();
+		this.validators.add(validator);
+	}
+
+	private void assertValidators(Validator... validators) {
+		Assert.notNull(validators, "Validators required");
+		for (Validator validator : validators) {
+			if (validator != null && (getTarget() != null && !validator.supports(getTarget().getClass()))) {
+				throw new IllegalStateException("Invalid target for Validator [" + validator + "]: " + getTarget());
+			}
 		}
-		this.validator = validator;
 	}
 
 	/**
-	 * Return the Validator to apply after each binding step, if any.
+	 * Add Validators to apply after each binding step.
+	 * @see #setValidator(Validator)
+	 * @see #replaceValidators(Validator...)
 	 */
-	public Validator getValidator() {
-		return this.validator;
+	public void addValidators(Validator... validators) {
+		assertValidators(validators);
+		this.validators.addAll(Arrays.asList(validators));
 	}
 
+	/**
+	 * Replace the Validators to apply after each binding step.
+	 * @see #setValidator(Validator)
+	 * @see #addValidators(Validator...)
+	 */
+	public void replaceValidators(Validator... validators) {
+		assertValidators(validators);
+		this.validators.clear();
+		this.validators.addAll(Arrays.asList(validators));
+	}
+
+	/**
+	 * Return the primary Validator to apply after each binding step, if any.
+	 */
+	public Validator getValidator() {
+		return this.validators.size() > 0 ? this.validators.get(0) : null;
+	}
+
+	/**
+	 * Return the Validators to apply after data binding.
+	 */
+	public List<Validator> getValidators() {
+		return Collections.unmodifiableList(this.validators);
+	}
 
 	//---------------------------------------------------------------------
 	// Implementation of PropertyEditorRegistry/TypeConverter interface
@@ -708,28 +749,31 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 
 	/**
-	 * Invoke the specified Validator, if any.
+	 * Invoke the specified Validators, if any.
 	 * @see #setValidator(Validator)
 	 * @see #getBindingResult()
 	 */
 	public void validate() {
-		this.validator.validate(getTarget(), getBindingResult());
+		for (Validator validator : this.validators) {
+			validator.validate(getTarget(), getBindingResult());
+		}
 	}
 
 	/**
-	 * Invoke the specified Validator, if any, with the given validation hints.
+	 * Invoke the specified Validators, if any, with the given validation hints.
 	 * <p>Note: Validation hints may get ignored by the actual target Validator.
 	 * @param validationHints one or more hint objects to be passed to a {@link SmartValidator}
 	 * @see #setValidator(Validator)
 	 * @see SmartValidator#validate(Object, Errors, Object...)
 	 */
 	public void validate(Object... validationHints) {
-		Validator validator = getValidator();
-		if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
-			((SmartValidator) validator).validate(getTarget(), getBindingResult(), validationHints);
-		}
-		else if (validator != null) {
-			validator.validate(getTarget(), getBindingResult());
+		for (Validator validator : getValidators()) {
+			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
+				((SmartValidator) validator).validate(getTarget(), getBindingResult(), validationHints);
+			}
+			else if (validator != null) {
+				validator.validate(getTarget(), getBindingResult());
+			}
 		}
 	}
 

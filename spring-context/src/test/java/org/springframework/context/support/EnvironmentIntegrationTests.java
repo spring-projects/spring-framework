@@ -23,19 +23,16 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
-import static org.hamcrest.CoreMatchers.*;
-
 /**
- * Tests covering the integration of {@link Environment} into {@link ApplicationContext}
- * hierarchies.
+ * Tests covering the integration of {@link Environment} into {@link ApplicationContext} hierarchies.
  *
  * @author Chris Beams
  */
 public class EnvironmentIntegrationTests {
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void repro() {
 		ConfigurableApplicationContext parent = new GenericApplicationContext();
@@ -51,4 +48,5 @@ public class EnvironmentIntegrationTests {
 				sameInstance(child.getEnvironment())));
 		assertThat("expected child ctx env", env, sameInstance(child.getEnvironment()));
 	}
+
 }

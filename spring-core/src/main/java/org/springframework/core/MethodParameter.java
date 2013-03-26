@@ -26,8 +26,6 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.util.Assert;
 
@@ -39,20 +37,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Andy Clement
- * @author Nikita Tovstoles
- * @author Chris Beams
  * @since 2.0
  * @see GenericCollectionTypeResolver
  */
 public class MethodParameter {
-
-
-	private static final Annotation[][] EMPTY_ANNOTATION_MATRIX = new Annotation[0][0];
-
-	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
-
-	static final ConcurrentMap<Method, Annotation[][]> methodParamAnnotationsCache =
-			new ConcurrentHashMap<Method, Annotation[][]>();
 
 	private final Method method;
 
@@ -157,7 +145,7 @@ public class MethodParameter {
 	/**
 	 * Return the wrapped Method, if any.
 	 * <p>Note: Either Method or Constructor is available.
-	 * @return the Method, or <code>null</code> if none
+	 * @return the Method, or {@code null} if none
 	 */
 	public Method getMethod() {
 		return this.method;
@@ -166,7 +154,7 @@ public class MethodParameter {
 	/**
 	 * Return the wrapped Constructor, if any.
 	 * <p>Note: Either Method or Constructor is available.
-	 * @return the Constructor, or <code>null</code> if none
+	 * @return the Constructor, or {@code null} if none
 	 */
 	public Constructor getConstructor() {
 		return this.constructor;
@@ -212,7 +200,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the type of the method/constructor parameter.
-	 * @return the parameter type (never <code>null</code>)
+	 * @return the parameter type (never {@code null})
 	 */
 	public Class<?> getParameterType() {
 		if (this.parameterType == null) {
@@ -230,7 +218,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the generic type of the method/constructor parameter.
-	 * @return the parameter type (never <code>null</code>)
+	 * @return the parameter type (never {@code null})
 	 */
 	public Type getGenericParameterType() {
 		if (this.genericParameterType == null) {
@@ -279,7 +267,7 @@ public class MethodParameter {
 	/**
 	 * Return the method/constructor annotation of the given type, if available.
 	 * @param annotationType the annotation type to look for
-	 * @return the annotation object, or <code>null</code> if not found
+	 * @return the annotation object, or {@code null} if not found
 	 */
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 		return getAnnotatedElement().getAnnotation(annotationType);
@@ -291,7 +279,7 @@ public class MethodParameter {
 	public Annotation[] getParameterAnnotations() {
 		if (this.parameterAnnotations == null) {
 			Annotation[][] annotationArray = (this.method != null ?
-					getMethodParameterAnnotations(this.method) : this.constructor.getParameterAnnotations());
+					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
 				this.parameterAnnotations = annotationArray[this.parameterIndex];
 			}
@@ -305,7 +293,7 @@ public class MethodParameter {
 	/**
 	 * Return the parameter annotation of the given type, if available.
 	 * @param annotationType the annotation type to look for
-	 * @return the annotation object, or <code>null</code> if not found
+	 * @return the annotation object, or {@code null} if not found
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getParameterAnnotation(Class<T> annotationType) {
@@ -322,14 +310,14 @@ public class MethodParameter {
 	 * Return true if the parameter has at least one annotation, false if it has none.
 	 */
 	public boolean hasParameterAnnotations() {
-		return getParameterAnnotations().length != 0;
+		return (getParameterAnnotations().length != 0);
 	}
 
 	/**
 	 * Return true if the parameter has the given annotation type, and false if it doesn't.
 	 */
 	public <T extends Annotation> boolean hasParameterAnnotation(Class<T> annotationType) {
-		return getParameterAnnotation(annotationType) != null;
+		return (getParameterAnnotation(annotationType) != null);
 	}
 
 	/**
@@ -344,7 +332,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the name of the method/constructor parameter.
-	 * @return the parameter name (may be <code>null</code> if no
+	 * @return the parameter name (may be {@code null} if no
 	 * parameter name metadata is contained in the class file or no
 	 * {@link #initParameterNameDiscovery ParameterNameDiscoverer}
 	 * has been set to begin with)
@@ -391,7 +379,7 @@ public class MethodParameter {
 	/**
 	 * Set the type index for the current nesting level.
 	 * @param typeIndex the corresponding type index
-	 * (or <code>null</code> for the default type index)
+	 * (or {@code null} for the default type index)
 	 * @see #getNestingLevel()
 	 */
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
@@ -400,7 +388,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the type index for the current nesting level.
-	 * @return the corresponding type index, or <code>null</code>
+	 * @return the corresponding type index, or {@code null}
 	 * if none specified (indicating the default type index)
 	 * @see #getNestingLevel()
 	 */
@@ -411,7 +399,7 @@ public class MethodParameter {
 	/**
 	 * Return the type index for the specified nesting level.
 	 * @param nestingLevel the nesting level to check
-	 * @return the corresponding type index, or <code>null</code>
+	 * @return the corresponding type index, or {@code null}
 	 * if none specified (indicating the default type index)
 	 */
 	public Integer getTypeIndexForLevel(int nestingLevel) {
@@ -426,63 +414,6 @@ public class MethodParameter {
 			this.typeIndexesPerLevel = new HashMap<Integer, Integer>(4);
 		}
 		return this.typeIndexesPerLevel;
-	}
-
-
-	/**
-	 * Create a new MethodParameter for the given method or constructor.
-	 * <p>This is a convenience constructor for scenarios where a
-	 * Method or Constructor reference is treated in a generic fashion.
-	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
-	 * @param parameterIndex the index of the parameter
-	 * @return the corresponding MethodParameter instance
-	 */
-	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
-		if (methodOrConstructor instanceof Method) {
-			return new MethodParameter((Method) methodOrConstructor, parameterIndex);
-		}
-		else if (methodOrConstructor instanceof Constructor) {
-			return new MethodParameter((Constructor) methodOrConstructor, parameterIndex);
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Given object [" + methodOrConstructor + "] is neither a Method nor a Constructor");
-		}
-	}
-
-	/**
-	 * Return the parameter annotations for the given method, retrieving cached values
-	 * if a lookup has already been performed for this method, otherwise perform a fresh
-	 * lookup and populate the cache with the result before returning. <strong>For
-	 * internal use only.</strong>
-	 * @param method the method to introspect for parameter annotations
-	 */
-	static Annotation[][] getMethodParameterAnnotations(Method method) {
-		Assert.notNull(method);
-
-		Annotation[][] result = methodParamAnnotationsCache.get(method);
-		if (result == null) {
-			result = method.getParameterAnnotations();
-
-			if(result.length == 0) {
-				result = EMPTY_ANNOTATION_MATRIX;
-			}
-			else {
-				for (int i = 0; i < result.length; i++) {
-					if (result[i].length == 0) {
-						result[i] = EMPTY_ANNOTATION_ARRAY;
-					}
-				}
-			}
-			methodParamAnnotationsCache.put(method, result);
-		}
-
-		//always return deep copy to prevent caller from modifying cache state
-		Annotation[][] resultCopy = new Annotation[result.length][0];
-		for(int i = 0; i < result.length; i++) {
-			resultCopy[i] = result[i].clone();
-		}
-		return resultCopy;
 	}
 
 	@Override
@@ -515,6 +446,28 @@ public class MethodParameter {
 			this.hash = result;
 		}
 		return result;
+	}
+
+
+	/**
+	 * Create a new MethodParameter for the given method or constructor.
+	 * <p>This is a convenience constructor for scenarios where a
+	 * Method or Constructor reference is treated in a generic fashion.
+	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 * @return the corresponding MethodParameter instance
+	 */
+	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
+		if (methodOrConstructor instanceof Method) {
+			return new MethodParameter((Method) methodOrConstructor, parameterIndex);
+		}
+		else if (methodOrConstructor instanceof Constructor) {
+			return new MethodParameter((Constructor) methodOrConstructor, parameterIndex);
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Given object [" + methodOrConstructor + "] is neither a Method nor a Constructor");
+		}
 	}
 
 }

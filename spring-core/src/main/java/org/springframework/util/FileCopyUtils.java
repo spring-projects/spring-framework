@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,19 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 /**
- * Simple utility methods for file and stream copying.
- * All copy methods use a block size of 4096 bytes,
- * and close all affected streams when done.
+ * Simple utility methods for file and stream copying. All copy methods use a block size
+ * of 4096 bytes, and close all affected streams when done. A variation of the copy
+ * methods from this class that leave streams open can be found in {@link StreamUtils}.
  *
- * <p>Mainly for use within the framework,
- * but also useful for application code.
+ * <p>Mainly for use within the framework, but also useful for application code.
  *
  * @author Juergen Hoeller
  * @since 06.10.2003
+ * @see StreamUtils
  */
 public abstract class FileCopyUtils {
 
-	public static final int BUFFER_SIZE = 4096;
+	public static final int BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
 
 	//---------------------------------------------------------------------
@@ -61,7 +61,7 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No input File specified");
 		Assert.notNull(out, "No output File specified");
 		return copy(new BufferedInputStream(new FileInputStream(in)),
-		    new BufferedOutputStream(new FileOutputStream(out)));
+			new BufferedOutputStream(new FileOutputStream(out)));
 	}
 
 	/**
@@ -106,15 +106,7 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
 		try {
-			int byteCount = 0;
-			byte[] buffer = new byte[BUFFER_SIZE];
-			int bytesRead = -1;
-			while ((bytesRead = in.read(buffer)) != -1) {
-				out.write(buffer, 0, bytesRead);
-				byteCount += bytesRead;
-			}
-			out.flush();
-			return byteCount;
+			return StreamUtils.copy(in, out);
 		}
 		finally {
 			try {
@@ -208,7 +200,7 @@ public abstract class FileCopyUtils {
 
 	/**
 	 * Copy the contents of the given String to the given output Writer.
-	 * Closes the write when done.
+	 * Closes the writer when done.
 	 * @param in the String to copy from
 	 * @param out the Writer to copy to
 	 * @throws IOException in case of I/O errors

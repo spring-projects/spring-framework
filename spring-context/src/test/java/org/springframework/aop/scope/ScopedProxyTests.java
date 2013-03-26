@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,21 @@
 
 package org.springframework.aop.scope;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.config.SimpleMapScope;
+import org.springframework.tests.context.SimpleMapScope;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
@@ -39,10 +41,10 @@ import org.springframework.util.SerializationTestUtils;
  * @author Chris Beams
  */
 public class ScopedProxyTests {
-	
+
 	private static final Class<?> CLASS = ScopedProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final ClassPathResource LIST_CONTEXT = new ClassPathResource(CLASSNAME + "-list.xml", CLASS);
 	private static final ClassPathResource MAP_CONTEXT = new ClassPathResource(CLASSNAME + "-map.xml", CLASS);
 	private static final ClassPathResource OVERRIDE_CONTEXT = new ClassPathResource(CLASSNAME + "-override.xml", CLASS);
@@ -51,14 +53,16 @@ public class ScopedProxyTests {
 	/* SPR-2108 */
 	@Test
 	public void testProxyAssignable() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(MAP_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(MAP_CONTEXT);
 		Object baseMap = bf.getBean("singletonMap");
 		assertTrue(baseMap instanceof Map);
 	}
 
 	@Test
 	public void testSimpleProxy() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(MAP_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(MAP_CONTEXT);
 		Object simpleMap = bf.getBean("simpleMap");
 		assertTrue(simpleMap instanceof Map);
 		assertTrue(simpleMap instanceof HashMap);
@@ -82,7 +86,8 @@ public class ScopedProxyTests {
 
 	@Test
 	public void testJdkScopedProxy() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(TESTBEAN_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(TESTBEAN_CONTEXT);
 		bf.setSerializationId("X");
 		SimpleMapScope scope = new SimpleMapScope();
 		bf.registerScope("request", scope);
@@ -111,7 +116,8 @@ public class ScopedProxyTests {
 
 	@Test
 	public void testCglibScopedProxy() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(LIST_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(LIST_CONTEXT);
 		bf.setSerializationId("Y");
 		SimpleMapScope scope = new SimpleMapScope();
 		bf.registerScope("request", scope);
@@ -126,7 +132,7 @@ public class ScopedProxyTests {
 		assertTrue(scope.getMap().containsKey("scopedTarget.scopedList"));
 		assertEquals(ArrayList.class, scope.getMap().get("scopedTarget.scopedList").getClass());
 
-		ArrayList deserialized = (ArrayList) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
+		ArrayList<?> deserialized = (ArrayList<?>) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
 		assertNotNull(deserialized);
 		assertTrue(AopUtils.isCglibProxy(deserialized));
 		assertTrue(deserialized.contains("myFriend"));

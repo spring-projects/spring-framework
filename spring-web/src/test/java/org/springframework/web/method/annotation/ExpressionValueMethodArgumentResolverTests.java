@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -37,7 +37,7 @@ import org.springframework.web.method.annotation.ExpressionValueMethodArgumentRe
 
 /**
  * Test fixture with {@link ExpressionValueMethodArgumentResolver}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ExpressionValueMethodArgumentResolverTests {
@@ -57,18 +57,18 @@ public class ExpressionValueMethodArgumentResolverTests {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
 		resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory());
-		
+
 		Method method = getClass().getMethod("params", int.class, String.class, String.class);
 		paramSystemProperty = new MethodParameter(method, 0);
 		paramContextPath = new MethodParameter(method, 1);
 		paramNotSupported = new MethodParameter(method, 2);
 
 		webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
-		
+
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
-	
+
 	@After
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
@@ -86,7 +86,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "22");
 		Object value = resolver.resolveArgument(paramSystemProperty, null, webRequest, null);
 		System.clearProperty("systemProperty");
-		
+
 		assertEquals("22", value);
 	}
 
@@ -94,7 +94,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 	public void resolveContextPath() throws Exception {
 		webRequest.getNativeRequest(MockHttpServletRequest.class).setContextPath("/contextPath");
 		Object value = resolver.resolveArgument(paramContextPath, null, webRequest, null);
-		
+
 		assertEquals("/contextPath", value);
 	}
 

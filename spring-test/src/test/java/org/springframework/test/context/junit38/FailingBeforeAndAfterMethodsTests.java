@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit38;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +24,7 @@ import java.util.Collection;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,7 +47,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
  * target="_blank">SPR-3960</a>.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -91,6 +92,7 @@ public class FailingBeforeAndAfterMethodsTests {
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void beforeTestMethod(TestContext testContext) {
 			junit.framework.Assert.fail("always failing beforeTestMethod()");
 		}
@@ -99,12 +101,13 @@ public class FailingBeforeAndAfterMethodsTests {
 	static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void afterTestMethod(TestContext testContext) {
 			junit.framework.Assert.fail("always failing afterTestMethod()");
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingBeforeTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -113,7 +116,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingAfterTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -122,7 +125,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {
@@ -136,7 +139,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {

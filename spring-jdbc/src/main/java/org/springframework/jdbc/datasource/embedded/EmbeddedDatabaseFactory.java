@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public class EmbeddedDatabaseFactory {
 
 	/**
 	 * Hook that gets the DataSource that provides the connectivity to the embedded database.
-	 * <p>Returns <code>null</code> if the DataSource has not been initialized or the database
+	 * <p>Returns {@code null} if the DataSource has not been initialized or the database
 	 * has been shut down. Subclasses may call to access the DataSource instance directly.
 	 */
 	protected final DataSource getDataSource() {
@@ -205,7 +205,6 @@ public class EmbeddedDatabaseFactory {
 		}
 
 		// getParentLogger() is required for JDBC 4.1 compatibility
-		@SuppressWarnings("unused")
 		public Logger getParentLogger() {
 			return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		}

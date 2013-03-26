@@ -47,13 +47,13 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 public class StandardEvaluationContext implements EvaluationContext {
-	
+
 	private TypedValue rootObject;
 
 	private List<ConstructorResolver> constructorResolvers;
 
 	private List<MethodResolver> methodResolvers;
-	
+
 	private ReflectiveMethodResolver reflectiveMethodResolver;
 
 	private List<PropertyAccessor> propertyAccessors;
@@ -67,14 +67,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
 	private final Map<String, Object> variables = new HashMap<String, Object>();
-	
+
 	private BeanResolver beanResolver;
 
 
 	public StandardEvaluationContext() {
 		setRootObject(null);
 	}
-	
+
 	public StandardEvaluationContext(Object rootObject) {
 		this();
 		setRootObject(rootObject);
@@ -102,12 +102,12 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensureConstructorResolversInitialized();
 		return this.constructorResolvers.remove(resolver);
 	}
-	
+
 	public List<ConstructorResolver> getConstructorResolvers() {
 		ensureConstructorResolversInitialized();
 		return this.constructorResolvers;
 	}
-	
+
 	public void setConstructorResolvers(List<ConstructorResolver> constructorResolvers) {
 		this.constructorResolvers = constructorResolvers;
 	}
@@ -117,7 +117,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensureMethodResolversInitialized();
 		this.methodResolvers.add(this.methodResolvers.size() - 1, resolver);
 	}
-	
+
 	public boolean removeMethodResolver(MethodResolver methodResolver) {
 		ensureMethodResolversInitialized();
 		return this.methodResolvers.remove(methodResolver);
@@ -131,21 +131,21 @@ public class StandardEvaluationContext implements EvaluationContext {
 	public void setBeanResolver(BeanResolver beanResolver) {
 		this.beanResolver = beanResolver;
 	}
-	
+
 	public BeanResolver getBeanResolver() {
 		return this.beanResolver;
 	}
-	
+
 	public void setMethodResolvers(List<MethodResolver> methodResolvers) {
 		this.methodResolvers = methodResolvers;
 	}
-	
+
 
 	public void addPropertyAccessor(PropertyAccessor accessor) {
 		ensurePropertyAccessorsInitialized();
 		this.propertyAccessors.add(this.propertyAccessors.size() - 1, accessor);
 	}
-	
+
 	public boolean removePropertyAccessor(PropertyAccessor accessor) {
 		return this.propertyAccessors.remove(accessor);
 	}
@@ -154,7 +154,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensurePropertyAccessorsInitialized();
 		return this.propertyAccessors;
 	}
-	
+
 	public void setPropertyAccessors(List<PropertyAccessor> propertyAccessors) {
 		this.propertyAccessors = propertyAccessors;
 	}

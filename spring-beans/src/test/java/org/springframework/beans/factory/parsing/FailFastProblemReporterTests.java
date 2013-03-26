@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.beans.factory.parsing;
 
-import static org.easymock.EasyMock.*;
-
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 import org.springframework.core.io.DescriptiveResource;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -41,15 +42,13 @@ public final class FailFastProblemReporterTests {
 		Problem problem = new Problem("VGER", new Location(new DescriptiveResource("here")),
 				null, new IllegalArgumentException());
 
-		Log log = createMock(Log.class);
-		log.warn(anyObject(), isA(IllegalArgumentException.class));
-		replay(log);
+		Log log = mock(Log.class);
 
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
 		reporter.setLogger(log);
 		reporter.warning(problem);
 
-		verify(log);
+		verify(log).warn(any(), isA(IllegalArgumentException.class));
 	}
 
 }

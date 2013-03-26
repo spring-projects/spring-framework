@@ -10,11 +10,11 @@
 
 	<test:testBean id="testBean" name="Rob Harrop" age="23"/>
 
-	<bean id="customisedTestBean" class="org.springframework.beans.TestBean">
+	<bean id="customisedTestBean" class="org.springframework.tests.sample.beans.TestBean">
 		<test:set name="Rob Harrop" age="23"/>
 	</bean>
 
-	<bean id="debuggingTestBean" class="org.springframework.beans.TestBean">
+	<bean id="debuggingTestBean" class="org.springframework.tests.sample.beans.TestBean">
 		<test:debug/>
 		<property name="name" value="Rob Harrop"/>
 		<property name="age" value="23"/>
@@ -24,14 +24,14 @@
 		<test:debug/>
 	</bean>
 
-	<bean id="chainedTestBean" class="org.springframework.beans.TestBean">
+	<bean id="chainedTestBean" class="org.springframework.tests.sample.beans.TestBean">
 		<test:debug/>
 		<test:nop/>
 		<property name="name" value="Rob Harrop"/>
 		<property name="age" value="23"/>
 	</bean>
 
-	<bean id="decorateWithAttribute" class="org.springframework.beans.TestBean" test:object-name="foo"/>
+	<bean id="decorateWithAttribute" class="org.springframework.tests.sample.beans.TestBean" test:object-name="foo"/>
 
 	<util:list id="list.of.things">
 		<test:person name="Fiona Apple" age="20"/>

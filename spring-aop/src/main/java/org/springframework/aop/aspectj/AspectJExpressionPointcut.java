@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
@@ -223,9 +224,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
-	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
-	 * We also allow <code>and</code> between two pointcut sub-expressions.
-	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 * write {@code and} as "&&" (though &amp;&amp; will work).
+	 * We also allow {@code and} between two pointcut sub-expressions.
+	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		String result = StringUtils.replace(pcExpr, " and ", " && ");
@@ -259,7 +260,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 						ex);
 				return false;
 			}
-		} 
+		}
 		catch (BCException ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 			return false;
@@ -281,8 +282,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			return false;
 		}
 		else {
-		  // the maybe case
-		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
+			// the maybe case
+			return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
 		}
 	}
 
@@ -494,10 +495,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 
 	/**
-	 * Handler for the Spring-specific <code>bean()</code> pointcut designator
+	 * Handler for the Spring-specific {@code bean()} pointcut designator
 	 * extension to AspectJ.
 	 * <p>This handler must be added to each pointcut object that needs to
-	 * handle the <code>bean()</code> PCD. Matching context is obtained
+	 * handle the {@code bean()} PCD. Matching context is obtained
 	 * automatically by examining a thread local variable and therefore a matching
 	 * context need not be set on the pointcut.
 	 */
@@ -554,7 +555,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			String advisedBeanName = getCurrentProxiedBeanName();
 			if (advisedBeanName == null) {  // no proxy creation in progress
 				// abstain; can't return YES, since that will make pointcut with negation fail
-				return FuzzyBoolean.MAYBE; 
+				return FuzzyBoolean.MAYBE;
 			}
 			if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
 				return FuzzyBoolean.NO;

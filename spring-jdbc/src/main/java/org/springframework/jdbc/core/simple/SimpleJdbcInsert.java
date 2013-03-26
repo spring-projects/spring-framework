@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * name of the table and a Map containing the column names and the column values.
  *
  * <p>The meta data processing is based on the DatabaseMetaData provided by the
- * JDBC driver.  As long as the JBDC driver can provide the names of the columns
+ * JDBC driver. As long as the JBDC driver can provide the names of the columns
  * for a specified table than we can rely on this auto-detection feature. If that
- * is not the case then the column names must be specified explicitly.
+ * is not the case, then the column names must be specified explicitly.
  *
  * <p>The actual insert is being handled using Spring's
  * {@link org.springframework.jdbc.core.JdbcTemplate}.
@@ -53,7 +53,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	/**
 	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
 	 * JdbcTemplate.
-	 * @param dataSource the <code>DataSource</code> to use
+	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(DataSource dataSource) {
@@ -62,7 +62,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 
 	/**
 	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
-	 * @param jdbcTemplate the <code>JdbcTemplate</code> to use
+	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(JdbcTemplate jdbcTemplate) {

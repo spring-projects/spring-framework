@@ -94,6 +94,11 @@ public abstract class AbstractDispatcherServletInitializer
 
 		ServletRegistration.Dynamic registration =
 				servletContext.addServlet(servletName, dispatcherServlet);
+
+		Assert.notNull(registration,
+				"Failed to register servlet with name '" + servletName + "'." +
+				"Check if there is another servlet registered under the same name.");
+
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
 		registration.setAsyncSupported(isAsyncSupported());
@@ -137,7 +142,7 @@ public abstract class AbstractDispatcherServletInitializer
 	 * Specify filters to add and also map to the {@code DispatcherServlet}.
 	 *
 	 * @return an array of filters or {@code null}
-	 * @see #registerServletFilters(ServletContext, String, Filter...)
+	 * @see #registerServletFilter(ServletContext, Filter)
 	 */
 	protected Filter[] getServletFilters() {
 		return null;
@@ -158,8 +163,7 @@ public abstract class AbstractDispatcherServletInitializer
 	 * filters directly with the {@code ServletContext}.
 	 *
 	 * @param servletContext the servlet context to register filters with
-	 * @param servletName the name of the servlet to map the filters to
-	 * @param filters the filters to be registered
+	 * @param filter the filter to be registered
 	 * @return the filter registration
 	 */
 	protected FilterRegistration.Dynamic registerServletFilter(ServletContext servletContext, Filter filter) {

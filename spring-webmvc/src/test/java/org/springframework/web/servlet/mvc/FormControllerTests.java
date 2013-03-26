@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -46,6 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@Deprecated
 public class FormControllerTests extends TestCase {
 
 	public void testReferenceDataOnForm() throws Exception {
@@ -122,6 +123,7 @@ public class FormControllerTests extends TestCase {
 		final Integer someNumber = new Integer(12);
 
 		TestController mc = new TestController() {
+			@Override
 			protected void onBindOnNewForm(HttpServletRequest request, Object command) throws Exception {
 				TestBean testBean = (TestBean)command;
 				testBean.setSomeNumber(new Integer(12));
@@ -370,6 +372,7 @@ public class FormControllerTests extends TestCase {
 		String successView = "s";
 
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 				throw new ServletException("invalid submit");
@@ -438,10 +441,12 @@ public class FormControllerTests extends TestCase {
 	final Float myFloat = new Float("123.45");
 
 		TestController mc = new TestController() {
+			@Override
 			protected boolean isFormChangeRequest(HttpServletRequest request) {
 				return (request.getParameter("formChange") != null);
 			}
 
+			@Override
 			protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command) {
 				assertNotNull("Command should not be null", command);
 				assertEquals("Incorrect command class", TestBean.class, command.getClass());
@@ -513,8 +518,10 @@ public class FormControllerTests extends TestCase {
 
 		public static String TOOSHORT = "tooshort";
 
+		@Override
 		public boolean supports(Class clazz) { return true; }
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb.getName() == null || "".equals(tb.getName()))
@@ -529,8 +536,10 @@ public class FormControllerTests extends TestCase {
 
 		public static String TOOSHORT = "tooshort";
 
+		@Override
 		public boolean supports(Class clazz) { return true; }
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			errors.reject("test", "testmessage");
 		}
@@ -548,12 +557,14 @@ public class FormControllerTests extends TestCase {
 			setCommandName(BEAN_NAME);
 		}
 
+		@Override
 		protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 			TestBean person = new TestBean();
 			person.setAge(DEFAULT_AGE);
 			return person;
 		}
 
+		@Override
 		protected boolean isFormChangeRequest(HttpServletRequest request) {
 			return (request.getParameter("formChange") != null);
 		}
@@ -562,6 +573,7 @@ public class FormControllerTests extends TestCase {
 
 	private static class TestControllerWithCustomOnSubmit extends TestController {
 
+		@Override
 		protected ModelAndView onSubmit(Object command) throws Exception {
 			return new ModelAndView("mySuccess");
 		}
@@ -580,6 +592,7 @@ public class FormControllerTests extends TestCase {
 			setCommandClass(TestBean.class);
 		}
 
+		@Override
 		protected Map referenceData(HttpServletRequest request) {
 			++refDataCount;
 			Map m = new HashMap();
@@ -595,6 +608,7 @@ public class FormControllerTests extends TestCase {
 
 	public static class BooleanBindingFormController extends AbstractFormController {
 
+		@Override
 		protected ModelAndView processFormSubmission
 				(HttpServletRequest req, HttpServletResponse resp, Object command, BindException errors) throws Exception {
 			ModelAndView mav = new ModelAndView();
@@ -602,6 +616,7 @@ public class FormControllerTests extends TestCase {
 			return mav;
 		}
 
+		@Override
 		protected ModelAndView showForm(
 				HttpServletRequest req, HttpServletResponse resp, BindException err) throws Exception {
 			return null;

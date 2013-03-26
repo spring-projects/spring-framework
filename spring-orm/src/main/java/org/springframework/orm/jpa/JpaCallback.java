@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,23 @@ import javax.persistence.PersistenceException;
 /**
  * Callback interface for JPA code. To be used with {@link JpaTemplate}'s
  * execution method, often as anonymous classes within a method implementation.
- * A typical implementation will call <code>EntityManager.find/merge</code>
+ * A typical implementation will call {@code EntityManager.find/merge}
  * to perform some operations on persistent objects.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.orm.jpa.JpaTemplate
- * @see org.springframework.orm.jpa.JpaTransactionManager
+ * @see JpaTemplate
+ * @see JpaTransactionManager
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>)
+ * (typically obtained through {@code @PersistenceContext})
  */
 @Deprecated
 public interface JpaCallback<T> {
 
 	/**
-	 * Gets called by <code>JpaTemplate.execute</code> with an active
-	 * JPA <code>EntityManager</code>. Does not need to care about activating
-	 * or closing the <code>EntityManager</code>, or handling transactions.
+	 * Gets called by {@code JpaTemplate.execute} with an active
+	 * JPA {@code EntityManager}. Does not need to care about activating
+	 * or closing the {@code EntityManager}, or handling transactions.
 	 *
 	 * <p>Note that JPA callback code will not flush any modifications to the
 	 * database if not executed within a transaction. Thus, you need to make
@@ -51,10 +51,10 @@ public interface JpaCallback<T> {
 	 * It gets propagated to the caller of the template.
 	 *
 	 * @param em active EntityManager
-	 * @return a result object, or <code>null</code> if none
+	 * @return a result object, or {@code null} if none
 	 * @throws PersistenceException if thrown by the JPA API
-	 * @see org.springframework.orm.jpa.JpaTemplate#execute
-	 * @see org.springframework.orm.jpa.JpaTemplate#executeFind
+	 * @see JpaTemplate#execute
+	 * @see JpaTemplate#executeFind
 	 */
 	T doInJpa(EntityManager em) throws PersistenceException;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,101 +16,62 @@
 
 package org.springframework.jdbc.object;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.easymock.EasyMock;
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runners.JUnit4;
-import org.junit.runner.RunWith;
-
-import org.springframework.jdbc.AbstractJdbcTests;
-import org.springframework.jdbc.datasource.TestDataSourceWrapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.TestDataSourceWrapper;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Thomas Risberg
  */
-@RunWith(JUnit4.class)
-public class GenericStoredProcedureTests extends AbstractJdbcTests {
+public class GenericStoredProcedureTests {
 
 	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
 
-	private CallableStatement mockCallable;
-
-	private BeanFactory bf;
-
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-		mockCallable = createMock(CallableStatement.class);
-		bf = new XmlBeanFactory(
-				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));
-		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
-		testDataSource.setTarget(mockDataSource);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		super.tearDown();
-		if (shouldVerify()) {
-			EasyMock.verify(mockCallable);
-		}
-	}
-
-	protected void replay() {
-		super.replay();
-		EasyMock.replay(mockCallable);
-	}
-
 	@Test
 	public void testAddInvoices() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
+				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));
+		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willReturn(connection);
+		CallableStatement callableStatement = mock(CallableStatement.class);
+		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
+		testDataSource.setTarget(dataSource);
 
-		mockCallable.setObject(1, new Integer(1106), Types.INTEGER);
-		expectLastCall();
-		mockCallable.setObject(2, new Integer(3), Types.INTEGER);
-		expectLastCall();
-		mockCallable.registerOutParameter(3, Types.INTEGER);
-		expectLastCall();
-		expect(mockCallable.execute()).andReturn(false);
-		expect(mockCallable.getUpdateCount()).andReturn(-1);
-		expect(mockCallable.getObject(3)).andReturn(new Integer(4));
-		if (debugEnabled) {
-			expect(mockCallable.getWarnings()).andReturn(null);
-		}
-		mockCallable.close();
-		expectLastCall();
+		given(callableStatement.execute()).willReturn(false);
+		given(callableStatement.getUpdateCount()).willReturn(-1);
+		given(callableStatement.getObject(3)).willReturn(new Integer(4));
 
-		mockConnection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}");
-		ctrlConnection.setReturnValue(mockCallable);
-
-		replay();
-
-		testAddInvoice(1106, 3);
-	}
-
-	private void testAddInvoice(final int amount, final int custid)
-		throws Exception {
+		given(connection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}")).willReturn(callableStatement);
 
 		StoredProcedure adder = (StoredProcedure) bf.getBean("genericProcedure");
 		Map<String, Object> in = new HashMap<String, Object>(2);
-		in.put("amount", amount);
-		in.put("custid", custid);
+		in.put("amount", 1106);
+		in.put("custid", 3);
 		Map out = adder.execute(in);
 		Integer id = (Integer) out.get("newid");
 		assertEquals(4, id.intValue());
+
+		verify(callableStatement).setObject(1, new Integer(1106), Types.INTEGER);
+		verify(callableStatement).setObject(2, new Integer(3), Types.INTEGER);
+		verify(callableStatement).registerOutParameter(3, Types.INTEGER);
+		verify(callableStatement).close();
 	}
 
 }

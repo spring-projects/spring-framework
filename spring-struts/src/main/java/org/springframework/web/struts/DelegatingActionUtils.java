@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,8 @@ public abstract class DelegatingActionUtils {
 	 * <p>Checks for a module-specific context first, falling back to the
 	 * context for the default module else.
 	 * @param actionServlet the associated ActionServlet
-	 * @param moduleConfig the associated ModuleConfig (can be <code>null</code>)
-	 * @return the WebApplicationContext, or <code>null</code> if none
+	 * @param moduleConfig the associated ModuleConfig (can be {@code null})
+	 * @return the WebApplicationContext, or {@code null} if none
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
 	public static WebApplicationContext getWebApplicationContext(
@@ -110,7 +110,7 @@ public abstract class DelegatingActionUtils {
 	 * <p>Checks for a module-specific context first, falling back to the
 	 * context for the default module else.
 	 * @param actionServlet the associated ActionServlet
-	 * @param moduleConfig the associated ModuleConfig (can be <code>null</code>)
+	 * @param moduleConfig the associated ModuleConfig (can be {@code null})
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
@@ -135,7 +135,7 @@ public abstract class DelegatingActionUtils {
 	 * <p>When checking the ContextLoaderPlugIn context: checks for a module-specific
 	 * context first, falling back to the context for the default module else.
 	 * @param actionServlet the associated ActionServlet
-	 * @param moduleConfig the associated ModuleConfig (can be <code>null</code>)
+	 * @param moduleConfig the associated ModuleConfig (can be {@code null})
 	 * @return the WebApplicationContext
 	 * @throws IllegalStateException if no WebApplicationContext could be found
 	 * @see #getWebApplicationContext

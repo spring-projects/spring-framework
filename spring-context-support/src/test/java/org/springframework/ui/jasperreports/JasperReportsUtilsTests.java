@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.ResourceBundle;
 
 import junit.framework.TestCase;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -71,12 +72,12 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsCsvWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
-		Map exporterParameters = new HashMap();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		exporterParameters.put(JRCsvExporterParameter.FIELD_DELIMITER, "~");
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer, exporterParameters);
 		String output = writer.getBuffer().toString();
 		assertCsvOutputCorrect(output);
-		assertTrue("Delimiter is incorrect", output.indexOf("~") > -1);
+		assertTrue("Delimiter is incorrect", output.contains("~"));
 	}
 
 	public void testRenderAsHtmlWithDataSource() throws Exception {
@@ -95,13 +96,13 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsHtmlWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
-		Map exporterParameters = new HashMap();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		String uri = "/my/uri";
 		exporterParameters.put(JRHtmlExporterParameter.IMAGES_URI, uri);
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer, exporterParameters);
 		String output = writer.getBuffer().toString();
 		assertHtmlOutputCorrect(output);
-		assertTrue("URI not included", output.indexOf(uri) > -1);
+		assertTrue("URI not included", output.contains(uri));
 	}
 
 	public void testRenderAsPdfWithDataSource() throws Exception {
@@ -120,12 +121,12 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Map exporterParameters = new HashMap();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
 		byte[] output = os.toByteArray();
 		assertPdfOutputCorrect(output);
-		assertTrue(new String(output).indexOf("PDF-1.6") > -1);
+		assertTrue(new String(output).contains("PDF-1.6"));
 	}
 
 	public void testRenderAsXlsWithDataSource() throws Exception {
@@ -144,7 +145,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsXlsWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Map exporterParameters = new HashMap();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 
 		SimpleProgressMonitor monitor = new SimpleProgressMonitor();
 		exporterParameters.put(JRXlsExporterParameter.PROGRESS_MONITOR, monitor);
@@ -174,13 +175,13 @@ public class JasperReportsUtilsTests extends TestCase {
 	private void assertCsvOutputCorrect(String output) {
 		assertTrue("Output length should be greater than 0", (output.length() > 0));
 		assertTrue("Output should start with Dear Lord!", output.startsWith("Dear Lord!"));
-		assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
+		assertTrue("Output should contain 'MeineSeite'", output.contains("MeineSeite"));
 	}
 
 	private void assertHtmlOutputCorrect(String output) {
 		assertTrue("Output length should be greater than 0", (output.length() > 0));
-		assertTrue("Output should contain <html>", output.indexOf("<html>") > -1);
-		assertTrue("Output should contain 'MeineSeite'", output.indexOf("MeineSeite") > -1);
+		assertTrue("Output should contain <html>", output.contains("<html>"));
+		assertTrue("Output should contain 'MeineSeite'", output.contains("MeineSeite"));
 	}
 
 	private void assertPdfOutputCorrect(byte[] output) throws Exception {
@@ -197,7 +198,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		HSSFRow row = sheet.getRow(3);
 		HSSFCell cell = row.getCell((short) 1);
 		assertNotNull("Cell should not be null", cell);
-		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getStringCellValue());
+		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getRichStringCellValue().getString());
 	}
 
 	private JasperReport getReport() throws Exception {
@@ -205,8 +206,8 @@ public class JasperReportsUtilsTests extends TestCase {
 		return (JasperReport) JRLoader.loadObject(resource.getInputStream());
 	}
 
-	private Map getParameters() {
-		Map model = new HashMap();
+	private Map<String, Object> getParameters() {
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("ReportTitle", "Dear Lord!");
 		model.put(JRParameter.REPORT_LOCALE, Locale.GERMAN);
 		model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
@@ -218,8 +219,8 @@ public class JasperReportsUtilsTests extends TestCase {
 		return new JRBeanCollectionDataSource(getData());
 	}
 
-	private List getData() {
-		List list = new ArrayList();
+	private List<PersonBean> getData() {
+		List<PersonBean> list = new ArrayList<PersonBean>();
 		for (int x = 0; x < 10; x++) {
 			PersonBean bean = new PersonBean();
 			bean.setId(x);
@@ -235,6 +236,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 		private boolean invoked = false;
 
+		@Override
 		public void afterPageExport() {
 			this.invoked = true;
 		}

@@ -3,12 +3,224 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 RC1 (2012-10-05)
+Changes in version 3.2.3 (2013-05-02)
+-------------------------------------
+
+* fixed ReflectiveMethodResolver to avoid potential UnsupportedOperationException on sort (SPR-10392)
+* fixed Jaxb2Marshaller's partial unmarshalling feature to consistently apply to all sources (SPR-10282)
+* JdbcTemplate defensively uses JDBC 3.0 getParameterType call for Oracle driver compatibility (SPR-10385)
+* introduced public ArgumentPreparedStatementSetter and ArgumentTypePreparedStatementSetter classes (SPR-10375)
+
+
+Changes in version 3.2.2 (2013-03-14)
+-------------------------------------
+
+* official support for Hibernate 4.2 (SPR-10255)
+* fixed missing inter-dependencies in module POMs (SPR-10218)
+* marked spring-web module as 'distributable' in order for session replication to work on Tomcat (SPR-10219)
+* DefaultListableBeanFactory caches target type per bean definition and allows for specifying it in advance (SPR-10335)
+* DefaultListableBeanFactory clears by-type matching cache on runtime register/destroySingleton calls (SPR-10326)
+* ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK annotations via ASM (SPR-10249)
+* ConfigurationClassPostProcessor detects covariant return type mismatch, avoiding infinite recursion (SPR-10261)
+* ConfigurationClassPostProcessor allows for overriding of scoped-proxy bean definitions (SPR-10265)
+* "depends-on" attribute on lang namespace element actually respected at runtime now (SPR-8625)
+* added locale-independent "commonMessages" property to AbstractMessageSource (SPR-10291)
+* added "maximumAutoGrowSize" property to SpelParserConfiguration (SPR-10229)
+* allow for ordering of mixed AspectJ before/after advices (SPR-9438)
+* added "beforeExistingAdvisors" flag to AbstractAdvisingBeanPostProcessor (SPR-10309)
+* MethodValidation/PersistenceExceptionTranslationPostProcessor apply after existing advisors by default (SPR-10309)
+* fixed regression in SpringValidatorAdapter's retrieval of invalid values (SPR-10243)
+* support 'unless' expression for cache veto (SPR-8871)
+* @Async's qualifier works for target class annotations behind a JDK proxy as well (SPR-10274)
+* @Scheduled provides String variants of fixedDelay, fixedRate, initialDelay for placeholder support (SPR-8067)
+* refined CronSequenceGenerator's rounding up of seconds to address second-specific cron expressions (SPR-9459)
+* @Transactional in AspectJ mode works with CallbackPreferringPlatformTransactionManager (WebSphere) as well (SPR-9268)
+* LazyConnectionDataSourceProxy catches setReadOnly exception analogous to DataSourceUtils (SPR-10312)
+* SQLErrorCodeSQLExceptionTranslator tries to find SQLException with actual error code among causes (SPR-10260)
+* added "createTemporaryLob" flag to DefaultLobHandler, using JDBC 4.0's createBlob/Clob mechanism (SPR-10339)
+* deprecated OracleLobHandler in favor of DefaultLobHandler for the Oracle 10g driver and higher (SPR-10339)
+* deprecated (NamedParameter)JdbcTemplate's queryForInt/Long operations in favor of queryForObject (SPR-10257)
+* added useful query variants without parameters to NamedParameterJdbcTemplate, for convenience in DAOs (SPR-10256)
+* "packagesToScan" feature for Hibernate 3 and Hibernate 4 detects annotated packages as well (SPR-7748, SPR-10288)
+* HibernateTransactionManager for Hibernate 4 supports "entityInterceptor(BeanName)" property (SPR-10301)
+* DefaultJdoDialect supports the JDO 2.2+ isolation level feature out of the box (SPR-10323)
+* DefaultMessageListenerContainer invokes specified ExceptionListener for recovery exceptions as well (SPR-10230)
+* DefaultMessageListenerContainer logs recovery failures at error level and exposes "isRecovering()" method (SPR-10230)
+* added "mappedClass" property to Jaxb2Marshaller, introducing support for partial unmarshalling (SPR-10282)
+* added "entityResolver", "classDescriptorResolver", "doctypes" and further properties to CastorMarshaller (SPR-8470)
+* deprecated CastorMarshaller's "object" property in favor of "rootObject" (SPR-8470)
+* MediaType throws dedicated InvalidMediaTypeException instead of generic IllegalArgumentException (SPR-10226)
+* DispatcherServlet allows for customizing its RequestAttributes exposure in subclasses (SPR-10342)
+* AbstractCachingViewResolver does not use global lock for accessing existing View instances anymore (SPR-3145)
+* MappingJackson(2)JsonView allows subclasses to access the ObjectMapper and to override content writing (SPR-7619)
+* Tiles 3 TilesConfigurer preserves standard EL support for "completeAutoload" mode as well (SPR-10361)
+* Log4jWebConfigurer supports resolving placeholders against ServletContext init-parameters as well (SPR-10284)
+* consistent use of LinkedHashMaps and independent getAttributeNames Enumeration in Servlet/Portlet mocks (SPR-10224)
+* several MockMvcBuilder refinements (SPR-10277, SPR-10279, SPR-10280)
+* introduced support for context hierarchies in the TestContext framework (SPR-5613)
+* introduced support for WebApplicationContext hierarchies in the TestContext framework (SPR-9863)
+
+
+Changes in version 3.2.1 (2013-01-24)
+--------------------------------------
+
+* SpEL support for static finals on interfaces (SPR-10125)
+* AnnotationAwareOrderComparator is able to sort Class objects as well (SPR-10152)
+* added dedicated sort method to AnnotationAwareOrderComparator (SPR-9625)
+* BridgeMethodResolver properly handles bridge methods in interfaces (SPR-9330)
+* LocalVariableTableParameterNameDiscoverer works for bridge methods as well (SPR-9429)
+* added constructor with Charset argument to EncodedResource (SPR-10096)
+* ResourcePropertyResource accepts EncodedResource for properties files with a specific encoding (SPR-10096)
+* SystemEnvironmentPropertySource properly works with an active JVM SecurityManager (SPR-9970)
+* CachedIntrospectionResults.clearClassLoader(null) removes cached classes for the system class loader (SPR-9189)
+* DisposableBeanAdapter detects "shutdown" as a destroy method as well (for EHCache CacheManager setup; SPR-9713)
+* introduced NoUniqueBeanDefinitionException as a dedicated subclass of NoSuchBeanDefinitionException (SPR-10194)
+* DefaultListableBeanFactory's getBean(Class) checks primary marker in case of multiple matches (SPR-7854)
+* fixed QualifierAnnotationAutowireCandidateResolver's detection of custom qualifier annotations (SPR-10107)
+* fixed AbstractAutoProxyCreator to accept null bean names again (SPR-10108)
+* AbstractAdvisingBeanPostProcessor caches per bean target class, working for null bean names as well (SPR-10144)
+* MessageSourceResourceBundle overrides JDK 1.6 containsKey method, avoiding NPE in getKeys (SPR-10136)
+* SpringValidationAdapter properly detects invalid value for JSR-303 field-level bean constraints (SPR-9332)
+* SpringBeanAutowiringInterceptor eagerly releases BeanFactory if post-construction fails (SPR-10013)
+* added "exposeAccessContext" flag to JndiRmiClientInterceptor/ProxyFactoryBean (for WebLogic; SPR-9428)
+* MBeanExporter does not log warnings for manually unregistered MBeans (SPR-9451)
+* MBeanInfoAssembler impls expose actual method parameter names if possible (SPR-9985)
+* AbstractCacheManager accepts no caches defined, allowing for EHCache default cache setup (SPR-7955)
+* EhCacheManagerFactoryBean applies cacheManagerName ahead of creation (for EHCache 2.5 compatibility; SPR-9171)
+* ThreadPoolExecutorFactoryBean exposes "createExecutor" method for custom ThreadPoolExecutor subclasses (SPR-9435)
+* added "awaitTerminationSeconds" property to ThreadPoolTaskExecutor/ThreadPoolTaskScheduler (SPR-5387)
+* aligned XML scheduled-task elements with @Scheduled in terms of kicking in after context refresh (SPR-9231)
+* reintroduced "mode" and "proxy-target-class" attributes in spring-task-3.1/3.2.xsd (SPR-10177)
+* spring-task-3.2.xsd allows for SpEL expressions in initial-delay attribute (SPR-10102)
+* spring-jms-3.2.xsd allows for SpEL expressions in prefetch and receive-timeout attributes (SPR-9553)
+* JmsTemplate uses configured receiveTimeout if shorter than remaining transaction timeout (SPR-10109)
+* added MappingJackson2MessageConverter for JMS (SPR-10099)
+* JDBC parameter binding uses JDBC 3.0 ParameterMetaData (if available) for type determination (SPR-10084)
+* JpaTransactionManager etc finds default EntityManagerFactory in parent context as well (SPR-10160)
+* MimeMessageHelper encodes attachment filename if not ASCII compliant (SPR-9258)
+* FreeMarkerConfigurationFactory properly supports TemplateLoaders when recreating Configurations (SPR-9389)
+* SpringContextResourceAdapter implements equals/hashCode according to the JCA 1.5 contract (SPR-9162)
+* ContextLoader properly detects pre-refreshed WebApplicationContext (SPR-9996)
+* added support for placeholders in @RequestMapping annotation value (SPR-9935)
+* added support for specifying a message code as @ResponseStatus reason (SPR-6044)
+* HttpEntityMethodProcessor supports HttpEntity/ResponseEntity subclasses as well (SPR-10207)
+* Tiles 3 TilesConfigurer properly works in combination with "completeAutoload" (SPR-10195)
+* Spring MVC Test framework supports HTTP OPTIONS method as well (SPR-10093)
+* MockHttpServletRequest's getParameter(Values) returns null for null parameter name (SPR-10192)
+* MockHttpServletResponse's getHeaderNames declares Collection instead of Set for Servlet 3.0 compatibility (SPR-9885)
+
+
+Changes in version 3.2 GA (2012-12-13)
+--------------------------------------
+
+* upgraded Spring Framework build to AspectJ 1.7.1, JUnit 4.11, Groovy 1.8.8, JRuby 1.6.5, Joda-Time 2.1
+* checked compatibility of Spring's Velocity support with Velocity 1.7 and Velocity Tools 2.0
+* checked compatibility of Spring's JasperReports support with JasperReports 5.0
+* added unit tests for Spring's Hibernate 4 support
+* deprecated Apache iBATIS support in favor of native Spring support in Mybatis (the iBATIS successor)
+* deprecated JSF 1.1 VariableResolver implementations in favor of Spring-provided JSF 1.2 ELResolvers
+* deprecated BeanReferenceFactoryBean and CommonsLogFactoryBean
+* DeprecatedBeanWarner detects deprecated FactoryBean classes and always logs user-specified bean type
+* fixed CGLIB proxy class leaks through further equals/hashCode implementations in Spring AOP pointcuts (SPR-8008)
+* ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK classes via ASM (SPR-10058)
+* SpEL indexer uses direct access to specific List elements instead of iterating over the Collection (SPR-10035)
+* DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
+* DefaultMessageListenerContainer clears resources of paused tasks when shutting down after stop (SPR-10092)
+* tx timeouts for JPA translate to "javax.persistence.query.timeout" only (for EclipseLink compatibility; SPR-10068)
+* ResourceDatabasePopulator and JdbcTestUtils now support comments within SQL statements (SPR-10075, SPR-9982)
+* AbstractCachingViewResolver uses a cache limit of 1024 by default, avoiding overflow for redirect URLs (SPR-10065)
+* fixed HierarchicalUriComponents equals implementation (SPR-10088)
+
+
+Changes in version 3.2 RC2 (2012-11-27)
+---------------------------------------
+
+* overhauled non-void JavaBean write method support (SPR-10029)
+* CachedIntrospectionResults uses full WeakReference for any non-safe ClassLoader arrangement (SPR-10028)
+* DefaultListableBeanFactory avoids wide/interleaved metadata locks to avoid deadlock potential (SPR-10020)
+* DefaultListableBeanFactory avoids singletonObjects lock wherever possible for non-singleton performance (SPR-9819)
+* DefaultListableBeanFactory doesn't cache for autowireBean calls anymore, avoiding ClassLoader leaks (SPR-8956)
+* Java 5 Closeable's and Java 7 AutoCloseable's "close()" automatically detected as destroy methods (SPR-10034)
+* @Bean destroy method inference not applying for DisposableBean implementers (avoiding double destruction)
+* @Lazy and @DependsOn not marked as @Inherited anymore - only supported on actual bean types (SPR-9589, SPR-9476)
+* AsyncAnnotationBean/MethodValidation/PersistenceExceptionTranslationPostProcessor cache eligible beans (SPR-7328)
+* ConfigurableApplicationContext, LobCreator and Client/ServerHttpResponse implement Closeable for Java 7 (SPR-9962)
+* spring-jms-3.2.xsd declares former nmtoken attributes as string, allowing for placeholders (SPR-9597)
+* ResourceDatabasePopulator explicitly closes its LineNumberReader (SPR-9912)
+* introduced TransactionAwareCacheManagerProxy for cache put synchronization with Spring transactions (SPR-9966)
+* added "transactionAware" bean property to EhCacheCacheManager and JCacheCacheManager (SPR-9966)
+* moved "cache.ehcache" and "cache.jcache" packages from spring-context to spring-context-support module
+* deprecated "scheduling.backportconcurrent" package in favor of native JDK 6 "scheduling.concurrent" support
+* deprecated Oracle OC4J support (OC4JJtaTransactionManager, OC4JLoadTimeWeaver) in favor of Oracle WebLogic
+* deprecated ExpressionEvaluationUtils, turning off Spring's own JSP expression support in favor of JSP 2.0
+* deprecated EJB 2.x implementation class hierarchy in "ejb.support" package
+* deprecated DefaultAnnotationHandlerMapping and AnnotationMethodHandlerAdapter/ExceptionResolver (SPR-10005)
+* Hibernate 4 support independently compiled against Hibernate 4.1, avoiding the use of reflection (SPR-10039)
+* added integration with Tiles 3 (SPR-8825)
+
+
+Changes in version 3.2 RC1 (2012-11-04)
 ---------------------------------------
 
 * added "getApplicationName()" method to ApplicationContext interface
 * introduced LiveBeansView MBean and LiveBeansViewServlet (SPR-9662)
+* ResourceBundleMessageSource supports "defaultEncoding", "fallbackToSystemLocale", "cacheSeconds" (SPR-7392)
+* BeanWrapper does not fall back to String constructor if ConversionService attempt failed before (SPR-9865)
+* @Autowired, @Value, and qualifiers may be used as meta-annotations for custom injection annotations (SPR-9890)
+* @DateTimeFormat may now be used as a meta-annotation for custom formatting annotations
+* allow replaced-method 'arg-type' matches against element body as well as 'match' attribute (SPR-9812)
+* fixed potential race condition in concurrent calling of autowired methods on a prototype bean (SPR-9806)
+* cancel on a Future returned by a TaskScheduler works reliably (SPR-9821)
+* LoadTimeWeaverAware beans are consistently being created early for JPA weaving to work reliably (SPR-9857)
+* @ManagedResource supports placeholder resolution on all of its String properties (SPR-8244)
+* Spring-backed DataSources consistently implement JDBC 4.0's Wrapper interface (SPR-9770, SPR-9856)
+* optimized ResourceDatabasePopulator to work around JDK 1.7 substring performance regression (SPR-9781)
+* JdbcTestUtils no longer interprets SQL comments as statements (SPR-9593)
+* JPA persistence.xml files may use jar-file entries relative to the unit root (as per the JPA spec; SPR-9797)
+* added "jtaDataSource" property to JPA LocalContainerEntityManagerFactoryBean (for default units; SPR-9883)
+* Hibernate 4 LocalSessionFactoryBuilder sets thread context ClassLoader (for JBoss 7 compatibility; SPR-9846)
+* HttpComponentsHttpInvokerRequestExecutor uses HttpComponents 4.2 to explicitly release connections (SPR-9833)
+* UriComponentsBuilder is capable of handling opaque URIs as well (SPR-9798)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
+* added Spring MVC Test framework (SPR-9859, SPR-7951)
+* introduced support for loading a WebApplicationContext in the TestContext framework (SPR-5243)
+* introduced support for session & request scoped beans in the TestContext framework (SPR-4588)
+* introduced support for setting locales in MockHttpServletRequest (SPR-9724)
+* improved regular expression for parsing query params (SPR-9832)
+* added mock implementations of Http[Input|Output]Message
+* MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
+* added support for wildcard media types in AbstractView and ContentNegotiationViewResolver (SPR-9807)
+* added support for opaque URIs in UriComponentsBuilder (SPR-9798)
+* added ObjectToStringHttpMessageConverter that delegates to a ConversionService (SPR-9738)
+* fixed NullPointerException in AbstractMessageConverterMethodProcessor (SPR-9868)
+* fixed issue in AnnotationMethodHandlerExceptionResolver (SPR-9209)
+* added CallableProcessingInterceptor and DeferredResultProcessingInterceptor
+* added Jackson2ObjectMapperBeanFactory (SPR-9739)
+* the Jackson message converters now include "application/*+json" in supported media types (SPR-7905)
+* DispatcherPortlet uses a forward for rendering a view as resource response (SPR-9876)
+* prevent duplicate @Import processing and ImportBeanDefinitionRegistrar invocation (SPR-9925)
+* throw AopInvocationException on advice returning null for primitive type (SPR-4675)
+* resolve Collection element types during conversion (SPR-9257)
+* allow SpEL reserved words in type package names (SPR-9862)
+* provide alternative message code resolver styles (SPR-9707)
+* support conversion from Enum Interface (SPR-9692)
+* bypass conversion when possible (SPR-9566)
+* extend conditional conversion support (SPR-9928)
+* introduce @EnableMBeanExport (SPR-8943)
+* add StringToUUIDConverter (SPR-9765)
+* allow MapToMap conversion even without a default constructor (SPR-9284)
+* allow SpEL to resolve getter method against object of type Class (SPR-9017)
+* prevent memory leaks with @Configuration beans (SPR-9851)
+* support inferred base package for @ComponentScan (SPR-9586)
+* sort candidate @AspectJ methods deterministically (SPR-9729)
+* improve SimpleStreamingClientHttpRequest performance (SPR-9530)
+* added UnknownHttpStatusCodeException (SPR-9406)
+* support for custom global Joda DateTimeFormatters (SPR-7121)
+* support DateTimeFormat annotation without Joda (SPR-6508)
+* use concurrent cache to improve performance of GenericTypeResolver (SPR-8701)
+* cache and late resolve annotations on bean properties to improve performance (SPR-9166)
+* allow PropertyResolver implementations to ignore unresolvable ${placeholders} (SPR-9569)
+* FormHttpMessageConverter now adds Jackson JSON converters if available on the classpath (SPR-10055)
 
 
 Changes in version 3.2 M2 (2012-09-11)
@@ -34,20 +246,26 @@ Changes in version 3.2 M2 (2012-09-11)
 * now raising RestClientException instead of IllegalArgumentException for unknown status codes
 * introduced JacksonObjectMapperFactoryBean for configuring a Jackson ObjectMapper in XML
 * introduced ContentNegotiationManager/ContentNegotiationStrategy for resolving requested media types
+* introduced support for content negotiation options in MVC namespace and MVC Java config
+* added ContentNegotiationManagerFactoryBean (SPR-8420)
 * introduced support for the HTTP PATCH method in Spring MVC and RestTemplate (SPR-7985)
 * enabled smart suffix pattern matching in @RequestMapping methods (SPR-7632)
 * introduced "defaultCharset" property in StringHttpMessageConverter (SPR-9487)
 * introduced @ExceptionResolver annotation for detecting classes with @ExceptionHandler methods
 * moved RSS/Atom message converter registration ahead of Jackson/JAXB2
 * now handling BindException in DefaultHandlerExceptionResolver
-* DeferredResult type is now parameterized
+* now setting "javax.servlet.error.exception" in DefaultHandlerExceptionResolver (SPR-9653)
+* added ResponseEntityExceptionHandler alternative to DefaultHandlerExceptionResolver (SPR-9290)
 * now using reflection to instantiate StandardServletAsyncWebRequest
 * fixed issue with forward before async request processing
+* DeferredResult type is now parameterized
+* added async options to MVC namespace and Java config (SPR-9694)
+* refactored Spring MVC async support (SPR-9433)
 * media types in HTTP Accept headers can be parsed with single quotes (-> Android 2.x) (SPR-8917)
 * DispatcherPortlet no longer forwards event exceptions to the render phase by default (SPR-9287)
 * fixed Portlet request mapping priorities in cross-controller case (SPR-9303, SPR-9605)
 * introduced exclude patterns for mapped interceptors in MVC namespace and MVC Java config
-* introduced support for content negotiation options in MVC namespace and MVC Java config
+* introduced support for ApplicationContextInitializers in the TestContext framework (SPR-9011)
 * introduced support for named dispatchers in MockServletContext (SPR-9587)
 * introduced support for single, unqualified tx manager in the TestContext framework (SPR-9645)
 * introduced support for TransactionManagementConfigurer in the TestContext framework (SPR-9604)
@@ -58,6 +276,19 @@ Changes in version 3.2 M2 (2012-09-11)
 * introduced "countRowsInTableWhere()" and "dropTables()" in tx base test classes (SPR-9665)
 * introduced support for @ComponentScan base package inference (SPR-9586)
 * now building, testing and publishing against JDK7, maintaining compat with JDKs 5&6 (SPR-9715)
+* added support for filter registrations in AbstractDispatcherServletInitializer (SPR-9696)
+* improved no-match handling for @RequestMapping methods (SPR-9603)
+* added support for matrix variables (SPR-5499, SPR-7818)
+* added support generic types in @RequestBody arguments (SPR-9570)
+* added support for generic types in the RestTemplate (SPR-7023)
+* added fix to decode target parameters prior to saving a FlashMap (SPR-9657)
+* now allowing an Errors argument after @RequestBody and @RequestPart (SPR-7114)
+* introduced @ControllerAdvice annotation (SPR-9112)
+* added exclude patterns for mapped interceptors (SPR-6570)
+* now ignoring parse errors in HttpPutFormContentFilter (SPR-9769)
+* optimized performance of HandlerMethod (SPR-9747, SPR-9748)
+* optimized performance of AntPathStringMatcher (SPR-9749)
+* added support for Filters/Servlet invocation in MockFilterChain (SPR-9745)
 
 
 Changes in version 3.2 M1 (2012-05-28)

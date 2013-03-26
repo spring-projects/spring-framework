@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public interface Advised extends TargetClassAware {
 	 * Set whether the proxy should be exposed by the AOP framework as a
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.
-	 * (If it uses <code>this</code>, the invocation will not be advised).
+	 * (If it uses {@code this}, the invocation will not be advised).
 	 * <p>Default is "false", for optimal performance.
 	 */
 	void setExposeProxy(boolean exposeProxy);
@@ -85,7 +85,7 @@ public interface Advised extends TargetClassAware {
 	/**
 	 * Return whether the factory should expose the proxy as a ThreadLocal.
 	 * This can be necessary if a target object needs to invoke a method on itself
-	 * benefitting from advice. (If it invokes a method on <code>this</code> no advice
+	 * benefitting from advice. (If it invokes a method on {@code this} no advice
 	 * will apply.) Getting the proxy is analogous to an EJB calling getEJBObject().
 	 * @see AopContext
 	 */
@@ -110,7 +110,7 @@ public interface Advised extends TargetClassAware {
 
 	/**
 	 * Return the advisors applying to this proxy.
-	 * @return a list of Advisors applying to this proxy (never <code>null</code>)
+	 * @return a list of Advisors applying to this proxy (never {@code null})
 	 */
 	Advisor[] getAdvisors();
 
@@ -124,7 +124,7 @@ public interface Advised extends TargetClassAware {
 	 */
 	void addAdvisor(Advisor advisor) throws AopConfigException;
 
-	/** 
+	/**
 	 * Add an Advisor at the specified position in the chain.
 	 * @param advisor the advisor to add at the specified position in the chain
 	 * @param pos position in chain (0 is head). Must be valid.
@@ -135,7 +135,7 @@ public interface Advised extends TargetClassAware {
 	/**
 	 * Remove the given advisor.
 	 * @param advisor the advisor to remove
-	 * @return <code>true</code> if the advisor was removed; <code>false</code>
+	 * @return {@code true} if the advisor was removed; {@code false}
 	 * if the advisor was not found and hence could not be removed
 	 */
 	boolean removeAdvisor(Advisor advisor);
@@ -165,7 +165,7 @@ public interface Advised extends TargetClassAware {
 	 * @param a the advisor to replace
 	 * @param b the advisor to replace it with
 	 * @return whether it was replaced. If the advisor wasn't found in the
-	 * list of advisors, this method returns <code>false</code> and does nothing.
+	 * list of advisors, this method returns {@code false} and does nothing.
 	 * @throws AopConfigException in case of invalid advice
 	 */
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
@@ -174,9 +174,9 @@ public interface Advised extends TargetClassAware {
 	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
 	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
-	 * applies, and returned from the <code>getAdvisors()</code> method in this wrapped form.
+	 * applies, and returned from the {@code getAdvisors()} method in this wrapped form.
 	 * <p>Note that the given advice will apply to all invocations on the proxy,
-	 * even to the <code>toString()</code> method! Use appropriate advice implementations
+	 * even to the {@code toString()} method! Use appropriate advice implementations
 	 * or specify appropriate pointcuts to apply to a narrower set of methods.
 	 * @param advice advice to add to the tail of the chain
 	 * @throws AopConfigException in case of invalid advice
@@ -191,7 +191,7 @@ public interface Advised extends TargetClassAware {
 	 * with a pointcut that always applies, and returned from the {@link #getAdvisors()}
 	 * method in this wrapped form.
 	 * <p>Note: The given advice will apply to all invocations on the proxy,
-	 * even to the <code>toString()</code> method! Use appropriate advice implementations
+	 * even to the {@code toString()} method! Use appropriate advice implementations
 	 * or specify appropriate pointcuts to apply to a narrower set of methods.
 	 * @param pos index from 0 (head)
 	 * @param advice advice to add at the specified position in the advice chain
@@ -202,8 +202,8 @@ public interface Advised extends TargetClassAware {
 	/**
 	 * Remove the Advisor containing the given advice.
 	 * @param advice the advice to remove
-	 * @return <code>true</code> of the advice was found and removed;
-	 * <code>false</code> if there was no such advice
+	 * @return {@code true} of the advice was found and removed;
+	 * {@code false} if there was no such advice
 	 */
 	boolean removeAdvice(Advice advice);
 
@@ -219,7 +219,7 @@ public interface Advised extends TargetClassAware {
 
 
 	/**
-	 * As <code>toString()</code> will normally be delegated to the target,
+	 * As {@code toString()} will normally be delegated to the target,
 	 * this returns the equivalent for the AOP proxy.
 	 * @return a string description of the proxy configuration
 	 */

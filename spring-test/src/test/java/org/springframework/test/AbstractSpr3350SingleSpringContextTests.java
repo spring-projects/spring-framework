@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.test;
 
-import org.springframework.beans.Pet;
+import org.springframework.tests.sample.beans.Pet;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 
@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationContext;
  * Abstract JUnit 3.8 based unit test which verifies new functionality requested
  * in <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3550"
  * target="_blank">SPR-3350</a>.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -51,9 +51,10 @@ public abstract class AbstractSpr3350SingleSpringContextTests extends AbstractDe
 	 * configured
 	 * {@link #createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
 	 * BeanDefinitionReader}.
-	 * 
+	 *
 	 * @see org.springframework.test.AbstractSingleSpringContextTests#getConfigPath()
 	 */
+	@Override
 	protected abstract String getConfigPath();
 
 	/**

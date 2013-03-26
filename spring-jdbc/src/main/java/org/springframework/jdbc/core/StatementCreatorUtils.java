@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Derive a default SQL type from the given Java type.
 	 * @param javaType the Java type to translate
-	 * @return the corresponding SQL type, or <code>null</code> if none found
+	 * @return the corresponding SQL type, or {@code null} if none found
 	 */
 	public static int javaTypeToSqlParameterType(Class javaType) {
 		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
@@ -189,7 +189,7 @@ public abstract class StatementCreatorUtils {
 		if (inValue instanceof SqlParameterValue) {
 			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Overriding typeinfo with runtime info from SqlParameterValue: column index " + paramIndex +
+				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() +
 						", Type name " + parameterValue.getTypeName());
 			}
@@ -228,22 +228,30 @@ public abstract class StatementCreatorUtils {
 			boolean useSetObject = false;
 			sqlType = Types.NULL;
 			try {
-				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
-				String databaseProductName = dbmd.getDatabaseProductName();
-				String jdbcDriverName = dbmd.getDriverName();
-				if (databaseProductName.startsWith("Informix") ||
-						jdbcDriverName.startsWith("Microsoft SQL Server")) {
-					useSetObject = true;
-				}
-				else if (databaseProductName.startsWith("DB2") ||
-						jdbcDriverName.startsWith("jConnect") ||
-						jdbcDriverName.startsWith("SQLServer")||
-						jdbcDriverName.startsWith("Apache Derby")) {
-					sqlType = Types.VARCHAR;
-				}
+				sqlType = ps.getParameterMetaData().getParameterType(paramIndex);
 			}
 			catch (Throwable ex) {
-				logger.debug("Could not check database or driver name", ex);
+				logger.debug("JDBC 3.0 getParameterType call not supported", ex);
+				// JDBC driver not compliant with JDBC 3.0
+				// -> proceed with database-specific checks
+				try {
+					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
+					String databaseProductName = dbmd.getDatabaseProductName();
+					String jdbcDriverName = dbmd.getDriverName();
+					if (databaseProductName.startsWith("Informix") ||
+							jdbcDriverName.startsWith("Microsoft SQL Server")) {
+						useSetObject = true;
+					}
+					else if (databaseProductName.startsWith("DB2") ||
+							jdbcDriverName.startsWith("jConnect") ||
+							jdbcDriverName.startsWith("SQLServer")||
+							jdbcDriverName.startsWith("Apache Derby")) {
+						sqlType = Types.VARCHAR;
+					}
+				}
+				catch (Throwable ex2) {
+					logger.debug("Could not check database or driver name", ex2);
+				}
 			}
 			if (useSetObject) {
 				ps.setObject(paramIndex, null);
@@ -367,7 +375,7 @@ public abstract class StatementCreatorUtils {
 	}
 
 	/**
-	 * Check whether the given value is a <code>java.util.Date</code>
+	 * Check whether the given value is a {@code java.util.Date}
 	 * (but not one of the JDBC-specific subclasses).
 	 */
 	private static boolean isDateValue(Class inValueType) {
@@ -380,7 +388,7 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Clean up all resources held by parameter values which were passed to an
 	 * execute method. This is for example important for closing LOB values.
-	 * @param paramValues parameter values supplied. May be <code>null</code>.
+	 * @param paramValues parameter values supplied. May be {@code null}.
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
@@ -393,7 +401,7 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Clean up all resources held by parameter values which were passed to an
 	 * execute method. This is for example important for closing LOB values.
-	 * @param paramValues parameter values supplied. May be <code>null</code>.
+	 * @param paramValues parameter values supplied. May be {@code null}.
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */

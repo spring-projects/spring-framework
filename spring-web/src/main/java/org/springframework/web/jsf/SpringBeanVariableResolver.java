@@ -31,7 +31,10 @@ import javax.faces.el.VariableResolver;
  * @since 2.5
  * @see WebApplicationContextVariableResolver
  * @see FacesContextUtils#getRequiredWebApplicationContext
+ * @deprecated as of Spring 3.2, in favor of the JSF 1.2 based
+ * {@link org.springframework.web.jsf.el.SpringBeanFacesELResolver}
  */
+@Deprecated
 public class SpringBeanVariableResolver extends DelegatingVariableResolver {
 
 	public SpringBeanVariableResolver(VariableResolver originalVariableResolver) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,19 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTests {
 
 	protected static final String OBJECT_NAME = "bean:name=testBean4";
 
+	@Test
 	public void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
@@ -39,9 +43,10 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertFalse("Age is not writable", attr.isWritable());
 	}
 
+	@Test
 	public void testWithUnknownClass() throws Exception {
 		try {
-			InterfaceBasedMBeanInfoAssembler assembler = getWithMapping("com.foo.bar.Unknown");
+			getWithMapping("com.foo.bar.Unknown");
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
@@ -49,9 +54,10 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		}
 	}
 
+	@Test
 	public void testWithNonInterface() throws Exception {
 		try {
-			InterfaceBasedMBeanInfoAssembler assembler = getWithMapping("JmxTestBean");
+			getWithMapping("JmxTestBean");
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
@@ -59,10 +65,11 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		}
 	}
 
-	public void ignoreTestWithFallThrough() throws Exception {
+	@Test
+	public void testWithFallThrough() throws Exception {
 		InterfaceBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "org.springframework.jmx.export.assembler.ICustomJmxBean");
-		assembler.setManagedInterfaces(new Class[] {IAdditionalTestMethods.class});
+		assembler.setManagedInterfaces(new Class<?>[] {IAdditionalTestMethods.class});
 
 		ModelMBeanInfo inf = assembler.getMBeanInfo(getBean(), getObjectName());
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
@@ -70,6 +77,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertNickName(attr);
 	}
 
+	@Test
 	public void testNickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
@@ -77,24 +85,29 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertNickName(attr);
 	}
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 7;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 3;
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() throws Exception {
 		return getWithMapping(
 				"org.springframework.jmx.export.assembler.IAdditionalTestMethods, " +
 				"org.springframework.jmx.export.assembler.ICustomJmxBean");
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/interfaceAssemblerMapped.xml";
 	}

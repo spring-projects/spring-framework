@@ -43,5 +43,4 @@ public class RssChannelHttpMessageConverter extends AbstractWireFeedHttpMessageC
 		return Channel.class.isAssignableFrom(clazz);
 	}
 
-
 }

@@ -5,8 +5,8 @@
 	Tests for throws advice.
 -->
 <beans>
-	
-	<bean id="nopInterceptor" class="test.aop.NopInterceptor"/>
+
+	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
 
 	<bean id="exposeInvocation" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
 		<property name="targetClass">
@@ -14,8 +14,8 @@
 		</property>
 		<property name="targetField"><value>INSTANCE</value></property>
 	</bean>
-	
-	<bean id="countingBeforeAdvice" class="test.aop.CountingBeforeAdvice"/>
+
+	<bean id="countingBeforeAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
 
 	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
@@ -25,5 +25,5 @@
 			<value>exposeInvocation,countingBeforeAdvice,nopInterceptor</value>
 		</property>
 	</bean>
-	
-</beans>		
+
+</beans>

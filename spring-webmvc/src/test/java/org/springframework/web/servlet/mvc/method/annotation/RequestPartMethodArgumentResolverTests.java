@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -46,29 +32,31 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.MockPart;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockMultipartFile;
+import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
+import org.springframework.mock.web.test.MockPart;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
-import org.springframework.web.servlet.mvc.method.annotation.RequestPartMethodArgumentResolver;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestPartMethodArgumentResolverTests {
@@ -76,7 +64,7 @@ public class RequestPartMethodArgumentResolverTests {
 	private RequestPartMethodArgumentResolver resolver;
 
 	private HttpMessageConverter<SimpleBean> messageConverter;
-	
+
 	private MultipartFile multipartFile1;
 	private MultipartFile multipartFile2;
 
@@ -99,10 +87,10 @@ public class RequestPartMethodArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-		
+
 		Method method = getClass().getMethod("handle", SimpleBean.class, SimpleBean.class, SimpleBean.class,
 				MultipartFile.class, List.class, Integer.TYPE, MultipartFile.class, Part.class, MultipartFile.class);
-		
+
 		paramRequestPart = new MethodParameter(method, 0);
 		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		paramNamedRequestPart = new MethodParameter(method, 1);
@@ -116,13 +104,12 @@ public class RequestPartMethodArgumentResolverTests {
 		paramServlet30Part.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		paramRequestParamAnnot = new MethodParameter(method, 8);
 
-		messageConverter = createMock(HttpMessageConverter.class);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		replay(messageConverter);
+		messageConverter = mock(HttpMessageConverter.class);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
 		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
 		reset(messageConverter);
-		
+
 		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", (byte[]) null);
 		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", (byte[]) null);
 		multipartRequest = new MockMultipartHttpServletRequest();
@@ -139,16 +126,16 @@ public class RequestPartMethodArgumentResolverTests {
 		assertTrue("Part parameter not supported", resolver.supportsParameter(paramServlet30Part));
 		assertFalse("non-RequestPart parameter supported", resolver.supportsParameter(paramInt));
 		assertFalse("@RequestParam args not supported", resolver.supportsParameter(paramRequestParamAnnot));
-	}	
+	}
 
-	@Test 
+	@Test
 	public void resolveMultipartFile() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
 		assertNotNull(actual);
 		assertSame(multipartFile1, actual);
 	}
 
-	@Test 
+	@Test
 	public void resolveMultipartFileList() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFileList, null, webRequest, null);
 		assertNotNull(actual);
@@ -193,7 +180,7 @@ public class RequestPartMethodArgumentResolverTests {
 	public void resolveNamedRequestPart() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramNamedRequestPart);
 	}
-	
+
 	@Test
 	public void resolveRequestPartNotValid() throws Exception {
 		try {
@@ -205,12 +192,12 @@ public class RequestPartMethodArgumentResolverTests {
 			assertNotNull(e.getBindingResult().getFieldError("name"));
 		}
 	}
-	
+
 	@Test
 	public void resolveRequestPartValid() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramNamedRequestPart);
 	}
-	
+
 	@Test
 	public void resolveRequestPartRequired() throws Exception {
 		try {
@@ -225,7 +212,7 @@ public class RequestPartMethodArgumentResolverTests {
 	public void resolveRequestPartNotRequired() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramValidRequestPart);
 	}
-	
+
 	@Test(expected=MultipartException.class)
 	public void isMultipartRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -246,18 +233,15 @@ public class RequestPartMethodArgumentResolverTests {
 	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws IOException, Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		expect(messageConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
-		expect(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).andReturn(argValue);
-		replay(messageConverter);
+		given(messageConverter.canRead(SimpleBean.class, contentType)).willReturn(true);
+		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(argValue);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 
 		assertEquals("Invalid argument value", argValue, actualValue);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
-		
-		verify(messageConverter);
-	}	
+	}
 
 	private static class SimpleBean {
 
@@ -273,8 +257,9 @@ public class RequestPartMethodArgumentResolverTests {
 			return name;
 		}
 	}
-	
+
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();
@@ -284,9 +269,9 @@ public class RequestPartMethodArgumentResolverTests {
 		}
 	}
 
-	public void handle(@RequestPart SimpleBean requestPart, 
-					   @RequestPart(value="requestPart", required=false) SimpleBean namedRequestPart, 
-					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart, 
+	public void handle(@RequestPart SimpleBean requestPart,
+					   @RequestPart(value="requestPart", required=false) SimpleBean namedRequestPart,
+					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart,
 					   @RequestPart("requestPart") MultipartFile multipartFile,
 					   @RequestPart("requestPart") List<MultipartFile> multipartFileList,
 					   int i,

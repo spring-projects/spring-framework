@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
- * to produce this format). <code>&lt;beans&gt;</code> doesn't need to be the root
+ * to produce this format). {@code &lt;beans&gt;} doesn't need to be the root
  * element of the XML document: This class will parse all bean definition elements
  * in the XML file, not regarding the actual root element.
  *
@@ -72,15 +72,14 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	public static final String RESOURCE_ATTRIBUTE = "resource";
 
-	/** @see org.springframework.context.annotation.Profile */
 	public static final String PROFILE_ATTRIBUTE = "profile";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private XmlReaderContext readerContext;
-
 	private Environment environment;
+
+	private XmlReaderContext readerContext;
 
 	private BeanDefinitionParserDelegate delegate;
 
@@ -104,12 +103,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
-
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
-
 		doRegisterBeanDefinitions(root);
 	}
+
 
 	/**
 	 * Register each bean definition within the given root {@code <beans/>} element.
@@ -120,21 +118,22 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected void doRegisterBeanDefinitions(Element root) {
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 		if (StringUtils.hasText(profileSpec)) {
-			Assert.state(this.environment != null, "environment property must not be null");
-			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+			Assert.state(this.environment != null, "Environment must be set for evaluating profiles");
+			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
+					profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
 				return;
 			}
 		}
 
-		// any nested <beans> elements will cause recursion in this method. In
+		// Any nested <beans> elements will cause recursion in this method. In
 		// order to propagate and preserve <beans> default-* attributes correctly,
 		// keep track of the current (parent) delegate, which may be null. Create
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
 		BeanDefinitionParserDelegate parent = this.delegate;
-		this.delegate = createHelper(readerContext, root, parent);
+		this.delegate = createHelper(this.readerContext, root, parent);
 
 		preProcessXml(root);
 		parseBeanDefinitions(root, this.delegate);
@@ -143,7 +142,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		this.delegate = parent;
 	}
 
-	protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+	protected BeanDefinitionParserDelegate createHelper(
+			XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
+
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext, environment);
 		delegate.initDefaults(root, parentDelegate);
 		return delegate;
@@ -223,7 +224,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 		Set<Resource> actualResources = new LinkedHashSet<Resource>(4);
 
-		// Discover whether the location is an absolute or relative URI 
+		// Discover whether the location is an absolute or relative URI
 		boolean absoluteLocation = false;
 		try {
 			absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();

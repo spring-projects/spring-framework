@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.scheduling.concurrent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -29,12 +24,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.ErrorHandler;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
@@ -44,7 +42,6 @@ public class ThreadPoolTaskSchedulerTests {
 
 	private static final String THREAD_NAME_PREFIX = "test-";
 
-
 	private final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 
 
@@ -52,6 +49,11 @@ public class ThreadPoolTaskSchedulerTests {
 	public void initScheduler() {
 		scheduler.setThreadNamePrefix(THREAD_NAME_PREFIX);
 		scheduler.afterPropertiesSet();
+	}
+
+	@After
+	public void shutdownScheduler() {
+		scheduler.destroy();
 	}
 
 
@@ -229,7 +231,7 @@ public class ThreadPoolTaskSchedulerTests {
 		private final int expectedRunCount;
 
 		private final AtomicInteger actualRunCount = new AtomicInteger();
-	
+
 		private final CountDownLatch latch;
 
 		private Thread lastThread;
@@ -239,6 +241,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.latch = new CountDownLatch(expectedRunCount);
 		}
 
+		@Override
 		public void run() {
 			lastThread = Thread.currentThread();
 			if (actualRunCount.incrementAndGet() > expectedRunCount) {
@@ -254,11 +257,12 @@ public class ThreadPoolTaskSchedulerTests {
 		private final int expectedRunCount;
 
 		private final AtomicInteger actualRunCount = new AtomicInteger();
-	
+
 		TestCallable(int expectedRunCount) {
 			this.expectedRunCount = expectedRunCount;
 		}
 
+		@Override
 		public String call() throws Exception {
 			if (actualRunCount.incrementAndGet() > expectedRunCount) {
 				throw new RuntimeException("intentional test failure");
@@ -278,6 +282,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.latch = new CountDownLatch(expectedErrorCount);
 		}
 
+		@Override
 		public void handleError(Throwable t) {
 			this.lastError = t;
 			this.latch.countDown();
@@ -295,6 +300,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.maxRunCount = maxRunCount;
 		}
 
+		@Override
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 			if (this.actualRunCount.incrementAndGet() > this.maxRunCount) {
 				return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.jdo;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.jdo.Constants;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -32,7 +33,6 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.util.ClassUtils;
@@ -40,19 +40,19 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Default implementation of the {@link JdoDialect} interface.
- * Updated to build on JDO 2.0 or higher, as of Spring 2.5.
+ * Requires JDO 2.0; explicitly supports JDO API features up until 3.0.
  * Used as default dialect by {@link JdoAccessor} and {@link JdoTransactionManager}.
  *
- * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
- * Returns a handle for a JDO2 DataStoreConnection on <code>getJdbcConnection</code>.
- * Calls the corresponding JDO2 PersistenceManager operation on <code>flush</code>
- * Ignores a given query timeout in <code>applyQueryTimeout</code>.
+ * <p>Simply begins a standard JDO transaction in {@code beginTransaction}.
+ * Returns a handle for a JDO2 DataStoreConnection on {@code getJdbcConnection}.
+ * Calls the corresponding JDO2 PersistenceManager operation on {@code flush}
+ * Translates {@code applyQueryTimeout} to JDO 3.0's {@code setTimeoutMillis}.
  * Uses a Spring SQLExceptionTranslator for exception translation, if applicable.
  *
  * <p>Note that, even with JDO2, vendor-specific subclasses are still necessary
  * for special transaction semantics and more sophisticated exception translation.
  * Furthermore, vendor-specific subclasses are encouraged to expose the native JDBC
- * Connection on <code>getJdbcConnection</code>, rather than JDO2's wrapper handle.
+ * Connection on {@code getJdbcConnection}, rather than JDO2's wrapper handle.
  *
  * <p>This class also implements the PersistenceExceptionTranslator interface,
  * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
@@ -122,22 +122,47 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	//-------------------------------------------------------------------------
 
 	/**
-	 * This implementation invokes the standard JDO <code>Transaction.begin</code>
-	 * method. Throws an InvalidIsolationLevelException if a non-default isolation
-	 * level is set.
+	 * This implementation invokes the standard JDO {@link Transaction#begin()}
+	 * method and also {@link Transaction#setIsolationLevel(String)} if necessary.
 	 * @see javax.jdo.Transaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
 	 */
 	public Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
 
-		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			throw new InvalidIsolationLevelException(
-					"Standard JDO does not support custom isolation levels: " +
-					"use a special JdoDialect implementation for your JDO provider");
+		String jdoIsolationLevel = getJdoIsolationLevel(definition);
+		if (jdoIsolationLevel != null) {
+			transaction.setIsolationLevel(jdoIsolationLevel);
 		}
 		transaction.begin();
 		return null;
+	}
+
+	/**
+	 * Determine the JDO isolation level String to use for the given
+	 * Spring transaction definition.
+	 * @param definition the Spring transaction definition
+	 * @return the corresponding JDO isolation level String, or {@code null}
+	 * to indicate that no isolation level should be set explicitly
+	 * @see Transaction#setIsolationLevel(String)
+	 * @see Constants#TX_SERIALIZABLE
+	 * @see Constants#TX_REPEATABLE_READ
+	 * @see Constants#TX_READ_COMMITTED
+	 * @see Constants#TX_READ_UNCOMMITTED
+	 */
+	protected String getJdoIsolationLevel(TransactionDefinition definition) {
+		switch (definition.getIsolationLevel()) {
+			case TransactionDefinition.ISOLATION_SERIALIZABLE:
+				return Constants.TX_SERIALIZABLE;
+			case TransactionDefinition.ISOLATION_REPEATABLE_READ:
+				return Constants.TX_REPEATABLE_READ;
+			case TransactionDefinition.ISOLATION_READ_COMMITTED:
+				return Constants.TX_READ_COMMITTED;
+			case TransactionDefinition.ISOLATION_READ_UNCOMMITTED:
+				return Constants.TX_READ_UNCOMMITTED;
+			default:
+				return null;
+		}
 	}
 
 	/**
@@ -152,7 +177,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * This implementation returns a DataStoreConnectionHandle for JDO2,
 	 * which will also work on JDO1 until actually accessing the JDBC Connection.
 	 * <p>For pre-JDO2 implementations, override this method to return the
-	 * Connection through the corresponding vendor-specific mechanism, or <code>null</code>
+	 * Connection through the corresponding vendor-specific mechanism, or {@code null}
 	 * if the Connection is not retrievable.
 	 * <p><b>NOTE:</b> A JDO2 DataStoreConnection is always a wrapper,
 	 * never the native JDBC Connection. If you need access to the native JDBC
@@ -164,7 +189,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * fetched Connection to be closed before continuing PersistenceManager work.
 	 * For this reason, the exposed ConnectionHandle eagerly releases its JDBC
 	 * Connection at the end of each JDBC data access operation (that is, on
-	 * <code>DataSourceUtils.releaseConnection</code>).
+	 * {@code DataSourceUtils.releaseConnection}).
 	 * @see javax.jdo.PersistenceManager#getDataStoreConnection()
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
@@ -180,7 +205,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * will implicitly be closed with the PersistenceManager.
 	 * <p>If the JDO provider returns a Connection handle that it
 	 * expects the application to close, the dialect needs to invoke
-	 * <code>Connection.close</code> here.
+	 * {@code Connection.close} here.
 	 * @see java.sql.Connection#close()
 	 */
 	public void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
@@ -212,7 +237,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * Implementation of the PersistenceExceptionTranslator interface,
 	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
 	 * <p>Converts the exception if it is a JDOException, using this JdoDialect.
-	 * Else returns <code>null</code> to indicate an unknown exception.
+	 * Else returns {@code null} to indicate an unknown exception.
 	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
 	 * @see #translateException
 	 */
@@ -237,10 +262,10 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 
 	/**
 	 * Template method for extracting a SQL String from the given exception.
-	 * <p>Default implementation always returns <code>null</code>. Can be overridden in
+	 * <p>Default implementation always returns {@code null}. Can be overridden in
 	 * subclasses to extract SQL Strings for vendor-specific exception classes.
 	 * @param ex the JDOException, containing a SQLException
-	 * @return the SQL String, or <code>null</code> if none found
+	 * @return the SQL String, or {@code null} if none found
 	 */
 	protected String extractSqlStringFromException(JDOException ex) {
 		return null;
@@ -249,8 +274,8 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 
 	/**
 	 * ConnectionHandle implementation that fetches a new JDO2 DataStoreConnection
-	 * for every <code>getConnection</code> call and closes the Connection on
-	 * <code>releaseConnection</code>. This is necessary because JDO2 requires the
+	 * for every {@code getConnection} call and closes the Connection on
+	 * {@code releaseConnection}. This is necessary because JDO2 requires the
 	 * fetched Connection to be closed before continuing PersistenceManager work.
 	 * @see javax.jdo.PersistenceManager#getDataStoreConnection()
 	 */

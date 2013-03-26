@@ -81,9 +81,9 @@ class TypeConverterDelegate {
 	 * Convert the value to the specified required type.
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * (or {@code null} if not known, for example in case of a collection element)
 	 * @param methodParam the method parameter that is the target of the conversion
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
@@ -98,9 +98,9 @@ class TypeConverterDelegate {
 	 * Convert the value to the specified required type.
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * (or {@code null} if not known, for example in case of a collection element)
 	 * @param field the reflective field that is the target of the conversion
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
@@ -114,10 +114,10 @@ class TypeConverterDelegate {
 	/**
 	 * Convert the value to the required type for the specified property.
 	 * @param propertyName name of the property
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
+	 * @param oldValue the previous value, if available (may be {@code null})
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * (or {@code null} if not known, for example in case of a collection element)
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
@@ -132,10 +132,10 @@ class TypeConverterDelegate {
 	 * Convert the value to the required type (if necessary from a String),
 	 * for the specified property.
 	 * @param propertyName name of the property
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
+	 * @param oldValue the previous value, if available (may be {@code null})
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * (or {@code null} if not known, for example in case of a collection element)
 	 * @param typeDescriptor the descriptor for the target property or field
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
@@ -215,7 +215,7 @@ class TypeConverterDelegate {
 					return (T) convertedValue.toString();
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-					if (!requiredType.isInterface() && !requiredType.isEnum()) {
+					if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
 						try {
 							Constructor strCtor = requiredType.getConstructor(String.class);
 							return (T) BeanUtils.instantiateClass(strCtor, convertedValue);
@@ -237,7 +237,6 @@ class TypeConverterDelegate {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
-					
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 					standardConversion = true;
 				}
@@ -327,7 +326,7 @@ class TypeConverterDelegate {
 	/**
 	 * Find a default editor for the given type.
 	 * @param requiredType the type to find an editor for
-	 * @return the corresponding editor, or <code>null</code> if none
+	 * @return the corresponding editor, or {@code null} if none
 	 */
 	private PropertyEditor findDefaultEditor(Class requiredType) {
 		PropertyEditor editor = null;
@@ -345,10 +344,10 @@ class TypeConverterDelegate {
 	/**
 	 * Convert the value to the required type (if necessary from a String),
 	 * using the given property editor.
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
+	 * @param oldValue the previous value, if available (may be {@code null})
 	 * @param newValue the proposed new value
 	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * (or {@code null} if not known, for example in case of a collection element)
 	 * @param editor the PropertyEditor to use
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
@@ -435,7 +434,7 @@ class TypeConverterDelegate {
 
 	/**
 	 * Convert the given text value using the given property editor.
-	 * @param oldValue the previous value, if available (may be <code>null</code>)
+	 * @param oldValue the previous value, if available (may be {@code null})
 	 * @param newTextValue the proposed text value
 	 * @param editor the PropertyEditor to use
 	 * @return the converted value

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.scripting.support;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.beans.factory.BeanFactory;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -27,15 +28,12 @@ import org.springframework.beans.factory.BeanFactory;
 public class RefreshableScriptTargetSourceTests extends TestCase {
 
 	public void testCreateWithNullScriptSource() throws Exception {
-		MockControl mockFactory = MockControl.createNiceControl(BeanFactory.class);
-		mockFactory.replay();
 		try {
-			new RefreshableScriptTargetSource((BeanFactory) mockFactory.getMock(), "a.bean", null, null, false);
+			new RefreshableScriptTargetSource(mock(BeanFactory.class), "a.bean", null, null, false);
 			fail("Must have failed when passed a null ScriptSource.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
-		mockFactory.verify();
 	}
 
 }

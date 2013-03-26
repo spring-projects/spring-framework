@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package org.springframework.web.context.request;
 
 import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.easymock.MockControl;
-import static org.junit.Assert.*;
 import org.junit.Test;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpSession;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpSession;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -34,6 +35,7 @@ public class ServletRequestAttributesTests {
 
 	private static final String KEY = "ThatThingThatThing";
 
+	@SuppressWarnings("serial")
 	private static final Serializable VALUE = new Serializable() {
 	};
 
@@ -131,17 +133,12 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void getSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
-		request.getSession(false);
-		mockRequest.setReturnValue(null, 1);
-		mockRequest.replay();
+		HttpServletRequest request = mock(HttpServletRequest.class);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		assertNull(value);
-
-		mockRequest.verify();
+		verify(request).getSession(false);
 	}
 
 	@Test
@@ -158,16 +155,11 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void removeSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
-		request.getSession(false);
-		mockRequest.setReturnValue(null, 1);
-		mockRequest.replay();
+		HttpServletRequest request = mock(HttpServletRequest.class);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.removeAttribute(KEY, RequestAttributes.SCOPE_SESSION);
-
-		mockRequest.verify();
+		verify(request).getSession(false);
 	}
 
 }

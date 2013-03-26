@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ResourceTestBean;
+import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -71,7 +71,7 @@ public final class ClassPathXmlApplicationContextTests {
 	private static final String TEST_PROPERTIES = "test.properties";
 	private static final String FQ_TEST_PROPERTIES = "classpath:org/springframework/beans/factory/xml/" + TEST_PROPERTIES;
 
-	
+
 	@Test
 	public void testSingleConfigLocation() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(FQ_SIMPLE_CONTEXT);
@@ -319,8 +319,8 @@ public final class ClassPathXmlApplicationContextTests {
 
 	@Test
 	public void testResourceAndInputStream() throws IOException {
-		ClassPathXmlApplicationContext ctx =
-		    new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {
+			@Override
 			public Resource getResource(String location) {
 				if (TEST_PROPERTIES.equals(location)) {
 					return new ClassPathResource(TEST_PROPERTIES, ClassPathXmlApplicationContextTests.class);

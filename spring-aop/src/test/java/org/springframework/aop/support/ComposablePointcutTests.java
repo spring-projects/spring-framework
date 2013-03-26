@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2008 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,38 +26,42 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.core.NestedRuntimeException;
 
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
 public final class ComposablePointcutTests {
-	
+
 	public static MethodMatcher GETTER_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}
 	};
-	
+
 	public static MethodMatcher GET_AGE_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().equals("getAge");
 		}
 	};
-	
+
 	public static MethodMatcher ABSQUATULATE_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().equals("absquatulate");
 		}
 	};
-	
+
 	public static MethodMatcher SETTER_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("set");
 		}
 	};
-	
+
 	@Test
 	public void testMatchAll() throws NoSuchMethodException {
 		Pointcut pc = new ComposablePointcut();
@@ -68,9 +72,9 @@ public final class ComposablePointcutTests {
 	@Test
 	public void testFilterByClass() throws NoSuchMethodException {
 		ComposablePointcut pc = new ComposablePointcut();
-	
+
 		assertTrue(pc.getClassFilter().matches(Object.class));
-		
+
 		ClassFilter cf = new RootClassFilter(Exception.class);
 		pc.intersection(cf);
 		assertFalse(pc.getClassFilter().matches(Object.class));
@@ -92,15 +96,15 @@ public final class ComposablePointcutTests {
 		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class, null));
 		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class, null));
 		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class, null));
-		
+
 		pc.union(GETTER_METHOD_MATCHER);
 		// Should now match all getter methods
 		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class, null));
 		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class, null));
 		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class, null));
-		
+
 		pc.union(ABSQUATULATE_METHOD_MATCHER);
-		// Should now match absquatulate() as well 
+		// Should now match absquatulate() as well
 		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class, null));
 		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class, null));
 		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class, null));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,14 @@
  */
 package org.springframework.aop.aspectj.annotation;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
@@ -39,9 +46,7 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.junit.Test;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
@@ -52,14 +57,14 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
 import test.aop.DefaultLockable;
 import test.aop.Lockable;
 import test.aop.PerTargetAspect;
 import test.aop.TwoAdviceAspect;
-import test.beans.ITestBean;
-import test.beans.TestBean;
 
 /**
  * Abstract tests for AspectJAdvisorFactory.
@@ -76,7 +81,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	 * @return the fixture
 	 */
 	protected abstract AspectJAdvisorFactory getFixture();
-	
+
 
 	@Test
 	public void testRejectsPerCflowAspect() {
@@ -88,7 +93,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 			assertTrue(ex.getMessage().indexOf("PERCFLOW") != -1);
 		}
 	}
-	
+
 	@Test
 	public void testRejectsPerCflowBelowAspect() {
 		try {
@@ -105,11 +110,11 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
-		TestBean itb = (TestBean) createProxy(target, 
+		TestBean itb = (TestBean) createProxy(target,
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerTargetAspect(), "someBean")),
 				TestBean.class);
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
-		
+
 		Advised advised = (Advised) itb;
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
@@ -121,10 +126,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		assertNotSame(imapa.getDeclaredPointcut(), imapa.getPointcut());
-		
+
 		// Hit the method in the per clause to instantiate the aspect
 		itb.getSpouse();
-		
+
 		assertTrue(maaif.isMaterialized());
 
 		assertEquals("Around advice must apply", 0, itb.getAge());
@@ -190,11 +195,11 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
-		TestBean itb = (TestBean) createProxy(target, 
+		TestBean itb = (TestBean) createProxy(target,
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerThisAspect(), "someBean")),
 				TestBean.class);
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
-		
+
 		Advised advised = (Advised) itb;
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
 		assertEquals(4, advised.getAdvisors().length);
@@ -208,30 +213,30 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		assertNotSame(imapa.getDeclaredPointcut(), imapa.getPointcut());
-		
+
 		// Hit the method in the per clause to instantiate the aspect
 		itb.getSpouse();
-		
+
 		assertTrue(maaif.isMaterialized());
 
 		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
-	
+
 		assertEquals("Around advice must apply", 0, itb.getAge());
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
-	
+
 	@Test
 	public void testPerTypeWithinAspect() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
 		PerTypeWithinAspectInstanceFactory aif = new PerTypeWithinAspectInstanceFactory();
-		TestBean itb = (TestBean) createProxy(target, 
-				getFixture().getAdvisors(aif), 
+		TestBean itb = (TestBean) createProxy(target,
+				getFixture().getAdvisors(aif),
 				TestBean.class);
 		assertEquals("No method calls", 0, aif.getInstantiationCount());
 		assertEquals("Around advice must now apply", 0, itb.getAge());
-		
+
 		Advised advised = (Advised) itb;
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
 		assertEquals(4, advised.getAdvisors().length);
@@ -245,19 +250,19 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		assertNotSame(imapa.getDeclaredPointcut(), imapa.getPointcut());
-		
+
 		// Hit the method in the per clause to instantiate the aspect
 		itb.getSpouse();
-		
+
 		assertTrue(maaif.isMaterialized());
 
 		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
-	
+
 		assertEquals("Around advice must still apply", 1, itb.getAge());
 		assertEquals("Around advice must still apply", 2, itb.getAge());
-		
-		TestBean itb2 = (TestBean) createProxy(target, 
-				getFixture().getAdvisors(aif), 
+
+		TestBean itb2 = (TestBean) createProxy(target,
+				getFixture().getAdvisors(aif),
 				TestBean.class);
 		assertEquals(1, aif.getInstantiationCount());
 		assertEquals("Around advice be independent for second instance", 0, itb2.getAge());
@@ -282,20 +287,20 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	public void testNamedPointcutFromAspectLibraryWithBinding() {
 		TestBean target = new TestBean();
-		ITestBean itb = (ITestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NamedPointcutAspectFromLibraryWithBinding(),"someBean")), 
+		ITestBean itb = (ITestBean) createProxy(target,
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NamedPointcutAspectFromLibraryWithBinding(),"someBean")),
 				ITestBean.class);
 		itb.setAge(10);
 		assertEquals("Around advice must apply", 20, itb.getAge());
 		assertEquals(20,target.getAge());
 	}
-	
+
 	private void testNamedPointcuts(Object aspectInstance) {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
-		ITestBean itb = (ITestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspectInstance,"someBean")), 
+		ITestBean itb = (ITestBean) createProxy(target,
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspectInstance,"someBean")),
 				ITestBean.class);
 		assertEquals("Around advice must apply", -1, itb.getAge());
 		assertEquals(realAge, target.getAge());
@@ -304,8 +309,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	public void testBindingWithSingleArg() {
 		TestBean target = new TestBean();
-		ITestBean itb = (ITestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new BindingAspectWithSingleArg(),"someBean")), 
+		ITestBean itb = (ITestBean) createProxy(target,
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new BindingAspectWithSingleArg(),"someBean")),
 				ITestBean.class);
 		itb.setAge(10);
 		assertEquals("Around advice must apply", 20, itb.getAge());
@@ -315,10 +320,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	public void testBindingWithMultipleArgsDifferentlyOrdered() {
 		ManyValuedArgs target = new ManyValuedArgs();
-		ManyValuedArgs mva = (ManyValuedArgs) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new ManyValuedArgs(),"someBean")), 
+		ManyValuedArgs mva = (ManyValuedArgs) createProxy(target,
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new ManyValuedArgs(),"someBean")),
 				ManyValuedArgs.class);
-		
+
 		String a = "a";
 		int b = 12;
 		int c = 25;
@@ -327,7 +332,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		String expectedResult = a + b+ c + d + e;
 		assertEquals(expectedResult, mva.mungeArgs(a, b, c, d, e));
 	}
-	
+
 	/**
 	 * In this case the introduction will be made.
 	 */
@@ -344,7 +349,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		assertFalse(lockable.locked());
 		lockable.lock();
 		assertTrue(lockable.locked());
-		
+
 		NotLockable notLockable2Target = new NotLockable();
 		NotLockable notLockable2 = (NotLockable) createProxy(notLockable2Target,
 				getFixture().getAdvisors(
@@ -363,17 +368,17 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 		assertTrue(lockable2.locked());
 	}
-	
+
 	@Test
 	public void testIntroductionAdvisorExcludedFromTargetImplementingInterface() {
 		assertTrue(AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(
 									new SingletonMetadataAwareAspectInstanceFactory(
-											new MakeLockable(),"someBean")), 
+											new MakeLockable(),"someBean")),
 						CannotBeUnlocked.class).isEmpty());
 		assertEquals(2, AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class).size());
 	}
-	
+
 	@Test
 	public void testIntroductionOnTargetImplementingInterface() {
 		CannotBeUnlocked target = new CannotBeUnlocked();
@@ -385,8 +390,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 						CannotBeUnlocked.class
 				),
 				CannotBeUnlocked.class);
-		assertTrue(proxy instanceof Lockable);
-		Lockable lockable = (Lockable) proxy;
+		assertThat(proxy, instanceOf(Lockable.class));
+		Lockable lockable = proxy;
 		assertTrue("Already locked", lockable.locked());
 		lockable.lock();
 		assertTrue("Real target ignores locking", lockable.locked());
@@ -398,8 +403,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 			// Ok
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
 		LinkedList target = new LinkedList();
@@ -411,11 +415,12 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 				CannotBeUnlocked.class);
 		assertFalse("Type pattern must have excluded mixin", proxy instanceof Lockable);
 	}
+
 	/* prereq AspectJ 1.6.7
 	@Test
 	public void testIntroductionBasedOnAnnotationMatch_Spr5307() {
 		AnnotatedTarget target = new AnnotatedTargetImpl();
-		
+
 		List<Advisor> advisors = getFixture().getAdvisors(
 				new SingletonMetadataAwareAspectInstanceFactory(new MakeAnnotatedTypeModifiable(),"someBean"));
 		Object proxy = createProxy(target,
@@ -426,23 +431,25 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		Lockable lockable = (Lockable)proxy;
 		lockable.locked();
 	}
-    */
+	*/
+
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
+
 	public void XtestIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
-		
+
 		List<Advisor> advisors = getFixture().getAdvisors(
 				new SingletonMetadataAwareAspectInstanceFactory(new MakeITestBeanModifiable(),"someBean"));
 		advisors.addAll(getFixture().getAdvisors(
 				new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")));
-		
+
 		Modifiable modifiable = (Modifiable) createProxy(target,
 				advisors,
 				ITestBean.class);
-		assertTrue(modifiable instanceof Modifiable);
+		assertThat(modifiable, instanceOf(Modifiable.class));
 		Lockable lockable = (Lockable) modifiable;
 		assertFalse(lockable.locked());
-		
+
 		ITestBean itb = (ITestBean) modifiable;
 		assertFalse(modifiable.isModified());
 		int oldAge = itb.getAge();
@@ -454,7 +461,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		assertFalse("Setting same value does not modify", modifiable.isModified());
 		itb.setName("And now for something completely different");
 		assertTrue(modifiable.isModified());
-		
+
 		lockable.lock();
 		assertTrue(lockable.locked());
 		try {
@@ -474,8 +481,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		UnsupportedOperationException expectedException = new UnsupportedOperationException();
 		List<Advisor> advisors = getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new ExceptionAspect(expectedException),"someBean"));
 		assertEquals("One advice method was found", 1, advisors.size());
-		ITestBean itb = (ITestBean) createProxy(target, 
-				advisors, 
+		ITestBean itb = (ITestBean) createProxy(target,
+				advisors,
 				ITestBean.class);
 		try {
 			itb.getAge();
@@ -485,7 +492,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 			assertSame(expectedException, ex);
 		}
 	}
-	
+
 	// TODO document this behaviour.
 	// Is it different AspectJ behaviour, at least for checked exceptions?
 	@Test
@@ -494,8 +501,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		RemoteException expectedException = new RemoteException();
 		List<Advisor> advisors = getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new ExceptionAspect(expectedException),"someBean"));
 		assertEquals("One advice method was found", 1, advisors.size());
-		ITestBean itb = (ITestBean) createProxy(target, 
-				advisors, 
+		ITestBean itb = (ITestBean) createProxy(target,
+				advisors,
 				ITestBean.class);
 		try {
 			itb.getAge();
@@ -505,7 +512,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 			assertSame(expectedException, ex.getCause());
 		}
 	}
-	
+
 	protected Object createProxy(Object target, List<Advisor> advisors, Class<?>... interfaces) {
 		ProxyFactory pf = new ProxyFactory(target);
 		if (interfaces.length > 1 || interfaces[0].isInterface()) {
@@ -533,8 +540,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		TwoAdviceAspect twoAdviceAspect = new TwoAdviceAspect();
 		List<Advisor> advisors = getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(twoAdviceAspect,"someBean"));
 		assertEquals("Two advice methods found", 2, advisors.size());
-		ITestBean itb = (ITestBean) createProxy(target, 
-				advisors, 
+		ITestBean itb = (ITestBean) createProxy(target,
+				advisors,
 				ITestBean.class);
 		itb.setName("");
 		assertEquals(0, itb.getAge());
@@ -549,8 +556,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 		ExceptionHandling afterReturningAspect = new ExceptionHandling();
 		List<Advisor> advisors = getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(afterReturningAspect,"someBean"));
-		Echo echo = (Echo) createProxy(target, 
-				advisors, 
+		Echo echo = (Echo) createProxy(target,
+				advisors,
 				Echo.class);
 		assertEquals(0, afterReturningAspect.successCount);
 		assertEquals("", echo.echo(""));
@@ -647,7 +654,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 
-	@Aspect("pertypewithin(test.beans.IOther+)")
+	@Aspect("pertypewithin(org.springframework.tests.sample.beans.IOther+)")
 	public static class PerTypeWithinAspect {
 
 		public int count;
@@ -672,19 +679,23 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 			return this.count;
 		}
 
+		@Override
 		public Object getAspectInstance() {
 			++this.count;
 			return new PerTypeWithinAspect();
 		}
 
+		@Override
 		public ClassLoader getAspectClassLoader() {
 			return PerTypeWithinAspect.class.getClassLoader();
 		}
 
+		@Override
 		public AspectMetadata getAspectMetadata() {
 			return new AspectMetadata(PerTypeWithinAspect.class, "perTypeWithin");
 		}
 
+		@Override
 		public int getOrder() {
 			return Ordered.LOWEST_PRECEDENCE;
 		}
@@ -764,8 +775,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		public void setAge(int a) {}
 
 		@Around(value="setAge(age)",argNames="age")
-		// @ArgNames({"age"})  // AMC needs more work here? ignoring pjp arg... ok??
-		//                     // argNames should be suported in Around as it is in Pointcut
+		// @ArgNames({"age"})	// AMC needs more work here? ignoring pjp arg... ok??
+								// argNames should be suported in Around as it is in Pointcut
 		public void changeReturnType(ProceedingJoinPoint pjp, int age) throws Throwable {
 			pjp.proceed(new Object[] {age*2});
 		}
@@ -886,47 +897,50 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
  */
 @Aspect
 abstract class AbstractMakeModifiable {
-	
+
 	public interface MutableModifable extends Modifiable {
 		void markDirty();
 	}
-	
+
 	public static class ModifiableImpl implements MutableModifable {
 		private boolean modified;
-		
+
+		@Override
 		public void acceptChanges() {
 			modified = false;
 		}
-		
+
+		@Override
 		public boolean isModified() {
 			return modified;
 		}
-		
+
+		@Override
 		public void markDirty() {
 			this.modified = true;
 		}
 	}
-	
-	@Before(value="execution(void set*(*)) && this(modifiable) && args(newValue)", 
+
+	@Before(value="execution(void set*(*)) && this(modifiable) && args(newValue)",
 			argNames="modifiable,newValue")
-	public void recordModificationIfSetterArgumentDiffersFromOldValue(JoinPoint jp, 
+	public void recordModificationIfSetterArgumentDiffersFromOldValue(JoinPoint jp,
 		MutableModifable mixin, Object newValue) {
-		
+
 		/*
 		 * We use the mixin to check and, if necessary, change,
-		 * modification status. We need the JoinPoint to get the 
-		 * setter method. We use newValue for comparison. 
+		 * modification status. We need the JoinPoint to get the
+		 * setter method. We use newValue for comparison.
 		 * We try to invoke the getter if possible.
 		 */
-		
+
 		if (mixin.isModified()) {
 			// Already changed, don't need to change again
 			//System.out.println("changed");
 			return;
 		}
-		
+
 		// Find the current raw value, by invoking the corresponding setter
-		Method correspondingGetter =  getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
+		Method correspondingGetter = getGetterFromSetter(((MethodSignature) jp.getSignature()).getMethod());
 		boolean modified = true;
 		if (correspondingGetter != null) {
 			try {
@@ -946,12 +960,12 @@ abstract class AbstractMakeModifiable {
 			mixin.markDirty();
 		}
 	}
-	
+
 	private Method getGetterFromSetter(Method setter) {
 		String getterName = setter.getName().replaceFirst("set", "get");
 		try {
 			return setter.getDeclaringClass().getMethod(getterName, (Class[]) null);
-		} 
+		}
 		catch (NoSuchMethodException ex) {
 			// must be write only
 			return null;
@@ -968,8 +982,8 @@ abstract class AbstractMakeModifiable {
  */
 @Aspect
 class MakeITestBeanModifiable extends AbstractMakeModifiable {
-	
-	@DeclareParents(value = "test.beans.ITestBean+",
+
+	@DeclareParents(value = "org.springframework.tests.sample.beans.ITestBean+",
 			defaultImpl=ModifiableImpl.class)
 	public static MutableModifable mixin;
 
@@ -982,7 +996,7 @@ class MakeITestBeanModifiable extends AbstractMakeModifiable {
  */
 @Aspect
 class MakeAnnotatedTypeModifiable extends AbstractMakeModifiable {
-	
+
 	@DeclareParents(value = "(@org.springframework.aop.aspectj.annotation.Measured *)",
 //	@DeclareParents(value = "(@Measured *)", // this would be a nice alternative...
 			defaultImpl=DefaultLockable.class)
@@ -996,11 +1010,11 @@ class MakeAnnotatedTypeModifiable extends AbstractMakeModifiable {
  */
 @Aspect
 class MakeLockable {
-	
+
 	@DeclareParents(value = "org.springframework..*",
 			defaultImpl=DefaultLockable.class)
 	public static Lockable mixin;
-	
+
 	@Before(value="execution(void set*(*)) && this(mixin)", argNames="mixin")
 	public void checkNotLocked(
 		Lockable mixin)  // Bind to arg
@@ -1017,17 +1031,21 @@ class MakeLockable {
 
 class CannotBeUnlocked implements Lockable, Comparable<Object> {
 
+	@Override
 	public void lock() {
 	}
 
+	@Override
 	public void unlock() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean locked() {
 		return true;
 	}
 
+	@Override
 	public int compareTo(Object arg0) {
 		throw new UnsupportedOperationException();
 	}
@@ -1043,9 +1061,9 @@ class CannotBeUnlocked implements Lockable, Comparable<Object> {
 interface Modifiable {
 
 	boolean isModified();
-	
+
 	void acceptChanges();
-	
+
 }
 
 /**
@@ -1057,14 +1075,14 @@ interface AnnotatedTarget {
 
 @Measured
 class AnnotatedTargetImpl implements AnnotatedTarget {
-	
+
 }
 
 @Retention(RetentionPolicy.RUNTIME)
 @interface Measured {}
 
 class NotLockable {
-	
+
 	private int intValue;
 
 	public int getIntValue() {
@@ -1097,5 +1115,5 @@ class PerThisAspect {
 	public void countSetter() {
 		++count;
 	}
-	
+
 }

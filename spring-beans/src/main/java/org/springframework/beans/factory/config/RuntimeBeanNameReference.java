@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.util.Assert;
 
-/** 
+/**
  * Immutable placeholder class used for a property value object when it's a
  * reference to another bean name in the factory, to be resolved at runtime.
  *
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  */
 public class RuntimeBeanNameReference implements BeanReference {
-	
+
 	private final String beanName;
 
 	private Object source;
@@ -49,7 +49,7 @@ public class RuntimeBeanNameReference implements BeanReference {
 	}
 
 	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
 	public void setSource(Object source) {
@@ -80,7 +80,7 @@ public class RuntimeBeanNameReference implements BeanReference {
 
 	@Override
 	public String toString() {
-	   return '<' + getBeanName() + '>';
+		return '<' + getBeanName() + '>';
 	}
 
 }

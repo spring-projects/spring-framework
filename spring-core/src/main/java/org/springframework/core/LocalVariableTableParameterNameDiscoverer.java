@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,11 @@ import org.springframework.util.ClassUtils;
 /**
  * Implementation of {@link ParameterNameDiscoverer} that uses the LocalVariableTable
  * information in the method attributes to discover parameter names. Returns
- * <code>null</code> if the class file was compiled without debug information.
+ * {@code null} if the class file was compiled without debug information.
  *
- * <p>Uses ObjectWeb's ASM library for analyzing class files. Each discoverer
- * instance caches the ASM discovered information for each introspected Class, in a
- * thread-safe manner. It is recommended to reuse discoverer instances
- * as far as possible.
+ * <p>Uses ObjectWeb's ASM library for analyzing class files. Each discoverer instance
+ * caches the ASM discovered information for each introspected Class, in a thread-safe
+ * manner. It is recommended to reuse ParameterNameDiscoverer instances as far as possible.
  *
  * @author Adrian Colyer
  * @author Costin Leau
@@ -62,19 +61,19 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
 	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache =
-			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>();
+			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>(32);
 
 
 	public String[] getParameterNames(Method method) {
-		Class<?> declaringClass = method.getDeclaringClass();
+		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
+		Class<?> declaringClass = originalMethod.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
-			// initialize cache
 			map = inspectClass(declaringClass);
 			this.parameterNamesCache.put(declaringClass, map);
 		}
 		if (map != NO_DEBUG_INFO_MAP) {
-			return map.get(method);
+			return map.get(originalMethod);
 		}
 		return null;
 	}
@@ -83,14 +82,12 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
-			// initialize cache
 			map = inspectClass(declaringClass);
 			this.parameterNamesCache.put(declaringClass, map);
 		}
 		if (map != NO_DEBUG_INFO_MAP) {
 			return map.get(ctor);
 		}
-
 		return null;
 	}
 
@@ -111,7 +108,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		try {
 			ClassReader classReader = new ClassReader(is);
-			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>();
+			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>(32);
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
 			return map;
 		}

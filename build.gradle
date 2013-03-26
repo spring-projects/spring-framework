@@ -1,763 +1,993 @@
 buildscript {
-    repositories {
-        maven { url 'http://repo.springsource.org/plugins-release' }
-    }
-    dependencies {
-        classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.1.5'
-    }
+	repositories {
+		maven { url "http://repo.springsource.org/plugins-release" }
+	}
+	dependencies {
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.3")
+		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.6")
+	}
 }
 
-configure(allprojects) {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-    apply plugin: 'idea'
+configure(allprojects) { project ->
+	group = "org.springframework"
+	version = qualifyVersionIfNecessary(version)
 
-    group = 'org.springframework'
+	ext.aspectjVersion  = "1.7.2"
+	ext.hsqldbVersion   = "1.8.0.10"
+	ext.junitVersion    = "4.11"
+	ext.slf4jVersion    = "1.6.1"
+	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
-    sourceCompatibility=1.5
-    targetCompatibility=1.5
+	apply plugin: "propdeps"
+	apply plugin: "java"
+	apply plugin: "test-source-set-dependencies"
+	apply from: "${gradleScriptDir}/ide.gradle"
 
-    ext.aspectjVersion = '1.6.12'
-    ext.hsqldbVersion='1.8.0.10'
-    ext.junitVersion = '4.11.20120805.1225' // temporary use of snapshot; spring-test
-                                            // still builds against on 4.10
+	compileJava {
+		sourceCompatibility=1.5
+		targetCompatibility=1.5
+	}
+	compileTestJava {
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
+	}
 
-    [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
+	[compileJava, compileTestJava]*.options*.compilerArgs = [
+		"-Xlint:serial",
+		"-Xlint:varargs",
+		"-Xlint:cast",
+		"-Xlint:classfile",
+		"-Xlint:dep-ann",
+		"-Xlint:divzero",
+		"-Xlint:empty",
+		"-Xlint:finally",
+		"-Xlint:overrides",
+		"-Xlint:path",
+		"-Xlint:processing",
+		"-Xlint:static",
+		"-Xlint:try",
+		"-Xlint:-options",     // intentionally disabled
+		"-Xlint:-fallthrough", // intentionally disabled
+		"-Xlint:-rawtypes",    // TODO enable and fix warnings
+		"-Xlint:-deprecation", // TODO enable and fix warnings
+		"-Xlint:-unchecked"    // TODO enable and fix warnings
+	]
 
-    sourceSets.test.resources.srcDirs = ['src/test/resources', 'src/test/java']
+	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
 
-    test.systemProperty("java.awt.headless", "true")
+	test {
+		systemProperty("java.awt.headless", "true")
+		systemProperty("testGroups", project.properties.get("testGroups"))
+	}
 
-    repositories {
-        maven { url "http://repo.springsource.org/libs-release" }
-        maven { url "http://repo.springsource.org/ebr-maven-external" }
-    }
+	repositories {
+		maven { url "http://repo.springsource.org/libs-release" }
+	}
 
-    dependencies {
-        testCompile "org.hamcrest:hamcrest-all:1.1"
-        testCompile "org.easymock:easymock:2.5.1"
-    }
+	dependencies {
+		testCompile("junit:junit:${junitVersion}")
+		testCompile("org.hamcrest:hamcrest-all:1.3")
+		testCompile("org.mockito:mockito-core:1.9.5")
+	}
 
-    // servlet-api (2.5) and tomcat-servlet-api (3.0) classpath entries should not be
-    // exported to dependent projects in Eclipse to avoid false compilation errors due
-    // to changing APIs across these versions
-    eclipse.classpath.file.whenMerged { classpath ->
-        classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
-    }
+	ext.javadocLinks = [
+		"http://docs.oracle.com/javase/6/docs/api",
+		"http://docs.oracle.com/javaee/6/api",
+		"http://portals.apache.org/pluto/portlet-2.0-apidocs/",
+		"http://commons.apache.org/lang/api-2.5",
+		"http://commons.apache.org/codec/apidocs",
+		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector",
+		"http://docs.jboss.org/jbossas/javadoc/7.1.2.Final",
+		"http://aopalliance.sourceforge.net/doc",
+		"http://glassfish.java.net/nonav/docs/v3/api",
+		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs", // commonj
+		"http://quartz-scheduler.org/api/2.1.5",
+		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
+		"http://hc.apache.org/httpclient-3.x/apidocs",
+		"http://fasterxml.github.com/jackson-core/javadoc/2.0.0",
+		"http://jackson.codehaus.org/1.4.2/javadoc",
+		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs",
+		"http://ibatis.apache.org/docs/java/dev",
+		"http://tiles.apache.org/framework/apidocs",
+		"http://commons.apache.org/dbcp/api-1.2.2",
+	] as String[]
 }
 
-configure(subprojects - project(":spring-test")) {
-    dependencies {
-        testCompile ("junit:junit-dep:${junitVersion}") {
-            exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        }
-    }
+configure(subprojects - project(":spring-build-src")) { subproject ->
+	apply plugin: "merge"
+	apply from: "${gradleScriptDir}/publish-maven.gradle"
+
+	jar {
+		manifest.attributes["Created-By"] =
+			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
+		manifest.attributes["Implementation-Title"] = subproject.name
+		manifest.attributes["Implementation-Version"] = subproject.version
+
+		from("${rootProject.projectDir}/src/dist") {
+			include "license.txt"
+			include "notice.txt"
+			into "META-INF"
+			expand(copyright: new Date().format("yyyy"), version: project.version)
+		}
+	}
+
+	javadoc {
+		description = "Generates project-level javadoc for use in -javadoc jar"
+
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = project.name
+		options.links(project.ext.javadocLinks)
+
+		// suppress warnings due to cross-module @see and @link references;
+		// note that global 'api' task does display all warnings.
+		logging.captureStandardError LogLevel.INFO
+		logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+	}
+
+	task sourcesJar(type: Jar, dependsOn:classes) {
+		classifier = "sources"
+		from sourceSets.main.allJava.srcDirs
+		include "**/*.java", "**/*.aj"
+	}
+
+	task javadocJar(type: Jar) {
+		classifier = "javadoc"
+		from javadoc
+	}
+
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
 }
 
-configure(subprojects) { subproject ->
-    apply from: "${rootProject.projectDir}/publish-maven.gradle"
+project("spring-build-src") {
+	description = "Exposes gradle buildSrc for IDE support"
+	apply plugin: "groovy"
 
-    jar {
-        manifest.attributes['Created-By'] =
-            "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})"
-        manifest.attributes['Implementation-Title'] = subproject.name
-        manifest.attributes['Implementation-Version'] = subproject.version
+	dependencies {
+		compile gradleApi()
+		groovy localGroovy()
+	}
 
-        from("${rootProject.projectDir}/src/dist") {
-            include "license.txt"
-            include "notice.txt"
-            into "META-INF"
-            expand(copyright: new Date().format('yyyy'), version: project.version)
-        }
-    }
-
-    javadoc {
-        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-        options.author = true
-        options.header = project.name
-        //options.overview = "${projectDir}/src/main/java/overview.html"
-    }
-
-    task sourcesJar(type: Jar, dependsOn:classes) {
-        classifier = 'sources'
-        from sourceSets.main.allJava.srcDirs
-        include '**/*.java', '**/*.aj'
-    }
-
-    task javadocJar(type: Jar) {
-        classifier = 'javadoc'
-        from javadoc
-    }
-
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
+	configurations.archives.artifacts.clear()
 }
 
+project("spring-core") {
+	description = "Spring Core"
 
-project('spring-core') {
-    description = 'Spring Core'
+	// As of Spring 3.2 spring-core repackages both asm 4.0 and cglib 3.0 and inlines both
+	// into the spring-core jar. cglib 3.0 itself depends on asm 4.0, and is therefore
+	// further transformed by the JarJar task to depend on org.springframework.asm; this
+	// avoids including two different copies of asm unnecessarily. If however future cglib
+	// versions drift from the version of asm used by Spring internally, this duplication
+	// will become necessary.
+	def asmVersion = "4.0"
+	def cglibVersion = "3.0"
 
-    // As of Spring 3.2 spring-core repackages both asm 4.0 and cglib 3.0 and inlines both
-    // into the spring-core jar. cglib 3.0 itself depends on asm 4.0, and is therefore
-    // further transformed by the JarJar task to depend on org.springframework.asm; this
-    // avoids including two different copies of asm unnecessarily. If however future cglib
-    // versions drift from the version of asm used by Spring internally, this duplication
-    // will become necessary.
-    def asmVersion = '4.0'
-    def cglibVersion = '3.0'
+	configurations {
+		jarjar
+		asm
+		cglib
+	}
 
-    configurations {
-        jarjar
-        asm
-        cglib
-    }
+	task asmRepackJar(type: Jar) { repackJar ->
+		repackJar.baseName = "spring-asm-repack"
+		repackJar.version = asmVersion
 
-    task asmRepackJar(type: Jar) { repackJar ->
-        repackJar.baseName = "spring-asm-repack"
-        repackJar.version = asmVersion
+		doLast() {
+			project.ant {
+				taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+					classpath: configurations.jarjar.asPath
+				jarjar(destfile: repackJar.archivePath) {
+					configurations.asm.each { originalJar ->
+						zipfileset(src: originalJar)
+					}
+					rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
+				}
+			}
+		}
+	}
 
-        doLast() {
-            project.ant {
-                taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
-                    classpath: configurations.jarjar.asPath
-                jarjar(destfile: repackJar.archivePath) {
-                    configurations.asm.each { originalJar ->
-                        zipfileset(src: originalJar)
-                    }
-                    rule(pattern: 'org.objectweb.asm.**', result: 'org.springframework.asm.@1')
-                }
-            }
-        }
-    }
+	task cglibRepackJar(type: Jar) { repackJar ->
+		repackJar.baseName = "spring-cglib-repack"
+		repackJar.version = cglibVersion
 
-    task cglibRepackJar(type: Jar) { repackJar ->
-        repackJar.baseName = "spring-cglib-repack"
-        repackJar.version = cglibVersion
+		doLast() {
+			project.ant {
+				taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+					classpath: configurations.jarjar.asPath
+				jarjar(destfile: repackJar.archivePath) {
+					configurations.cglib.each { originalJar ->
+						zipfileset(src: originalJar)
+					}
+					// repackage net.sf.cglib => org.springframework.cglib
+					rule(pattern: "net.sf.cglib.**", result: "org.springframework.cglib.@1")
+					// as mentioned above, transform cglib"s internal asm dependencies from
+					// org.objectweb.asm => org.springframework.asm. Doing this counts on the
+					// the fact that Spring and cglib depend on the same version of asm!
+					rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
+				}
+			}
+		}
+	}
 
-        doLast() {
-            project.ant {
-                taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
-                    classpath: configurations.jarjar.asPath
-                jarjar(destfile: repackJar.archivePath) {
-                    configurations.cglib.each { originalJar ->
-                        zipfileset(src: originalJar)
-                    }
-                    // repackage net.sf.cglib => org.springframework.cglib
-                    rule(pattern: 'net.sf.cglib.**', result: 'org.springframework.cglib.@1')
-                    // as mentioned above, transform cglib's internal asm dependencies from
-                    // org.objectweb.asm => org.springframework.asm. Doing this counts on the
-                    // the fact that Spring and cglib depend on the same version of asm!
-                    rule(pattern: 'org.objectweb.asm.**', result: 'org.springframework.asm.@1')
-                }
-            }
-        }
-    }
+	dependencies {
+		asm("org.ow2.asm:asm:${asmVersion}@jar")
+		asm("org.ow2.asm:asm-commons:${asmVersion}@jar")
+		cglib("cglib:cglib:${cglibVersion}@jar")
+		jarjar("com.googlecode.jarjar:jarjar:1.3")
 
-    dependencies {
-        asm "org.ow2.asm:asm:${asmVersion}@jar", "org.ow2.asm:asm-commons:${asmVersion}@jar"
-        cglib "cglib:cglib:${cglibVersion}@jar"
-        jarjar 'com.googlecode.jarjar:jarjar:1.3'
+		compile(files(asmRepackJar))
+		compile("commons-logging:commons-logging:1.1.1")
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		optional("net.sf.jopt-simple:jopt-simple:3.0")
+		optional("log4j:log4j:1.2.17")
+		testCompile("xmlunit:xmlunit:1.3")
+		testCompile("org.codehaus.woodstox:wstx-asl:3.2.7") {
+			exclude group: "stax", module: "stax-api"
+		}
+	}
 
-        compile files(asmRepackJar)
-        compile "commons-logging:commons-logging:1.1.1"
-        compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
-        compile("net.sf.jopt-simple:jopt-simple:3.0") { dep ->
-            optional dep
-            exclude group: 'org.apache.ant', module: 'ant'
-        }
-        compile("log4j:log4j:1.2.15") { dep ->
-            optional dep
-            exclude group: 'javax.mail', module: 'mail'
-            exclude group: 'javax.jms', module: 'jms'
-            exclude group: 'com.sun.jdmk', module: 'jmxtools'
-            exclude group: 'com.sun.jmx', module: 'jmxri'
-        }
-        testCompile "xmlunit:xmlunit:1.2"
-        testCompile "org.codehaus.woodstox:wstx-asl:3.2.7"
-    }
-
-    jar {
-        // inline all repackaged asm and cglib classes directly into the spring-core jar
-        dependsOn asmRepackJar
-        from(zipTree(asmRepackJar.archivePath)) {
-            include 'org/springframework/asm/**'
-        }
-        dependsOn cglibRepackJar
-        from(zipTree(cglibRepackJar.archivePath)) {
-            include 'org/springframework/cglib/**'
-        }
-    }
+	jar {
+		// inline all repackaged asm and cglib classes directly into the spring-core jar
+		dependsOn asmRepackJar
+		from(zipTree(asmRepackJar.archivePath)) {
+			include "org/springframework/asm/**"
+		}
+		dependsOn cglibRepackJar
+		from(zipTree(cglibRepackJar.archivePath)) {
+			include "org/springframework/cglib/**"
+		}
+	}
 }
 
-project('spring-beans') {
-    description = 'Spring Beans'
-    dependencies {
-        compile project(":spring-core")
-        compile files(project(":spring-core").cglibRepackJar)
-        compile("javax.el:el-api:1.0", provided)
-        compile("javax.inject:javax.inject:1", provided)
-    }
+project("spring-beans") {
+	description = "Spring Beans"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(files(project(":spring-core").cglibRepackJar))
+		provided("javax.el:el-api:1.0")
+		provided("javax.inject:javax.inject:1")
+		testCompile("log4j:log4j:1.2.17")
+	}
 }
 
-project('spring-aop') {
-    description = 'Spring AOP'
-    dependencies {
-        compile project(":spring-core")
-        compile files(project(":spring-core").cglibRepackJar)
-        compile project(":spring-beans")
-        compile("aopalliance:aopalliance:1.0")
-        compile("com.jamonapi:jamon:2.4", optional)
-        compile("commons-pool:commons-pool:1.5.3", optional)
-        compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
-    }
+project("spring-aop") {
+	description = "Spring AOP"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(files(project(":spring-core").cglibRepackJar))
+		compile(project(":spring-beans"))
+		compile("aopalliance:aopalliance:1.0")
+		optional("com.jamonapi:jamon:2.4")
+		optional("commons-pool:commons-pool:1.5.3")
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+	}
 }
 
-project('spring-expression') {
-    description = 'Spring Expression Language (SpEL)'
-    dependencies {
-        compile project(":spring-core")
-    }
+project("spring-expression") {
+	description = "Spring Expression Language (SpEL)"
+	dependencies {
+		compile(project(":spring-core"))
+	}
 }
 
-project('spring-instrument') {
-    description = 'Spring Instrument'
-    dependencies {
-        compile project(":spring-core")
-    }
-    jar {
-        manifest.attributes['Premain-Class'] =
-            'org.springframework.instrument.InstrumentationSavingAgent'
-    }
+project("spring-instrument") {
+	description = "Spring Instrument"
+	dependencies {
+		compile(project(":spring-core"))
+	}
+	jar {
+		manifest.attributes["Premain-Class"] =
+			"org.springframework.instrument.InstrumentationSavingAgent"
+	}
 }
 
-project('spring-instrument-tomcat') {
-    description = 'Spring Instrument Tomcat'
-    dependencies {
-        compile("org.apache.tomcat:catalina:6.0.16", provided)
-    }
+project("spring-instrument-tomcat") {
+	description = "Spring Instrument Tomcat"
+	dependencies {
+		provided("org.apache.tomcat:catalina:6.0.16")
+	}
 }
 
-project('spring-context') {
-    description = 'Spring Context'
-    dependencies {
-        compile(project(":spring-instrument"), optional)
-        compile project(":spring-aop")
-        compile project(":spring-beans")
-        compile project(":spring-expression")
-        compile project(":spring-core")
-        compile files(project(":spring-core").cglibRepackJar)
-        compile("backport-util-concurrent:backport-util-concurrent:3.0", optional)
-        compile("javax.annotation:jsr250-api:1.0", optional)
-        compile("javax.ejb:ejb-api:3.0", optional)
-        compile("javax.inject:javax.inject:1", optional)
-        compile("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1", optional)
-        compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
-        compile("javax.persistence:persistence-api:1.0", optional)
-        compile("javax.validation:validation-api:1.0.0.GA", optional)
-        compile("javax.xml.ws:jaxws-api:2.1-1") { dep ->
-            optional dep
-            exclude group: 'javax.jws', module: 'jsr181'
-        }
-        compile("org.beanshell:bsh:2.0b4", optional)
-        compile("org.codehaus.groovy:groovy-all:1.6.3", optional)
-        compile("org.jruby:jruby:1.4.0", optional)
-        compile("org.hibernate:hibernate-validator:4.2.0.Final") { dep ->
-            optional dep
-            exclude group: 'org.slf4j', module: 'slf4j-api'
-        }
-        compile("joda-time:joda-time:1.6", optional)
-        compile("javax.cache:cache-api:0.5", optional)
-        compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
-        compile("org.slf4j:slf4j-api:1.6.1", optional)
-        compile("org.codehaus.jsr166-mirror:jsr166:1.7.0", provided)
-        compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
-        testCompile "commons-dbcp:commons-dbcp:1.2.2"
-        testCompile("javax.xml:jaxrpc-api:1.1")
-        testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
-    }
+project("spring-context") {
+	description = "Spring Context"
+	dependencies {
+		optional(project(":spring-instrument"))
+		compile(project(":spring-aop"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-expression"))
+		compile(project(":spring-core"))
+		compile(files(project(":spring-core").cglibRepackJar))
+		optional("backport-util-concurrent:backport-util-concurrent:3.0")
+		optional("javax.ejb:ejb-api:3.0")
+		optional("javax.inject:javax.inject:1")
+		optional("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
+		optional("javax.persistence:persistence-api:1.0")
+		optional("javax.validation:validation-api:1.0.0.GA")
+		optional("org.beanshell:bsh:2.0b4")
+		optional("org.codehaus.groovy:groovy-all:1.8.8")
+		optional("org.jruby:jruby:1.6.5.1")
+		optional("joda-time:joda-time:2.1")
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+		optional("org.hibernate:hibernate-validator:4.3.0.Final")
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+		testCompile("commons-dbcp:commons-dbcp:1.2.2")
+		testCompile("javax.inject:javax.inject-tck:1")
+	}
 
-    test {
-        jvmArgs = ['-disableassertions:org.aspectj.weaver.UnresolvedType'] // SPR-7989
-    }
+	test {
+		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
+	}
 }
 
-project('spring-tx') {
-    description = 'Spring Transaction'
-    dependencies {
-        compile(project(":spring-context"), optional) // for JCA, @EnableTransactionManagement
-        compile(project(":spring-aop"), optional)
-        compile project(":spring-beans")
-        compile project(":spring-core")
-        compile("aopalliance:aopalliance:1.0")
-        compile("com.ibm.websphere:uow:6.0.2.17", provided)
-        compile("javax.resource:connector-api:1.5", optional)
-        compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
-        testCompile "org.easymock:easymockclassextension:2.3"
-    }
+project("spring-tx") {
+	description = "Spring Transaction"
+	dependencies {
+		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
+		optional(project(":spring-aop"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		compile("aopalliance:aopalliance:1.0")
+		provided("com.ibm.websphere:uow:6.0.2.17")
+		optional("javax.resource:connector-api:1.5")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+		optional("javax.ejb:ejb-api:3.0")
+		testCompile("javax.persistence:persistence-api:1.0")
+		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
+	}
 }
 
-project('spring-oxm') {
-    description = 'Spring Object/XML Marshalling'
-    apply from: 'oxm.gradle'
-    dependencies {
-        compile project(":spring-beans")
-        compile project(":spring-core")
-        compile(project(":spring-context"), optional) // for Jaxb2Marshaller
-        compile "commons-lang:commons-lang:2.5"
-        compile("com.thoughtworks.xstream:xstream:1.3.1", optional)
-        compile("com.sun.xml.bind:jaxb-impl:2.1.7", optional)
-        compile("org.jibx:jibx-run:1.2.3", optional)
-        compile("org.apache.xmlbeans:xmlbeans:2.4.0", optional)
-        compile("org.codehaus.castor:castor-xml:1.3.2", optional)
-        testCompile "org.codehaus.jettison:jettison:1.0.1"
-        testCompile "xmlunit:xmlunit:1.2"
-        testCompile "xmlpull:xmlpull:1.1.3.4a"
-        testCompile(files(genCastor.classesDir).builtBy(genCastor))
-        testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
-        testCompile(files(genXmlbeans.classesDir).builtBy(genXmlbeans))
-    }
+project("spring-oxm") {
+	description = "Spring Object/XML Marshalling"
+	apply from: "oxm.gradle"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on jibx compilation
+		// see http://jira.codehaus.org/browse/JIBX-465
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
+	dependencies {
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		optional(project(":spring-context")) // for Jaxb2Marshaller
+		compile("commons-lang:commons-lang:2.5")
+		optional("com.thoughtworks.xstream:xstream:1.3.1")
+		optional("com.sun.xml.bind:jaxb-impl:2.1.7")
+		optional("org.jibx:jibx-run:1.2.3")
+		optional("org.apache.xmlbeans:xmlbeans:2.4.0")
+		optional("org.codehaus.castor:castor-xml:1.3.2")
+		testCompile("org.codehaus.jettison:jettison:1.0.1")
+		testCompile("xmlunit:xmlunit:1.3")
+		testCompile("xmlpull:xmlpull:1.1.3.4a")
+		testCompile(files(genCastor.classesDir).builtBy(genCastor))
+		testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
+		testCompile(files(genXmlbeans.classesDir).builtBy(genXmlbeans))
+	}
 }
 
-project('spring-jms') {
-    description = 'Spring JMS'
-    dependencies {
-        compile project(":spring-core")
-        compile project(":spring-beans")
-        compile project(":spring-aop")
-        compile project(":spring-context")
-        compile project(":spring-tx")
-        compile(project(":spring-oxm"), optional)
-        compile("aopalliance:aopalliance:1.0")
-        compile("org.codehaus.jackson:jackson-mapper-asl:1.4.2", optional)
-    }
+project("spring-jms") {
+	description = "Spring JMS"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-aop"))
+		compile(project(":spring-context"))
+		compile(project(":spring-tx"))
+		optional(project(":spring-oxm"))
+		compile("aopalliance:aopalliance:1.0")
+		provided("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+		optional("javax.resource:connector-api:1.5")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+	}
 }
 
-project('spring-jdbc') {
-    description = 'Spring JDBC'
-    dependencies {
-        compile project(":spring-core")
-        compile project(":spring-beans")
-        compile(project(":spring-context"), optional) // for JndiDataSourceLookup
-        compile project(":spring-tx")
-        compile("c3p0:c3p0:0.9.1.2", optional)
-        compile("hsqldb:hsqldb:${hsqldbVersion}", optional)
-        compile("com.h2database:h2:1.0.71", optional)
-        compile("org.apache.derby:derby:10.5.3.0_1", optional)
-        compile("org.apache.derby:derbyclient:10.5.3.0_1", optional)
-        compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
-    }
+project("spring-jdbc") {
+	description = "Spring JDBC"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-beans"))
+		optional(project(":spring-context")) // for JndiDataSourceLookup
+		compile(project(":spring-tx"))
+		optional("c3p0:c3p0:0.9.1.2")
+		optional("hsqldb:hsqldb:${hsqldbVersion}")
+		optional("com.h2database:h2:1.0.71")
+		optional("org.apache.derby:derby:10.5.3.0_1")
+		optional("org.apache.derby:derbyclient:10.5.3.0_1")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+	}
 }
 
-project('spring-context-support') {
-    description = 'Spring Context Support'
-    dependencies {
-        compile project(":spring-core")
-        compile project(":spring-beans")
-        compile project(":spring-context")
-        compile(project(":spring-jdbc"), optional) // for Quartz support
-        compile(project(":spring-tx"), optional) // for Quartz support
-        compile("org.codehaus.fabric3.api:commonj:1.1.0", optional)
-        compile("opensymphony:quartz:1.6.2", optional)
-        compile("javax.mail:mail:1.4", optional)
-        compile("velocity:velocity:1.5", optional)
-        compile("commons-collections:commons-collections:3.2", optional)
-        compile("org.freemarker:freemarker:2.3.15", optional)
-        compile("jasperreports:jasperreports:2.0.5") { dep ->
-            optional dep
-            transitive = false
-        }
-        compile("commons-digester:commons-digester:1.8.1", optional)
-        compile("commons-beanutils:commons-beanutils:1.8.0", optional)
-        compile("com.lowagie:itext:2.0.8", optional)
-        testCompile "hsqldb:hsqldb:${hsqldbVersion}"
-        testCompile("org.apache.poi:poi:3.0.2-FINAL") {
-            exclude group: 'log4j', module: 'log4j'
-        }
-    }
+project("spring-context-support") {
+	description = "Spring Context Support"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-context"))
+		optional(project(":spring-jdbc")) // for Quartz support
+		optional(project(":spring-tx")) // for Quartz support
+		optional("javax.mail:mail:1.4")
+		optional("javax.cache:cache-api:0.5")
+		optional("net.sf.ehcache:ehcache-core:2.0.0")
+		optional("opensymphony:quartz:1.6.2")
+		optional("org.codehaus.fabric3.api:commonj:1.1.0")
+		optional("velocity:velocity:1.5")
+		optional("org.freemarker:freemarker:2.3.15")
+		optional("com.lowagie:itext:2.1.7")
+		optional("jasperreports:jasperreports:2.0.5")
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+		provided("javax.activation:activation:1.1")
+		testCompile("org.apache.poi:poi:3.0.2-FINAL")
+		testCompile("commons-beanutils:commons-beanutils:1.8.0") // for Velocity/JasperReports
+		testCompile("commons-digester:commons-digester:1.8.1") // for Velocity/JasperReports
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+	}
 
-    // pick up **/*.types files in src/main
-    sourceSets.main.resources.srcDirs += 'src/main/java'
+	// pick up **/*.types files in src/main
+	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
-project('spring-web') {
-    description = 'Spring Web'
-    dependencies {
-        compile project(":spring-core")
-        compile project(":spring-beans") // for MultiPartFilter
-        compile project(":spring-aop") // for JaxWsPortProxyFactoryBean
-        compile project(":spring-context")
-        compile(project(":spring-oxm"), optional) // for MarshallingHttpMessageConverter
-        compile("aopalliance:aopalliance:1.0")
-        compile("com.caucho:hessian:3.2.1", optional)
-        compile("rome:rome:1.0", optional)
-        compile("javax.el:el-api:1.0", optional)
-        compile("javax.faces:jsf-api:1.2_08", optional)
-        compile("javax.portlet:portlet-api:2.0", provided)
-        compile("org.apache.tomcat:tomcat-servlet-api:7.0.8", provided) // servlet-api 3.0
-        compile("javax.servlet.jsp:jsp-api:2.1", provided)
-        compile("javax.xml.soap:saaj-api:1.3", provided)
-        compile("axis:axis:1.4", optional)
-        compile("commons-fileupload:commons-fileupload:1.2", optional)
-        runtime("commons-io:commons-io:1.3", optional)
-        compile("commons-httpclient:commons-httpclient:3.1", optional)
-        compile("org.apache.httpcomponents:httpclient:4.2", optional)
-        compile("org.codehaus.jackson:jackson-mapper-asl:1.4.2", optional)
-        compile("com.fasterxml.jackson.core:jackson-databind:2.0.1", optional)
-        compile("taglibs:standard:1.1.2", optional)
-        compile("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") { dep ->
-            optional dep
-            exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
-        }
-        compile("org.eclipse.jetty:jetty-server:8.1.5.v20120716") { dep ->
-            optional dep
-            exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
-        }
-        testCompile project(":spring-context-support")  // for JafMediaTypeFactory
-        testCompile "xmlunit:xmlunit:1.2"
-    }
+project("spring-web") {
+	description = "Spring Web"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-beans")) // for MultiPartFilter
+		compile(project(":spring-aop")) // for JaxWsPortProxyFactoryBean
+		compile(project(":spring-context"))
+		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
+		compile("aopalliance:aopalliance:1.0")
+		optional("com.caucho:hessian:3.2.1")
+		optional("rome:rome:1.0")
+		optional("javax.el:el-api:1.0")
+		optional("javax.faces:jsf-api:1.2_08")
+		provided("javax.portlet:portlet-api:2.0")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		provided("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.xml:jaxrpc-api:1.1")
+		provided("javax.xml.soap:saaj-api:1.3")
+		provided("javax.activation:activation:1.1")
+		optional("commons-fileupload:commons-fileupload:1.2")
+		optional("commons-io:commons-io:1.3")
+		optional("commons-httpclient:commons-httpclient:3.1")
+		optional("org.apache.httpcomponents:httpclient:4.2")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		optional("taglibs:standard:1.1.2")
+		optional("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		optional("org.eclipse.jetty:jetty-server:8.1.5.v20120716") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		optional("log4j:log4j:1.2.17")
+		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
+		testCompile("xmlunit:xmlunit:1.3")
+	}
 
-    // pick up ContextLoader.properties in src/main
-    sourceSets.main.resources.srcDirs += 'src/main/java'
+	// pick up ContextLoader.properties in src/main
+	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
-project('spring-orm') {
-    description = 'Spring Object/Relational Mapping'
-    dependencies {
-        // compiling against both hibernate 3 and 4 here in order to support
-        // our respective orm.hibernate3 and orm.hibernate4 packages
-        compile("aopalliance:aopalliance:1.0")
-        compile("org.hibernate:com.springsource.org.hibernate:3.3.1.GA", optional)
-        compile("org.hibernate:hibernate-core:4.1.0.Final", optional)
-        compile("org.hibernate:hibernate-cglib-repack:2.1_3", optional)
-        compile("org.hibernate:hibernate-annotations:3.4.0.GA", optional)
-        compile("org.hibernate:hibernate-entitymanager:4.1.0.Final", optional)
-        compile("org.apache.openjpa:openjpa:1.1.0", optional)
-        compile("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1", optional)
-        compile("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1", optional)
-        compile("toplink.essentials:toplink-essentials:2.0-41b", optional)
-        compile("javax.jdo:jdo-api:3.0", optional)
-        compile("org.apache.ibatis:ibatis-sqlmap:2.3.4.726", optional)
-        testCompile "javax.servlet:servlet-api:2.5"
-        testCompile "org.slf4j:slf4j-jcl:1.5.3"
-        testCompile "commons-dbcp:commons-dbcp:1.2.2"
-        testCompile "org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1"
-        testCompile "org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1"
-        compile project(":spring-core")
-        compile project(":spring-beans")
-        compile(project(":spring-aop"), optional)
-        compile(project(":spring-context"), optional)
-        compile project(":spring-tx")
-        compile project(":spring-jdbc")
-        compile(project(":spring-web")) { dep ->
-            optional dep
-            exclude group: 'javax.persistence', module: 'persistence-api'
-        }
-    }
+project("spring-orm") {
+	description = "Spring Object/Relational Mapping"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on toplink compilation
+		// TODO: remove this block when we remove toplink
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
+	dependencies {
+		compile("aopalliance:aopalliance:1.0")
+		optional("org.hibernate:hibernate-core:3.3.2.GA")
+		optional("org.hibernate:hibernate-annotations:3.4.0.GA")
+		optional("org.hibernate:hibernate-entitymanager:3.4.0.GA")
+		optional("org.apache.openjpa:openjpa:1.1.0")
+		optional("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1")
+		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1")
+		optional("toplink.essentials:toplink-essentials:2.0-41b")
+		optional("javax.jdo:jdo-api:3.0")
+		optional("org.apache.ibatis:ibatis-sqlmap:2.3.4.726")
+		optional("javax.persistence:persistence-api:1.0")
+		provided("javax.servlet:servlet-api:2.5")
+		testCompile("javax.servlet:javax.servlet-api:3.0.1")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("commons-dbcp:commons-dbcp:1.2.2")
+		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1")
+		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1")
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+		compile(project(":spring-core"))
+		compile(project(":spring-beans"))
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))
+		compile(project(":spring-tx"))
+		compile(project(":spring-jdbc"))
+		optional(project(":spring-web"))
+	}
 }
 
-project('spring-webmvc') {
-    description = 'Spring Web MVC'
-    dependencies {
-        compile project(":spring-core")
-        compile project(":spring-expression")
-        compile project(":spring-beans")
-        compile project(":spring-web")
-        compile project(":spring-context")
-        compile(project(":spring-context-support"), optional) // for Velocity support
-        compile(project(":spring-oxm"), optional) // for MarshallingView
-        compile("org.apache.tiles:tiles-api:2.1.2", optional)
-        compile("org.apache.tiles:tiles-core:2.1.2", optional)
-        compile("org.apache.tiles:tiles-jsp:2.1.2", optional)
-        compile("org.apache.tiles:tiles-servlet:2.1.2", optional)
-        compile("velocity-tools:velocity-tools-view:1.4", optional)
-        compile("net.sourceforge.jexcelapi:jxl:2.6.3") { dep ->
-            optional dep
-            exclude group: 'log4j', module: 'log4j'
-        }
-        compile("org.apache.poi:poi:3.0.2-FINAL") { dep ->
-            optional dep
-            exclude group: 'log4j', module: 'log4j'
-        }
-        compile("javax.servlet:jstl:1.1.2", provided)
-        compile("org.apache.tomcat:tomcat-servlet-api:7.0.8", provided) // servlet-api 3.0
-        testCompile project(":spring-aop")
-        testCompile("org.slf4j:slf4j-log4j12:1.6.1") {
-            exclude group: 'log4j', module: 'log4j'
-        }
-        testCompile "rhino:js:1.7R1"
-        testCompile "xmlunit:xmlunit:1.2"
-        testCompile("dom4j:dom4j:1.6.1") {
-            exclude group: 'xml-apis', module: 'xml-apis'
-        }
-        testCompile("jaxen:jaxen:1.1.1") {
-            exclude group: 'xml-apis', module: 'xml-apis'
-            exclude group: 'xom', module: 'xom'
-            exclude group: 'xerces', module: 'xercesImpl'
-        }
-    }
-
-    // pick up DispatcherServlet.properties in src/main
-    sourceSets.main.resources.srcDirs += 'src/main/java'
+project("spring-orm-hibernate4") {
+	description = "Spring Object/Relational Mapping - Hibernate 4 support"
+	merge.into = project(":spring-orm")
+	dependencies {
+		provided(project(":spring-tx"))
+		provided(project(":spring-jdbc"))
+		optional("org.hibernate:hibernate-core:4.1.0.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.1.0.Final")
+		optional(project(":spring-web"))
+		optional("javax.servlet:servlet-api:2.5")
+	}
 }
 
-project('spring-webmvc-portlet') {
-    description = 'Spring Web Portlet'
-    dependencies {
-        compile("javax.servlet:servlet-api:2.5", provided)
-        compile project(":spring-core")
-        compile project(":spring-beans")
-        compile project(":spring-context")
-        compile project(":spring-web")
-        compile project(":spring-webmvc")
-    }
+project("spring-webmvc") {
+	description = "Spring Web MVC"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-expression"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-web"))
+		compile(project(":spring-context"))
+		optional(project(":spring-context-support")) // for Velocity support
+		optional(project(":spring-oxm")) // for MarshallingView
+		optional("org.apache.tiles:tiles-api:2.1.2")
+		optional("org.apache.tiles:tiles-core:2.1.2")
+		optional("org.apache.tiles:tiles-jsp:2.1.2")
+		optional("org.apache.tiles:tiles-servlet:2.1.2")
+		optional("velocity-tools:velocity-tools-view:1.4")
+		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
+		optional("org.apache.poi:poi:3.0.2-FINAL")
+		optional("com.lowagie:itext:2.1.7")
+		optional("jasperreports:jasperreports:2.0.5") {
+			exclude group: "xml-apis", module: "xml-apis"
+		}
+		optional("rome:rome:1.0")
+		optional("velocity:velocity:1.5")
+		optional("org.freemarker:freemarker:2.3.15")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		provided("javax.servlet:jstl:1.2")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		provided("javax.servlet.jsp:jsp-api:2.1")
+		testCompile(project(":spring-aop"))
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("rhino:js:1.7R1")
+		testCompile("xmlunit:xmlunit:1.3")
+		testCompile("dom4j:dom4j:1.6.1") {
+			exclude group: "xml-apis", module: "xml-apis"
+		}
+		testCompile("jaxen:jaxen:1.1.1") {
+			exclude group: "xml-apis", module: "xml-apis"
+			exclude group: "xom", module: "xom"
+			exclude group: "xerces", module: "xercesImpl"
+		}
+		testCompile("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("org.eclipse.jetty:jetty-server:8.1.5.v20120716") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("javax.validation:validation-api:1.0.0.GA")
+		testCompile("commons-fileupload:commons-fileupload:1.2")
+		testCompile("commons-io:commons-io:1.3")
+		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
+		testCompile("org.apache.httpcomponents:httpclient:4.2")
+	}
 
-    // pick up DispatcherPortlet.properties in src/main
-    sourceSets.main.resources.srcDirs += 'src/main/java'
+	// pick up DispatcherServlet.properties in src/main
+	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
-project('spring-test') {
-    description = 'Spring TestContext Framework'
-    dependencies {
-        compile project(":spring-core")
-        compile(project(":spring-beans"), optional)
-        compile(project(":spring-context"), optional)
-        compile(project(":spring-jdbc"), optional)
-        compile(project(":spring-tx"), optional)
-        compile(project(":spring-orm"), optional)
-        compile(project(":spring-web"), optional)
-        compile(project(":spring-webmvc"), optional)
-        compile(project(":spring-webmvc-portlet"), optional)
-        compile("junit:junit-dep:4.10") { dep ->
-            optional dep
-            // We already have hamcrest-all as a global testCompile dependency.
-            exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        }
-        compile("org.testng:testng:6.5.2") { dep ->
-            optional dep
-            exclude group: 'junit', module: 'junit'
-            // We already have hamcrest-all as a global testCompile dependency.
-            exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        }
-        compile("javax.servlet:servlet-api:2.5", optional)
-        compile("javax.servlet.jsp:jsp-api:2.1", optional)
-        compile("javax.portlet:portlet-api:2.0", optional)
-        compile("javax.activation:activation:1.0", provided)
-        testCompile "org.slf4j:slf4j-jcl:1.5.3"
-    }
+project("spring-webmvc-tiles3") {
+	description = "Spring Framework Tiles3 Integration"
+	merge.into = project(":spring-webmvc")
+	dependencies {
+		provided(project(":spring-context"))
+		provided(project(":spring-web"))
+		provided("javax.el:el-api:1.0")
+		provided("javax.servlet:jstl:1.2")
+		provided("javax.servlet.jsp:jsp-api:2.1")
+		optional("org.apache.tiles:tiles-request-api:1.0.1")
+		optional("org.apache.tiles:tiles-api:3.0.1")
+		optional("org.apache.tiles:tiles-core:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-servlet:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-jsp:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-extras:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-el:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+	}
 }
 
-project('spring-struts') {
-    description = 'Spring Struts'
-    dependencies {
-        compile project(":spring-core")
-        compile project(":spring-beans")
-        compile project(":spring-context")
-        compile project(":spring-web")
-        compile project(":spring-webmvc")
-        compile "struts:struts:1.2.9"
-        compile "commons-beanutils:commons-beanutils:1.7.0"
-        compile("javax.servlet:servlet-api:2.5", provided)
-        testCompile project(":spring-test")
-    }
+project("spring-webmvc-portlet") {
+	description = "Spring Web Portlet"
+	dependencies {
+		provided("javax.servlet:servlet-api:2.5")
+		provided("javax.portlet:portlet-api:2.0")
+		compile(project(":spring-core"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-context"))
+		compile(project(":spring-web"))
+		compile(project(":spring-webmvc"))
+		optional("commons-fileupload:commons-fileupload:1.2")
+	}
+
+	// pick up DispatcherPortlet.properties in src/main
+	sourceSets.main.resources.srcDirs += "src/main/java"
 }
 
-project('spring-aspects') {
-    description = 'Spring Aspects'
-    apply from: 'aspects.gradle'
-    dependencies {
-        compile(project(":spring-beans"), optional) // for @Configurable support
-        compile(project(":spring-aop"), optional) // for @Async support
-        compile(project(":spring-context"), optional) // for @Enable* support
-        compile(project(":spring-context-support"), optional) // for JavaMail support
-        compile(project(":spring-tx"), optional) // for JPA, @Transactional support
-        compile(project(":spring-orm"), optional) // for JPA exception translation support
-        aspects project(":spring-orm")
-        ajc "org.aspectj:aspectjtools:${aspectjVersion}"
-        compile "org.aspectj:aspectjrt:${aspectjVersion}"
-        testCompile project(":spring-core") // for CodeStyleAspect
-        compile project(":spring-beans") // for 'p' namespace visibility
-        testCompile project(":spring-test")
-    }
-    eclipse.project {
-        natures += 'org.eclipse.ajdt.ui.ajnature'
-        buildCommands = [new org.gradle.plugins.ide.eclipse.model.
-                BuildCommand('org.eclipse.ajdt.core.ajbuilder')]
-    }
+project("spring-test") {
+	description = "Spring TestContext Framework"
+
+	task testNG(type: Test) {
+		useTestNG()
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude "**/*TestCase.class"
+		// Generate TestNG reports alongside JUnit reports.
+		testReport true
+	}
+
+	test {
+		dependsOn testNG
+		useJUnit()
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
+	}
+
+	dependencies {
+		compile(project(":spring-core"))
+		optional(project(":spring-beans"))
+		optional(project(":spring-context"))
+		optional(project(":spring-jdbc"))
+		optional(project(":spring-tx"))
+		optional(project(":spring-orm"))
+		optional(project(":spring-web"))
+		optional(project(":spring-webmvc"))
+		optional(project(":spring-webmvc-portlet"), )
+		optional("junit:junit:${junitVersion}")
+		optional("org.testng:testng:6.5.2")
+		optional("javax.servlet:servlet-api:2.5")
+		optional("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.portlet:portlet-api:2.0")
+		optional("javax.persistence:persistence-api:1.0")
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		testCompile("org.hibernate:hibernate-core:3.3.2.GA")
+		provided("javax.inject:javax.inject:1")
+		provided("javax.activation:activation:1.1")
+		provided("javax.servlet:jstl:1.2")
+		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+	}
+}
+
+project("spring-test-mvc") {
+	description = "Spring Test MVC Framework"
+	merge.into = project(":spring-test")
+	dependencies {
+		optional(project(":spring-context"))
+		provided(project(":spring-webmvc"))
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		optional("org.hamcrest:hamcrest-core:1.3")
+		optional("com.jayway.jsonpath:json-path:0.8.1")
+		optional("xmlunit:xmlunit:1.3")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("javax.servlet:jstl:1.2")
+		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
+		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		testCompile("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		testCompile(project(":spring-context-support"))
+		testCompile(project(":spring-oxm"))
+		testCompile("com.thoughtworks.xstream:xstream:1.3.1")
+		testCompile("cglib:cglib-nodep:2.2")
+		testCompile("rome:rome:1.0")
+		testCompile("javax.activation:activation:1.1")
+		testCompile("javax.mail:mail:1.4")
+		testCompile("javax.xml.bind:jaxb-api:2.2.6")
+		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
+		testCompile("org.apache.tiles:tiles-api:3.0.1")
+		testCompile("org.apache.tiles:tiles-core:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		testCompile("org.apache.tiles:tiles-servlet:3.0.1") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+	}
+}
+
+project("spring-struts") {
+	description = "Spring Struts"
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-beans"))
+		compile(project(":spring-context"))
+		compile(project(":spring-web"))
+		compile(project(":spring-webmvc"))
+		compile("struts:struts:1.2.9")
+		compile("commons-beanutils:commons-beanutils:1.7.0")
+		provided("javax.servlet:servlet-api:2.5")
+		provided("javax.servlet:jstl:1.2")
+		testCompile(project(":spring-test"))
+	}
+}
+
+project("spring-aspects") {
+	description = "Spring Aspects"
+	apply from: "aspects.gradle"
+	dependencies {
+		optional(project(":spring-beans")) // for @Configurable support
+		optional(project(":spring-aop")) // for @Async support
+		optional(project(":spring-context")) // for @Enable* support
+		compile(project(":spring-context-support")) // for JavaMail support
+		optional(project(":spring-tx")) // for JPA, @Transactional support
+		optional(project(":spring-orm")) // for JPA exception translation support
+		aspects(project(":spring-orm"))
+		provided("javax.persistence:persistence-api:1.0")
+		testCompile("javax.mail:mail:1.4")
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")
+		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		testCompile(project(":spring-core")) // for CodeStyleAspect
+		compile(project(":spring-beans")) // for "p" namespace visibility
+		testCompile(project(":spring-test"))
+	}
+	eclipse.project {
+		natures += "org.eclipse.ajdt.ui.ajnature"
+		buildCommands = [new org.gradle.plugins.ide.eclipse.model.
+				BuildCommand("org.eclipse.ajdt.core.ajbuilder")]
+	}
 }
 
 configure(rootProject) {
-    description = 'Spring Framework'
+	description = "Spring Framework"
 
-    apply plugin: 'docbook-reference'
+	apply plugin: "docbook-reference"
+	apply plugin: "groovy"
+	apply plugin: "detect-split-packages"
+	apply from: "${gradleScriptDir}/jdiff.gradle"
 
-    reference {
-        sourceDir = file('src/reference/docbook')
-    }
+	reference {
+		sourceDir = file("src/reference/docbook")
+		pdfFilename = "spring-framework-reference.pdf"
+	}
 
-    // don't publish the default jar for the root project
-    configurations.archives.artifacts.clear()
+	detectSplitPackages {
+		projectsToScan -= project(":spring-instrument-tomcat")
+	}
 
-    dependencies { // for integration tests
-        testCompile project(":spring-core")
-        testCompile project(":spring-beans")
-        testCompile project(":spring-aop")
-        testCompile project(":spring-expression")
-        testCompile project(":spring-context")
-        testCompile project(":spring-tx")
-        testCompile project(":spring-jdbc")
-        testCompile project(":spring-test")
-        testCompile project(":spring-web")
-        testCompile project(":spring-webmvc-portlet")
-        testCompile "org.hibernate:hibernate-core:4.1.0.Final"
-        testCompile "javax.servlet:servlet-api:2.5"
-    }
+	// don't publish the default jar for the root project
+	configurations.archives.artifacts.clear()
 
-    task api(type: Javadoc) {
-        group = 'Documentation'
-        description = 'Generates aggregated Javadoc API documentation.'
-        title = "${rootProject.description} ${version} API"
-        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-        options.author = true
-        options.header = rootProject.description
-        options.overview = 'src/api/overview.html'
-        options.splitIndex = true
-        options.links(
-            'http://docs.jboss.org/jbossas/javadoc/4.0.5/connector'
-        )
-        source subprojects.collect { project ->
-            project.sourceSets.main.allJava
-        }
-        destinationDir = new File(buildDir, "api")
-        classpath = files(subprojects.collect { project ->
-            project.sourceSets.main.compileClasspath
-        })
-        maxMemory = '1024m'
-    }
+	dependencies { // for integration tests
+		testCompile(project(":spring-core"))
+		testCompile(project(":spring-beans"))
+		testCompile(project(":spring-aop"))
+		testCompile(project(":spring-expression"))
+		testCompile(project(":spring-context"))
+		testCompile(project(":spring-tx"))
+		testCompile(project(":spring-jdbc"))
+		testCompile(project(":spring-test"))
+		testCompile(project(":spring-web"))
+		testCompile(project(":spring-webmvc-portlet"))
+		testCompile(project(":spring-orm"))
+		testCompile("org.hibernate:hibernate-core:4.1.0.Final")
+		testCompile("javax.servlet:servlet-api:2.5")
+		testCompile("javax.portlet:portlet-api:2.0")
+		testCompile("javax.inject:javax.inject:1")
+		testCompile("javax.resource:connector-api:1.5")
+		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+	}
 
-    task docsZip(type: Zip) {
-        group = 'Distribution'
-        classifier = 'docs'
-        description = "Builds -${classifier} archive containing api and reference " +
-            "for deployment at static.springframework.org/spring-framework/docs."
+	task api(type: Javadoc) {
+		group = "Documentation"
+		description = "Generates aggregated Javadoc API documentation."
+		title = "${rootProject.description} ${version} API"
 
-        from('src/dist') {
-            include 'changelog.txt'
-        }
+		dependsOn {
+			subprojects.collect {
+				it.tasks.getByName("jar")
+			}
+		}
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = rootProject.description
+		options.overview = "src/api/overview.html"
+		options.stylesheetFile = file("src/api/stylesheet.css")
+		options.splitIndex = true
+		options.links(project.ext.javadocLinks)
 
-        from (api) {
-            into 'api'
-        }
+		source subprojects.collect { project ->
+			project.sourceSets.main.allJava
+		}
 
-        from (reference) {
-            into 'reference'
-        }
-    }
+		maxMemory = "1024m"
+		destinationDir = new File(buildDir, "api")
 
-    task schemaZip(type: Zip) {
-        group = 'Distribution'
-        classifier = 'schema'
-        description = "Builds -${classifier} archive containing all " +
-            "XSDs for deployment at static.springframework.org/schema."
+		doFirst {
+			classpath = files(
+				// ensure servlet 3.x and Hibernate 4.x have precedence on the Javadoc
+				// classpath over their respective 2.5 and 3.x variants
+				project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
+				rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },
+				// ensure the javadoc process can resolve types compiled from .aj sources
+				project(":spring-aspects").sourceSets.main.output
+			)
+			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
+		}
+	}
 
-        subprojects.each { subproject ->
-            def Properties schemas = new Properties();
+	task docsZip(type: Zip) {
+		group = "Distribution"
+		baseName = "spring-framework"
+		classifier = "docs"
+		description = "Builds -${classifier} archive containing api and reference " +
+			"for deployment at http://static.springframework.org/spring-framework/docs."
 
-            subproject.sourceSets.main.resources.find {
-                it.path.endsWith('META-INF/spring.schemas')
-            }?.withInputStream { schemas.load(it) }
+		from("src/dist") {
+			include "changelog.txt"
+		}
 
-            for (def key : schemas.keySet()) {
-                def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
-                assert shortName != key
-                File xsdFile = subproject.sourceSets.main.resources.find {
-                    it.path.endsWith(schemas.get(key))
-                }
-                assert xsdFile != null
-                into (shortName) {
-                    from xsdFile.path
-                }
-            }
-        }
-    }
+		from (api) {
+			into "javadoc-api"
+		}
 
-    task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
-        group = 'Distribution'
-        classifier = 'dist'
-        description = "Builds -${classifier} archive, containing all jars and docs, " +
-                      "suitable for community download page."
+		from (reference) {
+			into "spring-framework-reference"
+		}
+	}
 
-        ext.baseDir = "${project.name}-${project.version}";
+	task schemaZip(type: Zip) {
+		group = "Distribution"
+		baseName = "spring-framework"
+		classifier = "schema"
+		description = "Builds -${classifier} archive containing all " +
+			"XSDs for deployment at http://springframework.org/schema."
 
-        from('src/dist') {
-            include 'readme.txt'
-            include 'license.txt'
-            include 'notice.txt'
-            into "${baseDir}"
-            expand(copyright: new Date().format('yyyy'), version: project.version)
-        }
+		subprojects.each { subproject ->
+			def Properties schemas = new Properties();
 
-        from(zipTree(docsZip.archivePath)) {
-            into "${baseDir}/docs"
-        }
+			subproject.sourceSets.main.resources.find {
+				it.path.endsWith("META-INF/spring.schemas")
+			}?.withInputStream { schemas.load(it) }
 
-        from(zipTree(schemaZip.archivePath)) {
-            into "${baseDir}/schema"
-        }
+			for (def key : schemas.keySet()) {
+				def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
+				assert shortName != key
+				File xsdFile = subproject.sourceSets.main.resources.find {
+					it.path.endsWith(schemas.get(key))
+				}
+				assert xsdFile != null
+				into (shortName) {
+					from xsdFile.path
+				}
+			}
+		}
+	}
 
-        subprojects.each { subproject ->
-            into ("${baseDir}/libs") {
-                from subproject.jar
-                if (subproject.tasks.findByPath('sourcesJar')) {
-                    from subproject.sourcesJar
-                }
-                if (subproject.tasks.findByPath('javadocJar')) {
-                    from subproject.javadocJar
-                }
-            }
-        }
-    }
+	task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
+		group = "Distribution"
+		baseName = "spring-framework"
+		classifier = "dist"
+		description = "Builds -${classifier} archive, containing all jars and docs, " +
+					"suitable for community download page."
 
-    // Create an distribution that contains all dependencies (required and optional).
-    // Not published by default; only for use when building from source.
-    task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
-        group = 'Distribution'
-        classifier = 'dist-with-deps'
-        description = "Builds -${classifier} archive, containing everything " +
-            "in the -${distZip.classifier} archive plus all runtime dependencies."
+		ext.baseDir = "${baseName}-${project.version}";
 
-        from zipTree(distZip.archivePath)
+		from("src/dist") {
+			include "readme.txt"
+			include "license.txt"
+			include "notice.txt"
+			into "${baseDir}"
+			expand(copyright: new Date().format("yyyy"), version: project.version)
+		}
 
-        gradle.taskGraph.whenReady { taskGraph ->
-            if (taskGraph.hasTask(":${zipTask.name}")) {
-                def projectNames = rootProject.subprojects*.name
-                def artifacts = new HashSet()
-                subprojects.each { subproject ->
-                    subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                        def dependency = artifact.moduleVersion.id
-                        if (!projectNames.contains(dependency.name)) {
-                            artifacts << artifact.file
-                        }
-                    }
-                }
+		from(zipTree(docsZip.archivePath)) {
+			into "${baseDir}/docs"
+		}
 
-                zipTask.from(artifacts) {
-                    into "${distZip.baseDir}/deps"
-                }
-            }
-        }
-    }
+		from(zipTree(schemaZip.archivePath)) {
+			into "${baseDir}/schema"
+		}
 
-    artifacts {
-        archives docsZip
-        archives schemaZip
-        archives distZip
-    }
+		subprojects.each { subproject ->
+			into ("${baseDir}/libs") {
+				from subproject.jar
+				if (subproject.tasks.findByPath("sourcesJar")) {
+					from subproject.sourcesJar
+				}
+				if (subproject.tasks.findByPath("javadocJar")) {
+					from subproject.javadocJar
+				}
+			}
+		}
+	}
 
-    task wrapper(type: Wrapper) {
-        description = 'Generates gradlew[.bat] scripts'
-        gradleVersion = '1.1'
-    }
+	// Create an distribution that contains all dependencies (required and optional).
+	// Not published by default; only for use when building from source.
+	task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
+		group = "Distribution"
+		baseName = "spring-framework"
+		classifier = "dist-with-deps"
+		description = "Builds -${classifier} archive, containing everything " +
+			"in the -${distZip.classifier} archive plus all runtime dependencies."
+
+		from zipTree(distZip.archivePath)
+
+		gradle.taskGraph.whenReady { taskGraph ->
+			if (taskGraph.hasTask(":${zipTask.name}")) {
+				def projectNames = rootProject.subprojects*.name
+				def artifacts = new HashSet()
+				subprojects.each { subproject ->
+					(subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts +
+					subproject.configurations.optional.resolvedConfiguration.resolvedArtifacts).each { artifact ->
+						def dependency = artifact.moduleVersion.id
+						if (!projectNames.contains(dependency.name)) {
+							artifacts << artifact.file
+						}
+					}
+				}
+
+				zipTask.from(artifacts) {
+					into "${distZip.baseDir}/deps"
+				}
+			}
+		}
+	}
+
+	artifacts {
+		archives docsZip
+		archives schemaZip
+		archives distZip
+	}
+
+	task wrapper(type: Wrapper) {
+		description = "Generates gradlew[.bat] scripts"
+		gradleVersion = "1.3"
+
+		doLast() {
+			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
+			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
+			File wrapperFile = file("gradlew")
+			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
+				"GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
+			File wrapperBatFile = file("gradlew.bat")
+			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
+				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+		}
+	}
+
 }
 
+/*
+ * Support publication of artifacts versioned by topic branch.
+ * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
+ * If <TOPIC> starts with 'SPR-', change version
+ *     from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
+ *     e.g. 3.2.1.BUILD-SNAPSHOT => 3.2.1.SPR-1234-SNAPSHOT
+ */
+def qualifyVersionIfNecessary(version) {
+	if (rootProject.hasProperty("BRANCH_NAME")) {
+		def qualifier = rootProject.getProperty("BRANCH_NAME")
+		if (qualifier.startsWith("SPR-")) {
+			return version.replace('BUILD', qualifier)
+		}
+	}
+	return version
+}

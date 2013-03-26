@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public abstract class ScopedProxyUtils {
 	 */
 	public static BeanDefinitionHolder createScopedProxy(BeanDefinitionHolder definition,
 			BeanDefinitionRegistry registry, boolean proxyTargetClass) {
-		
+
 		String originalBeanName = definition.getBeanName();
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
 
@@ -87,7 +87,7 @@ public abstract class ScopedProxyUtils {
 		// (potentially an inner bean).
 		return new BeanDefinitionHolder(proxyDefinition, originalBeanName, definition.getAliases());
 	}
-	
+
 	/**
 	 * Generates the bean name that is used within the scoped proxy to reference the target bean.
 	 * @param originalBeanName the original name of bean

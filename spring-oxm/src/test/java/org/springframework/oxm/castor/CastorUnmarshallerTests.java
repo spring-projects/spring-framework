@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,10 @@ import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
 import org.springframework.oxm.Unmarshaller;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests the {@link CastorMarshaller} class.
- *
  * @author Arjen Poutsma
  * @author Jakub Narloch
  */
@@ -66,7 +65,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	protected void testFlight(Object o) {
 		Flight flight = (Flight) o;
 		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, (long) flight.getNumber());
+		assertThat("Number is invalid", flight.getNumber(), equalTo(42L));
 	}
 
 	@Override
@@ -104,15 +103,14 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
 		OrderItem item = order.getOrderItem(0);
 		assertEquals("Invalid items", "1", item.getId());
-		assertEquals("Invalid items", 15, (int)item.getQuantity());
+		assertThat("Invalid items", item.getQuantity(), equalTo(15));
 		item = order.getOrderItem(1);
 		assertEquals("Invalid items", "3", item.getId());
-		assertEquals("Invalid items", 20, (int)item.getQuantity());
+		assertThat("Invalid items", item.getQuantity(), equalTo(20));
 	}
 
 	@Test
 	public void testWhitespacePreserveTrue() throws Exception {
-
 		getCastorUnmarshaller().setWhitespacePreserve(true);
 		Object result = unmarshalFlights();
 		testFlights(result);
@@ -120,7 +118,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Test
 	public void testWhitespacePreserveFalse() throws Exception {
-
 		getCastorUnmarshaller().setWhitespacePreserve(false);
 		Object result = unmarshalFlights();
 		testFlights(result);
@@ -128,7 +125,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Test
 	public void testIgnoreExtraAttributesTrue() throws Exception {
-
 		getCastorUnmarshaller().setIgnoreExtraAttributes(true);
 		Object result = unmarshal(EXTRA_ATTRIBUTES_STRING);
 		testFlights(result);
@@ -144,7 +140,6 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Test
 	@Ignore("Not working yet")
 	public void testIgnoreExtraElementsTrue() throws Exception {
-
 		getCastorUnmarshaller().setIgnoreExtraElements(true);
 		getCastorUnmarshaller().setValidating(false);
 		Object result = unmarshal(EXTRA_ELEMENTS_STRING);
@@ -159,22 +154,19 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	}
 
 	@Test
-	public void testObject() throws Exception {
-
+	public void testRootObject() throws Exception {
 		Flights flights = new Flights();
-		getCastorUnmarshaller().setObject(flights);
+		getCastorUnmarshaller().setRootObject(flights);
 		Object result = unmarshalFlights();
-
 		testFlights(result);
 		assertSame("Result Flights is different object.", flights, result);
 	}
 
 	@Test
 	public void testClearCollectionsTrue() throws Exception {
-
 		Flights flights = new Flights();
 		flights.setFlight(new Flight[]{new Flight()});
-		getCastorUnmarshaller().setObject(flights);
+		getCastorUnmarshaller().setRootObject(flights);
 		getCastorUnmarshaller().setClearCollections(true);
 		Object result = unmarshalFlights();
 
@@ -186,10 +178,9 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Test
 	@Ignore("Fails on the builder server for some reason")
 	public void testClearCollectionsFalse() throws Exception {
-
 		Flights flights = new Flights();
 		flights.setFlight(new Flight[]{new Flight(), null});
-		getCastorUnmarshaller().setObject(flights);
+		getCastorUnmarshaller().setRootObject(flights);
 		getCastorUnmarshaller().setClearCollections(false);
 		Object result = unmarshalFlights();
 

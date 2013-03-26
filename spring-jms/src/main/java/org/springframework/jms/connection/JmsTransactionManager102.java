@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import javax.jms.TopicConnectionFactory;
  * @deprecated as of Spring 3.0, in favor of the JMS 1.1 based {@link JmsTransactionManager}
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class JmsTransactionManager102 extends JmsTransactionManager {
 
 	private boolean pubSubDomain = false;
@@ -77,8 +78,8 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	 * This tells the JMS 1.0.2 provider which class hierarchy to use for creating
 	 * Connections and Sessions.
 	 * <p>Default is Point-to-Point (Queues).
-	 * @param pubSubDomain <code>true</code> for Publish/Subscribe domain (Topics),
-	 * <code>false</code> for Point-to-Point domain (Queues)
+	 * @param pubSubDomain {@code true} for Publish/Subscribe domain (Topics),
+	 * {@code false} for Point-to-Point domain (Queues)
 	 */
 	public void setPubSubDomain(boolean pubSubDomain) {
 		this.pubSubDomain = pubSubDomain;

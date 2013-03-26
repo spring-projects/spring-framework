@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ public interface Expression {
 	 */
 	Object getValue() throws EvaluationException;
 
-	/** 
+	/**
 	 * Evaluate this expression against the specified root object
 	 * @param rootObject the root object against which properties/etc will be resolved
 	 * @return the evaluation result
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	Object getValue(Object rootObject) throws EvaluationException;
-	
+
 	/**
 	 * Evaluate the expression in the default context. If the result of the evaluation does not match (and
 	 * cannot be converted to) the expected result type then an exception will be returned.
@@ -53,10 +53,10 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	<T> T getValue(Class<T> desiredResultType) throws EvaluationException;
-	
+
 	/**
-	 * Evaluate the expression in the default context against the specified root object. If the 
-	 * result of the evaluation does not match (and cannot be converted to) the expected result type 
+	 * Evaluate the expression in the default context against the specified root object. If the
+	 * result of the evaluation does not match (and cannot be converted to) the expected result type
 	 * then an exception will be returned.
 	 * @param rootObject the root object against which properties/etc will be resolved
 	 * @param desiredResultType the class the caller would like the result to be
@@ -82,7 +82,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException;
-	
+
 	/**
 	 * Evaluate the expression in a specified context which can resolve references to properties, methods, types, etc -
 	 * the type of the evaluation result is expected to be of a particular class and an exception will be thrown if it
@@ -132,7 +132,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	Class getValueType(EvaluationContext context) throws EvaluationException;
-	
+
 	/**
 	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
 	 * method for the given context. The supplied root object overrides any specified in the context.
@@ -150,7 +150,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem determining the type
 	 */
 	TypeDescriptor getValueTypeDescriptor() throws EvaluationException;
-	
+
 	/**
 	 * Returns the most general type that can be passed to the {@link #setValue(EvaluationContext, Object)}
 	 * method using the default context.
@@ -207,13 +207,13 @@ public interface Expression {
 
 	/**
 	 * Set this expression in the provided context to the value provided.
-	 * 
+	 *
 	 * @param context the context in which to set the value of the expression
 	 * @param value the new value
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	void setValue(EvaluationContext context, Object value) throws EvaluationException;
-	
+
 	/**
 	 * Set this expression in the provided context to the value provided.
 	 * @param rootObject the root object against which to evaluate the expression
@@ -231,7 +231,7 @@ public interface Expression {
 	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException;
-	
+
 	/**
 	 * Returns the original string used to create this expression, unmodified.
 	 * @return the original expression string

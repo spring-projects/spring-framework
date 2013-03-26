@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link org.springframework.transaction.PlatformTransactionManager}
  * implementation for a single JDBC {@link javax.sql.DataSource}. This class is
  * capable of working in any environment with any JDBC driver, as long as the setup
- * uses a JDBC 2.0 Standard Extensions / JDBC 3.0 <code>javax.sql.DataSource</code>
+ * uses a JDBC 2.0 Standard Extensions / JDBC 3.0 {@code javax.sql.DataSource}
  * as its Connection factory mechanism. Binds a JDBC Connection from the specified
  * DataSource to the current thread, potentially allowing for one thread-bound
  * Connection per DataSource.
@@ -99,6 +99,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see LazyConnectionDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
+@SuppressWarnings("serial")
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
@@ -177,7 +178,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 		ConnectionHolder conHolder =
-		    (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
+			(ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
 		txObject.setConnectionHolder(conHolder, false);
 		return txObject;
 	}
@@ -345,10 +346,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 		public boolean isNewConnectionHolder() {
 			return this.newConnectionHolder;
-		}
-
-		public boolean hasTransaction() {
-			return (getConnectionHolder() != null && getConnectionHolder().isTransactionActive());
 		}
 
 		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {

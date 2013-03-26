@@ -23,8 +23,10 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -35,11 +37,10 @@ import org.springframework.test.context.junit4.orm.service.PersonService;
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with
  * Hibernate.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */
-@org.junit.Ignore // TODO SPR-8116 (Hibernate classpath-related)
 @ContextConfiguration
 public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4SpringContextTests {
 

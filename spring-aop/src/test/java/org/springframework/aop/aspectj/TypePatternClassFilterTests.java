@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import test.beans.CountingTestBean;
-import test.beans.IOther;
-import test.beans.ITestBean;
-import test.beans.TestBean;
-import test.beans.subpkg.DeepBean;
+import org.springframework.tests.sample.beans.CountingTestBean;
+import org.springframework.tests.sample.beans.IOther;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.subpkg.DeepBean;
 
 /**
  * Unit tests for the {@link TypePatternClassFilter} class.
@@ -45,7 +45,7 @@ public final class TypePatternClassFilterTests {
 
 	@Test
 	public void testValidPatternMatching() {
-		TypePatternClassFilter tpcf = new TypePatternClassFilter("test.beans.*");
+		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.tests.sample.beans.*");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(IOther.class));
@@ -56,14 +56,14 @@ public final class TypePatternClassFilterTests {
 
 	@Test
 	public void testSubclassMatching() {
-		TypePatternClassFilter tpcf = new TypePatternClassFilter("test.beans.ITestBean+");
+		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.tests.sample.beans.ITestBean+");
 		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
 		assertTrue("Must match: in package", tpcf.matches(CountingTestBean.class));
 		assertFalse("Must be excluded: not subclass", tpcf.matches(IOther.class));
 		assertFalse("Must be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
 	}
-	
+
 	@Test
 	public void testAndOrNotReplacement() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("java.lang.Object or java.lang.String");
@@ -75,12 +75,12 @@ public final class TypePatternClassFilterTests {
 		assertFalse("matches Double",tpcf.matches(Double.class));
 		tpcf = new TypePatternClassFilter("java.lang.Number+ and not java.lang.Float");
 		assertFalse("matches Float",tpcf.matches(Float.class));
-		assertTrue("matches Double",tpcf.matches(Double.class));	
+		assertTrue("matches Double",tpcf.matches(Double.class));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetTypePatternWithNullArgument() throws Exception {
-	    new TypePatternClassFilter(null);
+		new TypePatternClassFilter(null);
 	}
 
 	@Test(expected=IllegalStateException.class)

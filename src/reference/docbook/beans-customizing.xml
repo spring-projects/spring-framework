@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
+<section xml:id="beans-factory-nature"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
     xmlns:xlink="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-factory-nature">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xl="http://www.w3.org/1999/xlink"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Customizing the nature of a bean</title>
 
-  <section id="beans-factory-lifecycle">
+  <section xml:id="beans-factory-lifecycle">
     <title>Lifecycle callbacks</title>
-
-    <!-- MLP Beverly to review: Old Text: The Spring Framework provides several callback interfaces to
-    change the behavior of your bean in the container; they include -->
 
     <para>To interact with the container's management of the bean lifecycle, you
       can implement the Spring <interfacename>InitializingBean</interfacename>
@@ -17,9 +19,19 @@
       container calls <methodname>afterPropertiesSet()</methodname> for the
       former and <methodname>destroy()</methodname> for the latter to allow the
       bean to perform certain actions upon initialization and destruction of
-      your beans. You can also achieve the same integration with the container
-      without coupling your classes to Spring interfaces through the use of
-      init-method and destroy method object definition metadata.</para>
+      your beans.</para>
+
+      <tip>
+          <para>The JSR-250 <interfacename>@PostConstruct</interfacename> and
+          <interfacename>@PreDestroy</interfacename> annotations are generally
+          considered best practice for receiving lifecycle callbacks in a modern
+          Spring application. Using these annotations means that your beans are not
+          coupled to Spring specific interfaces. For details see
+          <xref linkend="beans-postconstruct-and-predestroy-annotations"/>.</para>
+          <para>If you don't want to use the JSR-250 annotations but you are still
+          looking to remove coupling consider the use of init-method and destroy-method
+          object definition metadata.</para>
+      </tip>
 
     <para>Internally, the Spring Framework uses
       <interfacename>BeanPostProcessor</interfacename> implementations to
@@ -38,7 +50,7 @@
     <para>The lifecycle callback interfaces are described in this
       section.</para>
 
-    <section id="beans-factory-lifecycle-initializingbean">
+    <section xml:id="beans-factory-lifecycle-initializingbean">
       <title>Initialization callbacks</title>
 
       <para>The
@@ -52,7 +64,9 @@
 
       <para>It is recommended that you do not use the
         <interfacename>InitializingBean</interfacename> interface because it
-        unnecessarily couples the code to Spring. Alternatively, specify a POJO
+        unnecessarily couples the code to Spring. Alternatively, use the
+        <link linkend="beans-postconstruct-and-predestroy-annotations">
+        <interfacename>@PostConstruct</interfacename> annotation</link> or specify a POJO
         initialization method. In the case of XML-based configuration metadata,
         you use the <literal>init-method</literal> attribute to specify the name
         of the method that has a void no-argument signature. For example, the
@@ -81,7 +95,7 @@
       <para>... but does not couple the code to Spring.</para>
     </section>
 
-    <section id="beans-factory-lifecycle-disposablebean">
+    <section xml:id="beans-factory-lifecycle-disposablebean">
       <title>Destruction callbacks</title>
 
       <para>Implementing the
@@ -94,7 +108,9 @@
 
       <para>It is recommended that you do not use the
         <interfacename>DisposableBean</interfacename> callback interface because
-        it unnecessarily couples the code to Spring. Alternatively, specify a
+        it unnecessarily couples the code to Spring. Alternatively, use the
+        <link linkend="beans-postconstruct-and-predestroy-annotations">
+        <interfacename>@PreDestroy</interfacename> annotation</link> or specify a
         generic method that is supported by bean definitions. With XML-based
         configuration metadata, you use the <literal>destroy-method</literal>
         attribute on the <literal>&lt;bean/&gt;</literal>. For example, the
@@ -123,7 +139,7 @@
       <para>... but does not couple the code to Spring.</para>
     </section>
 
-    <section id="beans-factory-lifecycle-default-init-destroy-methods">
+    <section xml:id="beans-factory-lifecycle-default-init-destroy-methods">
       <title>Default initialization and destroy methods</title>
 
       <para>When you write initialization and destroy method callbacks that do
@@ -208,7 +224,7 @@
         bean.</para>
     </section>
 
-    <section id="beans-factory-lifecycle-combined-effects">
+    <section xml:id="beans-factory-lifecycle-combined-effects">
       <title>Combining lifecycle mechanisms</title>
 
       <para>As of Spring 2.5, you have three options for controlling bean
@@ -274,7 +290,7 @@
       </itemizedlist>
     </section>
 
-    <section id="beans-factory-lifecycle-processor">
+    <section xml:id="beans-factory-lifecycle-processor">
       <title>Startup and shutdown callbacks</title>
 
       <para>The <interfacename>Lifecycle</interfacename> interface defines the
@@ -390,7 +406,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
         way as described above.</para>
     </section>
 
-    <section id="beans-factory-shutdown">
+    <section xml:id="beans-factory-shutdown">
       <title>Shutting down the Spring IoC container gracefully in non-web
         applications</title>
 
@@ -433,7 +449,7 @@ public final class Boot {
     </section>
   </section>
 
-  <section id="beans-factory-aware">
+  <section xml:id="beans-factory-aware">
     <title><interfacename>ApplicationContextAware</interfacename> and
       <interfacename>BeanNameAware</interfacename></title>
 
@@ -494,7 +510,7 @@ public final class Boot {
       <emphasis>afterPropertiesSet</emphasis> or a custom init-method.</para>
   </section>
 
-  <section id="aware-list">
+  <section xml:id="aware-list">
     <title>Other <interfacename>Aware</interfacename> interfaces</title>
 
     <para>Besides <interfacename>ApplicationContextAware</interfacename> and
@@ -507,7 +523,7 @@ public final class Boot {
       a general rule, the name is a good indication of the dependency
       type:</para>
 
-    <table id="beans-factory-nature-aware-list" pgwide="1">
+    <table xml:id="beans-factory-nature-aware-list" pgwide="1">
       <title><interfacename>Aware</interfacename> interfaces</title>
 
       <tgroup cols="3">

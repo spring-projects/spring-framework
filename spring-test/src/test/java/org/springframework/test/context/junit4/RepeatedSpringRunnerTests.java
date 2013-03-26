@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
@@ -39,7 +40,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * <li>Spring's {@link Repeat &#064;Repeat}</li>
  * <li>Spring's {@link Timed &#064;Timed}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */
@@ -100,7 +101,7 @@ public class RepeatedSpringRunnerTests {
 
 
 	@RunWith(SpringJUnit4ClassRunner.class)
-	@TestExecutionListeners( {})
+	@TestExecutionListeners({})
 	public abstract static class AbstractRepeatedTestCase {
 
 		protected void incrementInvocationCount() throws IOException {
@@ -151,39 +152,38 @@ public class RepeatedSpringRunnerTests {
 	 * href="http://jira.springframework.org/browse/SPR-6011"
 	 * target="_blank">SPR-6011</a>.
 	 */
-	@org.junit.Ignore // TODO SPR-8116 causing timeouts on cbeams' (otherwise fast) MBP.
-	// Timeouts are 2x-4x their expected range. Something seems wrong indeed.
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {
 
 		@Test
-		@Timed(millis = 10000)
+		@Timed(millis = 1000)
 		@Repeat(5)
 		public void repeatedFiveTimesButDoesNotExceedTimeout() throws Exception {
 			incrementInvocationCount();
 		}
 
 		@Test
-		@Timed(millis = 100)
+		@Timed(millis = 10)
 		@Repeat(1)
 		public void singleRepetitionExceedsTimeout() throws Exception {
 			incrementInvocationCount();
-			Thread.sleep(250);
+			Thread.sleep(15);
 		}
 
 		@Test
-		@Timed(millis = 200)
+		@Timed(millis = 20)
 		@Repeat(4)
 		public void firstRepetitionOfManyExceedsTimeout() throws Exception {
 			incrementInvocationCount();
-			Thread.sleep(250);
+			Thread.sleep(25);
 		}
 
 		@Test
-		@Timed(millis = 1000)
+		@Timed(millis = 100)
 		@Repeat(10)
 		public void collectiveRepetitionsExceedTimeout() throws Exception {
 			incrementInvocationCount();
-			Thread.sleep(150);
+			Thread.sleep(11);
 		}
 	}
 

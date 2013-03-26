@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
 
-/** 
+/**
  * Callback interface used by {@link JdbcTemplate}'s query methods.
  * Implementations of this interface perform the actual work of extracting
  * results from a {@link java.sql.ResultSet}, but don't need to worry
@@ -52,7 +52,7 @@ public interface ResultSetExtractor<T> {
 	 * Implementations must implement this method to process the entire ResultSet.
 	 * @param rs ResultSet to extract data from. Implementations should
 	 * not close this: it will be closed by the calling JdbcTemplate.
-	 * @return an arbitrary result object, or <code>null</code> if none
+	 * @return an arbitrary result object, or {@code null} if none
 	 * (the extractor will typically be stateful in the latter case).
 	 * @throws SQLException if a SQLException is encountered getting column
 	 * values or navigating (that is, there's no need to catch SQLException)

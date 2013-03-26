@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -30,22 +32,19 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.aop.advice.CountingBeforeAdvice;
+import org.springframework.tests.aop.advice.MethodCounter;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.NoTransactionException;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.transaction.support.AbstractPlatformTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-
-import test.advice.CountingBeforeAdvice;
-import test.advice.MethodCounter;
-import test.beans.ITestBean;
-import test.interceptor.NopInterceptor;
 
 /**
  * Integration tests for auto proxy creation by advisor recognition working in
  * conjunction with transaction managment resources.
- * 
- * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorTests;
+ *
+ * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorTests
  *
  * @author Rod Johnson
  * @author Chris Beams
@@ -54,7 +53,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorIntegrationTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String DEFAULT_CONTEXT = CLASSNAME + "-context.xml";
 
 	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
@@ -66,7 +65,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 	protected BeanFactory getBeanFactory() throws IOException {
 		return new ClassPathXmlApplicationContext(DEFAULT_CONTEXT, CLASS);
 	}
-	
+
 	@Test
 	public void testDefaultExclusionPrefix() throws Exception {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
@@ -100,7 +99,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 		test.getName();
 		assertEquals(1, counter.getCalls());
 	}
-	
+
 	@Test
 	public void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -157,7 +156,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		assertEquals(0, txMan.commits);
-		// Should NOT roll back on ServletException 
+		// Should NOT roll back on ServletException
 		try {
 			rb.echoException(new ServletException());
 		}
@@ -190,23 +189,24 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 
 @SuppressWarnings("serial")
 class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
-	
+
 	public NeverMatchAdvisor() {
 		super(new NopInterceptor());
 	}
-	
+
 	/**
 	 * This method is solely to allow us to create a mixture of dependencies in
 	 * the bean definitions. The dependencies don't have any meaning, and don't
 	 * <b>do</b> anything.
 	 */
 	public void setDependencies(List<?> l) {
-		
+
 	}
 
 	/**
 	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
 	 */
+	@Override
 	public boolean matches(Method m, Class<?> targetClass) {
 		return false;
 	}
@@ -215,11 +215,11 @@ class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
 
 class NoSetters {
-	
+
 	public void A() {
-		
+
 	}
-	
+
 	public int getB() {
 		return -1;
 	}
@@ -249,10 +249,12 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 		return (CountingBeforeAdvice) getAdvice();
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		setAdvice(new TxCountingBeforeAdvice());
 	}
 
+	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return method.getName().startsWith("setAge");
 	}
@@ -260,6 +262,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 
 	private class TxCountingBeforeAdvice extends CountingBeforeAdvice {
 
+		@Override
 		public void before(Method method, Object[] args, Object target) throws Throwable {
 			// do transaction checks
 			if (requireTransactionContext) {
@@ -282,7 +285,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 
 
 class Rollback {
-	
+
 	/**
 	 * Inherits transaction attribute.
 	 * Illustrates programmatic rollback.
@@ -293,7 +296,7 @@ class Rollback {
 			setRollbackOnly();
 		}
 	}
-	
+
 	/**
 	 * Extracted in a protected method to facilitate testing
 	 */
@@ -309,42 +312,6 @@ class Rollback {
 	public void echoException(Exception ex) throws Exception {
 		if (ex != null)
 			throw ex;
-	}
-
-}
-
-
-@SuppressWarnings("serial")
-class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
-
-	public TransactionDefinition lastDefinition;
-	public int begun;
-	public int commits;
-	public int rollbacks;
-	public int inflight;
-
-	protected Object doGetTransaction() {
-		return new Object();
-	}
-
-	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		this.lastDefinition = definition;
-		++begun;
-		++inflight;
-	}
-
-	protected void doCommit(DefaultTransactionStatus status) {
-		++commits;
-		--inflight;
-	}
-
-	protected void doRollback(DefaultTransactionStatus status) {
-		++rollbacks;
-		--inflight;
-	}
-	
-	public void clear() {
-		begun = commits = rollbacks = inflight = 0;
 	}
 
 }

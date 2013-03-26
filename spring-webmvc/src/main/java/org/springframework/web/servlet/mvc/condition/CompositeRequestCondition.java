@@ -18,14 +18,13 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Implements the {@link RequestCondition} contract by delegating to multiple

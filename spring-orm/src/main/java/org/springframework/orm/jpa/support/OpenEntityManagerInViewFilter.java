@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -53,10 +53,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as for non-transactional read-only execution.
  *
  * <p>Looks up the EntityManagerFactory in Spring's root web application context.
- * Supports an "entityManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * Supports an "entityManagerFactoryBeanName" filter init-param in {@code web.xml};
  * the default bean name is "entityManagerFactory". As an alternative, the
  * "persistenceUnitName" init-param allows for retrieval by logical unit name
- * (as specified in <code>persistence.xml</code>).
+ * (as specified in {@code persistence.xml}).
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -126,13 +126,22 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * The default value is "true" so that the filter may re-bind the opened
+	 * Returns "false" so that the filter may re-bind the opened
 	 * {@code EntityManager} to each asynchronously dispatched thread and postpone
 	 * closing it until the very last asynchronous dispatch.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may provide an {@code EntityManager}
+	 * to each error dispatches.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
+		return false;
 	}
 
 	@Override
@@ -144,7 +153,6 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !isAsyncDispatch(request);
 		String key = getAlreadyFilteredAttributeName();
 
 		if (TransactionSynchronizationManager.hasResource(emf)) {
@@ -152,6 +160,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
+			boolean isFirstRequest = !isAsyncDispatch(request);
 			if (isFirstRequest || !applyEntityManagerBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
 				try {
@@ -175,7 +184,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				EntityManagerHolder emHolder = (EntityManagerHolder)
 						TransactionSynchronizationManager.unbindResource(emf);
-				if (isLastRequestThread(request)) {
+				if (!isAsyncStarted(request)) {
 					logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
 					EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
 				}
@@ -186,7 +195,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the EntityManagerFactory that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>The default implementation delegates to the <code>lookupEntityManagerFactory</code>
+	 * <p>The default implementation delegates to the {@code lookupEntityManagerFactory}
 	 * without arguments, caching the EntityManagerFactory reference once obtained.
 	 * @return the EntityManagerFactory to use
 	 * @see #lookupEntityManagerFactory()
@@ -242,7 +251,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Bind and unbind the {@code EntityManager} to the current thread.
 	 */
-	private static class EntityManagerBindingCallableInterceptor implements CallableProcessingInterceptor {
+	private static class EntityManagerBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
 
 		private final EntityManagerFactory emFactory;
 
@@ -254,16 +263,18 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			this.emHolder = emHolder;
 		}
 
-		public void preProcess(NativeWebRequest request, Callable<?> task) {
+		@Override
+		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
 			initializeThread();
+		}
+
+		@Override
+		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(this.emFactory);
 		}
 
 		private void initializeThread() {
 			TransactionSynchronizationManager.bindResource(this.emFactory, this.emHolder);
-		}
-
-		public void postProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
-			TransactionSynchronizationManager.unbindResource(this.emFactory);
 		}
 	}
 

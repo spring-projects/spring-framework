@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class SpringTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
@@ -74,6 +75,16 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		}
 		rbta.getRollbackRules().addAll(rollBackRules);
 		return rbta;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || other instanceof SpringTransactionAnnotationParser);
+	}
+
+	@Override
+	public int hashCode() {
+		return SpringTransactionAnnotationParser.class.hashCode();
 	}
 
 }

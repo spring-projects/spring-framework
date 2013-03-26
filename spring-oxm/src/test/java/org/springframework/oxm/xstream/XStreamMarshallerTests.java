@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -36,26 +37,28 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
-import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
-import com.thoughtworks.xstream.io.json.JsonWriter;
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.springframework.util.xml.StaxUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
-import org.springframework.util.xml.StaxUtils;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
+import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
+import com.thoughtworks.xstream.io.json.JsonWriter;
+
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.custommonkey.xmlunit.XMLAssert.assertXpathExists;
+import static org.custommonkey.xmlunit.XMLAssert.assertXpathNotExists;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -143,19 +146,17 @@ public class XStreamMarshallerTests {
 
 	@Test
 	public void marshalSaxResult() throws Exception {
-		ContentHandler handlerMock = createStrictMock(ContentHandler.class);
-		handlerMock.startDocument();
-		handlerMock.startElement(eq(""), eq("flight"), eq("flight"), isA(Attributes.class));
-		handlerMock.startElement(eq(""), eq("flightNumber"), eq("flightNumber"), isA(Attributes.class));
-		handlerMock.characters(isA(char[].class), eq(0), eq(2));
-		handlerMock.endElement("", "flightNumber", "flightNumber");
-		handlerMock.endElement("", "flight", "flight");
-		handlerMock.endDocument();
-
-		replay(handlerMock);
-		SAXResult result = new SAXResult(handlerMock);
+		ContentHandler contentHandler = mock(ContentHandler.class);
+		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flight, result);
-		verify(handlerMock);
+		InOrder ordered = inOrder(contentHandler);
+		ordered.verify(contentHandler).startDocument();
+		ordered.verify(contentHandler).startElement(eq(""), eq("flight"), eq("flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq(""), eq("flightNumber"), eq("flightNumber"), isA(Attributes.class));
+		ordered.verify(contentHandler).characters(isA(char[].class), eq(0), eq(2));
+		ordered.verify(contentHandler).endElement("", "flightNumber", "flightNumber");
+		ordered.verify(contentHandler).endElement("", "flight", "flight");
+		ordered.verify(contentHandler).endDocument();
 	}
 
 	@Test
@@ -216,7 +217,7 @@ public class XStreamMarshallerTests {
 		String expected = "<flight flightNumber=\"42\" />";
 		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
-	
+
 	@Test
 	public void useAttributesForClassStringListMap() throws Exception {
 		marshaller
@@ -278,7 +279,7 @@ public class XStreamMarshallerTests {
 		Flights flights = new Flights();
 		flights.getFlights().add(flight);
 		flights.getStrings().add("42");
-		
+
 		Map<String, Class> aliases = new HashMap<String, Class>();
 		aliases.put("flight", Flight.class);
 		aliases.put("flights", Flights.class);

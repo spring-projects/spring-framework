@@ -24,7 +24,6 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.connection.SingleConnectionFactory;
@@ -49,7 +48,7 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  *
  * <p>The underlying mechanism is based on standard JMS MessageConsumer handling,
  * which is perfectly compatible with both native JMS and JMS in a J2EE environment.
- * Neither the JMS <code>MessageConsumer.setMessageListener</code> facility
+ * Neither the JMS {@code MessageConsumer.setMessageListener} facility
  * nor the JMS ServerSessionPool facility is required. A further advantage
  * of this approach is full control over the listening process, allowing for
  * custom scaling and throttling and of concurrent message processing
@@ -270,7 +269,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * fetching all requires resources and invoking the listener.
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
-	 * @param status the TransactionStatus (may be <code>null</code>)
+	 * @param status the TransactionStatus (may be {@code null})
 	 * @return whether a message has been received
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
@@ -424,7 +423,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	/**
 	 * Receive a message from the given consumer.
 	 * @param consumer the MessageConsumer to use
-	 * @return the Message, or <code>null</code> if none
+	 * @return the Message, or {@code null} if none
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
@@ -461,7 +460,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * <p>This implementation accepts any JMS 1.1 Connection.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Connection fetched from the holder,
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 */
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
@@ -472,7 +471,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * <p>This implementation accepts any JMS 1.1 Session.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Session fetched from the holder,
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();

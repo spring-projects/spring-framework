@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,34 +35,42 @@ public class MockCacheControl implements CacheControl {
 	private boolean useCachedContent = false;
 
 
+	@Override
 	public int getExpirationTime() {
 		return this.expirationTime;
 	}
 
+	@Override
 	public void setExpirationTime(int time) {
 		this.expirationTime = time;
 	}
 
+	@Override
 	public boolean isPublicScope() {
 		return this.publicScope;
 	}
 
+	@Override
 	public void setPublicScope(boolean publicScope) {
 		this.publicScope = publicScope;
 	}
 
+	@Override
 	public String getETag() {
 		return this.etag;
 	}
 
+	@Override
 	public void setETag(String token) {
 		this.etag = token;
 	}
 
+	@Override
 	public boolean useCachedContent() {
 		return this.useCachedContent;
 	}
 
+	@Override
 	public void setUseCachedContent(boolean useCachedContent) {
 		this.useCachedContent = useCachedContent;
 	}

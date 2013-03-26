@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.resource.cci.Record;
 
 import org.springframework.dao.DataAccessException;
 
-/** 
+/**
  * Callback interface for extracting a result object from a CCI Record instance.
  *
  * <p>Used for output object creation in CciTemplate. Alternatively, output
@@ -44,12 +44,12 @@ import org.springframework.dao.DataAccessException;
  * @see javax.resource.cci.ResultSet
  */
 public interface RecordExtractor<T> {
-	
-	/** 
+
+	/**
 	 * Process the data in the given Record, creating a corresponding result object.
 	 * @param record the Record to extract data from
 	 * (possibly a CCI ResultSet)
-	 * @return an arbitrary result object, or <code>null</code> if none
+	 * @return an arbitrary result object, or {@code null} if none
 	 * (the extractor will typically be stateful in the latter case)
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
 	 * to a DataAccessException

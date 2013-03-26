@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,23 @@ package org.springframework.orm.jpa.toplink;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.junit.Ignore;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 
 /**
  * Toplink-specific JPA tests with multiple EntityManagerFactory instances.
  *
  * @author Costin Leau
+ * @author Chris Beams
  */
-@org.junit.Ignore // TODO SPR-8116 this test causes gradle to hang. See OJEMFWAJWIT.
+@Ignore("This test causes gradle to hang. See SPR-10333.")
 public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	private EntityManagerFactory entityManagerFactory2;
 
 
+	@SuppressWarnings("deprecation")
 	public TopLinkMultiEntityManagerFactoryIntegrationTests() {
 		setAutowireMode(AUTOWIRE_BY_NAME);
 	}
@@ -41,6 +44,7 @@ public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		this.entityManagerFactory2 = entityManagerFactory2;
 	}
 
+	@Override
 	protected String[] getConfigLocations() {
 		return new String[] {
 			"/org/springframework/orm/jpa/toplink/toplink-manager-multi.xml",

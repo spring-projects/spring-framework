@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ package org.springframework.dao;
  * @author Rod Johnson
  * @see PessimisticLockingFailureException
  */
+@SuppressWarnings("serial")
 public class OptimisticLockingFailureException extends ConcurrencyFailureException {
 
 	/**

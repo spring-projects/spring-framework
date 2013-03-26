@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.Mergeable;
  * @author Rob Harrop
  * @since 21.01.2004
  */
+@SuppressWarnings("serial")
 public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMetadataElement {
 
 	private Object source;
@@ -48,7 +49,7 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 
 
 	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
 	public void setSource(Object source) {

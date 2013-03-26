@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import junit.framework.TestCase;
 
@@ -44,6 +45,20 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 	public void testMessageAccessWithDefaultMessageSourceAndFallbackToGerman() {
 		doTestMessageAccess(false, true, true, true, false);
+	}
+
+	public void testMessageAccessWithDefaultMessageSourceAndFallbackTurnedOff() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+			return;
+		}
+		doTestMessageAccess(false, false, false, false, false);
+	}
+
+	public void testMessageAccessWithDefaultMessageSourceAndFallbackTurnedOffAndFallbackToGerman() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+			return;
+		}
+		doTestMessageAccess(false, false, true, true, false);
 	}
 
 	public void testMessageAccessWithReloadableMessageSource() {
@@ -82,13 +97,13 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		String[] basenames = null;
 		if (reloadable) {
 			basenames = new String[] {
-				"classpath:" + basepath + "messages",
-				"classpath:" + basepath + "more-messages"};
+					"classpath:" + basepath + "messages",
+					"classpath:" + basepath + "more-messages"};
 		}
 		else {
 			basenames = new String[] {
-				basepath + "messages",
-				basepath + "more-messages"};
+					basepath + "messages",
+					basepath + "more-messages"};
 		}
 		pvs.add("basenames", basenames);
 		if (!fallbackToSystemLocale) {
@@ -100,8 +115,8 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		if (alwaysUseMessageFormat) {
 			pvs.add("alwaysUseMessageFormat", Boolean.TRUE);
 		}
-		Class clazz = reloadable ?
-				(Class) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
+		Class<?> clazz = reloadable ?
+				(Class<?>) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
 		ac.registerSingleton("messageSource", clazz, pvs);
 		ac.refresh();
 
@@ -202,11 +217,48 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
+	public void testResourceBundleMessageSourceWithDefaultCharset() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setDefaultEncoding("ISO-8859-1");
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
+	}
+
+	public void testResourceBundleMessageSourceWithInappropriateDefaultCharset() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+			return;
+		}
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		ms.setDefaultEncoding("argh");
+		ms.setFallbackToSystemLocale(false);
+		try {
+			ms.getMessage("code1", null, Locale.ENGLISH);
+			fail("Should have thrown NoSuchMessageException");
+		}
+		catch (NoSuchMessageException ex) {
+			// expected
+		}
+	}
+
 	public void testReloadableResourceBundleMessageSourceStandalone() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
 		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
+	}
+
+	public void testReloadableResourceBundleMessageSourceWithCommonMessages() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		Properties commonMessages = new Properties();
+		commonMessages.setProperty("warning", "Do not do {0}");
+		ms.setCommonMessages(commonMessages);
+		ms.setBasename("org/springframework/context/support/messages");
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
+		assertEquals("Do not do this", ms.getMessage("warning", new Object[] {"this"}, Locale.ENGLISH));
+		assertEquals("Do not do that", ms.getMessage("warning", new Object[] {"that"}, Locale.GERMAN));
 	}
 
 	public void testReloadableResourceBundleMessageSourceWithWhitespaceInBasename() {
@@ -298,6 +350,24 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
 		assertEquals(0, filenames.size());
+	}
+
+	public void testMessageSourceResourceBundle() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		MessageSourceResourceBundle rbe = new MessageSourceResourceBundle(ms, Locale.ENGLISH);
+		assertEquals("message1", rbe.getString("code1"));
+		assertTrue(rbe.containsKey("code1"));
+		MessageSourceResourceBundle rbg = new MessageSourceResourceBundle(ms, Locale.GERMAN);
+		assertEquals("nachricht2", rbg.getString("code2"));
+		assertTrue(rbg.containsKey("code2"));
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_16) {
+			ResourceBundle.clearCache();
+		}
 	}
 
 }

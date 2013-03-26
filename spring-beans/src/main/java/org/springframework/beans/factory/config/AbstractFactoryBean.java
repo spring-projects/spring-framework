@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,11 @@ import org.springframework.util.ReflectionUtils;
  * Simple template superclass for {@link FactoryBean} implementations that
  * creates a singleton or a prototype object, depending on a flag.
  *
- * <p>If the "singleton" flag is <code>true</code> (the default),
+ * <p>If the "singleton" flag is {@code true} (the default),
  * this class will create the object that it creates exactly once
  * on initialization and subsequently return said singleton instance
  * on all calls to the {@link #getObject()} method.
- * 
+ *
  * <p>Else, this class will create a new instance every time the
  * {@link #getObject()} method is invoked. Subclasses are responsible
  * for implementing the abstract {@link #createInstance()} template
@@ -78,7 +78,7 @@ public abstract class AbstractFactoryBean<T>
 
 	/**
 	 * Set if a singleton should be created, or a new object on each request
-	 * otherwise. Default is <code>true</code> (a singleton).
+	 * otherwise. Default is {@code true} (a singleton).
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
@@ -211,11 +211,11 @@ public abstract class AbstractFactoryBean<T>
 	 * FactoryBean is supposed to implement, for use with an 'early singleton
 	 * proxy' that will be exposed in case of a circular reference.
 	 * <p>The default implementation returns this FactoryBean's object type,
-	 * provided that it is an interface, or <code>null</code> else. The latter
+	 * provided that it is an interface, or {@code null} else. The latter
 	 * indicates that early singleton access is not supported by this FactoryBean.
 	 * This will lead to a FactoryBeanNotInitializedException getting thrown.
 	 * @return the interfaces to use for 'early singletons',
-	 * or <code>null</code> to indicate a FactoryBeanNotInitializedException
+	 * or {@code null} to indicate a FactoryBeanNotInitializedException
 	 * @see org.springframework.beans.factory.FactoryBeanNotInitializedException
 	 */
 	protected Class[] getEarlySingletonInterfaces() {

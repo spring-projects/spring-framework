@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Message listener container variant that uses plain JMS client APIs, specifically
- * a loop of <code>MessageConsumer.receive()</code> calls that also allow for
+ * a loop of {@code MessageConsumer.receive()} calls that also allow for
  * transactional reception of messages (registering them with XA transactions).
  * Designed to work in a native JMS environment as well as in a J2EE environment,
  * with only minimal differences in configuration.
@@ -87,7 +87,7 @@ import org.springframework.util.ClassUtils;
  * shrinking back to the standard number of consumers once the load decreases.
  * Consider adapting the {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"}
  * setting to control the lifespan of each new task, to avoid frequent scaling up
- * and down, in particular if the {@code ConnectionFactory} does not pool JMS 
+ * and down, in particular if the {@code ConnectionFactory} does not pool JMS
  * {@code Sessions} and/or the {@code TaskExecutor} does not pool threads (check
  * your configuration!). Note that dynamic scaling only really makes sense for a
  * queue in the first place; for a topic, you will typically stick with the default
@@ -182,6 +182,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private int activeInvokerCount = 0;
 
 	private int registeredWithDestination = 0;
+
+	private volatile boolean recovering = false;
 
 	private Runnable stopCallback;
 
@@ -297,9 +299,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * to scale the consumption of messages coming in from a queue. However,
 	 * note that any ordering guarantees are lost once multiple consumers are
 	 * registered. In general, stick with 1 consumer for low-volume queues.
-	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
-	 * This would lead to concurrent consumption of the same message,
-	 * which is hardly ever desirable.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic,
+	 * unless vendor-specific setup measures clearly allow for it.</b>
+	 * With regular setup, this would lead to concurrent consumption
+	 * of the same message, which is hardly ever desirable.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 * @see #setMaxConcurrentConsumers
 	 */
@@ -336,9 +339,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * to scale the consumption of messages coming in from a queue. However,
 	 * note that any ordering guarantees are lost once multiple consumers are
 	 * registered. In general, stick with 1 consumer for low-volume queues.
-	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
-	 * This would lead to concurrent consumption of the same message,
-	 * which is hardly ever desirable.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic,
+	 * unless vendor-specific setup measures clearly allow for it.</b>
+	 * With regular setup, this would lead to concurrent consumption
+	 * of the same message, which is hardly ever desirable.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 * @see #setConcurrentConsumers
 	 */
@@ -419,7 +423,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Return the limit for the number of idle consumers. 
+	 * Return the limit for the number of idle consumers.
 	 */
 	public final int getIdleConsumerLimit() {
 		synchronized (this.lifecycleMonitor) {
@@ -467,16 +471,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public final int getIdleTaskExecutionLimit() {
 		synchronized (this.lifecycleMonitor) {
 			return this.idleTaskExecutionLimit;
-		}
-	}
-
-	@Override
-	protected void validateConfiguration() {
-		super.validateConfiguration();
-		synchronized (this.lifecycleMonitor) {
-			if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
-				throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
-			}
 		}
 	}
 
@@ -535,6 +529,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
 			synchronized (this.lifecycleMonitor) {
+				// Waiting for AsyncMessageListenerInvokers to deactivate themselves...
 				while (this.activeInvokerCount > 0) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
@@ -542,6 +537,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					}
 					this.lifecycleMonitor.wait();
 				}
+				// Clear remaining scheduled invokers, possibly left over as paused tasks...
+				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+					scheduledInvoker.clearResources();
+				}
+				this.scheduledInvokers.clear();
 			}
 		}
 		catch (InterruptedException ex) {
@@ -564,7 +564,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Stop this listener container, invoking the specific callback
 	 * once all listener processing has actually stopped.
-	 * <p>Note: Further <code>stop(runnable)</code> calls (before processing
+	 * <p>Note: Further {@code stop(runnable)} calls (before processing
 	 * has actually stopped) will override the specified callback. Only the
 	 * latest specified callback will be invoked.
 	 * <p>If a subsequent {@link #start()} call restarts the listener container
@@ -619,8 +619,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * not to miss any messages that are just about to be published.
 	 * <p>This method may be polled after a {@link #start()} call, until asynchronous
 	 * registration of consumers has happened which is when the method will start returning
-	 * <code>true</code> &ndash; provided that the listener container ever actually establishes
-	 * a fixed registration. It will then keep returning <code>true</code> until shutdown,
+	 * {@code true} &ndash; provided that the listener container ever actually establishes
+	 * a fixed registration. It will then keep returning {@code true} until shutdown,
 	 * since the container will hold on to at least one consumer registration thereafter.
 	 * <p>Note that a listener container is not bound to having a fixed registration in
 	 * the first place. It may also keep recreating consumers for every invoker execution.
@@ -760,6 +760,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			super.establishSharedConnection();
 		}
 		catch (Exception ex) {
+			if (ex instanceof JMSException) {
+				invokeExceptionListener((JMSException) ex);
+			}
 			logger.debug("Could not establish shared JMS Connection - " +
 					"leaving it up to asynchronous invokers to establish a Connection as soon as possible", ex);
 		}
@@ -767,7 +770,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * This implementations proceeds even after an exception thrown from
-	 * <code>Connection.start()</code>, relying on listeners to perform
+	 * {@code Connection.start()}, relying on listeners to perform
 	 * appropriate recovery.
 	 */
 	@Override
@@ -782,7 +785,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * This implementations proceeds even after an exception thrown from
-	 * <code>Connection.stop()</code>, relying on listeners to perform
+	 * {@code Connection.stop()}, relying on listeners to perform
 	 * appropriate recovery after a restart.
 	 */
 	@Override
@@ -798,7 +801,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Handle the given exception that arose during setup of a listener.
 	 * Called for every such exception in every concurrent listener.
-	 * <p>The default implementation logs the exception at info level
+	 * <p>The default implementation logs the exception at warn level
 	 * if not recovered yet, and at debug level if already recovered.
 	 * Can be overridden in subclasses.
 	 * @param ex the exception to handle
@@ -839,7 +842,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Recover this listener container after a listener failed to set itself up,
-	 * for example reestablishing the underlying Connection.
+	 * for example re-establishing the underlying Connection.
 	 * <p>The default implementation delegates to DefaultMessageListenerContainer's
 	 * recovery-capable {@link #refreshConnectionUntilSuccessful()} method, which will
 	 * try to re-establish a Connection to the JMS provider both for the shared
@@ -848,8 +851,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #refreshDestination()
 	 */
 	protected void recoverAfterListenerSetupFailure() {
-		refreshConnectionUntilSuccessful();
-		refreshDestination();
+		this.recovering = true;
+		try {
+			refreshConnectionUntilSuccessful();
+			refreshDestination();
+		}
+		finally {
+			this.recovering = false;
+		}
 	}
 
 	/**
@@ -858,9 +867,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Connection, so either needs to operate on the shared Connection or on a
 	 * temporary Connection that just gets established for validation purposes.
 	 * <p>The default implementation retries until it successfully established a
-	 * Connection, for as long as this message listener container is active.
+	 * Connection, for as long as this message listener container is running.
 	 * Applies the specified recovery interval between retries.
 	 * @see #setRecoveryInterval
+	 * @see #start()
+	 * @see #stop()
 	 */
 	protected void refreshConnectionUntilSuccessful() {
 		while (isRunning()) {
@@ -876,16 +887,19 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
+				if (ex instanceof JMSException) {
+					invokeExceptionListener((JMSException) ex);
+				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying in ");
 				msg.append(this.recoveryInterval).append(" ms. Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
+					logger.error(msg, ex);
 				}
 				else {
-					logger.warn(msg);
+					logger.error(msg);
 				}
 			}
 			sleepInbetweenRecoveryAttempts();
@@ -927,13 +941,24 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 	}
 
+	/**
+	 * Return whether this listener container is currently in a recovery attempt.
+	 * <p>May be used to detect recovery phases but also the end of a recovery phase,
+	 * with {@code isRecovering()} switching to {@code false} after having been found
+	 * to return {@code true} before.
+	 * @see #recoverAfterListenerSetupFailure()
+	 */
+	public final boolean isRecovering() {
+		return this.recovering;
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Inner classes used as internal adapters
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Runnable that performs looped <code>MessageConsumer.receive()</code> calls.
+	 * Runnable that performs looped {@code MessageConsumer.receive()} calls.
 	 */
 	private class AsyncMessageListenerInvoker implements SchedulingAwareRunnable {
 

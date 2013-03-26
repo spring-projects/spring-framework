@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.target;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,7 +37,7 @@ import org.springframework.core.NamedThreadLocal;
  * for example, if one caller makes repeated calls on the AOP proxy.
  *
  * <p>Cleanup of thread-bound objects is performed on BeanFactory destruction,
- * calling their <code>DisposableBean.destroy()</code> method if available.
+ * calling their {@code DisposableBean.destroy()} method if available.
  * Be aware that many thread-bound objects can be around until the application
  * actually shuts down.
  *
@@ -50,7 +49,9 @@ import org.springframework.core.NamedThreadLocal;
  */
 public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * ThreadLocal holding the target associated with the current
 	 * thread. Unlike most ThreadLocals, which are static, this variable
@@ -62,10 +63,10 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	/**
 	 * Set of managed targets, enabling us to keep track of the targets we've created.
 	 */
-	private final Set<Object> targetSet = Collections.synchronizedSet(new HashSet<Object>());
-	
+	private final Set<Object> targetSet = new HashSet<Object>();
+
 	private int invocationCount;
-	
+
 	private int hitCount;
 
 
@@ -79,20 +80,24 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No target for prototype '" + getTargetBeanName() + "' bound to thread: " +
-				    "creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
+				logger.debug("No target for prototype '" + getTargetBeanName() +
+						"' bound to thread: " +
+						"creating one and binding it to thread '" +
+						Thread.currentThread().getName() + "'");
 			}
 			// Associate target with ThreadLocal.
 			target = newPrototypeInstance();
 			this.targetInThread.set(target);
-			this.targetSet.add(target);
+			synchronized (this.targetSet) {
+				this.targetSet.add(target);
+			}
 		}
 		else {
 			++this.hitCount;
 		}
 		return target;
 	}
-	
+
 	/**
 	 * Dispose of targets if necessary; clear ThreadLocal.
 	 * @see #destroyPrototypeInstance
@@ -119,7 +124,9 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	}
 
 	public int getObjectCount() {
-		return this.targetSet.size();
+		synchronized (this.targetSet) {
+			return this.targetSet.size();
+		}
 	}
 
 

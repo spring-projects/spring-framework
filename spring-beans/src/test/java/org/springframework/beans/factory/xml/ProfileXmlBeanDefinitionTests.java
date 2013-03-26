@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import static org.junit.Assert.assertThat;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
-import org.junit.internal.matchers.TypeSafeMatcher;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -171,6 +171,7 @@ public class ProfileXmlBeanDefinitionTests {
 	private static Matcher<BeanDefinitionRegistry> containsBeanDefinition(final String beanName) {
 		return new TypeSafeMatcher<BeanDefinitionRegistry>() {
 
+			@Override
 			public void describeTo(Description desc) {
 				desc.appendText("a BeanDefinitionRegistry containing bean named ")
 					.appendValue(beanName);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package org.springframework.core;
  * @author Rod Johnson
  */
 public class Jdk14ControlFlowTests extends AbstractControlFlowTests {
-	
+
 	/**
 	 * Necessary only because Eclipse won't run test suite unless it declares
 	 * some methods as well as inherited methods
@@ -30,6 +30,7 @@ public class Jdk14ControlFlowTests extends AbstractControlFlowTests {
 	public void testThisClassPlease() {
 	}
 
+	@Override
 	protected ControlFlow createControlFlow() {
 		return ControlFlowFactory.createControlFlow();
 	}

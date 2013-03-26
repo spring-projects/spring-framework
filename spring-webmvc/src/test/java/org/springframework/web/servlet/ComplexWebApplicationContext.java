@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import org.springframework.web.servlet.view.ResourceBundleViewResolver;
  */
 public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
+	@Override
 	public void refresh() throws BeansException {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class);
@@ -130,7 +131,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.add("commandClass", "org.springframework.beans.TestBean");
+		pvs.add("commandClass", "org.springframework.tests.sample.beans.TestBean");
 		pvs.add("formView", "form");
 		registerSingleton("formHandler", SimpleFormController.class, pvs);
 
@@ -152,8 +153,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("order", "1");
 		pvs.add("exceptionMappings",
-		    "java.lang.IllegalAccessException=failed2\n" +
-		    "ServletRequestBindingException=failed3");
+			"java.lang.IllegalAccessException=failed2\n" +
+			"ServletRequestBindingException=failed3");
 		pvs.add("defaultErrorView", "failed0");
 		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
 
@@ -179,6 +180,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class HeadController implements Controller {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			if ("HEAD".equals(request.getMethod())) {
 				response.setContentLength(5);
@@ -190,6 +192,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class BodyController implements Controller {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			response.getOutputStream().write("body".getBytes());
 			return null;
@@ -199,6 +202,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class NoViewController implements Controller {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			return new ModelAndView();
 		}
@@ -209,22 +213,27 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		private ServletConfig servletConfig;
 
+		@Override
 		public void init(ServletConfig servletConfig) throws ServletException {
 			this.servletConfig = servletConfig;
 		}
 
+		@Override
 		public ServletConfig getServletConfig() {
 			return servletConfig;
 		}
 
+		@Override
 		public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
 			servletResponse.getOutputStream().write("body".getBytes());
 		}
 
+		@Override
 		public String getServletInfo() {
 			return null;
 		}
 
+		@Override
 		public void destroy() {
 			this.servletConfig = null;
 		}
@@ -241,20 +250,24 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MyHandlerAdapter extends ApplicationObjectSupport implements HandlerAdapter, Ordered {
 
+		@Override
 		public int getOrder() {
 			return 99;
 		}
 
+		@Override
 		public boolean supports(Object handler) {
 			return handler != null && MyHandler.class.isAssignableFrom(handler.getClass());
 		}
 
+		@Override
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
-		    throws ServletException, IllegalAccessException {
+			throws ServletException, IllegalAccessException {
 			((MyHandler) delegate).doSomething(request);
 			return null;
 		}
 
+		@Override
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return ((MyHandler) delegate).lastModified();
 		}
@@ -263,15 +276,18 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MyDummyAdapter extends ApplicationObjectSupport implements HandlerAdapter {
 
+		@Override
 		public boolean supports(Object handler) {
 			return handler != null && MyHandler.class.isAssignableFrom(handler.getClass());
 		}
 
+		@Override
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
-		    throws IOException, ServletException {
+			throws IOException, ServletException {
 			throw new ServletException("dummy");
 		}
 
+		@Override
 		public long getLastModified(HttpServletRequest request, Object delegate) {
 			return -1;
 		}
@@ -280,8 +296,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MyHandlerInterceptor1 implements HandlerInterceptor {
 
+		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		    throws ServletException {
+			throws ServletException {
 			if (request.getAttribute("test2") != null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -291,6 +308,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			return true;
 		}
 
+		@Override
 		public void postHandle(
 				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 				throws ServletException {
@@ -303,6 +321,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			request.removeAttribute("test1x");
 		}
 
+		@Override
 		public void afterCompletion(
 				HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 				throws ServletException {
@@ -316,8 +335,9 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MyHandlerInterceptor2 implements HandlerInterceptor {
 
+		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		    throws ServletException {
+			throws ServletException {
 			if (request.getAttribute("test1x") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -330,6 +350,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			return true;
 		}
 
+		@Override
 		public void postHandle(
 				HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 				throws ServletException {
@@ -345,6 +366,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			request.removeAttribute("test2x");
 		}
 
+		@Override
 		public void afterCompletion(
 				HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 				throws Exception {
@@ -358,14 +380,17 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MyWebRequestInterceptor implements WebRequestInterceptor {
 
+		@Override
 		public void preHandle(WebRequest request) throws Exception {
 			request.setAttribute("test3", "test3", WebRequest.SCOPE_REQUEST);
 		}
 
+		@Override
 		public void postHandle(WebRequest request, ModelMap model) throws Exception {
 			request.setAttribute("test3x", "test3x", WebRequest.SCOPE_REQUEST);
 		}
 
+		@Override
 		public void afterCompletion(WebRequest request, Exception ex) throws Exception {
 			request.setAttribute("test3y", "test3y", WebRequest.SCOPE_REQUEST);
 		}
@@ -374,6 +399,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class ComplexLocaleChecker implements MyHandler {
 
+		@Override
 		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
 			WebApplicationContext wac = RequestContextUtils.getWebApplicationContext(request);
 			if (!(wac instanceof ComplexWebApplicationContext)) {
@@ -411,6 +437,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 		}
 
+		@Override
 		public long lastModified() {
 			return 99;
 		}
@@ -419,10 +446,12 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class MockMultipartResolver implements MultipartResolver {
 
+		@Override
 		public boolean isMultipart(HttpServletRequest request) {
 			return true;
 		}
 
+		@Override
 		public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
 			if (request.getAttribute("fail") != null) {
 				throw new MaxUploadSizeExceededException(1000);
@@ -435,15 +464,18 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			}
 			request.setAttribute("resolved", Boolean.TRUE);
 			return new AbstractMultipartHttpServletRequest(request) {
+				@Override
 				public HttpHeaders getMultipartHeaders(String paramOrFileName) {
 					return null;
 				}
+				@Override
 				public String getMultipartContentType(String paramOrFileName) {
 					return null;
 				}
 			};
 		}
 
+		@Override
 		public void cleanupMultipart(MultipartHttpServletRequest request) {
 			if (request.getAttribute("cleanedUp") != null) {
 				throw new IllegalStateException("Already cleaned up");
@@ -457,6 +489,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		public int counter = 0;
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			if (event instanceof RequestHandledEvent) {
 				this.counter++;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -412,6 +412,7 @@ public class AntPathMatcherTests {
 		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
 		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));	// SPR-8858
 		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));	// SPR-7970
+		assertEquals("/{foo:.*[^0-9].*}/edit/", pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
 	}
 
 	@Test
@@ -542,6 +543,14 @@ public class AntPathMatcherTests {
 		paths.clear();
 	}
 
+	// SPR-8687
 
+	@Test
+	public void trimTokensOff() {
+		pathMatcher.setTrimTokens(false);
+
+		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
+		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members"));
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -32,7 +32,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Test fixture with {@link ErrorsMethodArgumentResolver}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ErrorsMethodHandlerArgumentResolverTests {
@@ -66,7 +66,7 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		mavContainer.addAttribute("ignore4", "value4");
 		mavContainer.addAttribute("ignore5", "value5");
 		mavContainer.addAllAttributes(bindingResult.getModel());
-		
+
 		Object actual = resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 
 		assertSame(actual, bindingResult);
@@ -77,10 +77,10 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(bindingResult.getModel());
 		mavContainer.addAttribute("ignore1", "value1");
-		
+
 		resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void noBindingResult() throws Exception {
 		resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null);

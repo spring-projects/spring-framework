@@ -54,7 +54,7 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
@@ -64,12 +64,12 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 		if (targetType.getElementTypeDescriptor() == null) {
 			for (String field : fields) {
 				target.add(field.trim());
-			}						
+			}
 		} else {
 			for (String field : fields) {
 				Object targetElement = this.conversionService.convert(field.trim(), sourceType, targetType.getElementTypeDescriptor());
 				target.add(targetElement);
-			}			
+			}
 		}
 		return target;
 	}

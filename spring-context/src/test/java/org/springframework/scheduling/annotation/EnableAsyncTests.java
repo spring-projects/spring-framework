@@ -74,7 +74,6 @@ public class EnableAsyncTests {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void withAsyncBeanWithExecutorQualifiedByName() throws ExecutionException, InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -247,6 +246,7 @@ public class EnableAsyncTests {
 			return new AsyncBean();
 		}
 
+		@Override
 		public Executor getAsyncExecutor() {
 			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 			executor.setThreadNamePrefix("Custom-");

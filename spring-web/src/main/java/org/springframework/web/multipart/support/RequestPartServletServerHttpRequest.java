@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,15 +51,15 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 
 
 	/**
-	 * Create a new instance. 
+	 * Create a new instance.
 	 * @param request the current request
 	 * @param partName the name of the part to adapt to the {@link ServerHttpRequest} contract
 	 * @throws MissingServletRequestPartException if the request part cannot be found
 	 * @throws IllegalArgumentException if MultipartHttpServletRequest cannot be initialized
 	 */
-	public RequestPartServletServerHttpRequest(HttpServletRequest request, String partName) 
+	public RequestPartServletServerHttpRequest(HttpServletRequest request, String partName)
 			throws MissingServletRequestPartException {
-		
+
 		super(request);
 
 		this.multipartRequest = asMultipartRequest(request);
@@ -78,7 +78,7 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 			}
 		}
 	}
-	
+
 	private static MultipartHttpServletRequest asMultipartRequest(HttpServletRequest request) {
 		if (request instanceof MultipartHttpServletRequest) {
 			return (MultipartHttpServletRequest) request;

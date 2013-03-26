@@ -11,7 +11,7 @@
 	
 	</bean>
 
-	<bean id="jenny" class="org.springframework.beans.TestBean" scope="singleton">
+	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" scope="singleton">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 	</bean>

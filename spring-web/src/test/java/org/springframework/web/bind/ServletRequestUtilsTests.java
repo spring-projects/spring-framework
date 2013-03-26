@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.web.bind;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 
 /**
@@ -386,6 +388,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -399,6 +402,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -412,6 +416,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -425,6 +430,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -438,6 +444,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -451,6 +458,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();

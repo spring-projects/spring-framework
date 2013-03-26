@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
@@ -44,10 +43,10 @@ public class SessionHolder extends ResourceHolderSupport {
 	private static final Object DEFAULT_KEY = new Object();
 
 	/**
-	 * This Map needs to be synchronized because there might be multi-threaded
+	 * This Map needs to be concurrent because there might be multi-threaded
 	 * access in the case of JTA with remote transaction propagation.
 	 */
-	private final Map<Object, Session> sessionMap = Collections.synchronizedMap(new HashMap<Object, Session>(1));
+	private final Map<Object, Session> sessionMap = new ConcurrentHashMap<Object, Session>(1);
 
 	private Transaction transaction;
 
@@ -89,12 +88,10 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public Session getAnySession() {
-		synchronized (this.sessionMap) {
-			if (!this.sessionMap.isEmpty()) {
-				return this.sessionMap.values().iterator().next();
-			}
-			return null;
+		if (!this.sessionMap.isEmpty()) {
+			return this.sessionMap.values().iterator().next();
 		}
+		return null;
 	}
 
 	public void addSession(Session session) {
@@ -120,10 +117,8 @@ public class SessionHolder extends ResourceHolderSupport {
 	}
 
 	public boolean doesNotHoldNonDefaultSession() {
-		synchronized (this.sessionMap) {
-			return this.sessionMap.isEmpty() ||
-					(this.sessionMap.size() == 1 && this.sessionMap.containsKey(DEFAULT_KEY));
-		}
+		return this.sessionMap.isEmpty() ||
+				(this.sessionMap.size() == 1 && this.sessionMap.containsKey(DEFAULT_KEY));
 	}
 
 

@@ -128,8 +128,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	}
 
 	/**
-	 * Shortcut for {@link SerializationConfig.Feature#AUTO_DETECT_FIELDS} and
-	 * {@link DeserializationConfig.Feature#AUTO_DETECT_FIELDS}.
+	 * Shortcut for {@link org.codehaus.jackson.map.SerializationConfig.Feature#AUTO_DETECT_FIELDS} and
+	 * {@link org.codehaus.jackson.map.DeserializationConfig.Feature#AUTO_DETECT_FIELDS}.
 	 */
 	public void setAutoDetectFields(boolean autoDetectFields) {
 		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
@@ -137,8 +137,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	}
 
 	/**
-	 * Shortcut for {@link SerializationConfig.Feature#AUTO_DETECT_GETTERS} and
-	 * {@link DeserializationConfig.Feature#AUTO_DETECT_SETTERS}.
+	 * Shortcut for {@link org.codehaus.jackson.map.SerializationConfig.Feature#AUTO_DETECT_GETTERS} and
+	 * {@link org.codehaus.jackson.map.DeserializationConfig.Feature#AUTO_DETECT_SETTERS}.
 	 */
 	public void setAutoDetectGettersSetters(boolean autoDetectGettersSetters) {
 		this.features.put(SerializationConfig.Feature.AUTO_DETECT_GETTERS, autoDetectGettersSetters);
@@ -146,14 +146,14 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	}
 
 	/**
-	 * Shortcut for {@link SerializationConfig.Feature#FAIL_ON_EMPTY_BEANS}.
+	 * Shortcut for {@link org.codehaus.jackson.map.SerializationConfig.Feature#FAIL_ON_EMPTY_BEANS}.
 	 */
 	public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
 		this.features.put(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, failOnEmptyBeans);
 	}
 
 	/**
-	 * Shortcut for {@link SerializationConfig.Feature#INDENT_OUTPUT}.
+	 * Shortcut for {@link org.codehaus.jackson.map.SerializationConfig.Feature#INDENT_OUTPUT}.
 	 */
 	public void setIndentOutput(boolean indentOutput) {
 		this.features.put(SerializationConfig.Feature.INDENT_OUTPUT, indentOutput);
@@ -162,10 +162,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	/**
 	 * Specify features to enable.
 	 *
-	 * @see SerializationConfig.Feature
-	 * @see DeserializationConfig.Feature
-	 * @see JsonParser.Feature
-	 * @see JsonGenerator.Feature
+	 * @see org.codehaus.jackson.map.SerializationConfig.Feature
+	 * @see org.codehaus.jackson.map.DeserializationConfig.Feature
+	 * @see org.codehaus.jackson.map.JsonParser.Feature
+	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToEnable(Object[] featuresToEnable) {
 		if (featuresToEnable != null) {
@@ -178,10 +178,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	/**
 	 * Specify features to disable.
 	 *
-	 * @see SerializationConfig.Feature
-	 * @see DeserializationConfig.Feature
-	 * @see JsonParser.Feature
-	 * @see JsonGenerator.Feature
+	 * @see org.codehaus.jackson.map.SerializationConfig.Feature
+	 * @see org.codehaus.jackson.map.DeserializationConfig.Feature
+	 * @see org.codehaus.jackson.map.JsonParser.Feature
+	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToDisable(Object[] featuresToDisable) {
 		if (featuresToDisable != null) {

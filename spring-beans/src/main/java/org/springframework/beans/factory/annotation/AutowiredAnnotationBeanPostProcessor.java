@@ -55,6 +55,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -66,13 +67,13 @@ import org.springframework.util.ReflectionUtils;
  * Spring's {@link Autowired @Autowired} and {@link Value @Value} annotations.
  *
  * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
- * if available, as a direct alternative to Spring's own <code>@Autowired</code>.
+ * if available, as a direct alternative to Spring's own {@code @Autowired}.
  *
  * <p>Only one constructor (at max) of any given bean class may carry this
- * annotation with the 'required' parameter set to <code>true</code>, 
- * indicating <i>the</i> constructor to autowire when used as a Spring bean. 
- * If multiple <i>non-required</i> constructors carry the annotation, they 
- * will be considered as candidates for autowiring. The constructor with 
+ * annotation with the 'required' parameter set to {@code true},
+ * indicating <i>the</i> constructor to autowire when used as a Spring bean.
+ * If multiple <i>non-required</i> constructors carry the annotation, they
+ * will be considered as candidates for autowiring. The constructor with
  * the greatest number of dependencies that can be satisfied by matching
  * beans in the Spring container will be chosen. If none of the candidates
  * can be satisfied, then a default constructor (if present) will be used.
@@ -108,9 +109,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
 			new LinkedHashSet<Class<? extends Annotation>>();
-	
+
 	private String requiredParameterName = "required";
-	
+
 	private boolean requiredParameterValue = true;
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
@@ -118,10 +119,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
-			new ConcurrentHashMap<Class<?>, Constructor<?>[]>();
+			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(64);
 
 	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
 
 
 	/**
@@ -184,10 +185,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * Set the boolean value that marks a dependency as required 
-	 * <p>For example if using 'required=true' (the default), 
-	 * this value should be <code>true</code>; but if using 
-	 * 'optional=false', this value should be <code>false</code>.
+	 * Set the boolean value that marks a dependency as required
+	 * <p>For example if using 'required=true' (the default),
+	 * this value should be {@code true}; but if using
+	 * 'optional=false', this value should be {@code false}.
 	 * @see #setRequiredParameterName(String)
 	 */
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
@@ -195,11 +196,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -291,7 +292,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	/**
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
-	 * resolving all of its fields and methods which are annotated with <code>@Autowired</code>.
+	 * resolving all of its fields and methods which are annotated with {@code @Autowired}.
 	 * @param bean the target instance to process
 	 * @throws BeansException if autowiring failed
 	 */
@@ -372,7 +373,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private Annotation findAutowiredAnnotation(AccessibleObject ao) {
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
-			Annotation annotation = ao.getAnnotation(type);
+			Annotation annotation = AnnotationUtils.getAnnotation(ao, type);
 			if (annotation != null) {
 				return annotation;
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.DummyFactory;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
  * @author Juergen Hoeller

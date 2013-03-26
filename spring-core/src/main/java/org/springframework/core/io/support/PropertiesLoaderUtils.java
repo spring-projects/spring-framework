@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.io.support;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
@@ -26,10 +27,12 @@ import java.util.Properties;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.util.PropertiesPersister;
 import org.springframework.util.ResourceUtils;
 
 /**
- * Convenient utility methods for loading of <code>java.util.Properties</code>,
+ * Convenient utility methods for loading of {@code java.util.Properties},
  * performing standard handling of input streams.
  *
  * <p>For more configurable properties loading, including the option of a
@@ -42,11 +45,76 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class PropertiesLoaderUtils {
 
+	private static final String XML_FILE_EXTENSION = ".xml";
+
+
 	/**
-	 * Load properties from the given resource.
+	 * Load properties from the given EncodedResource,
+	 * potentially defining a specific encoding for the properties file.
+	 * @see #fillProperties(java.util.Properties, EncodedResource)
+	 */
+	public static Properties loadProperties(EncodedResource resource) throws IOException {
+		Properties props = new Properties();
+		fillProperties(props, resource);
+		return props;
+	}
+
+	/**
+	 * Fill the given properties from the given EncodedResource,
+	 * potentially defining a specific encoding for the properties file.
+	 * @param props the Properties instance to load into
+	 * @param resource the resource to load from
+	 * @throws IOException in case of I/O errors
+	 */
+	public static void fillProperties(Properties props, EncodedResource resource)
+			throws IOException {
+
+		fillProperties(props, resource, new DefaultPropertiesPersister());
+	}
+
+	/**
+	 * Actually load properties from the given EncodedResource into the given Properties instance.
+	 * @param props the Properties instance to load into
+	 * @param resource the resource to load from
+	 * @param persister the PropertiesPersister to use
+	 * @throws IOException in case of I/O errors
+	 */
+	static void fillProperties(Properties props, EncodedResource resource, PropertiesPersister persister)
+			throws IOException {
+
+		InputStream stream = null;
+		Reader reader = null;
+		try {
+			String filename = resource.getResource().getFilename();
+			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+				stream = resource.getInputStream();
+				persister.loadFromXml(props, stream);
+			}
+			else if (resource.requiresReader()) {
+				reader = resource.getReader();
+				persister.load(props, reader);
+			}
+			else {
+				stream = resource.getInputStream();
+				persister.load(props, stream);
+			}
+		}
+		finally {
+			if (stream != null) {
+				stream.close();
+			}
+			if (reader != null) {
+				reader.close();
+			}
+		}
+	}
+
+	/**
+	 * Load properties from the given resource (in ISO-8859-1 encoding).
 	 * @param resource the resource to load from
 	 * @return the populated Properties instance
 	 * @throws IOException if loading failed
+	 * @see #fillProperties(java.util.Properties, Resource)
 	 */
 	public static Properties loadProperties(Resource resource) throws IOException {
 		Properties props = new Properties();
@@ -55,7 +123,7 @@ public abstract class PropertiesLoaderUtils {
 	}
 
 	/**
-	 * Fill the given properties from the given resource.
+	 * Fill the given properties from the given resource (in ISO-8859-1 encoding).
 	 * @param props the Properties instance to fill
 	 * @param resource the resource to load from
 	 * @throws IOException if loading failed
@@ -63,7 +131,13 @@ public abstract class PropertiesLoaderUtils {
 	public static void fillProperties(Properties props, Resource resource) throws IOException {
 		InputStream is = resource.getInputStream();
 		try {
-			props.load(is);
+			String filename = resource.getFilename();
+			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+				props.loadFromXML(is);
+			}
+			else {
+				props.load(is);
+			}
 		}
 		finally {
 			is.close();
@@ -71,8 +145,8 @@ public abstract class PropertiesLoaderUtils {
 	}
 
 	/**
-	 * Load all properties from the given class path resource,
-	 * using the default class loader.
+	 * Load all properties from the specified class path resource
+	 * (in ISO-8859-1 encoding), using the default class loader.
 	 * <p>Merges properties if more than one resource of the same name
 	 * found in the class path.
 	 * @param resourceName the name of the class path resource
@@ -84,13 +158,13 @@ public abstract class PropertiesLoaderUtils {
 	}
 
 	/**
-	 * Load all properties from the given class path resource,
-	 * using the given class loader.
+	 * Load all properties from the specified class path resource
+	 * (in ISO-8859-1 encoding), using the given class loader.
 	 * <p>Merges properties if more than one resource of the same name
 	 * found in the class path.
 	 * @param resourceName the name of the class path resource
 	 * @param classLoader the ClassLoader to use for loading
-	 * (or <code>null</code> to use the default class loader)
+	 * (or {@code null} to use the default class loader)
 	 * @return the populated Properties instance
 	 * @throws IOException if loading failed
 	 */
@@ -100,24 +174,26 @@ public abstract class PropertiesLoaderUtils {
 		if (clToUse == null) {
 			clToUse = ClassUtils.getDefaultClassLoader();
 		}
-		Properties properties = new Properties();
+		Properties props = new Properties();
 		Enumeration urls = clToUse.getResources(resourceName);
 		while (urls.hasMoreElements()) {
 			URL url = (URL) urls.nextElement();
-			InputStream is = null;
+			URLConnection con = url.openConnection();
+			ResourceUtils.useCachesIfNecessary(con);
+			InputStream is = con.getInputStream();
 			try {
-				URLConnection con = url.openConnection();
-				ResourceUtils.useCachesIfNecessary(con);
-				is = con.getInputStream();
-				properties.load(is);
-			}
-			finally {
-				if (is != null) {
-					is.close();
+				if (resourceName != null && resourceName.endsWith(XML_FILE_EXTENSION)) {
+					props.loadFromXML(is);
+				}
+				else {
+					props.load(is);
 				}
 			}
+			finally {
+				is.close();
+			}
 		}
-		return properties;
+		return props;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,10 @@ import java.util.Date;
 
 import javax.management.ObjectName;
 
+import org.junit.Test;
 import org.springframework.jmx.AbstractJmxTests;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -31,10 +34,12 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 
 	private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/customConfigurer.xml";
 	}
 
+	@Test
 	public void testDatesInJmx() throws Exception {
 		// System.out.println(getServer().getClass().getName());
 		ObjectName oname = new ObjectName("bean:name=dateRange");
@@ -46,6 +51,7 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 		assertEquals("endDate ", getEndDate(), endJmx);
 	}
 
+	@Test
 	public void testGetDates() throws Exception {
 		DateRange dr = (DateRange) getContext().getBean("dateRange");
 

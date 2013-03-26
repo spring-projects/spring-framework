@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public interface AnnotatedBeanDefinition extends BeanDefinition {
 	/**
 	 * Obtain the annotation metadata (as well as basic class metadata)
 	 * for this bean definition's bean class.
-	 * @return the annotation metadata object (never <code>null</code>)
+	 * @return the annotation metadata object (never {@code null})
 	 */
 	AnnotationMetadata getMetadata();
 

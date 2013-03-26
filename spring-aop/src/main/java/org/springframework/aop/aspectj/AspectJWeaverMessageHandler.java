@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import org.aspectj.bridge.IMessageHandler;
  * Implementation of AspectJ's {@link IMessageHandler} interface that
  * routes AspectJ weaving messages through the same logging system as the
  * regular Spring messages.
- * 
+ *
  * <p>Pass the option...
  *
  * <p><code class="code">-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler</code>
  *
  * <p>to the weaver; for example, specifying the following in a
- * "<code>META-INF/aop.xml</code> file:
+ * "{@code META-INF/aop.xml} file:
  *
  * <p><code class="code">&lt;weaver options="..."/&gt;</code>
  *
@@ -44,51 +44,47 @@ import org.aspectj.bridge.IMessageHandler;
 public class AspectJWeaverMessageHandler implements IMessageHandler {
 
 	private static final String AJ_ID = "[AspectJ] ";
-	
+
 	private static final Log LOGGER = LogFactory.getLog("AspectJ Weaver");
-	
+
 
 	public boolean handleMessage(IMessage message) throws AbortException {
 		Kind messageKind = message.getKind();
 
-		if (LOGGER.isDebugEnabled() || LOGGER.isTraceEnabled()) {
-			if (messageKind == IMessage.DEBUG) {
+		if (messageKind == IMessage.DEBUG) {
+			if (LOGGER.isDebugEnabled() || LOGGER.isTraceEnabled()) {
 				LOGGER.debug(makeMessageFor(message));
 				return true;
 			}
-		} 
-		
-		if (LOGGER.isInfoEnabled()) {
-			if ((messageKind == IMessage.INFO) || (messageKind == IMessage.WEAVEINFO)) {
+		}
+		else if ((messageKind == IMessage.INFO) || (messageKind == IMessage.WEAVEINFO)) {
+			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info(makeMessageFor(message));
 				return true;
 			}
-		} 
-		
-		if (LOGGER.isWarnEnabled()) {
-			if (messageKind == IMessage.WARNING) {
+		}
+		else if (messageKind == IMessage.WARNING) {
+			if (LOGGER.isWarnEnabled()) {
 				LOGGER.warn(makeMessageFor(message));
 				return true;
 			}
 		}
-		
-		if (LOGGER.isErrorEnabled()) {
-			if (messageKind == IMessage.ERROR) {
+		else if (messageKind == IMessage.ERROR) {
+			if (LOGGER.isErrorEnabled()) {
 				LOGGER.error(makeMessageFor(message));
 				return true;
 			}
 		}
-		
-		if (LOGGER.isFatalEnabled()) {
-			if (messageKind == IMessage.ABORT) {
+		else if (messageKind == IMessage.ABORT) {
+			if (LOGGER.isFatalEnabled()) {
 				LOGGER.fatal(makeMessageFor(message));
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private String makeMessageFor(IMessage aMessage) {
 		return AJ_ID + aMessage.getMessage();
 	}

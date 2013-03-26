@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import javax.servlet.http.HttpSession;
 import junit.framework.TestCase;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
@@ -453,7 +453,7 @@ public class MultiActionControllerTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handleIllegalStateException.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mav = mac.handleRequest(request, response);
+		mac.handleRequest(request, response);
 		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
@@ -524,7 +524,6 @@ public class MultiActionControllerTests extends TestCase {
 			this.invoked.put("commandNoSession", Boolean.TRUE);
 
 			String pname = request.getParameter("name");
-			String page = request.getParameter("age");
 			// ALLOW FOR NULL
 			if (pname == null) {
 				assertTrue("name null", command.getName() == null);
@@ -532,6 +531,8 @@ public class MultiActionControllerTests extends TestCase {
 			else {
 				assertTrue("name param set", pname.equals(command.getName()));
 			}
+
+			//String page = request.getParameter("age");
 			// if (page == null)
 			// assertTrue("age default", command.getAge() == 0);
 			// else

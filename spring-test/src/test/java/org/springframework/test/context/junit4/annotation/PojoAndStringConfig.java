@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import org.springframework.beans.Employee;
-import org.springframework.beans.Pet;
+import org.springframework.tests.sample.beans.Employee;
+import org.springframework.tests.sample.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * ApplicationContext configuration class for various integration tests.
- * 
+ *
  * <p>The beans defined in this configuration class map directly to the
- * beans defined in <code>SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>.
+ * beans defined in {@code SpringJUnit4ClassRunnerAppCtxTests-context.xml}.
  * Consequently, the application contexts loaded from these two sources
  * should be identical with regard to bean definitions.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  */

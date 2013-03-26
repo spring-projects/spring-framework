@@ -45,7 +45,7 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 		falseValues.add("no");
 		falseValues.add("0");
 	}
-	
+
 	public Boolean convert(String source) {
 		String value = source.trim();
 		if ("".equals(value)) {

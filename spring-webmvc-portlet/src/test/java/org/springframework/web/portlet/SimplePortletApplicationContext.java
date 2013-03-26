@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import javax.portlet.RenderResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.validation.BindException;
@@ -44,10 +44,11 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 	private String renderCommandSessionAttributeName;
 	private String formSessionAttributeName;
 
+	@Override
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		registerSingleton("controller1", TestFormController.class, pvs);
-		
+
 		pvs = new MutablePropertyValues();
 		pvs.add("bindOnNewForm", "true");
 		registerSingleton("controller2", TestFormController.class, pvs);
@@ -65,7 +66,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 		registerSingleton("controller4", TestFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		Map parameterMap = new ManagedMap();		
+		Map parameterMap = new ManagedMap();
 		parameterMap.put("form", new RuntimeBeanReference("controller1"));
 		parameterMap.put("form-bind", new RuntimeBeanReference("controller2"));
 		parameterMap.put("form-session-bind", new RuntimeBeanReference("controller3"));
@@ -98,17 +99,20 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 			this.setFormView("form");
 		}
 
+		@Override
 		public void doSubmitAction(Object command) {
 			TestBean testBean = (TestBean) command;
 			testBean.setAge(testBean.getAge() + 10);
 		}
 
+		@Override
 		public ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors) throws Exception {
 			TestBean testBean = (TestBean) errors.getModel().get(getCommandName());
 			this.writeResponse(response, testBean, false);
 			return null;
 		}
 
+		@Override
 		public ModelAndView onSubmitRender(RenderRequest request, RenderResponse response, Object command, BindException errors)
 				throws IOException {
 			TestBean testBean = (TestBean) command;
@@ -128,6 +132,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 			response.getWriter().write((finished ? "finished" : "") + (testBean.getAge() + 5));
 		}
 
+		@Override
 		public void handleEventRequest(EventRequest request, EventResponse response) throws Exception {
 			response.setRenderParameter("event", request.getEvent().getName());
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.util.Assert;
 
 /**
- * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code> and
+ * Adapter that takes a JDK 1.5 {@code java.util.concurrent.Executor} and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
- * Also detects an extended <code>java.util.concurrent.ExecutorService</code>, adapting
+ * Also detects an extended {@code java.util.concurrent.ExecutorService}, adapting
  * the {@link org.springframework.core.task.AsyncTaskExecutor} interface accordingly.
  *
  * @author Juergen Hoeller

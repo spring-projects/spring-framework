@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,10 @@ package org.springframework.context;
 
 import java.util.Locale;
 
-import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.AbstractListableBeanFactoryTests;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.LifecycleBean;
+import org.springframework.beans.factory.xml.AbstractListableBeanFactoryTests;
+import org.springframework.tests.sample.beans.LifecycleBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -39,10 +39,12 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 
 	protected TestListener parentListener = new TestListener();
 
+	@Override
 	protected void setUp() throws Exception {
 		this.applicationContext = createContext();
 	}
 
+	@Override
 	protected BeanFactory getBeanFactory() {
 		return applicationContext;
 	}
@@ -94,7 +96,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 	public void testGrandparentTypedDefinitionFound() throws Exception {
-		TestBean dad = (TestBean) applicationContext.getBean("father", TestBean.class);
+		TestBean dad = applicationContext.getBean("father", TestBean.class);
 		assertTrue("Dad has correct name", dad.getName().equals("Albert"));
 	}
 
@@ -147,6 +149,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
@@ -107,6 +107,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 
 		WebApplicationContext wac =
 			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+				@Override
 				public void initialize(GenericWebApplicationContext context) {
 					RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
 					beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
@@ -671,8 +672,10 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 			this.attrsToValidate = attrsToValidate;
 		}
 
+		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new AbstractView () {
+				@Override
 				public String getContentType() {
 					return null;
 				}

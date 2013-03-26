@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 	/**
 	 * Return whether this holder should be unbound at completion
 	 * (or should rather be left bound to the thread after the transaction).
-	 * <p>The default implementation returns <code>true</code>.
+	 * <p>The default implementation returns {@code true}.
 	 */
 	protected boolean shouldUnbindAtCompletion() {
 		return true;
@@ -117,11 +117,11 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 
 	/**
 	 * Return whether this holder's resource should be released before
-	 * transaction completion (<code>true</code>) or rather after
-	 * transaction completion (<code>false</code>).
+	 * transaction completion ({@code true}) or rather after
+	 * transaction completion ({@code false}).
 	 * <p>Note that resources will only be released when they are
 	 * unbound from the thread ({@link #shouldUnbindAtCompletion()}).
-	 * <p>The default implementation returns <code>true</code>.
+	 * <p>The default implementation returns {@code true}.
 	 * @see #releaseResource
 	 */
 	protected boolean shouldReleaseBeforeCompletion() {
@@ -130,8 +130,8 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 
 	/**
 	 * Return whether this holder's resource should be released after
-	 * transaction completion (<code>true</code>).
-	 * <p>The default implementation returns <code>!shouldReleaseBeforeCompletion()</code>,
+	 * transaction completion ({@code true}).
+	 * <p>The default implementation returns {@code !shouldReleaseBeforeCompletion()},
 	 * releasing after completion if no attempt was made before completion.
 	 * @see #releaseResource
 	 */
@@ -167,8 +167,8 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 	 * Perform a cleanup on the given resource (which is left bound to the thread).
 	 * @param resourceHolder the resource holder to process
 	 * @param resourceKey the key that the ResourceHolder was bound for
-	 * @param committed whether the transaction has committed (<code>true</code>)
-	 * or rolled back (<code>false</code>)
+	 * @param committed whether the transaction has committed ({@code true})
+	 * or rolled back ({@code false})
 	 */
 	protected void cleanupResource(H resourceHolder, K resourceKey, boolean committed) {
 	}

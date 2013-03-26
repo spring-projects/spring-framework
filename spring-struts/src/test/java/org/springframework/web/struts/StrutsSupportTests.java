@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.struts;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -26,15 +27,15 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionServlet;
 import org.apache.struts.config.ModuleConfig;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
@@ -43,6 +44,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 public class StrutsSupportTests {
 
 	@Test
+	@SuppressWarnings("serial")
 	public void actionSupportWithContextLoaderPlugIn() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -69,6 +71,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void actionSupportWithRootContext() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -95,6 +98,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void dispatchActionSupportWithContextLoaderPlugIn() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -121,6 +125,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void dispatchActionSupportWithRootContext() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -147,6 +152,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void lookupDispatchActionSupportWithContextLoaderPlugIn() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -177,6 +183,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void lookupDispatchActionSupportWithRootContext() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -207,6 +214,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void testDelegatingActionProxy() throws Exception {
 		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/");
 		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();
@@ -221,9 +229,8 @@ public class StrutsSupportTests {
 			}
 		};
 
-		ModuleConfig moduleConfig = createMock(ModuleConfig.class);
-		expect(moduleConfig.getPrefix()).andReturn("").anyTimes();
-		replay(moduleConfig);
+		ModuleConfig moduleConfig = mock(ModuleConfig.class);
+		given(moduleConfig.getPrefix()).willReturn("");
 
 		plugin.init(actionServlet, moduleConfig);
 		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
@@ -242,11 +249,10 @@ public class StrutsSupportTests {
 		proxy.setServlet(null);
 		plugin.destroy();
 		assertTrue(testAction.getServlet() == null);
-
-		verify(moduleConfig);
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void delegatingActionProxyWithModule() throws Exception {
 		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/WEB-INF");
 		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();
@@ -262,9 +268,8 @@ public class StrutsSupportTests {
 			}
 		};
 
-		ModuleConfig moduleConfig = createMock(ModuleConfig.class);
-		expect(moduleConfig.getPrefix()).andReturn("/module").anyTimes();
-		replay(moduleConfig);
+		ModuleConfig moduleConfig = mock(ModuleConfig.class);
+		given(moduleConfig.getPrefix()).willReturn("/module");
 
 		plugin.init(actionServlet, moduleConfig);
 		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) == null);
@@ -289,6 +294,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void delegatingActionProxyWithModuleAndDefaultContext() throws Exception {
 		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/WEB-INF");
 		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();
@@ -304,13 +310,12 @@ public class StrutsSupportTests {
 			}
 		};
 
-		ModuleConfig defaultModuleConfig = createMock(ModuleConfig.class);
-		expect(defaultModuleConfig.getPrefix()).andReturn("").anyTimes();
+		ModuleConfig defaultModuleConfig = mock(ModuleConfig.class);
+		given(defaultModuleConfig.getPrefix()).willReturn("");
 
-		ModuleConfig moduleConfig = createMock(ModuleConfig.class);
-		expect(moduleConfig.getPrefix()).andReturn("/module").anyTimes();
+		ModuleConfig moduleConfig = mock(ModuleConfig.class);
+		given(moduleConfig.getPrefix()).willReturn("/module");
 
-		replay(defaultModuleConfig, moduleConfig);
 
 		plugin.init(actionServlet, defaultModuleConfig);
 		assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
@@ -330,8 +335,6 @@ public class StrutsSupportTests {
 		proxy.setServlet(null);
 		plugin.destroy();
 		assertTrue(testAction.getServlet() == null);
-
-		verify(defaultModuleConfig, moduleConfig);
 	}
 
 }

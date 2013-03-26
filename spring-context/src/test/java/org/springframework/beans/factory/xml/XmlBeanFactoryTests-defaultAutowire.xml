@@ -3,19 +3,19 @@
 
 <beans default-autowire="byType" default-dependency-check="objects">
 
-	<bean id="rod1" class="org.springframework.beans.factory.xml.DependenciesBean">
+	<bean id="rod1" class="org.springframework.tests.sample.beans.DependenciesBean">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod2" class="org.springframework.beans.factory.xml.DependenciesBean">
+	<bean id="rod2" class="org.springframework.tests.sample.beans.DependenciesBean">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod3" class="org.springframework.beans.factory.xml.DependenciesBean" autowire="no">
+	<bean id="rod3" class="org.springframework.tests.sample.beans.DependenciesBean" autowire="no">
 		<!-- Should not pick up spouse automatically -->
 	</bean>
 
-	<bean id="spouse" class="org.springframework.beans.TestBean" autowire="no" dependency-check="none">
+	<bean id="spouse" class="org.springframework.tests.sample.beans.TestBean" autowire="no" dependency-check="none">
 		<property name="name">
 			<value>Kerry</value>
 		</property>

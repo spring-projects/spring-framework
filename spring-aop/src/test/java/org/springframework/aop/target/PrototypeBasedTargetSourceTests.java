@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-
-import test.beans.SerializablePerson;
-import test.beans.TestBean;
-import test.util.SerializationTestUtils;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * Unit tests relating to the abstract {@link AbstractPrototypeBasedTargetSource}
@@ -41,10 +41,12 @@ public final class PrototypeBasedTargetSourceTests {
 	public void testSerializability() throws Exception {
 		MutablePropertyValues tsPvs = new MutablePropertyValues();
 		tsPvs.add("targetBeanName", "person");
-		RootBeanDefinition tsBd = new RootBeanDefinition(TestTargetSource.class, tsPvs);
+		RootBeanDefinition tsBd = new RootBeanDefinition(TestTargetSource.class);
+		tsBd.setPropertyValues(tsPvs);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		RootBeanDefinition bd = new RootBeanDefinition(SerializablePerson.class, pvs);
+		RootBeanDefinition bd = new RootBeanDefinition(SerializablePerson.class);
+		bd.setPropertyValues(pvs);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -59,19 +61,23 @@ public final class PrototypeBasedTargetSourceTests {
 		assertNotNull(sts.getTarget());
 	}
 
-	
+
 	private static class TestTargetSource extends AbstractPrototypeBasedTargetSource {
-		
+
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Nonserializable test field to check that subclass
 		 * state can't prevent serialization from working
 		 */
 		private TestBean thisFieldIsNotSerializable = new TestBean();
 
+		@Override
 		public Object getTarget() throws Exception {
 			return newPrototypeInstance();
 		}
 
+		@Override
 		public void releaseTarget(Object target) throws Exception {
 			// Do nothing
 		}

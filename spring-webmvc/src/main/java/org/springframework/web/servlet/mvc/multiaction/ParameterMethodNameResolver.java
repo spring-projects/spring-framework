@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,35 +30,35 @@ import org.springframework.web.util.WebUtils;
 /**
  * Implementation of {@link MethodNameResolver} which supports several strategies
  * for mapping parameter values to the names of methods to invoke.
- * 
+ *
  * <p>The simplest strategy looks for a specific named parameter, whose value is
  * considered the name of the method to invoke. The name of the parameter may be
- * specified as a JavaBean property, if the default <code>action</code> is not
+ * specified as a JavaBean property, if the default {@code action} is not
  * acceptable.
- * 
+ *
  * <p>The alternative strategy uses the very existence of a request parameter (
  * i.e. a request parameter with a certain name is found) as an indication that a
  * method with the same name should be dispatched to. In this case, the actual
  * request parameter value is ignored. The list of parameter/method names may
- * be set via the <code>methodParamNames<code> JavaBean property.
+ * be set via the {@code methodParamNames} JavaBean property.
  *
  * <p>The second resolution strategy is primarily expected to be used with web
  * pages containing multiple submit buttons. The 'name' attribute of each
  * button should be set to the mapped method name, while the 'value' attribute
  * is normally displayed as the button label by the browser, and will be
  * ignored by the resolver.
- * 
+ *
  * <p>Note that the second strategy also supports the use of submit buttons of
  * type 'image'. That is, an image submit button named 'reset' will normally be
- * submitted by the browser as two request paramters called 'reset.x', and
- * 'reset.y'. When checking for the existence of a paramter from the 
- * <code>methodParamNames</code> list, to indicate that a specific method should
- * be called, the code will look for request parameter in the "reset" form
- * (exactly as spcified in the list), and in the "reset.x" form ('.x' appended to
- * the name in the list). In this way it can handle both normal and image submit
- * buttons. The actual method name resolved if there is a match will always be
- * the bare form without the ".x". 
- * 
+ * submitted by the browser as two request parameters called 'reset.x', and
+ * 'reset.y'. When checking for the existence of a parameter from the
+ * {@code methodParamNames} list, to indicate that a specific method should
+ * be called, the code will look for a request parameter in the "reset" form
+ * (exactly as specified in the list), and in the "reset.x" form ('.x' appended
+ * to the name in the list). In this way it can handle both normal and image
+ * submit buttons. The actual method name resolved, if there is a match, will
+ * always be the bare form without the ".x".
+ *
  * <p><b>Note:</b> If both strategies are configured, i.e. both "paramName"
  * and "methodParamNames" are specified, then both will be checked for any given
  * request. A match for an explicit request parameter in the "methodParamNames"
@@ -66,10 +66,10 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>For use with either strategy, the name of a default handler method to use
  * when there is no match, can be specified as a JavaBean property.
- * 
+ *
  * <p>For both resolution strategies, the method name is of course coming from
  * some sort of view code, (such as a JSP page). While this may be acceptable,
- * it is sometimes desireable to treat this only as a 'logical' method name,
+ * it is sometimes desirable to treat this only as a 'logical' method name,
  * with a further mapping to a 'real' method name. As such, an optional
  * 'logical' mapping may be specified for this purpose.
  *

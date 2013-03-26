@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 /**
  * Supports parameters of a given type and resolves them using a stub value.
  * Also records the resolved parameter value.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class StubArgumentResolver implements HandlerMethodArgumentResolver {
@@ -34,7 +34,7 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 	private final Class<?> parameterType;
 
 	private final Object stubValue;
-	
+
 	private List<MethodParameter> resolvedParameters = new ArrayList<MethodParameter>();
 
 	public StubArgumentResolver(Class<?> supportedParameterType, Object stubValue) {
@@ -46,10 +46,12 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 		return resolvedParameters;
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.getParameterType().equals(this.parameterType);
 	}
 
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		this.resolvedParameters.add(parameter);

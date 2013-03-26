@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Convenient base class for configurers that can perform Dependency Injection
+ * Convenient base class for bean configurers that can perform Dependency Injection
  * on objects (however they may be created). Typically subclassed by AspectJ aspects.
  *
  * <p>Subclasses may also need a custom metadata resolution strategy, in the
- * {@link BeanWiringInfoResolver} interface. The default implementation looks
- * for a bean with the same name as the fully-qualified class name. (This is
- * the default name of the bean in a Spring XML file if the '<code>id</code>'
- * attribute is not used.)
+ * {@link BeanWiringInfoResolver} interface. The default implementation looks for
+ * a bean with the same name as the fully-qualified class name. (This is the default
+ * name of the bean in a Spring XML file if the '{@code id}' attribute is not used.)
 
  * @author Rob Harrop
  * @author Rod Johnson
@@ -47,7 +46,7 @@ import org.springframework.util.ClassUtils;
  * @see #setBeanWiringInfoResolver
  * @see ClassNameBeanWiringInfoResolver
  */
-public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
+public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -87,7 +86,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * Create the default BeanWiringInfoResolver to be used if none was
 	 * specified explicitly.
 	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
-	 * @return the default BeanWiringInfoResolver (never <code>null</code>)
+	 * @return the default BeanWiringInfoResolver (never {@code null})
 	 */
 	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
 		return new ClassNameBeanWiringInfoResolver();
@@ -113,9 +112,8 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	/**
 	 * Configure the bean instance.
 	 * <p>Subclasses can override this to provide custom configuration logic.
-	 * Typically called by an aspect, for all bean instances matched by a
-	 * pointcut.
-	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>)
+	 * Typically called by an aspect, for all bean instances matched by a pointcut.
+	 * @param beanInstance the bean instance to configure (must <b>not</b> be {@code null})
 	 */
 	public void configureBean(Object beanInstance) {
 		if (this.beanFactory == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.validation;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Unit tests for {@link ValidationUtils}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Chris Beams
@@ -161,10 +161,12 @@ public class ValidationUtilsTests {
 
 	private static class EmptyValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		@Override
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!");
 		}
@@ -173,10 +175,12 @@ public class ValidationUtilsTests {
 
 	private static class EmptyOrWhitespaceValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		@Override
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!");
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.beans.PropertyEditorSupport;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyBatchUpdateException;
@@ -28,13 +27,13 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.tests.sample.beans.LifecycleBean;
+import org.springframework.tests.sample.beans.MustBeInitialized;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 
-import test.beans.DummyFactory;
-import test.beans.LifecycleBean;
-import test.beans.TestBean;
 
 /**
  * Subclasses must implement setUp() to initialize bean factory
@@ -88,7 +87,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 */
 	public void testLifecycleCallbacks() {
 		LifecycleBean lb = (LifecycleBean) getBeanFactory().getBean("lifecycle");
-		Assert.assertEquals("lifecycle", lb.getBeanName());
+		assertEquals("lifecycle", lb.getBeanName());
 		// The dummy business method will throw an exception if the
 		// necessary callbacks weren't invoked in the right order.
 		lb.businessMethod();
@@ -122,7 +121,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetInstanceByNonmatchingClass() {
 		try {
-			Object o = getBeanFactory().getBean("rod", BeanFactory.class);
+			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}
 		catch (BeanNotOfRequiredTypeException ex) {
@@ -156,7 +155,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetSharedInstanceByNonmatchingClass() {
 		try {
-			Object o = getBeanFactory().getBean("rod", BeanFactory.class);
+			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}
 		catch (BeanNotOfRequiredTypeException ex) {
@@ -200,7 +199,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	public void testNotThere() {
 		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
 		try {
-			Object o = getBeanFactory().getBean("Mr Squiggle");
+			getBeanFactory().getBean("Mr Squiggle");
 			fail("Can't find missing bean");
 		}
 		catch (BeansException ex) {
@@ -224,7 +223,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void xtestTypeMismatch() {
 		try {
-			Object o = getBeanFactory().getBean("typeMismatch");
+			getBeanFactory().getBean("typeMismatch");
 			fail("Shouldn't succeed with type mismatch");
 		}
 		catch (BeanCreationException wex) {
@@ -279,6 +278,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 */
 	public void testFactoryIsInitialized() throws Exception {
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
+		assertNotNull(tb);
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		assertTrue("Factory was initialized because it implemented InitializingBean", factory.wasInitialized());
 	}
@@ -326,6 +326,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public static class TestBeanEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			TestBean tb = new TestBean();
 			StringTokenizer st = new StringTokenizer(text, "_");
@@ -333,34 +334,6 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			tb.setAge(Integer.parseInt(st.nextToken()));
 			setValue(tb);
 		}
-	}
-
-}
-
-
-/**
- * Simple test of BeanFactory initialization
- * @author Rod Johnson
- * @since 12.03.2003
- */
-class MustBeInitialized implements InitializingBean {
-
-	private boolean inited;
-
-	/**
-	 * @see InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws Exception {
-		this.inited = true;
-	}
-
-	/**
-	 * Dummy business method that will fail unless the factory
-	 * managed the bean's lifecycle correctly
-	 */
-	public void businessMethod() {
-		if (!this.inited)
-			throw new RuntimeException("Factory didn't call afterPropertiesSet() on MustBeInitialized object");
 	}
 
 }

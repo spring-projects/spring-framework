@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,6 @@ import javax.xml.rpc.Service;
  * or one of its subclasses: {@link LocalJaxRpcServiceFactoryBean},
  * {@link JaxRpcPortClientInterceptor}, or {@link JaxRpcPortProxyFactoryBean}.
  *
- * <p>Useful, for example, to register custom type mappings. See the
- * {@link org.springframework.remoting.jaxrpc.support.AxisBeanMappingServicePostProcessor}
- * class that registers Axis-specific bean mappings for specified bean classes.
- * This is defined for the domain objects in the JPetStore same application,
- * for example.
- *
  * @author Juergen Hoeller
  * @since 1.1.4
  * @see LocalJaxRpcServiceFactory#setServicePostProcessors
@@ -38,14 +32,14 @@ import javax.xml.rpc.Service;
  * @see JaxRpcPortClientInterceptor#setServicePostProcessors
  * @see JaxRpcPortProxyFactoryBean#setServicePostProcessors
  * @see javax.xml.rpc.Service#getTypeMappingRegistry
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public interface JaxRpcServicePostProcessor {
 
 	/**
 	 * Post-process the given JAX-RPC {@link Service}.
-	 * @param service the current JAX-RPC <code>Service</code>
+	 * @param service the current JAX-RPC {@code Service}
 	 * (can be cast to an implementation-specific class if necessary)
 	 */
 	void postProcessJaxRpcService(Service service);

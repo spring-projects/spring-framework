@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * <p>The use of a <i>raw</i> target ConnectionFactory would not only be inefficient
  * because of the lack of resource reuse. It might also lead to strange effects
- * when your JMS driver doesn't accept <code>MessageProducer.close()</code> calls
- * and/or <code>MessageConsumer.close()</code> calls before <code>Session.commit()</code>,
+ * when your JMS driver doesn't accept {@code MessageProducer.close()} calls
+ * and/or {@code MessageConsumer.close()} calls before {@code Session.commit()},
  * with the latter supposed to commit all the messages that have been sent through the
  * producer handle and received through the consumer handle. As a safe general solution,
  * always pass in a {@link CachingConnectionFactory} into this transaction manager's

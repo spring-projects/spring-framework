@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Simple <code>Controller</code> implementation that transforms the virtual
+ * Simple {@code Controller} implementation that transforms the virtual
  * path of a URL into a view name and returns that view.
- * 
+ *
  * <p>Can optionally prepend a {@link #setPrefix prefix} and/or append a
  * {@link #setSuffix suffix} to build the viewname from the URL filename.
  *
  * <p>Find below some examples:
  *
  * <ol>
- *   <li><code>"/index" -> "index"</code></li>
- *   <li><code>"/index.html" -> "index"</code></li>
- *   <li><code>"/index.html"</code> + prefix <code>"pre_"</code> and suffix <code>"_suf" -> "pre_index_suf"</code></li>
- *   <li><code>"/products/view.html" -> "products/view"</code></li>
+ *   <li>{@code "/index" -> "index"}</li>
+ *   <li>{@code "/index.html" -> "index"}</li>
+ *   <li>{@code "/index.html"} + prefix {@code "pre_"} and suffix {@code "_suf" -> "pre_index_suf"}</li>
+ *   <li>{@code "/products/view.html" -> "products/view"}</li>
  * </ol>
  *
  * <p>Thanks to David Barri for suggesting prefix/suffix support!
@@ -54,7 +54,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	private String suffix = "";
 
 	/** Request URL path String --> view name String */
-	private final Map<String, String> viewNameCache = new ConcurrentHashMap<String, String>();
+	private final Map<String, String> viewNameCache = new ConcurrentHashMap<String, String>(256);
 
 
 	/**
@@ -118,8 +118,8 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	/**
 	 * Returns view name based on the URL filename,
 	 * with prefix/suffix applied when appropriate.
-	 * @param uri the request URI; for example <code>"/index.html"</code>
-	 * @return the extracted URI filename; for example <code>"index"</code>
+	 * @param uri the request URI; for example {@code "/index.html"}
+	 * @return the extracted URI filename; for example {@code "index"}
 	 * @see #extractViewNameFromUrlPath
 	 * @see #postProcessViewName
 	 */
@@ -135,8 +135,8 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 
 	/**
 	 * Extract the URL filename from the given request URI.
-	 * @param uri the request URI; for example <code>"/index.html"</code>
-	 * @return the extracted URI filename; for example <code>"index"</code>
+	 * @param uri the request URI; for example {@code "/index.html"}
+	 * @return the extracted URI filename; for example {@code "index"}
 	 */
 	protected String extractViewNameFromUrlPath(String uri) {
 		int start = (uri.charAt(0) == '/' ? 1 : 0);

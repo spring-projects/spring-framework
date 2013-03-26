@@ -33,7 +33,7 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <p><b>Note:</b> In order to use Servlet 3.0 based multipart parsing,
  * you need to mark the affected servlet with a "multipart-config" section in
- * <code>web.xml</code>, or with a {@link javax.servlet.MultipartConfigElement}
+ * {@code web.xml}, or with a {@link javax.servlet.MultipartConfigElement}
  * in programmatic servlet registration, or (in case of a custom servlet class)
  * possibly with a {@link javax.servlet.annotation.MultipartConfig} annotation
  * on your servlet class. Configuration settings such as maximum sizes or

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
- * Stores registrations of view controllers. A view controller does nothing more than return a specified 
- * view name. It saves you from having to write a controller when you want to forward the request straight 
+ * Stores registrations of view controllers. A view controller does nothing more than return a specified
+ * view name. It saves you from having to write a controller when you want to forward the request straight
  * through to a view such as a JSP.
  *
  * @author Rossen Stoyanchev
@@ -37,7 +37,7 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 public class ViewControllerRegistry {
 
 	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>();
-	
+
 	private int order = 1;
 
 	public ViewControllerRegistration addViewController(String urlPath) {
@@ -45,10 +45,10 @@ public class ViewControllerRegistry {
 		registrations.add(registration);
 		return registration;
 	}
-	
+
 	/**
-	 * Specify the order to use for ViewControllers mappings relative to other {@link HandlerMapping}s 
-	 * configured in the Spring MVC application context. The default value for view controllers is 1, 
+	 * Specify the order to use for ViewControllers mappings relative to other {@link HandlerMapping}s
+	 * configured in the Spring MVC application context. The default value for view controllers is 1,
 	 * which is 1 higher than the value used for annotated controllers.
 	 */
 	public void setOrder(int order) {
@@ -67,11 +67,11 @@ public class ViewControllerRegistry {
 		for (ViewControllerRegistration registration : registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}
-		
+
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
 		handlerMapping.setOrder(order);
 		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
 	}
-	
+
 }

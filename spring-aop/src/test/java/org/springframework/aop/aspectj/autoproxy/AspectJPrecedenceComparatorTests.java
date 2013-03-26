@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.BeforeAdvice;
@@ -35,34 +34,13 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AspectJPrecedenceComparatorTests {
-
-	/*
-	 * Specification for the comparator (as defined in the 
-	 * AspectJPrecedenceComparator class)
-	 * 
-	 * <p>
-	 * Orders AspectJ advice/advisors by invocation order.
-	 * </p>
-	 * <p>
-	 * Given two pieces of advice, <code>a</code> and <code>b</code>:
-	 * </p>
-	 * <ul>
-	 *   <li>if <code>a</code> and <code>b</code> are defined in different
-	 *   aspects, then the advice in the aspect with the lowest order
-	 *   value has the highest precedence</li>
-	 *   <li>if <code>a</code> and <code>b</code> are defined in the same
-	 *   aspect, then if one of <code>a</code> or <code>b</code> is a form of
-	 *   after advice, then the advice declared last in the aspect has the
-	 *   highest precedence. If neither <code>a</code> nor <code>b</code> is a
-	 *   form of after advice, then the advice declared first in the aspect has
-	 *   the highest precedence.</li>
-	 * </ul>
-	 */
+public class AspectJPrecedenceComparatorTests {
 
 	private static final int HIGH_PRECEDENCE_ADVISOR_ORDER = 100;
 	private static final int LOW_PRECEDENCE_ADVISOR_ORDER = 200;
@@ -112,7 +90,7 @@ public final class AspectJPrecedenceComparatorTests {
 	public void testSameAspectOneOfEach() {
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
-		assertEquals("advisor1 and advisor2 not comparable", 0, this.comparator.compare(advisor1, advisor2));
+		assertEquals("advisor1 and advisor2 not comparable", 1, this.comparator.compare(advisor1, advisor2));
 	}
 
 	@Test
@@ -217,6 +195,7 @@ public final class AspectJPrecedenceComparatorTests {
 
 	private Advisor createSpringAOPAfterAdvice(int order) {
 		AfterReturningAdvice advice = new AfterReturningAdvice() {
+			@Override
 			public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 			}
 		};

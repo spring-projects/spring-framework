@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.UriComponentsBuilderMethodArgumentResolver;
@@ -35,7 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Test fixture with {@link UriComponentsBuilderMethodArgumentResolver}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class UriComponentsBuilderMethodArgumentResolverTests {
@@ -45,7 +45,7 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 	private MethodParameter builderParam;
 
 	private MethodParameter servletBuilderParam;
-	
+
 	private MethodParameter intParam;
 
 	private ServletWebRequest webRequest;
@@ -62,22 +62,22 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
 	}
-	
+
 	@Test
 	public void supportsParameter() throws Exception {
 		assertTrue(this.resolver.supportsParameter(this.builderParam));
 		assertTrue(this.resolver.supportsParameter(this.servletBuilderParam));
 		assertFalse(this.resolver.supportsParameter(this.intParam));
 	}
-	
+
 	@Test
 	public void resolveArgument() throws Exception {
 		this.servletRequest.setContextPath("/myapp");
 		this.servletRequest.setServletPath("/main");
 		this.servletRequest.setPathInfo("/accounts");
-		
+
 		Object actual = this.resolver.resolveArgument(this.builderParam, new ModelAndViewContainer(), this.webRequest, null);
-		
+
 		assertNotNull(actual);
 		assertEquals(ServletUriComponentsBuilder.class, actual.getClass());
 		assertEquals("http://localhost/myapp/main", ((ServletUriComponentsBuilder) actual).build().toUriString());
@@ -86,5 +86,5 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 	void handle(UriComponentsBuilder builder, ServletUriComponentsBuilder servletBuilder, int value) {
 	}
-	
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,17 @@
 
 package org.springframework.transaction.interceptor;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.transaction.PlatformTransactionManager;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Properties;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
-import org.springframework.transaction.support.TransactionCallback;
 
 /**
  * AOP Alliance MethodInterceptor for declarative transaction
@@ -40,7 +36,7 @@ import org.springframework.transaction.support.TransactionCallback;
  * <p>Derives from the {@link TransactionAspectSupport} class which
  * contains the integration with Spring's underlying transaction API.
  * TransactionInterceptor simply calls the relevant superclass methods
- * such as {@link #createTransactionIfNecessary} in the correct order.
+ * such as {@link #invokeWithinTransaction} in the correct order.
  *
  * <p>TransactionInterceptors are thread-safe.
  *
@@ -89,81 +85,17 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 
 
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
-		// Work out the target class: may be <code>null</code>.
+		// Work out the target class: may be {@code null}.
 		// The TransactionAttributeSource should be passed the target class
 		// as well as the method, which may be from an interface.
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
-		// If the transaction attribute is null, the method is non-transactional.
-		final TransactionAttribute txAttr =
-				getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(), targetClass);
-		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
-		final String joinpointIdentification = methodIdentification(invocation.getMethod(), targetClass);
-
-		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
-			// Standard transaction demarcation with getTransaction and commit/rollback calls.
-			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
-			Object retVal = null;
-			try {
-				// This is an around advice: Invoke the next interceptor in the chain.
-				// This will normally result in a target object being invoked.
-				retVal = invocation.proceed();
+		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
+		return invokeWithinTransaction(invocation.getMethod(), targetClass, new InvocationCallback() {
+			public Object proceedWithInvocation() throws Throwable {
+				return invocation.proceed();
 			}
-			catch (Throwable ex) {
-				// target invocation exception
-				completeTransactionAfterThrowing(txInfo, ex);
-				throw ex;
-			}
-			finally {
-				cleanupTransactionInfo(txInfo);
-			}
-			commitTransactionAfterReturning(txInfo);
-			return retVal;
-		}
-
-		else {
-			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
-			try {
-				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
-						new TransactionCallback<Object>() {
-							public Object doInTransaction(TransactionStatus status) {
-								TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
-								try {
-									return invocation.proceed();
-								}
-								catch (Throwable ex) {
-									if (txAttr.rollbackOn(ex)) {
-										// A RuntimeException: will lead to a rollback.
-										if (ex instanceof RuntimeException) {
-											throw (RuntimeException) ex;
-										}
-										else {
-											throw new ThrowableHolderException(ex);
-										}
-									}
-									else {
-										// A normal return value: will lead to a commit.
-										return new ThrowableHolder(ex);
-									}
-								}
-								finally {
-									cleanupTransactionInfo(txInfo);
-								}
-							}
-						});
-
-				// Check result: It might indicate a Throwable to rethrow.
-				if (result instanceof ThrowableHolder) {
-					throw ((ThrowableHolder) result).getThrowable();
-				}
-				else {
-					return result;
-				}
-			}
-			catch (ThrowableHolderException ex) {
-				throw ex.getCause();
-			}
-		}
+		});
 	}
 
 
@@ -193,41 +125,6 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		setTransactionManager((PlatformTransactionManager) ois.readObject());
 		setTransactionAttributeSource((TransactionAttributeSource) ois.readObject());
 		setBeanFactory((BeanFactory) ois.readObject());
-	}
-
-
-	/**
-	 * Internal holder class for a Throwable, used as a return value
-	 * from a TransactionCallback (to be subsequently unwrapped again).
-	 */
-	private static class ThrowableHolder {
-
-		private final Throwable throwable;
-
-		public ThrowableHolder(Throwable throwable) {
-			this.throwable = throwable;
-		}
-
-		public final Throwable getThrowable() {
-			return this.throwable;
-		}
-	}
-
-
-	/**
-	 * Internal holder class for a Throwable, used as a RuntimeException to be
-	 * thrown from a TransactionCallback (and subsequently unwrapped again).
-	 */
-	private static class ThrowableHolderException extends RuntimeException {
-
-		public ThrowableHolderException(Throwable throwable) {
-			super(throwable);
-		}
-
-		@Override
-		public String toString() {
-			return getCause().toString();
-		}
 	}
 
 }

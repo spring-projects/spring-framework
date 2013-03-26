@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2010 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,16 +20,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
@@ -42,14 +42,18 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ErrorHandler;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Christian Dupuis
  */
-public class JmsNamespaceHandlerTests extends TestCase {
+public class JmsNamespaceHandlerTests {
 
 	private static final String DEFAULT_CONNECTION_FACTORY = "connectionFactory";
 
@@ -58,15 +62,18 @@ public class JmsNamespaceHandlerTests extends TestCase {
 	private ToolingTestApplicationContext context;
 
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		this.context.close();
 	}
 
 
+	@Test
 	public void testBeansCreated() {
 		Map containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
 		assertEquals("Context should contain 3 JMS listener containers", 3, containers.size());
@@ -75,6 +82,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertEquals("Context should contain 3 JCA endpoint containers", 3, containers.size());
 	}
 
+	@Test
 	public void testContainerConfiguration() throws Exception {
 		Map<String, DefaultMessageListenerContainer> containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
 		ConnectionFactory defaultConnectionFactory = context.getBean(DEFAULT_CONNECTION_FACTORY, ConnectionFactory.class);
@@ -100,6 +108,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertEquals("2 containers should have the explicit connectionFactory", 2, explicitConnectionFactoryCount);
 	}
 
+	@Test
 	public void testListeners() throws Exception {
 		TestBean testBean1 = context.getBean("testBean1", TestBean.class);
 		TestBean testBean2 = context.getBean("testBean2", TestBean.class);
@@ -109,36 +118,28 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertNull(testBean2.getName());
 		assertNull(testBean3.message);
 
-		MockControl control1 = MockControl.createControl(TextMessage.class);
-		TextMessage message1 = (TextMessage) control1.getMock();
-		control1.expectAndReturn(message1.getText(), "Test1");
-		control1.replay();
+		TextMessage message1 = mock(TextMessage.class);
+		given(message1.getText()).willReturn("Test1");
 
 		MessageListener listener1 = getListener("listener1");
 		listener1.onMessage(message1);
 		assertEquals("Test1", testBean1.getName());
-		control1.verify();
 
-		MockControl control2 = MockControl.createControl(TextMessage.class);
-		TextMessage message2 = (TextMessage) control2.getMock();
-		control2.expectAndReturn(message2.getText(), "Test2");
-		control2.replay();
+		TextMessage message2 = mock(TextMessage.class);
+		given(message2.getText()).willReturn("Test2");
 
 		MessageListener listener2 = getListener("listener2");
 		listener2.onMessage(message2);
 		assertEquals("Test2", testBean2.getName());
-		control2.verify();
 
-		MockControl control3 = MockControl.createControl(TextMessage.class);
-		TextMessage message3 = (TextMessage) control3.getMock();
-		control3.replay();
+		TextMessage message3 = mock(TextMessage.class);
 
 		MessageListener listener3 = getListener(DefaultMessageListenerContainer.class.getName() + "#0");
 		listener3.onMessage(message3);
 		assertSame(message3, testBean3.message);
-		control3.verify();
 	}
 
+	@Test
 	public void testErrorHandlers() {
 		ErrorHandler expected = this.context.getBean("testErrorHandler", ErrorHandler.class);
 		ErrorHandler errorHandler1 = getErrorHandler("listener1");
@@ -149,6 +150,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertNull(defaultErrorHandler);
 	}
 
+	@Test
 	public void testPhases() {
 		int phase1 = getPhase("listener1");
 		int phase2 = getPhase("listener2");
@@ -180,16 +182,18 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		return ((Phased) container).getPhase();
 	}
 
+	@Test
 	public void testComponentRegistration() {
 		assertTrue("Parser should have registered a component named 'listener1'", context.containsComponentDefinition("listener1"));
 		assertTrue("Parser should have registered a component named 'listener2'", context.containsComponentDefinition("listener2"));
 		assertTrue("Parser should have registered a component named 'listener3'", context.containsComponentDefinition("listener3"));
-		assertTrue("Parser should have registered a component named '" + DefaultMessageListenerContainer.class.getName() + "#0'", 
+		assertTrue("Parser should have registered a component named '" + DefaultMessageListenerContainer.class.getName() + "#0'",
 			context.containsComponentDefinition(DefaultMessageListenerContainer.class.getName() + "#0"));
-		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'", 
+		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'",
 			context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0"));
 	}
 
+	@Test
 	public void testSourceExtraction() {
 		Iterator iterator = context.getRegisteredComponents();
 		while (iterator.hasNext()) {
@@ -211,30 +215,32 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 		public Message message;
 
+		@Override
 		public void onMessage(Message message) {
 			this.message = message;
 		}
 	}
-	
+
 
 	/**
 	 * Internal extension that registers a {@link ReaderEventListener} to store
 	 * registered {@link ComponentDefinition}s.
 	 */
 	private static class ToolingTestApplicationContext extends ClassPathXmlApplicationContext {
-		
+
 		private Set<ComponentDefinition> registeredComponents;
 
 		public ToolingTestApplicationContext(String path, Class clazz) {
 			super(path, clazz);
 		}
 
+		@Override
 		protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
 			this.registeredComponents = new HashSet<ComponentDefinition>();
 			beanDefinitionReader.setEventListener(new StoringReaderEventListener(this.registeredComponents));
 			beanDefinitionReader.setSourceExtractor(new PassThroughSourceExtractor());
 		}
-		
+
 		public boolean containsComponentDefinition(String name) {
 			for (ComponentDefinition cd : this.registeredComponents) {
 				if (cd instanceof CompositeComponentDefinition) {
@@ -253,21 +259,22 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			}
 			return false;
 		}
-		
+
 		public Iterator<ComponentDefinition> getRegisteredComponents() {
 			return this.registeredComponents.iterator();
 		}
 	}
-	
+
 
 	private static class StoringReaderEventListener extends EmptyReaderEventListener {
-		
+
 		protected final Set<ComponentDefinition> registeredComponents;
-		
+
 		public StoringReaderEventListener(Set<ComponentDefinition> registeredComponents) {
 			this.registeredComponents = registeredComponents;
 		}
-		
+
+		@Override
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			this.registeredComponents.add(componentDefinition);
 		}
@@ -276,6 +283,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	static class TestErrorHandler implements ErrorHandler {
 
+		@Override
 		public void handleError(Throwable t) {
 		}
 	}

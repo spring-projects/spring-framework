@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.easymock.MockControl;
-import org.junit.Ignore;
 
+import org.junit.Ignore;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rob Harrop
@@ -372,11 +373,8 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	}
 
 	private DataSource getMockJdbcDataSource() throws SQLException {
-		MockControl ctl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) ctl.getMock();
-		ds.getConnection();
-		ctl.setThrowable(new SQLException());
-		ctl.replay();
+		DataSource ds = mock(DataSource.class);
+		given(ds.getConnection()).willThrow(new SQLException());
 		return ds;
 	}
 
@@ -411,10 +409,12 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			super(clazz);
 		}
 
+		@Override
 		public JRDataSource create(JasperReport jasperReport) throws JRException {
 			return new JRBeanCollectionDataSource(getData());
 		}
 
+		@Override
 		public void dispose(JRDataSource jrDataSource) throws JRException {
 
 		}

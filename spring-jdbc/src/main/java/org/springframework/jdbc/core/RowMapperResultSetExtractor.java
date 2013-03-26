@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  *     "select * from user where id=?", new Object[] {id},
  *     new RowMapperResultSetExtractor(rowMapper, 1));</pre>
  *
- * <p>Alternatively, consider subclassing MappingSqlQuery from the <code>jdbc.object</code>
+ * <p>Alternatively, consider subclassing MappingSqlQuery from the {@code jdbc.object}
  * package: Instead of working with separate JdbcTemplate and RowMapper objects,
  * you can have executable query objects (containing row-mapping logic) there.
  *

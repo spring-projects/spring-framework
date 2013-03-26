@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,10 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.springframework.mock.web;
-
-import static org.easymock.EasyMock.*;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
 
 import java.io.IOException;
 
@@ -28,6 +24,10 @@ import javax.servlet.ServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link MockFilterChain}.
@@ -53,7 +53,7 @@ public class MockFilterChainTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructorNullFilter() {
-		new MockFilterChain(createMock(Servlet.class), (Filter) null);
+		new MockFilterChain(mock(Servlet.class), (Filter) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -87,16 +87,10 @@ public class MockFilterChainTests {
 
 	@Test
 	public void doFilterWithServlet() throws Exception {
-		Servlet servlet = createMock(Servlet.class);
-
+		Servlet servlet = mock(Servlet.class);
 		MockFilterChain chain = new MockFilterChain(servlet);
-		servlet.service(this.request, this.response);
-		replay(servlet);
-
 		chain.doFilter(this.request, this.response);
-
-		verify(servlet);
-
+		verify(servlet).service(this.request, this.response);
 		try {
 			chain.doFilter(this.request, this.response);
 			fail("Expected Exception");
@@ -108,9 +102,7 @@ public class MockFilterChainTests {
 
 	@Test
 	public void doFilterWithServletAndFilters() throws Exception {
-		Servlet servlet = createMock(Servlet.class);
-		servlet.service(this.request, this.response);
-		replay(servlet);
+		Servlet servlet = mock(Servlet.class);
 
 		MockFilter filter2 = new MockFilter(servlet);
 		MockFilter filter1 = new MockFilter(null);
@@ -121,7 +113,7 @@ public class MockFilterChainTests {
 		assertTrue(filter1.invoked);
 		assertTrue(filter2.invoked);
 
-		verify(servlet);
+		verify(servlet).service(this.request, this.response);
 
 		try {
 			chain.doFilter(this.request, this.response);
@@ -143,6 +135,7 @@ public class MockFilterChainTests {
 			this.servlet = servlet;
 		}
 
+		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
 
@@ -156,9 +149,11 @@ public class MockFilterChainTests {
 			}
 		}
 
+		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
 		}
 
+		@Override
 		public void destroy() {
 		}
 	}

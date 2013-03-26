@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
@@ -278,11 +278,13 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SomeOddException extends Exception {
 
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class AnotherOddException extends Exception {
 
 	}

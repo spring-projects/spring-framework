@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * An adapter for a target JDBC {@link javax.sql.DataSource}, applying the specified
- * user credentials to every standard <code>getConnection()</code> call, implicitly
- * invoking <code>getConnection(username, password)</code> on the target.
+ * user credentials to every standard {@code getConnection()} call, implicitly
+ * invoking {@code getConnection(username, password)} on the target.
  * All other methods simply delegate to the corresponding methods of the
  * target DataSource.
  *
  * <p>Can be used to proxy a target JNDI DataSource that does not have user
  * credentials configured. Client code can work with this DataSource as usual,
- * using the standard <code>getConnection()</code> call.
+ * using the standard {@code getConnection()} call.
  *
  * <p>In the following example, client code can simply transparently work with
  * the preconfigured "myDataSource", implicitly accessing "myTargetDataSource"
@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * &lt;/bean></pre>
  *
  * <p>If the "username" is empty, this proxy will simply delegate to the
- * standard <code>getConnection()</code> method of the target DataSource.
+ * standard {@code getConnection()} method of the target DataSource.
  * This can be used to keep a UserCredentialsDataSourceAdapter bean definition
  * just for the <i>option</i> of implicitly passing in user credentials if
  * the particular target DataSource requires it.
@@ -97,7 +97,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	/**
 	 * Set user credententials for this proxy and the current thread.
 	 * The given username and password will be applied to all subsequent
-	 * <code>getConnection()</code> calls on this DataSource proxy.
+	 * {@code getConnection()} calls on this DataSource proxy.
 	 * <p>This will override any statically specified user credentials,
 	 * that is, values of the "username" and "password" bean properties.
 	 * @param username the username to apply
@@ -146,10 +146,10 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	}
 
 	/**
-	 * This implementation delegates to the <code>getConnection(username, password)</code>
+	 * This implementation delegates to the {@code getConnection(username, password)}
 	 * method of the target DataSource, passing in the specified user credentials.
 	 * If the specified username is empty, it will simply delegate to the standard
-	 * <code>getConnection()</code> method of the target DataSource.
+	 * {@code getConnection()} method of the target DataSource.
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the Connection

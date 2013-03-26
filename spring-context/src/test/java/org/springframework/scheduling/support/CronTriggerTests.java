@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class CronTriggerTests {
 
-	private Calendar calendar = new GregorianCalendar();
+	private final Calendar calendar = new GregorianCalendar();
 
 	private final Date date;
 
@@ -49,14 +49,14 @@ public class CronTriggerTests {
 
 
 	public CronTriggerTests(Date date, TimeZone timeZone) {
-		this.timeZone = timeZone;
 		this.date = date;
+		this.timeZone = timeZone;
 	}
 
 	@Parameters
 	public static List<Object[]> getParameters() {
 		List<Object[]> list = new ArrayList<Object[]>();
-		list.add(new Object[] { new Date(), TimeZone.getDefault() });
+		list.add(new Object[] { new Date(), TimeZone.getTimeZone("PST") });
 		list.add(new Object[] { new Date(), TimeZone.getTimeZone("CET") });
 		return list;
 	}
@@ -65,6 +65,7 @@ public class CronTriggerTests {
 		calendar.add(Calendar.SECOND, 1);
 		calendar.set(Calendar.MILLISECOND, 0);
 	}
+
 
 	@Before
 	public void setUp() {
@@ -421,8 +422,8 @@ public class CronTriggerTests {
 
 	@Test
 	public void testSpecificHourSecond() throws Exception {
-		CronTrigger trigger = new CronTrigger("55 * 2 * * *", timeZone);
-		calendar.set(Calendar.HOUR_OF_DAY, 1);
+		CronTrigger trigger = new CronTrigger("55 * 10 * * *", timeZone);
+		calendar.set(Calendar.HOUR_OF_DAY, 9);
 		calendar.set(Calendar.SECOND, 54);
 		Date date = calendar.getTime();
 		TriggerContext context1 = getTriggerContext(date);
@@ -487,7 +488,7 @@ public class CronTriggerTests {
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNonExistentSpecificDate() throws Exception {
 		// TODO: maybe try and detect this as a special case in parser?
 		CronTrigger trigger = new CronTrigger("0 0 0 31 6 *", timeZone);
@@ -693,6 +694,26 @@ public class CronTriggerTests {
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context3));
 	}
 
+	@Test
+	public void testDaylightSavingMissingHour() throws Exception {
+		// This trigger has to be somewhere in between 2am and 3am
+		CronTrigger trigger = new CronTrigger("0 10 2 * * *", timeZone);
+		calendar.set(Calendar.DAY_OF_MONTH, 31);
+		calendar.set(Calendar.MONTH, Calendar.MARCH);
+		calendar.set(Calendar.YEAR, 2013);
+		calendar.set(Calendar.HOUR_OF_DAY, 1);
+		calendar.set(Calendar.SECOND, 54);
+		Date date = calendar.getTime();
+		TriggerContext context1 = getTriggerContext(date);
+		if (timeZone.equals(TimeZone.getTimeZone("CET"))) {
+			// Clocks go forward an hour so 2am doesn't exist in CET for this date
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
+		}
+		calendar.add(Calendar.HOUR_OF_DAY, 1);
+		calendar.set(Calendar.MINUTE, 10);
+		calendar.set(Calendar.SECOND, 0);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+	}
 
 	private void assertMatchesNextSecond(CronTrigger trigger, Calendar calendar) {
 		Date date = calendar.getTime();

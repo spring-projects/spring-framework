@@ -1,129 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="cache"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="cache">
-	<title>Cache Abstraction</title>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+    <title>Cache Abstraction</title>
 
-	<section id="cache-introduction">
-		<title>Introduction</title>
+    <section xml:id="cache-introduction">
+        <title>Introduction</title>
 
-		<para>Since version 3.1, Spring Framework provides support for transparently
-		adding caching into an existing Spring application. Similar to the <link linkend="transaction">transaction</link>
-		support, the caching abstraction allows consistent use of various caching
-		solutions with minimal impact on the code.</para>
-	</section>
+        <para>Since version 3.1, Spring Framework provides support for transparently
+        adding caching into an existing Spring application. Similar to the <link linkend="transaction">transaction</link>
+        support, the caching abstraction allows consistent use of various caching
+        solutions with minimal impact on the code.</para>
+    </section>
 
-	<section id="cache-strategies">
-	<title>Understanding the cache abstraction</title>
+    <section xml:id="cache-strategies">
+    <title>Understanding the cache abstraction</title>
 
-	<sidebar>
-	<title>Cache vs Buffer</title>
-	<para>The terms "buffer" and "cache" tend to be used interchangeably; note however they represent different things.
-	A buffer is used traditionally as an intermediate temporary store for data between a fast and a slow entity. As one
-	party would have to <emphasis>wait</emphasis> for the other affecting performance, the buffer alleviates this by
-	allowing entire blocks of data to move at once rather then in small chunks. The data is written and read only once from
-	the buffer. Furthermore, the buffers are <emphasis>visible</emphasis> to at least one party which is aware of it.</para>
-	<para>A cache on the other hand by definition is hidden and neither party is aware that caching occurs.It as well improves
-	performance but does that by allowing the same data to be read multiple times in a fast fashion.</para>
+    <sidebar>
+    <title>Cache vs Buffer</title>
+    <para>The terms "buffer" and "cache" tend to be used interchangeably; note however they represent different things.
+    A buffer is used traditionally as an intermediate temporary store for data between a fast and a slow entity. As one
+    party would have to <emphasis>wait</emphasis> for the other affecting performance, the buffer alleviates this by
+    allowing entire blocks of data to move at once rather then in small chunks. The data is written and read only once from
+    the buffer. Furthermore, the buffers are <emphasis>visible</emphasis> to at least one party which is aware of it.</para>
+    <para>A cache on the other hand by definition is hidden and neither party is aware that caching occurs.It as well improves
+    performance but does that by allowing the same data to be read multiple times in a fast fashion.</para>
 
-	<para>A further explanation of the differences between two can be found
-	<ulink url="http://en.wikipedia.org/wiki/Cache#The_difference_between_buffer_and_cache">here</ulink>.</para>
-	</sidebar>
+    <para>A further explanation of the differences between two can be found
+    <link xl:href="http://en.wikipedia.org/wiki/Cache#The_difference_between_buffer_and_cache">here</link>.</para>
+    </sidebar>
 
-	<para>At its core, the abstraction applies caching to Java methods, reducing thus the number of executions based on the
-	information available in the cache. That is, each time a <emphasis>targeted</emphasis> method is invoked, the abstraction
-	will apply a caching behaviour checking whether the method has been already executed for the given arguments. If it has,
-	then the cached result is returned without having to execute the actual method; if it has not, then method is executed, the
-	result cached and returned to the user so that, the next time the method is invoked, the cached result is returned.
-	This way, expensive methods (whether CPU or IO bound) can be executed only once for a given set of parameters and the result
-	reused without having to actually execute the method again. The caching logic is applied transparently without any interference
-	to the invoker.</para>
+    <para>At its core, the abstraction applies caching to Java methods, reducing thus the number of executions based on the
+    information available in the cache. That is, each time a <emphasis>targeted</emphasis> method is invoked, the abstraction
+    will apply a caching behavior checking whether the method has been already executed for the given arguments. If it has,
+    then the cached result is returned without having to execute the actual method; if it has not, then method is executed, the
+    result cached and returned to the user so that, the next time the method is invoked, the cached result is returned.
+    This way, expensive methods (whether CPU or IO bound) can be executed only once for a given set of parameters and the result
+    reused without having to actually execute the method again. The caching logic is applied transparently without any interference
+    to the invoker.</para>
 
-	<important>Obviously this approach works only for methods that are guaranteed to return the same output (result) for a given input
-	(or arguments) no matter how many times it is being executed.</important>
+    <important><para>Obviously this approach works only for methods that are guaranteed to return the same output (result) for a given input
+    (or arguments) no matter how many times it is being executed.</para></important>
 
-	<para>To use the cache abstraction, the developer needs to take care of two aspects:
-	<itemizedlist>
-		<listitem>caching declaration - identify the methods that need to be cached and their policy</listitem>
-		<listitem>cache configuration - the backing cache where the data is stored and read from</listitem>
-	</itemizedlist>
-	</para>
+    <para>To use the cache abstraction, the developer needs to take care of two aspects:
+    <itemizedlist>
+        <listitem><para>caching declaration - identify the methods that need to be cached and their policy</para></listitem>
+        <listitem><para>cache configuration - the backing cache where the data is stored and read from</para></listitem>
+    </itemizedlist>
+    </para>
 
-	<para>Note that just like other services in Spring Framework, the caching service is an abstraction (not a cache implementation) and requires
-	the use of an actual storage to store the cache data - that is, the abstraction frees the developer from having to write the caching
-	logic but does not provide the actual stores. There are two integrations available out of the box, for JDK <literal>java.util.concurrent.ConcurrentMap</literal>
-	and <ulink url="http://ehcache.org/">Ehcache</ulink> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
-	</section>
+    <para>Note that just like other services in Spring Framework, the caching service is an abstraction (not a cache implementation) and requires
+    the use of an actual storage to store the cache data - that is, the abstraction frees the developer from having to write the caching
+    logic but does not provide the actual stores. There are two integrations available out of the box, for JDK <literal>java.util.concurrent.ConcurrentMap</literal>
+    and <link xl:href="http://ehcache.org/">EhCache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
+    </section>
 
-	<section id="cache-annotations">
-	<title>Declarative annotation-based caching</title>
+    <section xml:id="cache-annotations">
+    <title>Declarative annotation-based caching</title>
 
-	<para>For caching declaration, the abstraction provides two Java annotations: <literal>@Cacheable</literal> and <literal>@CacheEvict</literal> which allow methods
-	to trigger cache population or cache eviction. Let us take a closer look at each annotation:</para>
+    <para>For caching declaration, the abstraction provides two Java annotations: <literal>@Cacheable</literal> and <literal>@CacheEvict</literal> which allow methods
+    to trigger cache population or cache eviction. Let us take a closer look at each annotation:</para>
 
-	<section id="cache-annotations-cacheable">
-		<title><literal>@Cacheable</literal> annotation</title>
+    <section xml:id="cache-annotations-cacheable">
+        <title><literal>@Cacheable</literal> annotation</title>
 
-		<para>As the name implies, <literal>@Cacheable</literal> is used to demarcate methods that are cacheable - that is, methods for whom the result is stored into the cache
-		so on subsequent invocations (with the same arguments), the value in the cache is returned without having to actually execute the method. In its simplest form,
-		the annotation declaration requires the name of the cache associated with the annotated method:</para>
+        <para>As the name implies, <literal>@Cacheable</literal> is used to demarcate methods that are cacheable - that is, methods for whom the result is stored into the cache
+        so on subsequent invocations (with the same arguments), the value in the cache is returned without having to actually execute the method. In its simplest form,
+        the annotation declaration requires the name of the cache associated with the annotated method:</para>
 
-		<programlisting language="java"><![CDATA[@Cacheable("books")
+        <programlisting language="java"><![CDATA[@Cacheable("books")
 public Book findBook(ISBN isbn) {...}]]></programlisting>
 
-		<para>In the snippet above, the method <literal>findBook</literal> is associated with the cache named <literal>books</literal>. Each time the method is called, the cache
-		is checked to see whether the invocation has been already executed and does not have to be repeated. While in most cases, only one cache is declared, the annotation allows multiple
-		names to be specified so that more then one cache are being used. In this case, each of the caches will be checked before executing the method - if at least one cache is hit,
-		then the associated value will be returned:</para>
-		<note>All the other caches that do not contain the method will be updated as well even though the cached method was not actually
-		executed.</note>
+        <para>In the snippet above, the method <literal>findBook</literal> is associated with the cache named <literal>books</literal>. Each time the method is called, the cache
+        is checked to see whether the invocation has been already executed and does not have to be repeated. While in most cases, only one cache is declared, the annotation allows multiple
+        names to be specified so that more then one cache are being used. In this case, each of the caches will be checked before executing the method - if at least one cache is hit,
+        then the associated value will be returned:</para>
+        <note><para>All the other caches that do not contain the method will be updated as well even though the cached method was not actually
+        executed.</para></note>
 
-		<programlisting language="java"><![CDATA[@Cacheable({ "books", "isbns" })
+        <programlisting language="java"><![CDATA[@Cacheable({ "books", "isbns" })
 public Book findBook(ISBN isbn) {...}]]></programlisting>
 
-		<section id="cache-annotations-cacheable-default-key">
-			<title>Default Key Generation</title>
+        <section xml:id="cache-annotations-cacheable-default-key">
+            <title>Default Key Generation</title>
 
-			<para>Since caches are essentially key-value stores, each invocation of a cached method needs to be translated into a suitable key for cache access.
-			Out of the box, the caching abstraction uses a simple <interfacename>KeyGenerator</interfacename> based on the following algorithm:</para>
-			<itemizedlist>
-				<listitem>If no params are given, return 0.</listitem>
-				<listitem>If only one param is given, return that instance.</listitem>
-				<listitem>If more the one param is given, return a key computed from the hashes of all parameters.</listitem>
-			</itemizedlist>
-			<para>
-			This approach works well for objects with <emphasis>natural keys</emphasis> as long as the <literal>hashCode()</literal> reflects that. If that is not the case then
-			for distributed or persistent environments, the strategy needs to be changed as the objects hashCode is not preserved.
-			In fact, depending on the JVM implementation or running conditions, the same hashCode can be reused for different objects, in the same VM instance.</para>
+            <para>Since caches are essentially key-value stores, each invocation of a cached method needs to be translated into a suitable key for cache access.
+            Out of the box, the caching abstraction uses a simple <interfacename>KeyGenerator</interfacename> based on the following algorithm:</para>
+            <itemizedlist>
+                <listitem><para>If no params are given, return 0.</para></listitem>
+                <listitem><para>If only one param is given, return that instance.</para></listitem>
+                <listitem><para>If more the one param is given, return a key computed from the hashes of all parameters.</para></listitem>
+            </itemizedlist>
+            <para>
+            This approach works well for objects with <emphasis>natural keys</emphasis> as long as the <literal>hashCode()</literal> reflects that. If that is not the case then
+            for distributed or persistent environments, the strategy needs to be changed as the objects hashCode is not preserved.
+            In fact, depending on the JVM implementation or running conditions, the same hashCode can be reused for different objects, in the same VM instance.</para>
 
-			<para>To provide a different <emphasis>default</emphasis> key generator, one needs to implement the <interfacename>org.springframework.cache.KeyGenerator</interfacename> interface.
-			Once configured, the generator will be used for each declaration that does not specify its own key generation strategy (see below).
-			</para>
-		</section>
+            <para>To provide a different <emphasis>default</emphasis> key generator, one needs to implement the <interfacename>org.springframework.cache.KeyGenerator</interfacename> interface.
+            Once configured, the generator will be used for each declaration that does not specify its own key generation strategy (see below).
+            </para>
+        </section>
 
-		<section id="cache-annotations-cacheable-key">
-			<title>Custom Key Generation Declaration</title>
+        <section xml:id="cache-annotations-cacheable-key">
+            <title>Custom Key Generation Declaration</title>
 
-			<para>Since caching is generic, it is quite likely the target methods have various signatures that cannot be simply mapped on top of the cache structure. This tends to become
-			obvious when the target method has multiple arguments out of which only some are suitable for caching (while the rest are used only by the method logic). For example:</para>
+            <para>Since caching is generic, it is quite likely the target methods have various signatures that cannot be simply mapped on top of the cache structure. This tends to become
+            obvious when the target method has multiple arguments out of which only some are suitable for caching (while the rest are used only by the method logic). For example:</para>
 
-			<programlisting language="java"><![CDATA[@Cacheable("books")
+            <programlisting language="java"><![CDATA[@Cacheable("books")
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed]]></programlisting>
 
-			<para>At first glance, while the two <literal>boolean</literal> arguments influence the way the book is found, they are no use for the cache. Further more what if only one of the two
-			is important while the other is not?</para>
+            <para>At first glance, while the two <literal>boolean</literal> arguments influence the way the book is found, they are no use for the cache. Further more what if only one of the two
+            is important while the other is not?</para>
 
-			<para>For such cases, the <literal>@Cacheable</literal> annotation allows the user to specify how the key is generated through its <literal>key</literal> attribute.
-			The developer can use <link linkend="expressions">SpEL</link> to pick the arguments of interest (or their nested properties), perform operations or even invoke arbitrary methods without
-			having to write any code or implement any interface. This is the recommended approach over the <link linkend="cache-annotations-cacheable-default-key">default</link> generator since
-			methods tend to be quite different in signatures as the code base grows; while the default strategy might work for some methods, it rarely does for all methods.</para>
+            <para>For such cases, the <literal>@Cacheable</literal> annotation allows the user to specify how the key is generated through its <literal>key</literal> attribute.
+            The developer can use <link linkend="expressions">SpEL</link> to pick the arguments of interest (or their nested properties), perform operations or even invoke arbitrary methods without
+            having to write any code or implement any interface. This is the recommended approach over the <link linkend="cache-annotations-cacheable-default-key">default</link> generator since
+            methods tend to be quite different in signatures as the code base grows; while the default strategy might work for some methods, it rarely does for all methods.</para>
 
-			<para>
-			Below are some examples of various SpEL declarations - if you are not familiar with it, do yourself a favour and read <xref linkend="expressions"/>:
-			</para>
+            <para>
+            Below are some examples of various SpEL declarations - if you are not familiar with it, do yourself a favour and read <xref linkend="expressions"/>:
+            </para>
 
-			<programlisting language="java"><!-- select 'isbn' argument -->
+            <programlisting language="java"><!-- select 'isbn' argument -->
 @Cacheable(value="books", <emphasis role="bold">key="#isbn"</emphasis>
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
@@ -135,450 +139,487 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 @Cacheable(value="books", <emphasis role="bold">key="T(someType).hash(#isbn)"</emphasis>)
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)</programlisting>
 
-			<para>The snippets above, show how easy it is to select a certain argument, one of its properties or even an arbitrary (static) method.</para>
-		</section>
+            <para>The snippets above, show how easy it is to select a certain argument, one of its properties or even an arbitrary (static) method.</para>
+        </section>
 
-		<section id="cache-annotations-cacheable-condition">
-			<title>Conditional caching</title>
+        <section xml:id="cache-annotations-cacheable-condition">
+            <title>Conditional caching</title>
 
-			<para>Sometimes, a method might not be suitable for caching all the time (for example, it might depend on the given arguments). The cache annotations support such functionality
-			through the <literal>conditional</literal> parameter which takes a <literal>SpEL</literal> expression that is evaluated to either <literal>true</literal> or <literal>false</literal>.
-			If <literal>true</literal>, the method is cached - if not, it behaves as if the method is not cached, that is executed every since time no matter what values are in the cache or what
-			arguments are used. A quick example - the following method will be cached, only if the argument <literal>name</literal> has a length shorter then 32:</para>
+            <para>Sometimes, a method might not be suitable for caching all the time (for example, it might depend on the given arguments). The cache annotations support such functionality
+            through the <literal>conditional</literal> parameter which takes a <literal>SpEL</literal> expression that is evaluated to either <literal>true</literal> or <literal>false</literal>.
+            If <literal>true</literal>, the method is cached - if not, it behaves as if the method is not cached, that is executed every since time no matter what values are in the cache or what
+            arguments are used. A quick example - the following method will be cached, only if the argument <literal>name</literal> has a length shorter then 32:</para>
 
-			<programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32")
+            <programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32")
 public Book findBook(String name)]]></programlisting>
-		</section>
 
-		<section id="cache-spel-context">
-			<title>Available caching <literal>SpEL</literal> evaluation context</title>
+            <para>In addition the <literal>conditional</literal> parameter, the <literal>unless</literal> parameter can be used to veto the adding of a value to the cache. Unlike
+            <literal>conditional</literal>, <literal>unless</literal> <literal>SpEL</literal> expressions are evalulated <emphasis>after</emphasis> the method has been called. Expanding
+            on the previous example - perhaps we only want to cache paperback books:</para>
 
-			<para>Each <literal>SpEL</literal> expression evaluates again a dedicated <literal><link linkend="expressions-language-ref">context</link></literal>. In addition
-			to the build in parameters, the framework provides dedicated caching related metadata such as the argument names. The next table lists the items made available to the context
-			so one can use them for key and conditional(see next section) computations:</para>
+            <programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32", unless="#result.hardback")
+public Book findBook(String name)]]></programlisting>
+        </section>
 
-			<table id="cache-spel-context-tbl" pgwide="1">
-					<title>Cache SpEL available metadata</title>
-					<tgroup cols="4">
-					<colspec align="center" />
-					<thead>
-						<row>
-						<entry>Name</entry>
-						<entry>Location</entry>
-						<entry>Description</entry>
-						<entry>Example</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-							<entry>methodName</entry>
-							<entry>root object</entry>
-							<entry>The name of the method being invoked</entry>
-							<entry><screen>#root.methodName</screen></entry>
-						</row>
-						<row>
-							<entry>method</entry>
-							<entry>root object</entry>
-							<entry>The method being invoked</entry>
-							<entry><screen>#root.method.name</screen></entry>
-						</row>
-						<row>
-							<entry>target</entry>
-							<entry>root object</entry>
-							<entry>The target object being invoked</entry>
-							<entry><screen>#root.target</screen></entry>
-						</row>
-						<row>
-							<entry>targetClass</entry>
-							<entry>root object</entry>
-							<entry>The class of the target being invoked</entry>
-							<entry><screen>#root.targetClass</screen></entry>
-						</row>
-						<row>
-							<entry>args</entry>
-							<entry>root object</entry>
-							<entry>The arguments (as array) used for invoking the target</entry>
-							<entry><screen>#root.args[0]</screen></entry>
-						</row>
-						<row>
-							<entry>caches</entry>
-							<entry>root object</entry>
-							<entry>Collection of caches against which the current method is executed</entry>
-							<entry><screen>#root.caches[0].name</screen></entry>
-						</row>
-						<row>
-							<entry><emphasis>argument name</emphasis></entry>
-							<entry>evaluation context</entry>
-							<entry>Name of any of the method argument. If for some reason the names are not available (ex: no debug information),
-							the argument names are also available under the <literal><![CDATA[a<#arg>]]></literal> where
-							<emphasis><![CDATA[#arg]]></emphasis> stands for the argument index (starting from 0).</entry>
-							<entry><screen>iban</screen> or <screen>a0</screen> (one can also use <screen>p0</screen> or <literal><![CDATA[p<#arg>]]></literal> notation as an alias).</entry>
-						</row>
-					</tbody>
-				 </tgroup>
-			</table>
-		</section>
-	</section>
+        <section xml:id="cache-spel-context">
+            <title>Available caching <literal>SpEL</literal> evaluation context</title>
 
-	<section id="cache-annotations-put">
-		<title><literal>@CachePut</literal> annotation</title>
+            <para>Each <literal>SpEL</literal> expression evaluates again a dedicated <literal><link linkend="expressions-language-ref">context</link></literal>. In addition
+            to the build in parameters, the framework provides dedicated caching related metadata such as the argument names. The next table lists the items made available to the context
+            so one can use them for key and conditional(see next section) computations:</para>
 
-		<para>For cases where the cache needs to be updated without interfering with the method execution, one can use the <literal>@CachePut</literal> annotation. That is, the method will always
-		be executed and its result placed into the cache (according to the <literal>@CachePut</literal> options). It supports the same options as <literal>@Cacheable</literal> and should be used
-		for cache population rather then method flow optimization.</para>
+            <table xml:id="cache-spel-context-tbl" pgwide="1">
+                    <title>Cache SpEL available metadata</title>
+                    <tgroup cols="4">
+                    <colspec align="center" />
+                    <thead>
+                        <row>
+                        <entry>Name</entry>
+                        <entry>Location</entry>
+                        <entry>Description</entry>
+                        <entry>Example</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>methodName</entry>
+                            <entry>root object</entry>
+                            <entry>The name of the method being invoked</entry>
+                            <entry><screen>#root.methodName</screen></entry>
+                        </row>
+                        <row>
+                            <entry>method</entry>
+                            <entry>root object</entry>
+                            <entry>The method being invoked</entry>
+                            <entry><screen>#root.method.name</screen></entry>
+                        </row>
+                        <row>
+                            <entry>target</entry>
+                            <entry>root object</entry>
+                            <entry>The target object being invoked</entry>
+                            <entry><screen>#root.target</screen></entry>
+                        </row>
+                        <row>
+                            <entry>targetClass</entry>
+                            <entry>root object</entry>
+                            <entry>The class of the target being invoked</entry>
+                            <entry><screen>#root.targetClass</screen></entry>
+                        </row>
+                        <row>
+                            <entry>args</entry>
+                            <entry>root object</entry>
+                            <entry>The arguments (as array) used for invoking the target</entry>
+                            <entry><screen>#root.args[0]</screen></entry>
+                        </row>
+                        <row>
+                            <entry>caches</entry>
+                            <entry>root object</entry>
+                            <entry>Collection of caches against which the current method is executed</entry>
+                            <entry><screen>#root.caches[0].name</screen></entry>
+                        </row>
+                        <row>
+                            <entry><emphasis>argument name</emphasis></entry>
+                            <entry>evaluation context</entry>
+                            <entry>Name of any of the method argument. If for some reason the names are not available (ex: no debug information),
+                            the argument names are also available under the <literal><![CDATA[a<#arg>]]></literal> where
+                            <emphasis><![CDATA[#arg]]></emphasis> stands for the argument index (starting from 0).</entry>
+                            <entry><screen>iban</screen> or <screen>a0</screen> (one can also use <screen>p0</screen> or <literal><![CDATA[p<#arg>]]></literal> notation as an alias).</entry>
+                        </row>
+                        <row>
+                            <entry>result</entry>
+                            <entry>evaluation context</entry>
+                            <entry>The result of the method call (the value to be cached). Only available in '<literal>unless</literal>' expressions and '<literal>cache evict</literal>'
+                            expression (when <literal>beforeInvocation</literal> is <literal>false</literal>).</entry>
+                            <entry><screen>#result</screen></entry>
+                        </row>
+                    </tbody>
+                 </tgroup>
+            </table>
+        </section>
+    </section>
 
-		<para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generally discouraged because they have different behaviours. While the latter
-		causes the method execution to be skipped by using the cache, the former forces the execution in order to execute a cache update. This leads to unexpected behaviour and with the exception of specific
-		corner-cases (such as annotations having conditions that exclude them from each other), such declarations should be avoided.</para>
-	</section>
+    <section xml:id="cache-annotations-put">
+        <title><literal>@CachePut</literal> annotation</title>
 
-	<section id="cache-annotations-evict">
-		<title><literal>@CacheEvict</literal> annotation</title>
+        <para>For cases where the cache needs to be updated without interfering with the method execution, one can use the <literal>@CachePut</literal> annotation. That is, the method will always
+        be executed and its result placed into the cache (according to the <literal>@CachePut</literal> options). It supports the same options as <literal>@Cacheable</literal> and should be used
+        for cache population rather then method flow optimization.</para>
 
-		<para>The cache abstraction allows not just population of a cache store but also eviction. This process is useful for removing stale or unused data from the cache. Opposed to
-		<literal>@Cacheable</literal>, annotation <literal>@CacheEvict</literal> demarcates methods that perform cache <emphasis>eviction</emphasis>, that is methods that act as triggers
-		for removing data from the cache. Just like its sibling, <literal>@CacheEvict</literal> requires one to specify one (or multiple) caches that are affected by the action, allows a
-		key or a condition to be specified but in addition, features an extra parameter <literal>allEntries</literal> which indicates whether a cache-wide eviction needs to be performed
-		rather then just an entry one (based on the key):</para>
+        <para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generally discouraged because they have different behaviors. While the latter
+        causes the method execution to be skipped by using the cache, the former forces the execution in order to execute a cache update. This leads to unexpected behavior and with the exception of specific
+        corner-cases (such as annotations having conditions that exclude them from each other), such declarations should be avoided.</para>
+    </section>
 
-		<programlisting language="java"><![CDATA[@CacheEvict(value = "books", allEntries=true)
+    <section xml:id="cache-annotations-evict">
+        <title><literal>@CacheEvict</literal> annotation</title>
+
+        <para>The cache abstraction allows not just population of a cache store but also eviction. This process is useful for removing stale or unused data from the cache. Opposed to
+        <literal>@Cacheable</literal>, annotation <literal>@CacheEvict</literal> demarcates methods that perform cache <emphasis>eviction</emphasis>, that is methods that act as triggers
+        for removing data from the cache. Just like its sibling, <literal>@CacheEvict</literal> requires one to specify one (or multiple) caches that are affected by the action, allows a
+        key or a condition to be specified but in addition, features an extra parameter <literal>allEntries</literal> which indicates whether a cache-wide eviction needs to be performed
+        rather then just an entry one (based on the key):</para>
+
+        <programlisting language="java"><![CDATA[@CacheEvict(value = "books", allEntries=true)
 public void loadBooks(InputStream batch)]]></programlisting>
 
-		<para>This option comes in handy when an entire cache region needs to be cleared out - rather then evicting each entry (which would take a long time since it is inefficient),
-		all the entires are removed in one operation as shown above. Note that the framework will ignore any key specified in this scenario as it does not apply (the entire cache is evicted not just
-		one entry).</para>
+        <para>This option comes in handy when an entire cache region needs to be cleared out - rather then evicting each entry (which would take a long time since it is inefficient),
+        all the entires are removed in one operation as shown above. Note that the framework will ignore any key specified in this scenario as it does not apply (the entire cache is evicted not just
+        one entry).</para>
 
-		<para>One can also indicate whether the eviction should occur after (the default) or before the method executes through the <literal>beforeInvocation</literal> attribute.
-		The former provides the same semantics as the rest of the annotations - once the method completes successfully, an action (in this case eviction) on the cache is executed. If the method does not
-		execute (as it might be cached) or an exception is thrown, the eviction does not occur. The latter (<literal>beforeInvocation=true</literal>) causes the eviction to occur always, before the method
-		is invoked - this is useful in cases where the eviction does not need to be tied to the method outcome.</para>
+        <para>One can also indicate whether the eviction should occur after (the default) or before the method executes through the <literal>beforeInvocation</literal> attribute.
+        The former provides the same semantics as the rest of the annotations - once the method completes successfully, an action (in this case eviction) on the cache is executed. If the method does not
+        execute (as it might be cached) or an exception is thrown, the eviction does not occur. The latter (<literal>beforeInvocation=true</literal>) causes the eviction to occur always, before the method
+        is invoked - this is useful in cases where the eviction does not need to be tied to the method outcome.</para>
 
-		<para>It is important to note that void methods can be used with <literal>@CacheEvict</literal> - as the methods act as triggers, the return values are ignored (as they don't interact with
-		the cache) - this is not the case with <literal>@Cacheable</literal> which adds/update data into the cache and thus requires a result.</para>
-	</section>
+        <para>It is important to note that void methods can be used with <literal>@CacheEvict</literal> - as the methods act as triggers, the return values are ignored (as they don't interact with
+        the cache) - this is not the case with <literal>@Cacheable</literal> which adds/update data into the cache and thus requires a result.</para>
+    </section>
 
-	<section id="cache-annotations-caching">
-		<title><literal>@Caching</literal> annotation</title>
+    <section xml:id="cache-annotations-caching">
+        <title><literal>@Caching</literal> annotation</title>
 
-		<para>There are cases when multiple annotations of the same type, such as <literal>@CacheEvict</literal> or <literal>@CachePut</literal> need to be specified, for example because the condition or the key
-		expression is different between different caches. Unfortunately Java does not support such declarations however there is a workaround - using a <emphasis>enclosing</emphasis> annotation, in this case,
-		<literal>@Caching</literal>. <literal>@Caching</literal> allows multiple nested <literal>@Cacheable</literal>, <literal>@CachePut</literal> and <literal>@CacheEvict</literal> to be used on the same method:</para>
+        <para>There are cases when multiple annotations of the same type, such as <literal>@CacheEvict</literal> or <literal>@CachePut</literal> need to be specified, for example because the condition or the key
+        expression is different between different caches. Unfortunately Java does not support such declarations however there is a workaround - using a <emphasis>enclosing</emphasis> annotation, in this case,
+        <literal>@Caching</literal>. <literal>@Caching</literal> allows multiple nested <literal>@Cacheable</literal>, <literal>@CachePut</literal> and <literal>@CacheEvict</literal> to be used on the same method:</para>
 
-		<programlisting language="java"><![CDATA[@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
+        <programlisting language="java"><![CDATA[@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
 public Book importBooks(String deposit, Date date)]]></programlisting>
 
-	</section>
+    </section>
 
-	<section id="cache-annotation-enable">
-		<title>Enable caching annotations</title>
+    <section xml:id="cache-annotation-enable">
+        <title>Enable caching annotations</title>
 
-		<para>It is important to note that even though declaring the cache annotations does not automatically triggers their actions - like many things in Spring, the feature has to be declaratively
-		enabled (which means if you ever suspect caching is to blame, you can disable it by removing only one configuration line rather then all the annotations in your code). In practice, this
-		translates to one line that informs Spring that it should process the cache annotations, namely:</para>
+        <para>It is important to note that even though declaring the cache annotations does not automatically triggers their actions - like many things in Spring, the feature has to be declaratively
+        enabled (which means if you ever suspect caching is to blame, you can disable it by removing only one configuration line rather then all the annotations in your code).</para>
 
-		<programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"]]>
-	<emphasis role="bold">xmlns:cache="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd]]>
-		<emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd</emphasis><![CDATA[">]]>
-	<emphasis role="bold"><![CDATA[<cache:annotation-driven />]]></emphasis>
+        <para>To enable caching annotations add the annotation <interfacename>@EnableCaching</interfacename> to one of your <interfacename>@Configuration</interfacename> classes:</para>
+
+        <programlisting language="java">@Configuration
+@EnableCaching
+public class AppConfig {
+
+}</programlisting>
+
+        <para>Alternatively for XML configuration use the <literal>cache:annotation-driven</literal> element:</para>
+
+        <programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"]]>
+    <emphasis role="bold">xmlns:cache="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd]]>
+        <emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd</emphasis><![CDATA[">]]>
+    <emphasis role="bold"><![CDATA[<cache:annotation-driven />]]></emphasis>
 <![CDATA[</beans>]]></programlisting>
 
-		<para>The namespace allows various options to be specified that influence the way the caching behaviour is added to the application through AOP. The configuration is similar (on purpose)
-		with that of <literal><ulink url="tx-annotation-driven-settings">tx:annotation-driven</ulink></literal>:
-		</para>
+        <para>Both the <literal>cache:annotation-driven</literal> element and <interfacename>@EnableCaching</interfacename> annotation allow various options to be specified that influence the way the
+        caching behavior is added to the application through AOP. The configuration is intentionally similar
+        with that of <link linkend="tx-annotation-driven-settings"><interfacename>@Transactional</interfacename></link>:
+        </para>
 
-		<para><table id="cache-annotation-driven-settings">
-			<title><literal>&lt;cache:annotation-driven/&gt;</literal>
-			settings</title>
+        <para><table xml:id="cache-annotation-driven-settings">
+            <title>Cache annotation settings</title>
 
-			<tgroup cols="3">
-			<thead>
-				<row>
-				<entry>Attribute</entry>
+            <tgroup cols="4">
+            <thead>
+                <row>
+                <entry>XML Attribute</entry>
 
-				<entry>Default</entry>
+                <entry>Annotation Attribute</entry>
 
-				<entry>Description</entry>
-				</row>
-			</thead>
+                <entry>Default</entry>
 
-			<tbody>
-				<row>
-				<entry><literal>cache-manager</literal></entry>
+                <entry>Description</entry>
+                </row>
+            </thead>
 
-				<entry>cacheManager</entry>
+            <tbody>
+                <row>
+                <entry><literal>cache-manager</literal></entry>
+                <entry>N/A (See <literal>CachingConfigurer</literal> Javadoc)</entry>
 
-				<entry><para>Name of cache manager to use. Only required
-				if the name of the cache manager is not
-				<literal>cacheManager</literal>, as in the example
-				above.</para></entry>
-				</row>
+                <entry>cacheManager</entry>
 
-				<row>
-				<entry><literal>mode</literal></entry>
+                <entry><para>Name of cache manager to use. Only required
+                if the name of the cache manager is not
+                <literal>cacheManager</literal>, as in the example
+                above.</para></entry>
+                </row>
 
-				<entry>proxy</entry>
+                <row>
+                <entry><literal>mode</literal></entry>
+                <entry><literal>mode</literal></entry>
 
-				<entry><para>The default mode "proxy" processes annotated
-				beans to be proxied using Spring's AOP framework (following
-				proxy semantics, as discussed above, applying to method calls
-				coming in through the proxy only). The alternative mode
-				"aspectj" instead weaves the affected classes with Spring's
-				AspectJ caching aspect, modifying the target class byte
-				code to apply to any kind of method call. AspectJ weaving
-				requires spring-aspects.jar in the classpath as well as
-				load-time weaving (or compile-time weaving) enabled. (See
-				<xref linkend="aop-aj-ltw-spring" /> for details on how to set
-				up load-time weaving.)</para></entry>
-				</row>
+                <entry>proxy</entry>
 
-				<row>
-				<entry><literal>proxy-target-class</literal></entry>
+                <entry><para>The default mode "proxy" processes annotated
+                beans to be proxied using Spring's AOP framework (following
+                proxy semantics, as discussed above, applying to method calls
+                coming in through the proxy only). The alternative mode
+                "aspectj" instead weaves the affected classes with Spring's
+                AspectJ caching aspect, modifying the target class byte
+                code to apply to any kind of method call. AspectJ weaving
+                requires spring-aspects.jar in the classpath as well as
+                load-time weaving (or compile-time weaving) enabled. (See
+                <xref linkend="aop-aj-ltw-spring" /> for details on how to set
+                up load-time weaving.)</para></entry>
+                </row>
 
-				<entry>false</entry>
+                <row>
+                <entry><literal>proxy-target-class</literal></entry>
+                <entry><literal>proxyTargetClass</literal></entry>
 
-				<entry><para>Applies to proxy mode only. Controls what type of
-				caching proxies are created for classes annotated with
-				the <interfacename>@Cacheable</interfacename> or <interfacename>@CacheEvict</interfacename> annotations.
-				If the <literal>proxy-target-class</literal> attribute is set
-				to <literal>true</literal>, then class-based proxies are
-				created. If <literal>proxy-target-class</literal> is
-				<literal>false</literal> or if the attribute is omitted, then
-				standard JDK interface-based proxies are created. (See <xref
-				linkend="aop-proxying" /> for a detailed examination of the
-				different proxy types.)</para></entry>
-				</row>
+                <entry>false</entry>
 
-				<row>
-				<entry><literal>order</literal></entry>
+                <entry><para>Applies to proxy mode only. Controls what type of
+                caching proxies are created for classes annotated with
+                the <interfacename>@Cacheable</interfacename> or <interfacename>@CacheEvict</interfacename> annotations.
+                If the <literal>proxy-target-class</literal> attribute is set
+                to <literal>true</literal>, then class-based proxies are
+                created. If <literal>proxy-target-class</literal> is
+                <literal>false</literal> or if the attribute is omitted, then
+                standard JDK interface-based proxies are created. (See <xref
+                linkend="aop-proxying" /> for a detailed examination of the
+                different proxy types.)</para></entry>
+                </row>
 
-				<entry>Ordered.LOWEST_PRECEDENCE</entry>
+                <row>
+                <entry><literal>order</literal></entry>
+                <entry><literal>order</literal></entry>
 
-				<entry><para>Defines the order of the cache advice that
-				is applied to beans annotated with
-				<interfacename>@Cacheable</interfacename> or <interfacename>@CacheEvict</interfacename>.
-				(For more
-				information about the rules related to ordering of AOP advice,
-				see <xref linkend="aop-ataspectj-advice-ordering" />.) No
-				specified ordering means that the AOP subsystem determines the
-				order of the advice.</para></entry>
-				</row>
-			</tbody>
-			</tgroup>
-		</table></para>
+                <entry>Ordered.LOWEST_PRECEDENCE</entry>
 
-		<note>
-		<para><literal>&lt;cache:annotation-driven/&gt;</literal> only looks for
-		<interfacename>@Cacheable/@CacheEvict</interfacename> on beans in the same
-		application context it is defined in. This means that, if you put
-		<literal>&lt;cache:annotation-driven/&gt;</literal> in a
-		<interfacename>WebApplicationContext</interfacename> for a
-		<classname>DispatcherServlet</classname>, it only checks for
-		<interfacename>@Cacheable/@CacheEvict</interfacename> beans in your
-		controllers, and not your services. See <xref
-		linkend="mvc-servlet" /> for more information.</para>
-		</note>
+                <entry><para>Defines the order of the cache advice that
+                is applied to beans annotated with
+                <interfacename>@Cacheable</interfacename> or <interfacename>@CacheEvict</interfacename>.
+                (For more
+                information about the rules related to ordering of AOP advice,
+                see <xref linkend="aop-ataspectj-advice-ordering" />.) No
+                specified ordering means that the AOP subsystem determines the
+                order of the advice.</para></entry>
+                </row>
+            </tbody>
+            </tgroup>
+        </table></para>
 
-		<sidebar>
-		<title>Method visibility and
-		<interfacename>@Cacheable/@CachePut/@CacheEvict</interfacename></title>
+        <note>
+        <para><literal>&lt;cache:annotation-driven/&gt;</literal> only looks for
+        <interfacename>@Cacheable/@CacheEvict</interfacename> on beans in the same
+        application context it is defined in. This means that, if you put
+        <literal>&lt;cache:annotation-driven/&gt;</literal> in a
+        <interfacename>WebApplicationContext</interfacename> for a
+        <classname>DispatcherServlet</classname>, it only checks for
+        <interfacename>@Cacheable/@CacheEvict</interfacename> beans in your
+        controllers, and not your services. See <xref
+        linkend="mvc-servlet" /> for more information.</para>
+        </note>
 
-		<para>When using proxies, you should apply the
-		<interfacename>@Cache*</interfacename> annotations only to
-		methods with <emphasis>public</emphasis> visibility. If you do
-		annotate protected, private or package-visible methods with these annotations,
-		no error is raised, but the annotated method does not exhibit the configured
-		caching settings. Consider the use of AspectJ (see below) if you
-		need to annotate non-public methods as it changes the bytecode itself.</para>
-		</sidebar>
+        <sidebar>
+        <title>Method visibility and
+        <interfacename>@Cacheable/@CachePut/@CacheEvict</interfacename></title>
 
-		<para><tip>
-			<para>Spring recommends that you only annotate concrete classes (and
-			methods of concrete classes) with the
-			<interfacename>@Cache*</interfacename> annotation, as opposed
-			to annotating interfaces. You certainly can place the
-			<interfacename>@Cache*</interfacename> annotation on an
-			interface (or an interface method), but this works only as you would
-			expect it to if you are using interface-based proxies. The fact that
-			Java annotations are <emphasis>not inherited from interfaces</emphasis>
-			means that if you are using class-based proxies
-			(<literal>proxy-target-class="true"</literal>) or the weaving-based
-			aspect (<literal>mode="aspectj"</literal>), then the caching
-			settings are not recognized by the proxying and weaving
-			infrastructure, and the object will not be wrapped in a
-			caching proxy, which would be decidedly
-			<emphasis>bad</emphasis>.</para>
-		</tip></para>
+        <para>When using proxies, you should apply the
+        <interfacename>@Cache*</interfacename> annotations only to
+        methods with <emphasis>public</emphasis> visibility. If you do
+        annotate protected, private or package-visible methods with these annotations,
+        no error is raised, but the annotated method does not exhibit the configured
+        caching settings. Consider the use of AspectJ (see below) if you
+        need to annotate non-public methods as it changes the bytecode itself.</para>
+        </sidebar>
 
-		<note>
-		<para>In proxy mode (which is the default), only external method calls
-		coming in through the proxy are intercepted. This means that
-		self-invocation, in effect, a method within the target object calling
-		another method of the target object, will not lead to an actual
-		caching at runtime even if the invoked method is marked with
-		<interfacename>@Cacheable</interfacename> - considering using the aspectj mode in this case.</para>
-		</note>
-	</section>
+        <para><tip>
+            <para>Spring recommends that you only annotate concrete classes (and
+            methods of concrete classes) with the
+            <interfacename>@Cache*</interfacename> annotation, as opposed
+            to annotating interfaces. You certainly can place the
+            <interfacename>@Cache*</interfacename> annotation on an
+            interface (or an interface method), but this works only as you would
+            expect it to if you are using interface-based proxies. The fact that
+            Java annotations are <emphasis>not inherited from interfaces</emphasis>
+            means that if you are using class-based proxies
+            (<literal>proxy-target-class="true"</literal>) or the weaving-based
+            aspect (<literal>mode="aspectj"</literal>), then the caching
+            settings are not recognized by the proxying and weaving
+            infrastructure, and the object will not be wrapped in a
+            caching proxy, which would be decidedly
+            <emphasis>bad</emphasis>.</para>
+        </tip></para>
 
-	<section id="cache-annotation-stereotype">
-		<title>Using custom annotations</title>
+        <note>
+        <para>In proxy mode (which is the default), only external method calls
+        coming in through the proxy are intercepted. This means that
+        self-invocation, in effect, a method within the target object calling
+        another method of the target object, will not lead to an actual
+        caching at runtime even if the invoked method is marked with
+        <interfacename>@Cacheable</interfacename> - considering using the aspectj mode in this case.</para>
+        </note>
+    </section>
 
-		<para>The caching abstraction allows one to use her own annotations to identify what method trigger cache population or eviction. This is quite handy as a template mechanism as it eliminates
-		the need to duplicate cache annotation declarations (especially useful if the key or condition are specified) or if the foreign imports (<literal>org.springframework</literal>) are not allowed
-		in your code base. Similar to the rest of the <link linkend="beans-stereotype-annotations">stereotype</link> annotations, both <literal>@Cacheable</literal> and <literal>@CacheEvict</literal>
-		can be used as meta-annotations, that is annotations that can annotate other annotations. To wit, let us replace a common <literal>@Cacheable</literal> declaration with our own, custom
-		annotation:
-		</para>
+    <section xml:id="cache-annotation-stereotype">
+        <title>Using custom annotations</title>
 
-		<programlisting language="java"><![CDATA[@Retention(RetentionPolicy.RUNTIME)
+        <para>The caching abstraction allows one to use her own annotations to identify what method trigger cache population or eviction. This is quite handy as a template mechanism as it eliminates
+        the need to duplicate cache annotation declarations (especially useful if the key or condition are specified) or if the foreign imports (<literal>org.springframework</literal>) are not allowed
+        in your code base. Similar to the rest of the <link linkend="beans-stereotype-annotations">stereotype</link> annotations, both <literal>@Cacheable</literal> and <literal>@CacheEvict</literal>
+        can be used as meta-annotations, that is annotations that can annotate other annotations. To wit, let us replace a common <literal>@Cacheable</literal> declaration with our own, custom
+        annotation:
+        </para>
+
+        <programlisting language="java"><![CDATA[@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 @Cacheable(value=“books”, key="#isbn")
 public @interface SlowService {
 }]]></programlisting>
 
-		<para>Above, we have defined our own <literal>SlowService</literal> annotation which itself is annotated with <literal>@Cacheable</literal> - now we can replace the following code:</para>
+        <para>Above, we have defined our own <literal>SlowService</literal> annotation which itself is annotated with <literal>@Cacheable</literal> - now we can replace the following code:</para>
 
-		<programlisting language="java"><![CDATA[@Cacheable(value="books", key="#isbn")
+        <programlisting language="java"><![CDATA[@Cacheable(value="books", key="#isbn")
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]></programlisting>
 
-		<para>with:</para>
+        <para>with:</para>
 
-		<programlisting language="java"><![CDATA[@SlowService
+        <programlisting language="java"><![CDATA[@SlowService
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]></programlisting>
 
-		<para>Even though <literal>@SlowService</literal> is not a Spring annotation, the container automatically picks up its declaration at runtime and understands its meaning. Note that as
-		mentioned <link linkend="cache-annotation-enable">above</link>, the annotation-driven behaviour needs to be enabled.</para>
-	</section>
-	</section>
+        <para>Even though <literal>@SlowService</literal> is not a Spring annotation, the container automatically picks up its declaration at runtime and understands its meaning. Note that as
+        mentioned <link linkend="cache-annotation-enable">above</link>, the annotation-driven behavior needs to be enabled.</para>
+    </section>
+    </section>
 
-	<section id="cache-declarative-xml">
-		<title>Declarative XML-based caching</title>
+    <section xml:id="cache-declarative-xml">
+        <title>Declarative XML-based caching</title>
 
-		<para>If annotations are not an option (no access to the sources or no external code), one can use XML for declarative caching. So instead of annotating the methods for caching, one specifies
-		the target method and the caching directives externally (similar to the declarative transaction management <link linkend="transaction-declarative-first-example">advice</link>). The previous example
-		can be translated into:</para>
+        <para>If annotations are not an option (no access to the sources or no external code), one can use XML for declarative caching. So instead of annotating the methods for caching, one specifies
+        the target method and the caching directives externally (similar to the declarative transaction management <link linkend="transaction-declarative-first-example">advice</link>). The previous example
+        can be translated into:</para>
 
-		<programlisting language="xml"><![CDATA[<!-- the service we want to make cacheable -->
+        <programlisting language="xml"><![CDATA[<!-- the service we want to make cacheable -->
 <bean id="bookService" class="x.y.service.DefaultBookService"/>
 
 <!-- cache definitions -->
 <cache:advice id="cacheAdvice" cache-manager="cacheManager">
-	<cache:caching cache="books">
-		<cache:cacheable method="findBook" key="#isbn"/>
-		<cache:cache-evict method="loadBooks" all-entries="true"/>
-	</cache:caching>
+    <cache:caching cache="books">
+        <cache:cacheable method="findBook" key="#isbn"/>
+        <cache:cache-evict method="loadBooks" all-entries="true"/>
+    </cache:caching>
 </cache:advice>
 
-<!-- apply the cacheable behaviour to all BookService interfaces -->
+<!-- apply the cacheable behavior to all BookService interfaces -->
 <aop:config>
-	<aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
+    <aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
 </aop:config>
 ...
 // cache manager definition omitted
 ]]>
-		</programlisting>
+        </programlisting>
 
-		<para>In the configuration above, the <literal>bookService</literal> is made cacheable. The caching semantics to apply are encapsulated in the <literal>cache:advice</literal> definition which
-		instructs method <literal>findBooks</literal> to be used for putting data into the cache while method <literal>loadBooks</literal> for evicting data. Both definitions are working against the
-		<literal>books</literal> cache.</para>
+        <para>In the configuration above, the <literal>bookService</literal> is made cacheable. The caching semantics to apply are encapsulated in the <literal>cache:advice</literal> definition which
+        instructs method <literal>findBooks</literal> to be used for putting data into the cache while method <literal>loadBooks</literal> for evicting data. Both definitions are working against the
+        <literal>books</literal> cache.</para>
 
-		<para>The <literal>aop:config</literal> definition applies the cache advice to the appropriate points in the program by using the AspectJ pointcut expression (more information is available
-		in <xref linkend="aop" />). In the example above, all methods from the <interfacename>BookService</interfacename> are considered and the cache advice applied to them.</para>
+        <para>The <literal>aop:config</literal> definition applies the cache advice to the appropriate points in the program by using the AspectJ pointcut expression (more information is available
+        in <xref linkend="aop" />). In the example above, all methods from the <interfacename>BookService</interfacename> are considered and the cache advice applied to them.</para>
 
-		<para>The declarative XML caching supports all of the annotation-based model so moving between the two should be fairly easy - further more both can be used inside the same application.
-		The XML based approach does not touch the target code however it is inherently more verbose; when dealing with classes with overloaded methods that are targeted for caching, identifying the
-		proper methods does take an extra effort since the <literal>method</literal> argument is not a good discriminator - in these cases, the AspectJ pointcut can be used to cherry pick the target
-		methods and apply the appropriate caching functionality. However through XML, it is easier to apply a package/group/interface-wide caching (again due to the AspectJ pointcut) and to create
-		template-like definitions (as we did in the example above by defining the target cache through the <literal>cache:definitions </literal><literal>cache</literal> attribute).
-		</para>
-	</section>
+        <para>The declarative XML caching supports all of the annotation-based model so moving between the two should be fairly easy - further more both can be used inside the same application.
+        The XML based approach does not touch the target code however it is inherently more verbose; when dealing with classes with overloaded methods that are targeted for caching, identifying the
+        proper methods does take an extra effort since the <literal>method</literal> argument is not a good discriminator - in these cases, the AspectJ pointcut can be used to cherry pick the target
+        methods and apply the appropriate caching functionality. However through XML, it is easier to apply a package/group/interface-wide caching (again due to the AspectJ pointcut) and to create
+        template-like definitions (as we did in the example above by defining the target cache through the <literal>cache:definitions </literal><literal>cache</literal> attribute).
+        </para>
+    </section>
 
-	<section id="cache-store-configuration">
-	<title>Configuring the cache storage</title>
+    <section xml:id="cache-store-configuration">
+    <title>Configuring the cache storage</title>
 
-	<para>Out of the box, the cache abstraction provides integration with two storages - one on top of the JDK <interfacename>ConcurrentMap</interfacename> and one
-	for <ulink url="ehcache.org">ehcache</ulink> library. To use them, one needs to simply declare an appropriate <interfacename>CacheManager</interfacename> - an entity that controls and manages
-	<interfacename>Cache</interfacename>s and can be used to retrieve these for storage.</para>
+    <para>Out of the box, the cache abstraction provides integration with two storages - one on top of the JDK <interfacename>ConcurrentMap</interfacename> and one
+    for <link xl:href="ehcache.org">ehcache</link> library. To use them, one needs to simply declare an appropriate <interfacename>CacheManager</interfacename> - an entity that controls and manages
+    <interfacename>Cache</interfacename>s and can be used to retrieve these for storage.</para>
 
-	<section id="cache-store-configuration-jdk">
-		<title>JDK <interfacename>ConcurrentMap</interfacename>-based <interfacename>Cache</interfacename></title>
+    <section xml:id="cache-store-configuration-jdk">
+        <title>JDK <interfacename>ConcurrentMap</interfacename>-based <interfacename>Cache</interfacename></title>
 
-		<para>The JDK-based <interfacename>Cache</interfacename> implementation resides under <literal>org.springframework.cache.concurrent</literal> package. It allows one to use <classname>
-		ConcurrentHashMap</classname> as a backing <interfacename>Cache</interfacename> store.</para>
+        <para>The JDK-based <interfacename>Cache</interfacename> implementation resides under <literal>org.springframework.cache.concurrent</literal> package. It allows one to use <classname>
+        ConcurrentHashMap</classname> as a backing <interfacename>Cache</interfacename> store.</para>
 
-	<programlisting language="xml"><![CDATA[<!-- generic cache manager -->
+    <programlisting language="xml"><![CDATA[<!-- generic cache manager -->
 <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
-	<property name="caches">
-	<set>
-		<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
-		<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="books"/>
-	</set>
-	</property>
+    <property name="caches">
+    <set>
+        <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+        <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="books"/>
+    </set>
+    </property>
 </bean>]]></programlisting>
 
-		<para>The snippet above uses the <classname>SimpleCacheManager</classname> to create a <interfacename>CacheManager</interfacename> for the two, nested <interfacename>Concurrent</interfacename>
-		<interfacename>Cache</interfacename> implementations named <emphasis>default</emphasis> and <emphasis>books</emphasis>.
-		Note that the names are configured directly for each cache.</para>
+        <para>The snippet above uses the <classname>SimpleCacheManager</classname> to create a <interfacename>CacheManager</interfacename> for the two, nested <interfacename>Concurrent</interfacename>
+        <interfacename>Cache</interfacename> implementations named <emphasis>default</emphasis> and <emphasis>books</emphasis>.
+        Note that the names are configured directly for each cache.</para>
 
-		<para>As the cache is created by the application, it is bound to its lifecycle, making it suitable for basic use cases, tests or simple applications. The cache scales well and is very fast
-		but it does not provide any management or persistence capabilities nor eviction contracts.</para>
-	</section>
+        <para>As the cache is created by the application, it is bound to its lifecycle, making it suitable for basic use cases, tests or simple applications. The cache scales well and is very fast
+        but it does not provide any management or persistence capabilities nor eviction contracts.</para>
+    </section>
 
-	<section id="cache-store-configuration-ehcache">
-		<title>Ehcache-based <interfacename>Cache</interfacename></title>
+    <section xml:id="cache-store-configuration-ehcache">
+        <title>EhCache-based <interfacename>Cache</interfacename></title>
 
-		<para>The Ehcache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate
-		<interfacename>CacheManager</interfacename>:</para>
+        <para>The EhCache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate
+        <interfacename>CacheManager</interfacename>:</para>
 
-		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
+        <programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
-<!-- Ehcache library setup -->
+<!-- EhCache library setup -->
 <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>]]></programlisting>
 
-		<para>This setup bootstraps ehcache library inside Spring IoC (through bean <literal>ehcache</literal>) which is then wired into the dedicated <interfacename>CacheManager</interfacename>
-		implementation. Note the entire ehcache-specific configuration is read from the resource <literal>ehcache.xml</literal>.</para>
-	</section>
+        <para>This setup bootstraps ehcache library inside Spring IoC (through bean <literal>ehcache</literal>) which is then wired into the dedicated <interfacename>CacheManager</interfacename>
+        implementation. Note the entire ehcache-specific configuration is read from the resource <literal>ehcache.xml</literal>.</para>
+    </section>
 
-	<section id="cache-store-configuration-noop">
-		<title>Dealing with caches without a backing store</title>
+    <section xml:id="cache-store-configuration-gemfire">
+        <title>GemFire-based <interfacename>Cache</interfacename></title>
 
-		<para>Sometimes when switching environments or doing testing, one might have cache declarations without an actual backing cache configured. As this is an invalid configuration, at runtime an
-		exception will be through since the caching infrastructure is unable to find a suitable store. In situations like this, rather then removing the cache declarations (which can prove tedious),
-		one can wire in a simple, dummy cache that performs no caching - that is, forces the cached methods to be executed every time:</para>
+        <para>GemFire is a memory-oriented/disk-backed, elastically scalable, continuously available, active (with built-in pattern-based subscription notifications),
+        globally replicated database and provides fully-featured edge caching. For further information on how to use GemFire as a CacheManager (and more), please refer
+        to the <link xl:href="http://static.springsource.org/spring-gemfire/docs/1.0.0.RELEASE/reference/html/">Spring GemFire reference documentation</link>.</para>
+    </section>
 
-		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
-	<property name="cacheManagers"><list>
-		<ref bean="jdkCache"/>
-		<ref bean="gemfireCache"/>
-	</list></property>
-	<property name="addNoOpCache" value="true"/>
+    <section xml:id="cache-store-configuration-noop">
+        <title>Dealing with caches without a backing store</title>
+
+        <para>Sometimes when switching environments or doing testing, one might have cache declarations without an actual backing cache configured. As this is an invalid configuration, at runtime an
+        exception will be through since the caching infrastructure is unable to find a suitable store. In situations like this, rather then removing the cache declarations (which can prove tedious),
+        one can wire in a simple, dummy cache that performs no caching - that is, forces the cached methods to be executed every time:</para>
+
+        <programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
+    <property name="cacheManagers"><list>
+        <ref bean="jdkCache"/>
+        <ref bean="gemfireCache"/>
+    </list></property>
+    <property name="fallbackToNoOpCache" value="true"/>
 </bean>]]></programlisting>
 
-		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and additionally, through the <literal>addNoOpManager</literal> flag, adds a
-		<emphasis>no op</emphasis> cache that for all the definitions not handled by the configured cache managers. That is, every cache definition not found in either <literal>jdkCache</literal>
-		or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
-		</para>
-	</section>
-	</section>
+        <para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and additionally, through the <literal>fallbackToNoOpCache</literal> flag, adds a
+        <emphasis>no op</emphasis> cache that for all the definitions not handled by the configured cache managers. That is, every cache definition not found in either <literal>jdkCache</literal>
+        or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
+        </para>
+    </section>
+    </section>
 
-	<section id="cache-plug">
-	<title>Plugging-in different back-end caches</title>
+    <section xml:id="cache-plug">
+    <title>Plugging-in different back-end caches</title>
 
-	<para>Clearly there are plenty of caching products out there that can be used as a backing store. To plug them in, one needs to provide a <interfacename>CacheManager</interfacename> and
-	<interfacename>Cache</interfacename> implementation since unfortunately there is no available standard that we can use instead. This may sound harder then it is since in practice,
-	the classes tend to be simple <ulink url="http://en.wikipedia.org/wiki/Adapter_pattern">adapter</ulink>s that map the caching abstraction framework on top of the storage API as the <literal>ehcache</literal> classes can show.
-	Most <interfacename>CacheManager</interfacename> classes can use the classes in <literal>org.springframework.cache.support</literal> package, such as <classname>AbstractCacheManager</classname>
-	which takes care of the boiler-plate code leaving only the actual <emphasis>mapping</emphasis> to be completed. We hope that in time, the libraries that provide integration with Spring
-	can fill in this small configuration gap.</para>
-	</section>
+    <para>Clearly there are plenty of caching products out there that can be used as a backing store. To plug them in, one needs to provide a <interfacename>CacheManager</interfacename> and
+    <interfacename>Cache</interfacename> implementation since unfortunately there is no available standard that we can use instead. This may sound harder then it is since in practice,
+    the classes tend to be simple <link xl:href="http://en.wikipedia.org/wiki/Adapter_pattern">adapter</link>s that map the caching abstraction framework on top of the storage API as the <literal>ehcache</literal> classes can show.
+    Most <interfacename>CacheManager</interfacename> classes can use the classes in <literal>org.springframework.cache.support</literal> package, such as <classname>AbstractCacheManager</classname>
+    which takes care of the boiler-plate code leaving only the actual <emphasis>mapping</emphasis> to be completed. We hope that in time, the libraries that provide integration with Spring
+    can fill in this small configuration gap.</para>
+    </section>
 
-	<section id="cache-specific-config">
-		<title>How can I set the TTL/TTI/Eviction policy/XXX feature?</title>
+    <section xml:id="cache-specific-config">
+        <title>How can I set the TTL/TTI/Eviction policy/XXX feature?</title>
 
-		<para>Directly through your cache provider. The cache abstraction is... well, an abstraction not a cache implementation. The solution you are using might support various data policies and different
-		topologies which other solutions do not (take for example the JDK <literal>ConcurrentHashMap</literal>) - exposing that in the cache abstraction would be useless simply because there would
-		no backing support. Such functionality should be controlled directly through the backing cache, when configuring it or through its native API.
-	</para>
-	</section>
+        <para>Directly through your cache provider. The cache abstraction is... well, an abstraction not a cache implementation. The solution you are using might support various data policies and different
+        topologies which other solutions do not (take for example the JDK <literal>ConcurrentHashMap</literal>) - exposing that in the cache abstraction would be useless simply because there would
+        no backing support. Such functionality should be controlled directly through the backing cache, when configuring it or through its native API.
+    </para>
+    </section>
 
 </chapter>

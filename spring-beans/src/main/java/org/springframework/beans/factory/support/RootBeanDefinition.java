@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -46,17 +45,27 @@ import org.springframework.util.Assert;
  * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
+@SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	private final Set<Member> externallyManagedConfigMembers = Collections.synchronizedSet(new HashSet<Member>(0));
+	// using a ConcurrentHashMap as a Set
+	private final Map<Member, Boolean> externallyManagedConfigMembers = new ConcurrentHashMap<Member, Boolean>(0);
 
-	private final Set<String> externallyManagedInitMethods = Collections.synchronizedSet(new HashSet<String>(0));
+	// using a ConcurrentHashMap as a Set
+	private final Map<String, Boolean> externallyManagedInitMethods = new ConcurrentHashMap<String, Boolean>(0);
 
-	private final Set<String> externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet<String>(0));
+	// using a ConcurrentHashMap as a Set
+	private final Map<String, Boolean> externallyManagedDestroyMethods = new ConcurrentHashMap<String, Boolean>(0);
 
 	private BeanDefinitionHolder decoratedDefinition;
 
-	boolean isFactoryMethodUnique;
+	boolean allowCaching = true;
+
+	private volatile Class<?> targetType;
+
+	boolean isFactoryMethodUnique = false;
+
+	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	Object resolvedConstructorOrFactoryMethod;
@@ -70,15 +79,13 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching partly prepared constructor arguments */
 	Object[] preparedConstructorArguments;
 
-	final Object constructorArgumentLock = new Object();
-
-	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
-	volatile Boolean beforeInstantiationResolved;
+	final Object postProcessingLock = new Object();
 
 	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
 	boolean postProcessed = false;
 
-	final Object postProcessingLock = new Object();
+	/** Package-visible field that indicates a before-instantiation post-processor having kicked in */
+	volatile Boolean beforeInstantiationResolved;
 
 
 	/**
@@ -231,6 +238,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (original instanceof RootBeanDefinition) {
 			RootBeanDefinition originalRbd = (RootBeanDefinition) original;
 			this.decoratedDefinition = originalRbd.decoratedDefinition;
+			this.allowCaching = originalRbd.allowCaching;
+			this.targetType = originalRbd.targetType;
 			this.isFactoryMethodUnique = originalRbd.isFactoryMethodUnique;
 		}
 	}
@@ -244,6 +253,21 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
 		}
+	}
+
+	/**
+	 * Specify the target type of this bean definition, if known in advance.
+	 */
+	public void setTargetType(Class<?> targetType) {
+		this.targetType = targetType;
+	}
+
+	/**
+	 * Return the target type of this bean definition, if known
+	 * (either specified in advance or resolved on first instantiation).
+	 */
+	public Class<?> getTargetType() {
+		return this.targetType;
 	}
 
 	/**
@@ -264,7 +288,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Return the resolved factory method as a Java Method object, if available.
-	 * @return the factory method, or <code>null</code> if not found or not resolved yet
+	 * @return the factory method, or {@code null} if not found or not resolved yet
 	 */
 	public Method getResolvedFactoryMethod() {
 		synchronized (this.constructorArgumentLock) {
@@ -275,27 +299,27 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 
 	public void registerExternallyManagedConfigMember(Member configMember) {
-		this.externallyManagedConfigMembers.add(configMember);
+		this.externallyManagedConfigMembers.put(configMember, Boolean.TRUE);
 	}
 
 	public boolean isExternallyManagedConfigMember(Member configMember) {
-		return this.externallyManagedConfigMembers.contains(configMember);
+		return this.externallyManagedConfigMembers.containsKey(configMember);
 	}
 
 	public void registerExternallyManagedInitMethod(String initMethod) {
-		this.externallyManagedInitMethods.add(initMethod);
+		this.externallyManagedInitMethods.put(initMethod, Boolean.TRUE);
 	}
 
 	public boolean isExternallyManagedInitMethod(String initMethod) {
-		return this.externallyManagedInitMethods.contains(initMethod);
+		return this.externallyManagedInitMethods.containsKey(initMethod);
 	}
 
 	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
-		this.externallyManagedDestroyMethods.add(destroyMethod);
+		this.externallyManagedDestroyMethods.put(destroyMethod, Boolean.TRUE);
 	}
 
 	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
-		return this.externallyManagedDestroyMethods.contains(destroyMethod);
+		return this.externallyManagedDestroyMethods.containsKey(destroyMethod);
 	}
 
 	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {

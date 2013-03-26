@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.io.FileNotFoundException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -38,12 +38,12 @@ import org.springframework.util.StringUtils;
  * interaction with an {@link ApplicationContext}.  For example, a {@link PropertyPlaceholderConfigurer}
  * that contains ${..} tokens in its 'location' property requires being tested through an ApplicationContext
  * as opposed to using only a BeanFactory during testing.
- * 
+ *
  * @author Chris Beams
  * @see org.springframework.beans.factory.config.PropertyResourceConfigurerTests
  */
 public class PropertyResourceConfigurerIntegrationTests {
-	
+
 	@Test
 	public void testPropertyPlaceholderConfigurerWithSystemPropertyInLocation() {
 		StaticApplicationContext ac = new StaticApplicationContext();
@@ -85,14 +85,14 @@ public class PropertyResourceConfigurerIntegrationTests {
 		catch (BeanInitializationException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof FileNotFoundException);
-			// slight hack for Linux/Unix systems			
+			// slight hack for Linux/Unix systems
 			String userDir = StringUtils.cleanPath(System.getProperty("user.dir"));
 			if (userDir.startsWith("/")) {
 				userDir = userDir.substring(1);
 			}
 			/* the above hack doesn't work since the exception message is created without
 			   the leading / stripped so the test fails.  Changed 17/11/04. DD */
-			//assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);		
+			//assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);
 			assertTrue(ex.getMessage().contains(userDir + "/test/" + userDir) ||
 					ex.getMessage().contains(userDir + "/test//" + userDir));
 		}

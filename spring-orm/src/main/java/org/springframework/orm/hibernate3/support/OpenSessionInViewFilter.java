@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -53,11 +53,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as for non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
- * with the flush mode set to <code>FlushMode.NEVER</code>. It assumes to be used
+ * with the flush mode set to {@code FlushMode.NEVER}. It assumes to be used
  * in combination with service layer transactions that care for the flushing: The
  * active transaction manager will temporarily change the flush mode to
- * <code>FlushMode.AUTO</code> during a read-write transaction, with the flush
- * mode reset to <code>FlushMode.NEVER</code> at the end of each transaction.
+ * {@code FlushMode.AUTO} during a read-write transaction, with the flush
+ * mode reset to {@code FlushMode.NEVER} at the end of each transaction.
  * If you intend to use this filter without transactions, consider changing
  * the default flush mode (through the "flushMode" property).
  *
@@ -74,13 +74,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
- * but can cause side effects, for example on <code>saveOrUpdate</code> or when
+ * but can cause side effects, for example on {@code saveOrUpdate} or when
  * continuing after a rolled-back transaction. The deferred close strategy is as safe
  * as no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
  *
  * <p>Looks up the SessionFactory in Spring's root web application context.
- * Supports a "sessionFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * Supports a "sessionFactoryBeanName" filter init-param in {@code web.xml};
  * the default bean name is "sessionFactory". Looks up the SessionFactory on each
  * request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
@@ -169,13 +169,22 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * The default value is "true" so that the filter may re-bind the opened
+	 * The default value is "false" so that the filter may re-bind the opened
 	 * {@code Session} to each asynchronously dispatched thread and postpone
 	 * closing it until the very last asynchronous dispatch.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may provide a Hibernate
+	 * {@code Session} to each error dispatches.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
+		return false;
 	}
 
 	@Override
@@ -187,7 +196,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !isAsyncDispatch(request);
 		String key = getAlreadyFilteredAttributeName();
 
 		if (isSingleSession()) {
@@ -197,6 +205,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				participate = true;
 			}
 			else {
+				boolean isFirstRequest = !isAsyncDispatch(request);
 				if (isFirstRequest || !applySessionBindingInterceptor(asyncManager, key)) {
 					logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
 					Session session = getSession(sessionFactory);
@@ -210,7 +219,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 		else {
 			// deferred close mode
-			Assert.state(isLastRequestThread(request), "Deferred close mode is not supported on async dispatches");
+			Assert.state(!isAsyncStarted(request), "Deferred close mode is not supported on async dispatches");
 			if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
 				// Do not modify deferred close: just set the participate flag.
 				participate = true;
@@ -229,7 +238,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					SessionHolder sessionHolder =
 							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-					if (isLastRequestThread(request)) {
+					if (!isAsyncStarted(request)) {
 						logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
 						closeSession(sessionHolder.getSession(), sessionFactory);
 					}
@@ -273,8 +282,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * Get a Session for the SessionFactory that this filter uses.
 	 * Note that this just applies in single session mode!
 	 * <p>The default implementation delegates to the
-	 * <code>SessionFactoryUtils.getSession</code> method and
-	 * sets the <code>Session</code>'s flush mode to "MANUAL".
+	 * {@code SessionFactoryUtils.getSession} method and
+	 * sets the {@code Session}'s flush mode to "MANUAL".
 	 * <p>Can be overridden in subclasses for creating a Session with a
 	 * custom entity interceptor or JDBC exception translator.
 	 * @param sessionFactory the SessionFactory that this filter uses
@@ -318,7 +327,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Bind and unbind the Hibernate {@code Session} to the current thread.
 	 */
-	private static class SessionBindingCallableInterceptor implements CallableProcessingInterceptor {
+	private static class SessionBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
 
 		private final SessionFactory sessionFactory;
 
@@ -329,16 +338,18 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			this.sessionHolder = sessionHolder;
 		}
 
-		public void preProcess(NativeWebRequest request, Callable<?> task) {
+		@Override
+		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
 			initializeThread();
+		}
+
+		@Override
+		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 
 		private void initializeThread() {
 			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
-		}
-
-		public void postProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 	}
 

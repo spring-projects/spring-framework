@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.validation.SmartValidator;
 
 /**
- * Adapter that takes a JSR-303 <code>javax.validator.Validator</code>
+ * Adapter that takes a JSR-303 {@code javax.validator.Validator}
  * and exposes it as a Spring {@link org.springframework.validation.Validator}
  * while also exposing the original JSR-303 Validator interface itself.
  *
@@ -99,7 +99,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 				}
 			}
 		}
-		processConstraintViolations(this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
+		processConstraintViolations(
+				this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
 	}
 
 	/**
@@ -114,10 +115,11 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 			FieldError fieldError = errors.getFieldError(field);
 			if (fieldError == null || !fieldError.isBindingFailure()) {
 				try {
-					String errorCode = violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName();
-					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, violation.getConstraintDescriptor());
+					ConstraintDescriptor<?> cd = violation.getConstraintDescriptor();
+					String errorCode = cd.getAnnotation().annotationType().getSimpleName();
+					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, cd);
 					if (errors instanceof BindingResult) {
-						// can do custom FieldError registration with invalid value from ConstraintViolation,
+						// Can do custom FieldError registration with invalid value from ConstraintViolation,
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
 						BindingResult bindingResult = (BindingResult) errors;
 						String nestedField = bindingResult.getNestedPath() + field;
@@ -128,8 +130,10 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						}
 						else {
 							Object invalidValue = violation.getInvalidValue();
-							if (!"".equals(field) && invalidValue == violation.getLeafBean()) {
-								// bean constraint with property path: retrieve the actual property value
+							if (!"".equals(field) && (invalidValue == violation.getLeafBean() ||
+									(field.contains(".") && !field.contains("[]")))) {
+								// Possibly a bean constraint with property path: retrieve the actual property value.
+								// However, explicitly avoid this for "address[]" style paths that we can't handle.
 								invalidValue = bindingResult.getRawFieldValue(field);
 							}
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);

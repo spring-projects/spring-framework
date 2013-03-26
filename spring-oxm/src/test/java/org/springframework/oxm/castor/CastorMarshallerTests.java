@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
@@ -28,19 +29,20 @@ import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.oxm.AbstractMarshallerTests;
+import org.springframework.oxm.Marshaller;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.oxm.Marshaller;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.easymock.EasyMock.*;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Tests the {@link CastorMarshaller} class.
@@ -121,26 +123,21 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void marshalSaxResult() throws Exception {
-		ContentHandler handlerMock = createMock(ContentHandler.class);
-		handlerMock.startDocument();
-		handlerMock.startPrefixMapping("tns", "http://samples.springframework.org/flight");
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("tns:flights"),
-				isA(Attributes.class));
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("tns:flight"),
-				isA(Attributes.class));
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("tns:number"),
-				isA(Attributes.class));
-		handlerMock.characters(aryEq(new char[]{'4', '2'}), eq(0), eq(2));
-		handlerMock.endElement("http://samples.springframework.org/flight", "number", "tns:number");
-		handlerMock.endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
-		handlerMock.endElement("http://samples.springframework.org/flight", "flights", "tns:flights");
-		handlerMock.endPrefixMapping("tns");
-		handlerMock.endDocument();
-
-		replay(handlerMock);
-		SAXResult result = new SAXResult(handlerMock);
+		ContentHandler contentHandler = mock(ContentHandler.class);
+		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flights, result);
-		verify(handlerMock);
+		InOrder ordered = inOrder(contentHandler);
+		ordered.verify(contentHandler).startDocument();
+		ordered.verify(contentHandler).startPrefixMapping("tns", "http://samples.springframework.org/flight");
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("tns:flights"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("tns:flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("tns:number"), isA(Attributes.class));
+		ordered.verify(contentHandler).characters(eq(new char[]{'4', '2'}), eq(0), eq(2));
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "number", "tns:number");
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flight", "tns:flight");
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flights", "tns:flights");
+		ordered.verify(contentHandler).endPrefixMapping("tns");
+		ordered.verify(contentHandler).endDocument();
 	}
 
 	@Test
@@ -295,7 +292,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 
 		Document doc = XMLUnit.buildControlDocument(xmlDoc);
 		NodeList node = engine.getMatchingNodes(xpath, doc);
-
 		assertEquals(msg, expected, node.item(0).getNodeValue());
 	}
 

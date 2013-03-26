@@ -18,6 +18,7 @@ package org.springframework.context.support;
 
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.management.MBeanServer;
@@ -34,12 +35,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * Adapter for live beans view exposure, building a snapshot of current beans
- * and their dependencies from either a local ApplicationContext (with a
- * local LiveBeansView bean definition) or all registered ApplicationContexts
- * (driven by the "spring.liveBeansView.mbean" environment property).
+ * and their dependencies from either a local {@code ApplicationContext} (with a
+ * local {@code LiveBeansView} bean definition) or all registered ApplicationContexts
+ * (driven by the {@value #MBEAN_DOMAIN_PROPERTY_NAME} environment property).
  *
  * <p>Note: This feature is still in beta and primarily designed for use with
- * SpringSource Tool Suite 3.1.
+ * Spring Tool Suite 3.1.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -116,40 +117,50 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	}
 
 	/**
-	 * Actually generate a JSON snapshot of the beans in the given ApplicationContexts
+	 * Actually generate a JSON snapshot of the beans in the given ApplicationContexts.
+	 * <p>This implementation doesn't use any JSON parsing libraries in order to avoid
+	 * third-party library dependencies. It produces an array of context description
+	 * objects, each containing a context and parent attribute as well as a beans
+	 * attribute with nested bean description objects. Each bean object contains a
+	 * bean, scope, type and resource attribute, as well as a dependencies attribute
+	 * with a nested array of bean names that the present bean depends on.
 	 * @param contexts the set of ApplicationContexts
 	 * @return the JSON document
 	 */
 	protected String generateJson(Set<ConfigurableApplicationContext> contexts) {
-		StringBuilder result = new StringBuilder();
-		for (ConfigurableApplicationContext context : contexts) {
-			result.append("{\n\"context\": \"").append(context.getId()).append("\"\n");
+		StringBuilder result = new StringBuilder("[\n");
+		for (Iterator<ConfigurableApplicationContext> it = contexts.iterator(); it.hasNext();) {
+			ConfigurableApplicationContext context = it.next();
+			result.append("{\n\"context\": \"").append(context.getId()).append("\",\n");
 			if (context.getParent() != null) {
-				result.append("\"parent\": \"").append(context.getParent().getId()).append("\"\n");
+				result.append("\"parent\": \"").append(context.getParent().getId()).append("\",\n");
 			}
 			else {
-				result.append("\"parent\": null\n");
+				result.append("\"parent\": null,\n");
 			}
+			result.append("\"beans\": [\n");
 			ConfigurableListableBeanFactory bf = context.getBeanFactory();
 			String[] beanNames = bf.getBeanDefinitionNames();
-			for (String beanName : beanNames) {
+			for (int i = 0; i < beanNames.length; i++) {
+				String beanName = beanNames[i];
 				BeanDefinition bd = bf.getBeanDefinition(beanName);
 				if (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE &&
 						(!bd.isLazyInit() || bf.containsSingleton(beanName))) {
-					result.append("{\n\"bean\": \"").append(beanName).append("\"\n");
+					result.append("{\n\"bean\": \"").append(beanName).append("\",\n");
 					String scope = bd.getScope();
 					if (!StringUtils.hasText(scope)) {
 						scope = BeanDefinition.SCOPE_SINGLETON;
 					}
-					result.append("\"scope\": \"").append(scope).append("\"\n");
-					Class beanType = bf.getType(beanName);
+					result.append("\"scope\": \"").append(scope).append("\",\n");
+					Class<?> beanType = bf.getType(beanName);
 					if (beanType != null) {
-						result.append("\"type\": \"").append(beanType.getName()).append("\"\n");
+						result.append("\"type\": \"").append(beanType.getName()).append("\",\n");
 					}
 					else {
-						result.append("\"type\": null\n");
+						result.append("\"type\": null,\n");
 					}
-					result.append("\"resource\": \"").append(bd.getResourceDescription()).append("\"\n");
+					String resource = StringUtils.replace(bd.getResourceDescription(), "\\", "/");
+					result.append("\"resource\": \"").append(resource).append("\",\n");
 					result.append("\"dependencies\": [");
 					String[] dependencies = bf.getDependenciesForBean(beanName);
 					if (dependencies.length > 0) {
@@ -159,11 +170,19 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 					if (dependencies.length > 0) {
 						result.append("\"");
 					}
-					result.append("]\n}\n");
+					result.append("]\n}");
+					if (i < beanNames.length - 1) {
+						result.append(",\n");
+					}
 				}
 			}
+			result.append("]\n");
 			result.append("}");
+			if (it.hasNext()) {
+				result.append(",\n");
+			}
 		}
+		result.append("]");
 		return result.toString();
 	}
 

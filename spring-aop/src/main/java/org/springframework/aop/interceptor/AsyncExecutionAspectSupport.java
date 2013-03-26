@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 import org.springframework.beans.BeansException;
@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for asynchronous method execution aspects, such as
  * {@link org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor}
- * or {@link org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
+ * or {@code org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
  *
  * <p>Provides support for <i>executor qualification</i> on a method-by-method basis.
  * {@code AsyncExecutionAspectSupport} objects must be constructed with a default {@code
@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
-	private final Map<Method, AsyncTaskExecutor> executors = new HashMap<Method, AsyncTaskExecutor>();
+	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<Method, AsyncTaskExecutor>(16);
 
 	private Executor defaultExecutor;
 
@@ -59,7 +59,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @param defaultExecutor the executor to use when executing asynchronous methods
 	 */
 	public AsyncExecutionAspectSupport(Executor defaultExecutor) {
-		this.setExecutor(defaultExecutor);
+		this.defaultExecutor = defaultExecutor;
 	}
 
 
@@ -87,27 +87,28 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * @returns the executor to use (never {@code null})
+	 * @return the executor to use (never {@code null})
 	 */
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
-		if (!this.executors.containsKey(method)) {
-			Executor executor = this.defaultExecutor;
+		AsyncTaskExecutor executor = this.executors.get(method);
+		if (executor == null) {
+			Executor executorToUse = this.defaultExecutor;
 			String qualifier = getExecutorQualifier(method);
 			if (StringUtils.hasLength(qualifier)) {
-				Assert.notNull(this.beanFactory,
-						"BeanFactory must be set on " + this.getClass().getSimpleName() +
-						" to access qualified executor [" + qualifier + "]");
-				executor = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+				Assert.notNull(this.beanFactory, "BeanFactory must be set on " + getClass().getSimpleName() +
+						" to access qualified executor '" + qualifier + "'");
+				executorToUse = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 						this.beanFactory, Executor.class, qualifier);
 			}
-			if (executor instanceof AsyncTaskExecutor) {
-				this.executors.put(method, (AsyncTaskExecutor) executor);
+			else if (executorToUse == null) {
+				throw new IllegalStateException("No executor qualifier specified and no default executor set on " +
+						getClass().getSimpleName() + " either");
 			}
-			else if (executor != null) {
-				this.executors.put(method, new TaskExecutorAdapter(executor));
-			}
+			executor = (executorToUse instanceof AsyncTaskExecutor ?
+					(AsyncTaskExecutor) executorToUse : new TaskExecutorAdapter(executorToUse));
+			this.executors.put(method, executor);
 		}
-		return this.executors.get(method);
+		return executor;
 	}
 
 	/**

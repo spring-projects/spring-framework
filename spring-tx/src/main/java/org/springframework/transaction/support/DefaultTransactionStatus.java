@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,7 +176,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	protected SavepointManager getSavepointManager() {
 		if (!isTransactionSavepointManager()) {
 			throw new NestedTransactionNotSupportedException(
-			    "Transaction object [" + getTransaction() + "] does not support savepoints");
+				"Transaction object [" + getTransaction() + "] does not support savepoints");
 		}
 		return (SavepointManager) getTransaction();
 	}

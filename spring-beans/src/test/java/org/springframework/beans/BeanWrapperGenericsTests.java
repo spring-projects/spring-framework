@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,15 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import test.beans.GenericBean;
-import test.beans.GenericIntegerBean;
-import test.beans.GenericSetOfIntegerBean;
-import test.beans.TestBean;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.tests.sample.beans.GenericBean;
+import org.springframework.tests.sample.beans.GenericIntegerBean;
+import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
@@ -157,7 +157,6 @@ public class BeanWrapperGenericsTests {
 		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		@SuppressWarnings("unchecked")
 		Map<String, Collection> input = new HashMap<String, Collection>();
 		HashSet<Integer> value1 = new HashSet<Integer>();
 		value1.add(new Integer(1));
@@ -497,6 +496,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NestedGenericCollectionBean extends BaseGenericCollectionBean {
 
 		private Map<String, Integer> mapOfInteger;
@@ -507,6 +507,7 @@ public class BeanWrapperGenericsTests {
 
 		private Map<String, List<List<Integer>>> mapOfListOfListOfInteger;
 
+		@Override
 		public Map<String, Integer> getMapOfInteger() {
 			return mapOfInteger;
 		}
@@ -515,10 +516,12 @@ public class BeanWrapperGenericsTests {
 			this.mapOfInteger = mapOfInteger;
 		}
 
+		@Override
 		public Map<String, List<Integer>> getMapOfListOfInteger() {
 			return mapOfListOfInteger;
 		}
 
+		@Override
 		public void setMapOfListOfInteger(Map<String, List<Integer>> mapOfListOfInteger) {
 			this.mapOfListOfInteger = mapOfListOfInteger;
 		}
@@ -541,6 +544,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ComplexMapHolder {
 
 		private Map<List<Integer>, List<Long>> genericMap;
@@ -591,6 +595,7 @@ public class BeanWrapperGenericsTests {
 
 		private double version;
 
+		@Override
 		public Double getVersion() {
 			return this.version;
 		}
@@ -613,10 +618,12 @@ public class BeanWrapperGenericsTests {
 
 	  private Long id;
 
+	  @Override
 	  public Long getId() {
 		  return id;
 	  }
 
+	  @Override
 	  public void setId(Long aId) {
 		  this.id = aId;
 	  }

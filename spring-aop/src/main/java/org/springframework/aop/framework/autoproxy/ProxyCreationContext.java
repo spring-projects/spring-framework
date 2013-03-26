@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class ProxyCreationContext {
 
 	/**
 	 * Return the name of the currently proxied bean instance.
-	 * @return the name of the bean, or <code>null</code> if none available
+	 * @return the name of the bean, or {@code null} if none available
 	 */
 	public static String getCurrentProxiedBeanName() {
 		return currentProxiedBeanName.get();
@@ -43,7 +43,7 @@ public class ProxyCreationContext {
 
 	/**
 	 * Set the name of the currently proxied bean instance.
-	 * @param beanName the name of the bean, or <code>null</code> to reset it
+	 * @param beanName the name of the bean, or {@code null} to reset it
 	 */
 	static void setCurrentProxiedBeanName(String beanName) {
 		if (beanName != null) {

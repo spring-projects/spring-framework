@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.context.request.WebRequest;
 /**
  * Convenience methods for retrieving the root
  * {@link org.springframework.web.context.WebApplicationContext} for a given
- * <code>ServletContext</code>. This is e.g. useful for accessing a Spring
+ * {@code ServletContext}. This is e.g. useful for accessing a Spring
  * context from within custom web views or Struts actions.
  *
  * <p>Note that there are more convenient ways of accessing the root context for
@@ -98,7 +98,7 @@ public abstract class WebApplicationContextUtils {
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the root WebApplicationContext for this web app, or {@code null} if none
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
@@ -109,7 +109,7 @@ public abstract class WebApplicationContextUtils {
 	 * Find a custom WebApplicationContext for this web application.
 	 * @param sc ServletContext to find the web application context for
 	 * @param attrName the name of the ServletContext attribute to look for
-	 * @return the desired WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc, String attrName) {
 		Assert.notNull(sc, "ServletContext must not be null");
@@ -230,11 +230,10 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Replace {@code Servlet}-based stub property sources with actual instances
-	 * populated with the given context object.
-	 * @see org.springframework.core.env.PropertySource.StubPropertySource
-	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
-	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
+	 * Convenient variant of {@link #initServletPropertySources(MutablePropertySources,
+	 * ServletContext, ServletConfig)} that always provides {@code null} for the
+	 * {@link ServletConfig} parameter.
+	 * @see #initServletPropertySources(MutablePropertySources, ServletContext, ServletConfig)
 	 */
 	public static void initServletPropertySources(
 			MutablePropertySources propertySources, ServletContext servletContext) {
@@ -242,10 +241,21 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Replace {@code Servlet}-based stub property sources with actual instances
-	 * populated with the given context and config objects.
+	 * Replace {@code Servlet}-based {@link StubPropertySource stub property sources} with
+	 * actual instances populated with the given {@code servletContext} and
+	 * {@code servletConfig} objects.
+	 * <p>This method is idempotent with respect to the fact it may be called any number
+	 * of times but will perform replacement of stub property sources with their
+	 * corresponding actual property sources once and only once.
+	 * @param propertySources the {@link MutablePropertySources} to initialize (must not
+	 * be {@code null})
+	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
+	 * or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 * servlet context property source} has already been initialized)
+	 * @param servletConfig the current {@link ServletConfig} (ignored if {@code null}
+	 * or if the {@link StandardServletEnvironment#SERVLET_CONFIG_PROPERTY_SOURCE_NAME
+	 * servlet config property source} has already been initialized)
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
-	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
 	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 */
 	public static void initServletPropertySources(

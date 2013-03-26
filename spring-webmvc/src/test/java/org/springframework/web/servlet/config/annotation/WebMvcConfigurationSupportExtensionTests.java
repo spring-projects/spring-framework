@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,18 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -46,6 +45,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -117,6 +120,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertNotNull(handler.getHandler());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		RequestMappingHandlerAdapter adapter = webConfig.requestMappingHandlerAdapter();
@@ -128,22 +132,30 @@ public class WebMvcConfigurationSupportExtensionTests {
 		// Message converters
 		assertEquals(1, adapter.getMessageConverters().size());
 
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
+
 		// Custom argument resolvers and return value handlers
-		@SuppressWarnings("unchecked")
-		List<HandlerMethodArgumentResolver> argResolvers= (List<HandlerMethodArgumentResolver>)
-			new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+		List<HandlerMethodArgumentResolver> argResolvers =
+			(List<HandlerMethodArgumentResolver>) fieldAccessor.getPropertyValue("customArgumentResolvers");
 		assertEquals(1, argResolvers.size());
 
-		@SuppressWarnings("unchecked")
-		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>)
-			new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
+		List<HandlerMethodReturnValueHandler> handlers =
+			(List<HandlerMethodReturnValueHandler>) fieldAccessor.getPropertyValue("customReturnValueHandlers");
 		assertEquals(1, handlers.size());
 
 		// Async support options
-		assertEquals(ConcurrentTaskExecutor.class, new DirectFieldAccessor(adapter).getPropertyValue("taskExecutor").getClass());
-		assertEquals(2500L, new DirectFieldAccessor(adapter).getPropertyValue("asyncRequestTimeout"));
+		assertEquals(ConcurrentTaskExecutor.class, fieldAccessor.getPropertyValue("taskExecutor").getClass());
+		assertEquals(2500L, fieldAccessor.getPropertyValue("asyncRequestTimeout"));
 
-		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
+		CallableProcessingInterceptor[] callableInterceptors =
+				(CallableProcessingInterceptor[]) fieldAccessor.getPropertyValue("callableInterceptors");
+		assertEquals(1, callableInterceptors.length);
+
+		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
+				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
+		assertEquals(1, deferredResultInterceptors.length);
+
+		assertEquals(false, fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect"));
 	}
 
 	@Test
@@ -210,6 +222,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
 			registry.addConverter(new Converter<TestBean, String>() {
+				@Override
 				public String convert(TestBean source) {
 					return "converted";
 				}
@@ -224,9 +237,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public Validator getValidator() {
 			return new Validator() {
+				@Override
 				public void validate(Object target, Errors errors) {
 					errors.reject("invalid");
 				}
+				@Override
 				public boolean supports(Class<?> clazz) {
 					return true;
 				}
@@ -235,12 +250,14 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-			configurer.setFavorParameter(true).setParameterName("f");
+			configurer.favorParameter(true).parameterName("f");
 		}
 
 		@Override
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor());
+			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor())
+				.registerCallableInterceptors(new CallableProcessingInterceptorAdapter() { })
+				.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptorAdapter() {});
 		}
 
 		@Override

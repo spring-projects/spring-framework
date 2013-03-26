@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ package org.springframework.beans;
  * instance for arbitrary type conversion needs, while using the very same conversion
  * algorithm (including delegation to {@link java.beans.PropertyEditor} and
  * {@link org.springframework.core.convert.ConversionService}) underneath.
+ *
+ * <p><b>Note:</b> Due to its reliance on {@link java.beans.PropertyEditor PropertyEditors},
+ * SimpleTypeConverter is <em>not</em> thread-safe. Use a separate instance for each thread.
  *
  * @author Juergen Hoeller
  * @since 2.0

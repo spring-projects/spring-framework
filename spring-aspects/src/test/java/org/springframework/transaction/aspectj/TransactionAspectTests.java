@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,31 @@
 
 package org.springframework.transaction.aspectj;
 
-import java.lang.reflect.Method;
-
-import junit.framework.AssertionFailedError;
-
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
+import java.lang.reflect.Method;
+
 /**
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  */
 public class TransactionAspectTests extends AbstractDependencyInjectionSpringContextTests {
-	
+
 	private TransactionAspectSupport transactionAspect;
-	
+
 	private CallCountingTransactionManager txManager;
-	
+
 	private TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface;
-	
+
 	private ClassWithProtectedAnnotatedMember beanWithAnnotatedProtectedMethod;
 
 	private ClassWithPrivateAnnotatedMember beanWithAnnotatedPrivateMethod;
-	
+
 	private MethodAnnotationOnClassWithNoInterface methodAnnotationOnly = new MethodAnnotationOnClassWithNoInterface();
 
 
@@ -49,7 +48,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface) {
 		this.annotationOnlyOnClassWithNoInterface = annotationOnlyOnClassWithNoInterface;
 	}
-	
+
 	public void setClassWithAnnotatedProtectedMethod(ClassWithProtectedAnnotatedMember aBean) {
 		this.beanWithAnnotatedProtectedMethod = aBean;
 	}
@@ -84,14 +83,14 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		beanWithAnnotatedProtectedMethod.doInTransaction();
-		assertEquals(1, txManager.commits);		
+		assertEquals(1, txManager.commits);
 	}
 
 	public void testCommitOnAnnotatedPrivateMethod() throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		beanWithAnnotatedPrivateMethod.doSomething();
-		assertEquals(1, txManager.commits);		
+		assertEquals(1, txManager.commits);
 	}
 
 	public void testNoCommitOnNonAnnotatedNonPublicMethodInTransactionalType() throws Throwable {
@@ -100,83 +99,96 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		annotationOnlyOnClassWithNoInterface.nonTransactionalMethod();
 		assertEquals(0,txManager.begun);
 	}
-	
+
 	public void testCommitOnAnnotatedMethod() throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		methodAnnotationOnly.echo(null);
 		assertEquals(1, txManager.commits);
 	}
-	
-	
+
+
 	public static class NotTransactional {
 		public void noop() {
 		}
 	}
-	
+
 	public void testNotTransactional() throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		new NotTransactional().noop();
 		assertEquals(0, txManager.begun);
 	}
-	
-	
+
+
 	public void testDefaultCommitOnAnnotatedClass() throws Throwable {
-		testRollback(new TransactionOperationCallback() {
-			public Object performTransactionalOperation() throws Throwable {
-				return annotationOnlyOnClassWithNoInterface.echo(new Exception());
-			}
-		}, false);
-	}
-	
-	public void testDefaultRollbackOnAnnotatedClass() throws Throwable {
-		testRollback(new TransactionOperationCallback() {
-			public Object performTransactionalOperation() throws Throwable {
-				return annotationOnlyOnClassWithNoInterface.echo(new RuntimeException());
-			}
-		}, true);
-	}
-	
-	
-	public static class SubclassOfClassWithTransactionalAnnotation extends TransactionalAnnotationOnlyOnClassWithNoInterface {
-	}
-	
-	public void testDefaultCommitOnSubclassOfAnnotatedClass() throws Throwable {
-		testRollback(new TransactionOperationCallback() {
-			public Object performTransactionalOperation() throws Throwable {
-				return new SubclassOfClassWithTransactionalAnnotation().echo(new Exception());
-			}
-		}, false);
-	}
-	
-	public static class SubclassOfClassWithTransactionalMethodAnnotation extends MethodAnnotationOnClassWithNoInterface {
-	}
-	
-	public void testDefaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() throws Throwable {
-		testRollback(new TransactionOperationCallback() {
-			public Object performTransactionalOperation() throws Throwable {
-				return new SubclassOfClassWithTransactionalMethodAnnotation().echo(new Exception());
-			}
-		}, false);
-	}
-	
-	public static class ImplementsAnnotatedInterface implements ITransactional {
-		public Object echo(Throwable t) throws Throwable {
-			if (t != null) {
-				throw t;
-			}
-			return t;
+		final Exception ex = new Exception();
+		try {
+			testRollback(new TransactionOperationCallback() {
+				public Object performTransactionalOperation() throws Throwable {
+					return annotationOnlyOnClassWithNoInterface.echo(ex);
+				}
+			}, false);
+			fail("Should have thrown Exception");
+		}
+		catch (Exception ex2) {
+			assertSame(ex, ex2);
 		}
 	}
-	
+
+	public void testDefaultRollbackOnAnnotatedClass() throws Throwable {
+		final RuntimeException ex = new RuntimeException();
+		try {
+			testRollback(new TransactionOperationCallback() {
+				public Object performTransactionalOperation() throws Throwable {
+					return annotationOnlyOnClassWithNoInterface.echo(ex);
+				}
+			}, true);
+			fail("Should have thrown RuntimeException");
+		}
+		catch (RuntimeException ex2) {
+			assertSame(ex, ex2);
+		}
+	}
+
+
+	public void testDefaultCommitOnSubclassOfAnnotatedClass() throws Throwable {
+		final Exception ex = new Exception();
+		try {
+				testRollback(new TransactionOperationCallback() {
+				public Object performTransactionalOperation() throws Throwable {
+					return new SubclassOfClassWithTransactionalAnnotation().echo(ex);
+				}
+			}, false);
+			fail("Should have thrown Exception");
+		}
+		catch (Exception ex2) {
+			assertSame(ex, ex2);
+		}
+	}
+
+	public void testDefaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() throws Throwable {
+		final Exception ex = new Exception();
+		try {
+			testRollback(new TransactionOperationCallback() {
+				public Object performTransactionalOperation() throws Throwable {
+					return new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex);
+				}
+			}, false);
+			fail("Should have thrown Exception");
+		}
+		catch (Exception ex2) {
+			assertSame(ex, ex2);
+		}
+	}
+
 	public void testDefaultCommitOnImplementationOfAnnotatedInterface() throws Throwable {
 //		testRollback(new TransactionOperationCallback() {
 //			public Object performTransactionalOperation() throws Throwable {
 //				return new ImplementsAnnotatedInterface().echo(new Exception());
 //			}
 //		}, false);
-		
+
 		final Exception ex = new Exception();
 		testNotTransactional(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -184,7 +196,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			}
 		}, ex);
 	}
-	
+
 	/**
 	 * Note: resolution does not occur. Thus we can't make a class transactional if
 	 * it implements a transactionally annotated interface. This behaviour could only
@@ -198,15 +210,15 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		TransactionAttribute ta = atas.getTransactionAttribute(m, ImplementsAnnotatedInterface.class);
 		assertNull(ta);
 	}
-	
-	
+
+
 	public void testDefaultRollbackOnImplementationOfAnnotatedInterface() throws Throwable {
 //		testRollback(new TransactionOperationCallback() {
 //			public Object performTransactionalOperation() throws Throwable {
 //				return new ImplementsAnnotatedInterface().echo(new RuntimeException());
 //			}
 //		}, true);
-		
+
 		final Exception rollbackProvokingException = new RuntimeException();
 		testNotTransactional(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -215,26 +227,20 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		}, rollbackProvokingException);
 	}
 
-	
+
 	protected void testRollback(TransactionOperationCallback toc, boolean rollback) throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		try {
 			toc.performTransactionalOperation();
-			assertEquals(1, txManager.commits);
 		}
-		catch (Throwable caught) {
-			if (caught instanceof AssertionFailedError) {
-				return;
-			}
+		finally {
+			assertEquals(1, txManager.begun);
+			assertEquals(rollback ? 0 : 1, txManager.commits);
+			assertEquals(rollback ? 1 : 0, txManager.rollbacks);
 		}
-		
-		if (rollback) {
-			assertEquals(1, txManager.rollbacks);
-		}
-		assertEquals(1, txManager.begun);
 	}
-	
+
 	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
@@ -251,11 +257,30 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			assertEquals(0, txManager.begun);
 		}
 	}
-	
+
 
 	private interface TransactionOperationCallback {
 
 		Object performTransactionalOperation() throws Throwable;
+	}
+
+
+	public static class SubclassOfClassWithTransactionalAnnotation extends TransactionalAnnotationOnlyOnClassWithNoInterface {
+	}
+
+
+	public static class SubclassOfClassWithTransactionalMethodAnnotation extends MethodAnnotationOnClassWithNoInterface {
+	}
+
+
+	public static class ImplementsAnnotatedInterface implements ITransactional {
+
+		public Object echo(Throwable t) throws Throwable {
+			if (t != null) {
+				throw t;
+			}
+			return t;
+		}
 	}
 
 }

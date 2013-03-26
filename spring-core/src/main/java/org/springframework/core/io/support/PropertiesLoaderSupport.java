@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.core.io.support;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -38,9 +36,6 @@ import org.springframework.util.PropertiesPersister;
  * @since 1.2.2
  */
 public abstract class PropertiesLoaderSupport {
-
-	public static final String XML_FILE_EXTENSION = ".xml";
-
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -118,7 +113,7 @@ public abstract class PropertiesLoaderSupport {
 
 	/**
 	 * Set the encoding to use for parsing properties files.
-	 * <p>Default is none, using the <code>java.util.Properties</code>
+	 * <p>Default is none, using the {@code java.util.Properties}
 	 * default encoding.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @see org.springframework.util.PropertiesPersister#load
@@ -167,7 +162,7 @@ public abstract class PropertiesLoaderSupport {
 	/**
 	 * Load properties into the given instance.
 	 * @param props the Properties instance to load into
-	 * @throws java.io.IOException in case of I/O errors
+	 * @throws IOException in case of I/O errors
 	 * @see #setLocations
 	 */
 	protected void loadProperties(Properties props) throws IOException {
@@ -176,21 +171,9 @@ public abstract class PropertiesLoaderSupport {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading properties file from " + location);
 				}
-				InputStream is = null;
 				try {
-					is = location.getInputStream();
-					String filename = location.getFilename();
-					if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
-						this.propertiesPersister.loadFromXml(props, is);
-					}
-					else {
-						if (this.fileEncoding != null) {
-							this.propertiesPersister.load(props, new InputStreamReader(is, this.fileEncoding));
-						}
-						else {
-							this.propertiesPersister.load(props, is);
-						}
-					}
+					PropertiesLoaderUtils.fillProperties(
+							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
 				}
 				catch (IOException ex) {
 					if (this.ignoreResourceNotFound) {
@@ -200,11 +183,6 @@ public abstract class PropertiesLoaderSupport {
 					}
 					else {
 						throw ex;
-					}
-				}
-				finally {
-					if (is != null) {
-						is.close();
 					}
 				}
 			}

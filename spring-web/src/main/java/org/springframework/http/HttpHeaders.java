@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+	 * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,8 +96,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final String[] DATE_FORMATS = new String[] {
 		"EEE, dd MMM yyyy HH:mm:ss zzz",
-        "EEE, dd-MMM-yy HH:mm:ss zzz",
-        "EEE MMM dd HH:mm:ss yyyy"
+		"EEE, dd-MMM-yy HH:mm:ss zzz",
+		"EEE MMM dd HH:mm:ss yyyy"
 	};
 
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
@@ -153,7 +153,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<MediaType> getAccept() {
 		String value = getFirst(ACCEPT);
-		return (value != null ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList());
+		List<MediaType> result = (value != null) ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList();
+
+		// Some containers parse 'Accept' into multiple values
+		if ((result.size() == 1) && (headers.get(ACCEPT).size() > 1)) {
+			value = StringUtils.collectionToCommaDelimitedString(headers.get(ACCEPT));
+			result = MediaType.parseMediaTypes(value);
+		}
+
+		return result;
 	}
 
 	/**

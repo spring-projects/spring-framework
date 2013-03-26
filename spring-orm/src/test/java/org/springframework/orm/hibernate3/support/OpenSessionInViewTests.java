@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.concurrent.Callable;
@@ -40,7 +28,6 @@ import javax.servlet.ServletResponse;
 import javax.transaction.TransactionManager;
 
 import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
@@ -48,11 +35,11 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.mock.web.PassThroughFilterChain;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -63,14 +50,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 
 /**
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 05.03.2005
  */
 public class OpenSessionInViewTests {
@@ -95,19 +86,16 @@ public class OpenSessionInViewTests {
 	@Test
 	public void testOpenSessionInViewInterceptorWithSingleSession() throws Exception {
 
-		SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		session.setFlushMode(FlushMode.MANUAL);
-		expect(session.getSessionFactory()).andReturn(sf);
-		expect(session.isOpen()).andReturn(true);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.isOpen()).willReturn(true);
 
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
@@ -127,29 +115,14 @@ public class OpenSessionInViewTests {
 		interceptor.postHandle(this.webRequest, null);
 		interceptor.afterCompletion(this.webRequest, null);
 
-		verify(sf);
-		verify(session);
-		reset(sf);
-		reset(session);
-		replay(sf);
-		replay(session);
-
 		interceptor.postHandle(this.webRequest, null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
-
-		verify(sf);
-		verify(session);
-		reset(sf);
-		reset(session);
-		expect(session.close()).andReturn(null);
-		replay(sf);
-		replay(session);
 
 		interceptor.afterCompletion(this.webRequest, null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
-		verify(sf);
-		verify(session);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
 	}
 
 	@Test
@@ -157,40 +130,30 @@ public class OpenSessionInViewTests {
 
 		// Initial request thread
 
-		final SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		session.setFlushMode(FlushMode.MANUAL);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
 
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
-		verify(sf);
-		verify(session);
-
-		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
-		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
-		asyncWebRequest.startAsync();
-		replay(asyncWebRequest);
+		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
 		});
-
-		verify(asyncWebRequest);
 
 		interceptor.afterConcurrentHandlingStarted(this.webRequest);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
@@ -200,56 +163,34 @@ public class OpenSessionInViewTests {
 		interceptor.preHandle(this.webRequest);
 		assertTrue("Session not bound to async thread", TransactionSynchronizationManager.hasResource(sf));
 
-		verify(sf);
-		reset(sf);
-		replay(sf);
-
-		verify(session);
-		reset(session);
-		replay(session);
-
 		interceptor.postHandle(this.webRequest, null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
-
-		verify(sf);
-		reset(sf);
-
-		verify(session);
-		reset(session);
-
-		expect(session.close()).andReturn(null);
-
-		replay(sf);
-		replay(session);
 
 		interceptor.afterCompletion(this.webRequest, null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
-		verify(sf);
-		verify(session);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(asyncWebRequest, times(2)).addCompletionHandler(any(Runnable.class));
+		verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+		verify(asyncWebRequest).startAsync();
 	}
 
 	@Test
 	public void testOpenSessionInViewInterceptorWithSingleSessionAndJtaTm() throws Exception {
-		final SessionFactoryImplementor sf = createStrictMock(SessionFactoryImplementor.class);
-		Session session = createStrictMock(Session.class);
+		final SessionFactoryImplementor sf = mock(SessionFactoryImplementor.class);
+		Session session = mock(Session.class);
 
-		TransactionManager tm = createStrictMock(TransactionManager.class);
-		expect(tm.getTransaction()).andReturn(null);
-		expect(tm.getTransaction()).andReturn(null);
-		replay(tm);
+		TransactionManager tm = mock(TransactionManager.class);
+		given(tm.getTransaction()).willReturn(null);
+		given(tm.getTransaction()).willReturn(null);
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(sf.getTransactionManager()).andReturn(tm);
-		session.setFlushMode(FlushMode.MANUAL);
-		expect(sf.getTransactionManager()).andReturn(tm);
-		expect(session.isOpen()).andReturn(true);
-
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(sf.getTransactionManager()).willReturn(tm);
+		given(sf.getTransactionManager()).willReturn(tm);
+		given(session.isOpen()).willReturn(true);
 
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
@@ -270,86 +211,50 @@ public class OpenSessionInViewTests {
 		interceptor.postHandle(this.webRequest, null);
 		interceptor.afterCompletion(this.webRequest, null);
 
-		verify(sf);
-		verify(session);
-
-		reset(sf);
-		reset(session);
-		replay(sf);
-		replay(session);
-
 		interceptor.postHandle(this.webRequest, null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
-
-		verify(sf);
-		verify(session);
-
-		reset(sf);
-		reset(session);
-		expect(session.close()).andReturn(null);
-		replay(sf);
-		replay(session);
 
 		interceptor.afterCompletion(this.webRequest, null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
-		verify(sf);
-		verify(session);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
 	}
 
 	@Test
 	public void testOpenSessionInViewInterceptorWithSingleSessionAndFlush() throws Exception {
-		SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
 		interceptor.setFlushMode(HibernateAccessor.FLUSH_AUTO);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
-		verify(sf);
-		verify(session);
 
-		reset(sf);
-		reset(session);
-		session.flush();
-		replay(sf);
-		replay(session);
 		interceptor.postHandle(this.webRequest, null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
-		verify(sf);
-		verify(session);
 
-		reset(sf);
-		reset(session);
-		expect(session.close()).andReturn(null);
-		replay(sf);
-		replay(session);
 		interceptor.afterCompletion(this.webRequest, null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
-		verify(sf);
-		verify(session);
+		verify(session).flush();
+		verify(session).close();
 	}
 
 	@Test
 	public void testOpenSessionInViewInterceptorAndDeferredClose() throws Exception {
-		SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
 		interceptor.setSingleSession(false);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		session.setFlushMode(FlushMode.MANUAL);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
 
 		interceptor.preHandle(this.webRequest);
 		org.hibernate.Session sess = SessionFactoryUtils.getSession(sf, true);
@@ -369,43 +274,28 @@ public class OpenSessionInViewTests {
 		interceptor.postHandle(this.webRequest, null);
 		interceptor.afterCompletion(this.webRequest, null);
 
-		verify(sf);
-		verify(session);
-
-		reset(sf);
-		reset(session);
-		expect(session.close()).andReturn(null);
-		replay(sf);
-		replay(session);
-
 		interceptor.postHandle(this.webRequest, null);
 		interceptor.afterCompletion(this.webRequest, null);
 
-		verify(sf);
-		verify(session);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
 	}
 
 	@Test
 	public void testOpenSessionInViewFilterWithSingleSession() throws Exception {
-		final SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		session.setFlushMode(FlushMode.MANUAL);
-		expect(session.close()).andReturn(null);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.close()).willReturn(null);
 
-		final SessionFactory sf2 = createStrictMock(SessionFactory.class);
-		Session session2 = createStrictMock(Session.class);
+		final SessionFactory sf2 = mock(SessionFactory.class);
+		Session session2 = mock(Session.class);
 
-		expect(sf2.openSession()).andReturn(session2);
-		expect(session2.getSessionFactory()).andReturn(sf2);
-		session2.setFlushMode(FlushMode.AUTO);
-		expect(session2.close()).andReturn(null);
-		replay(sf2);
-		replay(session2);
+		given(sf2.openSession()).willReturn(session2);
+		given(session2.getSessionFactory()).willReturn(sf2);
+		given(session2.close()).willReturn(null);
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -425,6 +315,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -432,8 +323,9 @@ public class OpenSessionInViewTests {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
@@ -448,26 +340,20 @@ public class OpenSessionInViewTests {
 		assertFalse(TransactionSynchronizationManager.hasResource(sf2));
 		assertNotNull(this.request.getAttribute("invoked"));
 
-		verify(sf);
-		verify(session);
-		verify(sf2);
-		verify(session2);
-
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session2).setFlushMode(FlushMode.AUTO);
 		wac.close();
 	}
 
 	@Test
 	public void testOpenSessionInViewFilterAsyncScenario() throws Exception {
-		final SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
 		// Initial request during which concurrent handling starts..
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		session.setFlushMode(FlushMode.MANUAL);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -483,22 +369,21 @@ public class OpenSessionInViewTests {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				count.incrementAndGet();
 			}
 		};
 
-		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
-		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
-		asyncWebRequest.startAsync();
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
-		replay(asyncWebRequest);
+		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
+		given(asyncWebRequest.isAsyncStarted()).willReturn(true);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -509,46 +394,29 @@ public class OpenSessionInViewTests {
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		assertEquals(1, count.get());
 
-		verify(sf);
-		verify(session);
-		verify(asyncWebRequest);
-
-		reset(sf);
-		reset(session);
-		reset(asyncWebRequest);
 
 		// Async dispatch after concurrent handling produces result ...
-
-		expect(session.close()).andReturn(null);
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
-
-		replay(sf);
-		replay(session);
-		replay(asyncWebRequest);
 
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		filter.doFilter(this.request, this.response, filterChain);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		assertEquals(2, count.get());
 
-		verify(sf);
-		verify(session);
-		verify(asyncWebRequest);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(asyncWebRequest, times(2)).addCompletionHandler(any(Runnable.class));
+		verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+		verify(asyncWebRequest).startAsync();
 
 		wac.close();
 	}
 
 	@Test
 	public void testOpenSessionInViewFilterWithSingleSessionAndPreBoundSession() throws Exception {
-		final SessionFactory sf = createStrictMock(SessionFactory.class);
-		Session session = createStrictMock(Session.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		Session session = mock(Session.class);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		session.setFlushMode(FlushMode.MANUAL);
-		expect(session.close()).andReturn(null);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -569,6 +437,7 @@ public class OpenSessionInViewTests {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -583,43 +452,32 @@ public class OpenSessionInViewTests {
 		interceptor.postHandle(this.webRequest, null);
 		interceptor.afterCompletion(this.webRequest, null);
 
-		verify(sf);
-		verify(session);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
 
 		wac.close();
 	}
 
 	@Test
 	public void testOpenSessionInViewFilterWithDeferredClose() throws Exception {
-		final SessionFactory sf = createStrictMock(SessionFactory.class);
-		final Session session = createStrictMock(Session.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		expect(session.getFlushMode()).andReturn(FlushMode.MANUAL);
-		session.setFlushMode(FlushMode.MANUAL);
-		replay(sf);
-		replay(session);
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
 
-		final SessionFactory sf2 = createStrictMock(SessionFactory.class);
-		final Session session2 = createStrictMock(Session.class);
+		final SessionFactory sf2 = mock(SessionFactory.class);
+		final Session session2 = mock(Session.class);
 
-		Transaction tx = createStrictMock(Transaction.class);
-		Connection con = createStrictMock(Connection.class);
+		Transaction tx = mock(Transaction.class);
+		Connection con = mock(Connection.class);
 
-		expect(sf2.openSession()).andReturn(session2);
-		expect(session2.connection()).andReturn(con);
-		expect(session2.beginTransaction()).andReturn(tx);
-		expect(session2.isConnected()).andReturn(true);
-		expect(session2.connection()).andReturn(con);
-		tx.commit();
-		expect(con.isReadOnly()).andReturn(false);
-		session2.setFlushMode(FlushMode.MANUAL);
-
-		replay(sf2);
-		replay(session2);
-		replay(tx);
-		replay(con);
+		given(sf2.openSession()).willReturn(session2);
+		given(session2.connection()).willReturn(con);
+		given(session2.beginTransaction()).willReturn(tx);
+		given(session2.isConnected()).willReturn(true);
+		given(session2.connection()).willReturn(con);
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -640,6 +498,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
@@ -647,31 +506,17 @@ public class OpenSessionInViewTests {
 				org.hibernate.Session sess = SessionFactoryUtils.getSession(sf, true);
 				SessionFactoryUtils.releaseSession(sess, sf);
 				tm.commit(ts);
-
-				verify(session);
-				reset(session);
-
-				expect(session.close()).andReturn(null);
-				replay(session);
-
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
 			}
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-
+				throws IOException, ServletException {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf2);
 				TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 				tm.commit(ts);
-
-				verify(session2);
-				reset(session2);
-
-				expect(session2.close()).andReturn(null);
-				replay(session2);
-
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};
@@ -681,39 +526,23 @@ public class OpenSessionInViewTests {
 		filter2.doFilter(this.request, this.response, filterChain3);
 		assertNotNull(this.request.getAttribute("invoked"));
 
-		verify(sf);
-		verify(session);
-
-		verify(sf2);
-		verify(session2);
-		verify(tx);
-		verify(con);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(tx).commit();
+		verify(session2).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
+		verify(session2).close();
 
 		wac.close();
 	}
 
 	@Test
 	public void testOpenSessionInViewFilterWithDeferredCloseAndAlreadyActiveDeferredClose() throws Exception {
-		final SessionFactory sf = createStrictMock(SessionFactory.class);
-		final Session session = createStrictMock(Session.class);
+		final SessionFactory sf = mock(SessionFactory.class);
+		final Session session = mock(Session.class);
 
-		expect(sf.openSession()).andReturn(session);
-		expect(session.getSessionFactory()).andReturn(sf);
-		expect(session.getFlushMode()).andReturn(FlushMode.MANUAL);
-		session.setFlushMode(FlushMode.MANUAL);
-		replay(sf);
-		replay(session);
-
-//		sf.openSession();
-//		sfControl.setReturnValue(session, 1);
-//		session.getSessionFactory();
-//		sessionControl.setReturnValue(sf);
-//		session.getFlushMode();
-//		sessionControl.setReturnValue(FlushMode.MANUAL, 1);
-//		session.setFlushMode(FlushMode.MANUAL);
-//		sessionControl.setVoidCallable(1);
-//		sfControl.replay();
-//		sessionControl.replay();
+		given(sf.openSession()).willReturn(session);
+		given(session.getSessionFactory()).willReturn(sf);
+		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -739,6 +568,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
@@ -746,23 +576,14 @@ public class OpenSessionInViewTests {
 				org.hibernate.Session sess = SessionFactoryUtils.getSession(sf, true);
 				SessionFactoryUtils.releaseSession(sess, sf);
 				tm.commit(ts);
-
-				verify(session);
-				reset(session);
-				try {
-					expect(session.close()).andReturn(null);
-				}
-				catch (HibernateException ex) {
-				}
-				replay(session);
-
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
 			}
 		};
 
 		FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};
@@ -773,8 +594,8 @@ public class OpenSessionInViewTests {
 		interceptor.postHandle(webRequest, null);
 		interceptor.afterCompletion(webRequest, null);
 
-		verify(sf);
-		verify(session);
+		verify(session).setFlushMode(FlushMode.MANUAL);
+		verify(session).close();
 
 		wac.close();
 	}

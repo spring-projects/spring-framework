@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.ejb.access;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
@@ -28,6 +25,9 @@ import javax.naming.NamingException;
 import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson
@@ -41,15 +41,14 @@ public class LocalSlsbInvokerInterceptorTests {
 	 */
 	@Test
 	public void testPerformsLookup() throws Exception {
-		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
-		replay(ejb);
+		LocalInterfaceWithBusinessMethods ejb = mock(LocalInterfaceWithBusinessMethods.class);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
 
 		configuredInterceptor(mockContext, jndiName);
 
-		verify(mockContext);
+		verify(mockContext).close();
 	}
 
 	@Test
@@ -57,6 +56,7 @@ public class LocalSlsbInvokerInterceptorTests {
 		final NamingException nex = new NamingException();
 		final String jndiName= "foobar";
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				assertTrue(jndiName.equals(name));
 				throw nex;
@@ -80,60 +80,55 @@ public class LocalSlsbInvokerInterceptorTests {
 	@Test
 	public void testInvokesMethodOnEjbInstance() throws Exception {
 		Object retVal = new Object();
-		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
-		expect(ejb.targetMethod()).andReturn(retVal);
-		ejb.remove();
-		replay(ejb);
+		LocalInterfaceWithBusinessMethods ejb = mock(LocalInterfaceWithBusinessMethods.class);
+		given(ejb.targetMethod()).willReturn(retVal);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
 
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
-		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessMethods.class } );
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] { BusinessMethods.class } );
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
 
 		assertTrue(target.targetMethod() == retVal);
 
-		verify(mockContext);
-		verify(ejb);
+		verify(mockContext).close();
+		verify(ejb).remove();
 	}
 
 	@Test
 	public void testInvokesMethodOnEjbInstanceWithSeparateBusinessMethods() throws Exception {
 		Object retVal = new Object();
-		LocalInterface ejb = createMock(LocalInterface.class);
-		expect(ejb.targetMethod()).andReturn(retVal);
-		ejb.remove();
-		replay(ejb);
+		LocalInterface ejb = mock(LocalInterface.class);
+		given(ejb.targetMethod()).willReturn(retVal);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
 
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
-		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessMethods.class } );
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] { BusinessMethods.class } );
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
 
 		assertTrue(target.targetMethod() == retVal);
 
-		verify(mockContext);
-		verify(ejb);
+		verify(mockContext).close();
+		verify(ejb).remove();
 	}
 
 	private void testException(Exception expected) throws Exception {
-		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
-		expect(ejb.targetMethod()).andThrow(expected);
-		replay(ejb);
+		LocalInterfaceWithBusinessMethods ejb = mock(LocalInterfaceWithBusinessMethods.class);
+		given(ejb.targetMethod()).willThrow(expected);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
 
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
-		ProxyFactory pf = new ProxyFactory(new Class[] { LocalInterfaceWithBusinessMethods.class } );
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] { LocalInterfaceWithBusinessMethods.class } );
 		pf.addAdvice(si);
 		LocalInterfaceWithBusinessMethods target = (LocalInterfaceWithBusinessMethods) pf.getProxy();
 
@@ -145,8 +140,7 @@ public class LocalSlsbInvokerInterceptorTests {
 			assertTrue(thrown == expected);
 		}
 
-		verify(mockContext);
-		verify(ejb);
+		verify(mockContext).close();
 	}
 
 	@Test
@@ -156,16 +150,10 @@ public class LocalSlsbInvokerInterceptorTests {
 
 	protected Context mockContext(final String jndiName, final Object ejbInstance)
 			throws Exception {
-
-		final SlsbHome mockHome = createMock(SlsbHome.class);
-		expect(mockHome.create()).andReturn((LocalInterface)ejbInstance);
-		replay(mockHome);
-
-		final Context mockCtx = createMock(Context.class);
-
-		expect(mockCtx.lookup("java:comp/env/" + jndiName)).andReturn(mockHome);
-		mockCtx.close();
-		replay(mockCtx);
+		SlsbHome mockHome = mock(SlsbHome.class);
+		given(mockHome.create()).willReturn((LocalInterface)ejbInstance);
+		Context mockCtx = mock(Context.class);
+		given(mockCtx.lookup("java:comp/env/" + jndiName)).willReturn(mockHome);
 		return mockCtx;
 	}
 
@@ -174,6 +162,7 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		LocalSlsbInvokerInterceptor si = new LocalSlsbInvokerInterceptor();
 		si.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() throws NamingException {
 				return mockCtx;
 			}
@@ -186,7 +175,7 @@ public class LocalSlsbInvokerInterceptorTests {
 	}
 
 
-	/** 
+	/**
 	 * Needed so that we can mock the create() method.
 	 */
 	private interface SlsbHome extends EJBLocalHome {

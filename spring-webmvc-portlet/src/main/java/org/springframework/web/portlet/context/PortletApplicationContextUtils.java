@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,14 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public abstract class PortletApplicationContextUtils {
-	
+
 	/**
 	 * Find the root WebApplicationContext for this portlet application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the root WebApplicationContext for this web app, or {@code null} if none
 	 * (typed to ApplicationContext to avoid a Servlet API dependency; can usually
 	 * be casted to WebApplicationContext, but there shouldn't be a need to)
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
@@ -98,7 +98,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {
@@ -188,11 +188,26 @@ public abstract class PortletApplicationContextUtils {
 	}
 
 	/**
-	 * Replace {@code Servlet}- and {@code Portlet}-based stub property sources
-	 * with actual instances populated with the given context and config objects.
+	 * Replace {@code Servlet}- and {@code Portlet}-based {@link
+	 * org.springframework.core.env.PropertySource.StubPropertySource stub property
+	 * sources} with actual instances populated with the given {@code servletContext},
+	 * {@code portletContext} and {@code portletConfig} objects.
+	 * <p>This method is idempotent with respect to the fact it may be called any number
+	 * of times but will perform replacement of stub property sources with their
+	 * corresponding actual property sources once and only once.
+	 * @param propertySources the {@link MutablePropertySources} to initialize (must not be {@code null})
+	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
+	 * or if the {@link org.springframework.web.context.support.StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 * servlet context property source} has already been initialized)
+	 * @param portletContext the current {@link PortletContext} (ignored if {@code null}
+	 * or if the {@link StandardPortletEnvironment#PORTLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 * portlet context property source} has already been initialized)
+	 * @param portletConfig the current {@link PortletConfig} (ignored if {@code null}
+	 * or if the {@link StandardPortletEnvironment#PORTLET_CONFIG_PROPERTY_SOURCE_NAME
+	 * portlet config property source} has already been initialized)
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
-	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
+	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 */
 	public static void initPortletPropertySources(MutablePropertySources propertySources, ServletContext servletContext,
 			PortletContext portletContext, PortletConfig portletConfig) {
@@ -226,6 +241,7 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current request object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<PortletRequest>, Serializable {
 
 		public PortletRequest getObject() {
@@ -242,6 +258,7 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current session object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<PortletSession>, Serializable {
 
 		public PortletSession getObject() {
@@ -258,6 +275,7 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current WebRequest object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
 		public WebRequest getObject() {

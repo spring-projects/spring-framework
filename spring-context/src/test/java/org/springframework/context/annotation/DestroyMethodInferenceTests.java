@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,21 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.io.Closeable;
 import java.io.IOException;
 
 import org.junit.Test;
+
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
+/**
+ * @author Chris Beams
+ * @author Juergen Hoeller
+ */
 public class DestroyMethodInferenceTests {
 
 	@Test
@@ -39,6 +44,7 @@ public class DestroyMethodInferenceTests {
 		WithInheritedCloseMethod c4 = ctx.getBean("c4", WithInheritedCloseMethod.class);
 		WithInheritedCloseMethod c5 = ctx.getBean("c5", WithInheritedCloseMethod.class);
 		WithNoCloseMethod c6 = ctx.getBean("c6", WithNoCloseMethod.class);
+		WithLocalShutdownMethod c7 = ctx.getBean("c7", WithLocalShutdownMethod.class);
 
 		assertThat(c0.closed, is(false));
 		assertThat(c1.closed, is(false));
@@ -47,6 +53,7 @@ public class DestroyMethodInferenceTests {
 		assertThat(c4.closed, is(false));
 		assertThat(c5.closed, is(false));
 		assertThat(c6.closed, is(false));
+		assertThat(c7.closed, is(false));
 		ctx.close();
 		assertThat("c0", c0.closed, is(true));
 		assertThat("c1", c1.closed, is(true));
@@ -55,6 +62,7 @@ public class DestroyMethodInferenceTests {
 		assertThat("c4", c4.closed, is(true));
 		assertThat("c5", c5.closed, is(true));
 		assertThat("c6", c6.closed, is(false));
+		assertThat("c7", c7.closed, is(true));
 	}
 
 	@Test
@@ -121,6 +129,11 @@ public class DestroyMethodInferenceTests {
 		public WithNoCloseMethod c6() {
 			return new WithNoCloseMethod();
 		}
+
+		@Bean
+		public WithLocalShutdownMethod c7() {
+			return new WithLocalShutdownMethod();
+		}
 	}
 
 
@@ -140,6 +153,7 @@ public class DestroyMethodInferenceTests {
 
 	static class WithInheritedCloseMethod implements Closeable {
 		boolean closed = false;
+		@Override
 		public void close() throws IOException {
 			closed = true;
 		}
@@ -148,4 +162,12 @@ public class DestroyMethodInferenceTests {
 	static class WithNoCloseMethod {
 		boolean closed = false;
 	}
+
+	static class WithLocalShutdownMethod {
+		boolean closed = false;
+		public void shutdown() {
+			closed = true;
+		}
+	}
+
 }

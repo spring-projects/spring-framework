@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 	/**
 	 * Execute a function represented as a java.lang.reflect.Method.
-	 * 
+	 *
 	 * @param state the expression evaluation state
 	 * @param the java method to invoke
 	 * @return the return value of the invoked Java method

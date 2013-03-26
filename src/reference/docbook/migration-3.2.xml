@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appendix xml:id="migration-3.2"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+  <title>Migrating to Spring Framework 3.2</title>
+
+  <para>In this appendix we discuss what users will want to know when upgrading to
+  Spring Framework 3.2. For a general overview of features, please see
+  <xref linkend="new-in-3.2"/></para>
+
+  <section xml:id="migration-3.2-new-optional-deps">
+    <title>Newly optional dependencies</title>
+    <para>Certain inter-module dependencies are now <literal>optional</literal> at the
+    Maven POM level where they were once required. For example, <literal>spring-tx</literal>
+    and its dependence on <literal>spring-context</literal>. This may result in <literal>
+    ClassNotFoundErrors</literal> or other similar problems for users that have been relying
+    on transitive dependency management to pull in affected downstream <literal>spring-*
+    </literal>. To resolve this problem, simply add the appropriate missing jars to your
+    build configuration.</para>
+  </section>
+
+  <section xml:id="migration-3.2-ehcache-support">
+    <title>EHCache support moved to spring-context-support</title>
+    <para>Along with Spring's new JCache support, the EHCache support classes in the
+    <literal>org.springframework.cache.ehcache</literal> package moved from the
+    <literal>spring-context</literal> module to <literal>spring-context-support</literal>.</para>
+  </section>
+
+  <section xml:id="migration-3.2-inline-asm">
+    <title>Inlining of spring-asm jar</title>
+    <para>In versions 3.0 and 3.1, we published a discrete <literal>spring-asm</literal>
+    containing repackaged <literal>org.objectweb.asm</literal> 3.x sources. As of Spring
+    Framework 3.2, we have upgraded to <literal>org.objectweb.asm</literal> 4.0 and done
+    away with the separate module jar, favoring inlining these classes directly within
+    <literal>spring-core</literal>. This should cause no migration issue for most users;
+    but on the off chance that you have <literal>spring-asm</literal> declared directly
+    within your project's build script, you'll want to remove it when upgrading to
+    Spring Framework 3.2.</para>
+  </section>
+
+  <section xml:id="migration-3.2-inline-cglib">
+    <title>Explicit CGLIB dependency no longer required</title>
+    <para>In prior versions, users of Spring's subclass-based AOP proxies (e.g. via
+    <literal>proxy-target-class="true"</literal>) and <literal>@Configuration</literal>
+    class support were required to declare an explicit dependency on CGLIB 2.2. As of
+    Spring Framework 3.2, we now repackage and inline the newly-released CGLIB 3.0.</para>
+    <para>This means greater convenience for users, as well as correct functionality for
+    Java 7 users who are creating subclass proxies of types that contain <literal>
+    invokedynamic</literal> bytecode instructions. Repackaging CGLIB internally ensures
+    no classpath conflicts with other third party frameworks that may depend on other
+    versions of CGLIB.</para>
+  </section>
+
+  <section xml:id="migration-3.2-osgi-users">
+    <title>For OSGi users</title>
+    <para>OSGi metadata is no longer published within individual Spring Framework
+    jar MANIFEST.MF files. Please see this
+    <link xl:href="http://www.springsource.org/springframework-ebr">announcement</link>
+    for more information about how users can get OSGi-ready versions of Spring
+    Framework 3.2 jars.</para>
+  </section>
+
+  <section xml:id="migration-3.2-compatibility-mvc-config">
+    <title>MVC Java Config and MVC Namespace</title>
+
+    <para>As explained in <xref linkend="mvc-config-content-negotiation"/>, both
+    the MVC Java config and the MVC namespace register extensions such as
+    <filename>.json</filename> and <filename>.xml</filename> if the
+    corresponding classpath dependencies are present. That means controller
+    methods may now return JSON or XML formatted content if those
+    extensions are present in the request URI,
+    even if the 'Accept' header doesn't request those media types.</para>
+
+    <para>The newly added support for matrix variables is explained in
+    <xref linkend="mvc-ann-matrix-variables"/>. To preserve backward
+    compatibility, by default, semicolon content is removed from incoming
+    request URIs and therefore <interfacename>@MatrixVariable</interfacename>
+    cannot be used without additional configuration. However, when using
+    the MVC Java config and the MVC namespace, semicolon content is left
+    in the URI so that matrix variables are automatically supported.
+    The removal of semicolon content is controlled through the
+    <classname>UrlPathHelper</classname> property of
+    <classname>RequestMappingHandlerMapping</classname>.</para>
+  </section>
+
+  <section xml:id="migration-3.2-compatibility-uri-variable-values">
+    <title>Decoding of URI Variable Values</title>
+    <para>URI variable values now get decoded when
+    <code>UrlPathHelper.setUrlDecode</code> is set to <code>false</code>.
+    See <link xl:href="https://jira.springsource.org/browse/SPR-9098">SPR-9098</link>.</para>
+  </section>
+
+  <section xml:id="migration-3.2-compatibility-http-patch">
+    <title>HTTP PATCH method</title>
+    <para>The <classname>DispatcherServlet</classname> now allows the
+    HTTP PATCH method where previously it didn't.</para>
+  </section>
+
+  <section xml:id="migration-3.2-compatibility-tiles3">
+    <title>Tiles 3</title>
+
+    <para>Besides the version number change, the set of Tiles
+    dependencies has also changed. You will need to have a subset or all of
+    <filename>tiles-request-api</filename>, <filename>tiles-api</filename>,
+    <filename>tiles-core</filename>, <filename>tiles-servlet</filename>,
+    <filename>tiles-jsp</filename>, <filename>tiles-el</filename>.
+    </para>
+  </section>
+
+  <section xml:id="migration-3.2-compatibility-spring-mvc-test">
+    <title>Spring MVC Test standalone project</title>
+
+    <para>If migrating from the
+    <link xl:href="https://github.com/SpringSource/spring-test-mvc">spring-test-mvc</link>
+    standalone project to the <filename>spring-test</filename> module in
+    Spring Framework 3.2, you will need to adjust the root package
+    to be <classname>org.springframework.test.web.servlet</classname>.</para>
+
+    <para>You will no longer be able to use the
+    <classname>MockMvcBuilders</classname> <code>annotationConfigSetup</code>
+    and <code>xmlConfigSetup</code> options. Instead you'll need to switch
+    to using the <interfacename>@WebAppConfiguration</interfacename> support
+    of <filename>spring-test</filename> for loading Spring configuration,
+    then inject a <interfacename>WebApplicationContext</interfacename> into
+    the test and use it to create a <classname>MockMvc</classname>. See
+    <xref linkend="spring-mvc-test-framework" /> for details.</para>
+  </section>
+
+  <section xml:id="migration-3.2-compatibility-spring-test">
+    <title>Spring Test Dependencies</title>
+
+    <para>The <literal>spring-test</literal> module has been upgraded to
+    depend on JUnit 4.11 (<literal>junit:junit</literal>), TestNG 6.5.2
+    (<literal>org.testng:testng</literal>), and Hamcrest Core 1.3
+    (<literal>org.hamcrest:hamcrest-core</literal>). Each of these
+    dependencies is declared as an <emphasis>optional</emphasis> dependency in
+    the Maven POM. Furthermore, it is important to note that the JUnit team
+    has stopped inlining Hamcrest Core within the
+    <literal>junit:junit</literal> Maven artifact as of JUnit 4.11. Hamcrest
+    Core is now a <emphasis>required</emphasis> transitive dependency of
+    <literal>junit</literal>, and users may therefore need to remove any
+    exclusions on <literal>hamcrest-core</literal> that they had previously
+    configured for their build.</para>
+  </section>
+
+  <section xml:id="migration-3.2-changes">
+    <title>Public API changes</title>
+
+    <section xml:id="migration-3.2-api-changes">
+      <title>JDiff reports</title>
+      <para>
+      Select JDiff reports are now being published to provide users with a convenient
+      means of understanding what's changed between versions. Going forward these will be
+      published between each minor version, e.g. from 3.1.3.RELEASE to 3.1.4.RELEASE; from
+      the latest maintenance version to the latest GA release, e.g.
+      <link xl:href="http://static.springsource.org/spring-framework/docs/3.1.3.RELEASE_to_3.2.0.RELEASE">
+      3.1.3.RELEASE to 3.2.0.RELEASE</link>; and in between each milestone
+      and/or RC for users who are tracking next-generation development, e.g.
+      <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RC2_to_3.2.0.RELEASE">
+      3.2.0.RC2 to 3.2.0.RELEASE</link>.
+      </para>
+    </section>
+
+    <section xml:id="migration-3.2-removals-and-deprecations">
+      <title>Deprecations</title>
+      <para>The following packages and types have been wholly or partially deprecated
+      in Spring Framework 3.2 and may be removed in a future version. Click through
+      to the linked Javadoc for each item for exact details. See also the
+      <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/deprecated-list.html">
+      complete list of deprecations</link> in the framework.</para>
+      <itemizedlist>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/ibatis/package-summary.html">
+          org.springframework.orm.ibatis</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html">
+          org.springframework.scheduling.backportconcurrent</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ejb/support/package-summary.html">
+          org.springframework.ejb.support</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html">
+          org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html">
+          org.springframework.web.jsf.DelegatingVariableResolver</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html">
+          org.springframework.web.jsf.SpringBeanVariableResolver</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html">
+          org.springframework.ui.velocity.CommonsLoggingLogSystem</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html">
+          org.springframework.ui.velocity.VelocityEngineUtils</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html">
+          org.springframework.beans.factory.config.BeanReferenceFactoryBean</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html">
+          org.springframework.beans.factory.config.CommonsLogFactoryBean</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html">
+          org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html">
+          org.springframework.transaction.jta.OC4JJtaTransactionManager</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html">
+          org.springframework.web.util.ExpressionEvaluationUtils</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html">
+          org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html">
+          org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html">
+          org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html">
+          org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html">
+          org.springframework.jmx.support.MBeanRegistrationSupport</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html">
+          org.springframework.test.context.ContextConfigurationAttributes</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html">
+          org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests</link>:
+          use of the <varname>simpleJdbcTemplate</varname> instance variable has been deprecated
+          in favor of the new <varname>jdbcTemplate</varname> instance variable.</para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html">
+          org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests</link>:
+          use of the <varname>simpleJdbcTemplate</varname> instance variable has been deprecated
+          in favor of the new <varname>jdbcTemplate</varname> instance variable.</para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html">
+          org.springframework.test.jdbc.SimpleJdbcTestUtils</link> has been deprecated in
+          favor of <classname>JdbcTestUtils</classname> which now contains all of the
+          functionality previously available in <classname>SimpleJdbcTestUtils</classname>.</para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html">
+          org.springframework.web.servlet.view.ContentNegotiatingViewResolver</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html">
+          org.springframework.transaction.interceptor.TransactionAspectUtils</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/HttpStatus.html">
+          org.springframework.http.HttpStatus</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/UriUtils.html">
+          org.springframework.web.util.UriUtils</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html">
+          org.springframework.orm.jpa.vendor.TopLinkJpaDialect</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html">
+          org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter</link>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/util/CachingMapDecorator.html">
+          org.springframework.orm.util.CachingMapDecorator</link>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</appendix>

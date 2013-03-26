@@ -31,7 +31,9 @@ import javax.ejb.SessionContext;
  * @since 1.2
  * @see AbstractStatelessSessionBean
  * @see AbstractStatefulSessionBean
+ * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
+@Deprecated
 public interface SmartSessionBean extends SessionBean {
 
 	/**

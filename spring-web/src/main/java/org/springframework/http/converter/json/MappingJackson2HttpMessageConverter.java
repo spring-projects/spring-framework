@@ -49,11 +49,12 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Keith Donald
+ * @author Rossen Stoyanchev
  * @since 3.1.2
  * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
-	implements GenericHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -69,7 +70,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 * Construct a new {@code MappingJackson2HttpMessageConverter}.
 	 */
 	public MappingJackson2HttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
 	/**
@@ -128,11 +129,11 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return canRead((Type) clazz, mediaType);
+		return canRead(clazz, null, mediaType);
 	}
 
-	public boolean canRead(Type type, MediaType mediaType) {
-		JavaType javaType = getJavaType(type);
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		JavaType javaType = getJavaType(type, contextClass);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
 	}
 
@@ -151,14 +152,14 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		JavaType javaType = getJavaType(clazz);
+		JavaType javaType = getJavaType(clazz, null);
 		return readJavaType(javaType, inputMessage);
 	}
 
-	public Object read(Type type, HttpInputMessage inputMessage)
+	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		JavaType javaType = getJavaType(type);
+		JavaType javaType = getJavaType(type, contextClass);
 		return readJavaType(javaType, inputMessage);
 	}
 
@@ -197,10 +198,10 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 	}
 
-
 	/**
-	 * Return the Jackson {@link JavaType} for the specified type.
-	 * <p>The default implementation returns {@link ObjectMapper#constructType(java.lang.reflect.Type)},
+	 * Return the Jackson {@link JavaType} for the specified type and context class.
+	 * <p>The default implementation returns {@link ObjectMapper#constructType(java.lang.reflect.Type)}
+	 * or {@code ObjectMapper.getTypeFactory().constructType(type, contextClass)},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
@@ -213,16 +214,21 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 * }
 	 * </pre>
 	 * @param type the type to return the java type for
+	 * @param contextClass a context class for the target type, for example a class
+	 * in which the target type appears in a method signature, can be {@code null}
+	 * signature, can be {@code null}
 	 * @return the java type
 	 */
-	protected JavaType getJavaType(Type type) {
-		return this.objectMapper.constructType(type);
+	protected JavaType getJavaType(Type type, Class<?> contextClass) {
+		return (contextClass != null) ?
+			this.objectMapper.getTypeFactory().constructType(type, contextClass) :
+			this.objectMapper.constructType(type);
 	}
 
 	/**
 	 * Determine the JSON encoding to use for the given content type.
 	 * @param contentType the media type as requested by the caller
-	 * @return the JSON encoding to use (never <code>null</code>)
+	 * @return the JSON encoding to use (never {@code null})
 	 */
 	protected JsonEncoding getJsonEncoding(MediaType contentType) {
 		if (contentType != null && contentType.getCharSet() != null) {

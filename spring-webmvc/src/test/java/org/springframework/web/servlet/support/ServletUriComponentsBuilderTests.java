@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -39,7 +39,7 @@ public class ServletUriComponentsBuilderTests {
 		this.request.setServerPort(80);
 		this.request.setContextPath("/mvc-showcase");
 	}
-	
+
 	@Test
 	public void fromRequest() {
 		request.setRequestURI("/mvc-showcase/data/param");
@@ -61,16 +61,16 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestAtypicalHttpPort() {
 		request.setServerPort(8080);
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-		
+
 		assertEquals("http://localhost:8080", result);
 	}
-	
+
 	@Test
 	public void fromRequestAtypicalHttpsPort() {
 		request.setScheme("https");
 		request.setServerPort(9043);
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
-		
+
 		assertEquals("https://localhost:9043", result);
 	}
 
@@ -84,13 +84,23 @@ public class ServletUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void fromRequestWithForwardedHostHeader() {
+		request.addHeader("X-Forwarded-Host", "anotherHost");
+		request.setRequestURI("/mvc-showcase/data/param");
+		request.setQueryString("foo=123");
+		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
+
+		assertEquals("http://anotherHost/mvc-showcase/data/param?foo=123", result);
+	}
+
+	@Test
 	public void fromContextPath() {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromContextPath(request).build().toUriString();
-		
+
 		assertEquals("http://localhost/mvc-showcase", result);
-	}	
+	}
 
 	@Test
 	public void fromServletMapping() {
@@ -98,9 +108,9 @@ public class ServletUriComponentsBuilderTests {
 		request.setServletPath("/app");
 		request.setQueryString("foo=123");
 		String result = ServletUriComponentsBuilder.fromServletMapping(request).build().toUriString();
-		
+
 		assertEquals("http://localhost/mvc-showcase/app", result);
-	}	
+	}
 
 	@Test
 	public void fromCurrentRequest() {
@@ -116,5 +126,5 @@ public class ServletUriComponentsBuilderTests {
 			RequestContextHolder.resetRequestAttributes();
 		}
 	}
-	
+
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,24 +19,26 @@ package org.springframework.orm.hibernate3.support;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
 import org.hibernate.SessionFactory;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 05.03.2005
  */
-public class HibernateDaoSupportTests extends TestCase {
+public class HibernateDaoSupportTests {
 
+	@Test
 	public void testHibernateDaoSupportWithSessionFactory() throws Exception {
-		MockControl sfControl = MockControl.createControl(SessionFactory.class);
-		SessionFactory sf = (SessionFactory) sfControl.getMock();
-		sfControl.replay();
+		SessionFactory sf = mock(SessionFactory.class);
 		final List test = new ArrayList();
 		HibernateDaoSupport dao = new HibernateDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -46,13 +48,14 @@ public class HibernateDaoSupportTests extends TestCase {
 		assertEquals("Correct SessionFactory", sf, dao.getSessionFactory());
 		assertEquals("Correct HibernateTemplate", sf, dao.getHibernateTemplate().getSessionFactory());
 		assertEquals("initDao called", test.size(), 1);
-		sfControl.verify();
 	}
 
+	@Test
 	public void testHibernateDaoSupportWithHibernateTemplate() throws Exception {
 		HibernateTemplate template = new HibernateTemplate();
 		final List test = new ArrayList();
 		HibernateDaoSupport dao = new HibernateDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}

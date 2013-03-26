@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -35,12 +36,12 @@ public class DeprecatedBeanWarnerTests {
 
 	private DeprecatedBeanWarner warner;
 
+
 	@Test
+	@SuppressWarnings("deprecation")
 	public void postProcess() {
 		beanFactory = new DefaultListableBeanFactory();
-		BeanDefinition def = BeanDefinitionBuilder
-			.genericBeanDefinition(MyDeprecatedBean.class)
-			.getBeanDefinition();
+		BeanDefinition def = new RootBeanDefinition(MyDeprecatedBean.class);
 		String beanName = "deprecated";
 		beanFactory.registerBeanDefinition(beanName, def);
 
@@ -51,15 +52,14 @@ public class DeprecatedBeanWarnerTests {
 
 	}
 
+
 	private class MyDeprecatedBeanWarner extends DeprecatedBeanWarner {
 
-
 		@Override
-		protected void logDeprecatedBean(String beanName, BeanDefinition beanDefinition) {
+		protected void logDeprecatedBean(String beanName, Class<?> beanType, BeanDefinition beanDefinition) {
 			DeprecatedBeanWarnerTests.this.beanName = beanName;
 			DeprecatedBeanWarnerTests.this.beanDefinition = beanDefinition;
 		}
 	}
-
 
 }

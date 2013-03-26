@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.util.StringUtils.*;
@@ -43,7 +45,7 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		context.getBean((Class<?>)null);
 	}
-	
+
 	@Test
 	public void scanAndRefresh() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -120,27 +122,28 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
 		// attempt to retrieve a bean that does not exist
-		Class<?> targetType = java.util.regex.Pattern.class;
+		Class<?> targetType = Pattern.class;
 		try {
 			Object bean = context.getBean(targetType);
 			fail("should have thrown NoSuchBeanDefinitionException, instead got: " + bean);
-		} catch (NoSuchBeanDefinitionException ex) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			assertThat(ex.getMessage(), containsString(
-					format("No unique bean of type [%s] is defined", targetType.getName())));
+					format("No qualifying bean of type [%s] is defined", targetType.getName())));
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getBeanByTypeAmbiguityRaisesException() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
 
 		try {
 			context.getBean(TestBean.class);
-		} catch (RuntimeException ex) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			assertThat(ex.getMessage(),
 					allOf(
-						containsString("No unique bean of type [" + TestBean.class.getName() + "] is defined"),
+						containsString("No qualifying bean of type [" + TestBean.class.getName() + "] is defined"),
 						containsString("tb1"),
 						containsString("tb2")
 					)
@@ -159,18 +162,22 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(AutowiredConfig.class);
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
 		});
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				bean.getClass().getName();
 				return bean;
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				bean.getClass().getName();
 				return bean;
@@ -230,14 +237,17 @@ public class AnnotationConfigApplicationContextTests {
 
 	static class UntypedFactoryBean implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() {
 			return null;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return false;
 		}

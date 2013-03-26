@@ -47,6 +47,7 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 	}
 
 	public void testLazyAssembling() throws Exception {
+		System.setProperty("domain", "bean");
 		ConfigurableApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
 		try {
@@ -73,6 +74,7 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 			assertEquals("Invalid name returned", "Juergen Hoeller", name);
 		}
 		finally {
+			System.clearProperty("domain");
 			ctx.close();
 		}
 	}

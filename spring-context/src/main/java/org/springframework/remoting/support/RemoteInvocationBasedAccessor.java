@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 
 	/**
 	 * Recreate the invocation result contained in the given RemoteInvocationResult object.
-	 * <p>The default implementation calls the default <code>recreate()</code> method.
+	 * <p>The default implementation calls the default {@code recreate()} method.
 	 * This can be overridden in subclass to provide custom recreation, potentially
 	 * processing the returned result object.
 	 * @param result the RemoteInvocationResult to recreate

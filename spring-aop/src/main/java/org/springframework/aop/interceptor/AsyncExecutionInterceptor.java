@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -25,24 +24,27 @@ import java.util.concurrent.Future;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * AOP Alliance <code>MethodInterceptor</code> that processes method invocations
+ * AOP Alliance {@code MethodInterceptor} that processes method invocations
  * asynchronously, using a given {@link org.springframework.core.task.AsyncTaskExecutor}.
  * Typically used with the {@link org.springframework.scheduling.annotation.Async} annotation.
  *
  * <p>In terms of target method signatures, any parameter types are supported.
- * However, the return type is constrained to either <code>void</code> or
- * <code>java.util.concurrent.Future</code>. In the latter case, the Future handle
+ * However, the return type is constrained to either {@code void} or
+ * {@code java.util.concurrent.Future}. In the latter case, the Future handle
  * returned from the proxy will be an actual asynchronous Future that can be used
  * to track the result of the asynchronous method execution. However, since the
  * target method needs to implement the same signature, it will have to return
  * a temporary Future handle that just passes the return value through
  * (like Spring's {@link org.springframework.scheduling.annotation.AsyncResult}
- * or EJB 3.1's <code>javax.ejb.AsyncResult</code>).
+ * or EJB 3.1's {@code javax.ejb.AsyncResult}).
  *
  * <p>As of Spring 3.1.2 the {@code AnnotationAsyncExecutionInterceptor} subclass is
  * preferred for use due to its support for executor qualification in conjunction with
@@ -76,7 +78,11 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * otherwise.
 	 */
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
-		Future<?> result = this.determineAsyncExecutor(invocation.getMethod()).submit(
+		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
+		Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
+		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+
+		Future<?> result = determineAsyncExecutor(specificMethod).submit(
 				new Callable<Object>() {
 					public Object call() throws Exception {
 						try {
@@ -91,6 +97,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 						return null;
 					}
 				});
+
 		if (Future.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
 			return result;
 		}
@@ -100,10 +107,9 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation is a no-op for compatibility in Spring 3.1.2. Subclasses may
-	 * override to provide support for extracting qualifier information, e.g. via an
-	 * annotation on the given method.
+	 * This implementation is a no-op for compatibility in Spring 3.1.2.
+	 * Subclasses may override to provide support for extracting qualifier information,
+	 * e.g. via an annotation on the given method.
 	 * @return always {@code null}
 	 * @see #determineAsyncExecutor(Method)
 	 * @since 3.1.2

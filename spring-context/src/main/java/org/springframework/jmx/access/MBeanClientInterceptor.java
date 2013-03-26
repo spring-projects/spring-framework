@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +66,12 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} that routes calls to an
- * MBean running on the supplied <code>MBeanServerConnection</code>.
- * Works for both local and remote <code>MBeanServerConnection</code>s.
+ * MBean running on the supplied {@code MBeanServerConnection}.
+ * Works for both local and remote {@code MBeanServerConnection}s.
  *
- * <p>By default, the <code>MBeanClientInterceptor</code> will connect to the
- * <code>MBeanServer</code> and cache MBean metadata at startup. This can
- * be undesirable when running against a remote <code>MBeanServer</code>
+ * <p>By default, the {@code MBeanClientInterceptor} will connect to the
+ * {@code MBeanServer} and cache MBean metadata at startup. This can
+ * be undesirable when running against a remote {@code MBeanServer}
  * that may not be running when the application starts. Through setting the
  * {@link #setConnectOnStartup(boolean) connectOnStartup} property to "false",
  * you can defer this process until the first invocation against the proxy.
@@ -127,7 +127,7 @@ public class MBeanClientInterceptor
 
 
 	/**
-	 * Set the <code>MBeanServerConnection</code> used to connect to the
+	 * Set the {@code MBeanServerConnection} used to connect to the
 	 * MBean which all invocations are routed to.
 	 */
 	public void setServer(MBeanServerConnection server) {
@@ -135,7 +135,7 @@ public class MBeanClientInterceptor
 	}
 
 	/**
-	 * Set the service URL of the remote <code>MBeanServer</code>.
+	 * Set the service URL of the remote {@code MBeanServer}.
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
@@ -161,7 +161,7 @@ public class MBeanClientInterceptor
 	}
 
 	/**
-	 * Set the agent id of the <code>MBeanServer</code> to locate.
+	 * Set the agent id of the {@code MBeanServer} to locate.
 	 * <p>Default is none. If specified, this will result in an
 	 * attempt being made to locate the attendant MBeanServer, unless
 	 * the {@link #setServiceUrl "serviceUrl"} property has been set.
@@ -173,7 +173,7 @@ public class MBeanClientInterceptor
 	}
 
 	/**
-	 * Set whether or not the proxy should connect to the <code>MBeanServer</code>
+	 * Set whether or not the proxy should connect to the {@code MBeanServer}
 	 * at creation time ("true") or the first time it is invoked ("false").
 	 * Default is "true".
 	 */
@@ -192,8 +192,8 @@ public class MBeanClientInterceptor
 	}
 
 	/**
-	 * Set the <code>ObjectName</code> of the MBean which calls are routed to,
-	 * as <code>ObjectName</code> instance or as <code>String</code>.
+	 * Set the {@code ObjectName} of the MBean which calls are routed to,
+	 * as {@code ObjectName} instance or as {@code String}.
 	 */
 	public void setObjectName(Object objectName) throws MalformedObjectNameException {
 		this.objectName = ObjectNameManager.getInstance(objectName);
@@ -202,9 +202,9 @@ public class MBeanClientInterceptor
 	/**
 	 * Set whether to use strict casing for attributes. Enabled by default.
 	 * <p>When using strict casing, a JavaBean property with a getter such as
-	 * <code>getFoo()</code> translates to an attribute called <code>Foo</code>.
-	 * With strict casing disabled, <code>getFoo()</code> would translate to just
-	 * <code>foo</code>.
+	 * {@code getFoo()} translates to an attribute called {@code Foo}.
+	 * With strict casing disabled, {@code getFoo()} would translate to just
+	 * {@code foo}.
 	 */
 	public void setUseStrictCasing(boolean useStrictCasing) {
 		this.useStrictCasing = useStrictCasing;
@@ -221,7 +221,7 @@ public class MBeanClientInterceptor
 
 	/**
 	 * Return the management interface of the target MBean,
-	 * or <code>null</code> if none specified.
+	 * or {@code null} if none specified.
 	 */
 	protected final Class getManagementInterface() {
 		return this.managementInterface;
@@ -233,7 +233,7 @@ public class MBeanClientInterceptor
 
 
 	/**
-	 * Prepares the <code>MBeanServerConnection</code> if the "connectOnStartup"
+	 * Prepares the {@code MBeanServerConnection} if the "connectOnStartup"
 	 * is turned on (which it is by default).
 	 */
 	public void afterPropertiesSet() {
@@ -247,7 +247,7 @@ public class MBeanClientInterceptor
 	}
 
 	/**
-	 * Ensures that an <code>MBeanServerConnection</code> is configured and attempts
+	 * Ensures that an {@code MBeanServerConnection} is configured and attempts
 	 * to detect a local connection if one is not supplied.
 	 */
 	public void prepare() {
@@ -336,7 +336,7 @@ public class MBeanClientInterceptor
 
 	/**
 	 * Route the invocation to the configured managed resource..
-	 * @param invocation the <code>MethodInvocation</code> to re-route
+	 * @param invocation the {@code MethodInvocation} to re-route
 	 * @return the value returned as a result of the re-routed invocation
 	 * @throws Throwable an invocation error propagated to the user
 	 * @see #doInvoke
@@ -391,9 +391,9 @@ public class MBeanClientInterceptor
 
 	/**
 	 * Route the invocation to the configured managed resource. Correctly routes JavaBean property
-	 * access to <code>MBeanServerConnection.get/setAttribute</code> and method invocation to
-	 * <code>MBeanServerConnection.invoke</code>.
-	 * @param invocation the <code>MethodInvocation</code> to re-route
+	 * access to {@code MBeanServerConnection.get/setAttribute} and method invocation to
+	 * {@code MBeanServerConnection.invoke}.
+	 * @param invocation the {@code MethodInvocation} to re-route
 	 * @return the value returned as a result of the re-routed invocation
 	 * @throws Throwable an invocation error propagated to the user
 	 */
@@ -525,7 +525,7 @@ public class MBeanClientInterceptor
 	/**
 	 * Convert the given result object (from attribute access or operation invocation)
 	 * to the specified target class for returning from the proxy method.
-	 * @param result the result object as returned by the <code>MBeanServer</code>
+	 * @param result the result object as returned by the {@code MBeanServer}
 	 * @param parameter the method parameter of the proxy method that's been invoked
 	 * @return the converted result object, or the passed-in object if no conversion
 	 * is necessary
@@ -619,7 +619,7 @@ public class MBeanClientInterceptor
 		private final Class[] parameterTypes;
 
 		/**
-		 * Create a new instance of <code>MethodCacheKey</code> with the supplied
+		 * Create a new instance of {@code MethodCacheKey} with the supplied
 		 * method name and parameter list.
 		 * @param name the name of the method
 		 * @param parameterTypes the arguments in the method signature

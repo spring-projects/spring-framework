@@ -4,24 +4,32 @@
 .DS_Store
 .settings
 .springBeans
-target
 bin
 build.sh
 integration-repo
 ivy-cache
 jxl.log
 jmx.log
-spring-jdbc/derby.log
+derby.log
 spring-test/test-output/
 .gradle
-build
-.classpath
-.project
 argfile*
 pom.xml
 
-# IDEA metadata and output dirs
+/build
+buildSrc/build
+/spring-*/build
+target/
+
+# Eclipse artifacts, including WTP generated manifests
+.classpath
+.project
+spring-*/src/main/java/META-INF/MANIFEST.MF
+
+# IDEA artifacts and output dirs
 *.iml
 *.ipr
 *.iws
 out
+test-output
+atlassian-ide-plugin.xml

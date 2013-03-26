@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,21 @@ public class CronSequenceGenerator {
 
 	private final TimeZone timeZone;
 
+
 	/**
-	 * Construct a {@link CronSequenceGenerator} from the pattern provided.
+	 * Construct a {@link CronSequenceGenerator} from the pattern provided,
+	 * using the default {@link TimeZone}.
+	 * @param expression a space-separated list of time fields
+	 * @throws IllegalArgumentException if the pattern cannot be parsed
+	 * @see java.util.TimeZone#getDefault()
+	 */
+	public CronSequenceGenerator(String expression) {
+		this(expression, TimeZone.getDefault());
+	}
+
+	/**
+	 * Construct a {@link CronSequenceGenerator} from the pattern provided,
+	 * using the specified {@link TimeZone}.
 	 * @param expression a space-separated list of time fields
 	 * @param timeZone the TimeZone to use for generated trigger times
 	 * @throws IllegalArgumentException if the pattern cannot be parsed
@@ -80,6 +93,7 @@ public class CronSequenceGenerator {
 		this.timeZone = timeZone;
 		parse(expression);
 	}
+
 
 	/**
 	 * Get the next {@link Date} in the sequence matching the Cron pattern and
@@ -104,7 +118,7 @@ public class CronSequenceGenerator {
 		4 If hour matches move on, otherwise find the next match
 		4.1 If next match is in the next day then roll forwards,
 		4.2 Reset the minutes and seconds and go to 2
-		
+
 		...
 		*/
 
@@ -112,11 +126,16 @@ public class CronSequenceGenerator {
 		calendar.setTimeZone(this.timeZone);
 		calendar.setTime(date);
 
-		// Truncate to the next whole second
-		calendar.add(Calendar.SECOND, 1);
+		// First, just reset the milliseconds and try to calculate from there...
 		calendar.set(Calendar.MILLISECOND, 0);
-
+		long originalTimestamp = calendar.getTimeInMillis();
 		doNext(calendar, calendar.get(Calendar.YEAR));
+
+		if (calendar.getTimeInMillis() == originalTimestamp) {
+			// We arrived at the original timestamp - round up to the next whole second and try again...
+			calendar.add(Calendar.SECOND, 1);
+			doNext(calendar, calendar.get(Calendar.YEAR));
+		}
 
 		return calendar.getTime();
 	}
@@ -135,7 +154,8 @@ public class CronSequenceGenerator {
 		int updateMinute = findNext(this.minutes, minute, calendar, Calendar.MINUTE, Calendar.HOUR_OF_DAY, resets);
 		if (minute == updateMinute) {
 			resets.add(Calendar.MINUTE);
-		} else {
+		}
+		else {
 			doNext(calendar, dot);
 		}
 
@@ -143,7 +163,8 @@ public class CronSequenceGenerator {
 		int updateHour = findNext(this.hours, hour, calendar, Calendar.HOUR_OF_DAY, Calendar.DAY_OF_WEEK, resets);
 		if (hour == updateHour) {
 			resets.add(Calendar.HOUR_OF_DAY);
-		} else {
+		}
+		else {
 			doNext(calendar, dot);
 		}
 
@@ -152,7 +173,8 @@ public class CronSequenceGenerator {
 		int updateDayOfMonth = findNextDay(calendar, this.daysOfMonth, dayOfMonth, daysOfWeek, dayOfWeek, resets);
 		if (dayOfMonth == updateDayOfMonth) {
 			resets.add(Calendar.DAY_OF_MONTH);
-		} else {
+		}
+		else {
 			doNext(calendar, dot);
 		}
 
@@ -160,7 +182,8 @@ public class CronSequenceGenerator {
 		int updateMonth = findNext(this.months, month, calendar, Calendar.MONTH, Calendar.YEAR, resets);
 		if (month != updateMonth) {
 			if (calendar.get(Calendar.YEAR) - dot > 4) {
-				throw new IllegalStateException("Invalid cron expression led to runaway search for next trigger");
+				throw new IllegalArgumentException("Invalid cron expression \"" + this.expression +
+						"\" led to runaway search for next trigger");
 			}
 			doNext(calendar, dot);
 		}
@@ -181,7 +204,7 @@ public class CronSequenceGenerator {
 			reset(calendar, resets);
 		}
 		if (count >= max) {
-			throw new IllegalStateException("Overflow in day for expression=" + this.expression);
+			throw new IllegalArgumentException("Overflow in day for expression \"" + this.expression + "\"");
 		}
 		return dayOfMonth;
 	}
@@ -222,7 +245,8 @@ public class CronSequenceGenerator {
 		}
 	}
 
-	// Parsing logic invoked by the constructor.
+
+	// Parsing logic invoked by the constructor
 
 	/**
 	 * Parse the given pattern expression.
@@ -230,8 +254,8 @@ public class CronSequenceGenerator {
 	private void parse(String expression) throws IllegalArgumentException {
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
 		if (fields.length != 6) {
-			throw new IllegalArgumentException(String.format(""
-					+ "cron expression must consist of 6 fields (found %d in %s)", fields.length, expression));
+			throw new IllegalArgumentException(String.format(
+					"Cron expression must consist of 6 fields (found %d in \"%s\")", fields.length, expression));
 		}
 		setNumberHits(this.seconds, fields[0], 0, 60);
 		setNumberHits(this.minutes, fields[1], 0, 60);
@@ -296,10 +320,12 @@ public class CronSequenceGenerator {
 				// Not an incrementer so it must be a range (possibly empty)
 				int[] range = getRange(field, min, max);
 				bits.set(range[0], range[1] + 1);
-			} else {
+			}
+			else {
 				String[] split = StringUtils.delimitedListToStringArray(field, "/");
 				if (split.length > 2) {
-					throw new IllegalArgumentException("Incrementer has more than two fields: " + field);
+					throw new IllegalArgumentException("Incrementer has more than two fields: '" +
+							field + "' in expression \"" + this.expression + "\"");
 				}
 				int[] range = getRange(split[0], min, max);
 				if (!split[0].contains("-")) {
@@ -322,19 +348,23 @@ public class CronSequenceGenerator {
 		}
 		if (!field.contains("-")) {
 			result[0] = result[1] = Integer.valueOf(field);
-		} else {
+		}
+		else {
 			String[] split = StringUtils.delimitedListToStringArray(field, "-");
 			if (split.length > 2) {
-				throw new IllegalArgumentException("Range has more than two fields: " + field);
+				throw new IllegalArgumentException("Range has more than two fields: '" +
+						field + "' in expression \"" + this.expression + "\"");
 			}
 			result[0] = Integer.valueOf(split[0]);
 			result[1] = Integer.valueOf(split[1]);
 		}
 		if (result[0] >= max || result[1] >= max) {
-			throw new IllegalArgumentException("Range exceeds maximum (" + max + "): " + field);
+			throw new IllegalArgumentException("Range exceeds maximum (" + max + "): '" +
+					field + "' in expression \"" + this.expression + "\"");
 		}
 		if (result[0] < min || result[1] < min) {
-			throw new IllegalArgumentException("Range less than minimum (" + min + "): " + field);
+			throw new IllegalArgumentException("Range less than minimum (" + min + "): '" +
+					field + "' in expression \"" + this.expression + "\"");
 		}
 		return result;
 	}

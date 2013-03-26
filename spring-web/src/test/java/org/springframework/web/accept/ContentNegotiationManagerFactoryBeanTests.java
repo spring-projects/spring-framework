@@ -19,12 +19,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -42,9 +43,11 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	@Before
 	public void setup() {
-		this.factoryBean = new ContentNegotiationManagerFactoryBean();
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
+
+		this.factoryBean = new ContentNegotiationManagerFactoryBean();
+		this.factoryBean.setServletContext(this.servletRequest.getServletContext());
 	}
 
 	@Test
@@ -72,9 +75,9 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	@Test
 	public void addMediaTypes() throws Exception {
-		Properties mediaTypes = new Properties();
-		mediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
-		this.factoryBean.setMediaTypes(mediaTypes);
+		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+		mediaTypes.put("json", MediaType.APPLICATION_JSON);
+		this.factoryBean.addMediaTypes(mediaTypes);
 
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
@@ -86,17 +89,16 @@ public class ContentNegotiationManagerFactoryBeanTests {
 	@Test
 	public void favorParameter() throws Exception {
 		this.factoryBean.setFavorParameter(true);
-		this.factoryBean.setParameterName("f");
 
-		Properties mediaTypes = new Properties();
-		mediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
-		this.factoryBean.setMediaTypes(mediaTypes);
+		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+		mediaTypes.put("json", MediaType.APPLICATION_JSON);
+		this.factoryBean.addMediaTypes(mediaTypes);
 
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
 		this.servletRequest.setRequestURI("/flower");
-		this.servletRequest.addParameter("f", "json");
+		this.servletRequest.addParameter("format", "json");
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
 	}

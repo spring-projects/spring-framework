@@ -42,6 +42,7 @@ public class CallableMethodReturnValueHandler implements HandlerMethodReturnValu
 			NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
+			mavContainer.setRequestHandled(true);
 			return;
 		}
 

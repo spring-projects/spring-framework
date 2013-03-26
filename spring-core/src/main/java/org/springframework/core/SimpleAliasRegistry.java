@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.StringValueResolver;
 public class SimpleAliasRegistry implements AliasRegistry {
 
 	/** Map from alias to canonical name */
-	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>();
+	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>(16);
 
 
 	public void registerAlias(String name, String alias) {
@@ -62,7 +62,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	/**
 	 * Return whether alias overriding is allowed.
-	 * Default is <code>true</code>.
+	 * Default is {@code true}.
 	 */
 	protected boolean allowAliasOverriding() {
 		return true;

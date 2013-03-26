@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -31,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 
 /**
  * This set of tests refutes the claims made in
@@ -88,6 +85,7 @@ public class AnnotatedConfigClassesWithoutAtConfigurationTests {
 
 	@Autowired
 	private LifecycleBean lifecycleBean;
+
 
 	@Test
 	public void testSPR_9051() throws Exception {

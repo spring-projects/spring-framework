@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 
 	private DestinationResolver dynamicDestinationResolver = new DynamicDestinationResolver();
 
-	private final Map<String, Destination> destinationCache = new ConcurrentHashMap<String, Destination>();
+	private final Map<String, Destination> destinationCache = new ConcurrentHashMap<String, Destination>(16);
 
 
 	/**
@@ -135,8 +135,8 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	 * the expected type.
 	 * @param destination the Destination object to validate
 	 * @param destinationName the name of the destination
-	 * @param pubSubDomain <code>true</code> if a Topic is expected,
-	 * <code>false</code> in case of a Queue
+	 * @param pubSubDomain {@code true} if a Topic is expected,
+	 * {@code false} in case of a Queue
 	 */
 	protected void validateDestination(Destination destination, String destinationName, boolean pubSubDomain) {
 		Class targetClass = Queue.class;

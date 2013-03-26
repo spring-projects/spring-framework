@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@ import java.util.List;
 import org.junit.Test;
 import org.springframework.aop.SpringProxy;
 
-import test.beans.ITestBean;
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
  * @author Chris Beams
  */
 public final class AopProxyUtilsTests {
-	
+
 	@Test
 	public void testCompleteProxiedInterfacesWorksWithNull() {
 		AdvisedSupport as = new AdvisedSupport();
@@ -45,7 +45,7 @@ public final class AopProxyUtilsTests {
 		assertTrue(ifaces.contains(Advised.class));
 		assertTrue(ifaces.contains(SpringProxy.class));
 	}
-	
+
 	@Test
 	public void testCompleteProxiedInterfacesWorksWithNullOpaque() {
 		AdvisedSupport as = new AdvisedSupport();
@@ -53,7 +53,7 @@ public final class AopProxyUtilsTests {
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
 		assertEquals(1, completedInterfaces.length);
 	}
-	
+
 	@Test
 	public void testCompleteProxiedInterfacesAdvisedNotIncluded() {
 		AdvisedSupport as = new AdvisedSupport();
@@ -61,14 +61,14 @@ public final class AopProxyUtilsTests {
 		as.addInterface(Comparable.class);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
 		assertEquals(4, completedInterfaces.length);
-		
+
 		// Can't assume ordering for others, so use a list
 		List<?> l = Arrays.asList(completedInterfaces);
 		assertTrue(l.contains(Advised.class));
 		assertTrue(l.contains(ITestBean.class));
 		assertTrue(l.contains(Comparable.class));
 	}
-	
+
 	@Test
 	public void testCompleteProxiedInterfacesAdvisedIncluded() {
 		AdvisedSupport as = new AdvisedSupport();
@@ -77,14 +77,14 @@ public final class AopProxyUtilsTests {
 		as.addInterface(Advised.class);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
 		assertEquals(4, completedInterfaces.length);
-		
+
 		// Can't assume ordering for others, so use a list
 		List<?> l = Arrays.asList(completedInterfaces);
 		assertTrue(l.contains(Advised.class));
 		assertTrue(l.contains(ITestBean.class));
 		assertTrue(l.contains(Comparable.class));
 	}
-	
+
 	@Test
 	public void testCompleteProxiedInterfacesAdvisedNotIncludedOpaque() {
 		AdvisedSupport as = new AdvisedSupport();
@@ -93,7 +93,7 @@ public final class AopProxyUtilsTests {
 		as.addInterface(Comparable.class);
 		Class<?>[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
 		assertEquals(3, completedInterfaces.length);
-		
+
 		// Can't assume ordering for others, so use a list
 		List<?> l = Arrays.asList(completedInterfaces);
 		assertFalse(l.contains(Advised.class));
@@ -129,6 +129,7 @@ public final class AopProxyUtilsTests {
 	public void testProxiedUserInterfacesWithNoInterface() {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
 				new InvocationHandler() {
+					@Override
 					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						return null;
 					}

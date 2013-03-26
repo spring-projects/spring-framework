@@ -27,7 +27,6 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -50,7 +49,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
-	private Runnable timeoutHandler = new DefaultTimeoutHandler();
+	private final List<Runnable> timeoutHandlers = new ArrayList<Runnable>();
 
 	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
 
@@ -74,15 +73,8 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		this.timeout = timeout;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>If not set, by default a timeout is handled by returning
-	 * SERVICE_UNAVAILABLE (503).
-	 */
-	public void setTimeoutHandler(Runnable timeoutHandler) {
-		if (timeoutHandler != null) {
-			this.timeoutHandler = timeoutHandler;
-		}
+	public void addTimeoutHandler(Runnable timeoutHandler) {
+		this.timeoutHandlers.add(timeoutHandler);
 	}
 
 	public void addCompletionHandler(Runnable runnable) {
@@ -135,31 +127,17 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	public void onTimeout(AsyncEvent event) throws IOException {
-		this.timeoutHandler.run();
+		for (Runnable handler : this.timeoutHandlers) {
+			handler.run();
+		}
 	}
 
 	public void onComplete(AsyncEvent event) throws IOException {
-		for (Runnable runnable : this.completionHandlers) {
-			runnable.run();
+		for (Runnable handler : this.completionHandlers) {
+			handler.run();
 		}
 		this.asyncContext = null;
 		this.asyncCompleted.set(true);
-	}
-
-
-	/**
-	 * Sends a SERVICE_UNAVAILABLE (503).
-	 */
-	private class DefaultTimeoutHandler implements Runnable {
-
-		public void run() {
-			try {
-				getResponse().sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
-			}
-			catch (IOException ex) {
-				// ignore
-			}
-		}
 	}
 
 }

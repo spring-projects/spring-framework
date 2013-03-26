@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,13 +99,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the <code>Marshaller</code> interface for JAXB 2.0.
+ * Implementation of the {@code Marshaller} interface for JAXB 2.0.
  *
- * <p>The typical usage will be to set either the <code>contextPath</code> or the <code>classesToBeBound</code> property
- * on this bean, possibly customize the marshaller and unmarshaller by setting properties, schemas, adapters, and
- * listeners, and to refer to it.
+ * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
+ * property on this bean, possibly customize the marshaller and unmarshaller by setting
+ * properties, schemas, adapters, and listeners, and to refer to it.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
@@ -125,15 +126,13 @@ public class Jaxb2Marshaller
 	private static final String CID = "cid:";
 
 
-	/**
-	 * Logger available to subclasses.
-	 */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String contextPath;
 
 	private Class<?>[] classesToBeBound;
-	
+
 	private String[] packagesToScan;
 
 	private Map<String, ?> jaxbContextProperties;
@@ -154,23 +153,27 @@ public class Jaxb2Marshaller
 
 	private String schemaLanguage = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
-	private boolean mtomEnabled = false;
-
-	private ClassLoader beanClassLoader;
-
-	private ResourceLoader resourceLoader;
-
-	private JAXBContext jaxbContext;
-
-	private Schema schema;
+	private LSResourceResolver schemaResourceResolver;
 
 	private boolean lazyInit = false;
+
+	private boolean mtomEnabled = false;
 
 	private boolean supportJaxbElementClass = false;
 
 	private boolean checkForXmlRootElement = true;
 
-	private LSResourceResolver schemaResourceResolver;
+	private Class<?> mappedClass;
+
+	private ClassLoader beanClassLoader;
+
+	private ResourceLoader resourceLoader;
+
+	private final Object jaxbContextMonitor = new Object();
+
+	private volatile JAXBContext jaxbContext;
+
+	private Schema schema;
 
 
 	/**
@@ -234,18 +237,18 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the <code>JAXBContext</code> properties. These implementation-specific
-	 * properties will be set on the underlying <code>JAXBContext</code>.
+	 * Set the {@code JAXBContext} properties. These implementation-specific
+	 * properties will be set on the underlying {@code JAXBContext}.
 	 */
 	public void setJaxbContextProperties(Map<String, ?> jaxbContextProperties) {
 		this.jaxbContextProperties = jaxbContextProperties;
 	}
 
 	/**
-	 * Set the JAXB <code>Marshaller</code> properties. These properties will be set on the
-	 * underlying JAXB <code>Marshaller</code>, and allow for features such as indentation.
+	 * Set the JAXB {@code Marshaller} properties. These properties will be set on the
+	 * underlying JAXB {@code Marshaller}, and allow for features such as indentation.
 	 * @param properties the properties
-	 * @see javax.xml.bind.Marshaller#setProperty(String,Object)
+	 * @see javax.xml.bind.Marshaller#setProperty(String, Object)
 	 * @see javax.xml.bind.Marshaller#JAXB_ENCODING
 	 * @see javax.xml.bind.Marshaller#JAXB_FORMATTED_OUTPUT
 	 * @see javax.xml.bind.Marshaller#JAXB_NO_NAMESPACE_SCHEMA_LOCATION
@@ -256,24 +259,24 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the JAXB <code>Unmarshaller</code> properties. These properties will be set on the
-	 * underlying JAXB <code>Unmarshaller</code>.
+	 * Set the JAXB {@code Unmarshaller} properties. These properties will be set on the
+	 * underlying JAXB {@code Unmarshaller}.
 	 * @param properties the properties
-	 * @see javax.xml.bind.Unmarshaller#setProperty(String,Object)
+	 * @see javax.xml.bind.Unmarshaller#setProperty(String, Object)
 	 */
 	public void setUnmarshallerProperties(Map<String, ?> properties) {
 		this.unmarshallerProperties = properties;
 	}
 
 	/**
-	 * Specify the <code>Marshaller.Listener</code> to be registered with the JAXB <code>Marshaller</code>.
+	 * Specify the {@code Marshaller.Listener} to be registered with the JAXB {@code Marshaller}.
 	 */
 	public void setMarshallerListener(Marshaller.Listener marshallerListener) {
 		this.marshallerListener = marshallerListener;
 	}
 
 	/**
-	 * Set the <code>Unmarshaller.Listener</code> to be registered with the JAXB <code>Unmarshaller</code>.
+	 * Set the {@code Unmarshaller.Listener} to be registered with the JAXB {@code Unmarshaller}.
 	 */
 	public void setUnmarshallerListener(Unmarshaller.Listener unmarshallerListener) {
 		this.unmarshallerListener = unmarshallerListener;
@@ -288,8 +291,8 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Specify the <code>XmlAdapter</code>s to be registered with the JAXB <code>Marshaller</code>
-	 * and <code>Unmarshaller</code>
+	 * Specify the {@code XmlAdapter}s to be registered with the JAXB {@code Marshaller}
+	 * and {@code Unmarshaller}
 	 */
 	public void setAdapters(XmlAdapter<?, ?>[] adapters) {
 		this.adapters = adapters;
@@ -310,7 +313,7 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the schema language. Default is the W3C XML Schema: <code>http://www.w3.org/2001/XMLSchema"</code>.
+	 * Set the schema language. Default is the W3C XML Schema: {@code http://www.w3.org/2001/XMLSchema"}.
 	 * @see XMLConstants#W3C_XML_SCHEMA_NS_URI
 	 * @see XMLConstants#RELAXNG_NS_URI
 	 */
@@ -329,14 +332,6 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Specify whether MTOM support should be enabled or not.
-	 * Default is <code>false</code>: marshalling using XOP/MTOM not being enabled.
-	 */
-	public void setMtomEnabled(boolean mtomEnabled) {
-		this.mtomEnabled = mtomEnabled;
-	}
-
-	/**
 	 * Set whether to lazily initialize the {@link JAXBContext} for this marshaller.
 	 * Default is {@code false} to initialize on startup; can be switched to {@code true}.
 	 * <p>Early initialization just applies if {@link #afterPropertiesSet()} is called.
@@ -346,13 +341,21 @@ public class Jaxb2Marshaller
 	}
 
 	/**
+	 * Specify whether MTOM support should be enabled or not.
+	 * Default is {@code false}: marshalling using XOP/MTOM not being enabled.
+	 */
+	public void setMtomEnabled(boolean mtomEnabled) {
+		this.mtomEnabled = mtomEnabled;
+	}
+
+	/**
 	 * Specify whether the {@link #supports(Class)} returns {@code true} for the {@link JAXBElement} class.
 	 * <p>Default is {@code false}, meaning that {@code supports(Class)} always returns {@code false} for
-	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can obtain the
-	 * type parameters of {@code JAXBElement}).
+	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can
+	 * obtain the type parameters of {@code JAXBElement}).
 	 * <p>This property is typically enabled in combination with usage of classes like
-	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView}, since the {@code ModelAndView}
-	 * does not offer type parameter information at runtime.
+	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView},
+	 * since the {@code ModelAndView} does not offer type parameter information at runtime.
 	 * @see #supports(Class)
 	 * @see #supports(Type)
 	 */
@@ -375,6 +378,14 @@ public class Jaxb2Marshaller
 		this.checkForXmlRootElement = checkForXmlRootElement;
 	}
 
+	/**
+	 * Specify a JAXB mapped class for partial unmarshalling.
+	 * @see javax.xml.bind.Unmarshaller#unmarshal(javax.xml.transform.Source, Class)
+	 */
+	public void setMappedClass(Class<?> mappedClass) {
+		this.mappedClass = mappedClass;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -382,6 +393,7 @@ public class Jaxb2Marshaller
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
+
 
 	public final void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
@@ -405,24 +417,32 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	protected synchronized JAXBContext getJaxbContext() {
-		if (this.jaxbContext == null) {
-			try {
-				if (StringUtils.hasLength(this.contextPath)) {
-					this.jaxbContext = createJaxbContextFromContextPath();
-				}
-				else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
-					this.jaxbContext = createJaxbContextFromClasses();
-				}
-				else if (!ObjectUtils.isEmpty(this.packagesToScan)) {
-					this.jaxbContext = createJaxbContextFromPackages();
-				}
-			}
-			catch (JAXBException ex) {
-				throw convertJaxbException(ex);
-			}
+	/**
+	 * Return the JAXBContext used by this marshaller, lazily building it if necessary.
+	 */
+	public JAXBContext getJaxbContext() {
+		if (this.jaxbContext != null) {
+			return this.jaxbContext;
 		}
-		return this.jaxbContext;
+		synchronized (this.jaxbContextMonitor) {
+			if (this.jaxbContext == null) {
+				try {
+					if (StringUtils.hasLength(this.contextPath)) {
+						this.jaxbContext = createJaxbContextFromContextPath();
+					}
+					else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
+						this.jaxbContext = createJaxbContextFromClasses();
+					}
+					else if (!ObjectUtils.isEmpty(this.packagesToScan)) {
+						this.jaxbContext = createJaxbContextFromPackages();
+					}
+				}
+				catch (JAXBException ex) {
+					throw convertJaxbException(ex);
+				}
+			}
+			return this.jaxbContext;
+		}
 	}
 
 	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
@@ -434,7 +454,9 @@ public class Jaxb2Marshaller
 				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader, this.jaxbContextProperties);
 			}
 			else {
-				return JAXBContext.newInstance(this.contextPath, ClassUtils.getDefaultClassLoader(), this.jaxbContextProperties);
+				// analogous to the JAXBContext.newInstance(String) implementation
+				return JAXBContext.newInstance(this.contextPath, Thread.currentThread().getContextClassLoader(),
+						this.jaxbContextProperties);
 			}
 		}
 		else {
@@ -506,10 +528,8 @@ public class Jaxb2Marshaller
 
 
 	public boolean supports(Class<?> clazz) {
-		if (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
-			return true;
-		}
-		return supportsInternal(clazz, this.checkForXmlRootElement);
+		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
+				supportsInternal(clazz, this.checkForXmlRootElement));
 	}
 
 	public boolean supports(Type genericType) {
@@ -655,7 +675,7 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Template method that can be overridden by concrete JAXB marshallers for custom initialization behavior.
-	 * Gets called after creation of JAXB <code>Marshaller</code>, and after the respective properties have been set.
+	 * Gets called after creation of JAXB {@code Marshaller}, and after the respective properties have been set.
 	 * <p>The default implementation sets the {@link #setMarshallerProperties(Map) defined properties}, the {@link
 	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
 	 * schemas}, {@link #setMarshallerListener(javax.xml.bind.Marshaller.Listener) listener}, and
@@ -699,6 +719,9 @@ public class Jaxb2Marshaller
 			if (StaxUtils.isStaxSource(source)) {
 				return unmarshalStaxSource(unmarshaller, source);
 			}
+			else if (this.mappedClass != null) {
+				return unmarshaller.unmarshal(source, this.mappedClass).getValue();
+			}
 			else {
 				return unmarshaller.unmarshal(source);
 			}
@@ -708,15 +731,19 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	private Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
+	protected Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
 		XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(staxSource);
 		if (streamReader != null) {
-			return jaxbUnmarshaller.unmarshal(streamReader);
+			return (this.mappedClass != null ?
+					jaxbUnmarshaller.unmarshal(streamReader, this.mappedClass).getValue() :
+					jaxbUnmarshaller.unmarshal(streamReader));
 		}
 		else {
 			XMLEventReader eventReader = StaxUtils.getXMLEventReader(staxSource);
 			if (eventReader != null) {
-				return jaxbUnmarshaller.unmarshal(eventReader);
+				return (this.mappedClass != null ?
+						jaxbUnmarshaller.unmarshal(eventReader, this.mappedClass).getValue() :
+						jaxbUnmarshaller.unmarshal(eventReader));
 			}
 			else {
 				throw new IllegalArgumentException("StaxSource contains neither XMLStreamReader nor XMLEventReader");
@@ -741,7 +768,7 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Template method that can be overridden by concrete JAXB marshallers for custom initialization behavior.
-	 * Gets called after creation of JAXB <code>Marshaller</code>, and after the respective properties have been set.
+	 * Gets called after creation of JAXB {@code Marshaller}, and after the respective properties have been set.
 	 * <p>The default implementation sets the {@link #setUnmarshallerProperties(Map) defined properties}, the {@link
 	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
 	 * schemas}, {@link #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener) listener}, and
@@ -770,10 +797,10 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Convert the given <code>JAXBException</code> to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
-	 * @param ex <code>JAXBException</code> that occured
-	 * @return the corresponding <code>XmlMappingException</code>
+	 * Convert the given {@code JAXBException} to an appropriate exception from the
+	 * {@code org.springframework.oxm} hierarchy.
+	 * @param ex {@code JAXBException} that occured
+	 * @return the corresponding {@code XmlMappingException}
 	 */
 	protected XmlMappingException convertJaxbException(JAXBException ex) {
 		if (ex instanceof ValidationException) {

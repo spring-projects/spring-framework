@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
@@ -82,7 +84,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Return the view's name. Should never be <code>null</code>,
+	 * Return the view's name. Should never be {@code null},
 	 * if the view was correctly configured.
 	 */
 	public String getBeanName() {
@@ -155,7 +157,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Set static attributes for this view from a
-	 * <code>java.util.Properties</code> object.
+	 * {@code java.util.Properties} object.
 	 * <p>"Static" attributes are fixed attributes that are specified in
 	 * the View instance configuration. "Dynamic" attributes, on the other hand,
 	 * are values passed in as part of the model.
@@ -203,7 +205,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>"Static" attributes are fixed attributes that are specified in
 	 * the View instance configuration. "Dynamic" attributes, on the other hand,
 	 * are values passed in as part of the model.
-	 * <p>Must be invoked before any calls to <code>render</code>.
+	 * <p>Must be invoked before any calls to {@code render}.
 	 * @param name the name of the attribute to expose
 	 * @param value the attribute value to expose
 	 * @see #render
@@ -223,15 +225,15 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Whether to add path variables in the model or not. 
-	 * <p>Path variables are commonly bound to URI template variables through the {@code @PathVariable} 
-	 * annotation. They're are effectively URI template variables with type conversion applied to 
-	 * them to derive typed Object values. Such values are frequently needed in views for 
-	 * constructing links to the same and other URLs. 
-	 * <p>Path variables added to the model override static attributes (see {@link #setAttributes(Properties)}) 
-	 * but not attributes already present in the model. 
-	 * <p>By default this flag is set to {@code true}. Concrete view types can override this. 
-	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise. 
+	 * Whether to add path variables in the model or not.
+	 * <p>Path variables are commonly bound to URI template variables through the {@code @PathVariable}
+	 * annotation. They're are effectively URI template variables with type conversion applied to
+	 * them to derive typed Object values. Such values are frequently needed in views for
+	 * constructing links to the same and other URLs.
+	 * <p>Path variables added to the model override static attributes (see {@link #setAttributes(Properties)})
+	 * but not attributes already present in the model.
+	 * <p>By default this flag is set to {@code true}. Concrete view types can override this.
+	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise.
 	 */
 	public void setExposePathVariables(boolean exposePathVariables) {
 		this.exposePathVariables = exposePathVariables;
@@ -255,7 +257,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
 				" and static attributes " + this.staticAttributes);
 		}
-		
+
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
 
 		prepareResponse(request, response);
@@ -263,7 +265,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Creates a combined output Map (never <code>null</code>) that includes dynamic values and static attributes. 
+	 * Creates a combined output Map (never {@code null}) that includes dynamic values and static attributes.
 	 * Dynamic values take precedence over static attributes.
 	 */
 	protected Map<String, Object> createMergedOutputModel(Map<String, ?> model, HttpServletRequest request,
@@ -289,7 +291,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		if (this.requestContextAttribute != null) {
 			mergedModel.put(this.requestContextAttribute, createRequestContext(request, response, mergedModel));
 		}
-		
+
 		return mergedModel;
 	}
 
@@ -298,7 +300,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Default implementation creates a standard RequestContext instance for the
 	 * given request and model. Can be overridden in subclasses for custom instances.
 	 * @param request current HTTP request
-	 * @param model combined output Map (never <code>null</code>),
+	 * @param model combined output Map (never {@code null}),
 	 * with dynamic values taking precedence over static attributes
 	 * @return the RequestContext instance
 	 * @see #setRequestContextAttribute
@@ -327,8 +329,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return whether this view generates download content
 	 * (typically binary content like PDF or Excel files).
-	 * <p>The default implementation returns <code>false</code>. Subclasses are
-	 * encouraged to return <code>true</code> here if they know that they are
+	 * <p>The default implementation returns {@code false}. Subclasses are
+	 * encouraged to return {@code true} here if they know that they are
 	 * generating download content that requires temporary caching on the
 	 * client side, typically via the response OutputStream.
 	 * @see #prepareResponse
@@ -344,7 +346,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * this would mean setting model objects as request attributes.
 	 * The second step will be the actual rendering of the view,
 	 * for example including the JSP via a RequestDispatcher.
-	 * @param model combined output Map (never <code>null</code>),
+	 * @param model combined output Map (never {@code null}),
 	 * with dynamic values taking precedence over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -408,6 +410,21 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		out.flush();
 	}
 
+	/**
+	 * Set the content type of the response to the configured
+	 * {@link #setContentType(String) content type} unless the
+	 * {@link View#SELECTED_CONTENT_TYPE} request attribute is present and set
+	 * to a concrete media type.
+	 */
+	protected void setResponseContentType(HttpServletRequest request, HttpServletResponse response) {
+		MediaType mediaType = (MediaType) request.getAttribute(View.SELECTED_CONTENT_TYPE);
+		if (mediaType != null && mediaType.isConcrete()) {
+			response.setContentType(mediaType.toString());
+		}
+		else {
+			response.setContentType(getContentType());
+		}
+	}
 
 	@Override
 	public String toString() {

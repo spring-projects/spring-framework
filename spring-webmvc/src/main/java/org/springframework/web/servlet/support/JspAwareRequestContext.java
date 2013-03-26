@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import javax.servlet.jsp.jstl.core.Config;
 
 /**
  * JSP-aware (and JSTL-aware) subclass of RequestContext, allowing for
- * population of the context from a <code>javax.servlet.jsp.PageContext</code>.
+ * population of the context from a {@code javax.servlet.jsp.PageContext}.
  *
  * <p>This context will detect a JSTL locale attribute in page/request/session/application
  * scope, in addition to the fallback locale strategy provided by the base class.
@@ -53,7 +53,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * using the given model attributes for Errors retrieval.
 	 * @param pageContext current JSP page context
 	 * @param model the model attributes for the current view
-	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
+	 * (can be {@code null}, using the request attributes for Errors retrieval)
 	 */
 	public JspAwareRequestContext(PageContext pageContext, Map<String, Object> model) {
 		initContext(pageContext, model);
@@ -64,7 +64,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 * using the given model attributes for Errors retrieval.
 	 * @param pageContext current JSP page context
 	 * @param model the model attributes for the current view
-	 * (can be <code>null</code>, using the request attributes for Errors retrieval)
+	 * (can be {@code null}, using the request attributes for Errors retrieval)
 	 */
 	protected void initContext(PageContext pageContext, Map<String, Object> model) {
 		if (!(pageContext.getRequest() instanceof HttpServletRequest)) {
@@ -87,7 +87,7 @@ public class JspAwareRequestContext extends RequestContext {
 	/**
 	 * This implementation checks for a JSTL locale attribute
 	 * in page, request, session or application scope; if not found,
-	 * returns the <code>HttpServletRequest.getLocale()</code>.
+	 * returns the {@code HttpServletRequest.getLocale()}.
 	 */
 	@Override
 	protected Locale getFallbackLocale() {

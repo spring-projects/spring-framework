@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,26 +16,23 @@
 
 package org.springframework.context.access;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * Unit test for {@link ContextBeanFactoryReference}
- * 
+ *
  * @author Colin Sampaleanu
  * @author Chris Beams
  */
 public class ContextBeanFactoryReferenceTests {
-	
+
 	@Test
 	public void testAllOperations() {
-		ConfigurableApplicationContext ctx = createMock(ConfigurableApplicationContext.class);
-
-		ctx.close();
-		replay(ctx);
+		ConfigurableApplicationContext ctx = mock(ConfigurableApplicationContext.class);
 
 		ContextBeanFactoryReference bfr = new ContextBeanFactoryReference(ctx);
 
@@ -49,6 +46,6 @@ public class ContextBeanFactoryReferenceTests {
 			// expected
 		}
 
-		verify(ctx);
+		verify(ctx).close();
 	}
 }

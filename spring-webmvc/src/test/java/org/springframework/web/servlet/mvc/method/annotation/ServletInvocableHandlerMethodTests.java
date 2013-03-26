@@ -29,8 +29,8 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -185,10 +185,12 @@ public class ServletInvocableHandlerMethodTests {
 
 	private static class ExceptionRaisingReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+		@Override
 		public boolean supportsReturnType(MethodParameter returnType) {
 			return true;
 		}
 
+		@Override
 		public void handleReturnValue(Object returnValue, MethodParameter returnType,
 				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 			throw new HttpMessageNotWritableException("oops, can't write");

@@ -36,7 +36,7 @@
 				<xsd:annotation>
 					<xsd:documentation source="java:org.springframework.cache.CacheManager"><![CDATA[
 	The bean name of the CacheManager that is to be used to retrieve the backing caches.
-	
+
 	This attribute is not required, and only needs to be specified
 	explicitly if the bean name of the desired CacheManager
 	is not 'cacheManager'.
@@ -52,7 +52,7 @@
 				<xsd:annotation>
 					<xsd:documentation source="java:org.springframework.cache.interceptor.KeyGenerator"><![CDATA[
 	The bean name of the KeyGenerator that is to be used to retrieve the backing caches.
-	
+
 	This attribute is not required, and only needs to be specified
 	explicitly if the default strategy (DefaultKeyGenerator) is not sufficient.
 					]]></xsd:documentation>
@@ -150,7 +150,7 @@
 						<xsd:annotation>
 							<xsd:documentation source="java:org.springframework.cache.interceptor.KeyGenerator"><![CDATA[
 	The bean name of the KeyGenerator that is to be used to retrieve the backing caches.
-	
+
 	This attribute is not required, and only needs to be specified
 	explicitly if the default strategy (DefaultKeyGenerator) is not sufficient.
 							]]></xsd:documentation>
@@ -160,7 +160,7 @@
 								</tool:annotation>
 							</xsd:appinfo>
 						</xsd:annotation>
-					</xsd:attribute>					
+					</xsd:attribute>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
@@ -194,16 +194,42 @@
 	example, 'get*', 'handle*', '*Order', 'on*Event', etc.]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		
+
 	</xsd:complexType>
-	
+
 	<xsd:complexType name="definitionsType">
 		<xsd:complexContent>
 			<xsd:extension base="basedefinitionType">
 				<xsd:sequence>
 				  <xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element name="cacheable" minOccurs="0" maxOccurs="unbounded" type="basedefinitionType"/>
-					<xsd:element name="cache-put" minOccurs="0" maxOccurs="unbounded" type="basedefinitionType"/>					
+					<xsd:element name="cacheable" minOccurs="0" maxOccurs="unbounded">
+						<xsd:complexType>
+							<xsd:complexContent>
+								<xsd:extension base="basedefinitionType">
+									<xsd:attribute name="unless" type="xsd:string" use="optional">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	The SpEL expression used to veto the method caching.]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:extension>
+							</xsd:complexContent>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="cache-put" minOccurs="0" maxOccurs="unbounded">
+						<xsd:complexType>
+							<xsd:complexContent>
+								<xsd:extension base="basedefinitionType">
+									<xsd:attribute name="unless" type="xsd:string" use="optional">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	The SpEL expression used to veto the method caching.]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:extension>
+							</xsd:complexContent>
+						</xsd:complexType>
+					</xsd:element>
 					<xsd:element name="cache-evict" minOccurs="0" maxOccurs="unbounded">
 						<xsd:complexType>
 							<xsd:complexContent>
@@ -217,16 +243,16 @@
 									<xsd:attribute name="before-invocation" type="xsd:boolean" use="optional">
 										<xsd:annotation>
 											<xsd:documentation><![CDATA[
-	Whether the eviction should occur after the method is successfully 
+	Whether the eviction should occur after the method is successfully
 	invoked (default) or before.]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
-									
+
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>
 					</xsd:element>
-				  </xsd:choice>			
+				  </xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

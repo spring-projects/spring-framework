@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	 * Determine the URLs for the given handler bean.
 	 * @param beanName the name of the candidate bean
 	 * @return the URLs determined for the bean,
-	 * or <code>null</code> or an empty array if none
+	 * or {@code null} or an empty array if none
 	 */
 	protected abstract String[] determineUrlsForHandler(String beanName);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * Generic Converter that attempts to convert a source Object to a target type
  * by delegating to methods on the target type.
  *
- * <p>Calls the static <code>valueOf(sourceType)</code> method on the target type
+ * <p>Calls the static {@code valueOf(sourceType)} method on the target type
  * to perform the conversion, if such a method exists. Else calls the target type's
  * Constructor that accepts a single sourceType argument, if such a Constructor exists.
  * Else throws a ConversionFailedException.
@@ -48,10 +48,17 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return !sourceType.equals(targetType) && hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
+		if (sourceType.getType().equals(targetType.getType())) {
+			// no conversion required
+			return false;
+		}
+		return hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return null;
+		}
 		Class<?> sourceClass = sourceType.getType();
 		Class<?> targetClass = targetType.getType();
 		Method method = getValueOfMethodOn(targetClass, sourceClass);
@@ -84,7 +91,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	private static Method getValueOfMethodOn(Class<?> clazz, Class<?> sourceParameterType) {
 		return ClassUtils.getStaticMethod(clazz, "valueOf", sourceParameterType);
 	}
-	
+
 	private static Constructor<?> getConstructor(Class<?> clazz, Class<?> sourceParameterType) {
 		return ClassUtils.getConstructorIfAvailable(clazz, sourceParameterType);
 	}

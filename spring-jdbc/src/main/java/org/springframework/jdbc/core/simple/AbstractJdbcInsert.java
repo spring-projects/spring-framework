@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,9 @@ public abstract class AbstractJdbcInsert {
 	private final List<String> declaredColumns = new ArrayList<String>();
 
 	/**
-	 * Has this operation been compiled? Compilation means at
-	 * least checking that a DataSource or JdbcTemplate has been provided,
-	 * but subclasses may also implement their own custom validation.
+	 * Has this operation been compiled? Compilation means at least checking
+	 * that a DataSource or JdbcTemplate has been provided, but subclasses
+	 * may also implement their own custom validation.
 	 */
 	private boolean compiled = false;
 
@@ -108,8 +108,15 @@ public abstract class AbstractJdbcInsert {
 
 
 	//-------------------------------------------------------------------------
-	// Methods dealing with configuaration properties
+	// Methods dealing with configuration properties
 	//-------------------------------------------------------------------------
+
+	/**
+	 * Get the {@link JdbcTemplate} that is configured to be used.
+	 */
+	public JdbcTemplate getJdbcTemplate() {
+		return this.jdbcTemplate;
+	}
 
 	/**
 	 * Set the name of the table for this insert
@@ -230,41 +237,31 @@ public abstract class AbstractJdbcInsert {
 		return this.insertTypes;
 	}
 
-	/**
-	 * Get the {@link JdbcTemplate} that is configured to be used
-	 */
-	protected JdbcTemplate getJdbcTemplate() {
-		return this.jdbcTemplate;
-	}
-
 
 	//-------------------------------------------------------------------------
 	// Methods handling compilation issues
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Compile this JdbcInsert using provided parameters and meta data plus other settings.  This
-	 * finalizes the configuration for this object and subsequent attempts to compile are ignored.
-	 * This will be implicitly called the first time an un-compiled insert is executed.
-	 * @throws org.springframework.dao.InvalidDataAccessApiUsageException if the object hasn't
-	 * been correctly initialized, for example if no DataSource has been provided
+	 * Compile this JdbcInsert using provided parameters and meta data plus other settings.
+	 * This finalizes the configuration for this object and subsequent attempts to compile are
+	 * ignored. This will be implicitly called the first time an un-compiled insert is executed.
+	 * @throws InvalidDataAccessApiUsageException if the object hasn't been correctly initialized,
+	 * for example if no DataSource has been provided
 	 */
 	public synchronized final void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
 			if (getTableName() == null) {
 				throw new InvalidDataAccessApiUsageException("Table name is required");
 			}
-
 			try {
 				this.jdbcTemplate.afterPropertiesSet();
 			}
 			catch (IllegalArgumentException ex) {
 				throw new InvalidDataAccessApiUsageException(ex.getMessage());
 			}
-
 			compileInternal();
 			this.compiled = true;
-
 			if (logger.isDebugEnabled()) {
 				logger.debug("JdbcInsert for table [" + getTableName() + "] compiled");
 			}
@@ -272,21 +269,17 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method to perform the actual compilation.  Subclasses can override this template method to perform
-	 * their own compilation.  Invoked after this base class's compilation is complete.
+	 * Method to perform the actual compilation. Subclasses can override this template method
+	 * to perform  their own compilation. Invoked after this base class's compilation is complete.
 	 */
 	protected void compileInternal() {
-
-		tableMetaDataContext.processMetaData(getJdbcTemplate().getDataSource(), getColumnNames(), getGeneratedKeyNames());
-
-		insertString = tableMetaDataContext.createInsertString(getGeneratedKeyNames());
-
-		insertTypes = tableMetaDataContext.createInsertTypes();
-
+		this.tableMetaDataContext.processMetaData(
+				getJdbcTemplate().getDataSource(), getColumnNames(), getGeneratedKeyNames());
+		this.insertString = this.tableMetaDataContext.createInsertString(getGeneratedKeyNames());
+		this.insertTypes = this.tableMetaDataContext.createInsertTypes();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled JdbcInsert. Insert string is [" + getInsertString() + "]");
+			logger.debug("Compiled insert object: insert string is [" + getInsertString() + "]");
 		}
-
 		onCompileInternal();
 	}
 
@@ -308,7 +301,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Check whether this operation has been compiled already;
 	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by <code>validateParameters</code>.
+	 * <p>Automatically called by {@code validateParameters}.
 	 */
 	protected void checkCompiled() {
 		if (!isCompiled()) {
@@ -318,12 +311,13 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method to check whether we are allowd to make any configuration changes at this time.  If the class has been
-	 * compiled, then no further changes to the configuration are allowed.
+	 * Method to check whether we are allowd to make any configuration changes at this time.
+	 * If the class has been compiled, then no further changes to the configuration are allowed.
 	 */
 	protected void checkIfConfigurationModificationIsAllowed() {
 		if (isCompiled()) {
-			throw new InvalidDataAccessApiUsageException("Configuration can't be altered once the class has been compiled or used.");
+			throw new InvalidDataAccessApiUsageException(
+					"Configuration can't be altered once the class has been compiled or used");
 		}
 	}
 
@@ -334,7 +328,6 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Method that provides execution of the insert using the passed in Map of parameters
-	 *
 	 * @param args Map with parameter names and values to be used in insert
 	 * @return number of rows affected
 	 */
@@ -346,7 +339,6 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Method that provides execution of the insert using the passed in {@link SqlParameterSource}
-	 *
 	 * @param parameterSource parameter names and values to be used in insert
 	 * @return number of rows affected
 	 */
@@ -357,14 +349,13 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method to execute the insert
+	 * Method to execute the insert.
 	 */
 	private int executeInsertInternal(List<Object> values) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for insert " + getInsertString() + " with: " + values);
 		}
-		int updateCount = jdbcTemplate.update(getInsertString(), values.toArray(), getInsertTypes());
-		return updateCount;
+		return getJdbcTemplate().update(getInsertString(), values.toArray(), getInsertTypes());
 	}
 
 	/**
@@ -428,8 +419,8 @@ public abstract class AbstractJdbcInsert {
 			return kh.getKey();
 		}
 		else {
-			throw new DataIntegrityViolationException("Unable to retrieve the generated key for the insert: " +
-					getInsertString());
+			throw new DataIntegrityViolationException(
+					"Unable to retrieve the generated key for the insert: " + getInsertString());
 		}
 	}
 
@@ -442,7 +433,7 @@ public abstract class AbstractJdbcInsert {
 		}
 		final KeyHolder keyHolder = new GeneratedKeyHolder();
 		if (this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
-			jdbcTemplate.update(
+			getJdbcTemplate().update(
 					new PreparedStatementCreator() {
 						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
@@ -467,22 +458,20 @@ public abstract class AbstractJdbcInsert {
 						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
 			// This is a hack to be able to get the generated key from a database that doesn't support
-			// get generated keys feature.  HSQL is one, PostgreSQL is another.  Postgres uses a RETURNING
+			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING
 			// clause while HSQL uses a second query that has to be executed with the same connection.
-			final String keyQuery = tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
-					tableMetaDataContext.getTableName(),
-					getGeneratedKeyNames()[0]);
+			final String keyQuery = this.tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
+					this.tableMetaDataContext.getTableName(), getGeneratedKeyNames()[0]);
 			Assert.notNull(keyQuery, "Query for simulating get generated keys can't be null");
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
-				Long key = jdbcTemplate.queryForLong(
-						getInsertString() + " " + keyQuery,
-						values.toArray(new Object[values.size()]));
-				HashMap keys = new HashMap(1);
+				Long key = getJdbcTemplate().queryForObject(getInsertString() + " " + keyQuery,
+						values.toArray(new Object[values.size()]), Long.class);
+				Map<String, Object> keys = new HashMap<String, Object>(1);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);
 			}
 			else {
-				jdbcTemplate.execute(new ConnectionCallback() {
+				getJdbcTemplate().execute(new ConnectionCallback<Object>() {
 					public Object doInConnection(Connection con) throws SQLException, DataAccessException {
 						// Do the insert
 						PreparedStatement ps = null;
@@ -490,13 +479,14 @@ public abstract class AbstractJdbcInsert {
 							ps = con.prepareStatement(getInsertString());
 							setParameterValues(ps, values, getInsertTypes());
 							ps.executeUpdate();
-						} finally {
+						}
+						finally {
 							JdbcUtils.closeStatement(ps);
 						}
 						//Get the key
 						Statement keyStmt = null;
 						ResultSet rs = null;
-						HashMap keys = new HashMap(1);
+						Map<String, Object> keys = new HashMap<String, Object>(1);
 						try {
 							keyStmt = con.createStatement();
 							rs = keyStmt.executeQuery(keyQuery);
@@ -505,7 +495,8 @@ public abstract class AbstractJdbcInsert {
 								keys.put(getGeneratedKeyNames()[0], key);
 								keyHolder.getKeyList().add(keys);
 							}
-						} finally {
+						}
+						finally {
 							JdbcUtils.closeResultSet(rs);
 							JdbcUtils.closeStatement(keyStmt);
 						}
@@ -547,14 +538,14 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method that provides execution of a batch insert using the passed in Maps of parameters
-	 *
+	 * Method that provides execution of a batch insert using the passed in Maps of parameters.
 	 * @param batch array of Maps with parameter names and values to be used in batch insert
 	 * @return array of number of rows affected
 	 */
+	@SuppressWarnings("unchecked")
 	protected int[] doExecuteBatch(Map<String, Object>[] batch) {
 		checkCompiled();
-		List[] batchValues = new ArrayList[batch.length];
+		List<Object>[] batchValues = new ArrayList[batch.length];
 		int i = 0;
 		for (Map<String, Object> args : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(args);
@@ -565,13 +556,13 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Method that provides execution of a batch insert using the passed in array of {@link SqlParameterSource}
-	 *
 	 * @param batch array of SqlParameterSource with parameter names and values to be used in insert
 	 * @return array of number of rows affected
 	 */
+	@SuppressWarnings("unchecked")
 	protected int[] doExecuteBatch(SqlParameterSource[] batch) {
 		checkCompiled();
-		List[] batchValues = new ArrayList[batch.length];
+		List<Object>[] batchValues = new ArrayList[batch.length];
 		int i = 0;
 		for (SqlParameterSource parameterSource : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
@@ -581,27 +572,22 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Method to execute the batch insert
+	 * Method to execute the batch insert.
 	 */
-	//TODO synchronize parameter setters with the SimpleJdbcTemplate
 	private int[] executeBatchInternal(final List<Object>[] batchValues) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing statement " + getInsertString() + " with batch of size: " + batchValues.length);
 		}
-		int[] updateCounts = jdbcTemplate.batchUpdate(
-				getInsertString(),
+		return getJdbcTemplate().batchUpdate(getInsertString(),
 				new BatchPreparedStatementSetter() {
-
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						List<Object> values = batchValues[i];
 						setParameterValues(ps, values, getInsertTypes());
 					}
-
 					public int getBatchSize() {
 						return batchValues.length;
 					}
 				});
-		return updateCounts;
 	}
 
 	/**
@@ -611,6 +597,7 @@ public abstract class AbstractJdbcInsert {
 	 */
 	private void setParameterValues(PreparedStatement preparedStatement, List<Object> values, int[] columnTypes)
 			throws SQLException {
+
 		int colIndex = 0;
 		for (Object value : values) {
 			colIndex++;
@@ -622,27 +609,25 @@ public abstract class AbstractJdbcInsert {
 			}
 		}
 	}
-	
+
 	/**
-	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
-	 * processing.
-	 *
+	 * Match the provided in parameter values with regitered parameters and parameters defined
+	 * via metadata processing.
 	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
-		return tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
+		return this.tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
 	}
 
 	/**
-	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
-	 * processing.
-	 *
+	 * Match the provided in parameter values with regitered parameters and parameters defined
+	 * via metadata processing.
 	 * @param args the parameter values provided in a Map
 	 * @return Map with parameter names and values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> args) {
-		return tableMetaDataContext.matchInParameterValuesWithInsertColumns(args);
+		return this.tableMetaDataContext.matchInParameterValuesWithInsertColumns(args);
 	}
 
 }

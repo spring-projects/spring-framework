@@ -30,7 +30,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 /**
  * Servlet 2.3 Filter that exposes the request to the current thread,
  * through both {@link org.springframework.context.i18n.LocaleContextHolder} and
- * {@link RequestContextHolder}. To be registered as filter in <code>web.xml</code>.
+ * {@link RequestContextHolder}. To be registered as filter in {@code web.xml}.
  *
  * <p>Alternatively, Spring's {@link org.springframework.web.context.request.RequestContextListener}
  * and Spring's {@link org.springframework.web.servlet.DispatcherServlet} also expose
@@ -69,14 +69,22 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		this.threadContextInheritable = threadContextInheritable;
 	}
 
-
 	/**
-	 * The default value is "true" in which case the filter will set up the request
-	 * context in each asynchronously dispatched thread.
+	 * Returns "false" so that the filter may set up the request context in each
+	 * asynchronously dispatched thread.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may set up the request context in an
+	 * error dispatch.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
+		return false;
 	}
 
 	@Override

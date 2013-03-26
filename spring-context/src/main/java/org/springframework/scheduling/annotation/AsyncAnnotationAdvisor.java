@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -39,8 +38,8 @@ import org.springframework.util.Assert;
  * annotation. This annotation can be used at the method and type level in
  * implementation classes as well as in service interfaces.
  *
- * <p>This advisor detects the EJB 3.1 <code>javax.ejb.Asynchronous</code>
- * annotation as well, treating it exactly like Spring's own <code>Async</code>.
+ * <p>This advisor detects the EJB 3.1 {@code javax.ejb.Asynchronous}
+ * annotation as well, treating it exactly like Spring's own {@code Async}.
  * Furthermore, a custom async annotation type may get specified through the
  * {@link #setAsyncAnnotationType "asyncAnnotationType"} property.
  *
@@ -57,8 +56,6 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	private Advice advice;
 
 	private Pointcut pointcut;
-
-	private BeanFactory beanFactory;
 
 
 	/**
@@ -84,36 +81,21 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 			// If EJB 3.1 API not present, simply ignore.
 		}
 		this.advice = buildAdvice(executor);
-		this.setTaskExecutor(executor);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
 	}
 
-	/**
-	 * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
-	 */
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-		delegateBeanFactory(beanFactory);
-	}
-
-	public void delegateBeanFactory(BeanFactory beanFactory) {
-		if (this.advice instanceof AnnotationAsyncExecutionInterceptor) {
-			((AnnotationAsyncExecutionInterceptor)this.advice).setBeanFactory(beanFactory);
-		}
-	}
 
 	/**
-	 * Specify the task executor to use for asynchronous methods.
+	 * Specify the default task executor to use for asynchronous methods.
 	 */
 	public void setTaskExecutor(Executor executor) {
 		this.advice = buildAdvice(executor);
-		delegateBeanFactory(this.beanFactory);
 	}
 
 	/**
 	 * Set the 'async' annotation type.
 	 * <p>The default async annotation type is the {@link Async} annotation, as well
-	 * as the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation (if present).
+	 * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation (if present).
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a method is to
 	 * be executed asynchronously.
@@ -124,6 +106,15 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 		Set<Class<? extends Annotation>> asyncAnnotationTypes = new HashSet<Class<? extends Annotation>>();
 		asyncAnnotationTypes.add(asyncAnnotationType);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
+	}
+
+	/**
+	 * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (this.advice instanceof BeanFactoryAware) {
+			((BeanFactoryAware) this.advice).setBeanFactory(beanFactory);
+		}
 	}
 
 
@@ -143,7 +134,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Calculate a pointcut for the given async annotation types, if any.
 	 * @param asyncAnnotationTypes the async annotation types to introspect
-	 * @return the applicable Pointcut object, or <code>null</code> if none
+	 * @return the applicable Pointcut object, or {@code null} if none
 	 */
 	protected Pointcut buildPointcut(Set<Class<? extends Annotation>> asyncAnnotationTypes) {
 		ComposablePointcut result = null;

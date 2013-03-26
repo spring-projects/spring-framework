@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>Implements the
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
- * but is not intended for declarative setup in <code>web.xml</code>. Instead,
+ * but is not intended for declarative setup in {@code web.xml}. Instead,
  * it is designed for programmatic setup, for example for building nested contexts or
  * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
- * reading the bean definitions in an implementation of the <code>loadBeanDefinitions</code>
+ * reading the bean definitions in an implementation of the {@code loadBeanDefinitions}
  * method.</b>
  *
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
@@ -147,15 +147,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		return new StandardServletEnvironment();
 	}
 
-	@Override
-	public ConfigurableWebEnvironment getEnvironment() {
-		ConfigurableEnvironment env = super.getEnvironment();
-		Assert.isInstanceOf(ConfigurableWebEnvironment.class, env,
-				"ConfigurableWebApplicationContext environment must be of type " +
-				"ConfigurableWebEnvironment");
-		return (ConfigurableWebEnvironment) env;
-	}
-
 	/**
 	 * Register ServletContextAwareProcessor.
 	 * @see ServletContextAwareProcessor
@@ -202,7 +193,11 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	@Override
 	protected void initPropertySources() {
 		super.initPropertySources();
-		this.getEnvironment().initPropertySources(this.servletContext, null);
+		ConfigurableEnvironment env = this.getEnvironment();
+		if (env instanceof ConfigurableWebEnvironment) {
+			((ConfigurableWebEnvironment)env).initPropertySources(
+					this.servletContext, null);
+		}
 	}
 
 	public Theme getTheme(String themeName) {

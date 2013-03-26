@@ -2,14 +2,17 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
 
 	<mvc:annotation-driven>
 		<mvc:message-converters register-defaults="false">
-			<bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
-			<bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
+			<ref bean="stringConverter" />
+			<ref bean="resourceConverter" />
 		</mvc:message-converters>
 	</mvc:annotation-driven>
+
+	<bean id="stringConverter" class="org.springframework.http.converter.StringHttpMessageConverter"/>
+	<bean id="resourceConverter" class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
 
 </beans>

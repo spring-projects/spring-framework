@@ -47,6 +47,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	private final HttpStatus statusCode;
 
+
 	/**
 	 * Create a new {@code ResponseEntity} with the given status code, and no body nor headers.
 	 * @param statusCode the status code
@@ -87,12 +88,13 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		this.statusCode = statusCode;
 	}
 
+
 	/**
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum value
 	 */
 	public HttpStatus getStatusCode() {
-		return statusCode;
+		return this.statusCode;
 	}
 
 	@Override
@@ -115,9 +117,9 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(statusCode.toString());
+		builder.append(this.statusCode.toString());
 		builder.append(' ');
-		builder.append(statusCode.getReasonPhrase());
+		builder.append(this.statusCode.getReasonPhrase());
 		builder.append(',');
 		T body = getBody();
 		HttpHeaders headers = getHeaders();

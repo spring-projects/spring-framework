@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.jms.listener.adapter;
 
-import static org.junit.Assert.*;
-
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 
 import javax.jms.BytesMessage;
@@ -33,12 +32,14 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
 import org.junit.Test;
-
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -60,163 +61,113 @@ public class MessageListenerAdapterTests {
 
 	@Test
 	public void testWithMessageContentsDelegateForTextMessage() throws Exception {
-		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
+		TextMessage textMessage = mock(TextMessage.class);
 		// TextMessage contents must be unwrapped...
-		textMessage.getText();
-		mockTextMessage.setReturnValue(TEXT);
-		mockTextMessage.replay();
+		given(textMessage.getText()).willReturn(TEXT);
 
-		MockControl mockDelegate = MockControl.createControl(MessageContentsDelegate.class);
-		MessageContentsDelegate delegate = (MessageContentsDelegate) mockDelegate.getMock();
-		delegate.handleMessage(TEXT);
-		mockDelegate.setVoidCallable();
-		mockDelegate.replay();
+		MessageContentsDelegate delegate = mock(MessageContentsDelegate.class);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
 		adapter.onMessage(textMessage);
 
-		mockDelegate.verify();
-		mockTextMessage.verify();
+		verify(delegate).handleMessage(TEXT);
 	}
 
 	@Test
 	public void testWithMessageContentsDelegateForBytesMessage() throws Exception {
-		MockControl mockBytesMessage = MockControl.createControl(BytesMessage.class);
-		BytesMessage bytesMessage = (BytesMessage) mockBytesMessage.getMock();
+		BytesMessage bytesMessage = mock(BytesMessage.class);
 		// BytesMessage contents must be unwrapped...
-		bytesMessage.getBodyLength();
-		mockBytesMessage.setReturnValue(TEXT.getBytes().length);
-		bytesMessage.readBytes(null);
-		mockBytesMessage.setMatcher(MockControl.ALWAYS_MATCHER);
-		mockBytesMessage.setReturnValue(TEXT.getBytes().length);
-		mockBytesMessage.replay();
+		given(bytesMessage.getBodyLength()).willReturn(new Long(TEXT.getBytes().length));
+		given(bytesMessage.readBytes(any(byte[].class))).willAnswer(new Answer<Integer>() {
+			@Override
+			public Integer answer(InvocationOnMock invocation) throws Throwable {
+				byte[] bytes = (byte[]) invocation.getArguments()[0];
+				ByteArrayInputStream inputStream = new ByteArrayInputStream(TEXT.getBytes());
+				return inputStream.read(bytes);
+			}
+		});
 
-		MockControl mockDelegate = MockControl.createControl(MessageContentsDelegate.class);
-		MessageContentsDelegate delegate = (MessageContentsDelegate) mockDelegate.getMock();
-		delegate.handleMessage(TEXT.getBytes());
-		mockDelegate.setMatcher(MockControl.ALWAYS_MATCHER);
-		mockDelegate.setVoidCallable();
-		mockDelegate.replay();
+		MessageContentsDelegate delegate = mock(MessageContentsDelegate.class);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
 		adapter.onMessage(bytesMessage);
 
-		mockDelegate.verify();
-		mockBytesMessage.verify();
+		verify(delegate).handleMessage(TEXT.getBytes());
 	}
 
 	@Test
 	public void testWithMessageContentsDelegateForObjectMessage() throws Exception {
-		MockControl mockObjectMessage = MockControl.createControl(ObjectMessage.class);
-		ObjectMessage objectMessage = (ObjectMessage) mockObjectMessage.getMock();
-		objectMessage.getObject();
-		mockObjectMessage.setReturnValue(NUMBER);
-		mockObjectMessage.replay();
+		ObjectMessage objectMessage = mock(ObjectMessage.class);
+		given(objectMessage.getObject()).willReturn(NUMBER);
 
-		MockControl mockDelegate = MockControl.createControl(MessageContentsDelegate.class);
-		MessageContentsDelegate delegate = (MessageContentsDelegate) mockDelegate.getMock();
-		delegate.handleMessage(NUMBER);
-		mockDelegate.setVoidCallable();
-		mockDelegate.replay();
+		MessageContentsDelegate delegate = mock(MessageContentsDelegate.class);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
 		adapter.onMessage(objectMessage);
 
-		mockDelegate.verify();
-		mockObjectMessage.verify();
+		verify(delegate).handleMessage(NUMBER);
 	}
 
 	@Test
 	public void testWithMessageContentsDelegateForObjectMessageWithPlainObject() throws Exception {
-		MockControl mockObjectMessage = MockControl.createControl(ObjectMessage.class);
-		ObjectMessage objectMessage = (ObjectMessage) mockObjectMessage.getMock();
-		objectMessage.getObject();
-		mockObjectMessage.setReturnValue(OBJECT);
-		mockObjectMessage.replay();
+		ObjectMessage objectMessage = mock(ObjectMessage.class);
+		given(objectMessage.getObject()).willReturn(OBJECT);
 
-		MockControl mockDelegate = MockControl.createControl(MessageContentsDelegate.class);
-		MessageContentsDelegate delegate = (MessageContentsDelegate) mockDelegate.getMock();
-		delegate.handleMessage(OBJECT);
-		mockDelegate.setVoidCallable();
-		mockDelegate.replay();
+		MessageContentsDelegate delegate = mock(MessageContentsDelegate.class);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
 		adapter.onMessage(objectMessage);
 
-		mockDelegate.verify();
-		mockObjectMessage.verify();
+		verify(delegate).handleMessage(OBJECT);
 	}
 
 	@Test
 	public void testWithMessageDelegate() throws Exception {
-		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
-		mockTextMessage.replay();
+		TextMessage textMessage = mock(TextMessage.class);
 
-		MockControl mockDelegate = MockControl.createControl(MessageDelegate.class);
-		MessageDelegate delegate = (MessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(textMessage);
-		mockDelegate.setVoidCallable();
-		mockDelegate.replay();
+		MessageDelegate delegate = mock(MessageDelegate.class);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
 		// we DON'T want the default SimpleMessageConversion happening...
 		adapter.setMessageConverter(null);
 		adapter.onMessage(textMessage);
 
-		mockDelegate.verify();
-		mockTextMessage.verify();
+		verify(delegate).handleMessage(textMessage);
 	}
 
 	@Test
 	public void testWhenTheAdapterItselfIsTheDelegate() throws Exception {
-		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
+		TextMessage textMessage = mock(TextMessage.class);
 		// TextMessage contents must be unwrapped...
-		textMessage.getText();
-		mockTextMessage.setReturnValue(TEXT);
-		mockTextMessage.replay();
+		given(textMessage.getText()).willReturn(TEXT);
 
 		StubMessageListenerAdapter adapter = new StubMessageListenerAdapter();
 		adapter.onMessage(textMessage);
 		assertTrue(adapter.wasCalled());
-
-		mockTextMessage.verify();
 	}
 
 	@Test
 	public void testRainyDayWithNoApplicableHandlingMethods() throws Exception {
-		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
+		TextMessage textMessage = mock(TextMessage.class);
 		// TextMessage contents must be unwrapped...
-		textMessage.getText();
-		mockTextMessage.setReturnValue(TEXT);
-		mockTextMessage.replay();
+		given(textMessage.getText()).willReturn(TEXT);
 
 		StubMessageListenerAdapter adapter = new StubMessageListenerAdapter();
 		adapter.setDefaultListenerMethod("walnutsRock");
 		adapter.onMessage(textMessage);
 		assertFalse(adapter.wasCalled());
-
-		mockTextMessage.verify();
 	}
 
 	@Test
 	public void testThatAnExceptionThrownFromTheHandlingMethodIsSimplySwallowedByDefault() throws Exception {
 		final IllegalArgumentException exception = new IllegalArgumentException();
 
-		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
-		mockTextMessage.replay();
-
-		MockControl mockDelegate = MockControl.createControl(MessageDelegate.class);
-		MessageDelegate delegate = (MessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(textMessage);
-		mockDelegate.setThrowable(exception);
-		mockDelegate.replay();
+		TextMessage textMessage = mock(TextMessage.class);
+		MessageDelegate delegate = mock(MessageDelegate.class);
+		willThrow(exception).given(delegate).handleMessage(textMessage);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected void handleListenerException(Throwable ex) {
 				assertNotNull("The Throwable passed to the handleListenerException(..) method must never be null.", ex);
 				assertTrue("The Throwable passed to the handleListenerException(..) method must be of type [ListenerExecutionFailedException].",
@@ -230,9 +181,6 @@ public class MessageListenerAdapterTests {
 		// we DON'T want the default SimpleMessageConversion happening...
 		adapter.setMessageConverter(null);
 		adapter.onMessage(textMessage);
-
-		mockDelegate.verify();
-		mockTextMessage.verify();
 	}
 
 	@Test
@@ -257,70 +205,38 @@ public class MessageListenerAdapterTests {
 
 	@Test
 	public void testWithResponsiveMessageDelegate_DoesNotSendReturnTextMessageIfNoSessionSupplied() throws Exception {
-		MockControl mockTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage textMessage = (TextMessage) mockTextMessage.getMock();
-		mockTextMessage.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(textMessage);
-		mockDelegate.setReturnValue(TEXT);
-		mockDelegate.replay();
+		TextMessage textMessage = mock(TextMessage.class);
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		given(delegate.handleMessage(textMessage)).willReturn(TEXT);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate);
 		// we DON'T want the default SimpleMessageConversion happening...
 		adapter.setMessageConverter(null);
 		adapter.onMessage(textMessage);
-
-		mockDelegate.verify();
-		mockTextMessage.verify();
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateWithDefaultDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
-		MockControl mockDestination = MockControl.createControl(Queue.class);
-		Queue destination = (Queue) mockDestination.getMock();
-		mockDestination.replay();
-
-		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
+		Queue destination = mock(Queue.class);
+		TextMessage sentTextMessage = mock(TextMessage.class);
 		// correlation ID is queried when response is being created...
-		sentTextMessage.getJMSCorrelationID();
-		mockSentTextMessage.setReturnValue(CORRELATION_ID);
+		given(sentTextMessage.getJMSCorrelationID()).willReturn(
+				CORRELATION_ID);
 		// Reply-To is queried when response is being created...
-		sentTextMessage.getJMSReplyTo();
-		mockSentTextMessage.setReturnValue(null); // we want to fall back to the default...
-		mockSentTextMessage.replay();
+		given(sentTextMessage.getJMSReplyTo()).willReturn(null); // we want to fall back to the default...
 
-		MockControl mockResponseTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage responseTextMessage = (TextMessage) mockResponseTextMessage.getMock();
-		responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
-		mockResponseTextMessage.setVoidCallable();
-		mockResponseTextMessage.replay();
+		TextMessage responseTextMessage = mock(TextMessage.class);
 
-		MockControl mockQueueSender = MockControl.createControl(QueueSender.class);
-		QueueSender queueSender = (QueueSender) mockQueueSender.getMock();
-		queueSender.send(responseTextMessage);
-		mockQueueSender.setVoidCallable();
-		queueSender.close();
-		mockQueueSender.setVoidCallable();
-		mockQueueSender.replay();
+		QueueSender queueSender = mock(QueueSender.class);
+		Session session = mock(Session.class);
+		given(session.createTextMessage(RESPONSE_TEXT)).willReturn(responseTextMessage);
+		given(session.createProducer(destination)).willReturn(queueSender);
 
-		MockControl mockSession = MockControl.createControl(Session.class);
-		Session session = (Session) mockSession.getMock();
-		session.createTextMessage(RESPONSE_TEXT);
-		mockSession.setReturnValue(responseTextMessage);
-		session.createProducer(destination);
-		mockSession.setReturnValue(queueSender);
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(sentTextMessage);
-		mockDelegate.setReturnValue(RESPONSE_TEXT);
-		mockDelegate.replay();
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -328,106 +244,62 @@ public class MessageListenerAdapterTests {
 		adapter.setDefaultResponseDestination(destination);
 		adapter.onMessage(sentTextMessage, session);
 
-		mockDelegate.verify();
-		mockSentTextMessage.verify();
-		mockResponseTextMessage.verify();
-		mockSession.verify();
-		mockDestination.verify();
-		mockQueueSender.verify();
+		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
+		verify(queueSender).send(responseTextMessage);
+		verify(queueSender).close();
+		verify(delegate).handleMessage(sentTextMessage);
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
-		MockControl mockDestination = MockControl.createControl(Queue.class);
-		Queue destination = (Queue) mockDestination.getMock();
-		mockDestination.replay();
-
-		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
+		Queue destination = mock(Queue.class);
+		TextMessage sentTextMessage = mock(TextMessage.class);
 		// correlation ID is queried when response is being created...
-		sentTextMessage.getJMSCorrelationID();
-		mockSentTextMessage.setReturnValue(null);
-		sentTextMessage.getJMSMessageID();
-		mockSentTextMessage.setReturnValue(CORRELATION_ID);
+		given(sentTextMessage.getJMSCorrelationID()).willReturn(null);
+		given(sentTextMessage.getJMSMessageID()).willReturn(CORRELATION_ID);
 		// Reply-To is queried when response is being created...
-		sentTextMessage.getJMSReplyTo();
-		mockSentTextMessage.setReturnValue(destination);
-		mockSentTextMessage.replay();
+		given(sentTextMessage.getJMSReplyTo()).willReturn(destination);
 
-		MockControl mockResponseTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage responseTextMessage = (TextMessage) mockResponseTextMessage.getMock();
-		responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
-		mockResponseTextMessage.setVoidCallable();
-		mockResponseTextMessage.replay();
+		TextMessage responseTextMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		Session session = mock(Session.class);
+		given(session.createTextMessage(RESPONSE_TEXT)).willReturn(responseTextMessage);
+		given(session.createProducer(destination)).willReturn(messageProducer);
 
-		MockControl mockMessageProducer = MockControl.createControl(MessageProducer.class);
-		MessageProducer messageProducer = (MessageProducer) mockMessageProducer.getMock();
-		messageProducer.send(responseTextMessage);
-		mockMessageProducer.setVoidCallable();
-		messageProducer.close();
-		mockMessageProducer.setVoidCallable();
-		mockMessageProducer.replay();
-
-		MockControl mockSession = MockControl.createControl(Session.class);
-		Session session = (Session) mockSession.getMock();
-		session.createTextMessage(RESPONSE_TEXT);
-		mockSession.setReturnValue(responseTextMessage);
-		session.createProducer(destination);
-		mockSession.setReturnValue(messageProducer);
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(sentTextMessage);
-		mockDelegate.setReturnValue(RESPONSE_TEXT);
-		mockDelegate.replay();
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
 		};
 		adapter.onMessage(sentTextMessage, session);
 
-		mockDelegate.verify();
-		mockSentTextMessage.verify();
-		mockResponseTextMessage.verify();
-		mockSession.verify();
-		mockDestination.verify();
-		mockMessageProducer.verify();
+		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
+		verify(messageProducer).send(responseTextMessage);
+		verify(messageProducer).close();
+		verify(delegate).handleMessage(sentTextMessage);
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestinationAndNoReplyToDestination_SendsReturnTextMessageWhenSessionSupplied() throws Exception {
-		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
+		final TextMessage sentTextMessage = mock(TextMessage.class);
 		// correlation ID is queried when response is being created...
-		sentTextMessage.getJMSCorrelationID();
-		mockSentTextMessage.setReturnValue(CORRELATION_ID);
+		given(sentTextMessage.getJMSCorrelationID()).willReturn(CORRELATION_ID);
 		// Reply-To is queried when response is being created...
-		sentTextMessage.getJMSReplyTo();
-		mockSentTextMessage.setReturnValue(null);
-		mockSentTextMessage.replay();
+		given(sentTextMessage.getJMSReplyTo()).willReturn(null);
 
-		MockControl mockResponseTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage responseTextMessage = (TextMessage) mockResponseTextMessage.getMock();
-		responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
-		mockResponseTextMessage.setVoidCallable();
-		mockResponseTextMessage.replay();
+		TextMessage responseTextMessage = mock(TextMessage.class);
+		final QueueSession session = mock(QueueSession.class);
+		given(session.createTextMessage(RESPONSE_TEXT)).willReturn(responseTextMessage);
 
-		MockControl mockSession = MockControl.createControl(QueueSession.class);
-		final QueueSession session = (QueueSession) mockSession.getMock();
-		session.createTextMessage(RESPONSE_TEXT);
-		mockSession.setReturnValue(responseTextMessage);
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(sentTextMessage);
-		mockDelegate.setReturnValue(RESPONSE_TEXT);
-		mockDelegate.replay();
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -437,58 +309,33 @@ public class MessageListenerAdapterTests {
 			fail("expected InvalidDestinationException");
 		} catch(InvalidDestinationException ex) { /* expected */ }
 
-		mockDelegate.verify();
-		mockSentTextMessage.verify();
-		mockResponseTextMessage.verify();
-		mockSession.verify();
+		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
+		verify(delegate).handleMessage(sentTextMessage);
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateNoDefaultDestination_SendsReturnTextMessageWhenSessionSupplied_AndSendingThrowsJMSException() throws Exception {
-		MockControl mockDestination = MockControl.createControl(Queue.class);
-		Queue destination = (Queue) mockDestination.getMock();
-		mockDestination.replay();
+		Queue destination = mock(Queue.class);
 
-		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
+		final TextMessage sentTextMessage = mock(TextMessage.class);
 		// correlation ID is queried when response is being created...
-		sentTextMessage.getJMSCorrelationID();
-		mockSentTextMessage.setReturnValue(CORRELATION_ID);
+		given(sentTextMessage.getJMSCorrelationID()).willReturn(CORRELATION_ID);
 		// Reply-To is queried when response is being created...
-		sentTextMessage.getJMSReplyTo();
-		mockSentTextMessage.setReturnValue(destination);
-		mockSentTextMessage.replay();
+		given(sentTextMessage.getJMSReplyTo()).willReturn(destination);
 
-		MockControl mockResponseTextMessage = MockControl.createControl(TextMessage.class);
-		TextMessage responseTextMessage = (TextMessage) mockResponseTextMessage.getMock();
-		responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
-		mockResponseTextMessage.setVoidCallable();
-		mockResponseTextMessage.replay();
+		TextMessage responseTextMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		willThrow(new JMSException("Doe!")).given(messageProducer).send(responseTextMessage);
 
-		MockControl mockMessageProducer = MockControl.createControl(MessageProducer.class);
-		MessageProducer messageProducer = (MessageProducer) mockMessageProducer.getMock();
-		messageProducer.send(responseTextMessage);
-		mockMessageProducer.setThrowable(new JMSException("Dow!"));
-		// ensure that regardless of a JMSException the producer is closed...
-		messageProducer.close();
-		mockMessageProducer.setVoidCallable();
-		mockMessageProducer.replay();
+		final QueueSession session = mock(QueueSession.class);
+		given(session.createTextMessage(RESPONSE_TEXT)).willReturn(responseTextMessage);
+		given(session.createProducer(destination)).willReturn(messageProducer);
 
-		MockControl mockSession = MockControl.createControl(QueueSession.class);
-		final QueueSession session = (QueueSession) mockSession.getMock();
-		session.createTextMessage(RESPONSE_TEXT);
-		mockSession.setReturnValue(responseTextMessage);
-		session.createProducer(destination);
-		mockSession.setReturnValue(messageProducer);
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(sentTextMessage);
-		mockDelegate.setReturnValue(RESPONSE_TEXT);
-		mockDelegate.replay();
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -498,31 +345,21 @@ public class MessageListenerAdapterTests {
 			fail("expected JMSException");
 		} catch(JMSException ex) { /* expected */ }
 
-		mockDelegate.verify();
-		mockSentTextMessage.verify();
-		mockResponseTextMessage.verify();
-		mockSession.verify();
-		mockDestination.verify();
-		mockMessageProducer.verify();
+		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
+		verify(messageProducer).close();
+		verify(delegate).handleMessage(sentTextMessage);
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateDoesNotSendReturnTextMessageWhenSessionSupplied_AndListenerMethodThrowsException() throws Exception {
-		MockControl mockMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage message = (TextMessage) mockMessage.getMock();
-		mockMessage.replay();
+		final TextMessage message = mock(TextMessage.class);
+		final QueueSession session = mock(QueueSession.class);
 
-		MockControl mockSession = MockControl.createControl(QueueSession.class);
-		final QueueSession session = (QueueSession) mockSession.getMock();
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(message);
-		mockDelegate.setThrowable(new IllegalArgumentException("Dow!"));
-		mockDelegate.replay();
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		willThrow(new IllegalArgumentException("Doe!")).given(delegate).handleMessage(message);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -531,72 +368,51 @@ public class MessageListenerAdapterTests {
 			adapter.onMessage(message, session);
 			fail("expected ListenerExecutionFailedException");
 		} catch(ListenerExecutionFailedException ex) { /* expected */ }
-
-		mockDelegate.verify();
-		mockMessage.verify();
-		mockSession.verify();
 	}
 
 	@Test
 	public void testFailsIfNoDefaultListenerMethodNameIsSupplied() throws Exception {
-		MockControl mockMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage message = (TextMessage) mockMessage.getMock();
-		message.getText();
-		mockMessage.setReturnValue(TEXT);
-
-		mockMessage.replay();
+		final TextMessage message = mock(TextMessage.class);
+		given(message.getText()).willReturn(TEXT);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
+			@Override
 			protected void handleListenerException(Throwable ex) {
 				assertTrue(ex instanceof IllegalStateException);
 			}
 		};
 		adapter.setDefaultListenerMethod(null);
 		adapter.onMessage(message);
-
-		mockMessage.verify();
 	}
 
 	@Test
 	public void testFailsWhenOverriddenGetListenerMethodNameReturnsNull() throws Exception {
-		MockControl mockMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage message = (TextMessage) mockMessage.getMock();
-		message.getText();
-		mockMessage.setReturnValue(TEXT);
-
-		mockMessage.replay();
+		final TextMessage message = mock(TextMessage.class);
+		given(message.getText()).willReturn(TEXT);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
+			@Override
 			protected void handleListenerException(Throwable ex) {
 				assertTrue(ex instanceof javax.jms.IllegalStateException);
 			}
+			@Override
 			protected String getListenerMethodName(Message originalMessage, Object extractedMessage) {
 				return null;
 			}
 		};
 		adapter.setDefaultListenerMethod(null);
 		adapter.onMessage(message);
-
-		mockMessage.verify();
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateWhenReturnTypeIsNotAJMSMessageAndNoMessageConverterIsSupplied() throws Exception {
-		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
-		mockSentTextMessage.replay();
-
-		MockControl mockSession = MockControl.createControl(Session.class);
-		final Session session = (Session) mockSession.getMock();
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveMessageDelegate.class);
-		ResponsiveMessageDelegate delegate = (ResponsiveMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(sentTextMessage);
-		mockDelegate.setReturnValue(RESPONSE_TEXT);
-		mockDelegate.replay();
+		final TextMessage sentTextMessage = mock(TextMessage.class);
+		final Session session = mock(Session.class);
+		ResponsiveMessageDelegate delegate = mock(ResponsiveMessageDelegate.class);
+		given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -606,55 +422,28 @@ public class MessageListenerAdapterTests {
 			adapter.onMessage(sentTextMessage, session);
 			fail("expected MessageConversionException");
 		} catch(MessageConversionException ex) { /* expected */ }
-
-		mockDelegate.verify();
-		mockSentTextMessage.verify();
-		mockSession.verify();
 	}
 
 	@Test
 	public void testWithResponsiveMessageDelegateWhenReturnTypeIsAJMSMessageAndNoMessageConverterIsSupplied() throws Exception {
-		MockControl mockDestination = MockControl.createControl(Queue.class);
-		Queue destination = (Queue) mockDestination.getMock();
-		mockDestination.replay();
-
-		MockControl mockSentTextMessage = MockControl.createControl(TextMessage.class);
-		final TextMessage sentTextMessage = (TextMessage) mockSentTextMessage.getMock();
+		Queue destination = mock(Queue.class);
+		final TextMessage sentTextMessage = mock(TextMessage.class);
 		// correlation ID is queried when response is being created...
-		sentTextMessage.getJMSCorrelationID();
-		mockSentTextMessage.setReturnValue(CORRELATION_ID);
+		given(sentTextMessage.getJMSCorrelationID()).willReturn(CORRELATION_ID);
 		// Reply-To is queried when response is being created...
-		sentTextMessage.getJMSReplyTo();
-		mockSentTextMessage.setReturnValue(destination);
-		mockSentTextMessage.replay();
+		given(sentTextMessage.getJMSReplyTo()).willReturn(destination);
 
-		MockControl mockResponseMessage = MockControl.createControl(TextMessage.class);
-		TextMessage responseMessage = (TextMessage) mockResponseMessage.getMock();
-		responseMessage.setJMSCorrelationID(CORRELATION_ID);
-		mockResponseMessage.setVoidCallable();
-		mockResponseMessage.replay();
+		TextMessage responseMessage = mock(TextMessage.class);
+		QueueSender queueSender = mock(QueueSender.class);
 
-		MockControl mockQueueSender = MockControl.createControl(QueueSender.class);
-		QueueSender queueSender = (QueueSender) mockQueueSender.getMock();
-		queueSender.send(responseMessage);
-		mockQueueSender.setVoidCallable();
-		queueSender.close();
-		mockQueueSender.setVoidCallable();
-		mockQueueSender.replay();
+		Session session = mock(Session.class);
+		given(session.createProducer(destination)).willReturn(queueSender);
 
-		MockControl mockSession = MockControl.createControl(Session.class);
-		Session session = (Session) mockSession.getMock();
-		session.createProducer(destination);
-		mockSession.setReturnValue(queueSender);
-		mockSession.replay();
-
-		MockControl mockDelegate = MockControl.createControl(ResponsiveJmsTextMessageReturningMessageDelegate.class);
-		ResponsiveJmsTextMessageReturningMessageDelegate delegate = (ResponsiveJmsTextMessageReturningMessageDelegate) mockDelegate.getMock();
-		delegate.handleMessage(sentTextMessage);
-		mockDelegate.setReturnValue(responseMessage);
-		mockDelegate.replay();
+		ResponsiveJmsTextMessageReturningMessageDelegate delegate = mock(ResponsiveJmsTextMessageReturningMessageDelegate.class);
+		given(delegate.handleMessage(sentTextMessage)).willReturn(responseMessage);
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -662,15 +451,13 @@ public class MessageListenerAdapterTests {
 		adapter.setMessageConverter(null);
 		adapter.onMessage(sentTextMessage, session);
 
-		mockDestination.verify();
-		mockDelegate.verify();
-		mockSentTextMessage.verify();
-		mockSession.verify();
-		mockQueueSender.verify();
-		mockResponseMessage.verify();
+		verify(responseMessage).setJMSCorrelationID(CORRELATION_ID);
+		verify(queueSender).send(responseMessage);
+		verify(queueSender).close();
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SerializableObject implements Serializable {
 	}
 

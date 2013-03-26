@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +24,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.easymock.MockControl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
@@ -49,8 +43,6 @@ import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.spi.JobFactory;
-
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -59,8 +51,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.scheduling.TestMethodInvokingTask;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.context.TestMethodInvokingTask;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
@@ -118,7 +116,7 @@ public class QuartzSupportTests {
 		}
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -127,33 +125,13 @@ public class QuartzSupportTests {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(new SchedulerContext());
-		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.addJob(jobDetail1, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger1);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.getContext()).willReturn(new SchedulerContext());
+		given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
+		given(scheduler.scheduleJob(trigger1)).willReturn(new Date());
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -174,7 +152,14 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).addJob(jobDetail1, true);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -210,7 +195,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -219,35 +204,14 @@ public class QuartzSupportTests {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(new SchedulerContext());
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(new SimpleTrigger());
-		if (overwrite) {
-			scheduler.addJob(jobDetail1, true);
-			schedulerControl.setVoidCallable();
-			scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
-			schedulerControl.setReturnValue(new Date());
-		}
-		else {
-			scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-			schedulerControl.setReturnValue(null);
-		}
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.getContext()).willReturn(new SchedulerContext());
+		given(scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1)).willReturn(new Date());
+		given(scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP)).willReturn(new SimpleTrigger());
+		given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -268,7 +232,18 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		if (overwrite) {
+			verify(scheduler).addJob(jobDetail1, true);
+			verify(scheduler).rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
+		}
+		else {
+			verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		}
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -304,7 +279,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -313,39 +288,19 @@ public class QuartzSupportTests {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(new SchedulerContext());
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(new SimpleTrigger());
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.getContext()).willReturn(new SchedulerContext());
+		given(scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP)).willReturn(new SimpleTrigger());
 		if (overwrite) {
-			scheduler.addJob(jobDetail1, true);
-			schedulerControl.setVoidCallable();
-			scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
-			schedulerControl.setReturnValue(new Date());
+			given(scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1)).willReturn(new Date());
 		}
-		else {
-			scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-			schedulerControl.setReturnValue(null);
-		}
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setThrowable(new ObjectAlreadyExistsException(""));
+		given(scheduler.scheduleJob(trigger0)).willThrow(new ObjectAlreadyExistsException(""));
 		if (overwrite) {
-			scheduler.rescheduleJob("myTrigger0", Scheduler.DEFAULT_GROUP, trigger0);
-			schedulerControl.setReturnValue(new Date());
+			given(scheduler.rescheduleJob("myTrigger0", Scheduler.DEFAULT_GROUP, trigger0)).willReturn(new Date());
 		}
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -366,15 +321,25 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		if (overwrite) {
+			verify(scheduler).addJob(jobDetail1, true);
+			verify(scheduler).rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
+		}
+		else {
+			verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		}
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
 	public void testSchedulerFactoryBeanWithListeners() throws Exception {
 		JobFactory jobFactory = new AdaptableJobFactory();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		final Scheduler scheduler = mock(Scheduler.class);
 
 		SchedulerListener schedulerListener = new TestSchedulerListener();
 		JobListener globalJobListener = new TestJobListener();
@@ -382,25 +347,8 @@ public class QuartzSupportTests {
 		TriggerListener globalTriggerListener = new TestTriggerListener();
 		TriggerListener triggerListener = new TestTriggerListener();
 
-		scheduler.setJobFactory(jobFactory);
-		schedulerControl.setVoidCallable();
-		scheduler.addSchedulerListener(schedulerListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addGlobalJobListener(globalJobListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addJobListener(jobListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addGlobalTriggerListener(globalTriggerListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addTriggerListener(triggerListener);
-		schedulerControl.setVoidCallable();
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
-
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -419,18 +367,29 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).setJobFactory(jobFactory);
+		verify(scheduler).addSchedulerListener(schedulerListener);
+		verify(scheduler).addGlobalJobListener(globalJobListener);
+		verify(scheduler).addJobListener(jobListener);
+		verify(scheduler).addGlobalTriggerListener(globalTriggerListener);
+		verify(scheduler).addTriggerListener(triggerListener);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
-	/*public void testMethodInvocationWithConcurrency() throws Exception {
+	@Ignore @Test
+	public void testMethodInvocationWithConcurrency() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		methodInvokingConcurrency(true);
-	}*/
+	}
 
 	// We can't test both since Quartz somehow seems to keep things in memory
 	// enable both and one of them will fail (order doesn't matter).
-	/*public void testMethodInvocationWithoutConcurrency() throws Exception {
+	@Ignore @Test
+	public void testMethodInvocationWithoutConcurrency() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		methodInvokingConcurrency(false);
-	}*/
+	}
 
 	private void methodInvokingConcurrency(boolean concurrent) throws Exception {
 		// Test the concurrency flag.
@@ -446,7 +405,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doWait");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger0 = new SimpleTriggerBean();
 		trigger0.setBeanName("myTrigger1");
@@ -532,7 +491,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTrigger trigger1 = new SimpleTrigger();
 		trigger1.setName("myTrigger1");
@@ -543,33 +502,12 @@ public class QuartzSupportTests {
 		trigger1.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
 		trigger1.setRepeatInterval(20);
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.setJobFactory(jobFactory);
-		schedulerControl.setVoidCallable();
-		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.addJob(jobDetail1, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.scheduleJob(trigger1);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
+		given(scheduler.scheduleJob(trigger1)).willReturn(new Date());
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -585,7 +523,17 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).setJobFactory(jobFactory);
+		verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).addJob(jobDetail1, true);
+		verify(scheduler).scheduleJob(trigger0);
+		verify(scheduler).scheduleJob(trigger1);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -593,18 +541,12 @@ public class QuartzSupportTests {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		final Scheduler scheduler = mock(Scheduler.class);
 		SchedulerContext schedulerContext = new SchedulerContext();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(schedulerContext, 4);
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		given(scheduler.getContext()).willReturn(schedulerContext);
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -618,7 +560,7 @@ public class QuartzSupportTests {
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 			schedulerFactoryBean.start();
-			Scheduler returnedScheduler = (Scheduler) schedulerFactoryBean.getObject();
+			Scheduler returnedScheduler = schedulerFactoryBean.getObject();
 			assertEquals(tb, returnedScheduler.getContext().get("testBean"));
 			assertEquals(ac, returnedScheduler.getContext().get("appCtx"));
 		}
@@ -626,7 +568,8 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -659,7 +602,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.setJobListenerNames(names);
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail = mijdfb.getObject();
 		List result = Arrays.asList(jobDetail.getJobListenerNames());
 		assertEquals(Arrays.asList(names), result);
 	}
@@ -693,6 +636,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithTaskExecutor() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
 
@@ -724,6 +669,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithRunnable() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyRunnable.count = 0;
 
 		JobDetail jobDetail = new JobDetailBean();
@@ -752,6 +699,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithQuartzJobBean() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -783,6 +732,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactory() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -816,6 +767,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -850,6 +802,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndRunnable() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyRunnable.param = 0;
 		DummyRunnable.count = 0;
 
@@ -882,6 +836,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
 
@@ -914,6 +869,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -952,6 +908,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
@@ -971,6 +928,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerAccessorBean() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerAccessorBean.xml");
 		Thread.sleep(3000);
@@ -1021,12 +979,14 @@ public class QuartzSupportTests {
 	// SPR-6038: detect HSQL and stop illegal locks being taken
 	@Test
 	public void testSchedulerWithHsqlDataSource() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/scheduling/quartz/databasePersistence.xml");
-		SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(ctx.getBean(DataSource.class));
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
 		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
 		Thread.sleep(3000);
 		try {
@@ -1040,30 +1000,39 @@ public class QuartzSupportTests {
 
 	private static class TestSchedulerListener implements SchedulerListener {
 
+		@Override
 		public void jobScheduled(Trigger trigger) {
 		}
 
+		@Override
 		public void jobUnscheduled(String triggerName, String triggerGroup) {
 		}
 
+		@Override
 		public void triggerFinalized(Trigger trigger) {
 		}
 
+		@Override
 		public void triggersPaused(String triggerName, String triggerGroup) {
 		}
 
+		@Override
 		public void triggersResumed(String triggerName, String triggerGroup) {
 		}
 
+		@Override
 		public void jobsPaused(String jobName, String jobGroup) {
 		}
 
+		@Override
 		public void jobsResumed(String jobName, String jobGroup) {
 		}
 
+		@Override
 		public void schedulerError(String msg, SchedulerException cause) {
 		}
 
+		@Override
 		public void schedulerShutdown() {
 		}
 	}
@@ -1071,16 +1040,20 @@ public class QuartzSupportTests {
 
 	private static class TestJobListener implements JobListener {
 
+		@Override
 		public String getName() {
 			return null;
 		}
 
+		@Override
 		public void jobToBeExecuted(JobExecutionContext context) {
 		}
 
+		@Override
 		public void jobExecutionVetoed(JobExecutionContext context) {
 		}
 
+		@Override
 		public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
 		}
 	}
@@ -1088,20 +1061,25 @@ public class QuartzSupportTests {
 
 	private static class TestTriggerListener implements TriggerListener {
 
+		@Override
 		public String getName() {
 			return null;
 		}
 
+		@Override
 		public void triggerFired(Trigger trigger, JobExecutionContext context) {
 		}
 
+		@Override
 		public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
 			return false;
 		}
 
+		@Override
 		public void triggerMisfired(Trigger trigger) {
 		}
 
+		@Override
 		public void triggerComplete(Trigger trigger, JobExecutionContext context, int triggerInstructionCode) {
 		}
 	}
@@ -1111,6 +1089,7 @@ public class QuartzSupportTests {
 
 		private int count;
 
+		@Override
 		public void execute(Runnable task) {
 			this.count++;
 			task.run();
@@ -1131,6 +1110,7 @@ public class QuartzSupportTests {
 			param = value;
 		}
 
+		@Override
 		public synchronized void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 			count++;
 		}
@@ -1150,6 +1130,7 @@ public class QuartzSupportTests {
 			param = value;
 		}
 
+		@Override
 		protected synchronized void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 			count++;
 		}
@@ -1169,6 +1150,7 @@ public class QuartzSupportTests {
 			param = value;
 		}
 
+		@Override
 		public void run() {
 			count++;
 		}

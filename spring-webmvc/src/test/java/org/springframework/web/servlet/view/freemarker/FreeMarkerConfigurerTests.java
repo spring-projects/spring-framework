@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.web.servlet.view.freemarker;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -73,7 +76,7 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
-		Configuration cfg = (Configuration) fcfb.getObject();
+		Configuration cfg = fcfb.getObject();
 		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
 	}
 
@@ -85,19 +88,21 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		settings.setProperty("localized_lookup", "false");
 		fcfb.setFreemarkerSettings(settings);
 		fcfb.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
 					throw new IllegalArgumentException(location);
 				}
 				return new ByteArrayResource("test".getBytes(), "test");
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}
 		});
 		fcfb.afterPropertiesSet();
-		assertTrue(fcfb.getObject() instanceof Configuration);
-		Configuration fc = (Configuration) fcfb.getObject();
+		assertThat(fcfb.getObject(), instanceOf(Configuration.class));
+		Configuration fc = fcfb.getObject();
 		Template ft = fc.getTemplate("test");
 		assertEquals("test", FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap()));
 	}

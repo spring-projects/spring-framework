@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.util;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,11 +29,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
 
 /**
  * Builder for {@link UriComponents}.
- * <p/>
- * Typical usage involves:
+ *
+ * <p></p>Typical usage involves:
  * <ol>
  *     <li>Create a {@code UriComponentsBuilder} with one of the static factory methods (such as
  *     {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
@@ -46,14 +47,16 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
+ * @author Oliver Gierke
+ * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
  * @see #fromUri(URI)
- * @since 3.1
  */
 public class UriComponentsBuilder {
 
-	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&=]+)?");
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
 
@@ -91,7 +94,7 @@ public class UriComponentsBuilder {
 
 	private int port = -1;
 
-	private PathComponentBuilder pathBuilder = NULL_PATH_COMPONENT_BUILDER;
+	private CompositePathComponentBuilder pathBuilder = new CompositePathComponentBuilder();
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
 
@@ -107,7 +110,7 @@ public class UriComponentsBuilder {
 	protected UriComponentsBuilder() {
 	}
 
-    // Factory methods
+	// Factory methods
 
 	/**
 	 * Returns a new, empty builder.
@@ -202,7 +205,10 @@ public class UriComponentsBuilder {
 				builder.path(path);
 				builder.query(query);
 			}
-			builder.fragment(fragment);
+
+			if (StringUtils.hasText(fragment)) {
+				builder.fragment(fragment);
+			}
 
 			return builder;
 		}
@@ -253,7 +259,7 @@ public class UriComponentsBuilder {
 
 
 
-    // build methods
+	// build methods
 
 	/**
 	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
@@ -306,7 +312,7 @@ public class UriComponentsBuilder {
 		return build(false).expand(uriVariableValues);
 	}
 
-    // URI components methods
+	// URI components methods
 
 	/**
 	 * Initializes all components of this URI builder with the components of the given URI.
@@ -334,7 +340,7 @@ public class UriComponentsBuilder {
 				this.port = uri.getPort();
 			}
 			if (StringUtils.hasLength(uri.getRawPath())) {
-				this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
+				this.pathBuilder = new CompositePathComponentBuilder(uri.getRawPath());
 			}
 			if (StringUtils.hasLength(uri.getRawQuery())) {
 				this.queryParams.clear();
@@ -352,7 +358,7 @@ public class UriComponentsBuilder {
 		this.userInfo = null;
 		this.host = null;
 		this.port = -1;
-		this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
+		this.pathBuilder = new CompositePathComponentBuilder();
 		this.queryParams.clear();
 	}
 
@@ -436,12 +442,7 @@ public class UriComponentsBuilder {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder path(String path) {
-		if (path != null) {
-			this.pathBuilder = this.pathBuilder.appendPath(path);
-		}
-		else {
-			this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
-		}
+		this.pathBuilder.addPath(path);
 		resetSchemeSpecificPart();
 		return this;
 	}
@@ -453,22 +454,21 @@ public class UriComponentsBuilder {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder replacePath(String path) {
-		this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
-		path(path);
+		this.pathBuilder = new CompositePathComponentBuilder(path);
 		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Appends the given path segments to the existing path of this builder. Each given path segments may contain URI
-	 * template variables.
+	 * Appends the given path segments to the existing path of this builder. Each given
+	 * path segments may contain URI template variables.
 	 *
 	 * @param pathSegments the URI path segments
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
 		Assert.notNull(pathSegments, "'segments' must not be null");
-		this.pathBuilder = this.pathBuilder.appendPathSegments(pathSegments);
+		this.pathBuilder.addPathSegments(pathSegments);
 		resetSchemeSpecificPart();
 		return this;
 	}
@@ -496,8 +496,10 @@ public class UriComponentsBuilder {
 			Matcher m = QUERY_PARAM_PATTERN.matcher(query);
 			while (m.find()) {
 				String name = m.group(1);
-				String value = m.group(2);
-				queryParam(name, value);
+				String eq = m.group(2);
+				String value = m.group(3);
+				queryParam(name, (value != null ? value :
+					(StringUtils.hasLength(eq) ? "" : null)));
 			}
 		}
 		else {
@@ -588,131 +590,122 @@ public class UriComponentsBuilder {
 		return this;
 	}
 
-	/**
-	 * Represents a builder for {@link HierarchicalUriComponents.PathComponent}
-	 */
+
 	private interface PathComponentBuilder {
-
-		HierarchicalUriComponents.PathComponent build();
-
-		PathComponentBuilder appendPath(String path);
-
-		PathComponentBuilder appendPathSegments(String... pathSegments);
+		PathComponent build();
 	}
 
-	/**
-	 * Represents a builder for full string paths.
-	 */
-	private static class FullPathComponentBuilder implements PathComponentBuilder {
+	private static class CompositePathComponentBuilder implements PathComponentBuilder {
 
-		private final StringBuilder path;
+		private LinkedList<PathComponentBuilder> componentBuilders = new LinkedList<PathComponentBuilder>();
 
-		private FullPathComponentBuilder(String path) {
-			this.path = new StringBuilder(path);
+		public CompositePathComponentBuilder() {
 		}
 
-		public HierarchicalUriComponents.PathComponent build() {
-			return new HierarchicalUriComponents.FullPathComponent(path.toString());
+		public CompositePathComponentBuilder(String path) {
+			addPath(path);
 		}
 
-		public PathComponentBuilder appendPath(String path) {
-			this.path.append(path);
-			return this;
+		public void addPathSegments(String... pathSegments) {
+			if (!ObjectUtils.isEmpty(pathSegments)) {
+				PathSegmentComponentBuilder psBuilder = getLastBuilder(PathSegmentComponentBuilder.class);
+				FullPathComponentBuilder fpBuilder = getLastBuilder(FullPathComponentBuilder.class);
+				if (psBuilder == null) {
+					psBuilder = new PathSegmentComponentBuilder();
+					this.componentBuilders.add(psBuilder);
+					if (fpBuilder != null) {
+						fpBuilder.removeTrailingSlash();
+					}
+				}
+				psBuilder.append(pathSegments);
+			}
 		}
 
-		public PathComponentBuilder appendPathSegments(String... pathSegments) {
-			PathComponentCompositeBuilder builder = new PathComponentCompositeBuilder(this);
-			builder.appendPathSegments(pathSegments);
-			return builder;
-		}
-	}
-
-	/**
-	 * Represents a builder for paths segment paths.
-	 */
-	private static class PathSegmentComponentBuilder implements PathComponentBuilder {
-
-		private final List<String> pathSegments = new ArrayList<String>();
-
-		private PathSegmentComponentBuilder(String... pathSegments) {
-			this.pathSegments.addAll(removeEmptyPathSegments(pathSegments));
+		public void addPath(String path) {
+			if (StringUtils.hasText(path)) {
+				PathSegmentComponentBuilder psBuilder = getLastBuilder(PathSegmentComponentBuilder.class);
+				FullPathComponentBuilder fpBuilder = getLastBuilder(FullPathComponentBuilder.class);
+				if (psBuilder != null) {
+					path = path.startsWith("/") ? path : "/" + path;
+				}
+				if (fpBuilder == null) {
+					fpBuilder = new FullPathComponentBuilder();
+					this.componentBuilders.add(fpBuilder);
+				}
+				fpBuilder.append(path);
+			}
 		}
 
-		private Collection<String> removeEmptyPathSegments(String... pathSegments) {
-			List<String> result = new ArrayList<String>();
-			for (String segment : pathSegments) {
-				if (StringUtils.hasText(segment)) {
-					result.add(segment);
+		@SuppressWarnings("unchecked")
+		private <T> T getLastBuilder(Class<T> builderClass) {
+			if (!this.componentBuilders.isEmpty()) {
+				PathComponentBuilder last = this.componentBuilders.getLast();
+				if (builderClass.isInstance(last)) {
+					return (T) last;
 				}
 			}
-			return result;
+			return null;
 		}
 
-		public HierarchicalUriComponents.PathComponent build() {
-			return new HierarchicalUriComponents.PathSegmentComponent(pathSegments);
-		}
-
-		public PathComponentBuilder appendPath(String path) {
-			PathComponentCompositeBuilder builder = new PathComponentCompositeBuilder(this);
-			builder.appendPath(path);
-			return builder;
-		}
-
-		public PathComponentBuilder appendPathSegments(String... pathSegments) {
-			this.pathSegments.addAll(removeEmptyPathSegments(pathSegments));
-			return this;
-		}
-	}
-
-	/**
-	 * Represents a builder for a collection of PathComponents.
-	 */
-	private static class PathComponentCompositeBuilder implements PathComponentBuilder {
-
-		private final List<PathComponentBuilder> pathComponentBuilders = new ArrayList<PathComponentBuilder>();
-
-		private PathComponentCompositeBuilder(PathComponentBuilder builder) {
-			pathComponentBuilders.add(builder);
-		}
-
-		public HierarchicalUriComponents.PathComponent build() {
-			List<HierarchicalUriComponents.PathComponent> pathComponents =
-					new ArrayList<HierarchicalUriComponents.PathComponent>(pathComponentBuilders.size());
-
-			for (PathComponentBuilder pathComponentBuilder : pathComponentBuilders) {
-				pathComponents.add(pathComponentBuilder.build());
+		public PathComponent build() {
+			int size = this.componentBuilders.size();
+			List<PathComponent> components = new ArrayList<PathComponent>(size);
+			for (int i = 0; i < size; i++) {
+				PathComponent pathComponent = this.componentBuilders.get(i).build();
+				if (pathComponent != null) {
+					components.add(pathComponent);
+				}
 			}
-			return new HierarchicalUriComponents.PathComponentComposite(pathComponents);
-		}
-
-		public PathComponentBuilder appendPath(String path) {
-			this.pathComponentBuilders.add(new FullPathComponentBuilder(path));
-			return this;
-		}
-
-		public PathComponentBuilder appendPathSegments(String... pathSegments) {
-			this.pathComponentBuilders.add(new PathSegmentComponentBuilder(pathSegments));
-			return this;
+			if (components.isEmpty()) {
+				return HierarchicalUriComponents.NULL_PATH_COMPONENT;
+			}
+			if (components.size() == 1) {
+				return components.get(0);
+			}
+			return new HierarchicalUriComponents.PathComponentComposite(components);
 		}
 	}
 
+	private static class FullPathComponentBuilder implements PathComponentBuilder {
 
-	/**
-	 * Represents a builder for an empty path.
-	 */
-	private static PathComponentBuilder NULL_PATH_COMPONENT_BUILDER = new PathComponentBuilder() {
+		private StringBuilder path = new StringBuilder();
 
-		public HierarchicalUriComponents.PathComponent build() {
-			return HierarchicalUriComponents.NULL_PATH_COMPONENT;
+		public void append(String path) {
+			this.path.append(path);
 		}
 
-		public PathComponentBuilder appendPath(String path) {
-			return new FullPathComponentBuilder(path);
+		public PathComponent build() {
+			if (this.path.length() == 0) {
+				return null;
+			}
+			String path = this.path.toString().replace("//", "/");
+			return new HierarchicalUriComponents.FullPathComponent(path);
 		}
 
-		public PathComponentBuilder appendPathSegments(String... pathSegments) {
-			return new PathSegmentComponentBuilder(pathSegments);
+		public void removeTrailingSlash() {
+			int index = this.path.length() - 1;
+			if (this.path.charAt(index) == '/') {
+				this.path.deleteCharAt(index);
+			}
 		}
-	};
+	}
+
+	private static class PathSegmentComponentBuilder implements PathComponentBuilder {
+
+		private List<String> pathSegments = new LinkedList<String>();
+
+		public void append(String... pathSegments) {
+			for (String pathSegment : pathSegments) {
+				if (StringUtils.hasText(pathSegment)) {
+					this.pathSegments.add(pathSegment);
+				}
+			}
+		}
+
+		public PathComponent build() {
+			return this.pathSegments.isEmpty() ?
+					null : new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments);
+		}
+	}
 
 }

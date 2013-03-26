@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
  * @author Rob Harrop
@@ -70,6 +70,15 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
+	public void getPathWithinServlet() {
+		request.setContextPath("/petclinic");
+		request.setServletPath("/main");
+		request.setRequestURI("/petclinic/main/welcome.html");
+
+		assertEquals("Incorrect path returned", "/welcome.html", helper.getPathWithinServletMapping(request));
+	}
+
+	@Test
 	public void getRequestUri() {
 		request.setRequestURI("/welcome.html");
 		assertEquals("Incorrect path returned", "/welcome.html", helper.getRequestUri(request));
@@ -103,6 +112,29 @@ public class UrlPathHelperTests {
 		request.setRequestURI("/foo;a=b;jsessionid=c0o7fszeb1;c=d");
 		assertEquals("jsessionid should always be removed", "/foo;a=b;c=d", helper.getRequestUri(request));
 	}
+
+	@Test
+	public void getLookupPathWithSemicolonContent() {
+		helper.setRemoveSemicolonContent(false);
+
+		request.setContextPath("/petclinic");
+		request.setServletPath("/main");
+		request.setRequestURI("/petclinic;a=b/main;b=c/welcome.html;c=d");
+
+		assertEquals("/welcome.html;c=d", helper.getLookupPathForRequest(request));
+	}
+
+	@Test
+	public void getLookupPathWithSemicolonContentAndNullPathInfo() {
+		helper.setRemoveSemicolonContent(false);
+
+		request.setContextPath("/petclinic");
+		request.setServletPath("/welcome.html");
+		request.setRequestURI("/petclinic;a=b/welcome.html;c=d");
+
+		assertEquals("/welcome.html;c=d", helper.getLookupPathForRequest(request));
+	}
+
 
 	//
 	// suite of tests root requests for default servlets (SRV 11.2) on Websphere vs Tomcat and other containers

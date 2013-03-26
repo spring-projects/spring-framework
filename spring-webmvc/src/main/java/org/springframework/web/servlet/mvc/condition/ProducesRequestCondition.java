@@ -76,7 +76,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * accepting a {@link ContentNegotiationManager}.
 	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
 	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
-	 * @param contentNegotiationManager used to determine requested media types
+	 * @param manager used to determine requested media types
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers,
 			ContentNegotiationManager manager) {

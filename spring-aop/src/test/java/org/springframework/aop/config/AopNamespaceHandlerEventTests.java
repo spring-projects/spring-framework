@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.aop.config;
 
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,8 +34,7 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
-
-import test.parsing.CollectingReaderEventListener;
+import org.springframework.tests.beans.CollectingReaderEventListener;
 
 /**
  * @author Rob Harrop
@@ -43,18 +44,18 @@ import test.parsing.CollectingReaderEventListener;
 public final class AopNamespaceHandlerEventTests {
 
 	private static final Class<?> CLASS = AopNamespaceHandlerEventTests.class;
-	
+
 	private static final Resource CONTEXT =  qualifiedResource(CLASS, "context.xml");
 	private static final Resource POINTCUT_EVENTS_CONTEXT =  qualifiedResource(CLASS, "pointcutEvents.xml");
 	private static final Resource POINTCUT_REF_CONTEXT = qualifiedResource(CLASS, "pointcutRefEvents.xml");
 	private static final Resource DIRECT_POINTCUT_EVENTS_CONTEXT = qualifiedResource(CLASS, "directPointcutEvents.xml");
-	
+
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 	private XmlBeanDefinitionReader reader;
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-	
+
 
 
 	@Before

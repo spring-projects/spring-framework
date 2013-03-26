@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertSame;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.springframework.beans.Employee;
+import org.springframework.tests.sample.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -32,7 +32,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
  * that uses a true {@link Configuration @Configuration class}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests
@@ -43,7 +43,7 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 
 	/**
 	 * This is <b>intentionally</b> annotated with {@code @Configuration}.
-	 * 
+	 *
 	 * <p>Consequently, this class contains standard singleton bean methods
 	 * instead of <i>annotated factory bean methods</i>.
 	 */

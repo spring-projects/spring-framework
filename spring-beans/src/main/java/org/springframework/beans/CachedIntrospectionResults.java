@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -70,14 +69,14 @@ public class CachedIntrospectionResults {
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
-	static final Set<ClassLoader> acceptedClassLoaders = Collections.synchronizedSet(new HashSet<ClassLoader>());
+	static final Set<ClassLoader> acceptedClassLoaders = new HashSet<ClassLoader>();
 
 	/**
 	 * Map keyed by class containing CachedIntrospectionResults.
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
-	static final Map<Class, Object> classCache = Collections.synchronizedMap(new WeakHashMap<Class, Object>());
+	static final Map<Class, Object> classCache = new WeakHashMap<Class, Object>();
 
 
 	/**
@@ -88,13 +87,15 @@ public class CachedIntrospectionResults {
 	 * whose lifecycle is not coupled to the application. In such a scenario,
 	 * CachedIntrospectionResults would by default not cache any of the application's
 	 * classes, since they would create a leak in the common ClassLoader.
-	 * <p>Any <code>acceptClassLoader</code> call at application startup should
+	 * <p>Any {@code acceptClassLoader} call at application startup should
 	 * be paired with a {@link #clearClassLoader} call at application shutdown.
 	 * @param classLoader the ClassLoader to accept
 	 */
 	public static void acceptClassLoader(ClassLoader classLoader) {
 		if (classLoader != null) {
-			acceptedClassLoaders.add(classLoader);
+			synchronized (acceptedClassLoaders) {
+				acceptedClassLoaders.add(classLoader);
+			}
 		}
 	}
 
@@ -106,9 +107,6 @@ public class CachedIntrospectionResults {
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
 	public static void clearClassLoader(ClassLoader classLoader) {
-		if (classLoader == null) {
-			return;
-		}
 		synchronized (classCache) {
 			for (Iterator<Class> it = classCache.keySet().iterator(); it.hasNext();) {
 				Class beanClass = it.next();
@@ -137,7 +135,10 @@ public class CachedIntrospectionResults {
 	 */
 	static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
 		CachedIntrospectionResults results;
-		Object value = classCache.get(beanClass);
+		Object value;
+		synchronized (classCache) {
+			value = classCache.get(beanClass);
+		}
 		if (value instanceof Reference) {
 			Reference ref = (Reference) value;
 			results = (CachedIntrospectionResults) ref.get();
@@ -146,21 +147,21 @@ public class CachedIntrospectionResults {
 			results = (CachedIntrospectionResults) value;
 		}
 		if (results == null) {
-			// On JDK 1.5 and higher, it is almost always safe to cache the bean class...
-			// The sole exception is a custom BeanInfo class being provided in a non-safe ClassLoader.
-			boolean fullyCacheable =
-					ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
-					isClassLoaderAccepted(beanClass.getClassLoader());
-			if (fullyCacheable || !ClassUtils.isPresent(beanClass.getName() + "BeanInfo", beanClass.getClassLoader())) {
-				results = new CachedIntrospectionResults(beanClass, fullyCacheable);
-				classCache.put(beanClass, results);
+			if (ClassUtils.isCacheSafe(beanClass, CachedIntrospectionResults.class.getClassLoader()) ||
+					isClassLoaderAccepted(beanClass.getClassLoader())) {
+				results = new CachedIntrospectionResults(beanClass);
+				synchronized (classCache) {
+					classCache.put(beanClass, results);
+				}
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
 				}
-				results = new CachedIntrospectionResults(beanClass, true);
-				classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
+				results = new CachedIntrospectionResults(beanClass);
+				synchronized (classCache) {
+					classCache.put(beanClass, new WeakReference<CachedIntrospectionResults>(results));
+				}
 			}
 		}
 		return results;
@@ -176,8 +177,10 @@ public class CachedIntrospectionResults {
 	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
 		// Iterate over array copy in order to avoid synchronization for the entire
 		// ClassLoader check (avoiding a synchronized acceptedClassLoaders Iterator).
-		ClassLoader[] acceptedLoaderArray =
-				acceptedClassLoaders.toArray(new ClassLoader[acceptedClassLoaders.size()]);
+		ClassLoader[] acceptedLoaderArray;
+		synchronized (acceptedClassLoaders) {
+			acceptedLoaderArray = acceptedClassLoaders.toArray(new ClassLoader[acceptedClassLoaders.size()]);
+		}
 		for (ClassLoader registeredLoader : acceptedLoaderArray) {
 			if (isUnderneathClassLoader(classLoader, registeredLoader)) {
 				return true;
@@ -193,11 +196,11 @@ public class CachedIntrospectionResults {
 	 * @param parent the parent ClassLoader to check for
 	 */
 	private static boolean isUnderneathClassLoader(ClassLoader candidate, ClassLoader parent) {
-		if (candidate == null) {
-			return false;
-		}
 		if (candidate == parent) {
 			return true;
+		}
+		if (candidate == null) {
+			return false;
 		}
 		ClassLoader classLoaderToCheck = candidate;
 		while (classLoaderToCheck != null) {
@@ -222,7 +225,7 @@ public class CachedIntrospectionResults {
 	 * @param beanClass the bean class to analyze
 	 * @throws BeansException in case of introspection failure
 	 */
-	private CachedIntrospectionResults(Class beanClass, boolean cacheFullMetadata) throws BeansException {
+	private CachedIntrospectionResults(Class beanClass) throws BeansException {
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
@@ -270,9 +273,7 @@ public class CachedIntrospectionResults {
 							(pd.getPropertyEditorClass() != null ?
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-				if (cacheFullMetadata) {
-					pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-				}
+				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 		}

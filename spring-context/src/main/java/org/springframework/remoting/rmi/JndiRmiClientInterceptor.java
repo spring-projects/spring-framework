@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.remoting.rmi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-
+import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
@@ -54,7 +54,7 @@ import org.springframework.util.ReflectionUtils;
  * Spring's unchecked RemoteAccessException.
  *
  * <p>The JNDI environment can be specified as "jndiEnvironment" property,
- * or be configured in a <code>jndi.properties</code> file or as system properties.
+ * or be configured in a {@code jndi.properties} file or as system properties.
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;
@@ -87,6 +87,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	private boolean cacheStub = true;
 
 	private boolean refreshStubOnConnectFailure = false;
+
+	private boolean exposeAccessContext = false;
 
 	private Object cachedStub;
 
@@ -166,6 +168,18 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 		this.refreshStubOnConnectFailure = refreshStubOnConnectFailure;
 	}
 
+	/**
+	 * Set whether to expose the JNDI environment context for all access to the target
+	 * RMI stub, i.e. for all method invocations on the exposed object reference.
+	 * <p>Default is "false", i.e. to only expose the JNDI context for object lookup.
+	 * Switch this flag to "true" in order to expose the JNDI environment (including
+	 * the authorization context) for each RMI invocation, as needed by WebLogic
+	 * for RMI stubs with authorization requirements.
+	 */
+	public void setExposeAccessContext(boolean exposeAccessContext) {
+		this.exposeAccessContext = exposeAccessContext;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws NamingException {
@@ -190,8 +204,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.debug("Using service interface [" + getServiceInterface().getName() +
-					    "] for JNDI RMI object [" + getJndiName() + "] - " +
-					    (!isImpl ? "not " : "") + "directly implemented");
+							"] for JNDI RMI object [" + getJndiName() + "] - " +
+							(!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
 			if (this.cacheStub) {
@@ -268,13 +282,15 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see java.rmi.NoSuchObjectException
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Object stub = null;
+		Object stub;
 		try {
 			stub = getStub();
 		}
 		catch (NamingException ex) {
 			throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed", ex);
 		}
+
+		Context ctx = (this.exposeAccessContext ? getJndiTemplate().getContext() : null);
 		try {
 			return doInvoke(invocation, stub);
 		}
@@ -296,6 +312,9 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 			else {
 				throw ex;
 			}
+		}
+		finally {
+			getJndiTemplate().releaseContext(ctx);
 		}
 	}
 
@@ -354,7 +373,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see #invoke
 	 */
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
-		Object freshStub = null;
+		Object freshStub;
 		synchronized (this.stubMonitor) {
 			this.cachedStub = null;
 			freshStub = lookupStub();
@@ -426,7 +445,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see org.springframework.remoting.support.RemoteInvocation
 	 */
 	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
-	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+			throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "RMI invoker proxy for service URL [" + getJndiName() + "]";

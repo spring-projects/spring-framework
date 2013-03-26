@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-20011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,23 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
 import org.junit.Test;
-
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.mock.web.portlet.MockPortletSession;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.util.WebUtils;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -60,9 +60,8 @@ public final class PortletUtilsTests {
 	public void testGetRealPathInterpretsLocationAsRelativeToWebAppRootIfPathDoesNotBeginWithALeadingSlash() throws Exception {
 		final String originalPath = "web/foo";
 		final String expectedRealPath = "/" + originalPath;
-		PortletContext ctx = createMock(PortletContext.class);
-		expect(ctx.getRealPath(expectedRealPath)).andReturn(expectedRealPath);
-		replay(ctx);
+		PortletContext ctx = mock(PortletContext.class);
+		given(ctx.getRealPath(expectedRealPath)).willReturn(expectedRealPath);
 
 		String actualRealPath = PortletUtils.getRealPath(ctx, originalPath);
 		assertEquals(expectedRealPath, actualRealPath);
@@ -83,6 +82,7 @@ public final class PortletUtilsTests {
 	@Test(expected=FileNotFoundException.class)
 	public void testGetRealPathWithPathThatCannotBeResolvedToFile() throws Exception {
 		PortletUtils.getRealPath(new MockPortletContext() {
+			@Override
 			public String getRealPath(String path) {
 				return null;
 			}
@@ -221,6 +221,7 @@ public final class PortletUtilsTests {
 		request.setParameter("William", "Baskerville");
 		request.setParameter("Adso", "Melk");
 		MockActionResponse response = new MockActionResponse() {
+			@Override
 			public void setRenderParameter(String key, String[] values) {
 				throw new IllegalStateException();
 			}
@@ -243,6 +244,7 @@ public final class PortletUtilsTests {
 	@Test
 	public void testClearAllRenderParametersDoesNotPropagateExceptionIfRedirectAlreadySentAtTimeOfCall() throws Exception {
 		MockActionResponse response = new MockActionResponse() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void setRenderParameters(Map parameters) {
 				throw new IllegalStateException();
@@ -399,13 +401,11 @@ public final class PortletUtilsTests {
 
 	@Test
 	public void testGetSessionAttributeDoes_Not_CreateANewSession() throws Exception {
-		PortletRequest request = createMock(PortletRequest.class);
-		expect(request.getPortletSession(false)).andReturn(null);
-		replay(request);
+		PortletRequest request = mock(PortletRequest.class);
 
 		Object sessionAttribute = PortletUtils.getSessionAttribute(request, "foo");
 		assertNull("Must return null if session attribute does not exist (or if Session does not exist)", sessionAttribute);
-		verify(request);
+		verify(request).getPortletSession(false);
 	}
 
 	@Test
@@ -413,15 +413,12 @@ public final class PortletUtilsTests {
 		MockPortletSession session = new MockPortletSession();
 		session.setAttribute("foo", "foo");
 
-		PortletRequest request = createMock(PortletRequest.class);
-		expect(request.getPortletSession(false)).andReturn(session);
-		replay(request);
+		PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession(false)).willReturn(session);
 
 		Object sessionAttribute = PortletUtils.getSessionAttribute(request, "foo");
 		assertNotNull("Must not return null if session attribute exists (and Session exists)", sessionAttribute);
 		assertEquals("foo", sessionAttribute);
-
-		verify(request);
 	}
 
 	@Test
@@ -429,102 +426,72 @@ public final class PortletUtilsTests {
 		MockPortletSession session = new MockPortletSession();
 		session.setAttribute("foo", "foo");
 
-		PortletRequest request = createMock(PortletRequest.class);
-		expect(request.getPortletSession(false)).andReturn(session);
-		replay(request);
+		PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession(false)).willReturn(session);
 
 		Object sessionAttribute = PortletUtils.getRequiredSessionAttribute(request, "foo");
 		assertNotNull("Must not return null if session attribute exists (and Session exists)", sessionAttribute);
 		assertEquals("foo", sessionAttribute);
-
-		verify(request);
 	}
 
 	@Test
 	public void testGetRequiredSessionAttributeWithExistingSessionAndNoAttribute() throws Exception {
 		MockPortletSession session = new MockPortletSession();
 
-		final PortletRequest request = createMock(PortletRequest.class);
-		expect(request.getPortletSession(false)).andReturn(session);
-		replay(request);
+		final PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession(false)).willReturn(session);
 		try {
 			PortletUtils.getRequiredSessionAttribute(request, "foo");
 			fail("expected IllegalStateException");
 		} catch (IllegalStateException ex) { /* expected */ }
-		verify(request);
+
 	}
 
 	@Test
 	public void testSetSessionAttributeWithExistingSessionAndNullValue() throws Exception {
-		PortletSession session = createMock(PortletSession.class);
-		PortletRequest request = createMock(PortletRequest.class);
-
-		expect(request.getPortletSession(false)).andReturn(session); // must not create Session for null value...
-		session.removeAttribute("foo", PortletSession.APPLICATION_SCOPE);
-		replay(request, session);
-
+		PortletSession session = mock(PortletSession.class);
+		PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession(false)).willReturn(session); // must not create Session for null value...
 		PortletUtils.setSessionAttribute(request, "foo", null, PortletSession.APPLICATION_SCOPE);
-
-		verify(request, session);
+		verify(session).removeAttribute("foo", PortletSession.APPLICATION_SCOPE);
 	}
 
 	@Test
 	public void testSetSessionAttributeWithNoExistingSessionAndNullValue() throws Exception {
-		PortletRequest request = createMock(PortletRequest.class);
-
-		expect(request.getPortletSession(false)).andReturn(null); // must not create Session for null value...
-		replay(request);
-
+		PortletRequest request = mock(PortletRequest.class);
 		PortletUtils.setSessionAttribute(request, "foo", null, PortletSession.APPLICATION_SCOPE);
-
-		verify(request);
+		verify(request).getPortletSession(false); // must not create Session for null value...
 	}
 
 	@Test
 	public void testSetSessionAttributeWithExistingSessionAndSpecificScope() throws Exception {
-		PortletSession session = createMock(PortletSession.class);
-		PortletRequest request = createMock(PortletRequest.class);
-
-		expect(request.getPortletSession()).andReturn(session); // must not create Session ...
-		session.setAttribute("foo", "foo", PortletSession.APPLICATION_SCOPE);
-		replay(request, session);
-
+		PortletSession session = mock(PortletSession.class);
+		PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession()).willReturn(session); // must not create Session ...
 		PortletUtils.setSessionAttribute(request, "foo", "foo", PortletSession.APPLICATION_SCOPE);
-
-		verify(request, session);
+		verify(session).setAttribute("foo", "foo", PortletSession.APPLICATION_SCOPE);
 	}
 
 	@Test
 	public void testGetSessionAttributeWithExistingSessionAndSpecificScope() throws Exception {
-		PortletSession session = createMock(PortletSession.class);
-		PortletRequest request = createMock(PortletRequest.class);
-
-		expect(request.getPortletSession(false)).andReturn(session);
-		expect(session.getAttribute("foo", PortletSession.APPLICATION_SCOPE)).andReturn("foo");
-		replay(request, session);
-
+		PortletSession session = mock(PortletSession.class);
+		PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession(false)).willReturn(session);
+		given(session.getAttribute("foo", PortletSession.APPLICATION_SCOPE)).willReturn("foo");
 		Object sessionAttribute = PortletUtils.getSessionAttribute(request, "foo", PortletSession.APPLICATION_SCOPE);
 		assertNotNull("Must not return null if session attribute exists (and Session exists)", sessionAttribute);
 		assertEquals("foo", sessionAttribute);
-
-		verify(request, session);
 	}
 
 	@Test
 	public void testGetSessionAttributeWithExistingSessionDefaultsToPortletScope() throws Exception {
-		PortletSession session = createMock(PortletSession.class);
-		PortletRequest request = createMock(PortletRequest.class);
-
-		expect(request.getPortletSession(false)).andReturn(session);
-		expect(session.getAttribute("foo", PortletSession.PORTLET_SCOPE)).andReturn("foo");
-
-		replay(request, session);
-
+		PortletSession session = mock(PortletSession.class);
+		PortletRequest request = mock(PortletRequest.class);
+		given(request.getPortletSession(false)).willReturn(session);
+		given(session.getAttribute("foo", PortletSession.PORTLET_SCOPE)).willReturn("foo");
 		Object sessionAttribute = PortletUtils.getSessionAttribute(request, "foo");
 		assertNotNull("Must not return null if session attribute exists (and Session exists)", sessionAttribute);
 		assertEquals("foo", sessionAttribute);
-
-		verify(request, session);
 	}
 
 

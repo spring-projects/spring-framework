@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.AnnotationTransactionNamespaceHandlerTests.TransactionalTestBean;
 
@@ -127,6 +127,7 @@ public class EnableTransactionManagementTests {
 			return new CallCountingTransactionManager();
 		}
 
+		@Override
 		public PlatformTransactionManager annotationDrivenTransactionManager() {
 			return txManager2();
 		}

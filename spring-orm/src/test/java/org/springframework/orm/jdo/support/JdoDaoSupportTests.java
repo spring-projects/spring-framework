@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,25 +21,26 @@ import java.util.List;
 
 import javax.jdo.PersistenceManagerFactory;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.orm.jdo.JdoTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 30.07.2003
  */
-public class JdoDaoSupportTests extends TestCase {
+public class JdoDaoSupportTests {
 
+	@Test
 	public void testJdoDaoSupportWithPersistenceManagerFactory() throws Exception {
-		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
-		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		PersistenceManagerFactory pmf = mock(PersistenceManagerFactory.class);
 		pmf.getConnectionFactory();
-		pmfControl.setReturnValue(null, 1);
-		pmfControl.replay();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -49,13 +50,14 @@ public class JdoDaoSupportTests extends TestCase {
 		assertEquals("Correct PersistenceManagerFactory", pmf, dao.getPersistenceManagerFactory());
 		assertEquals("Correct JdoTemplate", pmf, dao.getJdoTemplate().getPersistenceManagerFactory());
 		assertEquals("initDao called", test.size(), 1);
-		pmfControl.verify();
 	}
 
+	@Test
 	public void testJdoDaoSupportWithJdoTemplate() throws Exception {
 		JdoTemplate template = new JdoTemplate();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}

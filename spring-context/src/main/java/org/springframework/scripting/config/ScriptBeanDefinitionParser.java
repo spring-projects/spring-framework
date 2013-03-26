@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
@@ -33,18 +34,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
- * '<code>&lt;lang:jruby/&gt;</code>' and '<code>&lt;lang:bsh/&gt;</code>' tags.
+ * BeanDefinitionParser implementation for the '{@code &lt;lang:groovy/&gt;}',
+ * '{@code &lt;lang:jruby/&gt;}' and '{@code &lt;lang:bsh/&gt;}' tags.
  * Allows for objects written using dynamic languages to be easily exposed with
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>The script for each object can be specified either as a reference to the Resource
- * containing it (using the '<code>script-source</code>' attribute) or inline in the XML configuration
- * itself (using the '<code>inline-script</code>' attribute.
+ * containing it (using the '{@code script-source}' attribute) or inline in the XML configuration
+ * itself (using the '{@code inline-script}' attribute.
  *
  * <p>By default, dynamic objects created with these tags are <strong>not</strong> refreshable.
  * To enable refreshing, specify the refresh check delay for each object (in milliseconds) using the
- * '<code>refresh-check-delay</code>' attribute.
+ * '{@code refresh-check-delay}' attribute.
  *
  * @author Rob Harrop
  * @author Rod Johnson
@@ -63,6 +64,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
 
 	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
+
+	private static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
 
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
 
@@ -99,6 +102,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * Registers a {@link ScriptFactoryPostProcessor} if needed.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());
@@ -114,7 +118,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		bd.setBeanClassName(this.scriptFactoryClassName);
 		bd.setSource(parserContext.extractSource(element));
 		bd.setAttribute(ScriptFactoryPostProcessor.LANGUAGE_ATTRIBUTE, element.getLocalName());
-		
+
 		// Determine bean scope.
 		String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 		if (StringUtils.hasLength(scope)) {
@@ -136,6 +140,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Determine dependency check setting.
 		String dependencyCheck = element.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 		bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
+
+		// Parse depends-on list of bean names.
+		String dependsOn = element.getAttribute(DEPENDS_ON_ATTRIBUTE);
+		if (StringUtils.hasLength(dependsOn)) {
+			bd.setDependsOn(StringUtils.tokenizeToStringArray(
+					dependsOn, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS));
+		}
 
 		// Retrieve the defaults for bean definitions within this parser context
 		BeanDefinitionDefaults beanDefinitionDefaults = parserContext.getDelegate().getBeanDefinitionDefaults();
@@ -196,9 +207,9 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	/**
-	 * Resolves the script source from either the '<code>script-source</code>' attribute or
-	 * the '<code>inline-script</code>' element. Logs and {@link XmlReaderContext#error} and
-	 * returns <code>null</code> if neither or both of these values are specified.
+	 * Resolves the script source from either the '{@code script-source}' attribute or
+	 * the '{@code inline-script}' element. Logs and {@link XmlReaderContext#error} and
+	 * returns {@code null} if neither or both of these values are specified.
 	 */
 	private String resolveScriptSource(Element element, XmlReaderContext readerContext) {
 		boolean hasScriptSource = element.hasAttribute(SCRIPT_SOURCE_ATTRIBUTE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,9 +93,9 @@ import org.springframework.util.CollectionUtils;
  * into a JDO PersistenceManagerFactory. With the standard properties-driven approach,
  * you can only use an internal connection pool or a JNDI DataSource.
  *
- * <p>The <code>close()</code> method is standardized in JDO; don't forget to
+ * <p>The {@code close()} method is standardized in JDO; don't forget to
  * specify it as "destroy-method" for any PersistenceManagerFactory instance.
- * Note that this FactoryBean will automatically invoke <code>close()</code> for
+ * Note that this FactoryBean will automatically invoke {@code close()} for
  * the PersistenceManagerFactory that it creates, without any special configuration.
  *
  * @author Juergen Hoeller
@@ -164,7 +164,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 
 	/**
 	 * Specify JDO properties as a Map, to be passed into
-	 * <code>JDOHelper.getPersistenceManagerFactory</code> (if any).
+	 * {@code JDOHelper.getPersistenceManagerFactory} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Map)
 	 */
@@ -244,7 +244,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	 * Subclasses can override this to perform custom initialization of the
 	 * PersistenceManagerFactory instance, creating it for the specified name.
 	 * <p>The default implementation invokes JDOHelper's
-	 * <code>getPersistenceManagerFactory(String)</code> method.
+	 * {@code getPersistenceManagerFactory(String)} method.
 	 * A custom implementation could prepare the instance in a specific way,
 	 * or use a custom PersistenceManagerFactory implementation.
 	 * @param name the name of the desired PersistenceManagerFactory
@@ -260,7 +260,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	 * PersistenceManagerFactory instance, creating it via the given Properties
 	 * that got prepared by this LocalPersistenceManagerFactoryBean.
 	 * <p>The default implementation invokes JDOHelper's
-	 * <code>getPersistenceManagerFactory(Map)</code> method.
+	 * {@code getPersistenceManagerFactory(Map)} method.
 	 * A custom implementation could prepare the instance in a specific way,
 	 * or use a custom PersistenceManagerFactory implementation.
 	 * @param props the merged properties prepared by this LocalPersistenceManagerFactoryBean
@@ -281,7 +281,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 
 	public Class<? extends PersistenceManagerFactory> getObjectType() {
 		return (this.persistenceManagerFactory != null ?
-		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
+			this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
 	}
 
 	public boolean isSingleton() {
@@ -293,7 +293,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	 * Implementation of the PersistenceExceptionTranslator interface,
 	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
 	 * <p>Converts the exception if it is a JDOException, preferably using a specified
-	 * JdoDialect. Else returns <code>null</code> to indicate an unknown exception.
+	 * JdoDialect. Else returns {@code null} to indicate an unknown exception.
 	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
 	 * @see JdoDialect#translateException
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 /**
  * @author Rob Harrop
@@ -31,25 +31,25 @@ import org.springframework.beans.TestBean;
 public class ConventionsTests extends TestCase {
 
 	public void testSimpleObject() {
-		TestBean testBean = new TestBean();
-		assertEquals("Incorrect singular variable name", "testBean", Conventions.getVariableName(testBean));
+		TestObject testObject = new TestObject();
+		assertEquals("Incorrect singular variable name", "testObject", Conventions.getVariableName(testObject));
 	}
 
 	public void testArray() {
-		TestBean[] testBeans = new TestBean[0];
-		assertEquals("Incorrect plural array form", "testBeanList", Conventions.getVariableName(testBeans));
+		TestObject[] testObjects = new TestObject[0];
+		assertEquals("Incorrect plural array form", "testObjectList", Conventions.getVariableName(testObjects));
 	}
 
 	public void testCollections() {
-		List list = new ArrayList();
-		list.add(new TestBean());
-		assertEquals("Incorrect plural List form", "testBeanList", Conventions.getVariableName(list));
+		List<TestObject> list = new ArrayList<TestObject>();
+		list.add(new TestObject());
+		assertEquals("Incorrect plural List form", "testObjectList", Conventions.getVariableName(list));
 
-		Set set = new HashSet();
-		set.add(new TestBean());
-		assertEquals("Incorrect plural Set form", "testBeanList", Conventions.getVariableName(set));
+		Set<TestObject> set = new HashSet<TestObject>();
+		set.add(new TestObject());
+		assertEquals("Incorrect plural Set form", "testObjectList", Conventions.getVariableName(set));
 
-		List emptyList = new ArrayList();
+		List<?> emptyList = new ArrayList<Object>();
 		try {
 			Conventions.getVariableName(emptyList);
 			fail("Should not be able to generate name for empty collection");
@@ -67,7 +67,7 @@ public class ConventionsTests extends TestCase {
 
 	public void testGetQualifiedAttributeName() throws Exception {
 		String baseName = "foo";
-		Class cls = String.class;
+		Class<String> cls = String.class;
 		String desiredResult = "java.lang.String.foo";
 		assertEquals(desiredResult, Conventions.getQualifiedAttributeName(cls, baseName));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,8 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set the value that will replace '<code>/</code>' as the separator
-	 * in the view name. The default behavior simply leaves '<code>/</code>'
+	 * Set the value that will replace '{@code /}' as the separator
+	 * in the view name. The default behavior simply leaves '{@code /}'
 	 * as the separator.
 	 */
 	public void setSeparator(String separator) {

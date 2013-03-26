@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -27,8 +28,7 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -38,9 +38,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 
@@ -51,13 +55,15 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	private static PersistenceUnitInfo actualPui;
 
 
+	@Test
 	public void testValidPersistenceUnit() throws Exception {
 		parseValidPersistenceUnit();
 	}
 
+	@Test
 	public void testExceptionTranslationWithNoDialect() throws Exception {
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
-		EntityManagerFactory emf = cefb.getObject();
+		cefb.getObject();
 		assertNull("No dialect set", cefb.getJpaDialect());
 
 		RuntimeException in1 = new RuntimeException("in1");
@@ -68,6 +74,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		assertSame(in2, dex.getCause());
 	}
 
+	@Test
 	public void testEntityManagerFactoryIsProxied() throws Exception {
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
@@ -84,21 +91,12 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		assertNotNull(SerializationTestUtils.serializeAndDeserialize(emf));
 	}
 
+	@Test
 	public void testApplicationManagedEntityManagerWithoutTransaction() throws Exception {
 		Object testEntity = new Object();
+		EntityManager mockEm = mock(EntityManager.class);
 
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
-
-		// finish recording mock calls
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(mockEm);
-		mockEmf.close();
-		emfMc.setVoidCallable();
-		emfMc.replay();
+		given(mockEmf.createEntityManager()).willReturn(mockEm);
 
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
@@ -110,48 +108,24 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		cefb.destroy();
 
-		emfMc.verify();
-		emMc.verify();
+		verify(mockEmf).close();
 	}
 
+	@Test
 	public void testApplicationManagedEntityManagerWithTransaction() throws Exception {
 		Object testEntity = new Object();
 
-		MockControl tmMc = MockControl.createControl(EntityTransaction.class);
-		EntityTransaction mockTx = (EntityTransaction) tmMc.getMock();
-		mockTx.isActive();
-		tmMc.setReturnValue(false);
-		mockTx.begin();
-		tmMc.setVoidCallable();
-		mockTx.commit();
-		tmMc.setVoidCallable();
-		tmMc.replay();
+		EntityTransaction mockTx = mock(EntityTransaction.class);
 
 		// This one's for the tx (shared)
-		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
-		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
-		sharedEm.getTransaction();
-		sharedEmMc.setReturnValue(new NoOpEntityTransaction(), 3);
-		sharedEm.close();
-		sharedEmMc.setVoidCallable();
-		sharedEmMc.replay();
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(sharedEm);
+		EntityManager sharedEm = mock(EntityManager.class);
+		given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
 
 		// This is the application-specific one
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.getTransaction();
-		emMc.setReturnValue(mockTx, 3);
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
+		EntityManager mockEm = mock(EntityManager.class);
+		given(mockEm.getTransaction()).willReturn(mockTx);
 
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(mockEm);
-		mockEmf.close();
-		emfMc.setVoidCallable();
-		emfMc.replay();
+		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
 
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 
@@ -172,49 +146,28 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		cefb.destroy();
 
-		emfMc.verify();
-		emMc.verify();
-		tmMc.verify();
+		verify(mockTx).begin();
+		verify(mockTx).commit();
+		verify(mockEm).contains(testEntity);
+		verify(mockEmf).close();
 	}
 
+	@Test
 	public void testApplicationManagedEntityManagerWithTransactionAndCommitException() throws Exception {
 		Object testEntity = new Object();
 
-		MockControl tmMc = MockControl.createControl(EntityTransaction.class);
-		EntityTransaction mockTx = (EntityTransaction) tmMc.getMock();
-		mockTx.isActive();
-		tmMc.setReturnValue(false);
-		mockTx.begin();
-		tmMc.setVoidCallable();
-		mockTx.commit();
-		tmMc.setThrowable(new OptimisticLockException());
-		tmMc.replay();
+		EntityTransaction mockTx = mock(EntityTransaction.class);
+		willThrow(new OptimisticLockException()).given(mockTx).commit();
 
 		// This one's for the tx (shared)
-		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
-		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
-		sharedEm.getTransaction();
-		sharedEmMc.setReturnValue(new NoOpEntityTransaction(), 3);
-		sharedEm.close();
-		sharedEmMc.setVoidCallable();
-		sharedEmMc.replay();
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(sharedEm);
+		EntityManager sharedEm = mock(EntityManager.class);
+		given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
 
 		// This is the application-specific one
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.getTransaction();
-		emMc.setReturnValue(mockTx, 3);
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
+		EntityManager mockEm = mock(EntityManager.class);
+		given(mockEm.getTransaction()).willReturn(mockTx);
 
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(mockEm);
-		mockEmf.close();
-		emfMc.setVoidCallable();
-		emfMc.replay();
+		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
 
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 
@@ -241,39 +194,23 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		cefb.destroy();
 
-		emfMc.verify();
-		emMc.verify();
-		tmMc.verify();
+		verify(mockTx).begin();
+		verify(mockEm).contains(testEntity);
+		verify(mockEmf).close();
 	}
 
+	@Test
 	public void testApplicationManagedEntityManagerWithJtaTransaction() throws Exception {
 		Object testEntity = new Object();
 
 		// This one's for the tx (shared)
-		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
-		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
-		sharedEm.getTransaction();
-		sharedEmMc.setReturnValue(new NoOpEntityTransaction(), 3);
-		sharedEm.close();
-		sharedEmMc.setVoidCallable(1);
-		sharedEmMc.replay();
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(sharedEm);
+		EntityManager sharedEm = mock(EntityManager.class);
+		given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
 
 		// This is the application-specific one
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.joinTransaction();
-		emMc.setVoidCallable(1);
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
+		EntityManager mockEm = mock(EntityManager.class);
 
-		mockEmf.createEntityManager();
-		emfMc.setReturnValue(mockEm);
-		mockEmf.close();
-		emfMc.setVoidCallable();
-		emfMc.replay();
+		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
 
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		MutablePersistenceUnitInfo pui = ((MutablePersistenceUnitInfo) cefb.getPersistenceUnitInfo());
@@ -296,8 +233,9 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		cefb.destroy();
 
-		emfMc.verify();
-		emMc.verify();
+		verify(mockEm).joinTransaction();
+		verify(mockEm).contains(testEntity);
+		verify(mockEmf).close();
 	}
 
 	public LocalContainerEntityManagerFactoryBean parseValidPersistenceUnit() throws Exception {
@@ -307,6 +245,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		return emfb;
 	}
 
+	@Test
 	public void testInvalidPersistenceUnitName() throws Exception {
 		try {
 			createEntityManagerFactoryBean("org/springframework/orm/jpa/domain/persistence.xml", null, "call me Bob");
@@ -347,6 +286,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		//emfMc.verify();
 	}
 
+	@Test
 	public void testRejectsMissingPersistenceUnitInfo() throws Exception {
 		LocalContainerEntityManagerFactoryBean containerEmfb = new LocalContainerEntityManagerFactoryBean();
 		String entityManagerName = "call me Bob";
@@ -366,12 +306,14 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 	private static class DummyContainerPersistenceProvider implements PersistenceProvider {
 
+		@Override
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
 			actualPui = pui;
 			actualProps = map;
 			return mockEmf;
 		}
 
+		@Override
 		public EntityManagerFactory createEntityManagerFactory(String emfName, Map properties) {
 			throw new UnsupportedOperationException();
 		}
@@ -380,23 +322,29 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 	private static class NoOpEntityTransaction implements EntityTransaction {
 
+		@Override
 		public void begin() {
 		}
 
+		@Override
 		public void commit() {
 		}
 
+		@Override
 		public void rollback() {
 		}
 
+		@Override
 		public void setRollbackOnly() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean getRollbackOnly() {
 			return false;
 		}
 
+		@Override
 		public boolean isActive() {
 			return false;
 		}

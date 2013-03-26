@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,10 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.util.Assert;
 
 /**
- * Abstract base class implementing the common {@link CacheManager}
- * methods. Useful for 'static' environments where the backing caches do
- * not change.
+ * Abstract base class implementing the common {@link CacheManager} methods.
+ * Useful for 'static' environments where the backing caches do not change.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -39,27 +37,38 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>();
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
 
-	private Set<String> cacheNames = new LinkedHashSet<String>();
+	private Set<String> cacheNames = new LinkedHashSet<String>(16);
 
 
 	public void afterPropertiesSet() {
 		Collection<? extends Cache> caches = loadCaches();
-		Assert.notEmpty(caches, "loadCaches must not return an empty Collection");
-		this.cacheMap.clear();
 
 		// preserve the initial order of the cache names
+		this.cacheMap.clear();
+		this.cacheNames.clear();
 		for (Cache cache : caches) {
-			this.cacheMap.put(cache.getName(), cache);
+			this.cacheMap.put(cache.getName(), decorateCache(cache));
 			this.cacheNames.add(cache.getName());
 		}
 	}
 
 	protected final void addCache(Cache cache) {
-		this.cacheMap.put(cache.getName(), cache);
+		this.cacheMap.put(cache.getName(), decorateCache(cache));
 		this.cacheNames.add(cache.getName());
 	}
+
+	/**
+	 * Decorate the given Cache object if necessary.
+	 * @param cache the Cache object to be added to this CacheManager
+	 * @return the decorated Cache object to be used instead,
+	 * or simply the passed-in Cache object by default
+	 */
+	protected Cache decorateCache(Cache cache) {
+		return cache;
+	}
+
 
 	public Cache getCache(String name) {
 		return this.cacheMap.get(name);

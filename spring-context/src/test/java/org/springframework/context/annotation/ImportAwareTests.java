@@ -25,10 +25,14 @@ import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
+import org.springframework.util.Assert;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -77,6 +81,24 @@ public class ImportAwareTests {
 		assertThat(foo, is("xyz"));
 	}
 
+	@Test
+	public void importRegistrar() throws Exception {
+		ImportedRegistrar.called = false;
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportingRegistrarConfig.class);
+		ctx.refresh();
+		assertNotNull(ctx.getBean("registrarImportedBean"));
+	}
+
+	@Test
+	public void importRegistrarWithImport() throws Exception {
+		ImportedRegistrar.called = false;
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportingRegistrarConfigWithImport.class);
+		ctx.refresh();
+		assertNotNull(ctx.getBean("registrarImportedBean"));
+		assertNotNull(ctx.getBean(ImportedConfig.class));
+	}
 
 	@Configuration
 	@Import(ImportedConfig.class)
@@ -102,6 +124,7 @@ public class ImportAwareTests {
 
 		AnnotationMetadata importMetadata;
 
+		@Override
 		public void setImportMetadata(AnnotationMetadata importMetadata) {
 			this.importMetadata = importMetadata;
 		}
@@ -120,15 +143,50 @@ public class ImportAwareTests {
 
 	static class BPP implements BeanFactoryAware, BeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		}
+	}
+
+	@Configuration
+	@EnableImportRegistrar
+	static class ImportingRegistrarConfig {
+	}
+
+	@Configuration
+	@EnableImportRegistrar
+	@Import(ImportedConfig.class)
+	static class ImportingRegistrarConfigWithImport {
+	}
+
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Import(ImportedRegistrar.class)
+	public @interface EnableImportRegistrar {
+	}
+
+	static class ImportedRegistrar implements ImportBeanDefinitionRegistrar {
+
+		static boolean called;
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
+			BeanDefinition beanDefinition = new GenericBeanDefinition();
+			beanDefinition.setBeanClassName(String.class.getName());
+			registry.registerBeanDefinition("registrarImportedBean", beanDefinition );
+			Assert.state(called == false, "ImportedRegistrar called twice");
+			called = true;
 		}
 	}
 }

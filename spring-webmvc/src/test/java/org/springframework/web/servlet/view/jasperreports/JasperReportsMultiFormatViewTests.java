@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import net.sf.jasperreports.engine.JasperPrint;
  */
 public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsViewTests {
 
+	@Override
 	protected void extendModel(Map<String, Object> model) {
 		model.put(getDiscriminatorKey(), "csv");
 	}
@@ -48,6 +49,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		assertEquals("Invalid content type", "text/html", response.getContentType());
 	}
 
+	@Override
 	public void testOverrideContentDisposition() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -101,10 +103,12 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		return "format";
 	}
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		return new JasperReportsMultiFormatView();
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "text/csv";
 	}
@@ -121,6 +125,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 
 		public static final String TEST_PARAM = "net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI";
 
+		@Override
 		protected void renderReport(JasperPrint filledReport, Map parameters, HttpServletResponse response) {
 			assertNotNull("Exporter parameters are null", getExporterParameters());
 			assertEquals("Incorrect number of exporter parameters", 1, getExporterParameters().size());

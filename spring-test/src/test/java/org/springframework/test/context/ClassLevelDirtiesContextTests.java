@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -37,11 +38,11 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 /**
- * JUnit 4 based integration test which verifies correct {@link ContextCache
+ * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
  * application context caching} in conjunction with the
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext
  * &#064;DirtiesContext} annotation at the class level.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */
@@ -54,7 +55,7 @@ public class ClassLevelDirtiesContextTests {
 
 	/**
 	 * Asserts the statistics of the supplied context cache.
-	 * 
+	 *
 	 * @param usageScenario the scenario in which the statistics are used
 	 * @param expectedSize the expected number of contexts in the cache
 	 * @param expectedHitCount the expected hit count
@@ -179,8 +180,13 @@ public class ClassLevelDirtiesContextTests {
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class })
-	@ContextConfiguration("/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
+	@ContextConfiguration
 	public static abstract class BaseTestCase {
+
+		@Configuration
+		static class Config {
+			/* no beans */
+		}
 
 		@Autowired
 		protected ApplicationContext applicationContext;

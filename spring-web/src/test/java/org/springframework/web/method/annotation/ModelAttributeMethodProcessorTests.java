@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -37,13 +36,14 @@ import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture with {@link ModelAttributeMethodProcessor}.
@@ -153,26 +153,23 @@ public class ModelAttributeMethodProcessorTests {
 		mavContainer.addAttribute(expectedAttributeName, target);
 
 		WebDataBinder dataBinder = new WebRequestDataBinder(target);
-		WebDataBinderFactory factory = createMock(WebDataBinderFactory.class);
-		expect(factory.createBinder(webRequest, target, expectedAttributeName)).andReturn(dataBinder);
-		replay(factory);
+		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		given(factory.createBinder(webRequest, target, expectedAttributeName)).willReturn(dataBinder);
 
 		processor.resolveArgument(param, mavContainer, webRequest, factory);
-
-		verify(factory);
+		verify(factory).createBinder(webRequest, target, expectedAttributeName);
 	}
 
 	@Test
 	public void resovleArgumentViaDefaultConstructor() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
 
-		WebDataBinderFactory factory = createMock(WebDataBinderFactory.class);
-		expect(factory.createBinder((NativeWebRequest) anyObject(), notNull(), eq("attrName"))).andReturn(dataBinder);
-		replay(factory);
+		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		given(factory.createBinder((NativeWebRequest) anyObject(), notNull(), eq("attrName"))).willReturn(dataBinder);
 
 		processor.resolveArgument(paramNamedValidModelAttr, mavContainer, webRequest, factory);
 
-		verify(factory);
+		verify(factory).createBinder((NativeWebRequest) anyObject(), notNull(), eq("attrName"));
 	}
 
 	@Test
@@ -182,9 +179,8 @@ public class ModelAttributeMethodProcessorTests {
 		mavContainer.addAttribute(name, target);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
-		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
-		expect(binderFactory.createBinder(webRequest, target, name)).andReturn(dataBinder);
-		replay(binderFactory);
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, target, name)).willReturn(dataBinder);
 
 		processor.resolveArgument(paramNamedValidModelAttr, mavContainer, webRequest, binderFactory);
 
@@ -201,11 +197,11 @@ public class ModelAttributeMethodProcessorTests {
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
 		dataBinder.getBindingResult().reject("error");
 
-		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
-		expect(binderFactory.createBinder(webRequest, target, name)).andReturn(dataBinder);
-		replay(binderFactory);
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, target, name)).willReturn(dataBinder);
 
 		processor.resolveArgument(paramNonSimpleType, mavContainer, webRequest, binderFactory);
+		verify(binderFactory).createBinder(webRequest, target, name);
 	}
 
 	// SPR-9378
@@ -221,9 +217,8 @@ public class ModelAttributeMethodProcessorTests {
 		mavContainer.addAttribute("anotherTestBean", anotherTestBean);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(testBean, name);
-		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
-		expect(binderFactory.createBinder(webRequest, testBean, name)).andReturn(dataBinder);
-		replay(binderFactory);
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, testBean, name)).willReturn(dataBinder);
 
 		processor.resolveArgument(paramModelAttr, mavContainer, webRequest, binderFactory);
 
@@ -265,14 +260,17 @@ public class ModelAttributeMethodProcessorTests {
 			return validateInvoked;
 		}
 
+		@Override
 		public void bind(WebRequest request) {
 			bindInvoked = true;
 		}
 
+		@Override
 		public void validate() {
 			validateInvoked = true;
 		}
 
+		@Override
 		public void validate(Object... validationHints) {
 			validateInvoked = true;
 		}
@@ -296,7 +294,6 @@ public class ModelAttributeMethodProcessorTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@ModelAttribute("modelAttrName")
 	private String annotatedReturnValue() {
 		return null;

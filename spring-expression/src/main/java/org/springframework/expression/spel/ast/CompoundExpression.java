@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 
 /**
  * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -35,22 +35,20 @@ public class CompoundExpression extends SpelNodeImpl {
 			throw new IllegalStateException("Dont build compound expression less than one entry: "+expressionComponents.length);
 		}
 	}
-	
 
-	/**
-	 * Evalutes a compound expression. This involves evaluating each piece in turn and the return value from each piece
-	 * is the active context object for the subsequent piece.
-	 * @param state the state in which the expression is being evaluated
-	 * @return the final value from the last piece of the compound expression
-	 */
+
 	@Override
-	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+		if (getChildCount()==1) {
+			return children[0].getValueRef(state);
+		}
 		TypedValue result = null;
 		SpelNodeImpl nextNode = null;
 		try {
 			nextNode = children[0];
 			result = nextNode.getValueInternal(state);
-			for (int i = 1; i < getChildCount(); i++) {
+			int cc = getChildCount();
+			for (int i = 1; i < cc-1; i++) {
 				try {
 					state.pushActiveContextObject(result);
 					nextNode = children[i];
@@ -59,57 +57,39 @@ public class CompoundExpression extends SpelNodeImpl {
 					state.popActiveContextObject();
 				}
 			}
+			try {
+				state.pushActiveContextObject(result);
+				nextNode = children[cc-1];
+				return nextNode.getValueRef(state);
+			} finally {
+				state.popActiveContextObject();
+			}
 		} catch (SpelEvaluationException ee) {
-			// Correct the position for the error before rethrowing
+			// Correct the position for the error before re-throwing
 			ee.setPosition(nextNode.getStartPosition());
 			throw ee;
 		}
-		return result;
+	}
+
+	/**
+	 * Evaluates a compound expression. This involves evaluating each piece in turn and the return value from each piece
+	 * is the active context object for the subsequent piece.
+	 * @param state the state in which the expression is being evaluated
+	 * @return the final value from the last piece of the compound expression
+	 */
+	@Override
+	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		return getValueRef(state).getValue();
 	}
 
 	@Override
 	public void setValue(ExpressionState state, Object value) throws EvaluationException {
-		if (getChildCount() == 1) {
-			getChild(0).setValue(state, value);
-			return;
-		}
-		TypedValue ctx = children[0].getValueInternal(state);
-		for (int i = 1; i < getChildCount() - 1; i++) {
-			try {
-				state.pushActiveContextObject(ctx);
-				ctx = children[i].getValueInternal(state);
-			} finally {
-				state.popActiveContextObject();
-			}
-		}
-		try {
-			state.pushActiveContextObject(ctx);
-			getChild(getChildCount() - 1).setValue(state, value);
-		} finally {
-			state.popActiveContextObject();
-		}
+		getValueRef(state).setValue(value);
 	}
 
 	@Override
 	public boolean isWritable(ExpressionState state) throws EvaluationException {
-		if (getChildCount() == 1) {
-			return getChild(0).isWritable(state);
-		}
-		TypedValue ctx = children[0].getValueInternal(state);
-		for (int i = 1; i < getChildCount() - 1; i++) {
-			try {
-				state.pushActiveContextObject(ctx);
-				ctx = children[i].getValueInternal(state);
-			} finally {
-				state.popActiveContextObject();
-			}
-		}
-		try {
-			state.pushActiveContextObject(ctx);
-			return getChild(getChildCount() - 1).isWritable(state);
-		} finally {
-			state.popActiveContextObject();
-		}
+		return getValueRef(state).isWritable();
 	}
 
 	@Override

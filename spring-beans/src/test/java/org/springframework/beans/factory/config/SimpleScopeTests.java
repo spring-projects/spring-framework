@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,8 +28,8 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.TestBean;
 
 /**
  * Simple test to illustrate and verify scope usage.
@@ -39,11 +39,11 @@ import test.beans.TestBean;
  * @author Chris Beams
  */
 public final class SimpleScopeTests {
-	
+
 	private static final Resource CONTEXT = qualifiedResource(SimpleScopeTests.class, "context.xml");
 
 	private DefaultListableBeanFactory beanFactory;
-	
+
 	@Before
 	public void setUp() {
 		beanFactory = new DefaultListableBeanFactory();
@@ -53,6 +53,7 @@ public final class SimpleScopeTests {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
 			}
+			@Override
 			public Object get(String name, ObjectFactory<?> objectFactory) {
 				if (index >= objects.size()) {
 					index = 0;
@@ -71,7 +72,7 @@ public final class SimpleScopeTests {
 		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(beanFactory);
 		xbdr.loadBeanDefinitions(CONTEXT);
 	}
-	
+
 	@Test
 	public void testCanGetScopedObject() {
 		TestBean tb1 = (TestBean) beanFactory.getBean("usesScope");

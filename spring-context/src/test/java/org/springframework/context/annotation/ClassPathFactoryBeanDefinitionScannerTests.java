@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.context.SimpleMapScope;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation4.DependencyBean;
 import org.springframework.context.annotation4.FactoryMethodComponent;
@@ -57,7 +57,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 		TestBean tb2 = (TestBean)context.getBean("publicInstance"); //2
 		assertEquals("publicInstance", tb2.getName());
 		assertSame(tb2, tb);
-		
+
 		tb = (TestBean)context.getBean("protectedInstance"); //3
 		assertEquals("protectedInstance", tb.getName());
 		assertSame(tb, context.getBean("protectedInstance"));
@@ -72,7 +72,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 		tb2 = context.getBean("privateInstance", TestBean.class); //4
 		assertEquals(2, tb2.getAge());
 		assertNotSame(tb2, tb);
-		
+
 		Object bean = context.getBean("requestScopedInstance"); //5
 		assertTrue(AopUtils.isCglibProxy(bean));
 		assertTrue(bean instanceof ScopedObject);

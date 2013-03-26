@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ModelAndViewResolve
 
 /**
  * Test fixture with {@link ModelAndViewResolverMethodReturnValueHandler}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ModelAndViewResolverMethodReturnValueHandlerTests {
@@ -69,7 +69,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		TestBean testBean = new TestBean("name");
 
 		handler.handleReturnValue(testBean, returnType, mavContainer, request);
-		
+
 		assertEquals("viewName", mavContainer.getViewName());
 		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
 		assertFalse(mavContainer.isRequestHandled());
@@ -86,12 +86,12 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	public void handleNull() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(null, returnType, mavContainer, request);
-		
+
 		assertNull(mavContainer.getView());
 		assertNull(mavContainer.getViewName());
 		assertTrue(mavContainer.getModel().isEmpty());
 	}
-	
+
 	@Test(expected=UnsupportedOperationException.class)
 	public void handleSimpleType() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
@@ -102,7 +102,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	public void handleNonSimpleType() throws Exception{
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(new TestBean(), returnType, mavContainer, request);
-		
+
 		assertTrue(mavContainer.containsAttribute("testBean"));
 	}
 
@@ -115,15 +115,16 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	private TestBean testBeanReturnValue() {
 		return null;
 	}
-	
+
 	private static class TestModelAndViewResolver implements ModelAndViewResolver {
-		
+
 		private Class<?> returnValueType;
-		
+
 		public TestModelAndViewResolver(Class<?> returnValueType) {
 			this.returnValueType = returnValueType;
 		}
 
+		@Override
 		@SuppressWarnings("rawtypes")
 		public ModelAndView resolveModelAndView(Method method, Class handlerType, Object returnValue,
 				ExtendedModelMap model, NativeWebRequest request) {

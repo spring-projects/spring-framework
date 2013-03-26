@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.StringUtils;
 
 /**
- * Exception thrown when a {@code BeanFactory} is asked for a bean
- * instance for which it cannot find a definition.
+ * Exception thrown when a {@code BeanFactory} is asked for a bean instance
+ * for which it cannot find a definition.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see BeanFactory#getBean(String)
+ * @see BeanFactory#getBean(Class)
  */
 @SuppressWarnings("serial")
 public class NoSuchBeanDefinitionException extends BeansException {
@@ -60,7 +62,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param type required type of the missing bean
 	 */
 	public NoSuchBeanDefinitionException(Class<?> type) {
-		super("No unique bean of type [" + type.getName() + "] is defined");
+		super("No qualifying bean of type [" + type.getName() + "] is defined");
 		this.beanType = type;
 	}
 
@@ -70,10 +72,10 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param message detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(Class<?> type, String message) {
-		super("No unique bean of type [" + type.getName() + "] is defined: " + message);
+		super("No qualifying bean of type [" + type.getName() + "] is defined: " + message);
 		this.beanType = type;
 	}
-	
+
 	/**
 	 * Create a new {@code NoSuchBeanDefinitionException}.
 	 * @param type required type of the missing bean
@@ -81,7 +83,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 	 * @param message detailed message describing the problem
 	 */
 	public NoSuchBeanDefinitionException(Class<?> type, String dependencyDescription, String message) {
-		super("No matching bean of type [" + type.getName() + "] found for dependency" +
+		super("No qualifying bean of type [" + type.getName() + "] found for dependency" +
 				(StringUtils.hasLength(dependencyDescription) ? " [" + dependencyDescription + "]" : "") +
 				": " + message);
 		this.beanType = type;
@@ -89,19 +91,26 @@ public class NoSuchBeanDefinitionException extends BeansException {
 
 
 	/**
-	 * Return the name of the missing bean, if it was a lookup <em>by name</em>
-	 * that failed.
+	 * Return the name of the missing bean, if it was a lookup <em>by name</em> that failed.
 	 */
 	public String getBeanName() {
 		return this.beanName;
 	}
 
 	/**
-	 * Return the required type of the missing bean, if it was a lookup
-	 * <em>by type</em> that failed.
+	 * Return the required type of the missing bean, if it was a lookup <em>by type</em> that failed.
 	 */
 	public Class<?> getBeanType() {
 		return this.beanType;
+	}
+
+	/**
+	 * Return the number of beans found when only one matching bean was expected.
+	 * For a regular NoSuchBeanDefinitionException, this will always be 0.
+	 * @see NoUniqueBeanDefinitionException
+	 */
+	public int getNumberOfBeansFound() {
+		return 0;
 	}
 
 }

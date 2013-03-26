@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.util;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -31,18 +33,19 @@ import java.util.regex.Pattern;
  * <p>The mapping matches URLs using the following rules:<br> <ul> <li>? matches one character</li> <li>* matches zero
  * or more characters</li> <li>** matches zero or more 'directories' in a path</li> </ul>
  *
- * <p>Some examples:<br> <ul> <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
- * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li> <li><code>com/*.jsp</code> - matches all
- * <code>.jsp</code> files in the <code>com</code> directory</li> <li><code>com/&#42;&#42;/test.jsp</code> - matches all
- * <code>test.jsp</code> files underneath the <code>com</code> path</li> <li><code>org/springframework/&#42;&#42;/*.jsp</code>
- * - matches all <code>.jsp</code> files underneath the <code>org/springframework</code> path</li>
- * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches <code>org/springframework/servlet/bla.jsp</code> but also
- * <code>org/springframework/testing/servlet/bla.jsp</code> and <code>org/servlet/bla.jsp</code></li> </ul>
+ * <p>Some examples:<br> <ul> <li>{@code com/t?st.jsp} - matches {@code com/test.jsp} but also
+ * {@code com/tast.jsp} or {@code com/txst.jsp}</li> <li>{@code com/*.jsp} - matches all
+ * {@code .jsp} files in the {@code com} directory</li> <li>{@code com/&#42;&#42;/test.jsp} - matches all
+ * {@code test.jsp} files underneath the {@code com} path</li> <li>{@code org/springframework/&#42;&#42;/*.jsp}
+ * - matches all {@code .jsp} files underneath the {@code org/springframework} path</li>
+ * <li>{@code org/&#42;&#42;/servlet/bla.jsp} - matches {@code org/springframework/servlet/bla.jsp} but also
+ * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li> </ul>
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -55,7 +58,9 @@ public class AntPathMatcher implements PathMatcher {
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
 	private final Map<String, AntPathStringMatcher> stringMatcherCache =
-			new ConcurrentHashMap<String, AntPathStringMatcher>();
+			new ConcurrentHashMap<String, AntPathStringMatcher>(256);
+
+	private boolean trimTokens = true;
 
 
 	/** Set the path separator to use for pattern parsing. Default is "/", as in Ant. */
@@ -63,6 +68,10 @@ public class AntPathMatcher implements PathMatcher {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
 
+	/** Whether to trim tokenized paths and patterns. */
+	public void setTrimTokens(boolean trimTokens) {
+		this.trimTokens  = trimTokens;
+	}
 
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
@@ -78,12 +87,12 @@ public class AntPathMatcher implements PathMatcher {
 
 
 	/**
-	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
+	 * Actually match the given {@code path} against the given {@code pattern}.
 	 * @param pattern the pattern to match against
 	 * @param path the path String to test
 	 * @param fullMatch whether a full pattern match is required (else a pattern match
 	 * as far as the given base path goes is sufficient)
-	 * @return <code>true</code> if the supplied <code>path</code> matched, <code>false</code> if it didn't
+	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
 	protected boolean doMatch(String pattern, String path, boolean fullMatch,
 			Map<String, String> uriTemplateVariables) {
@@ -92,8 +101,8 @@ public class AntPathMatcher implements PathMatcher {
 			return false;
 		}
 
-		String[] pattDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
+		String[] pattDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
+		String[] pathDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -213,11 +222,12 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Tests whether or not a string matches against a pattern. The pattern may contain two special characters:<br> '*'
-	 * means zero or more characters<br> '?' means one and only one character
-	 * @param pattern pattern to match against. Must not be <code>null</code>.
-	 * @param str string which must be matched against the pattern. Must not be <code>null</code>.
-	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
+	 * Tests whether or not a string matches against a pattern. The pattern may contain two special characters:
+	 * <br>'*' means zero or more characters
+	 * <br>'?' means one and only one character
+	 * @param pattern pattern to match against. Must not be {@code null}.
+	 * @param str string which must be matched against the pattern. Must not be {@code null}.
+	 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 	 */
 	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
 		AntPathStringMatcher matcher = this.stringMatcherCache.get(pattern);
@@ -230,20 +240,20 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a pattern and a full path, determine the pattern-mapped part. <p>For example: <ul>
-	 * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -> ''</li>
-	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
-	 * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>cvs/commit.html</code>'</li>
-	 * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li> </ul>
-	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>' and '<code>path</code>', but
+	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
+	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code commit.html}'</li>
+	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code cvs/commit.html}'</li>
+	 * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} -> '{@code docs/cvs/commit.html}'</li>
+	 * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li>
+	 * <li>'{@code *}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li> </ul>
+	 * <p>Assumes that {@link #match} returns {@code true} for '{@code pattern}' and '{@code path}', but
 	 * does <strong>not</strong> enforce this.
 	 */
 	public String extractPathWithinPattern(String pattern, String path) {
-		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
+		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
+		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
 
 		StringBuilder builder = new StringBuilder();
 
@@ -307,7 +317,9 @@ public class AntPathMatcher implements PathMatcher {
 		else if (!StringUtils.hasText(pattern2)) {
 			return pattern1;
 		}
-		else if (!pattern1.equals(pattern2) && !pattern1.contains("{") && match(pattern1, pattern2)) {
+
+		boolean pattern1ContainsUriVar = pattern1.indexOf('{') != -1;
+		if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1, pattern2)) {
 			// /* + /hotel -> /hotel ; "/*.*" + "/*.html" -> /*.html
 			// However /user + /user -> /usr/user ; /{foo} + /bar -> /{foo}/bar
 			return pattern2;
@@ -334,7 +346,7 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		else {
 			int dotPos1 = pattern1.indexOf('.');
-			if (dotPos1 == -1) {
+			if (dotPos1 == -1 || pattern1ContainsUriVar) {
 				// simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;
@@ -365,10 +377,10 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
-	 * <p>The returned <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List,
+	 * <p>The returned {@code Comparator} will {@linkplain java.util.Collections#sort(java.util.List,
 	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns: <ol> <li><code>/hotels/new</code></li>
-	 * <li><code>/hotels/{hotel}</code></li> <li><code>/hotels/*</code></li> </ol> the returned comparator will sort this
+	 * generic patterns. So given a list with the following patterns: <ol> <li>{@code /hotels/new}</li>
+	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li> </ol> the returned comparator will sort this
 	 * list so that the order will be as indicated.
 	 * <p>The full path given as parameter is used to test for exact matches. So when the given path is {@code /hotels/2},
 	 * the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
@@ -459,6 +471,90 @@ public class AntPathMatcher implements PathMatcher {
 		private int getPatternLength(String pattern) {
 			Matcher m = VARIABLE_PATTERN.matcher(pattern);
 			return m.replaceAll("#").length();
+		}
+	}
+
+
+	/**
+	 * Tests whether or not a string matches against a pattern via a {@link Pattern}.
+	 * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and
+	 * only one character; '{' and '}' indicate a URI template pattern. For example <tt>/users/{user}</tt>.
+	 */
+	private static class AntPathStringMatcher {
+
+		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+
+		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
+
+		private final Pattern pattern;
+
+		private final List<String> variableNames = new LinkedList<String>();
+
+		public AntPathStringMatcher(String pattern) {
+			StringBuilder patternBuilder = new StringBuilder();
+			Matcher m = GLOB_PATTERN.matcher(pattern);
+			int end = 0;
+			while (m.find()) {
+				patternBuilder.append(quote(pattern, end, m.start()));
+				String match = m.group();
+				if ("?".equals(match)) {
+					patternBuilder.append('.');
+				}
+				else if ("*".equals(match)) {
+					patternBuilder.append(".*");
+				}
+				else if (match.startsWith("{") && match.endsWith("}")) {
+					int colonIdx = match.indexOf(':');
+					if (colonIdx == -1) {
+						patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
+						this.variableNames.add(m.group(1));
+					}
+					else {
+						String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
+						patternBuilder.append('(');
+						patternBuilder.append(variablePattern);
+						patternBuilder.append(')');
+						String variableName = match.substring(1, colonIdx);
+						this.variableNames.add(variableName);
+					}
+				}
+				end = m.end();
+			}
+			patternBuilder.append(quote(pattern, end, pattern.length()));
+			this.pattern = Pattern.compile(patternBuilder.toString());
+		}
+
+		private String quote(String s, int start, int end) {
+			if (start == end) {
+				return "";
+			}
+			return Pattern.quote(s.substring(start, end));
+		}
+
+		/**
+		 * Main entry point.
+		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
+		 */
+		public boolean matchStrings(String str, Map<String, String> uriTemplateVariables) {
+			Matcher matcher = this.pattern.matcher(str);
+			if (matcher.matches()) {
+				if (uriTemplateVariables != null) {
+					// SPR-8455
+					Assert.isTrue(this.variableNames.size() == matcher.groupCount(),
+							"The number of capturing groups in the pattern segment " + this.pattern +
+							" does not match the number of URI template variables it defines, which can occur if " +
+							" capturing groups are used in a URI template regex. Use non-capturing groups instead.");
+					for (int i = 1; i <= matcher.groupCount(); i++) {
+						String name = this.variableNames.get(i - 1);
+						String value = matcher.group(i);
+						uriTemplateVariables.put(name, value);
+					}
+				}
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 

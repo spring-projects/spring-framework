@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ import org.springframework.util.ClassUtils;
  * transaction coordinator, <i>beyond standard JTA</i>: transaction names
  * and per-transaction isolation levels.
  *
- * <p>Uses OC4J's special <code>begin(name)</code> method to start a JTA transaction,
+ * <p>Uses OC4J's special {@code begin(name)} method to start a JTA transaction,
  * in orderto make <b>Spring-driven transactions visible in OC4J's transaction
  * monitor</b>. In case of Spring's declarative transactions, the exposed name will
  * (by default) be the fully-qualified class name + "." + method name.
  *
  * <p>Supports a <b>per-transaction isolation level</b> through OC4J's corresponding
- * <code>OC4JTransaction.setTransactionIsolation(int)</code> method. This will
+ * {@code OC4JTransaction.setTransactionIsolation(int)} method. This will
  * apply the specified isolation level (e.g. ISOLATION_SERIALIZABLE) to all
  * JDBC Connections that participate in the given transaction.
  *
@@ -48,7 +48,7 @@ import org.springframework.util.ClassUtils;
  * "oracle.j2ee.transaction" package in later OC4J versions.
  *
  * <p>By default, the JTA UserTransaction and TransactionManager handles are
- * fetched directly from OC4J's <code>TransactionUtility</code> in 10.1.3.2+.
+ * fetched directly from OC4J's {@code TransactionUtility} in 10.1.3.2+.
  * This can be overridden by specifying "userTransaction"/"userTransactionName"
  * and "transactionManager"/"transactionManagerName", passing in existing handles
  * or specifying corresponding JNDI locations to look up.
@@ -61,10 +61,11 @@ import org.springframework.util.ClassUtils;
  * @since 2.0.3
  * @see org.springframework.transaction.TransactionDefinition#getName
  * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel
- * @see oracle.j2ee.transaction.OC4JTransactionManager#begin(String)
- * @see oracle.j2ee.transaction.OC4JTransaction#setTransactionIsolation
- * @see oracle.j2ee.transaction.TransactionUtility
+ * @deprecated as of Spring 3.2, in favor of {@link WebLogicJtaTransactionManager}
+ * since Oracle end-of-lifed OC4J in favor of WebLogic
  */
+@Deprecated
+@SuppressWarnings("serial")
 public class OC4JJtaTransactionManager extends JtaTransactionManager {
 
 	private static final String TRANSACTION_UTILITY_CLASS_NAME =

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,15 @@ import org.junit.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockRequestDispatcher;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockRequestDispatcher;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -249,8 +249,10 @@ public class ViewResolverTests {
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			@Override
 			public RequestDispatcher getRequestDispatcher(String path) {
 				return new MockRequestDispatcher(path) {
+					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
 						assertEquals("value1", forwardRequest.getAttribute("key1"));
@@ -287,8 +289,10 @@ public class ViewResolverTests {
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			@Override
 			public RequestDispatcher getRequestDispatcher(String path) {
 				return new MockRequestDispatcher(path) {
+					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
 						assertEquals("value1", forwardRequest.getAttribute("key1"));
@@ -432,6 +436,7 @@ public class ViewResolverTests {
 	@Test
 	public void testXmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
+			@Override
 			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
 				return super.getResourceByPath(path);
@@ -453,6 +458,7 @@ public class ViewResolverTests {
 	@Test
 	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
+			@Override
 			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
 				return super.getResourceByPath(path);
@@ -485,13 +491,13 @@ public class ViewResolverTests {
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setViewClass(JstlView.class);
 		vr.setApplicationContext(wac);
-	
-		View view = vr.resolveViewName("example1", Locale.getDefault());		
+
+		View view = vr.resolveViewName("example1", Locale.getDefault());
 		View cached = vr.resolveViewName("example1", Locale.getDefault());
 		if (view != cached) {
 			fail("Caching doesn't work");
 		}
-		
+
 		vr.removeFromCache("example1", Locale.getDefault());
 		cached = vr.resolveViewName("example1", Locale.getDefault());
 		if (view == cached) {
@@ -515,11 +521,11 @@ public class ViewResolverTests {
 
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
-		
+
 		assertEquals(2, count.intValue());
 
 		viewResolver.setCacheUnresolved(true);
-		
+
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());

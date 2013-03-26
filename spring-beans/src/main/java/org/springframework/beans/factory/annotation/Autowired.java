@@ -64,14 +64,14 @@ import java.lang.annotation.Target;
  * @see Qualifier
  * @see Value
  */
-@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Autowired {
 
 	/**
 	 * Declares whether the annotated dependency is required.
-	 * <p>Defaults to <code>true</code>.
+	 * <p>Defaults to {@code true}.
 	 */
 	boolean required() default true;
 

@@ -82,8 +82,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * {@link #writeWithMessageConverters(Object, MethodParameter, ServletServerHttpRequest, ServletServerHttpResponse)}
 	 */
 	protected <T> void writeWithMessageConverters(T returnValue,
-												  MethodParameter returnType,
-												  NativeWebRequest webRequest)
+												MethodParameter returnType,
+												NativeWebRequest webRequest)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
@@ -103,9 +103,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> void writeWithMessageConverters(T returnValue,
-												  MethodParameter returnType,
-												  ServletServerHttpRequest inputMessage,
-												  ServletServerHttpResponse outputMessage)
+												MethodParameter returnType,
+												ServletServerHttpRequest inputMessage,
+												ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
 		Class<?> returnValueClass = returnValue.getClass();
@@ -123,7 +123,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 		if (compatibleMediaTypes.isEmpty()) {
-			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
+			throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 		}
 
 		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
@@ -141,9 +141,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
-		selectedMediaType = selectedMediaType.removeQualityValue();
-
 		if (selectedMediaType != null) {
+			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : messageConverters) {
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
 					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
@@ -174,11 +173,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 		else if (!allSupportedMediaTypes.isEmpty()) {
 			List<MediaType> result = new ArrayList<MediaType>();
-            for (HttpMessageConverter<?> converter : messageConverters) {
-                if (converter.canWrite(returnValueClass, null)) {
-                	result.addAll(converter.getSupportedMediaTypes());
-                }
-            }
+			for (HttpMessageConverter<?> converter : messageConverters) {
+				if (converter.canWrite(returnValueClass, null)) {
+					result.addAll(converter.getSupportedMediaTypes());
+				}
+			}
 			return result;
 		}
 		else {
@@ -197,7 +196,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
 		produceType = produceType.copyQualityValue(acceptType);
-		return MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) < 0 ? acceptType : produceType;
+		return MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) <= 0 ? acceptType : produceType;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.support.lob.LobCreator
  * @see org.springframework.orm.ibatis.SqlMapClientFactoryBean#setLobHandler
+ * @deprecated as of Spring 3.2, in favor of the native Spring support
+ * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
  */
+@Deprecated
 public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 
 	/**
@@ -76,7 +79,7 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	protected AbstractLobTypeHandler(LobHandler lobHandler) {
 		if (lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on SqlMapClientFactoryBean");
+				"lobHandler property must be set on SqlMapClientFactoryBean");
 		}
 		this.lobHandler = lobHandler;
 	}

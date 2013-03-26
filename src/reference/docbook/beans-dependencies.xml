@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-dependencies"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-dependencies">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Dependencies</title>
 
   <para>A typical enterprise application does not consist of a single object (or
@@ -12,7 +16,7 @@
     bean definitions that stand alone to a fully realized application where
     objects collaborate to achieve a goal.</para>
 
-  <section id="beans-factory-collaborators">
+  <section xml:id="beans-factory-collaborators">
     <title>Dependency injection</title>
 
     <!-- MLP: Beverly review the following two paragraphs -->
@@ -41,7 +45,7 @@
       injection</link> and <link linkend="beans-setter-injection">Setter-based
       dependency injection</link>.</para>
 
-    <section id="beans-constructor-injection">
+    <section xml:id="beans-constructor-injection">
       <title>Constructor-based dependency injection</title>
 
       <para><emphasis>Constructor-based</emphasis> DI is accomplished by the
@@ -58,18 +62,18 @@
 
       <programlisting language="java">public class SimpleMovieLister {
 
-  <lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on a <interfacename>MovieFinder</interfacename></lineannotation>
+  <lineannotation>// the SimpleMovieLister has a dependency on a MovieFinder</lineannotation>
   private MovieFinder movieFinder;
 
-  <lineannotation>// a constructor so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation>
+  <lineannotation>// a constructor so that the Spring container can 'inject' a MovieFinder</lineannotation>
   public SimpleMovieLister(MovieFinder movieFinder) {
       this.movieFinder = movieFinder;
   }
 
-  <lineannotation>// business logic that actually 'uses' the injected <interfacename>MovieFinder</interfacename> is omitted...</lineannotation>
+  <lineannotation>// business logic that actually 'uses' the injected MovieFinder is omitted...</lineannotation>
 }</programlisting>
 
-      <section id="beans-factory-ctor-arguments-resolution">
+      <section xml:id="beans-factory-ctor-arguments-resolution">
         <title>Constructor argument resolution</title>
 
         <para>Constructor argument resolution matching occurs using the
@@ -129,7 +133,7 @@ public class ExampleBean {
   }
 }</programlisting>
 
-        <section id="beans-factory-ctor-arguments-type">
+        <section xml:id="beans-factory-ctor-arguments-type">
           <title>Constructor argument type matching</title>
 
           <para>In the preceding scenario, the container
@@ -143,7 +147,7 @@ public class ExampleBean {
 &lt;/bean&gt;</programlisting>
         </section>
 
-        <section id="beans-factory-ctor-arguments-index">
+        <section xml:id="beans-factory-ctor-arguments-index">
           <title>Constructor argument index</title>
 
           <para>Use the <literal>index</literal> attribute to specify explicitly
@@ -160,7 +164,7 @@ public class ExampleBean {
             0 based</emphasis>.</para>
         </section>
 
-        <section id="beans-factory-ctor-arguments-name">
+        <section xml:id="beans-factory-ctor-arguments-name">
           <title>Constructor argument name</title>
 
           <para>As of Spring 3.0 you can also use the constructor parameter
@@ -175,8 +179,8 @@ public class ExampleBean {
           must be compiled with the debug flag enabled so that Spring can
           look up the parameter name from the constructor. If you can't compile
           your code with debug flag (or don't want to) you can use
-          <interfacename><ulink
-          url="http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html">@ConstructorProperties</ulink></interfacename>
+          <interfacename><link
+          xl:href="http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html">@ConstructorProperties</link></interfacename>
           JDK annotation to explicitly name your constructor arguments. The
           sample class would then have to look as follows:</para>
 
@@ -196,7 +200,7 @@ public class ExampleBean {
       </section>
     </section>
 
-    <section id="beans-setter-injection">
+    <section xml:id="beans-setter-injection">
       <title>Setter-based dependency injection</title>
 
       <para><emphasis>Setter-based</emphasis> DI is accomplished by the
@@ -211,15 +215,15 @@ public class ExampleBean {
 
       <programlisting language="java">public class SimpleMovieLister {
 
-  <lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation>
+  <lineannotation>// the SimpleMovieLister has a dependency on the MovieFinder</lineannotation>
   private MovieFinder movieFinder;
 
-  <lineannotation>// a setter method so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation>
+  <lineannotation>// a setter method so that the Spring container can 'inject' a MovieFinder</lineannotation>
   public void setMovieFinder(MovieFinder movieFinder) {
       this.movieFinder = movieFinder;
   }
 
-  <lineannotation>// business logic that actually 'uses' the injected <interfacename>MovieFinder</interfacename> is omitted...</lineannotation>
+  <lineannotation>// business logic that actually 'uses' the injected MovieFinder is omitted...</lineannotation>
 }</programlisting>
 
       <para>The <interfacename>ApplicationContext</interfacename> supports
@@ -265,7 +269,7 @@ public class ExampleBean {
       </sidebar>
     </section>
 
-    <section id="beans-dependency-resolution">
+    <section xml:id="beans-dependency-resolution">
       <title>Dependency resolution process</title>
 
       <para>The container performs bean dependency resolution as follows:</para>
@@ -371,7 +375,7 @@ public class ExampleBean {
         callback method</link>) are invoked.</para>
     </section>
 
-    <section id="beans-some-examples">
+    <section xml:id="beans-some-examples">
       <title>Examples of dependency injection</title>
 
       <para>The following example uses XML-based configuration metadata for
@@ -380,7 +384,7 @@ public class ExampleBean {
 
       <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
 
-<lineannotation>&lt;!-- setter injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation>
+<lineannotation>&lt;!-- setter injection using the nested &lt;ref/&gt; element --&gt;</lineannotation>
 &lt;property name="beanOne"&gt;&lt;ref bean="anotherExampleBean"/&gt;&lt;/property&gt;
 
 <lineannotation>&lt;!-- setter injection using the neater 'ref' attribute --&gt;</lineannotation>
@@ -416,7 +420,7 @@ public class ExampleBean {
 
       <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
 
-<lineannotation>&lt;!-- constructor injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation>
+<lineannotation>&lt;!-- constructor injection using the nested &lt;ref/&gt; element --&gt;</lineannotation>
 &lt;constructor-arg&gt;
   &lt;ref bean="anotherExampleBean"/&gt;
 &lt;/constructor-arg&gt;
@@ -494,7 +498,7 @@ public class ExampleBean {
     </section>
   </section>
 
-  <section id="beans-factory-properties-detailed">
+  <section xml:id="beans-factory-properties-detailed">
     <title>Dependencies and configuration in detail</title>
 
     <para>As mentioned in the previous section, you can define bean properties
@@ -505,7 +509,7 @@ public class ExampleBean {
       <literal>&lt;constructor-arg/&gt;</literal> elements for this
       purpose.</para>
 
-    <section id="beans-value-element">
+    <section xml:id="beans-value-element">
       <title>Straight values (primitives, <literal>Strings</literal>, and so
         on)</title>
 
@@ -519,7 +523,7 @@ public class ExampleBean {
 
       <programlisting language="xml">&lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
 
-<lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation>
+<lineannotation>&lt;!-- results in a setDriverClassName(String) call --&gt;</lineannotation>
 &lt;property name="driverClassName" value="com.mysql.jdbc.Driver"/&gt;
 &lt;property name="url" value="jdbc:mysql://localhost:3306/mydb"/&gt;
 &lt;property name="username" value="root"/&gt;
@@ -533,7 +537,7 @@ public class ExampleBean {
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:p="http://www.springframework.org/schema/p"
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+     http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
 &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
       destroy-method="close"
@@ -547,10 +551,10 @@ public class ExampleBean {
 </programlisting>
 
       <para>The preceding XML is more succinct; however, typos are discovered at
-        runtime rather than design time, unless you use an IDE such as <ulink
-        url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> or the <ulink
-        url="http://www.springsource.com/products/sts">SpringSource Tool
-        Suite</ulink> (STS) that support automatic property completion when you
+        runtime rather than design time, unless you use an IDE such as <link
+        xl:href="http://www.jetbrains.com/idea/">IntelliJ IDEA</link> or the <link
+        xl:href="http://www.springsource.com/products/sts">SpringSource Tool
+        Suite</link> (STS) that support automatic property completion when you
         create bean definitions. Such IDE assistance is highly
         recommended.</para>
 
@@ -560,7 +564,7 @@ public class ExampleBean {
       <programlisting language="xml">&lt;bean id="mappings"
     class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"&gt;
 
- <lineannotation>&lt;!-- typed as a <classname>java.util.Properties</classname> --&gt;</lineannotation>
+ <lineannotation>&lt;!-- typed as a java.util.Properties --&gt;</lineannotation>
  &lt;property name="properties"&gt;
     &lt;value&gt;
        jdbc.driver.className=com.mysql.jdbc.Driver
@@ -577,7 +581,7 @@ public class ExampleBean {
         favor the use of the nested <literal>&lt;value/&gt;</literal> element
         over the <literal>value</literal> attribute style.</para>
 
-      <section id="beans-idref-element">
+      <section xml:id="beans-idref-element">
         <title>The <literal>idref</literal> element</title>
 
         <para>The <literal>idref</literal> element is simply an error-proof way
@@ -622,7 +626,7 @@ public class ExampleBean {
           to validate the bean id earlier, at XML document parse time.</para>
 
         <programlisting language="xml">&lt;property name="targetName"&gt;
- <lineannotation>&lt;!-- a bean with id '<literal>theTargetBean</literal>' must exist; otherwise an exception will be thrown --&gt;</lineannotation>
+ <lineannotation>&lt;!-- a bean with id 'theTargetBean' must exist; otherwise an exception will be thrown --&gt;</lineannotation>
  &lt;idref local="theTargetBean"/&gt;
 &lt;/property&gt;</programlisting>
 
@@ -635,7 +639,7 @@ public class ExampleBean {
       </section>
     </section>
 
-    <section id="beans-ref-element">
+    <section xml:id="beans-ref-element">
       <title>References to other beans (collaborators)</title>
 
       <para>The <literal>ref</literal> element is the final element inside a
@@ -649,7 +653,7 @@ public class ExampleBean {
         container.) All references are ultimately a reference to another object.
         Scoping and validation depend on whether you specify the id/name of the
         other object through the
-        <literal>bean,<literal>local,</literal></literal> or
+        <literal>bean</literal>,<literal>local,</literal> or
         <literal>parent</literal> attributes.</para>
 
       <para>Specifying the target bean through the <literal>bean</literal>
@@ -701,7 +705,7 @@ public class ExampleBean {
 &lt;/bean&gt;</programlisting>
     </section>
 
-    <section id="beans-inner-beans">
+    <section xml:id="beans-inner-beans">
       <title>Inner beans</title>
 
       <para>A <literal>&lt;bean/&gt;</literal> element inside the
@@ -723,13 +727,12 @@ public class ExampleBean {
         container ignores these values. It also ignores the
         <literal>scope</literal> flag. Inner beans are
         <emphasis>always</emphasis> anonymous and they are
-        <emphasis>always</emphasis> scoped as <link
-        linkend="beans-factory-scopes-prototype">prototypes</link>. It is
+        <emphasis>always</emphasis> created with the outer bean. It is
         <emphasis>not</emphasis> possible to inject inner beans into
         collaborating beans other than into the enclosing bean.</para>
     </section>
 
-    <section id="beans-collection-elements">
+    <section xml:id="beans-collection-elements">
       <title>Collections</title>
 
       <para>In the <literal>&lt;list/&gt;</literal>,
@@ -741,7 +744,7 @@ public class ExampleBean {
         <interfacename>Properties</interfacename>, respectively.</para>
 
       <programlisting language="xml">&lt;bean id="moreComplexObject" class="example.ComplexObject"&gt;
-<lineannotation>&lt;!-- results in a setAdminEmails(<classname>java.util.Properties</classname>) call --&gt;</lineannotation>
+<lineannotation>&lt;!-- results in a setAdminEmails(java.util.Properties) call --&gt;</lineannotation>
 &lt;property name="adminEmails"&gt;
   &lt;props&gt;
       &lt;prop key="administrator"&gt;administrator@example.org&lt;/prop&gt;
@@ -749,14 +752,14 @@ public class ExampleBean {
       &lt;prop key="development"&gt;development@example.org&lt;/prop&gt;
   &lt;/props&gt;
 &lt;/property&gt;
-<lineannotation>&lt;!-- results in a setSomeList(<interfacename>java.util.List</interfacename>) call --&gt;</lineannotation>
+<lineannotation>&lt;!-- results in a setSomeList(java.util.List) call --&gt;</lineannotation>
 &lt;property name="someList"&gt;
   &lt;list&gt;
       &lt;value&gt;a list element followed by a reference&lt;/value&gt;
       &lt;ref bean="myDataSource" /&gt;
   &lt;/list&gt;
 &lt;/property&gt;
-<lineannotation>&lt;!-- results in a setSomeMap(<interfacename>java.util.Map</interfacename>) call --&gt;</lineannotation>
+<lineannotation>&lt;!-- results in a setSomeMap(java.util.Map) call --&gt;</lineannotation>
 &lt;property name="someMap"&gt;
   &lt;map&gt;
       &lt;entry key="an entry" value="just some string"/&gt;
@@ -777,7 +780,7 @@ public class ExampleBean {
 
       <programlisting language="xml">bean | ref | idref | list | set | map | props | value | null</programlisting>
 
-      <section id="beans-collection-elements-merging">
+      <section xml:id="beans-collection-elements-merging">
         <title>Collection merging</title>
 
         <para>As of Spring 2.0, the container supports the
@@ -859,7 +862,7 @@ support=support@example.co.uk</programlisting>
           the container uses internally.</para>
       </section>
 
-      <section id="beans-collection-merge-limitations">
+      <section xml:id="beans-collection-merge-limitations">
         <title>Limitations of collection merging</title>
 
         <para>You cannot merge different collection types (such as a
@@ -873,7 +876,7 @@ support=support@example.co.uk</programlisting>
           in Spring 2.0 and later.</para>
       </section>
 
-      <section id="beans-collection-elements-strongly-typed">
+      <section xml:id="beans-collection-elements-strongly-typed">
         <title>Strongly-typed collection (Java 5+ only)</title>
 
         <para>In Java 5 and later, you can use strongly typed collections (using
@@ -920,7 +923,7 @@ support=support@example.co.uk</programlisting>
       </section>
     </section>
 
-    <section id="beans-null-element">
+    <section xml:id="beans-null-element">
       <title>Null and empty string values</title>
 
       <para><!--Clarify difference between null value and empty string value?-->Spring
@@ -946,7 +949,7 @@ support=support@example.co.uk</programlisting>
         <methodname>exampleBean.setEmail(null)</methodname>.</para>
     </section>
 
-    <section id="beans-p-namespace">
+    <section xml:id="beans-p-namespace">
       <title>XML shortcut with the p-namespace</title>
 
       <para>The p-namespace enables you to use the <literal>bean</literal>
@@ -969,7 +972,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:p="http://www.springframework.org/schema/p"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean name="classic" class="com.example.ExampleBean"&gt;
       &lt;property name="email" value="foo@bar.com"/&gt;
@@ -992,7 +995,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:p="http://www.springframework.org/schema/p"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean name="john-classic" class="com.example.Person"&gt;
       &lt;property name="name" value="John Doe"/&gt;
@@ -1030,26 +1033,26 @@ support=support@example.co.uk</programlisting>
           time.<!--Clarify ref to all three approaches.I see two, XML and namespace.--></para>
       </note>
     </section>
-    
-   	<section id="beans-c-namespace">
+
+       <section xml:id="beans-c-namespace">
       <title>XML shortcut with the c-namespace</title>
-      
-      <para>Similar to the <xref linkend="beans-p-namespace"/>, the <emphasis>c-namespace</emphasis>, newly introduced in Spring 3.1, 
+
+      <para>Similar to the <xref linkend="beans-p-namespace"/>, the <emphasis>c-namespace</emphasis>, newly introduced in Spring 3.1,
       allows usage of inlined attributes for configuring the constructor arguments rather then nested <literal>constructor-arg</literal>
       elements.</para>
-      
+
       <para>Let's review the examples from <xref linkend="beans-constructor-injection"/> with the <literal>c</literal> namespace:</para>
-      
+
       <programlisting language="java">&lt;beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:c="http://www.springframework.org/schema/c"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
-      
+
   &lt;bean id="bar" class="x.y.Bar"/&gt;
   &lt;bean id="baz" class="x.y.Baz"/&gt;
 
-  &lt;-- 'traditional' declaration --&gt;      
+  &lt;-- 'traditional' declaration --&gt;
   &lt;bean id="foo" class="x.y.Foo"&gt;
       &lt;constructor-arg ref="bar"/&gt;
       &lt;constructor-arg ref="baz"/&gt;
@@ -1061,24 +1064,24 @@ support=support@example.co.uk</programlisting>
 
 &lt;/beans&gt;</programlisting>
 
-	  <para>The <literal>c:</literal> namespace uses the same conventions as the <literal>p:</literal> one (trailing <literal>-ref</literal> for bean references)
-	  for setting the constructor arguments by their names. And just as well, it needs to be declared even though it is not defined in an XSD schema
-	  (but it exists inside the Spring core).</para>
-	  
-	  <para>For the rare cases where the constructor argument names are not available (usually if the bytecode was compiled without debugging information), one can
-	  use fallback to the argument indexes:</para>
+      <para>The <literal>c:</literal> namespace uses the same conventions as the <literal>p:</literal> one (trailing <literal>-ref</literal> for bean references)
+      for setting the constructor arguments by their names. And just as well, it needs to be declared even though it is not defined in an XSD schema
+      (but it exists inside the Spring core).</para>
+
+      <para>For the rare cases where the constructor argument names are not available (usually if the bytecode was compiled without debugging information), one can
+      use fallback to the argument indexes:</para>
 
       <programlisting language="java">&lt;-- 'c-namespace' index declaration --&gt;
 &lt;bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz"&gt;</programlisting>
 
-      <note>Due to the XML grammar, the index notation requires the presence of the leading <emphasis>_</emphasis> as XML attribute names cannot start
-      with a number (even though some IDE allow it).</note>
-      
-	  <para>In practice, the constructor resolution <link linkend="beans-factory-ctor-arguments-resolution">mechanism</link> is quite efficient in matching arguments so 
-	  unless one really needs to, we recommend using the name notation through-out your configuration.</para>
+      <note><para>Due to the XML grammar, the index notation requires the presence of the leading <emphasis>_</emphasis> as XML attribute names cannot start
+      with a number (even though some IDE allow it).</para></note>
+
+      <para>In practice, the constructor resolution <link linkend="beans-factory-ctor-arguments-resolution">mechanism</link> is quite efficient in matching arguments so
+      unless one really needs to, we recommend using the name notation through-out your configuration.</para>
     </section>
 
-    <section id="beans-compound-property-names">
+    <section xml:id="beans-compound-property-names">
       <title>Compound property names</title>
 
       <para>You can use compound or nested property names when you set bean
@@ -1102,7 +1105,7 @@ support=support@example.co.uk</programlisting>
     </section>
   </section>
 
-  <section id="beans-factory-dependson">
+  <section xml:id="beans-factory-dependson">
     <title>Using <literal>depends-on</literal></title>
 
     <para>If a bean is a dependency of another that usually means that one bean
@@ -1144,7 +1147,7 @@ support=support@example.co.uk</programlisting>
     </note>
   </section>
 
-  <section id="beans-factory-lazy-init">
+  <section xml:id="beans-factory-lazy-init">
     <title>Lazy-initialized
       beans<!--Changed to lazy-initialized from lazily instantiated because attribute is lazy-init, and there was a lot of inconsistency. --></title>
 
@@ -1190,7 +1193,7 @@ support=support@example.co.uk</programlisting>
 &lt;/beans&gt;</programlisting>
   </section>
 
-  <section id="beans-factory-autowire">
+  <section xml:id="beans-factory-autowire">
     <title>Autowiring collaborators</title>
 
     <!--I've moved around info and done a lot of editing/reformatting in this section, but nothing is missing.-->
@@ -1225,7 +1228,7 @@ support=support@example.co.uk</programlisting>
       five modes. You specify autowiring <emphasis>per</emphasis> bean and thus
       can choose which ones to autowire.</para>
 
-    <table id="beans-factory-autowiring-modes-tbl">
+    <table xml:id="beans-factory-autowiring-modes-tbl">
       <title>Autowiring modes</title>
 
       <tgroup cols="2">
@@ -1301,7 +1304,7 @@ support=support@example.co.uk</programlisting>
     <para>You can combine autowire behavior with dependency checking, which is
       performed after autowiring completes.</para>
 
-    <section id="beans-autowired-exceptions">
+    <section xml:id="beans-autowired-exceptions">
       <title>Limitations and disadvantages of autowiring</title>
 
       <para>Autowiring works best when it is used consistently across a project.
@@ -1377,7 +1380,7 @@ support=support@example.co.uk</programlisting>
       </itemizedlist>
     </section>
 
-    <section id="beans-factory-autowire-candidate">
+    <section xml:id="beans-factory-autowire-candidate">
       <title>Excluding a bean from autowiring</title>
 
       <para>On a per-bean basis, you can exclude a bean from autowiring. In
@@ -1410,7 +1413,7 @@ support=support@example.co.uk</programlisting>
     </section>
   </section>
 
-  <section id="beans-factory-method-injection">
+  <section xml:id="beans-factory-method-injection">
     <title>Method injection</title>
 
     <para>In most application scenarios, most beans in the container are <link
@@ -1446,9 +1449,9 @@ public class CommandManager implements ApplicationContextAware {
  private ApplicationContext applicationContext;
 
  public Object process(Map commandState) {
-    <lineannotation>// grab a new instance of the appropriate <interfacename>Command</interfacename></lineannotation>
+    <lineannotation>// grab a new instance of the appropriate Command</lineannotation>
     Command command = createCommand();
-    <lineannotation>// set the state on the (hopefully brand new) <interfacename>Command</interfacename> instance</lineannotation>
+    <lineannotation>// set the state on the (hopefully brand new) Command instance</lineannotation>
     command.setState(commandState);
     return command.execute();
  }
@@ -1472,11 +1475,11 @@ public class CommandManager implements ApplicationContextAware {
 
     <sidebar>
       <para>You can read more about the motivation for Method Injection in
-        <ulink url="http://blog.springsource.com/2004/08/06/method-injection/"
-        >this blog entry</ulink>.</para>
+        <link xl:href="http://blog.springsource.com/2004/08/06/method-injection/"
+        >this blog entry</link>.</para>
     </sidebar>
 
-    <section id="beans-factory-lookup-method-injection">
+    <section xml:id="beans-factory-lookup-method-injection">
       <title>Lookup method injection</title>
 
       <!--Deleted a box here that doesn't seem to have much info; I moved the blog entry link above. -->
@@ -1519,9 +1522,9 @@ public class CommandManager implements ApplicationContextAware {
 public abstract class CommandManager {
 
  public Object process(Object commandState) {
-    <lineannotation>// grab a new instance of the appropriate <interfacename>Command</interfacename> interface</lineannotation>
+    <lineannotation>// grab a new instance of the appropriate Command interface</lineannotation>
     Command command = createCommand();
-    <lineannotation>// set the state on the (hopefully brand new) <interfacename>Command</interfacename> instance</lineannotation>
+    <lineannotation>// set the state on the (hopefully brand new) Command instance</lineannotation>
     command.setState(commandState);
     return command.execute();
  }
@@ -1546,7 +1549,7 @@ public abstract class CommandManager {
 <lineannotation>&lt;!-- inject dependencies here as required --&gt;</lineannotation>
 &lt;/bean&gt;
 
-<lineannotation>&lt;!-- <literal>commandProcessor</literal> uses <literal>statefulCommandHelper</literal> --&gt;</lineannotation>
+<lineannotation>&lt;!-- commandProcessor uses statefulCommandHelper --&gt;</lineannotation>
 &lt;bean id="commandManager" class="fiona.apple.CommandManager"&gt;
 &lt;lookup-method name="createCommand" bean="command"/&gt;
 &lt;/bean&gt;</programlisting>
@@ -1569,14 +1572,14 @@ public abstract class CommandManager {
           <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows
           you to specify your own lookup interface as opposed to a
           Spring-specific lookup interface. Consult the JavaDocs for these
-          classes as well as this <ulink
-          url="http://blog.arendsen.net/index.php/2006/10/05/on-the-servicelocatorfactorybean-dlas-and-the-sustainability-of-code-and-design/"
-          >blog entry</ulink> for additional information
+          classes as well as this <link
+          xl:href="http://blog.arendsen.net/index.php/2006/10/05/on-the-servicelocatorfactorybean-dlas-and-the-sustainability-of-code-and-design/"
+          >blog entry</link> for additional information
           ServiceLocatorFactoryBean.</para>
       </tip>
     </section>
 
-    <section id="beans-factory-arbitrary-method-replacement">
+    <section xml:id="beans-factory-arbitrary-method-replacement">
       <title>Arbitrary method replacement</title>
 
       <para>A less useful form of method injection than lookup method Injection
@@ -1604,8 +1607,8 @@ public String computeValue(String input) {
         <interfacename>org.springframework.beans.factory.support.MethodReplacer</interfacename>
         interface provides the new method definition.</para>
 
-      <programlisting language="java"><lineannotation>/** meant to be used to override the existing <methodname>computeValue(String)</methodname>
-  implementation in <classname>MyValueCalculator</classname>
+      <programlisting language="java"><lineannotation>/** meant to be used to override the existing computeValue(String)
+  implementation in MyValueCalculator
 */</lineannotation>
 public class ReplacementComputeValue implements MethodReplacer {
 

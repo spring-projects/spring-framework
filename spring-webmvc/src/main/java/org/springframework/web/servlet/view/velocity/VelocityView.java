@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,13 @@ import org.springframework.web.util.NestedServletException;
  * the encoding of the Velocity template file
  * <li><b>velocityFormatterAttribute</b> (optional, default=null): the name of
  * the VelocityFormatter helper object to expose in the Velocity context of this
- * view, or <code>null</code> if not needed. VelocityFormatter is part of standard Velocity.
+ * view, or {@code null} if not needed. VelocityFormatter is part of standard Velocity.
  * <li><b>dateToolAttribute</b> (optional, default=null): the name of the
  * DateTool helper object to expose in the Velocity context of this view,
- * or <code>null</code> if not needed. DateTool is part of Velocity Tools.
+ * or {@code null} if not needed. DateTool is part of Velocity Tools.
  * <li><b>numberToolAttribute</b> (optional, default=null): the name of the
  * NumberTool helper object to expose in the Velocity context of this view,
- * or <code>null</code> if not needed. NumberTool is part of Velocity Tools.
+ * or {@code null} if not needed. NumberTool is part of Velocity Tools.
  * <li><b>cacheTemplate</b> (optional, default=false): whether or not the Velocity
  * template should be cached. It should normally be true in production, but setting
  * this to false enables us to modify Velocity templates without restarting the
@@ -113,8 +113,8 @@ public class VelocityView extends AbstractTemplateView {
 	 * on a specific tools package.
 	 * <p>For tools that are part of the view package of Velocity Tools, a special
 	 * Velocity context and a special init callback are needed. Use VelocityToolboxView
-	 * in such a case, or override <code>createVelocityContext</code> and
-	 * <code>initTool</code> accordingly.
+	 * in such a case, or override {@code createVelocityContext} and
+	 * {@code initTool} accordingly.
 	 * <p>For a simple VelocityFormatter instance or special locale-aware instances
 	 * of DateTool/NumberTool, which are part of the generic package of Velocity Tools,
 	 * specify the "velocityFormatterAttribute", "dateToolAttribute" or
@@ -133,7 +133,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the DateTool helper object to expose in the Velocity context
-	 * of this view, or <code>null</code> if not needed. The exposed DateTool will be aware of
+	 * of this view, or {@code null} if not needed. The exposed DateTool will be aware of
 	 * the current locale, as determined by Spring's LocaleResolver.
 	 * <p>DateTool is part of the generic package of Velocity Tools 1.0.
 	 * Spring uses a special locale-aware subclass of DateTool.
@@ -147,7 +147,7 @@ public class VelocityView extends AbstractTemplateView {
 
 	/**
 	 * Set the name of the NumberTool helper object to expose in the Velocity context
-	 * of this view, or <code>null</code> if not needed. The exposed NumberTool will be aware of
+	 * of this view, or {@code null} if not needed. The exposed NumberTool will be aware of
 	 * the current locale, as determined by Spring's LocaleResolver.
 	 * <p>NumberTool is part of the generic package of Velocity Tools 1.1.
 	 * Spring uses a special locale-aware subclass of NumberTool.
@@ -294,7 +294,7 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by <code>renderMergedTemplateModel</code>. The default implementation
+	 * <p>Called by {@code renderMergedTemplateModel}. The default implementation
 	 * is empty. This method can be overridden to add custom helpers to the model.
 	 * @param model the model that will be passed to the template for merging
 	 * @param request current HTTP request
@@ -348,8 +348,8 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by <code>renderMergedTemplateModel</code>. Default implementation
-	 * delegates to <code>exposeHelpers(velocityContext, request)</code>. This method
+	 * <p>Called by {@code renderMergedTemplateModel}. Default implementation
+	 * delegates to {@code exposeHelpers(velocityContext, request)}. This method
 	 * can be overridden to add special tools to the context, needing the servlet response
 	 * to initialize (see Velocity Tools, for example LinkTool and ViewTool/ChainedContext).
 	 * @param velocityContext Velocity context that will be passed to the template
@@ -380,7 +380,7 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Expose the tool attributes, according to corresponding bean property settings.
 	 * <p>Do not override this method unless for further tools driven by bean properties.
-	 * Override one of the <code>exposeHelpers</code> methods to add custom helpers.
+	 * Override one of the {@code exposeHelpers} methods to add custom helpers.
 	 * @param velocityContext Velocity context that will be passed to the template
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding model attributes
@@ -443,8 +443,8 @@ public class VelocityView extends AbstractTemplateView {
 	 * Render the Velocity view to the given response, using the given Velocity
 	 * context which contains the complete template model to use.
 	 * <p>The default implementation renders the template specified by the "url"
-	 * bean property, retrieved via <code>getTemplate</code>. It delegates to the
-	 * <code>mergeTemplate</code> method to merge the template instance with the
+	 * bean property, retrieved via {@code getTemplate}. It delegates to the
+	 * {@code mergeTemplate} method to merge the template instance with the
 	 * given Velocity context.
 	 * <p>Can be overridden to customize the behavior, for example to render
 	 * multiple templates into a single view.

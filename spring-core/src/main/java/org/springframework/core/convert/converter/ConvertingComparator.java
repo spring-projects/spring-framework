@@ -18,7 +18,6 @@ package org.springframework.core.convert.converter;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
@@ -44,7 +43,6 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	/**
 	 * Create a new {@link ConvertingComparator} instance.
 	 *
-	 * @param comparator the underlying comparator used to compare the converted values
 	 * @param converter the converter
 	 */
 	@SuppressWarnings("unchecked")
@@ -86,8 +84,8 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	}
 
 	/**
-	 * Create a new {@link ConvertingComparator} that compares {@link Map.Entry map
-	 * entries} based on their {@link Map.Entry#getKey() keys}.
+	 * Create a new {@link ConvertingComparator} that compares {@link java.util.Map.Entry
+	 * map * entries} based on their {@link java.util.Map.Entry#getKey() keys}.
 	 *
 	 * @param comparator the underlying comparator used to compare keys
 	 * @return a new {@link ConvertingComparator} instance
@@ -96,15 +94,15 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 			Comparator<K> comparator) {
 		return new ConvertingComparator<Map.Entry<K,V>, K>(comparator, new Converter<Map.Entry<K, V>, K>() {
 
-			public K convert(Entry<K, V> source) {
+			public K convert(Map.Entry<K, V> source) {
 				return source.getKey();
 			}
 		});
 	}
 
 	/**
-	 * Create a new {@link ConvertingComparator} that compares {@link Map.Entry map
-	 * entries} based on their {@link Map.Entry#getValue() values}.
+	 * Create a new {@link ConvertingComparator} that compares {@link java.util.Map.Entry
+	 * map entries} based on their {@link java.util.Map.Entry#getValue() values}.
 	 *
 	 * @param comparator the underlying comparator used to compare values
 	 * @return a new {@link ConvertingComparator} instance
@@ -113,7 +111,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 			Comparator<V> comparator) {
 		return new ConvertingComparator<Map.Entry<K,V>, V>(comparator, new Converter<Map.Entry<K, V>, V>() {
 
-			public V convert(Entry<K, V> source) {
+			public V convert(Map.Entry<K, V> source) {
 				return source.getValue();
 			}
 		});

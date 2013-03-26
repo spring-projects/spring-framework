@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Base class for classes that are setting up a
- * <code>java.util.concurrent.ExecutorService</code>
+ * {@code java.util.concurrent.ExecutorService}
  * (typically a {@link java.util.concurrent.ThreadPoolExecutor}).
  * Defines common configuration settings and common lifecycle handling.
  *
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
  */
+@SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
 		implements BeanNameAware, InitializingBean, DisposableBean {
 
@@ -52,6 +54,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 
 	private boolean waitForTasksToCompleteOnShutdown = false;
+
+	private int awaitTerminationSeconds = 0;
 
 	private String beanName;
 
@@ -84,14 +88,49 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	/**
-	 * Set whether to wait for scheduled tasks to complete on shutdown.
-	 * <p>Default is "false". Switch this to "true" if you prefer
-	 * fully completed tasks at the expense of a longer shutdown phase.
+	 * Set whether to wait for scheduled tasks to complete on shutdown,
+	 * not interrupting running tasks and executing all tasks in the queue.
+	 * <p>Default is "false", shutting down immediately through interrupting
+	 * ongoing tasks and clearing the queue. Switch this flag to "true" if you
+	 * prefer fully completed tasks at the expense of a longer shutdown phase.
+	 * <p>Note that Spring's container shutdown continues while ongoing tasks
+	 * are being completed. If you want this executor to block and wait for the
+	 * termination of tasks before the rest of the container continues to shut
+	 * down - e.g. in order to keep up other resources that your tasks may need -,
+	 * set the {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"}
+	 * property instead of or in addition to this property.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
 	 */
 	public void setWaitForTasksToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
 		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
+	}
+
+	/**
+	 * Set the maximum number of seconds that this executor is supposed to block
+	 * on shutdown in order to wait for remaining tasks to complete their execution
+	 * before the rest of the container continues to shut down. This is particularly
+	 * useful if your remaining tasks are likely to need access to other resources
+	 * that are also managed by the container.
+	 * <p>By default, this executor won't wait for the termination of tasks at all.
+	 * It will either shut down immediately, interrupting ongoing tasks and clearing
+	 * the remaining task queue - or, if the
+	 * {@link #setWaitForTasksToCompleteOnShutdown "waitForTasksToCompleteOnShutdown"}
+	 * flag has been set to {@code true}, it will continue to fully execute all
+	 * ongoing tasks as well as all remaining tasks in the queue, in parallel to
+	 * the rest of the container shutting down.
+	 * <p>In either case, if you specify an await-termination period using this property,
+	 * this executor will wait for the given time (max) for the termination of tasks.
+	 * As a rule of thumb, specify a significantly higher timeout here if you set
+	 * "waitForTasksToCompleteOnShutdown" to {@code true} at the same time,
+	 * since all remaining tasks in the queue will still get executed - in contrast
+	 * to the default shutdown behavior where it's just about waiting for currently
+	 * executing tasks that aren't reacting to thread interruption.
+	 * @see java.util.concurrent.ExecutorService#shutdown()
+	 * @see java.util.concurrent.ExecutorService#awaitTermination
+	 */
+	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
+		this.awaitTerminationSeconds = awaitTerminationSeconds;
 	}
 
 	public void setBeanName(String name) {
@@ -100,7 +139,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
-	 * Calls <code>initialize()</code> after the container applied all property values.
+	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
 	public void afterPropertiesSet() {
@@ -122,7 +161,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Create the target {@link java.util.concurrent.ExecutorService} instance.
-	 * Called by <code>afterPropertiesSet</code>.
+	 * Called by {@code afterPropertiesSet}.
 	 * @param threadFactory the ThreadFactory to use
 	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use
 	 * @return a new ExecutorService instance
@@ -133,7 +172,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
-	 * Calls <code>shutdown</code> when the BeanFactory destroys
+	 * Calls {@code shutdown} when the BeanFactory destroys
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */
@@ -144,6 +183,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Perform a shutdown on the ThreadPoolExecutor.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
+	 * @see java.util.concurrent.ExecutorService#shutdownNow()
+	 * @see #awaitTerminationIfNecessary()
 	 */
 	public void shutdown() {
 		if (logger.isInfoEnabled()) {
@@ -154,6 +195,31 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		}
 		else {
 			this.executor.shutdownNow();
+		}
+		awaitTerminationIfNecessary();
+	}
+
+	/**
+	 * Wait for the executor to terminate, according to the value of the
+	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
+	 */
+	private void awaitTerminationIfNecessary() {
+		if (this.awaitTerminationSeconds > 0) {
+			try {
+				if (!this.executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Timed out while waiting for executor" +
+								(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");
+					}
+				}
+			}
+			catch (InterruptedException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Interrupted while waiting for executor" +
+							(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");
+				}
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -24,12 +25,14 @@ import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * A description of a JavaBeans Property that allows us to avoid a dependency on
- * <code>java.beans.PropertyDescriptor</code>. The <code>java.beans</code> package
+ * {@code java.beans.PropertyDescriptor}. The {@code java.beans} package
  * is not available in a number of environments (e.g. Android, Java ME), so this is
  * desirable for portability of Spring's core conversion facility.
  *
@@ -37,11 +40,15 @@ import org.springframework.util.StringUtils;
  * The built TypeDescriptor can then be used to convert from/to the property type.
  *
  * @author Keith Donald
+ * @author Phillip Webb
  * @since 3.1
  * @see TypeDescriptor#TypeDescriptor(Property)
  * @see TypeDescriptor#nested(Property, int)
  */
 public final class Property {
+
+	private static Map<Property, Annotation[]> annotationCache =
+			new ConcurrentReferenceHashMap<Property, Annotation[]>();
 
 	private final Class<?> objectType;
 
@@ -50,11 +57,10 @@ public final class Property {
 	private final Method writeMethod;
 
 	private final String name;
-	
+
 	private final MethodParameter methodParameter;
 
-	private final Annotation[] annotations;
-
+	private Annotation[] annotations;
 
 	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
 		this(objectType, readMethod, writeMethod, null);
@@ -65,13 +71,7 @@ public final class Property {
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.methodParameter = resolveMethodParameter();
-		if (name != null) {
-			this.name = name;
-		}
-		else {
-			this.name = resolveName();
-		}
-		this.annotations = resolveAnnotations();
+		this.name = (name == null ? resolveName() : name);
 	}
 
 
@@ -90,21 +90,21 @@ public final class Property {
 	}
 
 	/**
-	 * The property type: e.g. <code>java.lang.String</code>
+	 * The property type: e.g. {@code java.lang.String}
 	 */
 	public Class<?> getType() {
 		return this.methodParameter.getParameterType();
 	}
 
 	/**
-	 * The property getter method: e.g. <code>getFoo()</code>
+	 * The property getter method: e.g. {@code getFoo()}
 	 */
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
 
 	/**
-	 * The property setter method: e.g. <code>setFoo(String)</code>
+	 * The property setter method: e.g. {@code setFoo(String)}
 	 */
 	public Method getWriteMethod() {
 		return this.writeMethod;
@@ -112,18 +112,21 @@ public final class Property {
 
 
 	// package private
-	
+
 	MethodParameter getMethodParameter() {
 		return this.methodParameter;
 	}
 
 	Annotation[] getAnnotations() {
+		if(this.annotations == null) {
+			this.annotations = resolveAnnotations();
+		}
 		return this.annotations;
 	}
 
 
 	// internal helpers
-	
+
 	private String resolveName() {
 		if (this.readMethod != null) {
 			int index = this.readMethod.getName().indexOf("get");
@@ -166,48 +169,48 @@ public final class Property {
 		}
 		return write;
 	}
-	
+
 	private MethodParameter resolveReadMethodParameter() {
 		if (getReadMethod() == null) {
 			return null;
 		}
-		return resolveParameterType(new MethodParameter(getReadMethod(), -1));			
+		return resolveParameterType(new MethodParameter(getReadMethod(), -1));
 	}
 
 	private MethodParameter resolveWriteMethodParameter() {
 		if (getWriteMethod() == null) {
 			return null;
 		}
-		return resolveParameterType(new MethodParameter(getWriteMethod(), 0));			
+		return resolveParameterType(new MethodParameter(getWriteMethod(), 0));
 	}
 
 	private MethodParameter resolveParameterType(MethodParameter parameter) {
 		// needed to resolve generic property types that parameterized by sub-classes e.g. T getFoo();
 		GenericTypeResolver.resolveParameterType(parameter, getObjectType());
-		return parameter;			
+		return parameter;
 	}
-	
+
 	private Annotation[] resolveAnnotations() {
-		Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
-		Method readMethod = getReadMethod();
-		if (readMethod != null) {
-			for (Annotation ann : readMethod.getAnnotations()) {
-				annMap.put(ann.annotationType(), ann);
+		Annotation[] annotations = annotationCache.get(this);
+		if(annotations == null) {
+			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
+			addAnnotationsToMap(annotationMap, getReadMethod());
+			addAnnotationsToMap(annotationMap, getWriteMethod());
+			addAnnotationsToMap(annotationMap, getField());
+			annotations = annotationMap.values().toArray(new Annotation[annotationMap.size()]);
+			annotationCache.put(this, annotations);
+		}
+		return annotations;
+	}
+
+	private void addAnnotationsToMap(
+		Map<Class<? extends Annotation>, Annotation> annotationMap,
+		AnnotatedElement object) {
+		if (object != null) {
+			for (Annotation annotation : object.getAnnotations()) {
+				annotationMap.put(annotation.annotationType(), annotation);
 			}
 		}
-		Method writeMethod = getWriteMethod();
-		if (writeMethod != null) {
-			for (Annotation ann : writeMethod.getAnnotations()) {
-				annMap.put(ann.annotationType(), ann);
-			}
-		}
-		Field field = getField();
-		if (field != null) {
-			for (Annotation ann : field.getAnnotations()) {
-				annMap.put(ann.annotationType(), ann);
-			}
-		}
-		return annMap.values().toArray(new Annotation[annMap.size()]);
 	}
 
 	private Field getField() {
@@ -238,4 +241,34 @@ public final class Property {
 		}
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int hashCode = 1;
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(objectType);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(readMethod);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(writeMethod);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(name);
+		return hashCode;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Property other = (Property) obj;
+		boolean equals = true;
+		equals &= ObjectUtils.nullSafeEquals(objectType, other.objectType);
+		equals &= ObjectUtils.nullSafeEquals(readMethod, other.readMethod);
+		equals &= ObjectUtils.nullSafeEquals(writeMethod, other.writeMethod);
+		equals &= ObjectUtils.nullSafeEquals(name, other.name);
+		return equals;
+	}
 }

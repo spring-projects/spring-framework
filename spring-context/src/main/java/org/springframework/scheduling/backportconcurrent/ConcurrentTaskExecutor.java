@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
  * Adapter that takes a JSR-166 backport
- * <code>edu.emory.mathcs.backport.java.util.concurrent.Executor</code> and
+ * {@code edu.emory.mathcs.backport.java.util.concurrent.Executor} and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
  *
  * <p><b>NOTE:</b> This class implements Spring's
@@ -54,7 +54,9 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
  * @see edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor
  * @see edu.emory.mathcs.backport.java.util.concurrent.Executors
  * @see ThreadPoolTaskExecutor
+ * @deprecated as of Spring 3.2, in favor of using the native JDK 6 concurrent support
  */
+@Deprecated
 public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor {
 
 	private Executor concurrentExecutor;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ class SmartMimeMessage extends MimeMessage {
 	/**
 	 * Create a new SmartMimeMessage.
 	 * @param session the JavaMail Session to create the message for
-	 * @param defaultEncoding the default encoding, or <code>null</code> if none
-	 * @param defaultFileTypeMap the default FileTypeMap, or <code>null</code> if none
+	 * @param defaultEncoding the default encoding, or {@code null} if none
+	 * @param defaultFileTypeMap the default FileTypeMap, or {@code null} if none
 	 */
 	public SmartMimeMessage(Session session, String defaultEncoding, FileTypeMap defaultFileTypeMap) {
 		super(session);
@@ -56,14 +56,14 @@ class SmartMimeMessage extends MimeMessage {
 
 
 	/**
-	 * Return the default encoding of this message, or <code>null</code> if none.
+	 * Return the default encoding of this message, or {@code null} if none.
 	 */
 	public final String getDefaultEncoding() {
 		return this.defaultEncoding;
 	}
 
 	/**
-	 * Return the default FileTypeMap of this message, or <code>null</code> if none.
+	 * Return the default FileTypeMap of this message, or {@code null} if none.
 	 */
 	public final FileTypeMap getDefaultFileTypeMap() {
 		return this.defaultFileTypeMap;

@@ -36,6 +36,7 @@ import org.springframework.util.FileCopyUtils;
  * method.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see RestTemplate#setErrorHandler
  */
@@ -45,16 +46,17 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * Delegates to {@link #hasError(HttpStatus)} with the response status code.
 	 */
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		return hasError(getStatusCode(response));
+		return hasError(getHttpStatusCode(response));
 	}
 
-	private HttpStatus getStatusCode(ClientHttpResponse response) throws IOException {
+	private HttpStatus getHttpStatusCode(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode;
 		try {
 			statusCode = response.getStatusCode();
 		}
 		catch (IllegalArgumentException ex) {
-			throw new RestClientException("Unknown status code [" + response.getRawStatusCode() + "]");
+			throw new UnknownHttpStatusCodeException(response.getRawStatusCode(),
+					response.getStatusText(), response.getHeaders(), getResponseBody(response), getCharset(response));
 		}
 		return statusCode;
 	}
@@ -66,7 +68,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
 	 * @param statusCode the HTTP status code
-	 * @return <code>true</code> if the response has an error; <code>false</code> otherwise
+	 * @return {@code true} if the response has an error; {@code false} otherwise
 	 */
 	protected boolean hasError(HttpStatus statusCode) {
 		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||
@@ -80,16 +82,14 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * and a {@link RestClientException} in other cases.
 	 */
 	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = getStatusCode(response);
-		HttpHeaders headers = response.getHeaders();
-		MediaType contentType = headers.getContentType();
-		Charset charset = contentType != null ? contentType.getCharSet() : null;
-		byte[] body = getResponseBody(response);
+		HttpStatus statusCode = getHttpStatusCode(response);
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				throw new HttpClientErrorException(statusCode, response.getStatusText(), headers, body, charset);
+				throw new HttpClientErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
 			case SERVER_ERROR:
-				throw new HttpServerErrorException(statusCode, response.getStatusText(), headers, body, charset);
+				throw new HttpServerErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
 			default:
 				throw new RestClientException("Unknown status code [" + statusCode + "]");
 		}
@@ -106,6 +106,12 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			// ignore
 		}
 		return new byte[0];
+	}
+
+	private Charset getCharset(ClientHttpResponse response) {
+		HttpHeaders headers = response.getHeaders();
+		MediaType contentType = headers.getContentType();
+		return contentType != null ? contentType.getCharSet() : null;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,9 @@
 
 package org.springframework.scheduling.annotation;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
@@ -34,12 +27,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -51,6 +49,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
+
 	@Test
 	public void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -58,7 +61,8 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		try {
 			ctx.refresh();
 			fail("expected exception");
-		} catch (BeanCreationException ex) {
+		}
+		catch (BeanCreationException ex) {
 			assertTrue(ex.getRootCause().getMessage().startsWith("@Scheduled method 'scheduled' found"));
 		}
 	}
@@ -69,11 +73,11 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(Config.class, SubclassProxyTxConfig.class, RepoConfigA.class);
 		ctx.refresh();
 
-		Thread.sleep(10); // allow @Scheduled method to be called several times
+		Thread.sleep(100); // allow @Scheduled method to be called several times
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isAopProxy(repository), is(true));
+		assertThat("repository is not a proxy", AopUtils.isAopProxy(repository), equalTo(true));
 		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
 		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
 	}
@@ -84,7 +88,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigB.class);
 		ctx.refresh();
 
-		Thread.sleep(30); // allow @Scheduled method to be called several times
+		Thread.sleep(50); // allow @Scheduled method to be called several times
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
@@ -92,6 +96,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
 		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
 	}
+
 
 	@Configuration
 	@EnableTransactionManagement
@@ -133,8 +138,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		@Bean
 		public PersistenceExceptionTranslator peTranslator() {
-			PersistenceExceptionTranslator txlator = createMock(PersistenceExceptionTranslator.class);
-			replay(txlator);
+			PersistenceExceptionTranslator txlator = mock(PersistenceExceptionTranslator.class);
 			return txlator;
 		}
 	}
@@ -154,6 +158,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 			this.count.incrementAndGet();
 		}
 
+		@Override
 		public int getInvocationCount() {
 			return this.count.get();
 		}
@@ -169,15 +174,17 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		private final AtomicInteger count = new AtomicInteger(0);
 
+		@Override
 		@Transactional
 		@Scheduled(fixedDelay = 5)
 		public void scheduled() {
 			this.count.incrementAndGet();
 		}
 
+		@Override
 		public int getInvocationCount() {
 			return this.count.get();
 		}
 	}
-}
 
+}

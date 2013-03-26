@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.expression.spel.standard;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
@@ -27,54 +29,20 @@ import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.ast.Assign;
-import org.springframework.expression.spel.ast.BeanReference;
-import org.springframework.expression.spel.ast.BooleanLiteral;
-import org.springframework.expression.spel.ast.CompoundExpression;
-import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.Elvis;
-import org.springframework.expression.spel.ast.FunctionReference;
-import org.springframework.expression.spel.ast.Identifier;
-import org.springframework.expression.spel.ast.Indexer;
-import org.springframework.expression.spel.ast.InlineList;
-import org.springframework.expression.spel.ast.Literal;
-import org.springframework.expression.spel.ast.MethodReference;
-import org.springframework.expression.spel.ast.NullLiteral;
-import org.springframework.expression.spel.ast.OpAnd;
-import org.springframework.expression.spel.ast.OpDivide;
-import org.springframework.expression.spel.ast.OpEQ;
-import org.springframework.expression.spel.ast.OpGE;
-import org.springframework.expression.spel.ast.OpGT;
-import org.springframework.expression.spel.ast.OpLE;
-import org.springframework.expression.spel.ast.OpLT;
-import org.springframework.expression.spel.ast.OpMinus;
-import org.springframework.expression.spel.ast.OpModulus;
-import org.springframework.expression.spel.ast.OpMultiply;
-import org.springframework.expression.spel.ast.OpNE;
-import org.springframework.expression.spel.ast.OpOr;
-import org.springframework.expression.spel.ast.OpPlus;
-import org.springframework.expression.spel.ast.OperatorInstanceof;
-import org.springframework.expression.spel.ast.OperatorMatches;
-import org.springframework.expression.spel.ast.OperatorNot;
-import org.springframework.expression.spel.ast.OperatorPower;
-import org.springframework.expression.spel.ast.Projection;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
-import org.springframework.expression.spel.ast.QualifiedIdentifier;
-import org.springframework.expression.spel.ast.Selection;
-import org.springframework.expression.spel.ast.SpelNodeImpl;
-import org.springframework.expression.spel.ast.StringLiteral;
-import org.springframework.expression.spel.ast.Ternary;
-import org.springframework.expression.spel.ast.TypeReference;
-import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.expression.spel.ast.*;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Hand written SpEL parser. Instances are reusable but are not thread safe.
  *
  * @author Andy Clement
+ * @author Phillip Webb
  * @since 3.0
  */
 class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
+
+	private static final Pattern VALID_QUALIFIED_ID_PATTERN = Pattern.compile("[\\p{L}\\p{N}_$]+");
 
 	// The expression being parsed
 	private String expressionString;
@@ -137,8 +105,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			Token t = peekToken();
 			if (t.kind==TokenKind.ASSIGN) { // a=b
 				if (expr==null) {
-				expr = new NullLiteral(toPos(t.startpos-1,t.endpos-1));
-			}
+					expr = new NullLiteral(toPos(t.startpos-1,t.endpos-1));
+				}
 				nextToken();
 				SpelNodeImpl assignedValue = eatLogicalOrExpression();
 				return new Assign(toPos(t),expr,assignedValue);
@@ -172,7 +140,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		while (peekIdentifierToken("or") || peekToken(TokenKind.SYMBOLIC_OR)) {
 			Token t = nextToken(); //consume OR
 			SpelNodeImpl rhExpr = eatLogicalAndExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			expr = new OpOr(toPos(t),expr,rhExpr);
 		}
 		return expr;
@@ -184,7 +152,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		while (peekIdentifierToken("and") || peekToken(TokenKind.SYMBOLIC_AND)) {
 			Token t = nextToken();// consume 'AND'
 			SpelNodeImpl rhExpr = eatRelationalExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			expr = new OpAnd(toPos(t),expr,rhExpr);
 		}
 		return expr;
@@ -197,7 +165,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (relationalOperatorToken != null) {
 			Token t = nextToken(); //consume relational operator token
 			SpelNodeImpl rhExpr = eatSumExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			TokenKind tk = relationalOperatorToken.kind;
 			if (relationalOperatorToken.isNumericRelationalOperator()) {
 				int pos = toPos(t);
@@ -231,14 +199,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//sumExpression: productExpression ( (PLUS^ | MINUS^) productExpression)*;
 	private SpelNodeImpl eatSumExpression() {
 		SpelNodeImpl expr = eatProductExpression();
-		while (peekToken(TokenKind.PLUS,TokenKind.MINUS)) {
-			Token t = nextToken();//consume PLUS or MINUS
+		while (peekToken(TokenKind.PLUS,TokenKind.MINUS,TokenKind.INC)) {
+			Token t = nextToken();//consume PLUS or MINUS or INC
 			SpelNodeImpl rhExpr = eatProductExpression();
 			checkRightOperand(t,rhExpr);
 			if (t.kind==TokenKind.PLUS) {
 				expr = new OpPlus(toPos(t),expr,rhExpr);
-			} else {
-				Assert.isTrue(t.kind==TokenKind.MINUS);
+			} else if (t.kind==TokenKind.MINUS) {
 				expr = new OpMinus(toPos(t),expr,rhExpr);
 			}
 		}
@@ -247,11 +214,11 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// productExpression: powerExpr ((STAR^ | DIV^| MOD^) powerExpr)* ;
 	private SpelNodeImpl eatProductExpression() {
-		SpelNodeImpl expr = eatPowerExpression();
+		SpelNodeImpl expr = eatPowerIncDecExpression();
 		while (peekToken(TokenKind.STAR,TokenKind.DIV,TokenKind.MOD)) {
 			Token t = nextToken(); // consume STAR/DIV/MOD
-			SpelNodeImpl rhExpr = eatPowerExpression();
-			checkRightOperand(t,rhExpr);
+			SpelNodeImpl rhExpr = eatPowerIncDecExpression();
+			checkOperands(t,expr,rhExpr);
 			if (t.kind==TokenKind.STAR) {
 				expr = new OpMultiply(toPos(t),expr,rhExpr);
 			} else if (t.kind==TokenKind.DIV) {
@@ -264,19 +231,26 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return expr;
 	}
 
-	// powerExpr  : unaryExpression (POWER^ unaryExpression)? ;
-	private SpelNodeImpl eatPowerExpression() {
+	// powerExpr  : unaryExpression (POWER^ unaryExpression)? (INC || DEC) ;
+	private SpelNodeImpl eatPowerIncDecExpression() {
 		SpelNodeImpl expr = eatUnaryExpression();
 		if (peekToken(TokenKind.POWER)) {
 			Token t = nextToken();//consume POWER
 			SpelNodeImpl rhExpr = eatUnaryExpression();
 			checkRightOperand(t,rhExpr);
 			return new OperatorPower(toPos(t),expr, rhExpr);
+		} else if (expr!=null && peekToken(TokenKind.INC,TokenKind.DEC)) {
+			Token t = nextToken();//consume INC/DEC
+			if (t.getKind()==TokenKind.INC) {
+				return new OpInc(toPos(t),true,expr);
+			} else {
+				return new OpDec(toPos(t),true,expr);
+			}
 		}
 		return expr;
 	}
 
-	// unaryExpression: (PLUS^ | MINUS^ | BANG^) unaryExpression | primaryExpression ;
+	// unaryExpression: (PLUS^ | MINUS^ | BANG^ | INC^ | DEC^) unaryExpression | primaryExpression ;
 	private SpelNodeImpl eatUnaryExpression() {
 		if (peekToken(TokenKind.PLUS,TokenKind.MINUS,TokenKind.NOT)) {
 			Token t = nextToken();
@@ -288,6 +262,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			} else {
 				Assert.isTrue(t.kind==TokenKind.MINUS);
 				return new OpMinus(toPos(t),expr);
+			}
+		} else if (peekToken(TokenKind.INC,TokenKind.DEC)) {
+			Token t = nextToken();
+			SpelNodeImpl expr = eatUnaryExpression();
+			if (t.getKind()==TokenKind.INC) {
+				return new OpInc(toPos(t),false,expr);
+			} else {
+				return new OpDec(toPos(t),false,expr);
 			}
 		} else {
 			return eatPrimaryExpression();
@@ -575,6 +557,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		}
 		nextToken();
 		SpelNodeImpl expr = eatExpression();
+		if(expr == null) {
+			raiseInternalException(toPos(t), SpelMessage.MISSING_SELECTION_EXPRESSION);
+		}
 		eatToken(TokenKind.RSQUARE);
 		if (t.kind==TokenKind.SELECT_FIRST) {
 			constructedNodes.push(new Selection(nullSafeNavigation,Selection.FIRST,toPos(t),expr));
@@ -591,14 +576,35 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
 	 */
 	private SpelNodeImpl eatPossiblyQualifiedId() {
-		List<SpelNodeImpl> qualifiedIdPieces = new ArrayList<SpelNodeImpl>();
-		Token startnode = eatToken(TokenKind.IDENTIFIER);
-		qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
-		while (peekToken(TokenKind.DOT,true)) {
-			Token node = eatToken(TokenKind.IDENTIFIER);
-			qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+		LinkedList<SpelNodeImpl> qualifiedIdPieces = new LinkedList<SpelNodeImpl>();
+		Token node = peekToken();
+		while (isValidQualifiedId(node)) {
+			nextToken();
+			if(node.kind != TokenKind.DOT) {
+				qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+			}
+			node = peekToken();
 		}
-		return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size()-1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+		if(qualifiedIdPieces.isEmpty()) {
+			if(node == null) {
+				raiseInternalException( expressionString.length(), SpelMessage.OOD);
+			}
+			raiseInternalException(node.startpos, SpelMessage.NOT_EXPECTED_TOKEN,
+					"qualified ID", node.getKind().toString().toLowerCase());
+		}
+		int pos = toPos(qualifiedIdPieces.getFirst().getStartPosition(), qualifiedIdPieces.getLast().getEndPosition());
+		return new QualifiedIdentifier(pos, qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+	}
+
+	private boolean isValidQualifiedId(Token node) {
+		if(node == null || node.kind == TokenKind.LITERAL_STRING) {
+			return false;
+		}
+		if(node.kind == TokenKind.DOT || node.kind == TokenKind.IDENTIFIER) {
+			return true;
+		}
+		String value = node.stringValue();
+		return StringUtils.hasLength(value) && VALID_QUALIFIED_ID_PATTERN.matcher(value).matches();
 	}
 
 	// This is complicated due to the support for dollars in identifiers.  Dollars are normally separate tokens but
@@ -831,6 +837,17 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return t.stringValue();
 		} else {
 			return t.kind.toString().toLowerCase();
+		}
+	}
+
+	private void checkOperands(Token token, SpelNodeImpl left, SpelNodeImpl right) {
+		checkLeftOperand(token, left);
+		checkRightOperand(token, right);
+	}
+
+	private void checkLeftOperand(Token token, SpelNodeImpl operandExpression) {
+		if (operandExpression==null) {
+			raiseInternalException(token.startpos,SpelMessage.LEFT_OPERAND_PROBLEM);
 		}
 	}
 

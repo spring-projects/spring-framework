@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -87,7 +88,7 @@ import org.springframework.util.StringUtils;
  * Note that "META-INF/applicationContext.xml" is the default context config
  * location, so it doesn't have to specified unless you intend to specify
  * different/additional config files. So in the default case, you may remove
- * the entire <code>config-property</code> section above.
+ * the entire {@code config-property} section above.
  *
  * <p><b>For simple deployment needs, all you need to do is the following:</b>
  * Package all application classes into a RAR file (which is just a standard
@@ -129,7 +130,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 * String that consists of multiple resource location, separated
 	 * by commas, semicolons, whitespace, or line breaks.
 	 * <p>This can be specified as "ContextConfigLocation" config
-	 * property in the <code>ra.xml</code> deployment descriptor.
+	 * property in the {@code ra.xml} deployment descriptor.
 	 * <p>The default is "classpath:META-INF/applicationContext.xml".
 	 */
 	public void setContextConfigLocation(String contextConfigLocation) {
@@ -222,10 +223,23 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	}
 
 	/**
-	 * This implementation always returns <code>null</code>.
+	 * This implementation always returns {@code null}.
 	 */
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof SpringContextResourceAdapter &&
+				ObjectUtils.nullSafeEquals(getContextConfigLocation(),
+						((SpringContextResourceAdapter) obj).getContextConfigLocation()));
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(getContextConfigLocation());
 	}
 
 }

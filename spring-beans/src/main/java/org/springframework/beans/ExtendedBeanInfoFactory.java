@@ -20,7 +20,6 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import org.springframework.core.Ordered;
 
@@ -52,14 +51,7 @@ public class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
 	 */
 	private boolean supports(Class<?> beanClass) {
 		for (Method method : beanClass.getMethods()) {
-			String methodName = method.getName();
-			Class<?>[] parameterTypes = method.getParameterTypes();
-			if (Modifier.isPublic(method.getModifiers())
-					&& methodName.length() > 3
-					&& methodName.startsWith("set")
-					&& (parameterTypes.length == 1
-						|| (parameterTypes.length == 2 && parameterTypes[0].equals(int.class)))
-					&& !void.class.isAssignableFrom(method.getReturnType())) {
+			if (ExtendedBeanInfo.isCandidateWriteMethod(method)) {
 				return true;
 			}
 		}

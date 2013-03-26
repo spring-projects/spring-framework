@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.annotation;
 
 import static org.junit.Assert.assertEquals;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -30,7 +30,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * Unit tests for {@link CustomAutowireConfigurer}.
- * 
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -69,6 +69,7 @@ public final class CustomAutowireConfigurerTests {
 
 	public static class CustomResolver implements AutowireCandidateResolver {
 
+		@Override
 		public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 			if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
 				return false;
@@ -82,6 +83,7 @@ public final class CustomAutowireConfigurerTests {
 			return false;
 		}
 
+		@Override
 		public Object getSuggestedValue(DependencyDescriptor descriptor) {
 			return null;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,22 @@ public class ResourcePropertySourceTests {
 	private static final String PROPERTIES_LOCATION = "classpath:" + PROPERTIES_PATH;
 	private static final String PROPERTIES_RESOURCE_DESCRIPTION = "class path resource [" + PROPERTIES_PATH + "]";
 
+	private static final String XML_PROPERTIES_PATH = "org/springframework/core/io/example.xml";
+	private static final String XML_PROPERTIES_LOCATION = "classpath:" + XML_PROPERTIES_PATH;
+	private static final String XML_PROPERTIES_RESOURCE_DESCRIPTION = "class path resource [" + XML_PROPERTIES_PATH + "]";
+
 	@Test
 	public void withLocationAndGeneratedName() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource(PROPERTIES_LOCATION);
 		assertEquals(ps.getProperty("foo"), "bar");
 		assertThat(ps.getName(), is(PROPERTIES_RESOURCE_DESCRIPTION));
+	}
+
+	@Test
+	public void xmlWithLocationAndGeneratedName() throws IOException {
+		PropertySource<?> ps = new ResourcePropertySource(XML_PROPERTIES_LOCATION);
+		assertEquals(ps.getProperty("foo"), "bar");
+		assertThat(ps.getName(), is(XML_PROPERTIES_RESOURCE_DESCRIPTION));
 	}
 
 	@Test

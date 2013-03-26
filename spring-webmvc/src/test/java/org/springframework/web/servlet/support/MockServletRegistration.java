@@ -40,27 +40,33 @@ class MockServletRegistration implements ServletRegistration.Dynamic {
 		return loadOnStartup;
 	}
 
+	@Override
 	public void setLoadOnStartup(int loadOnStartup) {
 		this.loadOnStartup = loadOnStartup;
 	}
 
+	@Override
 	public void setRunAsRole(String roleName) {
 		this.roleName = roleName;
 	}
 
+	@Override
 	public Set<String> addMapping(String... urlPatterns) {
 		mappings.addAll(Arrays.asList(urlPatterns));
 		return mappings;
 	}
 
+	@Override
 	public Collection<String> getMappings() {
 		return mappings;
 	}
 
+	@Override
 	public String getRunAsRole() {
 		return roleName;
 	}
 
+	@Override
 	public void setAsyncSupported(boolean isAsyncSupported) {
 		this.asyncSupported = isAsyncSupported;
 	}
@@ -71,33 +77,41 @@ class MockServletRegistration implements ServletRegistration.Dynamic {
 
 	// not implemented
 
+	@Override
 	public String getName() {
 		return null;
 	}
 
+	@Override
 	public void setMultipartConfig(MultipartConfigElement multipartConfig) {
 	}
 
+	@Override
 	public Set<String> setServletSecurity(ServletSecurityElement constraint) {
 		return null;
 	}
 
+	@Override
 	public String getClassName() {
 		return null;
 	}
 
+	@Override
 	public boolean setInitParameter(String name, String value) {
 		return false;
 	}
 
+	@Override
 	public String getInitParameter(String name) {
 		return null;
 	}
 
+	@Override
 	public Set<String> setInitParameters(Map<String, String> initParameters) {
 		return null;
 	}
 
+	@Override
 	public Map<String, String> getInitParameters() {
 		return null;
 	}

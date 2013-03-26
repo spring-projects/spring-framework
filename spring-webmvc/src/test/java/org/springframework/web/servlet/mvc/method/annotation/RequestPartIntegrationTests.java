@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.FreePortScanner;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.stereotype.Controller;
+import org.springframework.tests.web.FreePortScanner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,12 +102,12 @@ public class RequestPartIntegrationTests {
 
 	@Before
 	public void setUp() {
-		XmlAwareFormHttpMessageConverter converter = new XmlAwareFormHttpMessageConverter();
+		AllEncompassingFormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 		converter.setPartConverters(Arrays.<HttpMessageConverter<?>>asList(
 				new ResourceHttpMessageConverter(), new MappingJacksonHttpMessageConverter()));
 
- 		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
- 		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));
+		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));
 	}
 
 	@AfterClass
@@ -173,10 +173,10 @@ public class RequestPartIntegrationTests {
 
 		@RequestMapping(value = "/test", method = RequestMethod.POST, consumes = { "multipart/mixed", "multipart/form-data" })
 		public ResponseEntity<Object> create(@RequestPart("json-data") TestData testData, @RequestPart("file-data") MultipartFile file) {
-	        String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
-	        HttpHeaders headers = new HttpHeaders();
+			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
+			HttpHeaders headers = new HttpHeaders();
 			headers.setLocation(URI.create(url));
-	        return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
+			return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
 		}
 	}
 

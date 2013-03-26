@@ -24,7 +24,7 @@ import javax.servlet.ServletException;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 

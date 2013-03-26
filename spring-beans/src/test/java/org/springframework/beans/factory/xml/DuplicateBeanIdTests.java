@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,19 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.TestBean;
 
 
 /**
  * With Spring 3.1, bean id attributes (and all other id attributes across the
  * core schemas) are no longer typed as xsd:id, but as xsd:string.  This allows
  * for using the same bean id within nested <beans> elements.
- * 
+ *
  * Duplicate ids *within the same level of nesting* will still be treated as an
  * error through the ProblemReporter, as this could never be an intended/valid
  * situation.
- * 
+ *
  * @author Chris Beams
  * @since 3.1
  * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#testWithDuplicateName

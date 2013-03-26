@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("flight")
 public class Flight {
 
-    @XStreamAlias("number")
-    private long flightNumber;
+	@XStreamAlias("number")
+	private long flightNumber;
 
-    public long getFlightNumber() {
-        return flightNumber;
-    }
+	public long getFlightNumber() {
+		return flightNumber;
+	}
 
-    public void setFlightNumber(long number) {
-        this.flightNumber = number;
-    }
+	public void setFlightNumber(long number) {
+		this.flightNumber = number;
+	}
 }

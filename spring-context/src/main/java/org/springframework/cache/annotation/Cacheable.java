@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.lang.annotation.Target;
  * returned instance is used as the cache value.
  *
  * @author Costin Leau
+ * @author Phillip Webb
  * @since 3.1
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
@@ -52,8 +53,17 @@ public @interface Cacheable {
 	String key() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching. 
+	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
 	 * <p>Default is "", meaning the method is always cached.
 	 */
 	String condition() default "";
+
+	/**
+	 * Spring Expression Language (SpEL) attribute used to veto method caching.
+	 * <p>Unlike {@link #condition()}, this expression is evaluated after the method
+	 * has been called and can therefore refer to the {@code result}. Default is "",
+	 * meaning that caching is never vetoed.
+	 * @since 3.2
+	 */
+	String unless() default "";
 }

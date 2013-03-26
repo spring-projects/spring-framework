@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,12 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 
 	private final HttpURLConnection connection;
 
+	private final boolean outputStreaming;
 
-	SimpleBufferingClientHttpRequest(HttpURLConnection connection) {
+
+	SimpleBufferingClientHttpRequest(HttpURLConnection connection, boolean outputStreaming) {
 		this.connection = connection;
+		this.outputStreaming = outputStreaming;
 	}
 
 
@@ -67,7 +70,7 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 			}
 		}
 
-		if (this.connection.getDoOutput()) {
+		if (this.connection.getDoOutput() && this.outputStreaming) {
 			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
 		}
 		this.connection.connect();

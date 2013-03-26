@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@
 package org.springframework.web.util;
 
 import java.io.FileNotFoundException;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.util.Log4jConfigurer;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Convenience class that performs custom log4j initialization for web environments,
@@ -34,7 +32,7 @@ import org.springframework.util.SystemPropertyUtils;
  * don't need application-specific log files within the WAR directory, don't use
  * log4j setup within the application (thus, don't use Log4jConfigListener or
  * Log4jConfigServlet). Instead, use a global, VM-wide log4j setup (for example,
- * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
+ * in JBoss) or JDK 1.4's {@code java.util.logging} (which is global too).
  *
  * <p>Supports three init parameters at the servlet context level (that is,
  * context-param entries in web.xml):
@@ -57,7 +55,7 @@ import org.springframework.util.SystemPropertyUtils;
  * below for details on how to use this system property in log file locations.
  * </ul>
  *
- * <p>Note: <code>initLogging</code> should be called before any other Spring activity
+ * <p>Note: {@code initLogging} should be called before any other Spring activity
  * (when using log4j), for proper initialization before any Spring logging attempts.
  *
  * <p>Log4j's watchdog thread will asynchronously check whether the timestamp
@@ -76,12 +74,12 @@ import org.springframework.util.SystemPropertyUtils;
  * The default system property key is "webapp.root", to be used in a log4j config
  * file like as follows:
  *
- * <p><code>log4j.appender.myfile.File=${webapp.root}/WEB-INF/demo.log</code>
+ * <p>{@code log4j.appender.myfile.File=${webapp.root}/WEB-INF/demo.log}
  *
  * <p>Alternatively, specify a unique context-param "webAppRootKey" per web application.
  * For example, with "webAppRootKey = "demo.root":
  *
- * <p><code>log4j.appender.myfile.File=${demo.root}/WEB-INF/demo.log</code>
+ * <p>{@code log4j.appender.myfile.File=${demo.root}/WEB-INF/demo.log}
  *
  * <p><b>WARNING:</b> Some containers (like Tomcat) do <i>not</i> keep system properties
  * separate per web app. You have to use unique "webAppRootKey" context-params per web
@@ -90,6 +88,7 @@ import org.springframework.util.SystemPropertyUtils;
  * context-param at all) without worrying.
  *
  * @author Juergen Hoeller
+ * @author Marten Deinum
  * @since 12.08.2003
  * @see org.springframework.util.Log4jConfigurer
  * @see Log4jConfigListener
@@ -122,9 +121,8 @@ public abstract class Log4jWebConfigurer {
 		if (location != null) {
 			// Perform actual log4j initialization; else rely on log4j's default initialization.
 			try {
-				// Resolve system property placeholders before potentially
-				// resolving a real path.
-				location = SystemPropertyUtils.resolvePlaceholders(location);
+				// Resolve property placeholders before potentially resolving a real path.
+				location = ServletContextPropertyUtils.resolvePlaceholders(location, servletContext);
 
 				// Leave a URL (e.g. "classpath:" or "file:") as-is.
 				if (!ResourceUtils.isUrl(location)) {

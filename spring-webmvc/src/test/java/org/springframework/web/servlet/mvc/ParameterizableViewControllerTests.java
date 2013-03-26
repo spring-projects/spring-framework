@@ -22,8 +22,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
@@ -39,7 +39,7 @@ public class ParameterizableViewControllerTests {
 	private ParameterizableViewController controller;
 
 	private MockHttpServletRequest request;
-	
+
 	@Before
 	public void setup() {
 		this.controller = new ParameterizableViewController();
@@ -54,7 +54,7 @@ public class ParameterizableViewControllerTests {
 		assertEquals(viewName, mav.getViewName());
 		assertTrue(mav.getModel().isEmpty());
 	}
-	
+
 	@Test
 	public void handleRequestWithoutViewName() throws Exception {
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());

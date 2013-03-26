@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.expression.spel;
 
-import java.util.Map;
-import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import junit.framework.Assert;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.expression.AccessException;
@@ -33,7 +34,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Testing variations on map access.
- * 
+ *
  * @author Andy Clement
  */
 public class MapAccessTests extends ExpressionTestCase {
@@ -56,7 +57,7 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseExpression("testMap.monday");
 		Object value = expr.getValue(ctx, String.class);
-		Assert.assertEquals("montag", value);
+		assertEquals("montag", value);
 	}
 
 	@Test
@@ -67,7 +68,7 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseExpression("testMap[#day]");
 		Object value = expr.getValue(ctx, String.class);
-		Assert.assertEquals("samstag", value);
+		assertEquals("samstag", value);
 	}
 
 	@Test
@@ -83,9 +84,10 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression exp = parser.parseExpression("testBean.properties['key2']");
-		String key= (String)exp.getValue(bean);
+		String key = (String) exp.getValue(bean);
+		assertNotNull(key);
 
-		}
+	}
 
 	public static class TestBean
 	{
@@ -149,28 +151,33 @@ public class MapAccessTests extends ExpressionTestCase {
 
 	public static class MapAccessor implements PropertyAccessor {
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (((Map) target).containsKey(name));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(((Map) target).get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return true;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 			((Map) target).put(name, newValue);
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { Map.class };
 		}
-		
+
 	}
 
 }

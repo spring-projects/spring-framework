@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
 import org.springframework.cache.interceptor.CacheInterceptor;
@@ -39,6 +39,6 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 	public void testKeyStrategy() throws Exception {
 		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
 				CacheInterceptor.class);
-		Assert.assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+		assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
 	}
 }

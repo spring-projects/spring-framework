@@ -33,7 +33,6 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 3.0
- * @see org.jboss.virtual.VirtualFile
  * @see org.jboss.vfs.VirtualFile
  */
 public class VfsResource extends AbstractResource {

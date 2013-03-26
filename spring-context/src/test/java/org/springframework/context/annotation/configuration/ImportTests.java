@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.context.annotation.configuration;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import test.beans.ITestBean;
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * System tests for {@link Import} annotation support.
- * 
+ *
  * @author Chris Beams
  */
 public class ImportTests {
@@ -125,7 +125,7 @@ public class ImportTests {
 	@Configuration
 	@Import(DataSourceConfig.class)
 	static class AppConfig {
-		
+
 		@Bean
 		public ITestBean transferService() {
 			return new TestBean(accountRepository());

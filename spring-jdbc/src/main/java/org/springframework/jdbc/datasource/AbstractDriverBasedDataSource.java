@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 
 
 	/**
-	 * This implementation delegates to <code>getConnectionFromDriver</code>,
+	 * This implementation delegates to {@code getConnectionFromDriver},
 	 * using the default username and password of this DataSource.
 	 * @see #getConnectionFromDriver(String, String)
 	 * @see #setUsername
@@ -120,7 +120,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	}
 
 	/**
-	 * This implementation delegates to <code>getConnectionFromDriver</code>,
+	 * This implementation delegates to {@code getConnectionFromDriver},
 	 * using the given username and password.
 	 * @see #getConnectionFromDriver(String, String)
 	 */
@@ -139,14 +139,18 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
 	protected Connection getConnectionFromDriver(String username, String password) throws SQLException {
-		Properties props = new Properties(getConnectionProperties());
+		Properties mergedProps = new Properties();
+		Properties connProps = getConnectionProperties();
+		if (connProps != null) {
+			mergedProps.putAll(connProps);
+		}
 		if (username != null) {
-			props.setProperty("user", username);
+			mergedProps.setProperty("user", username);
 		}
 		if (password != null) {
-			props.setProperty("password", password);
+			mergedProps.setProperty("password", password);
 		}
-		return getConnectionFromDriver(props);
+		return getConnectionFromDriver(mergedProps);
 	}
 
 	/**

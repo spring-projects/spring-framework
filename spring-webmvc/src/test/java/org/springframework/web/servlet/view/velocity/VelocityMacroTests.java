@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 
-import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -57,12 +57,14 @@ public class VelocityMacroTests extends TestCase {
 	private MockHttpServletResponse response;
 
 
+	@Override
 	public void setUp() throws Exception {
 		wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(TEMPLATE_FILE, expectedTemplate);
 			}
@@ -79,6 +81,7 @@ public class VelocityMacroTests extends TestCase {
 
 	public void testExposeSpringMacroHelpers() throws Exception {
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				assertTrue(context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
 				RequestContext rc = (RequestContext) context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
@@ -100,6 +103,7 @@ public class VelocityMacroTests extends TestCase {
 		final String helperTool = "wrongType";
 
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				fail();
 			}

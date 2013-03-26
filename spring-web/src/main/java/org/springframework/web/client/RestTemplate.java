@@ -45,9 +45,9 @@ import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UriTemplate;
@@ -151,7 +151,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter());
 		this.messageConverters.add(new SourceHttpMessageConverter());
-		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 		if (romePresent) {
 			this.messageConverters.add(new AtomFeedHttpMessageConverter());
 			this.messageConverters.add(new RssChannelHttpMessageConverter());
@@ -465,8 +465,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * RequestCallback}; the response with the {@link ResponseExtractor}.
 	 * @param url the fully-expanded URL to connect to
 	 * @param method the HTTP method to execute (GET, POST, etc.)
-	 * @param requestCallback object that prepares the request (can be <code>null</code>)
-	 * @param responseExtractor object that extracts the return value from the response (can be <code>null</code>)
+	 * @param requestCallback object that prepares the request (can be {@code null})
+	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,
@@ -553,20 +553,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				}
 
 				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
+				for (HttpMessageConverter<?> converter : getMessageConverters()) {
 					if (responseClass != null) {
-						if (messageConverter.canRead(responseClass, null)) {
-							allSupportedMediaTypes
-									.addAll(getSupportedMediaTypes(messageConverter));
+						if (converter.canRead(responseClass, null)) {
+							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
 						}
 					}
-					else if (messageConverter instanceof GenericHttpMessageConverter) {
+					else if (converter instanceof GenericHttpMessageConverter) {
 
-						GenericHttpMessageConverter genericMessageConverter =
-								(GenericHttpMessageConverter) messageConverter;
-						if (genericMessageConverter.canRead(responseType, null)) {
-							allSupportedMediaTypes
-									.addAll(getSupportedMediaTypes(messageConverter));
+						GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
+						if (genericConverter.canRead(responseType, null, null)) {
+							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
 						}
 					}
 
@@ -710,6 +707,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * HTTP-specific subclass of UriTemplate, overriding the encode method.
 	 */
+	@SuppressWarnings("serial")
 	private static class HttpUrlTemplate extends UriTemplate {
 
 		public HttpUrlTemplate(String uriTemplate) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
+
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
@@ -33,10 +34,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.Test;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
-
+import org.mockito.InOrder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractMarshallerTests;
@@ -49,12 +47,13 @@ import org.springframework.oxm.jaxb.test.ObjectFactory;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ReflectionUtils;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.Locator;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertFalse;
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLAssert.fail;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertTrue;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
@@ -83,27 +82,22 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	@Test
 	public void marshalSAXResult() throws Exception {
-		ContentHandler handlerMock = createStrictMock(ContentHandler.class);
-		handlerMock.setDocumentLocator(isA(Locator.class));
-		handlerMock.startDocument();
-		handlerMock.startPrefixMapping("", "http://samples.springframework.org/flight");
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("flights"),
-				isA(Attributes.class));
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("flight"),
-				isA(Attributes.class));
-		handlerMock.startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("number"),
-				isA(Attributes.class));
-		handlerMock.characters(isA(char[].class), eq(0), eq(2));
-		handlerMock.endElement("http://samples.springframework.org/flight", "number", "number");
-		handlerMock.endElement("http://samples.springframework.org/flight", "flight", "flight");
-		handlerMock.endElement("http://samples.springframework.org/flight", "flights", "flights");
-		handlerMock.endPrefixMapping("");
-		handlerMock.endDocument();
-		replay(handlerMock);
-
-		SAXResult result = new SAXResult(handlerMock);
+		ContentHandler contentHandler = mock(ContentHandler.class);
+		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flights, result);
-		verify(handlerMock);
+		InOrder ordered = inOrder(contentHandler);
+		ordered.verify(contentHandler).setDocumentLocator(isA(Locator.class));
+		ordered.verify(contentHandler).startDocument();
+		ordered.verify(contentHandler).startPrefixMapping("", "http://samples.springframework.org/flight");
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flights"), eq("flights"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("flight"), eq("flight"), isA(Attributes.class));
+		ordered.verify(contentHandler).startElement(eq("http://samples.springframework.org/flight"), eq("number"), eq("number"), isA(Attributes.class));
+		ordered.verify(contentHandler).characters(isA(char[].class), eq(0), eq(2));
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "number", "number");
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flight", "flight");
+		ordered.verify(contentHandler).endElement("http://samples.springframework.org/flight", "flights", "flights");
+		ordered.verify(contentHandler).endPrefixMapping("");
+		ordered.verify(contentHandler).endDocument();
 	}
 
 	@Test
@@ -163,7 +157,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.afterPropertiesSet();
 		testSupports();
 	}
-	
+
 	@Test
 	public void supportsPackagesToScan() throws Exception {
 		marshaller = new Jaxb2Marshaller();
@@ -207,6 +201,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	private void testSupportsPrimitives() {
 		final Primitives primitives = new Primitives();
 		ReflectionUtils.doWithMethods(Primitives.class, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Type returnType = method.getGenericReturnType();
 				assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(9) + ">",
@@ -221,6 +216,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 				}
 			}
 		}, new ReflectionUtils.MethodFilter() {
+			@Override
 			public boolean matches(Method method) {
 				return method.getName().startsWith("primitive");
 			}
@@ -230,6 +226,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	private void testSupportsStandardClasses() throws Exception {
 		final StandardClasses standardClasses = new StandardClasses();
 		ReflectionUtils.doWithMethods(StandardClasses.class, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Type returnType = method.getGenericReturnType();
 				assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">",
@@ -244,6 +241,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 				}
 			}
 		}, new ReflectionUtils.MethodFilter() {
+			@Override
 			public boolean matches(Method method) {
 				return method.getName().startsWith("standardClass");
 			}
@@ -261,7 +259,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		assertFalse("Jaxb2Marshaller supports DummyType class", marshaller.supports(DummyType.class));
 		assertFalse("Jaxb2Marshaller supports DummyType type", marshaller.supports((Type)DummyType.class));
 	}
-	
+
 
 	@Test
 	public void marshalAttachments() throws Exception {
@@ -269,25 +267,22 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.setClassesToBeBound(BinaryObject.class);
 		marshaller.setMtomEnabled(true);
 		marshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = createMock(MimeContainer.class);
+		MimeContainer mimeContainer = mock(MimeContainer.class);
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
 
-		expect(mimeContainer.convertToXopPackage()).andReturn(true);
-		mimeContainer.addAttachment(isA(String.class), isA(DataHandler.class));
-		expectLastCall().times(3);
-
-		replay(mimeContainer);
+		given(mimeContainer.convertToXopPackage()).willReturn(true);
 		byte[] bytes = FileCopyUtils.copyToByteArray(logo.getInputStream());
 		BinaryObject object = new BinaryObject(bytes, dataHandler);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
-		verify(mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
+		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
 	}
 
 	@XmlRootElement
+	@SuppressWarnings("unused")
 	public static class DummyRootElement {
 
 		private DummyType t = new DummyType();
@@ -295,17 +290,21 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@XmlType
+	@SuppressWarnings("unused")
 	public static class DummyType {
 
 		private String s = "Hello";
+
 	}
 
+	@SuppressWarnings("unused")
 	private JAXBElement<DummyRootElement> createDummyRootElement() {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
 	private JAXBElement<DummyType> createDummyType() {
 		return null;
 	}
-	
+
 }

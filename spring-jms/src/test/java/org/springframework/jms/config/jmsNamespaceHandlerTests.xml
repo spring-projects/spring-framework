@@ -54,13 +54,13 @@
 
 	<bean id="testMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter102"/>
 
-	<bean id="testTransactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
+	<bean id="testTransactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 
 	<bean id="testErrorHandler" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestErrorHandler"/>
 
-	<bean id="testBean1" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean1" class="org.springframework.tests.sample.beans.TestBean"/>
 
-	<bean id="testBean2" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean"/>
 
 	<bean id="testBean3" class="org.springframework.jms.config.JmsNamespaceHandlerTests$TestMessageListener"/>
 

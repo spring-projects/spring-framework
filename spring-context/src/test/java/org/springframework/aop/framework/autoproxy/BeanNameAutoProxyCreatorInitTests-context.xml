@@ -24,6 +24,6 @@
 		</property>
 	</bean>
 
-	<bean id="bean" class="org.springframework.beans.TestBean"/>
+	<bean id="bean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>		

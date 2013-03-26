@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 24.03.2003
  */
+@SuppressWarnings("serial")
 public class TransactionSystemException extends TransactionException {
 
 	private Throwable applicationException;
@@ -66,7 +67,7 @@ public class TransactionSystemException extends TransactionException {
 	/**
 	 * Return the application exception that was thrown before this transaction exception,
 	 * if any.
-	 * @return the application exception, or <code>null</code> if none set
+	 * @return the application exception, or {@code null} if none set
 	 */
 	public final Throwable getApplicationException() {
 		return this.applicationException;
@@ -75,7 +76,7 @@ public class TransactionSystemException extends TransactionException {
 	/**
 	 * Return the exception that was the first to be thrown within the failed transaction:
 	 * i.e. the application exception, if any, or the TransactionSystemException's own cause.
-	 * @return the original exception, or <code>null</code> if there was none
+	 * @return the original exception, or {@code null} if there was none
 	 */
 	public Throwable getOriginalException() {
 		return (this.applicationException != null ? this.applicationException : getCause());

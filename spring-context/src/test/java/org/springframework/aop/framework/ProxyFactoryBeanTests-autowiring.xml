@@ -3,12 +3,12 @@
 
 <beans>
 
-	<bean id="debugInterceptor" class="test.interceptor.NopInterceptor"/>
+	<bean id="debugInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
 
 	<bean id="testBean"  class="org.springframework.aop.framework.ProxyFactoryBean">
 		<!-- Target is autowired, so can check type of parent without a guard -->
 		<property name="target">
-			<bean class="org.springframework.beans.TestBean" autowire="byType"/>
+			<bean class="org.springframework.tests.sample.beans.TestBean" autowire="byType"/>
 		</property>
 		<property name="interceptorNames" value="debugInterceptor"/>
 	</bean>

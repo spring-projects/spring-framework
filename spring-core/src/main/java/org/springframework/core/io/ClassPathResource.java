@@ -30,15 +30,15 @@ import org.springframework.util.StringUtils;
  * {@link Resource} implementation for class path resources.
  * Uses either a given ClassLoader or a given Class for loading resources.
  *
- * <p>Supports resolution as <code>java.io.File</code> if the class path
+ * <p>Supports resolution as {@code java.io.File} if the class path
  * resource resides in the file system, but not for resources in a JAR.
  * Always supports resolution as URL.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003
- * @see java.lang.ClassLoader#getResourceAsStream(String)
- * @see java.lang.Class#getResourceAsStream(String)
+ * @see ClassLoader#getResourceAsStream(String)
+ * @see Class#getResourceAsStream(String)
  */
 public class ClassPathResource extends AbstractFileResolvingResource {
 
@@ -69,8 +69,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * resource access methods will not accept it.
 	 * @param path the absolute path within the classpath
 	 * @param classLoader the class loader to load the resource with,
-	 * or <code>null</code> for the thread context class loader
-	 * @see java.lang.ClassLoader#getResourceAsStream(String)
+	 * or {@code null} for the thread context class loader
+	 * @see ClassLoader#getResourceAsStream(String)
 	 */
 	public ClassPathResource(String path, ClassLoader classLoader) {
 		Assert.notNull(path, "Path must not be null");
@@ -205,18 +205,14 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	public String getDescription() {
 		StringBuilder builder = new StringBuilder("class path resource [");
-
 		String pathToUse = path;
-
 		if (this.clazz != null && !pathToUse.startsWith("/")) {
 			builder.append(ClassUtils.classPackageAsResourcePath(this.clazz));
 			builder.append('/');
 		}
-
 		if (pathToUse.startsWith("/")) {
 			pathToUse = pathToUse.substring(1);
 		}
-
 		builder.append(pathToUse);
 		builder.append(']');
 		return builder.toString();
@@ -232,9 +228,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		}
 		if (obj instanceof ClassPathResource) {
 			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path)
-					&& ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) && ObjectUtils.nullSafeEquals(
-				this.clazz, otherRes.clazz));
+			return (this.path.equals(otherRes.path) &&
+					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
+					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
 		}
 		return false;
 	}

@@ -23,7 +23,7 @@ truly trivial, e.g. typo fixes, removing compiler warnings, etc.
 
 If you're considering anything more than correcting a typo or fixing a minor
 bug, please discuss it on the [spring-framework-contrib][] mailing list before
-submitting a pull request. We're happy to provide guidance but please spend an
+submitting a pull request. We're happy to provide guidance, but please spend an
 hour or two researching the subject on your own including searching the mailing
 list for prior discussions.
 
@@ -31,33 +31,29 @@ list for prior discussions.
 
 If you have not previously done so, please fill out and submit the
 [SpringSource CLA form][]. You'll receive a token when this process is complete.
-Keep track of this, you may be asked for it later!
+Keep track of this; you may be asked for it later!
 
 Note that emailing/postal mailing a signed copy is _not_ necessary. Submission
 of the web form is all that is required.
 
-When you've completed the web form, simply add the following in a comment on
+Once you've completed the web form, simply add the following in a comment on
 your pull request:
 
     I have signed and agree to the terms of the SpringSource Individual
     Contributor License Agreement.
 
 You do not need to include your token/id. Please add the statement above to all
-future pull requests as well, simply so the Spring Framework team knows
+future pull requests as well, simply so that the Spring Framework team knows
 immediately that this process is complete.
 
 
-## Create your branch from `master`
+## Create your branch from `3.2.x`
 
-At any given time, Spring Framework's `master` branch represents the version
-currently under development. For example, if 3.1.1 was the latest Spring
-Framework release, `master` represents 3.2.0 development, and the `3.1.x`
-branch represents 3.1.2 development.
-
-Create your topic branch to be submitted as a pull request from `master`. The
-Spring team will consider your pull request for backporting to maintenance
-versions (e.g. 3.1.2) on a case-by-case basis; you don't need to worry about
-submitting anything for backporting.
+If your pull request addresses a bug or improvement, please create your branch
+from Spring Framework's `3.2.x` branch. `master` is reserved for work on new features
+for the next major version of the framework. Rest assured that if your pull
+request is accepted and merged into `3.2.x`, these changes will also eventually
+be merged into `master`.
 
 
 ## Use short branch names
@@ -76,7 +72,7 @@ Please carefully follow the whitespace and formatting conventions already
 present in the framework.
 
 1. Tabs, not spaces
-1. Unix (LF), not dos (CRLF) line endings
+1. Unix (LF), not DOS (CRLF) line endings
 1. Eliminate all trailing whitespace
 1. Wrap Javadoc at 90 characters
 1. Aim to wrap code at 90 characters, but favor readability over wrapping
@@ -91,7 +87,7 @@ present in the framework.
 
 ```java
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,16 +108,16 @@ package ...;
 ## Update Apache license header to modified files as necessary
 
 Always check the date range in the license header. For example, if you've
-modified a file in 2012 whose header still reads
+modified a file in 2013 whose header still reads
 
 ```java
  * Copyright 2002-2011 the original author or authors.
 ```
 
-then be sure to update it to 2012 appropriately
+then be sure to update it to 2013 appropriately
 
 ```java
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
 ```
 
 ## Use @since tags for newly-added public API types and methods
@@ -232,11 +228,11 @@ Most importantly, please format your commit messages in the following way
 
 1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link"
 1. Begin the subject line sentence with a capitalized verb, e.g. "Add, Prune,
-   Fix, Introduce, Avoid, etc"
+   Fix, Introduce, Avoid, etc."
 1. Do not end the subject line with a period
 1. Keep the subject line to 50 characters or less if possible
 1. Wrap lines in the body at 72 characters or less
-1. Mention associated jira issue(s) at the end of the commit comment, prefixed
+1. Mention associated JIRA issue(s) at the end of the commit comment, prefixed
    with "Issue: " as above
 1. In the body of the commit message, explain how things worked before this
    commit, what has changed, and how things work now

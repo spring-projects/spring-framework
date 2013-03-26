@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import javax.servlet.jsp.JspException;
 import org.springframework.web.bind.WebDataBinder;
 
 /**
- * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
- * elements with a '<code>type</code>' of '<code>checkbox</code>'.
+ * Databinding-aware JSP tag for rendering multiple HTML '{@code input}'
+ * elements with a '{@code type}' of '{@code checkbox}'.
  *
  * <p>Intended to be used with a Collection as the {@link #getItems()} bound value}.
  *
@@ -31,6 +31,7 @@ import org.springframework.web.bind.WebDataBinder;
  * @author Mark Fisher
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class CheckboxesTag extends AbstractMultiCheckedElementTag {
 
 	@Override

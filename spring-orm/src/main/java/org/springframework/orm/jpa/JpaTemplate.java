@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * Helper class that allows for writing JPA data access code in the same style
  * as with Spring's well-known JdoTemplate and HibernateTemplate classes.
  * Automatically converts PersistenceExceptions into Spring DataAccessExceptions,
- * following the <code>org.springframework.dao</code> exception hierarchy.
+ * following the {@code org.springframework.dao} exception hierarchy.
  *
  * <p>The central method is of this template is "execute", supporting JPA access code
  * implementing the {@link JpaCallback} interface. It provides JPA EntityManager
@@ -86,7 +86,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>)
+ * (typically obtained through {@code @PersistenceContext})
  * Note that this class did not get upgraded to JPA 2.0 and never will.
  */
 @Deprecated
@@ -123,7 +123,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	/**
 	 * Set whether to expose the native JPA EntityManager to JpaCallback
 	 * code. Default is "false": a EntityManager proxy will be returned,
-	 * suppressing <code>close</code> calls and automatically applying transaction
+	 * suppressing {@code close} calls and automatically applying transaction
 	 * timeouts (if any).
 	 * <p>As there is often a need to cast to a provider-specific EntityManager
 	 * class in DAOs that use the JPA 1.0 API, for JPA 2.0 previews and other
@@ -165,7 +165,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * @param action callback object that specifies the JPA action
 	 * @param exposeNativeEntityManager whether to expose the native
 	 * JPA entity manager to callback code
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of JPA errors
 	 */
 	public <T> T execute(JpaCallback<T> action, boolean exposeNativeEntityManager) throws DataAccessException {

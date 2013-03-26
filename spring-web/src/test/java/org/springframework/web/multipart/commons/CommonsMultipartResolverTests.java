@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.web.multipart.commons;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -41,15 +46,13 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.mock.web.PassThroughFilterChain;
+import org.springframework.mock.web.test.MockFilterConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.mock.web.test.PassThroughFilterChain;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
@@ -220,7 +223,7 @@ public class CommonsMultipartResolverTests {
 			MultipartHttpServletRequest request) throws UnsupportedEncodingException {
 
 		MultipartTestBean1 mtb1 = new MultipartTestBean1();
-		assertEquals(null, mtb1.getField1());
+		assertArrayEquals(null, mtb1.getField1());
 		assertEquals(null, mtb1.getField2());
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb1, "mybean");
 		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
@@ -234,7 +237,7 @@ public class CommonsMultipartResolverTests {
 		assertEquals(new String(file2.getBytes()), new String(mtb1.getField2()));
 
 		MultipartTestBean2 mtb2 = new MultipartTestBean2();
-		assertEquals(null, mtb2.getField1());
+		assertArrayEquals(null, mtb2.getField1());
 		assertEquals(null, mtb2.getField2());
 		binder = new ServletRequestDataBinder(mtb2, "mybean");
 		binder.registerCustomEditor(String.class, "field1", new StringMultipartFileEditor());
@@ -282,6 +285,7 @@ public class CommonsMultipartResolverTests {
 
 		final List<MultipartFile> files = new ArrayList<MultipartFile>();
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				MultipartHttpServletRequest request = (MultipartHttpServletRequest) servletRequest;
 				files.addAll(request.getFileMap().values());
@@ -319,6 +323,7 @@ public class CommonsMultipartResolverTests {
 
 		final List<MultipartFile> files = new ArrayList<MultipartFile>();
 		FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
 				if (originalRequest instanceof MultipartHttpServletRequest) {
 					MultipartHttpServletRequest request = (MultipartHttpServletRequest) originalRequest;
@@ -373,13 +378,13 @@ public class CommonsMultipartResolverTests {
 					}
 					List<FileItem> fileItems = new ArrayList<FileItem>();
 					MockFileItem fileItem1 = new MockFileItem(
-					    "field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
+						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem1x = new MockFileItem(
-					    "field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
+						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem2 = new MockFileItem(
-					    "field2", "type2", empty ? "" : "C:/field2.txt", empty ? "" : "text2");
+						"field2", "type2", empty ? "" : "C:/field2.txt", empty ? "" : "text2");
 					MockFileItem fileItem2x = new MockFileItem(
-					    "field2x", "type2", empty ? "" : "C:\\field2x.txt", empty ? "" : "text2");
+						"field2x", "type2", empty ? "" : "C:\\field2x.txt", empty ? "" : "text2");
 					MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
 					MockFileItem fileItem4 = new MockFileItem("field4", "text/html; charset=iso-8859-1", null, "value4");
 					MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");
@@ -397,6 +402,7 @@ public class CommonsMultipartResolverTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MockFileItem implements FileItem {
 
 		private String fieldName;
@@ -414,70 +420,77 @@ public class CommonsMultipartResolverTests {
 			this.value = value;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(value.getBytes());
 		}
 
+		@Override
 		public String getContentType() {
 			return contentType;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public boolean isInMemory() {
 			return true;
 		}
 
+		@Override
 		public long getSize() {
 			return value.length();
 		}
 
+		@Override
 		public byte[] get() {
 			return value.getBytes();
 		}
 
+		@Override
 		public String getString(String encoding) throws UnsupportedEncodingException {
 			return new String(get(), encoding);
 		}
 
+		@Override
 		public String getString() {
 			return value;
 		}
 
+		@Override
 		public void write(File file) throws Exception {
 			this.writtenFile = file;
 		}
 
-		public File getWrittenFile() {
-			return writtenFile;
-		}
-
+		@Override
 		public void delete() {
 			this.deleted = true;
 		}
 
-		public boolean isDeleted() {
-			return deleted;
-		}
-
+		@Override
 		public String getFieldName() {
 			return fieldName;
 		}
 
+		@Override
 		public void setFieldName(String s) {
 			this.fieldName = s;
 		}
 
+		@Override
 		public boolean isFormField() {
 			return (this.name == null);
 		}
 
+		@Override
 		public void setFormField(boolean b) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public OutputStream getOutputStream() throws IOException {
 			throw new UnsupportedOperationException();
 		}

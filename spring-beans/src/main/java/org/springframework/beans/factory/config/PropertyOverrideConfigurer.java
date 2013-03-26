@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
@@ -53,7 +52,7 @@ import org.springframework.beans.factory.BeanInitializationException;
  * the same bean property, the <i>last</i> one will win (due to the overriding mechanism).
  *
  * <p>Property values can be converted after reading them in, through overriding
- * the <code>convertPropertyValue</code> method. For example, encrypted values
+ * the {@code convertPropertyValue} method. For example, encrypted values
  * can be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller
@@ -71,8 +70,11 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 	private boolean ignoreInvalidKeys = false;
 
-	/** Contains names of beans that have overrides */
-	private Set<String> beanNames = Collections.synchronizedSet(new HashSet<String>());
+	/**
+	 * Contains names of beans that have overrides
+	 * (using a ConcurrentHashMap as a Set)
+	 */
+	private Map<String, Boolean> beanNames = new ConcurrentHashMap<String, Boolean>(16);
 
 
 	/**
@@ -128,7 +130,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		}
 		String beanName = key.substring(0, separatorIndex);
 		String beanProperty = key.substring(separatorIndex+1);
-		this.beanNames.add(beanName);
+		this.beanNames.put(beanName, Boolean.TRUE);
 		applyPropertyValue(factory, beanName, beanProperty, value);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Property '" + key + "' set to value [" + value + "]");
@@ -159,7 +161,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 * the named bean
 	 */
 	public boolean hasPropertyOverridesFor(String beanName) {
-		return this.beanNames.contains(beanName);
+		return this.beanNames.containsKey(beanName);
 	}
 
 }

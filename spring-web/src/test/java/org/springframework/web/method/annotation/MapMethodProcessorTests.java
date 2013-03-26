@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -35,15 +35,15 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.MapMethodProcessor}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class MapMethodProcessorTests {
 
 	private MapMethodProcessor processor;
-	
+
 	private ModelAndViewContainer mavContainer;
-	
+
 	private MethodParameter paramMap;
 
 	private MethodParameter returnParamMap;
@@ -54,8 +54,8 @@ public class MapMethodProcessorTests {
 	public void setUp() throws Exception {
 		processor = new MapMethodProcessor();
 		mavContainer = new ModelAndViewContainer();
-		
-		Method method = getClass().getDeclaredMethod("map", Map.class); 
+
+		Method method = getClass().getDeclaredMethod("map", Map.class);
 		paramMap = new MethodParameter(method, 0);
 		returnParamMap = new MethodParameter(method, 0);
 
@@ -76,12 +76,12 @@ public class MapMethodProcessorTests {
 	public void resolveArgumentValue() throws Exception {
 		assertSame(mavContainer.getModel(), processor.resolveArgument(paramMap, mavContainer, webRequest, null));
 	}
-	
+
 	@Test
 	public void handleMapReturnValue() throws Exception {
 		mavContainer.addAttribute("attr1", "value1");
 		Map<String, Object> returnValue = new ModelMap("attr2", "value2");
-		
+
 		processor.handleReturnValue(returnValue , returnParamMap, mavContainer, webRequest);
 
 		assertEquals("value1", mavContainer.getModel().get("attr1"));
@@ -92,5 +92,5 @@ public class MapMethodProcessorTests {
 	private Map<String, Object> map(Map<String, Object> map) {
 		return null;
 	}
-	
+
 }

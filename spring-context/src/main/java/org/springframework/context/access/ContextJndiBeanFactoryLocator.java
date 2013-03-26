@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 
 	/**
 	 * Load/use a bean factory, as specified by a factory key which is a JNDI
-	 * address, of the form <code>java:comp/env/ejb/BeanFactoryPath</code>. The
+	 * address, of the form {@code java:comp/env/ejb/BeanFactoryPath}. The
 	 * contents of this JNDI location must be a string containing one or more
-	 * classpath resource names (separated by any of the delimiters '<code>,; \t\n</code>'
+	 * classpath resource names (separated by any of the delimiters '{@code ,; \t\n}'
 	 * if there is more than one. The resulting BeanFactory (or ApplicationContext)
 	 * will be created from the combined resources.
 	 * @see #createBeanFactory
@@ -77,7 +77,7 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 	 * Create the BeanFactory instance, given an array of class path resource Strings
 	 * which should be combined. This is split out as a separate method so that
 	 * subclasses can override the actual BeanFactory implementation class.
-	 * <p>Delegates to <code>createApplicationContext</code> by default,
+	 * <p>Delegates to {@code createApplicationContext} by default,
 	 * wrapping the result in a ContextBeanFactoryReference.
 	 * @param resources an array of Strings representing classpath resource names
 	 * @return the created BeanFactory, wrapped in a BeanFactoryReference

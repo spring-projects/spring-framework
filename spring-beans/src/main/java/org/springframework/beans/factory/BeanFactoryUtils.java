@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public abstract class BeanFactoryUtils {
 	public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
 		return beanNamesIncludingAncestors(lbf).length;
 	}
-	
+
 	/**
 	 * Return all bean names in the factory, including ancestor factories.
 	 * @param lbf the bean factory
@@ -133,7 +133,7 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
-	 * <p>This version of <code>beanNamesForTypeIncludingAncestors</code> automatically
+	 * <p>This version of {@code beanNamesForTypeIncludingAncestors} automatically
 	 * includes prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type the type that beans must match
@@ -300,7 +300,7 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
-	 * <p>This version of <code>beanOfTypeIncludingAncestors</code> automatically includes
+	 * <p>This version of {@code beanOfTypeIncludingAncestors} automatically includes
 	 * prototypes and FactoryBeans.
 	 * <p><b>Note: Beans of the same name will take precedence at the 'lowest' factory level,
 	 * i.e. such beans will be returned from the lowest factory that they are being found in,
@@ -310,20 +310,15 @@ public abstract class BeanFactoryUtils {
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the matching bean instance
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if 0 or more than 1 beans of the given type were found
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static <T> T beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
 			throws BeansException {
 
 		Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type);
-		if (beansOfType.size() == 1) {
-			return beansOfType.values().iterator().next();
-		}
-		else {
-			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
-		}
+		return uniqueBean(type, beansOfType);
 	}
 
 	/**
@@ -351,8 +346,8 @@ public abstract class BeanFactoryUtils {
 	 * eagerly initialized to determine their type: So be aware that passing in "true"
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the matching bean instance
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if 0 or more than 1 beans of the given type were found
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static <T> T beanOfTypeIncludingAncestors(
@@ -360,12 +355,7 @@ public abstract class BeanFactoryUtils {
 			throws BeansException {
 
 		Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type, includeNonSingletons, allowEagerInit);
-		if (beansOfType.size() == 1) {
-			return beansOfType.values().iterator().next();
-		}
-		else {
-			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
-		}
+		return uniqueBean(type, beansOfType);
 	}
 
 	/**
@@ -375,24 +365,19 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
-	 * <p>This version of <code>beanOfType</code> automatically includes
+	 * <p>This version of {@code beanOfType} automatically includes
 	 * prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the matching bean instance
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if 0 or more than 1 beans of the given type were found
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static <T> T beanOfType(ListableBeanFactory lbf, Class<T> type) throws BeansException {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map<String, T> beansOfType = lbf.getBeansOfType(type);
-		if (beansOfType.size() == 1) {
-			return beansOfType.values().iterator().next();
-		}
-		else {
-			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
-		}
+		return uniqueBean(type, beansOfType);
 	}
 
 	/**
@@ -415,8 +400,8 @@ public abstract class BeanFactoryUtils {
 	 * eagerly initialized to determine their type: So be aware that passing in "true"
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
 	 * @return the matching bean instance
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if 0 or more than 1 beans of the given type were found
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static <T> T beanOfType(
@@ -425,11 +410,27 @@ public abstract class BeanFactoryUtils {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map<String, T> beansOfType = lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit);
-		if (beansOfType.size() == 1) {
-			return beansOfType.values().iterator().next();
+		return uniqueBean(type, beansOfType);
+	}
+
+	/**
+	 * Extract a unique bean for the given type from the given Map of matching beans.
+	 * @param type type of bean to match
+	 * @param matchingBeans all matching beans found
+	 * @return the unique bean instance
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
+	 */
+	private static <T> T uniqueBean(Class<T> type, Map<String, T> matchingBeans) {
+		int nrFound = matchingBeans.size();
+		if (nrFound == 1) {
+			return matchingBeans.values().iterator().next();
+		}
+		else if (nrFound > 1) {
+			throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
+			throw new NoSuchBeanDefinitionException(type);
 		}
 	}
 

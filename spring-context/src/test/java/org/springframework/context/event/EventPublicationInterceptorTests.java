@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,21 @@
 
 package org.springframework.context.event;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.TestListener;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Dmitriy Kopylenko
@@ -39,19 +38,13 @@ import org.springframework.context.support.StaticApplicationContext;
  * @author Rick Evans
  */
 public class EventPublicationInterceptorTests {
-	
+
 	private ApplicationEventPublisher publisher;
 
 
 	@Before
 	public void setUp() {
-		publisher = createMock(ApplicationEventPublisher.class);
-		replay(publisher);
-	}
-	
-	@After
-	public void tearDown() {
-		verify(publisher);
+		publisher = mock(ApplicationEventPublisher.class);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -91,8 +84,9 @@ public class EventPublicationInterceptorTests {
 		final TestListener listener = new TestListener();
 
 		class TestContext extends StaticApplicationContext {
+			@Override
 			protected void onRefresh() throws BeansException {
-				addListener(listener);
+				addApplicationListener(listener);
 			}
 		}
 
@@ -121,6 +115,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TestEvent extends ApplicationEvent {
 
 		public TestEvent(Object source) {
@@ -129,6 +124,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static final class TestEventWithNoValidOneArgObjectCtor extends ApplicationEvent {
 
 		public TestEventWithNoValidOneArgObjectCtor() {
@@ -137,16 +133,19 @@ public class EventPublicationInterceptorTests {
 	}
 
 
-	public static class FactoryBeanTestListener extends TestListener implements FactoryBean {
+	public static class FactoryBeanTestListener extends TestListener implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() throws Exception {
 			return "test";
 		}
 
-		public Class getObjectType() {
+		@Override
+		public Class<String> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

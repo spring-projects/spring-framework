@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.web.util.HtmlUtils;
 /**
  * Errors wrapper that adds automatic HTML escaping to the wrapped instance,
  * for convenient usage in HTML views. Can be retrieved easily via
- * RequestContext's <code>getErrors</code> method.
+ * RequestContext's {@code getErrors} method.
  *
  * <p>Note that BindTag does <i>not</i> use this class to avoid unnecessary
  * creation of ObjectError instances. It just escapes the messages and values

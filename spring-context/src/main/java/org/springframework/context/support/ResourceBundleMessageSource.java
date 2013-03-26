@@ -16,14 +16,24 @@
 
 package org.springframework.context.support;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.core.JdkVersion;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -39,9 +49,9 @@ import org.springframework.util.StringUtils;
  * the generated MessageFormats for each message. It also implements rendering of
  * no-arg messages without MessageFormat, as supported by the AbstractMessageSource
  * base class. The caching provided by this MessageSource is significantly faster
- * than the built-in caching of the <code>java.util.ResourceBundle</code> class.
+ * than the built-in caching of the {@code java.util.ResourceBundle} class.
  *
- * <p>Unfortunately, <code>java.util.ResourceBundle</code> caches loaded bundles
+ * <p>Unfortunately, {@code java.util.ResourceBundle} caches loaded bundles
  * forever: Reloading a bundle during VM execution is <i>not</i> possible.
  * As this MessageSource relies on ResourceBundle, it faces the same limitation.
  * Consider {@link ReloadableResourceBundleMessageSource} for an alternative
@@ -57,6 +67,12 @@ import org.springframework.util.StringUtils;
 public class ResourceBundleMessageSource extends AbstractMessageSource implements BeanClassLoaderAware {
 
 	private String[] basenames = new String[0];
+
+	private String defaultEncoding;
+
+	private boolean fallbackToSystemLocale = true;
+
+	private long cacheMillis = -1;
 
 	private ClassLoader bundleClassLoader;
 
@@ -87,7 +103,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	/**
 	 * Set a single basename, following {@link java.util.ResourceBundle} conventions:
 	 * essentially, a fully-qualified classpath location. If it doesn't contain a
-	 * package qualifier (such as <code>org.mypackage</code>), it will be resolved
+	 * package qualifier (such as {@code org.mypackage}), it will be resolved
 	 * from the classpath root.
 	 * <p>Messages will normally be held in the "/lib" or "/classes" directory of
 	 * a web application's WAR structure. They can also be held in jar files on
@@ -95,7 +111,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasenames
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
@@ -106,7 +122,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	/**
 	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
 	 * conventions: essentially, a fully-qualified classpath location. If it
-	 * doesn't contain a package qualifier (such as <code>org.mypackage</code>),
+	 * doesn't contain a package qualifier (such as {@code org.mypackage}),
 	 * it will be resolved from the classpath root.
 	 * <p>The associated resource bundles will be checked sequentially
 	 * when resolving a message code. Note that message definitions in a
@@ -115,11 +131,11 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
-	public void setBasenames(String... basenames)  {
+	public void setBasenames(String... basenames) {
 		if (basenames != null) {
 			this.basenames = new String[basenames.length];
 			for (int i = 0; i < basenames.length; i++) {
@@ -131,6 +147,59 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		else {
 			this.basenames = new String[0];
 		}
+	}
+
+	/**
+	 * Set the default charset to use for parsing resource bundle files.
+	 * <p>Default is none, using the {@code java.util.ResourceBundle}
+	 * default encoding: ISO-8859-1.
+	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
+	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support
+	 * and more flexibility in setting of an encoding per file.
+	 */
+	public void setDefaultEncoding(String defaultEncoding) {
+		this.defaultEncoding = defaultEncoding;
+	}
+
+	/**
+	 * Set whether to fall back to the system Locale if no files for a specific
+	 * Locale have been found. Default is "true"; if this is turned off, the only
+	 * fallback will be the default file (e.g. "messages.properties" for
+	 * basename "messages").
+	 * <p>Falling back to the system Locale is the default behavior of
+	 * {@code java.util.ResourceBundle}. However, this is often not desirable
+	 * in an application server environment, where the system Locale is not relevant
+	 * to the application at all: Set this flag to "false" in such a scenario.
+	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
+	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support.
+	 */
+	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
+		this.fallbackToSystemLocale = fallbackToSystemLocale;
+	}
+
+	/**
+	 * Set the number of seconds to cache loaded resource bundle files.
+	 * <ul>
+	 * <li>Default is "-1", indicating to cache forever.
+	 * <li>A positive number will expire resource bundles after the given
+	 * number of seconds. This is essentially the interval between refresh checks.
+	 * Note that a refresh attempt will first check the last-modified timestamp
+	 * of the file before actually reloading it; so if files don't change, this
+	 * interval can be set rather low, as refresh attempts will not actually reload.
+	 * <li>A value of "0" will check the last-modified timestamp of the file on
+	 * every message access. <b>Do not use this in a production environment!</b>
+	 * <li><b>Note that depending on your ClassLoader, expiration might not work reliably
+	 * since the ClassLoader may hold on to a cached version of the bundle file.</b>
+	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
+	 * with resource bundle files in a non-classpath location.
+	 * </ul>
+	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
+	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support
+	 * and more flexibility in terms of the kinds of resources to load from
+	 * (in particular from outside of the classpath where expiration works reliably).
+	 */
+	public void setCacheSeconds(int cacheSeconds) {
+		this.cacheMillis = (cacheSeconds * 1000);
 	}
 
 	/**
@@ -197,34 +266,42 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * fetching already generated MessageFormats from the cache.
 	 * @param basename the basename of the ResourceBundle
 	 * @param locale the Locale to find the ResourceBundle for
-	 * @return the resulting ResourceBundle, or <code>null</code> if none
+	 * @return the resulting ResourceBundle, or {@code null} if none
 	 * found for the given basename and Locale
 	 */
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
-		synchronized (this.cachedResourceBundles) {
-			Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
-			if (localeMap != null) {
-				ResourceBundle bundle = localeMap.get(locale);
-				if (bundle != null) {
+		if (this.cacheMillis >= 0) {
+			// Fresh ResourceBundle.getBundle call in order to let ResourceBundle
+			// do its native caching, at the expense of more extensive lookup steps.
+			return doGetBundle(basename, locale);
+		}
+		else {
+			// Cache forever: prefer locale cache over repeated getBundle calls.
+			synchronized (this.cachedResourceBundles) {
+				Map<Locale, ResourceBundle> localeMap = this.cachedResourceBundles.get(basename);
+				if (localeMap != null) {
+					ResourceBundle bundle = localeMap.get(locale);
+					if (bundle != null) {
+						return bundle;
+					}
+				}
+				try {
+					ResourceBundle bundle = doGetBundle(basename, locale);
+					if (localeMap == null) {
+						localeMap = new HashMap<Locale, ResourceBundle>();
+						this.cachedResourceBundles.put(basename, localeMap);
+					}
+					localeMap.put(locale, bundle);
 					return bundle;
 				}
-			}
-			try {
-				ResourceBundle bundle = doGetBundle(basename, locale);
-				if (localeMap == null) {
-					localeMap = new HashMap<Locale, ResourceBundle>();
-					this.cachedResourceBundles.put(basename, localeMap);
+				catch (MissingResourceException ex) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
+					}
+					// Assume bundle not found
+					// -> do NOT throw the exception to allow for checking parent message source.
+					return null;
 				}
-				localeMap.put(locale, bundle);
-				return bundle;
-			}
-			catch (MissingResourceException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: " + ex.getMessage());
-				}
-				// Assume bundle not found
-				// -> do NOT throw the exception to allow for checking parent message source.
-				return null;
 			}
 		}
 	}
@@ -239,7 +316,20 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
+		if ((this.defaultEncoding != null && !"ISO-8859-1".equals(this.defaultEncoding)) ||
+				!this.fallbackToSystemLocale || this.cacheMillis >= 0) {
+			// Custom Control required...
+			if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+				throw new IllegalStateException("Cannot use 'defaultEncoding', 'fallbackToSystemLocale' and " +
+						"'cacheSeconds' on the standard ResourceBundleMessageSource when running on Java 5. " +
+						"Consider using ReloadableResourceBundleMessageSource instead.");
+			}
+			return new ControlBasedResourceBundleFactory().getBundle(basename, locale);
+		}
+		else {
+			// Good old standard call...
+			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
+		}
 	}
 
 	/**
@@ -248,7 +338,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @param bundle the ResourceBundle to work on
 	 * @param code the message code to retrieve
 	 * @param locale the Locale to use to build the MessageFormat
-	 * @return the resulting MessageFormat, or <code>null</code> if no message
+	 * @return the resulting MessageFormat, or {@code null} if no message
 	 * defined for the given code
 	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
@@ -298,7 +388,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		}
 	}
 
-
 	/**
 	 * Show the configuration of this MessageSource.
 	 */
@@ -306,6 +395,103 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	public String toString() {
 		return getClass().getName() + ": basenames=[" +
 				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+	}
+
+
+	/**
+	 * Factory indirection for runtime isolation of the optional dependencv on
+	 * Java 6's Control class.
+	 * @see ResourceBundle#getBundle(String, java.util.Locale, ClassLoader, java.util.ResourceBundle.Control)
+	 * @see MessageSourceControl
+	 */
+	private class ControlBasedResourceBundleFactory {
+
+		public ResourceBundle getBundle(String basename, Locale locale) {
+			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+		}
+	}
+
+
+	/**
+	 * Custom implementation of Java 6's {@code ResourceBundle.Control},
+	 * adding support for custom file encodings, deactivating the fallback to the
+	 * system locale and activating ResourceBundle's native cache, if desired.
+	 */
+	private class MessageSourceControl extends ResourceBundle.Control {
+
+		@Override
+		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+				throws IllegalAccessException, InstantiationException, IOException {
+			if (format.equals("java.properties")) {
+				String bundleName = toBundleName(baseName, locale);
+				final String resourceName = toResourceName(bundleName, "properties");
+				final ClassLoader classLoader = loader;
+				final boolean reloadFlag = reload;
+				InputStream stream;
+				try {
+					stream = AccessController.doPrivileged(
+							new PrivilegedExceptionAction<InputStream>() {
+								public InputStream run() throws IOException {
+									InputStream is = null;
+									if (reloadFlag) {
+										URL url = classLoader.getResource(resourceName);
+										if (url != null) {
+											URLConnection connection = url.openConnection();
+											if (connection != null) {
+												connection.setUseCaches(false);
+												is = connection.getInputStream();
+											}
+										}
+									}
+									else {
+										is = classLoader.getResourceAsStream(resourceName);
+									}
+									return is;
+								}
+							});
+				}
+				catch (PrivilegedActionException ex) {
+					throw (IOException) ex.getException();
+				}
+				if (stream != null) {
+					try {
+						return (defaultEncoding != null ?
+								new PropertyResourceBundle(new InputStreamReader(stream, defaultEncoding)) :
+								new PropertyResourceBundle(stream));
+					}
+					finally {
+						stream.close();
+					}
+				}
+				else {
+					return null;
+				}
+			}
+			else {
+				return super.newBundle(baseName, locale, format, loader, reload);
+			}
+		}
+
+		@Override
+		public Locale getFallbackLocale(String baseName, Locale locale) {
+			return (fallbackToSystemLocale ? super.getFallbackLocale(baseName, locale) : null);
+		}
+
+		@Override
+		public long getTimeToLive(String baseName, Locale locale) {
+			return (cacheMillis >= 0 ? cacheMillis : super.getTimeToLive(baseName, locale));
+		}
+
+		@Override
+		public boolean needsReload(String baseName, Locale locale, String format, ClassLoader loader, ResourceBundle bundle, long loadTime) {
+			if (super.needsReload(baseName, locale, format, loader, bundle, loadTime)) {
+				cachedBundleMessageFormats.remove(bundle);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
 	}
 
 }

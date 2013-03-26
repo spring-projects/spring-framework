@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
@@ -37,8 +36,8 @@ import org.springframework.core.OrderComparator;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -81,7 +80,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>();
+			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
 
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<ControllerAdviceBean, ExceptionHandlerMethodResolver>();
@@ -104,7 +103,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
 		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
-		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
 	/**

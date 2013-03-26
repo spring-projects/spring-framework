@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ import org.springframework.web.context.ServletContextAware;
  * that applies initialization and destruction callbacks to beans that
  * implement the {@link javax.servlet.Servlet} interface.
  *
- * <p>After initialization of the bean instance, the Servlet <code>init</code>
+ * <p>After initialization of the bean instance, the Servlet {@code init}
  * method will be called with a ServletConfig that contains the bean name
  * of the Servlet and the ServletContext that it is running in.
  *
- * <p>Before destruction of the bean instance, the Servlet <code>destroy</code>
+ * <p>Before destruction of the bean instance, the Servlet {@code destroy}
  * will be called.
  *
  * <p><b>Note that this post-processor does not support Servlet initialization
@@ -76,7 +76,7 @@ public class SimpleServletPostProcessor implements
 
 	/**
 	 * Set whether to use the shared ServletConfig object passed in
-	 * through <code>setServletConfig</code>, if available.
+	 * through {@code setServletConfig}, if available.
 	 * <p>Default is "true". Turn this setting to "false" to pass in
 	 * a mock ServletConfig object with the bean name as servlet name,
 	 * holding the current ServletContext.

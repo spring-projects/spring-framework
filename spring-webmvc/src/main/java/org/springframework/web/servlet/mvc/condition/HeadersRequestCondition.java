@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * A logical conjunction (' && ') request condition that matches a request against 
+ * A logical conjunction (' && ') request condition that matches a request against
  * a set of header expressions with syntax defined in {@link RequestMapping#headers()}.
- * 
- * <p>Expressions passed to the constructor with header names 'Accept' or 
+ *
+ * <p>Expressions passed to the constructor with header names 'Accept' or
  * 'Content-Type' are ignored. See {@link ConsumesRequestCondition} and
- * {@link ProducesRequestCondition} for those. 
- * 
+ * {@link ProducesRequestCondition} for those.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -42,20 +42,20 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	private final Set<HeaderExpression> expressions;
 
 	/**
-	 * Create a new instance from the given header expressions. Expressions with 
-	 * header names 'Accept' or 'Content-Type' are ignored. See {@link ConsumesRequestCondition} 
-	 * and {@link ProducesRequestCondition} for those. 
+	 * Create a new instance from the given header expressions. Expressions with
+	 * header names 'Accept' or 'Content-Type' are ignored. See {@link ConsumesRequestCondition}
+	 * and {@link ProducesRequestCondition} for those.
 	 * @param headers media type expressions with syntax defined in {@link RequestMapping#headers()};
 	 * 		if 0, the condition will match to every request.
 	 */
 	public HeadersRequestCondition(String... headers) {
 		this(parseExpressions(headers));
 	}
-	
+
 	private HeadersRequestCondition(Collection<HeaderExpression> conditions) {
 		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<HeaderExpression>(conditions));
 	}
-	
+
 	private static Collection<HeaderExpression> parseExpressions(String... headers) {
 		Set<HeaderExpression> expressions = new LinkedHashSet<HeaderExpression>();
 		if (headers != null) {
@@ -76,7 +76,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	public Set<NameValueExpression<String>> getExpressions() {
 		return new LinkedHashSet<NameValueExpression<String>>(this.expressions);
 	}
-	
+
 	@Override
 	protected Collection<HeaderExpression> getContent() {
 		return this.expressions;
@@ -88,7 +88,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	}
 
 	/**
-	 * Returns a new instance with the union of the header expressions 
+	 * Returns a new instance with the union of the header expressions
 	 * from "this" and the "other" instance.
 	 */
 	public HeadersRequestCondition combine(HeadersRequestCondition other) {
@@ -96,9 +96,9 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		set.addAll(other.expressions);
 		return new HeadersRequestCondition(set);
 	}
-	
+
 	/**
-	 * Returns "this" instance if the request matches all expressions; 
+	 * Returns "this" instance if the request matches all expressions;
 	 * or {@code null} otherwise.
 	 */
 	public HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
@@ -116,10 +116,10 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * 	<li>0 if the two conditions have the same number of header expressions
 	 * 	<li>Less than 0 if "this" instance has more header expressions
 	 * 	<li>Greater than 0 if the "other" instance has more header expressions
-	 * </ul>   
-	 * 
-	 * <p>It is assumed that both instances have been obtained via 
-	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance 
+	 * </ul>
+	 *
+	 * <p>It is assumed that both instances have been obtained via
+	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching header expression only or is otherwise empty.
 	 */
 	public int compareTo(HeadersRequestCondition other, HttpServletRequest request) {
@@ -127,7 +127,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	}
 
 	/**
-	 * Parses and matches a single header expression to a request. 
+	 * Parses and matches a single header expression to a request.
 	 */
 	static class HeaderExpression extends AbstractNameValueExpression<String> {
 
@@ -157,5 +157,5 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 			result = 31 * result + (isNegated ? 1 : 0);
 			return result;
 		}
-	}	
+	}
 }

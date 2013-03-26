@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * A base class for {@link RequestCondition} types providing implementations of 
- * {@link #equals(Object)}, {@link #hashCode()}, and {@link #toString()}. 
- * 
+ * A base class for {@link RequestCondition} types providing implementations of
+ * {@link #equals(Object)}, {@link #hashCode()}, and {@link #toString()}.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
-	
+
 	/**
 	 * Return the discrete items a request condition is composed of.
 	 * For example URL patterns, HTTP request methods, param expressions, etc.
 	 * @return a collection of objects, never {@code null}
 	 */
 	protected abstract Collection<?> getContent();
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {

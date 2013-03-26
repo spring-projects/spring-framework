@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jms.remoting;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -30,70 +31,50 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
  */
-public class JmsInvokerTests extends TestCase {
+public class JmsInvokerTests {
 
-	private MockControl connectionFactoryControl;
 	private QueueConnectionFactory mockConnectionFactory;
 
-	private MockControl connectionControl;
 	private QueueConnection mockConnection;
 
-	private MockControl sessionControl;
 	private QueueSession mockSession;
 
-	private MockControl queueControl;
 	private Queue mockQueue;
 
 
-	protected void setUp() throws Exception {
-		connectionFactoryControl = MockControl.createControl(QueueConnectionFactory.class);
-		mockConnectionFactory = (QueueConnectionFactory) connectionFactoryControl.getMock();
+	@Before
+	public void setUpMocks() throws Exception {
+		mockConnectionFactory = mock(QueueConnectionFactory.class);
+		mockConnection = mock(QueueConnection.class);
+		mockSession = mock(QueueSession.class);
+		mockQueue = mock(Queue.class);
 
-		connectionControl = MockControl.createControl(QueueConnection.class);
-		mockConnection = (QueueConnection) connectionControl.getMock();
-
-		sessionControl = MockControl.createControl(QueueSession.class);
-		mockSession = (QueueSession) sessionControl.getMock();
-
-		queueControl = MockControl.createControl(Queue.class);
-		mockQueue = (Queue) queueControl.getMock();
-
-		mockConnectionFactory.createConnection();
-		connectionFactoryControl.setReturnValue(mockConnection, 8);
-
-		mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		connectionControl.setReturnValue(mockSession, 8);
-
-		mockConnection.start();
-		connectionControl.setVoidCallable(8);
-
-		connectionFactoryControl.replay();
-		connectionControl.replay();
+		given(mockConnectionFactory.createConnection()).willReturn(mockConnection);
+		given(mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(mockSession);
 	}
 
 
+	@Test
 	public void testJmsInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
-		sessionControl.replay();
-
 		doTestJmsInvokerProxyFactoryBeanAndServiceExporter(false);
 	}
 
+	@Test
 	public void testJmsInvokerProxyFactoryBeanAndServiceExporterWithDynamicQueue() throws Throwable {
-		mockSession.createQueue("myQueue");
-		sessionControl.setReturnValue(mockQueue, 8);
-		sessionControl.replay();
-
+		given(mockSession.createQueue("myQueue")).willReturn(mockQueue);
 		doTestJmsInvokerProxyFactoryBeanAndServiceExporter(true);
 	}
 
@@ -107,15 +88,12 @@ public class JmsInvokerTests extends TestCase {
 		exporter.afterPropertiesSet();
 
 		JmsInvokerProxyFactoryBean pfb = new JmsInvokerProxyFactoryBean() {
+			@Override
 			protected Message doExecuteRequest(Session session, Queue queue, Message requestMessage) throws JMSException {
-				MockControl exporterSessionControl = MockControl.createControl(Session.class);
-				Session mockExporterSession = (Session) exporterSessionControl.getMock();
+				Session mockExporterSession = mock(Session.class);
 				ResponseStoringProducer mockProducer = new ResponseStoringProducer();
-				mockExporterSession.createProducer(requestMessage.getJMSReplyTo());
-				exporterSessionControl.setReturnValue(mockProducer);
-				exporterSessionControl.replay();
+				given(mockExporterSession.createProducer(requestMessage.getJMSReplyTo())).willReturn(mockProducer);
 				exporter.onMessage(requestMessage, mockExporterSession);
-				exporterSessionControl.verify();
 				assertTrue(mockProducer.closed);
 				return mockProducer.response;
 			}
@@ -154,10 +132,6 @@ public class JmsInvokerTests extends TestCase {
 		catch (IllegalAccessException ex) {
 			// expected
 		}
-
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		sessionControl.verify();
 	}
 
 
@@ -167,59 +141,75 @@ public class JmsInvokerTests extends TestCase {
 
 		public boolean closed = false;
 
+		@Override
 		public void setDisableMessageID(boolean b) throws JMSException {
 		}
 
+		@Override
 		public boolean getDisableMessageID() throws JMSException {
 			return false;
 		}
 
+		@Override
 		public void setDisableMessageTimestamp(boolean b) throws JMSException {
 		}
 
+		@Override
 		public boolean getDisableMessageTimestamp() throws JMSException {
 			return false;
 		}
 
+		@Override
 		public void setDeliveryMode(int i) throws JMSException {
 		}
 
+		@Override
 		public int getDeliveryMode() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public void setPriority(int i) throws JMSException {
 		}
 
+		@Override
 		public int getPriority() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public void setTimeToLive(long l) throws JMSException {
 		}
 
+		@Override
 		public long getTimeToLive() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public Destination getDestination() throws JMSException {
 			return null;
 		}
 
+		@Override
 		public void close() throws JMSException {
 			this.closed = true;
 		}
 
+		@Override
 		public void send(Message message) throws JMSException {
 			this.response = message;
 		}
 
+		@Override
 		public void send(Message message, int i, int i1, long l) throws JMSException {
 		}
 
+		@Override
 		public void send(Destination destination, Message message) throws JMSException {
 		}
 
+		@Override
 		public void send(Destination destination, Message message, int i, int i1, long l) throws JMSException {
 		}
 	}
@@ -235,169 +225,216 @@ public class JmsInvokerTests extends TestCase {
 			this.serializable = serializable;
 		}
 
+		@Override
 		public void setObject(Serializable serializable) throws JMSException {
 			this.serializable = serializable;
 		}
 
+		@Override
 		public Serializable getObject() throws JMSException {
 			return serializable;
 		}
 
+		@Override
 		public String getJMSMessageID() throws JMSException {
 			return null;
 		}
 
+		@Override
 		public void setJMSMessageID(String string) throws JMSException {
 		}
 
+		@Override
 		public long getJMSTimestamp() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public void setJMSTimestamp(long l) throws JMSException {
 		}
 
+		@Override
 		public byte[] getJMSCorrelationIDAsBytes() throws JMSException {
 			return new byte[0];
 		}
 
+		@Override
 		public void setJMSCorrelationIDAsBytes(byte[] bytes) throws JMSException {
 		}
 
+		@Override
 		public void setJMSCorrelationID(String string) throws JMSException {
 		}
 
+		@Override
 		public String getJMSCorrelationID() throws JMSException {
 			return null;
 		}
 
+		@Override
 		public Destination getJMSReplyTo() throws JMSException {
 			return replyTo;
 		}
 
+		@Override
 		public void setJMSReplyTo(Destination destination) throws JMSException {
 			this.replyTo = destination;
 		}
 
+		@Override
 		public Destination getJMSDestination() throws JMSException {
 			return null;
 		}
 
+		@Override
 		public void setJMSDestination(Destination destination) throws JMSException {
 		}
 
+		@Override
 		public int getJMSDeliveryMode() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public void setJMSDeliveryMode(int i) throws JMSException {
 		}
 
+		@Override
 		public boolean getJMSRedelivered() throws JMSException {
 			return false;
 		}
 
+		@Override
 		public void setJMSRedelivered(boolean b) throws JMSException {
 		}
 
+		@Override
 		public String getJMSType() throws JMSException {
 			return null;
 		}
 
+		@Override
 		public void setJMSType(String string) throws JMSException {
 		}
 
+		@Override
 		public long getJMSExpiration() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public void setJMSExpiration(long l) throws JMSException {
 		}
 
+		@Override
 		public int getJMSPriority() throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public void setJMSPriority(int i) throws JMSException {
 		}
 
+		@Override
 		public void clearProperties() throws JMSException {
 		}
 
+		@Override
 		public boolean propertyExists(String string) throws JMSException {
 			return false;
 		}
 
+		@Override
 		public boolean getBooleanProperty(String string) throws JMSException {
 			return false;
 		}
 
+		@Override
 		public byte getByteProperty(String string) throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public short getShortProperty(String string) throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public int getIntProperty(String string) throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public long getLongProperty(String string) throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public float getFloatProperty(String string) throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public double getDoubleProperty(String string) throws JMSException {
 			return 0;
 		}
 
+		@Override
 		public String getStringProperty(String string) throws JMSException {
 			return null;
 		}
 
+		@Override
 		public Object getObjectProperty(String string) throws JMSException {
 			return null;
 		}
 
+		@Override
 		public Enumeration getPropertyNames() throws JMSException {
 			return null;
 		}
 
+		@Override
 		public void setBooleanProperty(String string, boolean b) throws JMSException {
 		}
 
+		@Override
 		public void setByteProperty(String string, byte b) throws JMSException {
 		}
 
+		@Override
 		public void setShortProperty(String string, short i) throws JMSException {
 		}
 
+		@Override
 		public void setIntProperty(String string, int i) throws JMSException {
 		}
 
+		@Override
 		public void setLongProperty(String string, long l) throws JMSException {
 		}
 
+		@Override
 		public void setFloatProperty(String string, float v) throws JMSException {
 		}
 
+		@Override
 		public void setDoubleProperty(String string, double v) throws JMSException {
 		}
 
+		@Override
 		public void setStringProperty(String string, String string1) throws JMSException {
 		}
 
+		@Override
 		public void setObjectProperty(String string, Object object) throws JMSException {
 		}
 
+		@Override
 		public void acknowledge() throws JMSException {
 		}
 
+		@Override
 		public void clearBody() throws JMSException {
 		}
 	}
@@ -405,6 +442,7 @@ public class JmsInvokerTests extends TestCase {
 
 	private static class MockSimpleMessageConverter extends SimpleMessageConverter {
 
+		@Override
 		public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 			return new MockObjectMessage((Serializable) object);
 		}

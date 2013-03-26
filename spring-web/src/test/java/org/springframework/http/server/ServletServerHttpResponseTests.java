@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 
 import static org.junit.Assert.*;

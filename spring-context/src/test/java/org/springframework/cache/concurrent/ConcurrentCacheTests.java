@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2010-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,71 @@ package org.springframework.cache.concurrent;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.springframework.cache.Cache;
-import org.springframework.cache.vendor.AbstractNativeCacheTests;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
  */
-public class ConcurrentCacheTests extends AbstractNativeCacheTests<ConcurrentMap<Object, Object>> {
+public class ConcurrentCacheTests  {
 
-	@Override
-	protected Cache createCache(ConcurrentMap<Object, Object> nativeCache) {
-		return new ConcurrentMapCache(CACHE_NAME, nativeCache, true);
+	protected final static String CACHE_NAME = "testCache";
+
+	protected ConcurrentMap<Object, Object> nativeCache;
+
+	protected Cache cache;
+
+
+	@Before
+	public void setUp() throws Exception {
+		nativeCache = new ConcurrentHashMap<Object, Object>();
+		cache = new ConcurrentMapCache(CACHE_NAME, nativeCache, true);
+		cache.clear();
 	}
 
-	@Override
-	protected ConcurrentMap<Object, Object> createNativeCache() throws Exception {
-		return new ConcurrentHashMap<Object, Object>();
+
+	@Test
+	public void testCacheName() throws Exception {
+		assertEquals(CACHE_NAME, cache.getName());
 	}
+
+	@Test
+	public void testNativeCache() throws Exception {
+		assertSame(nativeCache, cache.getNativeCache());
+	}
+
+	@Test
+	public void testCachePut() throws Exception {
+		Object key = "enescu";
+		Object value = "george";
+
+		assertNull(cache.get(key));
+		cache.put(key, value);
+		assertEquals(value, cache.get(key).get());
+	}
+
+	@Test
+	public void testCacheRemove() throws Exception {
+		Object key = "enescu";
+		Object value = "george";
+
+		assertNull(cache.get(key));
+		cache.put(key, value);
+	}
+
+	@Test
+	public void testCacheClear() throws Exception {
+		assertNull(cache.get("enescu"));
+		cache.put("enescu", "george");
+		assertNull(cache.get("vlaicu"));
+		cache.put("vlaicu", "aurel");
+		cache.clear();
+		assertNull(cache.get("vlaicu"));
+		assertNull(cache.get("enescu"));
+	}
+
 }

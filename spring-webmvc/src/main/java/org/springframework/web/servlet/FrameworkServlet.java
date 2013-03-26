@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
@@ -39,17 +39,19 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
@@ -537,13 +539,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Retrieve a <code>WebApplicationContext</code> from the <code>ServletContext</code>
+	 * Retrieve a {@code WebApplicationContext} from the {@code ServletContext}
 	 * attribute with the {@link #setContextAttribute configured name}. The
-	 * <code>WebApplicationContext</code> must have already been loaded and stored in the
-	 * <code>ServletContext</code> before this servlet gets initialized (or invoked).
+	 * {@code WebApplicationContext} must have already been loaded and stored in the
+	 * {@code ServletContext} before this servlet gets initialized (or invoked).
 	 * <p>Subclasses may override this method to provide a different
-	 * <code>WebApplicationContext</code> retrieval strategy.
-	 * @return the WebApplicationContext for this servlet, or <code>null</code> if not found
+	 * {@code WebApplicationContext} retrieval strategy.
+	 * @return the WebApplicationContext for this servlet, or {@code null} if not found
 	 * @see #getContextAttribute()
 	 */
 	protected WebApplicationContext findWebApplicationContext() {
@@ -570,7 +572,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * created context (for triggering its {@link #onRefresh callback}, and to call
 	 * {@link org.springframework.context.ConfigurableApplicationContext#refresh()}
 	 * before returning the context instance.
-	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
+	 * @param parent the parent ApplicationContext to use, or {@code null} if none
 	 * @return the WebApplicationContext for this servlet
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
@@ -590,7 +592,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
-		wac.setEnvironment(this.getEnvironment());
+		wac.setEnvironment(getEnvironment());
 		wac.setParent(parent);
 		wac.setConfigLocation(getContextConfigLocation());
 
@@ -633,6 +635,15 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		wac.setNamespace(getNamespace());
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
+		// the wac environment's #initPropertySources will be called in any case when
+		// the context is refreshed; do it eagerly here to ensure servlet property sources
+		// are in place for use in any post-processing or initialization that occurs
+		// below prior to #refresh
+		ConfigurableEnvironment env = wac.getEnvironment();
+		if (env instanceof ConfigurableWebEnvironment) {
+			((ConfigurableWebEnvironment)env).initPropertySources(getServletContext(), getServletConfig());
+		}
+
 		postProcessWebApplicationContext(wac);
 
 		applyInitializers(wac);
@@ -645,7 +656,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * {@link org.springframework.web.context.support.XmlWebApplicationContext}
 	 * or a {@link #setContextClass custom context class}, if set.
 	 * Delegates to #createWebApplicationContext(ApplicationContext).
-	 * @param parent the parent WebApplicationContext to use, or <code>null</code> if none
+	 * @param parent the parent WebApplicationContext to use, or {@code null} if none
 	 * @return the WebApplicationContext for this servlet
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 * @see #createWebApplicationContext(ApplicationContext)
@@ -694,7 +705,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.
-	 * <p>The default implementation is empty. <code>refresh()</code> will
+	 * <p>The default implementation is empty. {@code refresh()} will
 	 * be called automatically after this method returns.
 	 * <p>Note that this method is designed to allow subclasses to modify the application
 	 * context, while {@link #initWebApplicationContext} is designed to allow
@@ -711,7 +722,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Return the ServletContext attribute name for this servlet's WebApplicationContext.
 	 * <p>The default implementation returns
-	 * <code>SERVLET_CONTEXT_PREFIX + servlet name</code>.
+	 * {@code SERVLET_CONTEXT_PREFIX + servlet name}.
 	 * @see #SERVLET_CONTEXT_PREFIX
 	 * @see #getServletName
 	 */
@@ -772,12 +783,22 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		// For subclasses: do nothing by default.
 	}
 
+	/**
+	 * Close the WebApplicationContext of this servlet.
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
+	 */
+	@Override
+	public void destroy() {
+		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
+		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
+			((ConfigurableApplicationContext) this.webApplicationContext).close();
+		}
+	}
+
 
 	/**
 	 * Override the parent class implementation in order to intercept PATCH
 	 * requests.
-	 *
-	 * @see #doPatch(HttpServletRequest, HttpServletResponse)
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -794,8 +815,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Delegate GET requests to processRequest/doService.
-	 * <p>Will also be invoked by HttpServlet's default implementation of <code>doHead</code>,
-	 * with a <code>NoBodyResponse</code> that just captures the content length.
+	 * <p>Will also be invoked by HttpServlet's default implementation of {@code doHead},
+	 * with a {@code NoBodyResponse} that just captures the content length.
 	 * @see #doService
 	 * @see #doHead
 	 */
@@ -856,10 +877,18 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				return;
 			}
 		}
-		super.doOptions(request, response);
-		String allowedMethods = response.getHeader("Allow");
-		allowedMethods += ", " + RequestMethod.PATCH.name();
-		response.setHeader("Allow", allowedMethods);
+
+		// Use response wrapper for Servlet 2.5 compatibility where
+		// the getHeader() method does not exist
+		super.doOptions(request, new HttpServletResponseWrapper(response) {
+			@Override
+			public void setHeader(String name, String value) {
+				if ("Allow".equals(name)) {
+					value = (StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+				}
+				super.setHeader(name, value);
+			}
+		});
 	}
 
 	/**
@@ -896,15 +925,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		LocaleContext localeContext = buildLocaleContext(request);
 
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
-		ServletRequestAttributes requestAttributes = null;
-		if (previousAttributes == null || previousAttributes.getClass().equals(ServletRequestAttributes.class)) {
-			requestAttributes = new ServletRequestAttributes(request);
-		}
-
-		initContextHolders(request, localeContext, requestAttributes);
+		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.registerCallableInterceptor(this.getClass().getName(), createRequestBindingInterceptor(request));
+		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
+
+		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
 			doService(request, response);
@@ -931,27 +957,18 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			if (logger.isDebugEnabled()) {
 				if (failureCause != null) {
 					this.logger.debug("Could not complete request", failureCause);
-				} else {
+				}
+				else {
 					if (asyncManager.isConcurrentHandlingStarted()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Leaving response open for concurrent processing");
-						}
+						logger.debug("Leaving response open for concurrent processing");
 					}
 					else {
 						this.logger.debug("Successfully completed request");
 					}
 				}
 			}
-			if (this.publishEvents) {
-				// Whether or not we succeeded, publish an event.
-				long processingTime = System.currentTimeMillis() - startTime;
-				this.webApplicationContext.publishEvent(
-						new ServletRequestHandledEvent(this,
-								request.getRequestURI(), request.getRemoteAddr(),
-								request.getMethod(), getServletConfig().getServletName(),
-								WebUtils.getSessionId(request), getUsernameForRequest(request),
-								processingTime, failureCause));
-			}
+
+			publishRequestHandledEvent(request, startTime, failureCause);
 		}
 	}
 
@@ -959,18 +976,43 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Build a LocaleContext for the given request, exposing the request's
 	 * primary locale as current locale.
 	 * @param request current HTTP request
-	 * @return the corresponding LocaleContext
+	 * @return the corresponding LocaleContext, or {@code null} if none to bind
+	 * @see LocaleContextHolder#setLocaleContext
 	 */
 	protected LocaleContext buildLocaleContext(HttpServletRequest request) {
 		return new SimpleLocaleContext(request.getLocale());
 	}
 
-	private void initContextHolders(HttpServletRequest request,
-			LocaleContext localeContext, RequestAttributes attributes) {
+	/**
+	 * Build ServletRequestAttributes for the given request (potentially also
+	 * holding a reference to the response), taking pre-bound attributes
+	 * (and their type) into consideration.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param previousAttributes pre-bound RequestAttributes instance, if any
+	 * @return the ServletRequestAttributes to bind, or {@code null} to preserve
+	 * the previously bound instance (or not binding any, if none bound before)
+	 * @see RequestContextHolder#setRequestAttributes
+	 */
+	protected ServletRequestAttributes buildRequestAttributes(
+			HttpServletRequest request, HttpServletResponse response, RequestAttributes previousAttributes) {
 
-		LocaleContextHolder.setLocaleContext(localeContext, this.threadContextInheritable);
-		if (attributes != null) {
-			RequestContextHolder.setRequestAttributes(attributes, this.threadContextInheritable);
+		if (previousAttributes == null || previousAttributes instanceof ServletRequestAttributes) {
+			return new ServletRequestAttributes(request);
+		}
+		else {
+			return null;  // preserve the pre-bound RequestAttributes instance
+		}
+	}
+
+	private void initContextHolders(
+			HttpServletRequest request, LocaleContext localeContext, RequestAttributes requestAttributes) {
+
+		if (localeContext != null) {
+			LocaleContextHolder.setLocaleContext(localeContext, this.threadContextInheritable);
+		}
+		if (requestAttributes != null) {
+			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Bound request context to thread: " + request);
@@ -987,18 +1029,17 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 	}
 
-	private CallableProcessingInterceptor createRequestBindingInterceptor(final HttpServletRequest request) {
-
-		return new CallableProcessingInterceptor() {
-
-			public void preProcess(NativeWebRequest webRequest, Callable<?> task) {
-				initContextHolders(request, buildLocaleContext(request), new ServletRequestAttributes(request));
-			}
-
-			public void postProcess(NativeWebRequest webRequest, Callable<?> task, Object concurrentResult) {
-				resetContextHolders(request, null, null);
-			}
-		};
+	private void publishRequestHandledEvent(HttpServletRequest request, long startTime, Throwable failureCause) {
+		if (this.publishEvents) {
+			// Whether or not we succeeded, publish an event.
+			long processingTime = System.currentTimeMillis() - startTime;
+			this.webApplicationContext.publishEvent(
+					new ServletRequestHandledEvent(this,
+							request.getRequestURI(), request.getRemoteAddr(),
+							request.getMethod(), getServletConfig().getServletName(),
+							WebUtils.getSessionId(request), getUsernameForRequest(request),
+							processingTime, failureCause));
+		}
 	}
 
 	/**
@@ -1006,7 +1047,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>The default implementation takes the name of the UserPrincipal, if any.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the username, or <code>null</code> if none found
+	 * @return the username, or {@code null} if none found
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
 	protected String getUsernameForRequest(HttpServletRequest request) {
@@ -1014,11 +1055,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		return (userPrincipal != null ? userPrincipal.getName() : null);
 	}
 
+
 	/**
 	 * Subclasses must implement this method to do the work of request handling,
 	 * receiving a centralized callback for GET, POST, PUT and DELETE.
 	 * <p>The contract is essentially the same as that for the commonly overridden
-	 * <code>doGet</code> or <code>doPost</code> methods of HttpServlet.
+	 * {@code doGet} or {@code doPost} methods of HttpServlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.
 	 * @param request current HTTP request
@@ -1032,26 +1074,37 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
-	 * Close the WebApplicationContext of this servlet.
-	 * @see org.springframework.context.ConfigurableApplicationContext#close()
-	 */
-	@Override
-	public void destroy() {
-		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
-		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
-			((ConfigurableApplicationContext) this.webApplicationContext).close();
-		}
-	}
-
-
-	/**
 	 * ApplicationListener endpoint that receives events from this servlet's WebApplicationContext
-	 * only, delegating to <code>onApplicationEvent</code> on the FrameworkServlet instance.
+	 * only, delegating to {@code onApplicationEvent} on the FrameworkServlet instance.
 	 */
 	private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
 
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			FrameworkServlet.this.onApplicationEvent(event);
+		}
+	}
+
+
+	/**
+	 * CallableProcessingInterceptor implementation that initializes and resets
+	 * FrameworkServlet's context holders, i.e. LocaleContextHolder and RequestContextHolder.
+	 */
+	private class RequestBindingInterceptor extends CallableProcessingInterceptorAdapter {
+
+		@Override
+		public <T> void preProcess(NativeWebRequest webRequest, Callable<T> task) {
+			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+			if (request != null) {
+				HttpServletResponse response = webRequest.getNativeRequest(HttpServletResponse.class);
+				initContextHolders(request, buildLocaleContext(request), buildRequestAttributes(request, response, null));
+			}
+		}
+		@Override
+		public <T> void postProcess(NativeWebRequest webRequest, Callable<T> task, Object concurrentResult) {
+			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+			if (request != null) {
+				resetContextHolders(request, null, null);
+			}
 		}
 	}
 

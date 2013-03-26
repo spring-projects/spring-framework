@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -39,7 +39,7 @@ import org.springframework.web.method.annotation.RequestHeaderMapMethodArgumentR
 
 /**
  * Text fixture with {@link RequestHeaderMapMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -62,7 +62,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver();
-		
+
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
 		paramMap = new MethodParameter(method, 0);
 		paramMultiValueMap = new MethodParameter(method, 1);
@@ -108,7 +108,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Object result = resolver.resolveArgument(paramMultiValueMap, null, webRequest, null);
-		
+
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -127,7 +127,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Object result = resolver.resolveArgument(paramHttpHeaders, null, webRequest, null);
-		
+
 		assertTrue(result instanceof HttpHeaders);
 		assertEquals("Invalid result", expected, result);
 	}

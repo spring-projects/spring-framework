@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 package org.springframework.web.servlet;
 
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertSame;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * A test fixture with HandlerExecutionChain and mock handler interceptors.
@@ -56,9 +53,9 @@ public class HandlerExecutionChainTests {
 		this.handler = new Object();
 		this.chain = new HandlerExecutionChain(this.handler);
 
-		this.interceptor1 = createStrictMock(AsyncHandlerInterceptor.class);
-		this.interceptor2 = createStrictMock(AsyncHandlerInterceptor.class);
-		this.interceptor3 = createStrictMock(AsyncHandlerInterceptor.class);
+		this.interceptor1 = mock(AsyncHandlerInterceptor.class);
+		this.interceptor2 = mock(AsyncHandlerInterceptor.class);
+		this.interceptor3 = mock(AsyncHandlerInterceptor.class);
 
 		this.chain.addInterceptor(this.interceptor1);
 		this.chain.addInterceptor(this.interceptor2);
@@ -69,79 +66,60 @@ public class HandlerExecutionChainTests {
 	public void successScenario() throws Exception {
 		ModelAndView mav = new ModelAndView();
 
-		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor3.preHandle(this.request, this.response, this.handler)).andReturn(true);
-
-		this.interceptor1.postHandle(this.request, this.response, this.handler, mav);
-		this.interceptor2.postHandle(this.request, this.response, this.handler, mav);
-		this.interceptor3.postHandle(this.request, this.response, this.handler, mav);
-
-		this.interceptor3.afterCompletion(this.request, this.response, this.handler, null);
-		this.interceptor2.afterCompletion(this.request, this.response, this.handler, null);
-		this.interceptor1.afterCompletion(this.request, this.response, this.handler, null);
-
-		replay(this.interceptor1, this.interceptor2, this.interceptor3);
+		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor3.preHandle(this.request, this.response, this.handler)).willReturn(true);
 
 		this.chain.applyPreHandle(request, response);
 		this.chain.applyPostHandle(request, response, mav);
 		this.chain.triggerAfterCompletion(this.request, this.response, null);
 
-		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+		verify(this.interceptor1).postHandle(this.request, this.response, this.handler, mav);
+		verify(this.interceptor2).postHandle(this.request, this.response, this.handler, mav);
+		verify(this.interceptor3).postHandle(this.request, this.response, this.handler, mav);
+
+		verify(this.interceptor3).afterCompletion(this.request, this.response, this.handler, null);
+		verify(this.interceptor2).afterCompletion(this.request, this.response, this.handler, null);
+		verify(this.interceptor1).afterCompletion(this.request, this.response, this.handler, null);
 	}
 
 	@Test
 	public void successAsyncScenario() throws Exception {
-		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor3.preHandle(this.request, this.response, this.handler)).andReturn(true);
-
-		this.interceptor1.afterConcurrentHandlingStarted(request, response, this.handler);
-		this.interceptor2.afterConcurrentHandlingStarted(request, response, this.handler);
-		this.interceptor3.afterConcurrentHandlingStarted(request, response, this.handler);
-
-		replay(this.interceptor1, this.interceptor2, this.interceptor3);
+		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor3.preHandle(this.request, this.response, this.handler)).willReturn(true);
 
 		this.chain.applyPreHandle(request, response);
 		this.chain.applyAfterConcurrentHandlingStarted(request, response);
 		this.chain.triggerAfterCompletion(this.request, this.response, null);
 
-		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+		verify(this.interceptor1).afterConcurrentHandlingStarted(request, response, this.handler);
+		verify(this.interceptor2).afterConcurrentHandlingStarted(request, response, this.handler);
+		verify(this.interceptor3).afterConcurrentHandlingStarted(request, response, this.handler);
 	}
 
 	@Test
 	public void earlyExitInPreHandle() throws Exception {
-		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(false);
-
-		this.interceptor1.afterCompletion(this.request, this.response, this.handler, null);
-
-		replay(this.interceptor1, this.interceptor2, this.interceptor3);
+		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willReturn(false);
 
 		this.chain.applyPreHandle(request, response);
 
-		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+		verify(this.interceptor1).afterCompletion(this.request, this.response, this.handler, null);
 	}
 
 	@Test
 	public void exceptionBeforePreHandle() throws Exception {
-		replay(this.interceptor1, this.interceptor2, this.interceptor3);
-
 		this.chain.triggerAfterCompletion(this.request, this.response, null);
-
-		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+		verifyZeroInteractions(this.interceptor1, this.interceptor2, this.interceptor3);
 	}
 
 	@Test
 	public void exceptionDuringPreHandle() throws Exception {
 		Exception ex = new Exception("");
 
-		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andThrow(ex);
-
-		this.interceptor1.afterCompletion(this.request, this.response, this.handler, ex);
-
-		replay(this.interceptor1, this.interceptor2, this.interceptor3);
+		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willThrow(ex);
 
 		try {
 			this.chain.applyPreHandle(request, response);
@@ -151,27 +129,24 @@ public class HandlerExecutionChainTests {
 		}
 		this.chain.triggerAfterCompletion(this.request, this.response, ex);
 
-		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+		verify(this.interceptor1).afterCompletion(this.request, this.response, this.handler, ex);
+		verify(this.interceptor3, never()).preHandle(this.request, this.response, this.handler);
 	}
 
 	@Test
 	public void exceptionAfterPreHandle() throws Exception {
 		Exception ex = new Exception("");
 
-		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(true);
-		expect(this.interceptor3.preHandle(this.request, this.response, this.handler)).andReturn(true);
-
-		this.interceptor3.afterCompletion(this.request, this.response, this.handler, ex);
-		this.interceptor2.afterCompletion(this.request, this.response, this.handler, ex);
-		this.interceptor1.afterCompletion(this.request, this.response, this.handler, ex);
-
-		replay(this.interceptor1, this.interceptor2, this.interceptor3);
+		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willReturn(true);
+		given(this.interceptor3.preHandle(this.request, this.response, this.handler)).willReturn(true);
 
 		this.chain.applyPreHandle(request, response);
 		this.chain.triggerAfterCompletion(this.request, this.response, ex);
 
-		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+		verify(this.interceptor3).afterCompletion(this.request, this.response, this.handler, ex);
+		verify(this.interceptor2).afterCompletion(this.request, this.response, this.handler, ex);
+		verify(this.interceptor1).afterCompletion(this.request, this.response, this.handler, ex);
 	}
 
 }

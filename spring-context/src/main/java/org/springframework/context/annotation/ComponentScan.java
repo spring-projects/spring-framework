@@ -163,7 +163,7 @@ public @interface ComponentScan {
 		 * <p>Specifying zero classes is permitted but will have no effect on component
 		 * scanning.
 		 */
-		Class<?>[] value(); //doco
+		Class<?>[] value();
 	}
 
 }

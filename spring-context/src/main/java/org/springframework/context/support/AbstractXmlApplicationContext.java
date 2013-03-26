@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 
 
 	/**
-	 * Set whether to use XML validation. Default is <code>true</code>.
+	 * Set whether to use XML validation. Default is {@code true}.
 	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
@@ -131,9 +131,9 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	/**
 	 * Return an array of Resource objects, referring to the XML bean definition
 	 * files that this context should be built with.
-	 * <p>The default implementation returns <code>null</code>. Subclasses can override
+	 * <p>The default implementation returns {@code null}. Subclasses can override
 	 * this to provide pre-built Resource objects rather than location Strings.
-	 * @return an array of Resource objects, or <code>null</code> if none
+	 * @return an array of Resource objects, or {@code null} if none
 	 * @see #getConfigLocations()
 	 */
 	protected Resource[] getConfigResources() {

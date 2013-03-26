@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson
@@ -74,43 +75,31 @@ public class ControllerTests extends TestCase {
 	private void doTestServletForwardingController(ServletForwardingController sfc, boolean include)
 			throws Exception {
 
-		MockControl requestControl = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) requestControl.getMock();
-		MockControl responseControl = MockControl.createControl(HttpServletResponse.class);
-		HttpServletResponse response = (HttpServletResponse) responseControl.getMock();
-		MockControl contextControl = MockControl.createControl(ServletContext.class);
-		ServletContext context = (ServletContext) contextControl.getMock();
-		MockControl dispatcherControl = MockControl.createControl(RequestDispatcher.class);
-		RequestDispatcher dispatcher = (RequestDispatcher) dispatcherControl.getMock();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		ServletContext context = mock(ServletContext.class);
+		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
 
-		request.getMethod();
-		requestControl.setReturnValue("GET", 1);
-		context.getNamedDispatcher("action");
-		contextControl.setReturnValue(dispatcher, 1);
+		given(request.getMethod()).willReturn("GET");
+		given(context.getNamedDispatcher("action")).willReturn(dispatcher);
 		if (include) {
-			request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-			requestControl.setReturnValue("somePath", 1);
-			dispatcher.include(request, response);
-			dispatcherControl.setVoidCallable(1);
+			given(request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE)).willReturn("somePath");
 		}
 		else {
-			request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-			requestControl.setReturnValue(null, 1);
-			dispatcher.forward(request, response);
-			dispatcherControl.setVoidCallable(1);
+			given(request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE)).willReturn(null);
 		}
-		requestControl.replay();
-		contextControl.replay();
-		dispatcherControl.replay();
 
 		StaticWebApplicationContext sac = new StaticWebApplicationContext();
 		sac.setServletContext(context);
 		sfc.setApplicationContext(sac);
 		assertNull(sfc.handleRequest(request, response));
 
-		requestControl.verify();
-		contextControl.verify();
-		dispatcherControl.verify();
+		if (include) {
+			verify(dispatcher).include(request, response);
+		}
+		else {
+			verify(dispatcher).forward(request, response);
+		}
 	}
 
 	public void testServletWrappingController() throws Exception {
@@ -178,23 +167,28 @@ public class ControllerTests extends TestCase {
 			destroyed = false;
 		}
 
+		@Override
 		public void init(ServletConfig servletConfig) {
 			config = servletConfig;
 		}
 
+		@Override
 		public ServletConfig getServletConfig() {
 			return config;
 		}
 
+		@Override
 		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
 			request = servletRequest;
 			response = servletResponse;
 		}
 
+		@Override
 		public String getServletInfo() {
 			return "TestServlet";
 		}
 
+		@Override
 		public void destroy() {
 			destroyed = true;
 		}

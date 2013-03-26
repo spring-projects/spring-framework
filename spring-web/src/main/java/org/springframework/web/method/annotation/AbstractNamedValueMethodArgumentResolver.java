@@ -62,7 +62,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	private final BeanExpressionContext expressionContext;
 
 	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
-			new ConcurrentHashMap<MethodParameter, NamedValueInfo>();
+			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
 
 	/**
 	 * @param beanFactory a bean factory to use for resolving ${...} placeholder
@@ -80,11 +80,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			throws Exception {
 
 		Class<?> paramType = parameter.getParameterType();
-
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 
 		Object arg = resolveName(namedValueInfo.name, parameter, webRequest);
-
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
 				arg = resolveDefaultValue(namedValueInfo.defaultValue);
@@ -93,6 +91,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 				handleMissingValue(namedValueInfo.name, parameter);
 			}
 			arg = handleNullValue(namedValueInfo.name, arg, paramType);
+		}
+		else if ("".equals(arg) && (namedValueInfo.defaultValue != null)) {
+			arg = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
 		if (binderFactory != null) {
@@ -121,7 +122,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	/**
 	 * Create the {@link NamedValueInfo} object for the given method parameter. Implementations typically
 	 * retrieve the method annotation by means of {@link MethodParameter#getParameterAnnotation(Class)}.
-	 *
 	 * @param parameter the method parameter
 	 * @return the named value information
 	 */
@@ -146,7 +146,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param name the name of the value being resolved
 	 * @param parameter the method parameter to resolve to an argument value
 	 * @param request the current request
-	 *
 	 * @return the resolved argument. May be {@code null}
 	 * @throws Exception in case of errors
 	 */
@@ -203,8 +202,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
-
 	}
+
 
 	/**
 	 * Represents the information about a named value, including name, whether it's required and a default value.
@@ -223,4 +222,5 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			this.defaultValue = defaultValue;
 		}
 	}
+
 }

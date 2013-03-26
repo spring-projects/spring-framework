@@ -164,7 +164,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Return the destination to receive messages from. Will be <code>null</code>
+	 * Return the destination to receive messages from. Will be {@code null}
 	 * if the configured destination is not an actual {@link Destination} type;
 	 * c.f. {@link #setDestinationName(String) when the destination is a String}.
 	 */
@@ -181,7 +181,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * container picking up the new destination immediately (works e.g. with
 	 * DefaultMessageListenerContainer, as long as the cache level is less than
 	 * CACHE_CONSUMER). However, this is considered advanced usage; use it with care!
-	 * @param destinationName the desired destination (can be <code>null</code>)
+	 * @param destinationName the desired destination (can be {@code null})
 	 * @see #setDestination(javax.jms.Destination)
 	 */
 	public void setDestinationName(String destinationName) {
@@ -191,7 +191,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Return the name of the destination to receive messages from.
-	 * Will be <code>null</code> if the configured destination is not a
+	 * Will be {@code null} if the configured destination is not a
 	 * {@link String} type; c.f. {@link #setDestination(Destination) when
 	 * it is an actual Destination}.
 	 */
@@ -201,14 +201,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Return a descriptive String for this container's JMS destination
-	 * (never <code>null</code>).
+	 * (never {@code null}).
 	 */
 	protected String getDestinationDescription() {
 		return this.destination.toString();
 	}
 
 	/**
-	 * Set the JMS message selector expression (or <code>null</code> if none).
+	 * Set the JMS message selector expression (or {@code null} if none).
 	 * Default is none.
 	 * <p>See the JMS specification for a detailed definition of selector expressions.
 	 * <p>Note: The message selector may be replaced at runtime, with the listener
@@ -221,7 +221,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Return the JMS message selector expression (or <code>null</code> if none).
+	 * Return the JMS message selector expression (or {@code null} if none).
 	 */
 	public String getMessageSelector() {
 		return this.messageSelector;
@@ -552,7 +552,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Invoke the specified listener as standard JMS MessageListener.
 	 * <p>Default implementation performs a plain invocation of the
-	 * <code>onMessage</code> method.
+	 * {@code onMessage} method.
 	 * @param listener the JMS MessageListener to invoke
 	 * @param message the received JMS Message
 	 * @throws JMSException if thrown by JMS API methods

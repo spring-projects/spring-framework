@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,10 @@ import org.hibernate.cache.CacheProvider;
  * @author Juergen Hoeller
  * @since 2.5.1
  * @see LocalSessionFactoryBean#setCacheProvider
+ * @deprecated as of Spring 3.0, following Hibernate 3.3's deprecation
+ * of the CacheProvider SPI
  */
+@Deprecated
 public class LocalCacheProviderProxy implements CacheProvider {
 
 	private final CacheProvider cacheProvider;
@@ -41,7 +44,7 @@ public class LocalCacheProviderProxy implements CacheProvider {
 		// absolutely needs thread-bound CacheProvider to initialize
 		if (cp == null) {
 			throw new IllegalStateException("No Hibernate CacheProvider found - " +
-			    "'cacheProvider' property must be set on LocalSessionFactoryBean");
+				"'cacheProvider' property must be set on LocalSessionFactoryBean");
 		}
 		this.cacheProvider = cp;
 	}

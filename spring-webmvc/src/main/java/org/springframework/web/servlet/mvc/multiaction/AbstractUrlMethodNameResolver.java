@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,8 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * <code>getHandlerMethodNameForUrlPath</code>.
-	 * Converts <code>null</code> values to NoSuchRequestHandlingMethodExceptions.
+	 * {@code getHandlerMethodNameForUrlPath}.
+	 * Converts {@code null} values to NoSuchRequestHandlingMethodExceptions.
 	 * @see #getHandlerMethodNameForUrlPath
 	 */
 	public final String getHandlerMethodName(HttpServletRequest request)
@@ -101,7 +101,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	/**
 	 * Return a method name that can handle this request, based on the
-	 * given lookup path. Called by <code>getHandlerMethodName</code>.
+	 * given lookup path. Called by {@code getHandlerMethodName}.
 	 * @param urlPath the URL path to use for lookup,
 	 * according to the settings in this class
 	 * @return a method name that can handle this request.

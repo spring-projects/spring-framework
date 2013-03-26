@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -25,9 +28,9 @@ import java.util.Properties;
 import java.util.Vector;
 
 import junit.framework.TestCase;
+
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
-
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.FileSystemResource;
@@ -68,8 +71,8 @@ public class VelocityConfigurerTests extends TestCase {
 		map.put("myentry", value);
 		vefb.setVelocityPropertiesMap(map);
 		vefb.afterPropertiesSet();
-		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		assertThat(vefb.getObject(), instanceOf(VelocityEngine.class));
+		VelocityEngine ve = vefb.getObject();
 		assertEquals("/mydir", ve.getProperty("myprop"));
 		assertEquals(value, ve.getProperty("myentry"));
 	}
@@ -78,8 +81,8 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.afterPropertiesSet();
-		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		assertThat(vefb.getObject(), instanceOf(VelocityEngine.class));
+		VelocityEngine ve = vefb.getObject();
 		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
 
@@ -87,6 +90,7 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if (location.equals("file:/mydir") || location.equals("file:/mydir/test")) {
 					return new ByteArrayResource("test".getBytes(), "test");
@@ -98,13 +102,14 @@ public class VelocityConfigurerTests extends TestCase {
 					throw new IllegalArgumentException(ex.toString());
 				}
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}
 		});
 		vefb.afterPropertiesSet();
-		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		assertThat(vefb.getObject(), instanceOf(VelocityEngine.class));
+		VelocityEngine ve = vefb.getObject();
 		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", new HashMap()));
 	}
 
@@ -112,7 +117,7 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir");
 		vc.afterPropertiesSet();
-		assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
+		assertThat(vc.createVelocityEngine(), instanceOf(VelocityEngine.class));
 		VelocityEngine ve = vc.createVelocityEngine();
 		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
@@ -121,7 +126,7 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
 		vc.afterPropertiesSet();
-		assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
+		assertThat(vc.createVelocityEngine(), instanceOf(VelocityEngine.class));
 		VelocityEngine ve = vc.createVelocityEngine();
 		Vector paths = new Vector();
 		paths.add(new File("/mydir").getAbsolutePath());
@@ -133,19 +138,21 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
 		vc.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if ("file:/yourdir/test".equals(location)) {
 					return new DescriptiveResource("");
 				}
 				return new ByteArrayResource("test".getBytes(), "test");
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}
 		});
 		vc.setPreferFileSystemAccess(false);
 		vc.afterPropertiesSet();
-		assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
+		assertThat(vc.createVelocityEngine(), instanceOf(VelocityEngine.class));
 		VelocityEngine ve = vc.createVelocityEngine();
 		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", new HashMap()));
 	}

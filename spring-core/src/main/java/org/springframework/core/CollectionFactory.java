@@ -187,8 +187,8 @@ public abstract class CollectionFactory {
 	 * Determine whether the given collection type is an approximable type,
 	 * i.e. a type that {@link #createApproximateCollection} can approximate.
 	 * @param collectionType the collection type to check
-	 * @return <code>true</code> if the type is approximable,
-	 * <code>false</code> if it is not
+	 * @return {@code true} if the type is approximable,
+	 * {@code false} if it is not
 	 */
 	public static boolean isApproximableCollectionType(Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
@@ -255,7 +255,8 @@ public abstract class CollectionFactory {
 				return (Collection) collectionType.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException("Could not instantiate Collection type: " + collectionType.getName());
+				throw new IllegalArgumentException("Could not instantiate Collection type: " +
+						collectionType.getName(), ex);
 			}
 		}
 	}
@@ -264,8 +265,8 @@ public abstract class CollectionFactory {
 	 * Determine whether the given map type is an approximable type,
 	 * i.e. a type that {@link #createApproximateMap} can approximate.
 	 * @param mapType the map type to check
-	 * @return <code>true</code> if the type is approximable,
-	 * <code>false</code> if it is not
+	 * @return {@code true} if the type is approximable,
+	 * {@code false} if it is not
 	 */
 	public static boolean isApproximableMapType(Class<?> mapType) {
 		return (mapType != null && approximableMapTypes.contains(mapType));
@@ -293,7 +294,7 @@ public abstract class CollectionFactory {
 	/**
 	 * Create the most approximate map for the given map.
 	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
-	 * @param collectionType the desired type of the target Map
+	 * @param mapType the desired type of the target Map
 	 * @param initialCapacity the initial capacity
 	 * @return the new Map instance
 	 * @see java.util.TreeMap
@@ -322,7 +323,8 @@ public abstract class CollectionFactory {
 				return (Map) mapType.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName());
+				throw new IllegalArgumentException("Could not instantiate Map type: " +
+						mapType.getName(), ex);
 			}
 		}
 	}
@@ -332,6 +334,7 @@ public abstract class CollectionFactory {
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
 	@Deprecated
+	@SuppressWarnings("serial")
 	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
 
 		private JdkConcurrentHashMap(int initialCapacity) {

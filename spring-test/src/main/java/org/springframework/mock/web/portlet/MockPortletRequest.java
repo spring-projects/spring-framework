@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
-
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletMode;
@@ -42,7 +41,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.portlet.PortletRequest} interface.
- * 
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @since 2.0
@@ -103,7 +102,7 @@ public class MockPortletRequest implements PortletRequest {
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
-	 * 
+	 *
 	 * @see MockPortalContext
 	 * @see MockPortletContext
 	 */
@@ -113,7 +112,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}.
-	 * 
+	 *
 	 * @param portletContext the PortletContext that the request runs in
 	 * @see MockPortalContext
 	 */
@@ -123,7 +122,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest.
-	 * 
+	 *
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
@@ -269,7 +268,7 @@ public class MockPortletRequest implements PortletRequest {
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
 		List<String> list = this.properties.get(key);
-		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
+		return (list != null && list.size() > 0 ? list.get(0) : null);
 	}
 
 	public Enumeration<String> getProperties(String key) {
@@ -332,7 +331,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return new Vector<String>(this.attributes.keySet()).elements();
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	public void setParameters(Map<String, String[]> parameters) {

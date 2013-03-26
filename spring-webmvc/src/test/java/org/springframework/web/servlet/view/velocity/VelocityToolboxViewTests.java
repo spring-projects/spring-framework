@@ -18,9 +18,9 @@ import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.view.context.ChainedContext;
 import org.apache.velocity.tools.view.tools.LinkTool;
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 
@@ -39,6 +39,7 @@ public class VelocityToolboxViewTests {
 		wac.setServletContext(new MockServletContext());
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
@@ -49,6 +50,7 @@ public class VelocityToolboxViewTests {
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
 		VelocityToolboxView vv = new VelocityToolboxView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 				assertTrue(template == expectedTemplate);
 				assertTrue(response == expectedResponse);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ import org.springframework.web.portlet.ModelAndView;
  * render phase will be called repeatedly by the portal -- it does this every time
  * the page containing the portlet is updated, even if the activity is in some other
  * portlet.  The main difference in the methods in this class is that the
- * <code>onSubmit</code> methods have all been split into <code>onSubmitAction</code>
- * and <code>onSubmitRender</code> to account for the two phases.</p>
+ * {@code onSubmit} methods have all been split into {@code onSubmitAction}
+ * and {@code onSubmitRender} to account for the two phases.</p>
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="AbstractFormController.html#workflow">in addition to the superclass</a>):</b><br>
@@ -70,12 +70,12 @@ import org.springframework.web.portlet.ModelAndView;
  * <li>If no errors occurred, the controller will call
  * {@link #onSubmitAction(ActionRequest, ActionResponse, Object, BindException) onSubmitAction}
  * during the action phase and then {@link #onSubmitRender(RenderRequest, RenderResponse,
-		* Object, BindException) onSubmitRender} during the render phase, which in case of the
+ * Object, BindException) onSubmitRender} during the render phase, which in case of the
  * default implementation delegate to {@link #onSubmitAction(Object, BindException)
  * onSubmitAction} and {@link #onSubmitRender(Object, BindException) onSubmitRender}
  * with just the command object.
  * The default implementation of the latter method will return the configured
- * <code>successView</code>. Consider just implementing {@link #doSubmitAction doSubmitAction}
+ * {@code successView}. Consider just implementing {@link #doSubmitAction doSubmitAction}
  * for simply performing a submit action during the action phase and then rendering
  * the success view during the render phase.</li>
  * </ol>
@@ -85,9 +85,9 @@ import org.springframework.web.portlet.ModelAndView;
  * {@link #onSubmitAction onSubmitAction} or {@link #onSubmitRender onSubmitRender}
  * methods. Submit actions can also perform custom validation if necessary
  * (typically database-driven checks), calling {@link #showForm(RenderRequest,
-		* RenderResponse, BindException) showForm} in case of validation errors to show
- * the form view again.  You do not have to override both the <code>onSubmitAction</code> and
- * <code>onSubmitRender</code> methods at a given level unless you truly have custom logic to
+ * RenderResponse, BindException) showForm} in case of validation errors to show
+ * the form view again.  You do not have to override both the {@code onSubmitAction} and
+ * {@code onSubmitRender} methods at a given level unless you truly have custom logic to
  * perform in both.<p>
  *
  * <p><b>WARNING:</b> Make sure that any one-time system updates (such as database
@@ -121,10 +121,10 @@ import org.springframework.web.portlet.ModelAndView;
  * <table>
  * </p>
  *
- * <p>Parameters indicated with <code>setPassRenderParameters</code> will be
+ * <p>Parameters indicated with {@code setPassRenderParameters} will be
  * preserved if the form has errors or if a form change request occurs.
- * If there are render parameters you need in <code>onSubmitRender</code>,
- * then you need to pass those forward from <code>onSubmitAction</code>.
+ * If there are render parameters you need in {@code onSubmitRender},
+ * then you need to pass those forward from {@code onSubmitAction}.
  *
  * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
  *
@@ -147,7 +147,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * <p>Subclasses should set the following properties, either in the constructor
 	 * or via a BeanFactory: commandName, commandClass, sessionForm, formView,
 	 * successView. Note that commandClass doesn't need to be set when overriding
-	 * <code>formBackingObject</code>, as this determines the class anyway.
+	 * {@code formBackingObject}, as this determines the class anyway.
 	 * @see #setCommandClass(Class)
 	 * @see #setCommandName(String)
 	 * @see #setSessionForm(boolean)
@@ -249,7 +249,7 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Create a reference data map for the given request.
 	 * Called by referenceData version with all parameters.
-	 * <p>The default implementation returns <code>null</code>.
+	 * <p>The default implementation returns {@code null}.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current portlet request
 	 * @return a Map with reference data entries, or null if none
@@ -263,11 +263,11 @@ public class SimpleFormController extends AbstractFormController {
 
 
 	/**
-	 * This implementation calls <code>showForm</code> in case of errors,
-	 * and delegates to <code>onSubmitRender<code>'s full version else.
+	 * This implementation calls {@code showForm} in case of errors,
+	 * and delegates to {@code onSubmitRender}'s full version else.
 	 * <p>This can only be overridden to check for an action that should be executed
 	 * without respect to binding errors, like a cancel action. To just handle successful
-	 * submissions without binding errors, override one of the <code>onSubmitRender</code>
+	 * submissions without binding errors, override one of the {@code onSubmitRender}
 	 * methods.
 	 * @see #showForm(RenderRequest, RenderResponse, BindException)
 	 * @see #onSubmitRender(RenderRequest, RenderResponse, Object, BindException)
@@ -289,11 +289,11 @@ public class SimpleFormController extends AbstractFormController {
 
 	/**
 	 * This implementation does nothing in case of errors,
-	 * and delegates to <code>onSubmitAction</code>'s full version else.
+	 * and delegates to {@code onSubmitAction}'s full version else.
 	 * <p>This can only be overridden to check for an action that should be executed
 	 * without respect to binding errors, like a cancel action. To just handle successful
-	 * submissions without binding errors, override one of the <code>onSubmitAction</code>
-	 * methods or <code>doSubmitAction</code>.
+	 * submissions without binding errors, override one of the {@code onSubmitAction}
+	 * methods or {@code doSubmitAction}.
 	 * @see #showForm
 	 * @see #onSubmitAction(ActionRequest, ActionResponse, Object, BindException)
 	 * @see #onSubmitAction(Object, BindException)
@@ -347,7 +347,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * <p>Gets called by {@link #suppressValidation} and {@link #processFormSubmission}.
 	 * Consequently, this single method determines to suppress validation
 	 * <i>and</i> to show the form view in any case.
-	 * <p>The default implementation returns <code>false</code.
+	 * <p>The default implementation returns {@code false}.
 	 * @param request current portlet request
 	 * @return whether the given request is a form change request
 	 * @see #suppressValidation
@@ -359,10 +359,10 @@ public class SimpleFormController extends AbstractFormController {
 
 	/**
 	 * Called during form submission if {@link #isFormChangeRequest(PortletRequest)}
-	 * returns <code>true</code>. Allows subclasses to implement custom logic
+	 * returns {@code true}. Allows subclasses to implement custom logic
 	 * to modify the command object to directly modify data in the form.
 	 * <p>The default implementation delegates to
-	 * <code>onFormChange(request, response, command)</code>.
+	 * {@code onFormChange(request, response, command)}.
 	 * @param request current action request
 	 * @param response current action response
 	 * @param command form object with request parameters bound onto it
@@ -379,8 +379,8 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simpler <code>onFormChange</code> variant, called by the full version
-	 * <code>onFormChange(request, response, command, errors)</code>.
+	 * Simpler {@code onFormChange} variant, called by the full version
+	 * {@code onFormChange(request, response, command, errors)}.
 	 * <p>The default implementation is empty.
 	 * @param request current action request
 	 * @param response current action response
@@ -398,13 +398,13 @@ public class SimpleFormController extends AbstractFormController {
 	 * reported by the registered validator, or on every submit if no validator.
 	 * <p>The default implementation delegates to {@link #onSubmitRender(Object, BindException)}.
 	 * For simply performing a submit action and rendering the specified success view,
-	 * do not implement an <code>onSubmitRender</code> at all.
+	 * do not implement an {@code onSubmitRender} at all.
 	 * <p>Subclasses can override this to provide custom rendering to display results of
-	 * the action phase. Implementations can also call <code>showForm</code> to return to the form
-	 * if the <code>onSubmitAction</code> failed custom validation. Do <i>not</i> implement multiple
-	 * <code>onSubmitRender</code> methods: In that case,
+	 * the action phase. Implementations can also call {@code showForm} to return to the form
+	 * if the {@code onSubmitAction} failed custom validation. Do <i>not</i> implement multiple
+	 * {@code onSubmitRender} methods: In that case,
 	 * just this method will be called by the controller.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * <p>Call {@code errors.getModel()} to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
 	 * @param request current render request
@@ -430,12 +430,12 @@ public class SimpleFormController extends AbstractFormController {
 	 * Submit action phase callback with all parameters. Called in case of submit without errors
 	 * reported by the registered validator respectively on every submit if no validator.
 	 * <p>The default implementation delegates to {@link #onSubmitAction(Object, BindException)}.
-	 * For simply performing a submit action consider implementing <code>doSubmitAction</code>
-	 * rather than an <code>onSubmitAction</code> version.
+	 * For simply performing a submit action consider implementing {@code doSubmitAction}
+	 * rather than an {@code onSubmitAction} version.
 	 * <p>Subclasses can override this to provide custom submission handling like storing
 	 * the object to the database. Implementations can also perform custom validation and
-	 * signal the render phase to call <code>showForm</code> to return to the form. Do <i>not</i>
-	 * implement multiple <code>onSubmitAction</code> methods: In that case,
+	 * signal the render phase to call {@code showForm} to return to the form. Do <i>not</i>
+	 * implement multiple {@code onSubmitAction} methods: In that case,
 	 * just this method will be called by the controller.
 	 * @param request current action request
 	 * @param response current action response
@@ -454,15 +454,15 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simpler <code>onSubmitRender</code> version. Called by the default implementation
-	 * of the <code>onSubmitRender</code> version with all parameters.
+	 * Simpler {@code onSubmitRender} version. Called by the default implementation
+	 * of the {@code onSubmitRender} version with all parameters.
 	 * <p>The default implementation calls {@link #onSubmitRender(Object)}, using the
 	 * returned ModelAndView if actually implemented in a subclass. Else, the
 	 * default behavior will apply: rendering the success view with the command
 	 * and Errors instance as model.
 	 * <p>Subclasses can override this to provide custom submission handling that
 	 * does not need request and response.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * <p>Call {@code errors.getModel()} to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
 	 * @param command form object with request parameters bound onto it
@@ -492,8 +492,8 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simpler <code>onSubmitAction</code> version. Called by the default implementation
-	 * of the <code>onSubmitAction</code> version with all parameters.
+	 * Simpler {@code onSubmitAction} version. Called by the default implementation
+	 * of the {@code onSubmitAction} version with all parameters.
 	 * <p>The default implementation calls {@link #onSubmitAction(Object)}.
 	 * <p>Subclasses can override this to provide custom submission handling that
 	 * does not need request and response.
@@ -510,10 +510,10 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simplest <code>onSubmitRender</code> version. Called by the default implementation
-	 * of the <code>onSubmitRender</code> version with command and BindException parameters.
+	 * Simplest {@code onSubmitRender} version. Called by the default implementation
+	 * of the {@code onSubmitRender} version with command and BindException parameters.
 	 * <p>This implementation returns null as ModelAndView, making the calling
-	 * <code>onSubmitRender</code> method perform its default rendering of the success view.
+	 * {@code onSubmitRender} method perform its default rendering of the success view.
 	 * <p>Subclasses can override this to provide custom submission handling
 	 * that just depends on the command object.
 	 * @param command form object with request parameters bound onto it
@@ -529,9 +529,9 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * Simplest <code>onSubmitAction</code> version. Called by the default implementation
-	 * of the <code>onSubmitAction</code> version with command and BindException parameters.
-	 * <p>This implementation calls <code>doSubmitAction</code>.
+	 * Simplest {@code onSubmitAction} version. Called by the default implementation
+	 * of the {@code onSubmitAction} version with command and BindException parameters.
+	 * <p>This implementation calls {@code doSubmitAction}.
 	 * <p>Subclasses can override this to provide custom submission handling
 	 * that just depends on the command object.
 	 * @param command form object with request parameters bound onto it
@@ -546,7 +546,7 @@ public class SimpleFormController extends AbstractFormController {
 
 	/**
 	 * Template method for submit actions. Called by the default implementation
-	 * of the simplest <code>onSubmitAction</code> version.
+	 * of the simplest {@code onSubmitAction} version.
 	 * <p><b>This is the preferred submit callback to implement if you want to
 	 * perform an action (like storing changes to the database) and then render
 	 * the success view with the command and Errors instance as model.</b>

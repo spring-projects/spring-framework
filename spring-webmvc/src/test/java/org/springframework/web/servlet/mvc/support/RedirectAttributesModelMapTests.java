@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
 /**
- * 
+ *
  * Test fixture for {@link RedirectAttributesModelMap} tests.
  *
  * @author Rossen Stoyanchev
@@ -40,7 +40,7 @@ import org.springframework.validation.DataBinder;
 public class RedirectAttributesModelMapTests {
 
 	private RedirectAttributesModelMap redirectAttributes;
-	
+
 	private FormattingConversionService conversionService;
 
 	@Before
@@ -48,10 +48,10 @@ public class RedirectAttributesModelMapTests {
 		this.conversionService = new DefaultFormattingConversionService();
 		DataBinder dataBinder = new DataBinder(null);
 		dataBinder.setConversionService(conversionService);
-		
+
 		this.redirectAttributes = new RedirectAttributesModelMap(dataBinder);
 	}
-	
+
 	@Test
 	public void addAttributePrimitiveType() {
 		this.redirectAttributes.addAttribute("speed", 65);
@@ -62,12 +62,12 @@ public class RedirectAttributesModelMapTests {
 	public void addAttributeCustomType() {
 		String attrName = "person";
 		this.redirectAttributes.addAttribute(attrName, new TestBean("Fred"));
-		
+
 		assertEquals("ConversionService should have invoked toString()", "Fred", this.redirectAttributes.get(attrName));
 
 		this.conversionService.addConverter(new TestBeanConverter());
 		this.redirectAttributes.addAttribute(attrName, new TestBean("Fred"));
-		
+
 		assertEquals("Type converter should have been used", "[Fred]", this.redirectAttributes.get(attrName));
 	}
 
@@ -83,14 +83,14 @@ public class RedirectAttributesModelMapTests {
 	@Test
 	public void addAttributeValue() {
 		this.redirectAttributes.addAttribute(new TestBean("Fred"));
-		
+
 		assertEquals("Fred", this.redirectAttributes.get("testBean"));
 	}
 
 	@Test
 	public void addAllAttributesList() {
 		this.redirectAttributes.addAllAttributes(Arrays.asList(new TestBean("Fred"), new Integer(5)));
-		
+
 		assertEquals("Fred", this.redirectAttributes.get("testBean"));
 		assertEquals("5", this.redirectAttributes.get("integer"));
 	}
@@ -101,7 +101,7 @@ public class RedirectAttributesModelMapTests {
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
 		this.redirectAttributes.addAllAttributes(map);
-		
+
 		assertEquals("Fred", this.redirectAttributes.get("person"));
 		assertEquals("33", this.redirectAttributes.get("age"));
 	}
@@ -111,18 +111,18 @@ public class RedirectAttributesModelMapTests {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
-		
+
 		this.redirectAttributes.addAttribute("person", new TestBean("Ralph"));
 		this.redirectAttributes.mergeAttributes(map);
-		
+
 		assertEquals("Ralph", this.redirectAttributes.get("person"));
 		assertEquals("33", this.redirectAttributes.get("age"));
 	}
-	
+
 	@Test
 	public void put() {
 		this.redirectAttributes.put("testBean", new TestBean("Fred"));
-		
+
 		assertEquals("Fred", this.redirectAttributes.get("testBean"));
 	}
 
@@ -132,16 +132,17 @@ public class RedirectAttributesModelMapTests {
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
 		this.redirectAttributes.putAll(map);
-		
+
 		assertEquals("Fred", this.redirectAttributes.get("person"));
 		assertEquals("33", this.redirectAttributes.get("age"));
 	}
-	
+
 	public static class TestBeanConverter implements Converter<TestBean, String> {
-		
+
+		@Override
 		public String convert(TestBean source) {
 			return "[" + source.getName() + "]";
 		}
-	}	
-	
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,6 +183,16 @@ public class StandardEnvironmentTests {
 		environment.addActiveProfile("p3");
 		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("p2", "p3"));
 		assertThat(environment.getActiveProfiles().length, is(5));
+	}
+
+	@Test
+	public void addActiveProfile_whenActiveProfilesPropertyIsAlreadySet() {
+		ConfigurableEnvironment env = new StandardEnvironment();
+		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME), nullValue());
+		env.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
+		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME), equalTo("p1"));
+		env.addActiveProfile("p2");
+		assertThat(env.getActiveProfiles(), arrayContaining("p1", "p2"));
 	}
 
 	@Test
@@ -446,7 +456,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, String> getModifiableSystemEnvironment() {
+	public static Map<String, String> getModifiableSystemEnvironment() {
 		// for os x / linux
 		Class<?>[] classes = Collections.class.getDeclaredClasses();
 		Map<String, String> env = System.getenv();

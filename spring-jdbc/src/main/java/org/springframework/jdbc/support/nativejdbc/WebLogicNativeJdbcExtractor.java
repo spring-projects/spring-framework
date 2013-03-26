@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of the {@link NativeJdbcExtractor} interface for WebLogic,
- * supporting WebLogic Server 8.1 and higher.
+ * supporting WebLogic Server 9.0 and higher.
  *
  * <p>Returns the underlying native Connection to application code instead
  * of WebLogic's wrapper implementation; unwraps the Connection for native
  * statements. The returned JDBC classes can then safely be cast, e.g. to
- * <code>oracle.jdbc.OracleConnection</code>.
+ * {@code oracle.jdbc.OracleConnection}.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working
  * with a WebLogic DataSource: If a given object is not a WebLogic
@@ -68,7 +68,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 
 	/**
-	 * Return <code>true</code>, as WebLogic returns wrapped Statements.
+	 * Return {@code true}, as WebLogic returns wrapped Statements.
 	 */
 	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
@@ -76,7 +76,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Return <code>true</code>, as WebLogic returns wrapped PreparedStatements.
+	 * Return {@code true}, as WebLogic returns wrapped PreparedStatements.
 	 */
 	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
@@ -84,7 +84,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Return <code>true</code>, as WebLogic returns wrapped CallableStatements.
+	 * Return {@code true}, as WebLogic returns wrapped CallableStatements.
 	 */
 	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
@@ -92,7 +92,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via WebLogic's <code>getVendorConnection</code> method.
+	 * Retrieve the Connection via WebLogic's {@code getVendorConnection} method.
 	 */
 	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {

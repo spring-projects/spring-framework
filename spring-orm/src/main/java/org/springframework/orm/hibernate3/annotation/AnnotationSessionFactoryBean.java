@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 
 	private static final String RESOURCE_PATTERN = "/**/*.class";
 
+	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
+
 
 	private Class[] annotatedClasses;
 
@@ -101,7 +103,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 
 
 	@Override
-	public void setConfigurationClass(Class configurationClass) {
+	public void setConfigurationClass(Class<?> configurationClass) {
 		if (configurationClass == null || !AnnotationConfiguration.class.isAssignableFrom(configurationClass)) {
 			throw new IllegalArgumentException(
 					"AnnotationSessionFactoryBean only supports AnnotationConfiguration or subclasses");
@@ -141,9 +143,9 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
-	 * <code>@javax.persistence.Entity</code>, <code>@javax.persistence.Embeddable</code>
-	 * or <code>@javax.persistence.MappedSuperclass</code>, as well as for
-	 * Hibernate's special <code>@org.hibernate.annotations.Entity</code>.
+	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
+	 * or {@code @javax.persistence.MappedSuperclass}, as well as for
+	 * Hibernate's special {@code @org.hibernate.annotations.Entity}.
 	 * @see #setPackagesToScan
 	 */
 	public void setEntityTypeFilters(TypeFilter[] entityTypeFilters) {
@@ -191,8 +193,11 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 						if (resource.isReadable()) {
 							MetadataReader reader = readerFactory.getMetadataReader(resource);
 							String className = reader.getClassMetadata().getClassName();
-							if (matchesFilter(reader, readerFactory)) {
+							if (matchesEntityTypeFilter(reader, readerFactory)) {
 								config.addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
+							}
+							else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+								config.addPackage(className.substring(0, className.length() - PACKAGE_INFO_SUFFIX.length()));
 							}
 						}
 					}
@@ -211,7 +216,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * Check whether any of the configured entity type filters matches
 	 * the current class descriptor contained in the metadata reader.
 	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
+	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
 		if (this.entityTypeFilters != null) {
 			for (TypeFilter filter : this.entityTypeFilters) {
 				if (filter.match(reader, readerFactory)) {

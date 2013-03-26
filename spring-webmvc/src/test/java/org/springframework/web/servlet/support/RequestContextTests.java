@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.util.WebUtils;
@@ -67,7 +67,7 @@ public class RequestContextTests {
 		map.put("spam", "bucket");
 		assertEquals("foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
 	}
-	
+
 	@Test
 	public void testGetContextUrlWithMapEscaping() throws Exception {
 		request.setContextPath("foo/");
@@ -83,12 +83,12 @@ public class RequestContextTests {
 		request.setContextPath("/app");
 		request.setServletPath("/servlet");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
-		
+
 		assertEquals("/app/servlet", context.getPathToServlet());
 
 		request.setAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE, "/origApp");
 		request.setAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE, "/origServlet");
-		
+
 		assertEquals("/origApp/origServlet", context.getPathToServlet());
 	}
 

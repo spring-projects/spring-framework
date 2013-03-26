@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -82,6 +83,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		CacheableOperation cuo = new CacheableOperation();
 		cuo.setCacheNames(caching.value());
 		cuo.setCondition(caching.condition());
+		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
 		cuo.setName(ae.toString());
 		return cuo;
@@ -102,6 +104,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		CachePutOperation cuo = new CachePutOperation();
 		cuo.setCacheNames(caching.value());
 		cuo.setCondition(caching.condition());
+		cuo.setUnless(caching.unless());
 		cuo.setKey(caching.key());
 		cuo.setName(ae.toString());
 		return cuo;
@@ -135,7 +138,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return ops;
 	}
 
-	private static <T extends Annotation> Collection<T> getAnnotations(AnnotatedElement ae, Class<T> annotationType) {
+	private <T extends Annotation> Collection<T> getAnnotations(AnnotatedElement ae, Class<T> annotationType) {
 		Collection<T> anns = new ArrayList<T>(2);
 
 		// look at raw annotation
@@ -154,4 +157,15 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 
 		return (anns.isEmpty() ? null : anns);
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || other instanceof SpringCacheAnnotationParser);
+	}
+
+	@Override
+	public int hashCode() {
+		return SpringCacheAnnotationParser.class.hashCode();
+	}
+
 }

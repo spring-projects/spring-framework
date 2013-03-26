@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -115,7 +117,7 @@ public class UrlPathHelper {
 	 * <p>If the request specifies a character encoding itself, the request
 	 * encoding will override this setting. This also allows for generically
 	 * overriding the character encoding in a filter that invokes the
-	 * <code>ServletRequest.setCharacterEncoding</code> method.
+	 * {@code ServletRequest.setCharacterEncoding} method.
 	 * @param defaultEncoding the character encoding to use
 	 * @see #determineEncoding
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
@@ -172,9 +174,10 @@ public class UrlPathHelper {
 	public String getPathWithinServletMapping(HttpServletRequest request) {
 		String pathWithinApp = getPathWithinApplication(request);
 		String servletPath = getServletPath(request);
-		if (pathWithinApp.startsWith(servletPath)) {
+		String path = getRemainingPath(pathWithinApp, servletPath, false);
+		if (path != null) {
 			// Normal case: URI contains servlet path.
-			return pathWithinApp.substring(servletPath.length());
+			return path;
 		}
 		else {
 			// Special case: URI is different from servlet path.
@@ -195,22 +198,59 @@ public class UrlPathHelper {
 	public String getPathWithinApplication(HttpServletRequest request) {
 		String contextPath = getContextPath(request);
 		String requestUri = getRequestUri(request);
-		if (StringUtils.startsWithIgnoreCase(requestUri, contextPath)) {
+		String path = getRemainingPath(requestUri, contextPath, true);
+		if (path != null) {
 			// Normal case: URI contains context path.
-			String path = requestUri.substring(contextPath.length());
 			return (StringUtils.hasText(path) ? path : "/");
 		}
 		else {
-			// Special case: rather unusual.
 			return requestUri;
 		}
 	}
 
+	/**
+	 * Match the given "mapping" to the start of the "requestUri" and if there
+	 * is a match return the extra part. This method is needed because the
+	 * context path and the servlet path returned by the HttpServletRequest are
+	 * stripped of semicolon content unlike the requesUri.
+	 */
+	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
+		int index1 = 0;
+		int index2 = 0;
+		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
+			char c1 = requestUri.charAt(index1);
+			char c2 = mapping.charAt(index2);
+			if (c1 == ';') {
+				index1 = requestUri.indexOf('/', index1);
+				if (index1 == -1) {
+					return null;
+				}
+				c1 = requestUri.charAt(index1);
+			}
+			if (c1 == c2) {
+				continue;
+			}
+			if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+				continue;
+			}
+			return null;
+		}
+		if (index2 != mapping.length()) {
+			return null;
+		}
+		if (index1 == requestUri.length()) {
+			return "";
+		}
+		else if (requestUri.charAt(index1) == ';') {
+			index1 = requestUri.indexOf('/', index1);
+		}
+		return (index1 != -1) ? requestUri.substring(index1) : "";
+	}
 
 	/**
 	 * Return the request URI for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getRequestURI()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getRequestURI()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
 	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
@@ -229,7 +269,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * @param request current HTTP request
 	 * @return the context path
@@ -249,7 +289,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the servlet path for the given request, regarding an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getServletPath()</code> is already
+	 * <p>As the value returned by {@code request.getServletPath()} is already
 	 * decoded by the servlet container, this method will not attempt to decode it.
 	 * @param request current HTTP request
 	 * @return the servlet path
@@ -288,7 +328,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * @param request current HTTP request
 	 * @return the context path
@@ -343,7 +383,7 @@ public class UrlPathHelper {
 	/**
 	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
-	 * <p>The default implementation uses <code>URLDecoder.decode(input, enc)</code>.
+	 * <p>The default implementation uses {@code URLDecoder.decode(input, enc)}.
 	 * @param request current HTTP request
 	 * @param source the String to decode
 	 * @return the decoded String
@@ -359,6 +399,7 @@ public class UrlPathHelper {
 		return source;
 	}
 
+	@SuppressWarnings("deprecation")
 	private String decodeInternal(HttpServletRequest request, String source) {
 		String enc = determineEncoding(request);
 		try {
@@ -379,7 +420,7 @@ public class UrlPathHelper {
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
@@ -400,10 +441,8 @@ public class UrlPathHelper {
 	 * @return the updated URI string
 	 */
 	public String removeSemicolonContent(String requestUri) {
-		if (this.removeSemicolonContent) {
-			return removeSemicolonContentInternal(requestUri);
-		}
-		return removeJsessionid(requestUri);
+		return this.removeSemicolonContent ?
+				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri);
 	}
 
 	private String removeSemicolonContentInternal(String requestUri) {
@@ -447,6 +486,33 @@ public class UrlPathHelper {
 			Map<String, String> decodedVars = new LinkedHashMap<String, String>(vars.size());
 			for (Entry<String, String> entry : vars.entrySet()) {
 				decodedVars.put(entry.getKey(), decodeInternal(request, entry.getValue()));
+			}
+			return decodedVars;
+		}
+	}
+
+	/**
+	 * Decode the given matrix variables via
+	 * {@link #decodeRequestString(HttpServletRequest, String)} unless
+	 * {@link #setUrlDecode(boolean)} is set to {@code true} in which case it is
+	 * assumed the URL path from which the variables were extracted is already
+	 * decoded through a call to
+	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 *
+	 * @param request current HTTP request
+	 * @param vars URI variables extracted from the URL path
+	 * @return the same Map or a new Map instance
+	 */
+	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request, MultiValueMap<String, String> vars) {
+		if (this.urlDecode) {
+			return vars;
+		}
+		else {
+			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap	<String, String>(vars.size());
+			for (String key : vars.keySet()) {
+				for (String value : vars.get(key)) {
+					decodedVars.add(key, decodeInternal(request, value));
+				}
 			}
 			return decodedVars;
 		}

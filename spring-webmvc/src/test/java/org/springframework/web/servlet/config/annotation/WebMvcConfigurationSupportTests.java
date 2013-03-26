@@ -30,8 +30,8 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -44,8 +44,11 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
+import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * A test fixture with an {@link WebMvcConfigurationSupport} instance.
@@ -56,20 +59,24 @@ public class WebMvcConfigurationSupportTests {
 
 	private WebMvcConfigurationSupport mvcConfiguration;
 
+	private StaticWebApplicationContext wac;
+
+
 	@Before
 	public void setUp() {
-		mvcConfiguration = new WebMvcConfigurationSupport();
+		this.wac = new StaticWebApplicationContext();
+		this.mvcConfiguration = new WebMvcConfigurationSupport();
+		this.mvcConfiguration.setApplicationContext(wac);
 	}
 
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
-		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
-		cxt.registerSingleton("controller", TestController.class);
+		this.wac.registerSingleton("controller", TestController.class);
 
 		RequestMappingHandlerMapping handlerMapping = mvcConfiguration.requestMappingHandlerMapping();
 		assertEquals(0, handlerMapping.getOrder());
 
-		handlerMapping.setApplicationContext(cxt);
+		handlerMapping.setApplicationContext(this.wac);
 		handlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
@@ -146,9 +153,14 @@ public class WebMvcConfigurationSupportTests {
 
 		assertEquals(0, compositeResolver.getOrder());
 
-		List<HandlerExceptionResolver> expectedResolvers = new ArrayList<HandlerExceptionResolver>();
-		mvcConfiguration.addDefaultHandlerExceptionResolvers(expectedResolvers);
-		assertEquals(expectedResolvers.size(), compositeResolver.getExceptionResolvers().size());
+		List<HandlerExceptionResolver> expectedResolvers = compositeResolver.getExceptionResolvers();
+
+		assertEquals(ExceptionHandlerExceptionResolver.class, expectedResolvers.get(0).getClass());
+		assertEquals(ResponseStatusExceptionResolver.class, expectedResolvers.get(1).getClass());
+		assertEquals(DefaultHandlerExceptionResolver.class, expectedResolvers.get(2).getClass());
+
+		ExceptionHandlerExceptionResolver eher = (ExceptionHandlerExceptionResolver) expectedResolvers.get(0);
+		assertNotNull(eher.getApplicationContext());
 	}
 
 

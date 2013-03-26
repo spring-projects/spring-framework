@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 		final String headerName = "MyHeader";
 		final String headerValue = "MyValue";
 		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 				request.getHeaders().add(headerName, headerValue);
@@ -80,7 +81,7 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/post"), HttpMethod.POST);
 			final int BUF_SIZE = 4096;
 			final int ITERATIONS = Integer.MAX_VALUE / BUF_SIZE;
-			final int contentLength = ITERATIONS * BUF_SIZE;
+//			final int contentLength = ITERATIONS * BUF_SIZE;
 //			request.getHeaders().setContentLength(contentLength);
 			OutputStream body = request.getBody();
 			for (int i = 0; i < ITERATIONS; i++) {

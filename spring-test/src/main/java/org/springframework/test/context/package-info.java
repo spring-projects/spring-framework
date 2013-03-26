@@ -4,7 +4,7 @@
  * agnostic of the actual testing framework in use. The same techniques and
  * annotation-based configuration used in, for example, a JUnit 4.5+ environment
  * can also be applied to tests written with TestNG, etc.
- * 
+ *
  * <p>In addition to providing generic and extensible testing infrastructure,
  * the Spring TestContext Framework provides out-of-the-box support for
  * Spring-specific integration testing functionality such as context management

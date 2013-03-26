@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -27,572 +28,264 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.easymock.MockControl;
+import javax.sql.DataSource;
 
-import org.springframework.jdbc.AbstractJdbcTests;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.jdbc.core.RowMapper;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Thomas Risberg
+ * @author Phillip Webb
  */
-public class NamedParameterQueryTests extends AbstractJdbcTests {
+public class NamedParameterQueryTests {
 
-	private MockControl ctrlPreparedStatement;
-	private PreparedStatement mockPreparedStatement;
-	private MockControl ctrlResultSet;
-	private ResultSet mockResultSet;
-	private MockControl ctrlResultSetMetaData;
-	private ResultSetMetaData mockResultSetMetaData;
+	private DataSource dataSource;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		ctrlResultSet = MockControl.createControl(ResultSet.class);
-		mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
-		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
+	private Connection connection;
+
+	private PreparedStatement preparedStatement;
+
+	private ResultSet resultSet;
+
+	private ResultSetMetaData resultSetMetaData;
+
+	private NamedParameterJdbcTemplate template;
+
+	@Before
+	public void setUp() throws Exception {
+		connection = mock(Connection.class);
+		dataSource = mock(DataSource.class);
+		preparedStatement = mock(PreparedStatement.class);
+		resultSet = mock(ResultSet.class);
+		resultSetMetaData = mock(ResultSetMetaData.class);
+		template = new NamedParameterJdbcTemplate(dataSource);
+		given(dataSource.getConnection()).willReturn(connection);
+		given(resultSetMetaData.getColumnCount()).willReturn(1);
+		given(resultSetMetaData.getColumnLabel(1)).willReturn("age");
+		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
+		given(preparedStatement.executeQuery()).willReturn(resultSet);
 	}
 
-	protected void replay() {
-		super.replay();
-		ctrlPreparedStatement.replay();
-		ctrlResultSet.replay();
-		ctrlResultSetMetaData.replay();
+	@After
+	public void verifyClose() throws Exception {
+		verify(preparedStatement).close();
+		verify(resultSet).close();
+		verify(connection).close();
 	}
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		if (false && shouldVerify()) {
-			ctrlPreparedStatement.verify();
-			ctrlResultSet.verify();
-			ctrlResultSetMetaData.verify();
-		}
-	}
-
+	@Test
 	public void testQueryForListWithParamMap() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1, 2);
-		mockResultSetMetaData.getColumnLabel(1);
-		ctrlResultSetMetaData.setReturnValue("age", 2);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData, 2);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new Integer(11));
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new Integer(12));
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, true, false);
+		given(resultSet.getObject(1)).willReturn(11, 12);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		List<Map<String, Object>> li = template.queryForList(
+				"SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
 
-		List li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 2, li.size());
-		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
-		assertEquals("Second row is Integer", 12, ((Integer)((Map)li.get(1)).get("age")).intValue());
+		assertEquals("First row is Integer", 11,
+				((Integer) ((Map) li.get(0)).get("age")).intValue());
+		assertEquals("Second row is Integer", 12,
+				((Integer) ((Map) li.get(1)).get("age")).intValue());
+
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForListWithParamMapAndEmptyResult() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
-
-		ctrlResultSet = MockControl.createControl(ResultSet.class);
-		mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.next()).willReturn(false);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		List<Map<String, Object>> li = template.queryForList(
+				"SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
 
-		List li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 0, li.size());
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForListWithParamMapAndSingleRowAndColumn() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-		mockResultSetMetaData.getColumnLabel(1);
-		ctrlResultSetMetaData.setReturnValue("age", 1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new Integer(11));
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getObject(1)).willReturn(11);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		List<Map<String, Object>> li = template.queryForList(
+				"SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
 
-		List li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
+		assertEquals("First row is Integer", 11,
+				((Integer) ((Map) li.get(0)).get("age")).intValue());
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
-	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(11);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+	@Test
+	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn()
+			throws Exception {
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(11);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		List<Integer> li = template.queryForList("SELECT AGE FROM CUSTMR WHERE ID < :id",
+				parms, Integer.class);
 
-		List li = template.queryForList(sql, parms, Integer.class);
 		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, ((Integer) li.get(0)).intValue());
+		assertEquals("First row is Integer", 11, li.get(0).intValue());
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForMapWithParamMapAndSingleRowAndColumn() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID < ?";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-		mockResultSetMetaData.getColumnLabel(1);
-		ctrlResultSetMetaData.setReturnValue("age", 1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getObject(1);
-		ctrlResultSet.setReturnValue(new Integer(11));
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getObject(1)).willReturn(11);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		Map map = template.queryForMap("SELECT AGE FROM CUSTMR WHERE ID < :id", parms);
 
-		Map map = template.queryForMap(sql, parms);
 		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID < ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForObjectWithParamMapAndRowMapper() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
-
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(22);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
+				parms, new RowMapper<Object>() {
+					@Override
+					public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getInt(1);
+					}
+				});
 
-		Object o = template.queryForObject(sql, parms, new RowMapper() {
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return new Integer(rs.getInt(1));
-			}
-		});
 		assertTrue("Correct result type", o instanceof Integer);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForObjectWithMapAndInteger() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(22);
 
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
+		Map<String, Object> parms = new HashMap<String, Object>();
+		parms.put("id", 3);
+		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
+				parms, Integer.class);
 
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(22);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
-
-		Map parms = new HashMap();
-		parms.put("id", new Integer(3));
-
-		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForObjectWithParamMapAndInteger() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(22);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		Object o = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",
+				parms, Integer.class);
 
-		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForObjectWithParamMapAndList() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID IN (:ids)";
 		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID IN (?, ?)";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(22);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setObject(2, new Integer(4));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("ids", Arrays.asList(new Object[] {new Integer(3), new Integer(4)}));
-
+		parms.addValue("ids", Arrays.asList(new Object[] { 3, 4 }));
 		Object o = template.queryForObject(sql, parms, Integer.class);
+
 		assertTrue("Correct result type", o instanceof Integer);
+		verify(connection).prepareStatement(sqlToUse);
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForObjectWithParamMapAndListOfExpressionLists() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN ((?, ?), (?, ?))";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(22);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setString(2, "Rod");
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setObject(3, new Integer(4));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setString(4, "Juergen");
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		List l1 = new ArrayList();
-		l1.add(new Object[] {new Integer(3), "Rod"});
-		l1.add(new Object[] {new Integer(4), "Juergen"});
+		List<Object[]> l1 = new ArrayList<Object[]>();
+		l1.add(new Object[] { 3, "Rod" });
+		l1.add(new Object[] { 4, "Juergen" });
 		parms.addValue("multiExpressionList", l1);
+		Object o = template.queryForObject(
+				"SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)",
+				parms, Integer.class);
 
-		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
+		verify(connection).prepareStatement(
+				"SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN ((?, ?), (?, ?))");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForIntWithParamMap() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
-
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
-
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt(1);
-		ctrlResultSet.setReturnValue(22.0d);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(3));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt(1)).willReturn(22);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		parms.addValue("id", new Integer(3));
+		parms.addValue("id", 3);
+		int i = template.queryForInt("SELECT AGE FROM CUSTMR WHERE ID = :id", parms);
 
-		int i = template.queryForInt(sql, parms);
 		assertEquals("Return of an int", 22, i);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3);
 	}
 
+	@Test
 	public void testQueryForLongWithParamBean() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID = :id";
-		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE ID = ?";
+		given(resultSet.getMetaData()).willReturn(resultSetMetaData);
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getLong(1)).willReturn(87L);
 
-		mockResultSetMetaData.getColumnCount();
-		ctrlResultSetMetaData.setReturnValue(1);
+		BeanPropertySqlParameterSource parms = new BeanPropertySqlParameterSource(
+				new ParameterBean(3));
 
-		mockResultSet.getMetaData();
-		ctrlResultSet.setReturnValue(mockResultSetMetaData);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getLong(1);
-		ctrlResultSet.setReturnValue(87.0d);
-		mockResultSet.wasNull();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
+		long l = template.queryForLong("SELECT AGE FROM CUSTMR WHERE ID = :id", parms);
 
-		mockPreparedStatement.setObject(1, new Integer(3), Types.INTEGER);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sqlToUse);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
-		BeanPropertySqlParameterSource parms = new BeanPropertySqlParameterSource(new ParameterBean(3));
-
-		long l = template.queryForLong(sql, parms);
 		assertEquals("Return of a long", 87, l);
+		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+		verify(preparedStatement).setObject(1, 3, Types.INTEGER);
 	}
 
-
-	private static class ParameterBean {
+	static class ParameterBean {
 
 		private int id;
 

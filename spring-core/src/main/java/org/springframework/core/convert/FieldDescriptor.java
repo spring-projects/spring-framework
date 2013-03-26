@@ -55,7 +55,7 @@ class FieldDescriptor extends AbstractDescriptor {
 	public Annotation[] getAnnotations() {
 		return TypeDescriptor.nullSafeAnnotations(this.field.getAnnotations());
 	}
-	
+
 	@Override
 	protected Class<?> resolveCollectionElementType() {
 		return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel, this.typeIndexesPerLevel);

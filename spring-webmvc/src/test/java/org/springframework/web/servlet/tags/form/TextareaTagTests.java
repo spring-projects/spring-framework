@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 /**
@@ -33,8 +33,11 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 	private TestBean rob;
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new TextareaTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -52,11 +55,11 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "readonly", "readonly");
 		assertBlockTagContains(output, "Rob");
 	}
-	
+
 	public void testSimpleBindWithDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setPath("name");
 		this.tag.setReadonly("true");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
@@ -87,7 +90,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 	public void testSimpleBindWithHtmlEscaping() throws Exception {
 		final String NAME = "Rob \"I Love Mangos\" Harrop";
 		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
-		
+
 		this.tag.setPath("name");
 		this.rob.setName(NAME);
 
@@ -109,6 +112,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, "12.34f");
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		// set up test data
 		this.rob = new TestBean();

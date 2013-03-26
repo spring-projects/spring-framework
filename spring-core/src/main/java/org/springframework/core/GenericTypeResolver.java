@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.core;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -25,16 +23,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Helper class for resolving generic types against type variables.
@@ -50,11 +43,9 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class GenericTypeResolver {
 
-	private static final Log logger = LogFactory.getLog(GenericTypeResolver.class);
-
 	/** Cache from Class to TypeVariable Map */
-	private static final Map<Class, Reference<Map<TypeVariable, Type>>> typeVariableCache =
-			Collections.synchronizedMap(new WeakHashMap<Class, Reference<Map<TypeVariable, Type>>>());
+	private static final Map<Class, Map<TypeVariable, Type>> typeVariableCache =
+			new ConcurrentReferenceHashMap<Class, Map<TypeVariable,Type>>();
 
 
 	/**
@@ -97,7 +88,6 @@ public abstract class GenericTypeResolver {
 	/**
 	 * Determine the target type for the generic return type of the given method,
 	 * where formal type variables are declared on the given class.
-	 *
 	 * @param method the method to introspect
 	 * @param clazz the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
@@ -116,15 +106,12 @@ public abstract class GenericTypeResolver {
 	 * Determine the target type for the generic return type of the given
 	 * <em>generic method</em>, where formal type variables are declared on
 	 * the given method itself.
-	 *
 	 * <p>For example, given a factory method with the following signature,
 	 * if {@code resolveReturnTypeForGenericMethod()} is invoked with the reflected
 	 * method for {@code creatProxy()} and an {@code Object[]} array containing
 	 * {@code MyService.class}, {@code resolveReturnTypeForGenericMethod()} will
 	 * infer that the target return type is {@code MyService}.
-	 *
 	 * <pre>{@code public static <T> T createProxy(Class<T> clazz)}</pre>
-	 *
 	 * <h4>Possible Return Values</h4>
 	 * <ul>
 	 * <li>the target return type, if it can be inferred</li>
@@ -138,27 +125,20 @@ public abstract class GenericTypeResolver {
 	 * Method#getGenericParameterTypes() formal argument list} for the given
 	 * method</li>
 	 * </ul>
-	 *
 	 * @param method the method to introspect, never {@code null}
 	 * @param args the arguments that will be supplied to the method when it is
 	 * invoked, never {@code null}
-	 * @return the resolved target return type, the standard return type, or
-	 * {@code null}
+	 * @return the resolved target return type, the standard return type, or {@code null}
 	 * @since 3.2
 	 * @see #resolveReturnType
 	 */
 	public static Class<?> resolveReturnTypeForGenericMethod(Method method, Object[] args) {
-		Assert.notNull(method, "method must not be null");
-		Assert.notNull(args, "args must not be null");
+		Assert.notNull(method, "Method must not be null");
+		Assert.notNull(args, "Argument array must not be null");
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Resolving return type for [%s] with concrete method arguments [%s].",
-				method.toGenericString(), ObjectUtils.nullSafeToString(args)));
-		}
-
-		final TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
-		final Type genericReturnType = method.getGenericReturnType();
-		final Type[] methodArgumentTypes = method.getGenericParameterTypes();
+		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
+		Type genericReturnType = method.getGenericReturnType();
+		Type[] methodArgumentTypes = method.getGenericParameterTypes();
 
 		// No declared type variables to inspect, so just return the standard return type.
 		if (declaredTypeVariables.length == 0) {
@@ -176,11 +156,6 @@ public abstract class GenericTypeResolver {
 		boolean locallyDeclaredTypeVariableMatchesReturnType = false;
 		for (TypeVariable<Method> currentTypeVariable : declaredTypeVariables) {
 			if (currentTypeVariable.equals(genericReturnType)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format(
-						"Found declared type variable [%s] that matches the target return type [%s].",
-						currentTypeVariable, genericReturnType));
-				}
 				locallyDeclaredTypeVariableMatchesReturnType = true;
 				break;
 			}
@@ -188,39 +163,20 @@ public abstract class GenericTypeResolver {
 
 		if (locallyDeclaredTypeVariableMatchesReturnType) {
 			for (int i = 0; i < methodArgumentTypes.length; i++) {
-				final Type currentMethodArgumentType = methodArgumentTypes[i];
-
+				Type currentMethodArgumentType = methodArgumentTypes[i];
 				if (currentMethodArgumentType.equals(genericReturnType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format(
-							"Found method argument type at index [%s] that matches the target return type.", i));
-					}
 					return args[i].getClass();
 				}
-
 				if (currentMethodArgumentType instanceof ParameterizedType) {
 					ParameterizedType parameterizedType = (ParameterizedType) currentMethodArgumentType;
 					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-
-					for (int j = 0; j < actualTypeArguments.length; j++) {
-						final Type typeArg = actualTypeArguments[j];
-
+					for (Type typeArg : actualTypeArguments) {
 						if (typeArg.equals(genericReturnType)) {
-							if (logger.isDebugEnabled()) {
-								logger.debug(String.format(
-									"Found method argument type at index [%s] that is parameterized with a type argument that matches the target return type.",
-									i));
-							}
-
 							if (args[i] instanceof Class) {
 								return (Class<?>) args[i];
-							} else {
-								// Consider adding logic to determine the class of the
-								// J'th typeArg, if possible.
-								logger.info(String.format(
-									"Could not determine the target type for type argument [%s] for method [%s].",
-									typeArg, method.toGenericString()));
-
+							}
+							else {
+								// Consider adding logic to determine the class of the typeArg, if possible.
 								// For now, just fall back...
 								return method.getReturnType();
 							}
@@ -240,7 +196,7 @@ public abstract class GenericTypeResolver {
 	 * of it.
 	 * @param method the target method to check the return type of
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
-	 * @return the resolved parameter type of the method return type, or <code>null</code>
+	 * @return the resolved parameter type of the method return type, or {@code null}
 	 * if not resolvable or if the single argument is of type {@link WildcardType}.
 	 */
 	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
@@ -269,7 +225,7 @@ public abstract class GenericTypeResolver {
 	 * and possibly declare a concrete type for its type variable.
 	 * @param clazz the target class to check against
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
-	 * @return the resolved type of the argument, or <code>null</code> if not resolvable
+	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
 	public static Class<?> resolveTypeArgument(Class clazz, Class genericIfc) {
 		Class[] typeArgs = resolveTypeArguments(clazz, genericIfc);
@@ -290,7 +246,7 @@ public abstract class GenericTypeResolver {
 	 * @param clazz the target class to check against
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of each argument, with the array size matching the
-	 * number of actual type arguments, or <code>null</code> if not resolvable
+	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
 	public static Class[] resolveTypeArguments(Class clazz, Class genericIfc) {
 		return doResolveTypeArguments(clazz, clazz, genericIfc);
@@ -372,11 +328,16 @@ public abstract class GenericTypeResolver {
 	 * Resolve the specified generic type against the given TypeVariable map.
 	 * @param genericType the generic type to resolve
 	 * @param typeVariableMap the TypeVariable Map to resolved against
-	 * @return the type if it resolves to a Class, or <code>Object.class</code> otherwise
+	 * @return the type if it resolves to a Class, or {@code Object.class} otherwise
 	 */
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
-		Type rawType = getRawType(genericType, typeVariableMap);
-		return (rawType instanceof Class ? (Class) rawType : Object.class);
+		Type resolvedType = getRawType(genericType, typeVariableMap);
+		if (resolvedType instanceof GenericArrayType) {
+			Type componentType = ((GenericArrayType) resolvedType).getGenericComponentType();
+			Class<?> componentClass = resolveType(componentType, typeVariableMap);
+			resolvedType = Array.newInstance(componentClass, 0).getClass();
+		}
+		return (resolvedType instanceof Class ? (Class) resolvedType : Object.class);
 	}
 
 	/**
@@ -408,8 +369,7 @@ public abstract class GenericTypeResolver {
 	 * all super types, enclosing types and interfaces.
 	 */
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
-		Reference<Map<TypeVariable, Type>> ref = typeVariableCache.get(clazz);
-		Map<TypeVariable, Type> typeVariableMap = (ref != null ? ref.get() : null);
+		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 
 		if (typeVariableMap == null) {
 			typeVariableMap = new HashMap<TypeVariable, Type>();
@@ -441,14 +401,14 @@ public abstract class GenericTypeResolver {
 				type = type.getEnclosingClass();
 			}
 
-			typeVariableCache.put(clazz, new WeakReference<Map<TypeVariable, Type>>(typeVariableMap));
+			typeVariableCache.put(clazz, typeVariableMap);
 		}
 
 		return typeVariableMap;
 	}
 
 	/**
-	 * Extracts the bound <code>Type</code> for a given {@link TypeVariable}.
+	 * Extracts the bound {@code Type} for a given {@link TypeVariable}.
 	 */
 	static Type extractBoundForTypeVariable(TypeVariable typeVariable) {
 		Type[] bounds = typeVariable.getBounds();
@@ -492,7 +452,7 @@ public abstract class GenericTypeResolver {
 	 * public class FooImpl implements Foo<String, Integer> {
 	 *  ..
 	 * }</pre>
-	 * For '<code>FooImpl</code>' the following mappings would be added to the {@link Map}:
+	 * For '{@code FooImpl}' the following mappings would be added to the {@link Map}:
 	 * {S=java.lang.String, T=java.lang.Integer}.
 	 */
 	private static void populateTypeMapFromParameterizedType(ParameterizedType type, Map<TypeVariable, Type> typeVariableMap) {

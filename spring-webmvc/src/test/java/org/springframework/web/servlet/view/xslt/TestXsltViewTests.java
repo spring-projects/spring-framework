@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,18 +40,19 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Unit tests for the {@link AbstractXsltView} class.
- * 
+ *
  * @author Darren Davison
  * @author Rick Evans
  * @author Juergen Hoeller
  * @since 11.03.2005
  */
+@Deprecated
 public class TestXsltViewTests extends TestCase {
 
 	private TestXsltView view;
@@ -63,6 +64,7 @@ public class TestXsltViewTests extends TestCase {
 	private int fatal = 0;
 
 
+	@Override
 	public void setUp() {
 		this.view = new TestXsltView();
 	}
@@ -80,12 +82,15 @@ public class TestXsltViewTests extends TestCase {
 
 	public void testCustomErrorListener() {
 		view.setErrorListener(new ErrorListener() {
+			@Override
 			public void warning(TransformerException ex) {
 				incWarnings();
 			}
+			@Override
 			public void error(TransformerException ex) {
 				incErrors();
 			}
+			@Override
 			public void fatalError(TransformerException ex) {
 				incFatals();
 			}
@@ -110,6 +115,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Source createXsltSource(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception {
 				Hero hero = (Hero) model.get("hero");
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -136,6 +142,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Source createXsltSource(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception {
 				Hero hero = (Hero) model.get("hero");
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -163,6 +170,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
@@ -195,6 +203,7 @@ public class TestXsltViewTests extends TestCase {
 		response.setWriterAccessAllowed(false);
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
@@ -221,6 +230,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
@@ -256,6 +266,7 @@ public class TestXsltViewTests extends TestCase {
 		response.setOutputStreamAccessAllowed(false);
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Source createXsltSource(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception {
 				Hero hero = (Hero) model.get("hero");
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -265,11 +276,13 @@ public class TestXsltViewTests extends TestCase {
 				node.setAttribute("catchphrase", hero.getCatchphrase());
 				return new DOMSource(node);
 			}
+			@Override
 			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
 			}
+			@Override
 			protected boolean useWriter() {
 				return true;
 			}
@@ -299,6 +312,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
+			@Override
 			protected Source createXsltSource(
 					Map model, String rootName, HttpServletRequest request, HttpServletResponse response)
 					throws Exception {
@@ -325,7 +339,7 @@ public class TestXsltViewTests extends TestCase {
 		wordList.add("hello");
 		wordList.add("world");
 		map.put("wordList", wordList);
-		
+
 		view.render(new ModelAndView("home", map).getModel(), request, response);
 		String text = response.getContentAsString();
 		assertTrue(text.trim().startsWith("<html"));

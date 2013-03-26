@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.util.ResourceUtils;
  * location that can be loaded via a ResourcePatternResolver.
  *
  * <p>Callers will usually assume that a location is a relative path
- * if the {@link #isUrl(String)} method returns <code>false</code>.
+ * if the {@link #isUrl(String)} method returns {@code false}.
  *
  * @author Juergen Hoeller
  * @since 1.2.3
@@ -54,7 +54,7 @@ public abstract class ResourcePatternUtils {
 	 * ResourcePatternResolver extension, or a PathMatchingResourcePatternResolver
 	 * built on the given ResourceLoader.
 	 * @param resourceLoader the ResourceLoader to build a pattern resolver for
-	 * (may be <code>null</code> to indicate a default ResourceLoader)
+	 * (may be {@code null} to indicate a default ResourceLoader)
 	 * @return the ResourcePatternResolver
 	 * @see PathMatchingResourcePatternResolver
 	 */

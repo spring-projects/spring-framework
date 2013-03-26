@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
 
 /**
- * Simple servlet that can expose an internal resource, including a 
+ * Simple servlet that can expose an internal resource, including a
  * default URL if the specified resource is not found. An alternative,
  * for example, to trying and catching exceptions when using JSP include.
  *
@@ -42,27 +42,27 @@ import org.springframework.web.context.support.ServletContextResource;
  * of this servlet, and use the "JSP include" action to include this URL,
  * with the "resource" parameter indicating the actual target path in the WAR.
  *
- * <p>The <code>defaultUrl</code> property can be set to the internal
+ * <p>The {@code defaultUrl} property can be set to the internal
  * resource path of a default URL, to be rendered when the target resource
  * is not found or not specified in the first place.
  *
- * <p>The "resource" parameter and the <code>defaultUrl</code> property can
+ * <p>The "resource" parameter and the {@code defaultUrl} property can
  * also specify a list of target resources to combine. Those resources will be
  * included one by one to build the response. If last-modified determination
  * is active, the newest timestamp among those files will be used.
  *
- * <p>The <code>allowedResources</code> property can be set to a URL
+ * <p>The {@code allowedResources} property can be set to a URL
  * pattern of resources that should be available via this servlet.
  * If not set, any target resource can be requested, including resources
  * in the WEB-INF directory!
  *
  * <p>If using this servlet for direct access rather than via includes,
- * the <code>contentType</code> property should be specified to apply a
+ * the {@code contentType} property should be specified to apply a
  * proper content type. Note that a content type header in the target JSP will
  * be ignored when including the resource via a RequestDispatcher include.
  *
  * <p>To apply last-modified timestamps for the target resource, set the
- * <code>applyLastModified</code> property to true. This servlet will then
+ * {@code applyLastModified} property to true. This servlet will then
  * return the file timestamp of the target resource as last-modified value,
  * falling back to the startup time of this servlet if not retrievable.
  *
@@ -88,6 +88,7 @@ import org.springframework.web.context.support.ServletContextResource;
  * @see #setAllowedResources
  * @see #setApplyLastModified
  */
+@SuppressWarnings("serial")
 public class ResourceServlet extends HttpServletBean {
 
 	/**
@@ -191,7 +192,7 @@ public class ResourceServlet extends HttpServletBean {
 	 */
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		// determine URL of resource to include
 		String resourceUrl = determineResourceUrl(request);
@@ -231,7 +232,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * <p>Default implementation returns the value of the "resource" parameter.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the URL of the target resource, or <code>null</code> if none found
+	 * @return the URL of the target resource, or {@code null} if none found
 	 * @see #RESOURCE_PARAM_NAME
 	 */
 	protected String determineResourceUrl(HttpServletRequest request) {
@@ -247,7 +248,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * @throws IOException if thrown by the RequestDispatcher
 	 */
 	private boolean includeDefaultUrl(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		if (this.defaultUrl == null) {
 			return false;
@@ -265,13 +266,13 @@ public class ResourceServlet extends HttpServletBean {
 	 * @throws IOException if thrown by the RequestDispatcher
 	 */
 	private void doInclude(HttpServletRequest request, HttpServletResponse response, String resourceUrl)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		if (this.contentType != null) {
 			response.setContentType(this.contentType);
 		}
 		String[] resourceUrls =
-		    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
+			StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 		for (int i = 0; i < resourceUrls.length; i++) {
 			// check whether URL matches allowed resources
 			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, resourceUrls[i])) {

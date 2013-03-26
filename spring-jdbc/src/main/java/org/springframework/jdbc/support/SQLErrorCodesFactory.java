@@ -36,7 +36,7 @@ import org.springframework.util.PatternMatchUtils;
  * Factory for creating {@link SQLErrorCodes} based on the
  * "databaseProductName" taken from the {@link java.sql.DatabaseMetaData}.
  *
- * <p>Returns <code>SQLErrorCodes</code> populated with vendor codes
+ * <p>Returns {@code SQLErrorCodes} populated with vendor codes
  * defined in a configuration file named "sql-error-codes.xml".
  * Reads the default file in this package if not overridden by a file in
  * the root of the class path (for example in the "/WEB-INF/classes" directory).
@@ -130,10 +130,10 @@ public class SQLErrorCodesFactory {
 			logger.warn("Error loading SQL error codes from config file", ex);
 			errorCodes = Collections.emptyMap();
 		}
-		
+
 		this.errorCodesMap = errorCodes;
 	}
-	
+
 	/**
 	 * Load the given resource from the class path.
 	 * <p><b>Not to be overridden by application developers, who should obtain
@@ -142,7 +142,7 @@ public class SQLErrorCodesFactory {
 	 * @param path resource path; either a custom path or one of either
 	 * {@link #SQL_ERROR_CODE_DEFAULT_PATH} or
 	 * {@link #SQL_ERROR_CODE_OVERRIDE_PATH}.
-	 * @return the resource, or <code>null</code> if the resource wasn't found
+	 * @return the resource, or {@code null} if the resource wasn't found
 	 * @see #getInstance
 	 */
 	protected Resource loadResource(String path) {
@@ -153,13 +153,13 @@ public class SQLErrorCodesFactory {
 	/**
 	 * Return the {@link SQLErrorCodes} instance for the given database.
 	 * <p>No need for a database metadata lookup.
-	 * @param dbName the database name (must not be <code>null</code>)
-	 * @return the <code>SQLErrorCodes</code> instance for the given database
-	 * @throws IllegalArgumentException if the supplied database name is <code>null</code>
+	 * @param dbName the database name (must not be {@code null})
+	 * @return the {@code SQLErrorCodes} instance for the given database
+	 * @throws IllegalArgumentException if the supplied database name is {@code null}
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		Assert.notNull(dbName, "Database product name must not be null");
-		
+
 		SQLErrorCodes sec = this.errorCodesMap.get(dbName);
 		if (sec == null) {
 			for (SQLErrorCodes candidate : this.errorCodesMap.values()) {
@@ -188,9 +188,9 @@ public class SQLErrorCodesFactory {
 	 * Return {@link SQLErrorCodes} for the given {@link DataSource},
 	 * evaluating "databaseProductName" from the
 	 * {@link java.sql.DatabaseMetaData}, or an empty error codes
-	 * instance if no <code>SQLErrorCodes</code> were found.
-	 * @param dataSource the <code>DataSource</code> identifying the database
-	 * @return the corresponding <code>SQLErrorCodes</code> object
+	 * instance if no {@code SQLErrorCodes} were found.
+	 * @param dataSource the {@code DataSource} identifying the database
+	 * @return the corresponding {@code SQLErrorCodes} object
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource dataSource) {
@@ -234,10 +234,10 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Associate the specified database name with the given {@link DataSource}.
-	 * @param dataSource the <code>DataSource</code> identifying the database
+	 * @param dataSource the {@code DataSource} identifying the database
 	 * @param dbName the corresponding database name as stated in the error codes
-	 * definition file (must not be <code>null</code>)
-	 * @return the corresponding <code>SQLErrorCodes</code> object
+	 * definition file (must not be {@code null})
+	 * @return the corresponding {@code SQLErrorCodes} object
 	 */
 	public SQLErrorCodes registerDatabase(DataSource dataSource, String dbName) {
 		synchronized (this.dataSourceCache) {

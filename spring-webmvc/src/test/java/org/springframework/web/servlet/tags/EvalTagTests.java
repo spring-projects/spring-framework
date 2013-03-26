@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,11 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.PropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockPageContext;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
@@ -41,6 +40,7 @@ public class EvalTagTests extends AbstractTagTests {
 
 	private MockPageContext context;
 
+	@Override
 	protected void setUp() throws Exception {
 		context = createPageContext();
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
@@ -159,16 +159,16 @@ public class EvalTagTests extends AbstractTagTests {
 
 
 	public static class Bean {
-		
+
 		public String method() {
 			return "foo";
 		}
-		
+
 		@NumberFormat(style=Style.PERCENT)
 		public BigDecimal getFormattable() {
 			return new BigDecimal(".25");
 		}
-		
+
 		public String html() {
 			return "<p>";
 		}
@@ -176,7 +176,7 @@ public class EvalTagTests extends AbstractTagTests {
 		public String getBean() {
 			return "not the bean object";
 		}
-		
+
 		public Object getNull() {
 			return null;
 		}

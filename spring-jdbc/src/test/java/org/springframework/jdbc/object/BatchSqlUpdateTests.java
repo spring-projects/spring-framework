@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,30 +16,31 @@
 
 package org.springframework.jdbc.object;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
-import org.easymock.MockControl;
-import org.apache.commons.logging.LogFactory;
+import javax.sql.DataSource;
 
-import org.springframework.jdbc.AbstractJdbcTests;
+import org.junit.Test;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.JdbcTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
  * @since 22.02.2005
  */
-public class BatchSqlUpdateTests extends AbstractJdbcTests {
+public class BatchSqlUpdateTests {
 
-	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
-
-
+	@Test
 	public void testBatchUpdateWithExplicitFlush() throws Exception {
 		doTestBatchUpdate(false);
 	}
 
+	@Test
 	public void testBatchUpdateWithFlushThroughBatchSize() throws Exception {
 		doTestBatchUpdate(true);
 	}
@@ -49,42 +50,19 @@ public class BatchSqlUpdateTests extends AbstractJdbcTests {
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setObject(1, new Integer(ids[0]), Types.INTEGER);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setObject(1, new Integer(ids[1]), Types.INTEGER);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
+		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willReturn(connection);
+		PreparedStatement preparedStatement = mock(PreparedStatement.class);
+		given(preparedStatement.getConnection()).willReturn(connection);
+		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
+		DatabaseMetaData mockDatabaseMetaData = mock(DatabaseMetaData.class);
+		given(mockDatabaseMetaData.supportsBatchUpdates()).willReturn(true);
+		given(connection.prepareStatement(sql)).willReturn(preparedStatement);
+		given(connection.getMetaData()).willReturn(mockDatabaseMetaData);
 
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 1);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
-
-		BatchSqlUpdate update = new BatchSqlUpdate(mockDataSource, sql);
+		BatchSqlUpdate update = new BatchSqlUpdate(dataSource, sql);
 		update.declareParameter(new SqlParameter(Types.INTEGER));
 		if (flushThroughBatchSize) {
 			update.setBatchSize(2);
@@ -122,8 +100,9 @@ public class BatchSqlUpdateTests extends AbstractJdbcTests {
 		update.reset();
 		assertEquals(0, update.getRowsAffected().length);
 
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(preparedStatement).setObject(1, new Integer(ids[0]), Types.INTEGER);
+		verify(preparedStatement).setObject(1, new Integer(ids[1]), Types.INTEGER);
+		verify(preparedStatement, times(2)).addBatch();
+		verify(preparedStatement).close();
 	}
-
 }

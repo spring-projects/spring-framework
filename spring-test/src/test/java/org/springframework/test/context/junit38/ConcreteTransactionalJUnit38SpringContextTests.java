@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import javax.sql.DataSource;
 
 import org.junit.internal.runners.JUnit38ClassRunner;
 import org.junit.runner.RunWith;
-import org.springframework.beans.Employee;
-import org.springframework.beans.Pet;
+import org.springframework.tests.sample.beans.Employee;
+import org.springframework.tests.sample.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 /**
  * Combined integration test for {@link AbstractJUnit38SpringContextTests} and
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -109,10 +109,12 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}
 
+	@Override
 	public final void setBeanName(final String beanName) {
 		this.beanName = beanName;
 	}

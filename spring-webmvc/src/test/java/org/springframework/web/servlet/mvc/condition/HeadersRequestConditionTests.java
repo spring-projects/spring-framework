@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
@@ -134,7 +134,7 @@ public class HeadersRequestConditionTests {
 		assertTrue("Invalid comparison result: " + result, result > 0);
 	}
 
-	
+
 	@Test
 	public void combine() {
 		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo=bar");

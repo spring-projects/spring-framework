@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,18 @@ package org.springframework.web.servlet.view.xml;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.xml.transform.stream.StreamResult;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.oxm.Marshaller;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -41,7 +42,7 @@ public class MarshallingViewTests {
 
 	@Before
 	public void createView() throws Exception {
-		marshallerMock = createMock(Marshaller.class);
+		marshallerMock = mock(Marshaller.class);
 		view = new MarshallingView(marshallerMock);
 	}
 
@@ -71,14 +72,12 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		expect(marshallerMock.supports(Object.class)).andReturn(true);
+		given(marshallerMock.supports(Object.class)).willReturn(true);
 		marshallerMock.marshal(eq(toBeMarshalled), isA(StreamResult.class));
 
-		replay(marshallerMock);
 		view.render(model, request, response);
 		assertEquals("Invalid content type", "application/xml", response.getContentType());
 		assertEquals("Invalid content length", 0, response.getContentLength());
-		verify(marshallerMock);
 	}
 
 	@Test
@@ -92,7 +91,6 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		replay(marshallerMock);
 		try {
 			view.render(model, request, response);
 			fail("ServletException expected");
@@ -101,7 +99,6 @@ public class MarshallingViewTests {
 			// expected
 		}
 		assertEquals("Invalid content length", 0, response.getContentLength());
-		verify(marshallerMock);
 	}
 
 	@Test
@@ -113,7 +110,6 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		replay(marshallerMock);
 		try {
 			view.render(model, request, response);
 			fail("ServletException expected");
@@ -122,7 +118,6 @@ public class MarshallingViewTests {
 			// expected
 		}
 		assertEquals("Invalid content length", 0, response.getContentLength());
-		verify(marshallerMock);
 	}
 
 	@Test
@@ -136,9 +131,8 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		expect(marshallerMock.supports(Object.class)).andReturn(false);
+		given(marshallerMock.supports(Object.class)).willReturn(false);
 
-		replay(marshallerMock);
 		try {
 			view.render(model, request, response);
 			fail("ServletException expected");
@@ -146,7 +140,6 @@ public class MarshallingViewTests {
 		catch (ServletException ex) {
 			// expected
 		}
-		verify(marshallerMock);
 	}
 
 	@Test
@@ -159,14 +152,12 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		expect(marshallerMock.supports(Object.class)).andReturn(true);
-		marshallerMock.marshal(eq(toBeMarshalled), isA(StreamResult.class));
+		given(marshallerMock.supports(Object.class)).willReturn(true);
 
-		replay(marshallerMock);
 		view.render(model, request, response);
 		assertEquals("Invalid content type", "application/xml", response.getContentType());
 		assertEquals("Invalid content length", 0, response.getContentLength());
-		verify(marshallerMock);
+		verify(marshallerMock).marshal(eq(toBeMarshalled), isA(StreamResult.class));
 	}
 
 	@Test
@@ -179,9 +170,8 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		expect(marshallerMock.supports(Object.class)).andReturn(false);
+		given(marshallerMock.supports(Object.class)).willReturn(false);
 
-		replay(marshallerMock);
 		try {
 			view.render(model, request, response);
 			fail("ServletException expected");
@@ -189,7 +179,6 @@ public class MarshallingViewTests {
 		catch (ServletException ex) {
 			// expected
 		}
-		verify(marshallerMock);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,57 +18,49 @@ package org.springframework.orm.jpa;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
-import junit.framework.TestCase;
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.MockControl;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Costin Leau
+ * @author Phillip Webb
  */
-public class JpaInterceptorTests extends TestCase {
-
-	private MockControl factoryControl, managerControl;
+public class JpaInterceptorTests {
 
 	private EntityManagerFactory factory;
 
 	private EntityManager entityManager;
 
 
-	@Override
-	protected void setUp() throws Exception {
-		factoryControl = MockControl.createControl(EntityManagerFactory.class);
-		factory = (EntityManagerFactory) factoryControl.getMock();
-		managerControl = MockControl.createControl(EntityManager.class);
-		entityManager = (EntityManager) managerControl.getMock();
+	@Before
+	public void setUp() throws Exception {
+		factory = mock(EntityManagerFactory.class);
+		entityManager = mock(EntityManager.class);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-
-		factoryControl = null;
-		factory = null;
-		managerControl = null;
-		entityManager = null;
-
 	}
 
+	@Test
 	public void testInterceptorWithNewEntityManager() throws PersistenceException {
-		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
-		managerControl.expectAndReturn(entityManager.isOpen(), true);
-		entityManager.close();
-
-		factoryControl.replay();
-		managerControl.replay();
+		given(factory.createEntityManager()).willReturn(entityManager);
+		given(entityManager.isOpen()).willReturn(true);
 
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setEntityManagerFactory(factory);
@@ -79,17 +71,13 @@ public class JpaInterceptorTests extends TestCase {
 			fail("Should not have thrown Throwable: " + t.getMessage());
 		}
 
-		factoryControl.verify();
-		managerControl.verify();
+		verify(entityManager).close();
 	}
 
+	@Test
 	public void testInterceptorWithNewEntityManagerAndLazyFlush() throws PersistenceException {
-		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
-		managerControl.expectAndReturn(entityManager.isOpen(), true);
-		entityManager.close();
-
-		factoryControl.replay();
-		managerControl.replay();
+		given(factory.createEntityManager()).willReturn(entityManager);
+		given(entityManager.isOpen()).willReturn(true);
 
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setFlushEager(false);
@@ -101,14 +89,11 @@ public class JpaInterceptorTests extends TestCase {
 			fail("Should not have thrown Throwable: " + t.getMessage());
 		}
 
-		factoryControl.verify();
-		managerControl.verify();
+		verify(entityManager).close();
 	}
 
+	@Test
 	public void testInterceptorWithThreadBound() {
-		factoryControl.replay();
-		managerControl.replay();
-		
 		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(entityManager));
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setEntityManagerFactory(factory);
@@ -121,18 +106,10 @@ public class JpaInterceptorTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.unbindResource(factory);
 		}
-
-		factoryControl.verify();
-		managerControl.verify();
 	}
 
+	@Test
 	public void testInterceptorWithThreadBoundAndFlushEager() throws PersistenceException {
-		//entityManager.setFlushMode(FlushModeType.AUTO);
-		entityManager.flush();
-
-		factoryControl.replay();
-		managerControl.replay();
-
 		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(entityManager));
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setFlushEager(true);
@@ -147,17 +124,11 @@ public class JpaInterceptorTests extends TestCase {
 			TransactionSynchronizationManager.unbindResource(factory);
 		}
 
-		factoryControl.verify();
-		managerControl.verify();
+		verify(entityManager).flush();
 	}
 
+	@Test
 	public void testInterceptorWithThreadBoundAndFlushCommit() {
-		//entityManager.setFlushMode(FlushModeType.COMMIT);
-		//entityManager.flush();
-
-		factoryControl.replay();
-		managerControl.replay();
-
 		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(entityManager));
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setFlushEager(false);
@@ -171,22 +142,15 @@ public class JpaInterceptorTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.unbindResource(factory);
 		}
-
-		factoryControl.verify();
-		managerControl.verify();
 	}
 
+	@Test
 	public void testInterceptorWithFlushFailure() throws Throwable {
-		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
-		entityManager.flush();
-		
+		given(factory.createEntityManager()).willReturn(entityManager);
+
 		PersistenceException exception = new PersistenceException();
-		managerControl.setThrowable(exception, 1);
-		managerControl.expectAndReturn(entityManager.isOpen(), true);
-		entityManager.close();
-		
-		factoryControl.replay();
-		managerControl.replay();
+		willThrow(exception).given(entityManager).flush();
+		given(entityManager.isOpen()).willReturn(true);
 
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setFlushEager(true);
@@ -200,21 +164,16 @@ public class JpaInterceptorTests extends TestCase {
 			assertEquals(exception, ex.getCause());
 		}
 
-		factoryControl.verify();
-		managerControl.verify();
+		verify(entityManager).close();
 	}
-	
+
+	@Test
 	public void testInterceptorWithFlushFailureWithoutConversion() throws Throwable {
-		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
-		entityManager.flush();
-		
+		given(factory.createEntityManager()).willReturn(entityManager);
+
 		PersistenceException exception = new PersistenceException();
-		managerControl.setThrowable(exception, 1);
-		managerControl.expectAndReturn(entityManager.isOpen(), true);
-		entityManager.close();
-		
-		factoryControl.replay();
-		managerControl.replay();
+		willThrow(exception).given(entityManager).flush();
+		given(entityManager.isOpen()).willReturn(true);
 
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setFlushEager(true);
@@ -229,11 +188,11 @@ public class JpaInterceptorTests extends TestCase {
 			assertEquals(exception, ex);
 		}
 
-		factoryControl.verify();
-		managerControl.verify();
+		verify(entityManager).close();
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestInvocation implements MethodInvocation {
 
 		private EntityManagerFactory entityManagerFactory;
@@ -242,6 +201,7 @@ public class JpaInterceptorTests extends TestCase {
 			this.entityManagerFactory = entityManagerFactory;
 		}
 
+		@Override
 		public Object proceed() throws Throwable {
 			if (!TransactionSynchronizationManager.hasResource(this.entityManagerFactory)) {
 				throw new IllegalStateException("Session not bound");
@@ -261,10 +221,12 @@ public class JpaInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Method getMethod() {
 			return null;
 		}
 
+		@Override
 		public AccessibleObject getStaticPart() {
 			return null;
 		}
@@ -273,6 +235,7 @@ public class JpaInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Object[] getArguments() {
 			return null;
 		}
@@ -284,6 +247,7 @@ public class JpaInterceptorTests extends TestCase {
 			return 0;
 		}
 
+		@Override
 		public Object getThis() {
 			return null;
 		}

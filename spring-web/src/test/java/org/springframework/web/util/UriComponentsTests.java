@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,46 @@
 
 package org.springframework.web.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ * @author Phillip Webb
+ */
 public class UriComponentsTests {
 
-    @Test
-    public void encode() {
-        UriComponents uriComponents = UriComponentsBuilder.fromPath("/hotel list").build();
-        UriComponents encoded = uriComponents.encode();
-        assertEquals("/hotel%20list", encoded.getPath());
-    }
+	@Test
+	public void encode() {
+		UriComponents uriComponents = UriComponentsBuilder.fromPath("/hotel list").build();
+		UriComponents encoded = uriComponents.encode();
+		assertEquals("/hotel%20list", encoded.getPath());
+	}
 
-    @Test
-    public void toUriEncoded() throws URISyntaxException {
-        UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
-        UriComponents encoded = uriComponents.encode();
-        assertEquals(new URI("http://example.com/hotel%20list/Z%C3%BCrich"), encoded.toUri());
-    }
+	@Test
+	public void toUriEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
+		UriComponents encoded = uriComponents.encode();
+		assertEquals(new URI("http://example.com/hotel%20list/Z%C3%BCrich"), encoded.toUri());
+	}
 
-    @Test
-    public void toUriNotEncoded() throws URISyntaxException {
-        UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
-        assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
-    }
-	
+	@Test
+	public void toUriNotEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
+		assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
+	}
+
 	@Test
 	public void expand() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo} {bar}").build();
@@ -63,7 +73,7 @@ public class UriComponentsTests {
 	public void invalidCharacters() {
 		UriComponentsBuilder.fromPath("/{foo}").build(true);
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidEncodedSequence() {
 		UriComponentsBuilder.fromPath("/fo%2o").build(true);
@@ -73,6 +83,40 @@ public class UriComponentsTests {
 	public void normalize() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo/../bar").build();
 		assertEquals("http://example.com/bar", uriComponents.normalize().toString());
+	}
+
+	@Test
+	public void serializable() throws Exception {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+				"http://example.com").path("/{foo}").query("bar={baz}").build();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(uriComponents);
+		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+		UriComponents readObject = (UriComponents) ois.readObject();
+		assertThat(uriComponents.toString(), equalTo(readObject.toString()));
+	}
+
+	@Test
+	public void equalsHierarchicalUriComponents() throws Exception {
+		UriComponents uriComponents1 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bar={baz}").build();
+		UriComponents uriComponents2 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bar={baz}").build();
+		UriComponents uriComponents3 = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo}").query("bin={baz}").build();
+		assertThat(uriComponents1, instanceOf(HierarchicalUriComponents.class));
+		assertThat(uriComponents1, equalTo(uriComponents1));
+		assertThat(uriComponents1, equalTo(uriComponents2));
+		assertThat(uriComponents1, not(equalTo(uriComponents3)));
+	}
+
+	@Test
+	public void equalsOpaqueUriComponents() throws Exception {
+		UriComponents uriComponents1 = UriComponentsBuilder.fromUriString("http:example.com/foo/bar").build();
+		UriComponents uriComponents2 = UriComponentsBuilder.fromUriString("http:example.com/foo/bar").build();
+		UriComponents uriComponents3 = UriComponentsBuilder.fromUriString("http:example.com/foo/bin").build();
+		assertThat(uriComponents1, instanceOf(OpaqueUriComponents.class));
+		assertThat(uriComponents1, equalTo(uriComponents1));
+		assertThat(uriComponents1, equalTo(uriComponents2));
+		assertThat(uriComponents1, not(equalTo(uriComponents3)));
 	}
 
 }

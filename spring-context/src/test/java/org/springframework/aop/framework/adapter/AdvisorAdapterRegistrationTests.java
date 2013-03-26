@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.framework.Advised;
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -96,10 +96,12 @@ interface SimpleBeforeAdvice extends BeforeAdvice {
 @SuppressWarnings("serial")
 class SimpleBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
 
+	@Override
 	public boolean supportsAdvice(Advice advice) {
 		return (advice instanceof SimpleBeforeAdvice);
 	}
 
+	@Override
 	public MethodInterceptor getInterceptor(Advisor advisor) {
 		SimpleBeforeAdvice advice = (SimpleBeforeAdvice) advisor.getAdvice();
 		return new SimpleBeforeAdviceInterceptor(advice) ;
@@ -112,6 +114,7 @@ class SimpleBeforeAdviceImpl implements SimpleBeforeAdvice {
 
 	private int invocationCounter;
 
+	@Override
 	public void before() throws Throwable {
 		++invocationCounter;
 	}
@@ -131,6 +134,7 @@ final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
 		this.advice = advice;
 	}
 
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		advice.before();
 		return mi.proceed();

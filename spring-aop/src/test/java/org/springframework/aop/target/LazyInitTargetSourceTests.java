@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import java.util.Set;
 
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
-
-import test.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 
 /**
  * @author Juergen Hoeller
@@ -34,16 +36,17 @@ import test.beans.ITestBean;
  * @since 07.01.2005
  */
 public final class LazyInitTargetSourceTests {
-	
+
 	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
-	
+
 	private static final Resource SINGLETON_CONTEXT = qualifiedResource(CLASS, "singleton.xml");
 	private static final Resource CUSTOM_TARGET_CONTEXT = qualifiedResource(CLASS, "customTarget.xml");
 	private static final Resource FACTORY_BEAN_CONTEXT = qualifiedResource(CLASS, "factoryBean.xml");
 
 	@Test
 	public void testLazyInitSingletonTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(SINGLETON_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(SINGLETON_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
@@ -54,7 +57,8 @@ public final class LazyInitTargetSourceTests {
 
 	@Test
 	public void testCustomLazyInitSingletonTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(CUSTOM_TARGET_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CUSTOM_TARGET_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
@@ -65,7 +69,8 @@ public final class LazyInitTargetSourceTests {
 
 	@Test
 	public void testLazyInitFactoryBeanTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(FACTORY_BEAN_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(FACTORY_BEAN_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		Set<?> set1 = (Set<?>) bf.getBean("proxy1");
@@ -80,8 +85,10 @@ public final class LazyInitTargetSourceTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomLazyInitTargetSource extends LazyInitTargetSource {
 
+		@Override
 		protected void postProcessTargetObject(Object targetObject) {
 			((ITestBean) targetObject).setName("Rob Harrop");
 		}

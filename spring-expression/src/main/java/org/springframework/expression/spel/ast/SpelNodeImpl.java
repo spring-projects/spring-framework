@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ import org.springframework.util.Assert;
 public abstract class SpelNodeImpl implements SpelNode {
 
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
-	
+
 	protected int pos; // start = top 16bits, end = bottom 16bits
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 	private SpelNodeImpl parent;
-	
+
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
 		// pos combines start and end so can never be zero because tokens cannot be zero length
@@ -51,7 +51,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 			}
 		}
 	}
-	
+
 	protected SpelNodeImpl getPreviousChild() {
 		SpelNodeImpl result = null;
 		if (parent != null) {
@@ -62,7 +62,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 		}
 		return result;
 	}
-	
+
 	/**
      * @return true if the next child is one of the specified classes
      */
@@ -96,7 +96,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
 	}
-	
+
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState);
@@ -118,7 +118,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 	public SpelNode getChild(int index) {
 		return children[index];
 	}
-	
+
 	public int getChildCount() {
 		return children.length;
 	}
@@ -130,18 +130,8 @@ public abstract class SpelNodeImpl implements SpelNode {
 		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
-	@SuppressWarnings("unchecked")
 	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
-		Object result = getValueInternal(state).getValue();
-		if (result != null && desiredReturnType != null) {
-			Class<?> resultType = result.getClass();
-			if (desiredReturnType.isAssignableFrom(resultType)) {
-				return (T) result;
-			}
-			// Attempt conversion to the requested type, may throw an exception
-			return ExpressionUtils.convert(state.getEvaluationContext(), result, desiredReturnType);
-		}
-		return (T) result;
+		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
 	}
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
@@ -154,6 +144,9 @@ public abstract class SpelNodeImpl implements SpelNode {
 
 	public int getEndPosition() {
 		return (pos&0xffff);
-	} 
+	}
 
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+		throw new SpelEvaluationException(pos,SpelMessage.NOT_ASSIGNABLE,toStringAST());
+	}
 }

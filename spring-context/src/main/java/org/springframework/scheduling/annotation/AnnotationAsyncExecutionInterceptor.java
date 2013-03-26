@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	/**
 	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor.
 	 * @param defaultExecutor the executor to be used by default if no more specific
-	 * executor has been qualified at the method level using {@link Async#value()}.
+	 * executor has been qualified at the method level using {@link Async#value()}
 	 */
 	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor) {
 		super(defaultExecutor);
@@ -64,7 +64,7 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 		if (async == null) {
 			async = AnnotationUtils.findAnnotation(method.getDeclaringClass(), Async.class);
 		}
-		return async == null ? null : async.value();
+		return (async != null ? async.value() : null);
 	}
 
 }

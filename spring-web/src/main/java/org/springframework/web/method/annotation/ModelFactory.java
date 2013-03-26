@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,24 +41,24 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Provides methods to initialize the {@link Model} before controller method 
- * invocation and to update it afterwards. On initialization, the model is 
- * populated with attributes from the session or by invoking 
- * {@code @ModelAttribute} methods. On update, model attributes are 
- * synchronized with the session -- either adding or removing them. 
+ * Provides methods to initialize the {@link Model} before controller method
+ * invocation and to update it afterwards. On initialization, the model is
+ * populated with attributes from the session or by invoking
+ * {@code @ModelAttribute} methods. On update, model attributes are
+ * synchronized with the session -- either adding or removing them.
  * Also {@link BindingResult} attributes where missing.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public final class ModelFactory {
 
 	private final List<InvocableHandlerMethod> attributeMethods;
-	
+
 	private final WebDataBinderFactory binderFactory;
-	
+
 	private final SessionAttributesHandler sessionAttributesHandler;
-	
+
 	/**
 	 * Create a new instance with the given {@code @ModelAttribute} methods.
 	 * @param attributeMethods for model initialization
@@ -76,15 +76,15 @@ public final class ModelFactory {
 	/**
 	 * Populate the model in the following order:
 	 * <ol>
-	 * 	<li>Retrieve "known" session attributes -- i.e. attributes listed via 
-	 * 	{@link SessionAttributes @SessionAttributes} and previously stored in 
+	 * 	<li>Retrieve "known" session attributes -- i.e. attributes listed via
+	 * 	{@link SessionAttributes @SessionAttributes} and previously stored in
 	 * 	the in the model at least once
 	 * 	<li>Invoke {@link ModelAttribute @ModelAttribute} methods
 	 * 	<li>Find method arguments eligible as session attributes and retrieve
-	 * 	them if they're not	already	present in the model 
+	 * 	them if they're not	already	present in the model
 	 * </ol>
 	 * @param request the current request
-	 * @param mavContainer contains the model to be initialized 
+	 * @param mavContainer contains the model to be initialized
 	 * @param handlerMethod the method for which the model is initialized
 	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
@@ -108,18 +108,18 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Invoke model attribute methods to populate the model. Attributes are 
+	 * Invoke model attribute methods to populate the model. Attributes are
 	 * added only if not already present in the model.
 	 */
 	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer mavContainer)
 			throws Exception {
-		
+
 		for (InvocableHandlerMethod attrMethod : this.attributeMethods) {
 			String modelName = attrMethod.getMethodAnnotation(ModelAttribute.class).value();
 			if (mavContainer.containsAttribute(modelName)) {
 				continue;
 			}
-			
+
 			Object returnValue = attrMethod.invokeForRequest(request, mavContainer);
 
 			if (!attrMethod.isVoid()){
@@ -130,9 +130,9 @@ public final class ModelFactory {
 			}
 		}
 	}
-	
+
 	/**
-	 * Return all {@code @ModelAttribute} arguments declared as session 
+	 * Return all {@code @ModelAttribute} arguments declared as session
 	 * attributes via {@code @SessionAttributes}.
 	 */
 	private List<String> findSessionAttributeArguments(HandlerMethod handlerMethod) {
@@ -147,12 +147,12 @@ public final class ModelFactory {
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Derive the model attribute name for the given return value using 
+	 * Derive the model attribute name for the given return value using
 	 * one of the following:
 	 * <ol>
-	 * 	<li>The method {@code ModelAttribute} annotation value 
+	 * 	<li>The method {@code ModelAttribute} annotation value
 	 * 	<li>The declared return type if it is other than {@code Object}
 	 * 	<li>The actual return value type
 	 * </ol>
@@ -176,7 +176,7 @@ public final class ModelFactory {
 	 * Derives the model attribute name for a method parameter based on:
 	 * <ol>
 	 * 	<li>The parameter {@code @ModelAttribute} annotation value
-	 * 	<li>The parameter type 
+	 * 	<li>The parameter type
 	 * </ol>
 	 * @return the derived name; never {@code null} or an empty string
 	 */
@@ -185,7 +185,7 @@ public final class ModelFactory {
 		String attrName = (annot != null) ? annot.value() : null;
 		return StringUtils.hasText(attrName) ? attrName :  Conventions.getVariableNameForParameter(parameter);
 	}
-	
+
 	/**
 	 * Synchronize model attributes with the session. Add {@link BindingResult}
 	 * attributes where necessary.
@@ -194,17 +194,17 @@ public final class ModelFactory {
 	 * @throws Exception if creating BindingResult attributes fails
 	 */
 	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer) throws Exception {
-		
+
 		if (mavContainer.getSessionStatus().isComplete()){
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {
 			this.sessionAttributesHandler.storeAttributes(request, mavContainer.getModel());
 		}
-		
+
 		if (!mavContainer.isRequestHandled()) {
 			updateBindingResult(request, mavContainer.getModel());
-		} 
+		}
 	}
 
 	/**
@@ -217,7 +217,7 @@ public final class ModelFactory {
 
 			if (isBindingCandidate(name, value)) {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + name;
-			
+
 				if (!model.containsAttribute(bindingResultKey)) {
 					WebDataBinder dataBinder = binderFactory.createBinder(request, value, name);
 					model.put(bindingResultKey, dataBinder.getBindingResult());
@@ -233,14 +233,14 @@ public final class ModelFactory {
 		if (attributeName.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 			return false;
 		}
-		
+
 		Class<?> attrType = (value != null) ? value.getClass() : null;
 		if (this.sessionAttributesHandler.isHandlerSessionAttribute(attributeName, attrType)) {
 			return true;
 		}
-		
-		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) && 
+
+		return (value != null && !value.getClass().isArray() && !(value instanceof Collection) &&
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
-	
+
 }

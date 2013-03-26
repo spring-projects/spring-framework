@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,18 +16,25 @@
 
 package org.springframework.jmx.export.assembler;
 
+import java.util.Properties;
+
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
-import java.util.Properties;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
+ * @author Chris Beams
  */
 public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTests {
 
 	protected static final String OBJECT_NAME = "bean:name=testBean4";
 
+	@Test
 	public void testGetAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
@@ -36,6 +43,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 		assertFalse("Age is not writable", attr.isWritable());
 	}
 
+	@Test
 	public void testWithFallThrough() throws Exception {
 		MethodNameBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "add,myOperation,getName,setName,getAge");
@@ -47,6 +55,7 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 		assertNickName(attr);
 	}
 
+	@Test
 	public void testNickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
@@ -54,22 +63,27 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 		assertNickName(attr);
 	}
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 7;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 3;
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() throws Exception {
 		return getWithMapping("getNickName,setNickName,add,myOperation,getName,setName,getAge");
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodNameAssemblerMapped.xml";
 	}

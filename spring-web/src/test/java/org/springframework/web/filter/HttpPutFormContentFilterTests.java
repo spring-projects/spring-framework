@@ -30,9 +30,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.MockFilterChain;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockFilterChain;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
  * Test fixture for {@link HttpPutFormContentFilter}.

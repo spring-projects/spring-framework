@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for working with <em>profile values</em>.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -51,7 +51,7 @@ public abstract class ProfileValueUtils {
 	 * &#064;ProfileValueSourceConfiguration} is not present on the specified
 	 * class or if a custom {@link ProfileValueSource} is not declared, the
 	 * default {@link SystemProfileValueSource} will be returned instead.
-	 * 
+	 *
 	 * @param testClass The test class for which the ProfileValueSource should
 	 * be retrieved
 	 * @return the configured (or default) ProfileValueSource for the specified
@@ -102,15 +102,15 @@ public abstract class ProfileValueUtils {
 	}
 
 	/**
-	 * Determine if the supplied <code>testClass</code> is <em>enabled</em> in
+	 * Determine if the supplied {@code testClass} is <em>enabled</em> in
 	 * the current environment, as specified by the {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation at the class level.
 	 * <p>
-	 * Defaults to <code>true</code> if no {@link IfProfileValue
+	 * Defaults to {@code true} if no {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation is declared.
-	 * 
+	 *
 	 * @param testClass the test class
-	 * @return <code>true</code> if the test is <em>enabled</em> in the current
+	 * @return {@code true} if the test is <em>enabled</em> in the current
 	 * environment
 	 */
 	public static boolean isTestEnabledInThisEnvironment(Class<?> testClass) {
@@ -119,18 +119,18 @@ public abstract class ProfileValueUtils {
 	}
 
 	/**
-	 * Determine if the supplied <code>testMethod</code> is <em>enabled</em> in
+	 * Determine if the supplied {@code testMethod} is <em>enabled</em> in
 	 * the current environment, as specified by the {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation, which may be declared on the test
 	 * method itself or at the class level. Class-level usage overrides
 	 * method-level usage.
 	 * <p>
-	 * Defaults to <code>true</code> if no {@link IfProfileValue
+	 * Defaults to {@code true} if no {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation is declared.
-	 * 
+	 *
 	 * @param testMethod the test method
 	 * @param testClass the test class
-	 * @return <code>true</code> if the test is <em>enabled</em> in the current
+	 * @return {@code true} if the test is <em>enabled</em> in the current
 	 * environment
 	 */
 	public static boolean isTestEnabledInThisEnvironment(Method testMethod, Class<?> testClass) {
@@ -138,20 +138,20 @@ public abstract class ProfileValueUtils {
 	}
 
 	/**
-	 * Determine if the supplied <code>testMethod</code> is <em>enabled</em> in
+	 * Determine if the supplied {@code testMethod} is <em>enabled</em> in
 	 * the current environment, as specified by the {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation, which may be declared on the test
 	 * method itself or at the class level. Class-level usage overrides
 	 * method-level usage.
 	 * <p>
-	 * Defaults to <code>true</code> if no {@link IfProfileValue
+	 * Defaults to {@code true} if no {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation is declared.
-	 * 
+	 *
 	 * @param profileValueSource the ProfileValueSource to use to determine if
 	 * the test is enabled
 	 * @param testMethod the test method
 	 * @param testClass the test class
-	 * @return <code>true</code> if the test is <em>enabled</em> in the current
+	 * @return {@code true} if the test is <em>enabled</em> in the current
 	 * environment
 	 */
 	public static boolean isTestEnabledInThisEnvironment(ProfileValueSource profileValueSource, Method testMethod,
@@ -169,17 +169,17 @@ public abstract class ProfileValueUtils {
 	}
 
 	/**
-	 * Determine if the <code>value</code> (or one of the <code>values</code>)
+	 * Determine if the {@code value} (or one of the {@code values})
 	 * in the supplied {@link IfProfileValue &#064;IfProfileValue} annotation is
 	 * <em>enabled</em> in the current environment.
-	 * 
+	 *
 	 * @param profileValueSource the ProfileValueSource to use to determine if
 	 * the test is enabled
 	 * @param ifProfileValue the annotation to introspect; may be
-	 * <code>null</code>
-	 * @return <code>true</code> if the test is <em>enabled</em> in the current
-	 * environment or if the supplied <code>ifProfileValue</code> is
-	 * <code>null</code>
+	 * {@code null}
+	 * @return {@code true} if the test is <em>enabled</em> in the current
+	 * environment or if the supplied {@code ifProfileValue} is
+	 * {@code null}
 	 */
 	private static boolean isTestEnabledInThisEnvironment(ProfileValueSource profileValueSource,
 			IfProfileValue ifProfileValue) {

@@ -51,12 +51,12 @@ public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJac
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter() {
 
 			@Override
-			protected JavaType getJavaType(Type type) {
+			protected JavaType getJavaType(Type type, Class<?> contextClass) {
 				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
 					return new ObjectMapper().getTypeFactory().constructCollectionType(ArrayList.class, MyBean.class);
 				}
 				else {
-					return super.getJavaType(type);
+					return super.getJavaType(type, contextClass);
 				}
 			}
 		};
@@ -87,7 +87,7 @@ public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJac
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), inputMessage);
+		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
 		assertEquals(1, results.size());
 		MyBean result = results.get(0);
 		assertEquals("Foo", result.getString());

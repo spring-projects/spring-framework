@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2010 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,20 +17,22 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Date;
+
 import javax.inject.Provider;
 
-import static org.easymock.EasyMock.*;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import static test.util.TestResourceUtils.*;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * @author Colin Sampaleanu
@@ -42,12 +44,13 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 	private static final Resource CONTEXT =
 		qualifiedResource(ObjectFactoryCreatingFactoryBeanTests.class, "context.xml");
-	
-	private XmlBeanFactory beanFactory;
+
+	private DefaultListableBeanFactory beanFactory;
 
 	@Before
 	public void setUp() {
-		this.beanFactory = new XmlBeanFactory(CONTEXT);
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(CONTEXT);
 		this.beanFactory.setSerializationId("test");
 	}
 
@@ -105,19 +108,16 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		final String targetBeanName = "singleton";
 		final String expectedSingleton = "Alicia Keys";
 
-		BeanFactory beanFactory = createMock(BeanFactory.class);
-		expect(beanFactory.getBean(targetBeanName)).andReturn(expectedSingleton);
-		replay(beanFactory);
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		given(beanFactory.getBean(targetBeanName)).willReturn(expectedSingleton);
 
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
 		factory.setTargetBeanName(targetBeanName);
 		factory.setBeanFactory(beanFactory);
 		factory.afterPropertiesSet();
-		ObjectFactory<?> objectFactory = (ObjectFactory<?>) factory.getObject();
+		ObjectFactory<?> objectFactory = factory.getObject();
 		Object actualSingleton = objectFactory.getObject();
 		assertSame(expectedSingleton, actualSingleton);
-		
-		verify(beanFactory);
 	}
 
 	@Test

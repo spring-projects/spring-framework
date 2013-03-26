@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	/**
 	 * Determine whether the aspect bean with the given name is eligible.
-	 * <p>The default implementation always returns <code>true</code>.
+	 * <p>The default implementation always returns {@code true}.
 	 * @param beanName the name of the aspect bean
 	 * @return whether the bean is eligible
 	 */

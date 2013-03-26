@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,22 @@
 package org.springframework.aop.config;
 
 import static java.lang.String.format;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import test.beans.ITestBean;
-import test.beans.TestBean;
-import test.util.SerializationTestUtils;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.SerializationTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -38,15 +40,15 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 /**
  * Integration tests for scoped proxy use in conjunction with aop: namespace.
  * Deemed an integration test because .web mocks and application contexts are required.
- * 
- * @see org.springframework.aop.config.AopNamespaceHandlerTests;
- * 
+ *
+ * @see org.springframework.aop.config.AopNamespaceHandlerTests
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
  */
 public final class AopNamespaceHandlerScopeIntegrationTests {
-	
+
 	private static final String CLASSNAME = AopNamespaceHandlerScopeIntegrationTests.class.getName();
 	private static final String CONTEXT = format("classpath:%s-context.xml", ClassUtils.convertClassNameToResourcePath(CLASSNAME));
 

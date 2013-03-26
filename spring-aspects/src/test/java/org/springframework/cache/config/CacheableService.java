@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ package org.springframework.cache.config;
 
 /**
  * Basic service interface.
- * 
+ *
  * @author Costin Leau
+ * @author Phillip Webb
  */
 public interface CacheableService<T> {
 
@@ -38,6 +39,8 @@ public interface CacheableService<T> {
 	void invalidateEarly(Object arg1, Object arg2);
 
 	T conditional(int field);
+
+	T unless(int arg);
 
 	T key(Object arg1, Object arg2);
 

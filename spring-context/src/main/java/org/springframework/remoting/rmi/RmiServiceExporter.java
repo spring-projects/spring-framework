@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * <p>With an RMI invoker, RMI communication works on the {@link RmiInvocationHandler}
  * level, needing only one stub for any service. Service interfaces do not have to
- * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
+ * extend {@code java.rmi.Remote} or throw {@code java.rmi.RemoteException}
  * on all methods, but in and out parameters have to be serializable.
  *
  * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
@@ -52,9 +52,9 @@ import org.springframework.beans.factory.InitializingBean;
  * If one cannot be determined, it will fall back and use the IP address. Depending
  * on your network configuration, in some cases it will resolve the IP to the loopback
  * address. To ensure that RMI will use the host name bound to the correct network
- * interface, you should pass the <code>java.rmi.server.hostname</code> property to the
+ * interface, you should pass the {@code java.rmi.server.hostname} property to the
  * JVM that will export the registry and/or the service using the "-D" JVM argument.
- * For example: <code>-Djava.rmi.server.hostname=myserver.com</code>
+ * For example: {@code -Djava.rmi.server.hostname=myserver.com}
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -97,7 +97,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	/**
 	 * Set the name of the exported RMI service,
-	 * i.e. <code>rmi://host:port/NAME</code>
+	 * i.e. {@code rmi://host:port/NAME}
 	 */
 	public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
@@ -113,7 +113,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	/**
 	 * Set a custom RMI client socket factory to use for exporting the service.
-	 * <p>If the given object also implements <code>java.rmi.server.RMIServerSocketFactory</code>,
+	 * <p>If the given object also implements {@code java.rmi.server.RMIServerSocketFactory},
 	 * it will automatically be registered as server socket factory too.
 	 * @see #setServerSocketFactory
 	 * @see java.rmi.server.RMIClientSocketFactory
@@ -127,7 +127,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	/**
 	 * Set a custom RMI server socket factory to use for exporting the service.
 	 * <p>Only needs to be specified when the client socket factory does not
-	 * implement <code>java.rmi.server.RMIServerSocketFactory</code> already.
+	 * implement {@code java.rmi.server.RMIServerSocketFactory} already.
 	 * @see #setClientSocketFactory
 	 * @see java.rmi.server.RMIClientSocketFactory
 	 * @see java.rmi.server.RMIServerSocketFactory
@@ -157,7 +157,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	/**
 	 * Set the host of the registry for the exported RMI service,
-	 * i.e. <code>rmi://HOST:port/name</code>
+	 * i.e. {@code rmi://HOST:port/name}
 	 * <p>Default is localhost.
 	 */
 	public void setRegistryHost(String registryHost) {
@@ -166,8 +166,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	/**
 	 * Set the port of the registry for the exported RMI service,
-	 * i.e. <code>rmi://host:PORT/name</code>
-	 * <p>Default is <code>Registry.REGISTRY_PORT</code> (1099).
+	 * i.e. {@code rmi://host:PORT/name}
+	 * <p>Default is {@code Registry.REGISTRY_PORT} (1099).
 	 * @see java.rmi.registry.Registry#REGISTRY_PORT
 	 */
 	public void setRegistryPort(int registryPort) {
@@ -176,7 +176,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	/**
 	 * Set a custom RMI client socket factory to use for the RMI registry.
-	 * <p>If the given object also implements <code>java.rmi.server.RMIServerSocketFactory</code>,
+	 * <p>If the given object also implements {@code java.rmi.server.RMIServerSocketFactory},
 	 * it will automatically be registered as server socket factory too.
 	 * @see #setRegistryServerSocketFactory
 	 * @see java.rmi.server.RMIClientSocketFactory
@@ -190,7 +190,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	/**
 	 * Set a custom RMI server socket factory to use for the RMI registry.
 	 * <p>Only needs to be specified when the client socket factory does not
-	 * implement <code>java.rmi.server.RMIServerSocketFactory</code> already.
+	 * implement {@code java.rmi.server.RMIServerSocketFactory} already.
 	 * @see #setRegistryClientSocketFactory
 	 * @see java.rmi.server.RMIClientSocketFactory
 	 * @see java.rmi.server.RMIServerSocketFactory
@@ -411,7 +411,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	/**
 	 * Test the given RMI registry, calling some operation on it to
 	 * check whether it is still active.
-	 * <p>Default implementation calls <code>Registry.list()</code>.
+	 * <p>Default implementation calls {@code Registry.list()}.
 	 * @param registry the RMI registry to test
 	 * @throws RemoteException if thrown by registry methods
 	 * @see java.rmi.registry.Registry#list()

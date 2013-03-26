@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
+import org.springframework.mock.web.test.MockMultipartFile;
+import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
 import static org.junit.Assert.*;
@@ -36,19 +36,19 @@ import static org.junit.Assert.*;
 public class RequestPartServletServerHttpRequestTests {
 
 	private RequestPartServletServerHttpRequest request;
-	
+
 	private MockMultipartHttpServletRequest mockRequest;
 
 	private MockMultipartFile mockFile;
-	
+
 	@Before
 	public void create() throws Exception {
 		mockFile = new MockMultipartFile("part", "", "application/json" ,"Part Content".getBytes("UTF-8"));
 		mockRequest = new MockMultipartHttpServletRequest();
 		mockRequest.addFile(mockFile);
 		request = new RequestPartServletServerHttpRequest(mockRequest, "part");
-	}	
-	
+	}
+
 	@Test
 	public void getMethod() throws Exception {
 		mockRequest.setMethod("POST");
@@ -80,5 +80,5 @@ public class RequestPartServletServerHttpRequestTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		assertArrayEquals("Invalid content returned", mockFile.getBytes(), result);
 	}
-	
+
 }

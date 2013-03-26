@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * Wrapper for a {@link ClientHttpRequest} that has support for {@link ClientHttpRequestInterceptor}s.
@@ -63,7 +63,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	@Override
 	protected final ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		RequestExecution requestExecution = new RequestExecution();
-		
+
 		return requestExecution.execute(this, bufferedOutput);
 	}
 
@@ -86,7 +86,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 				delegate.getHeaders().putAll(request.getHeaders());
 
 				if (body.length > 0) {
-					FileCopyUtils.copy(body, delegate.getBody());
+					StreamUtils.copy(body, delegate.getBody());
 				}
 				return delegate.execute();
 			}

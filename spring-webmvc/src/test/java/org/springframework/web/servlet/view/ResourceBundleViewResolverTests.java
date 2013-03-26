@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
@@ -42,10 +42,11 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	private static String PROPS_FILE = "org.springframework.web.servlet.view.testviews";
 
 	private ResourceBundleViewResolver rb;
-	
+
 	private StaticWebApplicationContext wac;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
@@ -71,14 +72,14 @@ public class ResourceBundleViewResolverTests extends TestCase {
 
 	public void testParentsAreAbstract() throws Exception {
 		try {
-			View v = rb.resolveViewName("debug.Parent", Locale.ENGLISH);
+			rb.resolveViewName("debug.Parent", Locale.ENGLISH);
 			fail("Should have thrown BeanIsAbstractException");
 		}
 		catch (BeanIsAbstractException ex) {
 			// expected
 		}
 		try {
-			View v = rb.resolveViewName("testParent", Locale.ENGLISH);
+			rb.resolveViewName("testParent", Locale.ENGLISH);
 			fail("Should have thrown BeanIsAbstractException");
 		}
 		catch (BeanIsAbstractException ex) {
@@ -147,11 +148,11 @@ public class ResourceBundleViewResolverTests extends TestCase {
 		assertTrue("test has correct name", "test".equals(tv.getBeanName()));
 		assertTrue("test should have been initialized once, not " + tv.initCount + " times", tv.initCount == 1);
 	}
-	
+
 	public void testNoSuchBasename() throws Exception {
 		try {
 			rb.setBasename("weoriwoierqupowiuer");
-			View v = rb.resolveViewName("debugView", Locale.ENGLISH);
+			rb.resolveViewName("debugView", Locale.ENGLISH);
 			fail("No such basename: all requests should fail with exception");
 		}
 		catch (MissingResourceException ex) {
@@ -170,9 +171,11 @@ public class ResourceBundleViewResolverTests extends TestCase {
 			}
 		}
 
+		@Override
 		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) {
 		}
 
+		@Override
 		protected void initApplicationContext() {
 			++initCount;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.portlet.context.PortletWebRequest;
  * <p><b>NOTE:</b> The WebRequestInterceptor is by default only applied to the Portlet
  * <b>render</b> phase, which is dealing with preparing and rendering a Portlet view.
  * The Portlet action phase will only be intercepted with WebRequestInterceptor calls
- * if the <code>renderPhaseOnly</code> flag is explicitly set to <code>false</code>.
+ * if the {@code renderPhaseOnly} flag is explicitly set to {@code false}.
  * In general, it is recommended to use the Portlet-specific HandlerInterceptor
  * mechanism for differentiating between action and render interception.
  *
@@ -66,8 +66,8 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * Create a new WebRequestHandlerInterceptorAdapter for the given WebRequestInterceptor.
 	 * @param requestInterceptor the WebRequestInterceptor to wrap
-	 * @param renderPhaseOnly whether to apply to the render phase only (<code>true</code>)
-	 * or to the action phase as well (<code>false</code>)
+	 * @param renderPhaseOnly whether to apply to the render phase only ({@code true})
+	 * or to the action phase as well ({@code false})
 	 */
 	public WebRequestHandlerInterceptorAdapter(WebRequestInterceptor requestInterceptor, boolean renderPhaseOnly) {
 		Assert.notNull(requestInterceptor, "WebRequestInterceptor must not be null");

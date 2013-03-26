@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import test.beans.TestBean;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Juergen Hoeller

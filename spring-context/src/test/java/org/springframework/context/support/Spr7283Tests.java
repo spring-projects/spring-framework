@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,22 @@ import org.junit.Test;
  */
 public class Spr7283Tests {
 
-    @Test
-    public void testListWithInconsistentElementType() {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("spr7283.xml", getClass());
-		List list = ctx.getBean("list", List.class);
+	@Test
+	public void testListWithInconsistentElementType() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("spr7283.xml", getClass());
+		List<?> list = ctx.getBean("list", List.class);
 		assertEquals(2, list.size());
 		assertTrue(list.get(0) instanceof A);
 		assertTrue(list.get(1) instanceof B);
-    }
+	}
 
 
-    public static class A {
-    	public A() {}
-    }
+	public static class A {
+		public A() {}
+	}
 
-    public static class B {
-    	public B() {}
-    }
-        
+	public static class B {
+		public B() {}
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
 	private final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
-			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>();
+			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>(64);
 
 	private BeanFactory beanFactory;
 
@@ -113,7 +113,9 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @see org.springframework.context.ApplicationListener
 	 */
 	protected Collection<ApplicationListener> getApplicationListeners() {
-		return this.defaultRetriever.getApplicationListeners();
+		synchronized (this.defaultRetriever) {
+			return this.defaultRetriever.getApplicationListeners();
+		}
 	}
 
 	/**
@@ -135,26 +137,30 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		else {
 			retriever = new ListenerRetriever(true);
 			LinkedList<ApplicationListener> allListeners = new LinkedList<ApplicationListener>();
+			Set<ApplicationListener> listeners;
+			Set<String> listenerBeans;
 			synchronized (this.defaultRetriever) {
-				for (ApplicationListener listener : this.defaultRetriever.applicationListeners) {
-					if (supportsEvent(listener, eventType, sourceType)) {
-						retriever.applicationListeners.add(listener);
+				listeners = new LinkedHashSet<ApplicationListener>(this.defaultRetriever.applicationListeners);
+				listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
+			}
+			for (ApplicationListener listener : listeners) {
+				if (supportsEvent(listener, eventType, sourceType)) {
+					retriever.applicationListeners.add(listener);
+					allListeners.add(listener);
+				}
+			}
+			if (!listenerBeans.isEmpty()) {
+				BeanFactory beanFactory = getBeanFactory();
+				for (String listenerBeanName : listenerBeans) {
+					ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
+					if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
+						retriever.applicationListenerBeans.add(listenerBeanName);
 						allListeners.add(listener);
 					}
 				}
-				if (!this.defaultRetriever.applicationListenerBeans.isEmpty()) {
-					BeanFactory beanFactory = getBeanFactory();
-					for (String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
-						ApplicationListener listener = beanFactory.getBean(listenerBeanName, ApplicationListener.class);
-						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
-							retriever.applicationListenerBeans.add(listenerBeanName);
-							allListeners.add(listener);
-						}
-					}
-				}
-				OrderComparator.sort(allListeners);
-				this.retrieverCache.put(cacheKey, retriever);
 			}
+			OrderComparator.sort(allListeners);
+			this.retrieverCache.put(cacheKey, retriever);
 			return allListeners;
 		}
 	}

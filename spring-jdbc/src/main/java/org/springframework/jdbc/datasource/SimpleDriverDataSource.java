@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Simple implementation of the standard JDBC {@link javax.sql.DataSource} interface,
  * configuring a plain old JDBC {@link java.sql.Driver} via bean properties, and returning
- * a new {@link java.sql.Connection} from every <code>getConnection</code> call.
+ * a new {@link java.sql.Connection} from every {@code getConnection} call.
  *
  * <p><b>NOTE: This class is not an actual connection pool; it does not actually
  * pool Connections.</b> It just serves as simple replacement for a full-blown

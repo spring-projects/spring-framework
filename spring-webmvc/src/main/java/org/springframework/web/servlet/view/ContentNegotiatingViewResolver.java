@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,12 @@ package org.springframework.web.servlet.view;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
-
 import javax.activation.FileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.OrderComparator;
@@ -43,11 +43,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.FixedContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -99,13 +95,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private boolean favorPathExtension = true;
-	private boolean favorParameter = false;
-	private boolean ignoreAcceptHeader = false;
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
-	private Boolean useJaf;
-	private String parameterName;
-	private MediaType defaultContentType;
+	private final ContentNegotiationManagerFactoryBean cnManagerFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
@@ -113,10 +103,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private List<ViewResolver> viewResolvers;
 
-
-	public ContentNegotiatingViewResolver() {
-		super();
-	}
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -128,7 +114,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
-	 * If not set, the default constructor is used.
+	 * <p>If not set, ContentNegotiationManager's default constructor will be used,
+	 * applying a {@link org.springframework.web.accept.HeaderContentNegotiationStrategy}.
+	 * @see ContentNegotiationManager#ContentNegotiationManager()
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
@@ -137,47 +125,47 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	/**
 	 * Indicate whether the extension of the request path should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code true}.
-	 * <p>For instance, when this flag is <code>true</code> (the default), a request for {@code /hotels.pdf}
+	 * <p>For instance, when this flag is {@code true} (the default), a request for {@code /hotels.pdf}
 	 * will result in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the
 	 * browser-defined {@code text/html,application/xhtml+xml}.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
-		this.favorPathExtension = favorPathExtension;
+		this.cnManagerFactoryBean.setFavorPathExtension(favorPathExtension);
 	}
 
 	/**
 	 * Indicate whether to use the Java Activation Framework to map from file extensions to media types.
 	 * <p>Default is {@code true}, i.e. the Java Activation Framework is used (if available).
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setUseJaf(boolean useJaf) {
-		this.useJaf = useJaf;
+		this.cnManagerFactoryBean.setUseJaf(useJaf);
 	}
 
 	/**
 	 * Indicate whether a request parameter should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code false}.
-	 * <p>For instance, when this flag is <code>true</code>, a request for {@code /hotels?format=pdf} will result
+	 * <p>For instance, when this flag is {@code true}, a request for {@code /hotels?format=pdf} will result
 	 * in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined
 	 * {@code text/html,application/xhtml+xml}.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setFavorParameter(boolean favorParameter) {
-		this.favorParameter = favorParameter;
+		this.cnManagerFactoryBean.setFavorParameter(favorParameter);
 	}
 
 	/**
 	 * Set the parameter name that can be used to determine the requested media type if the {@link
 	 * #setFavorParameter} property is {@code true}. The default parameter name is {@code format}.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setParameterName(String parameterName) {
-		this.parameterName = parameterName;
+		this.cnManagerFactoryBean.setParameterName(parameterName);
 	}
 
 	/**
@@ -185,27 +173,25 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * <p>If set to {@code true}, this view resolver will only refer to the file extension and/or
 	 * parameter, as indicated by the {@link #setFavorPathExtension favorPathExtension} and
 	 * {@link #setFavorParameter favorParameter} properties.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
-		this.ignoreAcceptHeader = ignoreAcceptHeader;
+		this.cnManagerFactoryBean.setIgnoreAcceptHeader(ignoreAcceptHeader);
 	}
 
 	/**
 	 * Set the mapping from file extensions to media types.
 	 * <p>When this mapping is not set or when an extension is not present, this view resolver
 	 * will fall back to using a {@link FileTypeMap} when the Java Action Framework is available.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setMediaTypes(Map<String, String> mediaTypes) {
 		if (mediaTypes != null) {
-			for (Map.Entry<String, String> entry : mediaTypes.entrySet()) {
-				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = MediaType.parseMediaType(entry.getValue());
-				this.mediaTypes.put(extension, mediaType);
-			}
+			Properties props = new Properties();
+			props.putAll(mediaTypes);
+			this.cnManagerFactoryBean.setMediaTypes(props);
 		}
 	}
 
@@ -213,11 +199,11 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * Set the default content type.
 	 * <p>This content type will be used when file extension, parameter, nor {@code Accept}
 	 * header define a content-type, either through being disabled or empty.
-	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setDefaultContentType(MediaType defaultContentType) {
-		this.defaultContentType = defaultContentType;
+		this.cnManagerFactoryBean.setDefaultContentType(defaultContentType);
 	}
 
 	/**
@@ -277,31 +263,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 					"'viewResolvers' property on the ContentNegotiatingViewResolver");
 		}
 		OrderComparator.sort(this.viewResolvers);
+		this.cnManagerFactoryBean.setServletContext(servletContext);
 	}
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (this.contentNegotiationManager == null) {
-			List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
-			if (this.favorPathExtension) {
-				PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
-				if (this.useJaf != null) {
-					strategy.setUseJaf(this.useJaf);
-				}
-				strategies.add(strategy);
-			}
-			if (this.favorParameter) {
-				ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
-				strategy.setParameterName(this.parameterName);
-				strategies.add(strategy);
-			}
-			if (!this.ignoreAcceptHeader) {
-				strategies.add(new HeaderContentNegotiationStrategy());
-			}
-			if (this.defaultContentType != null) {
-				strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
-			}
-			ContentNegotiationStrategy[] array = strategies.toArray(new ContentNegotiationStrategy[strategies.size()]);
-			this.contentNegotiationManager = new ContentNegotiationManager(array);
+			this.cnManagerFactoryBean.afterPropertiesSet();
+			this.contentNegotiationManager = this.cnManagerFactoryBean.getObject();
 		}
 	}
 
@@ -311,7 +279,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
 		if (requestedMediaTypes != null) {
 			List<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
-			View bestView = getBestView(candidateViews, requestedMediaTypes);
+			View bestView = getBestView(candidateViews, requestedMediaTypes, attrs);
 			if (bestView != null) {
 				return bestView;
 			}
@@ -330,11 +298,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	/**
 	 * Determines the list of {@link MediaType} for the given {@link HttpServletRequest}.
-	 * <p>The default implementation invokes {@link #getMediaTypeFromFilename(String)} if {@linkplain
-	 * #setFavorPathExtension favorPathExtension} property is <code>true</code>. If the property is
-	 * <code>false</code>, or when a media type cannot be determined from the request path,
-	 * this method will inspect the {@code Accept} header of the request.
-	 * <p>This method can be overridden to provide a different algorithm.
 	 * @param request the current servlet request
 	 * @return the list of media types requested, if any
 	 */
@@ -411,7 +374,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		return candidateViews;
 	}
 
-	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes) {
+	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
 			if (candidateView instanceof SmartView) {
 				SmartView smartView = (SmartView) candidateView;
@@ -427,11 +390,12 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			for (View candidateView : candidateViews) {
 				if (StringUtils.hasText(candidateView.getContentType())) {
 					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
-					if (mediaType.includes(candidateContentType)) {
+					if (mediaType.isCompatibleWith(candidateContentType)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Returning [" + candidateView + "] based on requested media type '"
 									+ mediaType + "'");
 						}
+						attrs.setAttribute(View.SELECTED_CONTENT_TYPE, mediaType, RequestAttributes.SCOPE_REQUEST);
 						return candidateView;
 					}
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  * @since 1.1
  */
 public abstract class MethodOverride implements BeanMetadataElement {
-	
+
 	private final String methodName;
 
 	private boolean overloaded = true;
@@ -76,7 +76,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	}
 
 	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
 	public void setSource(Object source) {

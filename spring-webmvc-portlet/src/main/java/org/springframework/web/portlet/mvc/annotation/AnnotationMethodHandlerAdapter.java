@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	private BeanExpressionContext expressionContext;
 
 	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
-			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
+			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>(64);
 
 
 	/**
@@ -174,11 +174,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	}
 
 	/**
-	 * Cache content produced by <code>@SessionAttributes</code> annotated handlers
+	 * Cache content produced by {@code @SessionAttributes} annotated handlers
 	 * for the given number of seconds. Default is 0, preventing caching completely.
 	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
-	 * handlers (but not to <code>@SessionAttributes</code> annotated handlers), this
-	 * setting will apply to <code>@SessionAttributes</code> annotated handlers only.
+	 * handlers (but not to {@code @SessionAttributes} annotated handlers), this
+	 * setting will apply to {@code @SessionAttributes} annotated handlers only.
 	 * @see #setCacheSeconds
 	 * @see org.springframework.web.bind.annotation.SessionAttributes
 	 */
@@ -195,7 +195,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
 	 * safe reference to synchronize on for locking on the current session.
 	 * <p>In many cases, the PortletSession reference itself is a safe mutex
 	 * as well, since it will always be the same object reference for the
@@ -256,7 +256,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
@@ -413,7 +413,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * <p>The default implementation creates a standard PortletRequestDataBinder.
 	 * This can be overridden for custom PortletRequestDataBinder subclasses.
 	 * @param request current portlet request
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the objectName of the target object
 	 * @return the PortletRequestDataBinder instance to use

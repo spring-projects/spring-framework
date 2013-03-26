@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,16 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -35,7 +40,6 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Reflection-based {@link MethodResolver} used by default in
@@ -53,7 +57,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	private Map<Class<?>, MethodFilter> filters = null;
 
-	// Using distance will ensure a more accurate match is discovered, 
+	// Using distance will ensure a more accurate match is discovered,
 	// more closely following the Java rules.
 	private boolean useDistance = false;
 
@@ -66,7 +70,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
 	 * use a distance computation to check which is the better of two close matches (when there
 	 * are multiple matches).  Using the distance computation is intended to ensure matches
-	 * are more closely representative of what a Java compiler would do when taking into 
+	 * are more closely representative of what a Java compiler would do when taking into
 	 * account boxing/unboxing and whether the method candidates are declared to handle a
 	 * supertype of the type (of the argument) being passed in.
 	 * @param useDistance true if distance computation should be used when calculating matches
@@ -90,31 +94,32 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-			Method[] methods = getMethods(type);
+			List<Method> methods = new ArrayList<Method>(Arrays.asList(getMethods(type, targetObject)));
 
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
-				List<Method> methodsForFiltering = new ArrayList<Method>();
-				for (Method method: methods) {
-					methodsForFiltering.add(method);
-				}
-				List<Method> methodsFiltered = filter.filter(methodsForFiltering);
-				if (CollectionUtils.isEmpty(methodsFiltered)) {
-					methods = NO_METHODS;
-				}
-				else {
-					methods = methodsFiltered.toArray(new Method[methodsFiltered.size()]);
-				}
+				methods = filter.filter(methods);
 			}
 
-			Arrays.sort(methods, new Comparator<Method>() {
-				public int compare(Method m1, Method m2) {
-					int m1pl = m1.getParameterTypes().length;
-					int m2pl = m2.getParameterTypes().length;
-					return (new Integer(m1pl)).compareTo(m2pl);
-				}
-			});
+			// Sort methods into a sensible order
+			if (methods.size() > 1) {
+				Collections.sort(methods, new Comparator<Method>() {
+					public int compare(Method m1, Method m2) {
+						int m1pl = m1.getParameterTypes().length;
+						int m2pl = m2.getParameterTypes().length;
+						return (new Integer(m1pl)).compareTo(m2pl);
+					}
+				});
+			}
+
+			// Resolve any bridge methods
+			for (int i = 0; i < methods.size(); i++) {
+				methods.set(i, BridgeMethodResolver.findBridgedMethod(methods.get(i)));
+			}
+
+			// Remove duplicate methods (possible due to resolved bridge methods)
+			methods = new ArrayList<Method>(new LinkedHashSet<Method>(methods));
 
 			Method closeMatch = null;
 			int closeMatchDistance = Integer.MAX_VALUE;
@@ -123,9 +128,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			boolean multipleOptions = false;
 
 			for (Method method : methods) {
-				if (method.isBridge()) {
-					continue;
-				}
 				if (method.getName().equals(name)) {
 					Class<?>[] paramTypes = method.getParameterTypes();
 					List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
@@ -195,6 +197,16 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		else {
 			this.filters.put(type,filter);
 		}
+	}
+
+	private Method[] getMethods(Class<?> type, Object targetObject) {
+		if(targetObject instanceof Class) {
+			Set<Method> methods = new HashSet<Method>();
+			methods.addAll(Arrays.asList(getMethods(type)));
+			methods.addAll(Arrays.asList(getMethods(targetObject.getClass())));
+			return methods.toArray(new Method[methods.size()]);
+		}
+		return getMethods(type);
 	}
 
 	/**

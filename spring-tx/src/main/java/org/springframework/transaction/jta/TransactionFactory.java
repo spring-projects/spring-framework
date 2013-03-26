@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ public interface TransactionFactory {
 
 	/**
 	 * Create an active Transaction object based on the given name and timeout.
-	 * @param name the transaction name (may be <code>null</code>)
+	 * @param name the transaction name (may be {@code null})
 	 * @param timeout the transaction timeout (may be -1 for the default timeout)
-	 * @return the active Transaction object (never <code>null</code>)
+	 * @return the active Transaction object (never {@code null})
 	 * @throws NotSupportedException if the transaction manager does not support
 	 * a transaction of the specified type
 	 * @throws SystemException if the transaction manager failed to create the
@@ -52,7 +52,7 @@ public interface TransactionFactory {
 	/**
 	 * Determine whether the underlying transaction manager supports XA transactions
 	 * managed by a resource adapter (i.e. without explicit XA resource enlistment).
-	 * <p>Typically <code>false</code>. Checked by
+	 * <p>Typically {@code false}. Checked by
 	 * {@link org.springframework.jca.endpoint.AbstractMessageEndpointFactory}
 	 * in order to differentiate between invalid configuration and valid
 	 * ResourceAdapter-managed transactions.

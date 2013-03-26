@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -50,6 +51,7 @@ public class MockHttpSession implements HttpSession {
 
 	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
+
 	private static int nextId = 1;
 
 	private final String id;
@@ -71,7 +73,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession with a default {@link MockServletContext}.
-	 * 
+	 *
 	 * @see MockServletContext
 	 */
 	public MockHttpSession() {
@@ -80,7 +82,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
-	 * 
+	 *
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
@@ -89,7 +91,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
-	 * 
+	 *
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
@@ -141,7 +143,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.attributes.keySet());
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	public String[] getValueNames() {
@@ -222,7 +224,7 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Serialize the attributes of this session into an object that can be
 	 * turned into a byte array with standard Java serialization.
-	 * 
+	 *
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
@@ -249,7 +251,7 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Deserialize the attributes of this session from a state object created by
 	 * {@link #serializeState()}.
-	 * 
+	 *
 	 * @param state a representation of this session's serialized state
 	 */
 	@SuppressWarnings("unchecked")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.jndi;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.junit.Test;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson
@@ -233,6 +233,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -259,6 +260,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -287,6 +289,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -372,7 +375,7 @@ public class JndiObjectFactoryBeanTests {
 			fail("Should have thrown NamingException");
 		}
 		catch (NamingException ex) {
-			assertTrue(ex.getMessage().indexOf("org.springframework.beans.DerivedTestBean") != -1);
+			assertTrue(ex.getMessage().indexOf("org.springframework.tests.sample.beans.DerivedTestBean") != -1);
 		}
 	}
 
@@ -380,12 +383,10 @@ public class JndiObjectFactoryBeanTests {
 	public void testLookupWithExposeAccessContext() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		TestBean tb = new TestBean();
-		final Context mockCtx = createMock(Context.class);
-		expect(mockCtx.lookup("foo")).andReturn(tb);
-		mockCtx.close();
-		expectLastCall().times(2);
-		replay(mockCtx);
+		final Context mockCtx = mock(Context.class);
+		given(mockCtx.lookup("foo")).willReturn(tb);
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return mockCtx;
 			}
@@ -402,7 +403,7 @@ public class JndiObjectFactoryBeanTests {
 		proxy.equals(proxy);
 		proxy.hashCode();
 		proxy.toString();
-		verify(mockCtx);
+		verify(mockCtx, times(2)).close();
 	}
 
 }

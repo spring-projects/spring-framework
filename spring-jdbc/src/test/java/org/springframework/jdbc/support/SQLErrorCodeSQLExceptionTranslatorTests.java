@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2013 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,9 @@
 
 package org.springframework.jdbc.support;
 
-import java.sql.SQLException;
 import java.sql.BatchUpdateException;
+import java.sql.DataTruncation;
+import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
@@ -33,9 +34,10 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
-	
+
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 	static {
 		ERROR_CODES.setBadSqlGrammarCodes(new String[] { "1", "2" });
@@ -92,14 +94,23 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException badSqlEx = new SQLException("", "", 1);
-		BatchUpdateException batchUdateEx = new BatchUpdateException();
-		batchUdateEx.setNextException(badSqlEx);
-		BadSqlGrammarException bsgex = (BadSqlGrammarException) sext.translate("task", "SQL", batchUdateEx);
+		BatchUpdateException batchUpdateEx = new BatchUpdateException();
+		batchUpdateEx.setNextException(badSqlEx);
+		BadSqlGrammarException bsgex = (BadSqlGrammarException) sext.translate("task", "SQL", batchUpdateEx);
 		assertEquals("SQL", bsgex.getSql());
 		assertEquals(badSqlEx, bsgex.getSQLException());
 	}
 
+	public void testDataTruncationTranslation() {
+		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
+		SQLException dataAccessEx = new SQLException("", "", 5);
+		DataTruncation dataTruncation = new DataTruncation(1, true, true, 1, 1, dataAccessEx);
+		DataAccessResourceFailureException daex = (DataAccessResourceFailureException) sext.translate("task", "SQL", dataTruncation);
+		assertEquals(dataTruncation, daex.getCause());
+	}
+
+	@SuppressWarnings("serial")
 	public void testCustomTranslateMethodTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";
@@ -109,6 +120,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		SQLException intVioEx = new SQLException("", "", 6);
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator() {
+			@Override
 			protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
 				assertEquals(TASK, task);
 				assertEquals(SQL, sql);
@@ -116,19 +128,19 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 			}
 		};
 		sext.setSqlErrorCodes(ERROR_CODES);
-		
+
 		// Shouldn't custom translate this
 		assertEquals(customDex, sext.translate(TASK, SQL, badSqlEx));
 		DataIntegrityViolationException diex = (DataIntegrityViolationException) sext.translate(TASK, SQL, intVioEx);
 		assertEquals(intVioEx, diex.getCause());
 	}
-	
+
 	public void testCustomExceptionTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";
 		final SQLErrorCodes customErrorCodes = new SQLErrorCodes();
 		final CustomSQLErrorCodesTranslation customTranslation = new CustomSQLErrorCodesTranslation();
-		
+
 		customErrorCodes.setBadSqlGrammarCodes(new String[] {"1", "2"});
 		customErrorCodes.setDataIntegrityViolationCodes(new String[] {"3", "4"});
 		customTranslation.setErrorCodes(new String[] {"1"});
@@ -137,7 +149,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator();
 		sext.setSqlErrorCodes(customErrorCodes);
-		
+
 		// Should custom translate this
 		SQLException badSqlEx = new SQLException("", "", 1);
 		assertEquals(CustomErrorCodeException.class, sext.translate(TASK, SQL, badSqlEx).getClass());

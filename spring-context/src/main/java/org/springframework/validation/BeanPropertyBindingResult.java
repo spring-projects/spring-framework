@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import org.springframework.util.Assert;
  * Default implementation of the {@link Errors} and {@link BindingResult}
  * interfaces, for the registration and evaluation of binding errors on
  * JavaBean objects.
- * 
+ *
  * <p>Performs standard JavaBean property access, also supporting nested
  * properties. Normally, application code will work with the
- * <code>Errors</code> interface or the <code>BindingResult</code> interface.
- * A {@link DataBinder} returns its <code>BindingResult</code> via
- * {@link org.springframework.validation.DataBinder#getBindingResult()}.
+ * {@code Errors} interface or the {@code BindingResult} interface.
+ * A {@link DataBinder} returns its {@code BindingResult} via
+ * {@link DataBinder#getBindingResult()}.
  *
  * @author Juergen Hoeller
  * @since 2.0

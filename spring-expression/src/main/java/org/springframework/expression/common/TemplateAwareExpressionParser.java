@@ -146,7 +146,6 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @param expressionString the expression string which may contain the suffix
 	 * @param pos the start position at which to check for the suffix
 	 * @param suffix the suffix string
-	 * @return
 	 */
 	private boolean isSuffixHere(String expressionString,int pos,String suffix) {
 		int suffixPosition = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ import org.springframework.util.Assert;
 
 /**
  * Lex some input data into a stream of tokens that can then be parsed.
- *  
+ *
  * @author Andy Clement
+ * @author Phillip Webb
  * @since 3.0
  */
 class Tokenizer {
-	
+
 	String expressionString;
 	char[] toProcess;
 	int pos;
@@ -55,13 +56,21 @@ class Tokenizer {
 			} else {
 				switch (ch) {
 				case '+':
-					pushCharToken(TokenKind.PLUS);
+					if (isTwoCharToken(TokenKind.INC)) {
+						pushPairToken(TokenKind.INC);
+					} else {
+						pushCharToken(TokenKind.PLUS);
+					}
 					break;
 				case '_': // the other way to start an identifier
 					lexIdentifier();
 					break;
 				case '-':
-					pushCharToken(TokenKind.MINUS);
+					if (isTwoCharToken(TokenKind.DEC)) {
+						pushPairToken(TokenKind.DEC);
+					} else {
+						pushCharToken(TokenKind.MINUS);
+					}
 					break;
 				case ':':
 					pushCharToken(TokenKind.COLON);
@@ -109,7 +118,7 @@ class Tokenizer {
 					if (isTwoCharToken(TokenKind.SELECT_FIRST)) {
 						pushPairToken(TokenKind.SELECT_FIRST);
 					} else {
-						pushCharToken(TokenKind.POWER);					
+						pushCharToken(TokenKind.POWER);
 					}
 					break;
 				case '!':
@@ -129,15 +138,21 @@ class Tokenizer {
 					}
 					break;
 				case '&':
-					if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
-						pushPairToken(TokenKind.SYMBOLIC_AND);
+					if (!isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+							throw new InternalParseException(new SpelParseException(
+									expressionString, pos,
+									SpelMessage.MISSING_CHARACTER, "&"));
 					}
+					pushPairToken(TokenKind.SYMBOLIC_AND);
 					break;
 				case '|':
-					if (isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
-						pushPairToken(TokenKind.SYMBOLIC_OR);
+					if (!isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
+						throw new InternalParseException(new SpelParseException(
+								expressionString, pos,
+								SpelMessage.MISSING_CHARACTER, "|"));
 					}
-					break;					
+					pushPairToken(TokenKind.SYMBOLIC_OR);
+					break;
 				case '?':
 					if (isTwoCharToken(TokenKind.SELECT)) {
 						pushPairToken(TokenKind.SELECT);
@@ -146,7 +161,7 @@ class Tokenizer {
 					} else if (isTwoCharToken(TokenKind.SAFE_NAVI)) {
 						pushPairToken(TokenKind.SAFE_NAVI);
 					} else {
-						pushCharToken(TokenKind.QMARK);					
+						pushCharToken(TokenKind.QMARK);
 					}
 					break;
 				case '$':
@@ -208,7 +223,7 @@ class Tokenizer {
 		}
 	}
 
-	public List<Token> getTokens() { 
+	public List<Token> getTokens() {
 		return tokens;
 	}
 
@@ -258,26 +273,26 @@ class Tokenizer {
 		tokens.add(new Token(TokenKind.LITERAL_STRING, subarray(start,pos), start, pos));
 	}
 
-//	REAL_LITERAL :	
+//	REAL_LITERAL :
 //	  ('.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?) |
 //		((DECIMAL_DIGIT)+ '.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?) |
 //		((DECIMAL_DIGIT)+ (EXPONENT_PART) (REAL_TYPE_SUFFIX)?) |
 //		((DECIMAL_DIGIT)+ (REAL_TYPE_SUFFIX));
 //	fragment INTEGER_TYPE_SUFFIX : ( 'L' | 'l' );
-//	fragment HEX_DIGIT : '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'A'|'B'|'C'|'D'|'E'|'F'|'a'|'b'|'c'|'d'|'e'|'f';		
-//		
-//	fragment EXPONENT_PART : 'e'  (SIGN)*  (DECIMAL_DIGIT)+ | 'E'  (SIGN)*  (DECIMAL_DIGIT)+ ;	
+//	fragment HEX_DIGIT : '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'A'|'B'|'C'|'D'|'E'|'F'|'a'|'b'|'c'|'d'|'e'|'f';
+//
+//	fragment EXPONENT_PART : 'e'  (SIGN)*  (DECIMAL_DIGIT)+ | 'E'  (SIGN)*  (DECIMAL_DIGIT)+ ;
 //	fragment SIGN :	'+' | '-' ;
 //	fragment REAL_TYPE_SUFFIX : 'F' | 'f' | 'D' | 'd';
 //	INTEGER_LITERAL
-//	: (DECIMAL_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;		
+//	: (DECIMAL_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;
 
 	private void lexNumericLiteral(boolean firstCharIsZero) {
 		boolean isReal = false;
 		int start = pos;
 		char ch = toProcess[pos+1];
 		boolean isHex = ch=='x' || ch=='X';
-		
+
 		// deal with hexadecimal
 		if (firstCharIsZero && isHex) {
 			pos=pos+1;
@@ -285,16 +300,16 @@ class Tokenizer {
 				pos++;
 			} while (isHexadecimalDigit(toProcess[pos]));
 			if (isChar('L','l')) {
-				pushHexIntToken(subarray(start+2,pos),true, start, pos);				
+				pushHexIntToken(subarray(start+2,pos),true, start, pos);
 				pos++;
 			} else {
-				pushHexIntToken(subarray(start+2,pos),false, start, pos);				
+				pushHexIntToken(subarray(start+2,pos),false, start, pos);
 			}
 			return;
 		}
 
 		// real numbers must have leading digits
-		
+
 		// Consume first part of number
 		do {
 			pos++;
@@ -303,7 +318,7 @@ class Tokenizer {
 		// a '.' indicates this number is a real
 		ch = toProcess[pos];
 		if (ch=='.') {
-			isReal = true; 
+			isReal = true;
 			int dotpos = pos;
 			// carry on consuming digits
 			do {
@@ -320,9 +335,9 @@ class Tokenizer {
 		}
 
 		int endOfNumber = pos;
-		
+
 		// Now there may or may not be an exponent
-		
+
 		// is it a long ?
 		if (isChar('L','l')) {
 			if (isReal) { // 3.4L - not allowed
@@ -337,7 +352,7 @@ class Tokenizer {
 			if (isSign(possibleSign)) {
 				pos++;
 			}
-			
+
 			// exponent digits
 			do {
 				pos++;
@@ -346,7 +361,7 @@ class Tokenizer {
 			if (isFloatSuffix(toProcess[pos])) {
 				isFloat = true;
 				endOfNumber = ++pos;
-			} else if (isDoubleSuffix(toProcess[pos])) {				
+			} else if (isDoubleSuffix(toProcess[pos])) {
 				endOfNumber = ++pos;
 			}
 			pushRealToken(subarray(start,pos), isFloat, start, pos);
@@ -359,7 +374,7 @@ class Tokenizer {
 				endOfNumber = ++pos;
 			} else if (isDoubleSuffix(ch)) {
 				isReal = true;
-				endOfNumber = ++pos;				
+				endOfNumber = ++pos;
 			}
 			if (isReal) {
 				pushRealToken(subarray(start,endOfNumber), isFloat, start, endOfNumber);
@@ -378,7 +393,7 @@ class Tokenizer {
 			pos++;
 		} while (isIdentifier(toProcess[pos]));
 		char[] subarray = subarray(start,pos);
-		
+
 		// Check if this is the alternative (textual) representation of an operator (see alternativeOperatorNames)
 		if ((pos-start)==2 || (pos-start)==3) {
 			String asString = new String(subarray).toUpperCase();
@@ -401,7 +416,7 @@ class Tokenizer {
 
 	private void pushHexIntToken(char[] data,boolean isLong, int start, int end) {
 		if (data.length==0) {
-			if (isLong) {				
+			if (isLong) {
 				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NOT_A_LONG,expressionString.substring(start,end+1)));
 			} else {
 				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NOT_AN_INTEGER,expressionString.substring(start,end)));
@@ -418,7 +433,7 @@ class Tokenizer {
 		if (isFloat) {
 			tokens.add(new Token(TokenKind.LITERAL_REAL_FLOAT, data, start, end));
 		} else {
-			tokens.add(new Token(TokenKind.LITERAL_REAL, data, start, end));			
+			tokens.add(new Token(TokenKind.LITERAL_REAL, data, start, end));
 		}
 	}
 
@@ -504,7 +519,7 @@ class Tokenizer {
 		return (flags[ch] & IS_HEXDIGIT)!=0;
 	}
 
-	private static final byte flags[] = new byte[256];	
+	private static final byte flags[] = new byte[256];
 	private static final byte IS_DIGIT=0x01;
 	private static final byte IS_HEXDIGIT=0x02;
 	private static final byte IS_ALPHA=0x04;

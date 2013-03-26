@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="oxm"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="oxm">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
     <title>Marshalling XML using O/X Mappers</title>
 
-    <section id="oxm-introduction">
+    <section xml:id="oxm-introduction">
         <title>Introduction</title>
         <para>
             In this chapter, we will describe Spring's Object/XML Mapping support. Object/XML Mapping, or O/X mapping
@@ -13,7 +17,7 @@
             known as XML Marshalling, or XML Serialization. This chapter uses these terms interchangeably.
         </para>
         <para>
-            Within the field of O/X mapping, a <emphasis>marshaller</emphasis> is responsible for serializing an 
+            Within the field of O/X mapping, a <emphasis>marshaller</emphasis> is responsible for serializing an
             object (graph) to XML. In similar fashion, an <emphasis>unmarshaller</emphasis> deserializes the XML to an
             object graph. This XML can take the form of a DOM document, an input or output stream, or a SAX handler.
         </para>
@@ -30,12 +34,12 @@
         <formalpara>
             <title>Consistent Interfaces</title>
             <para>
-                Spring's O/X mapping operates through two global interfaces: the 
-                <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface. 
-                These abstractions allow you to switch O/X mapping 
-                frameworks with relative ease, with little or no changes required on the classes that do the 
-                marshalling. This approach has the additional benefit of making it possible to do XML marshalling with 
-                a mix-and-match approach (e.g. some marshalling performed using JAXB, other using XMLBeans) in a 
+                Spring's O/X mapping operates through two global interfaces: the
+                <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface.
+                These abstractions allow you to switch O/X mapping
+                frameworks with relative ease, with little or no changes required on the classes that do the
+                marshalling. This approach has the additional benefit of making it possible to do XML marshalling with
+                a mix-and-match approach (e.g. some marshalling performed using JAXB, other using XMLBeans) in a
                 non-intrusive fashion, leveraging the strength of each technology.
             </para>
         </formalpara>
@@ -48,18 +52,18 @@
             </para>
         </formalpara>
     </section>
-    <section id="oxm-marshaller-unmarshaller">
+    <section xml:id="oxm-marshaller-unmarshaller">
         <title>Marshaller and Unmarshaller</title>
         <para>
             As stated in the introduction, a <emphasis>marshaller</emphasis> serializes an object to XML, and an
             <emphasis>unmarshaller</emphasis> deserializes XML stream to an object. In this section, we will describe
             the two Spring interfaces used for this purpose.
         </para>
-        <section id="oxm-marshaller">
+        <section xml:id="oxm-marshaller">
             <title>Marshaller</title>
             <para>
-                Spring abstracts all marshalling operations behind the 
-                <interfacename>org.springframework.oxm.Marshaller</interfacename> interface, the main methods of which 
+                Spring abstracts all marshalling operations behind the
+                <interfacename>org.springframework.oxm.Marshaller</interfacename> interface, the main methods of which
                 is listed below.
                 <programlisting language="java"><![CDATA[
 public interface Marshaller {
@@ -71,7 +75,7 @@ public interface Marshaller {
         throws XmlMappingException, IOException;
 }]]></programlisting>
                 The <interfacename>Marshaller</interfacename> interface has one main method, which marshals the given
-                object to a given <interfacename>javax.xml.transform.Result</interfacename>. Result is a tagging 
+                object to a given <interfacename>javax.xml.transform.Result</interfacename>. Result is a tagging
                 interface that basically represents an XML output abstraction: concrete implementations wrap various XML
                 representations, as indicated in the table below.
                 <informaltable>
@@ -104,8 +108,8 @@ public interface Marshaller {
                 </informaltable>
                 <note>
                     <para>
-                        Although the <methodname>marshal()</methodname> method accepts a plain object as its first 
-                        parameter, most <classname>Marshaller</classname> implementations cannot handle arbitrary 
+                        Although the <methodname>marshal()</methodname> method accepts a plain object as its first
+                        parameter, most <classname>Marshaller</classname> implementations cannot handle arbitrary
                         objects. Instead, an object class must be mapped in a mapping file, marked with an annotation,
                         registered with the marshaller, or have a common base class. Refer to the further sections
                         in this chapter to determine how your O/X technology of choice manages this.
@@ -113,10 +117,10 @@ public interface Marshaller {
                 </note>
             </para>
         </section>
-        <section id="oxm-unmarshaller">
+        <section xml:id="oxm-unmarshaller">
             <title>Unmarshaller</title>
             <para>
-                Similar to the <interfacename>Marshaller</interfacename>, there is the 
+                Similar to the <interfacename>Marshaller</interfacename>, there is the
                 <interfacename>org.springframework.oxm.Unmarshaller</interfacename> interface.
                 <programlisting language="java"><![CDATA[
 public interface Unmarshaller {
@@ -127,7 +131,7 @@ public interface Unmarshaller {
     Object unmarshal(Source source)
         throws XmlMappingException, IOException;
 }]]></programlisting>
-                This interface also has one method, which reads from the given 
+                This interface also has one method, which reads from the given
                 <interfacename>javax.xml.transform.Source</interfacename> (an XML input abstraction), and returns the
                 object read. As with Result, Source is a tagging interface that has three concrete implementations. Each
                 wraps a different XML representation, as indicated in the table below.
@@ -163,14 +167,14 @@ public interface Unmarshaller {
                     </tgroup>
                 </informaltable>
             </para>
+            <para>
+                Even though there are two separate marshalling interfaces (<interfacename>Marshaller</interfacename>
+                and <interfacename>Unmarshaller</interfacename>), all implementations found in Spring-WS implement both in
+                one class. This means that you can wire up one marshaller class and refer to it both as a marshaller and an
+                unmarshaller in your <filename>applicationContext.xml</filename>.
+            </para>
         </section>
-        <para>
-            Even though there are two separate marshalling interfaces (<interfacename>Marshaller</interfacename>
-            and <interfacename>Unmarshaller</interfacename>), all implementations found in Spring-WS implement both in
-            one class. This means that you can wire up one marshaller class and refer to it both as a marshaller and an 
-            unmarshaller in your <filename>applicationContext.xml</filename>.
-        </para>
-        <section id="oxm-xmlmappingexception">
+        <section xml:id="oxm-xmlmappingexception">
             <title>XmlMappingException</title>
             <para>
                 Spring converts exceptions from the underlying O/X mapping tool to its own exception hierarchy with the
@@ -185,30 +189,16 @@ public interface Unmarshaller {
             <para>
                 The O/X Mapping exception hierarchy is shown in the following figure:
                 <mediaobject>
-                    <imageobject role="fo">
+                    <imageobject>
                       <imagedata align="center" fileref="images/oxm-exceptions.png"
                           format="PNG" width="400"/>
                     </imageobject>
-                    <caption>
-                        <para>
-                            O/X Mapping exception hierarchy
-                        </para>
-                    </caption>
-
-                    <imageobject role="html">
-                      <imagedata align="center" fileref="images/oxm-exceptions.png"
-                          format="PNG" width="400"/>
-                    </imageobject>
-                    <caption>
-                        <para>
-                            O/X Mapping exception hierarchy
-                        </para>
-                    </caption>
+                    <caption>O/X Mapping exception hierarchy</caption>
                 </mediaobject>
             </para>
         </section>
     </section>
-    <section id="oxm-usage">
+    <section xml:id="oxm-usage">
         <title>Using Marshaller and Unmarshaller</title>
         <para>
             Spring's OXM can be used for a wide variety of situations. In the following example, we will use it to
@@ -317,64 +307,67 @@ public class Application {
 ]]></programlisting>
         </para>
     </section>
-	<section id="oxm-schema-based-config">
-       	<title>XML Schema-based Configuration</title>
-       	<para>
-       		Marshallers could be configured more concisely using tags from the OXM namespace.
-       		To make these tags available, the appropriate schema has to be referenced first in the preamble of the XML configuration file.
-       		Note the 'oxm' related text below:
-       	</para>
-       	<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+    <section xml:id="oxm-schema-based-config">
+           <title>XML Schema-based Configuration</title>
+           <para>
+               Marshallers could be configured more concisely using tags from the OXM namespace.
+               To make these tags available, the appropriate schema has to be referenced first in the preamble of the XML configuration file.
+               Note the 'oxm' related text below:
+           </para>
+           <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     ]]><emphasis role="bold"><![CDATA[xmlns:oxm="http://www.springframework.org/schema/oxm"]]></emphasis>
     <![CDATA[xsi:schemaLocation="http://www.springframework.org/schema/beans
-    ]]><![CDATA[http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    ]]><![CDATA[http://www.springframework.org/schema/beans/spring-beans.xsd
     ]]><emphasis role="bold"><![CDATA[http://www.springframework.org/schema/oxm
-    ]]><![CDATA[http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd"]]></emphasis><![CDATA[>
+    ]]><![CDATA[http://www.springframework.org/schema/oxm/spring-oxm.xsd"]]></emphasis><![CDATA[>
 ]]></programlisting>
-		<para>
-			Currently, the following tags are available:
-			<itemizedlist>
-				<listitem>
-					<para><link linkend="oxm-jaxb2-xsd"><literal>jaxb2-marshaller</literal></link></para>
-				</listitem>
-				<listitem>
-					<para><link linkend="oxm-xmlbeans-xsd"><literal>xmlbeans-marshaller</literal></link></para>
-				</listitem>
-				<listitem>
-					<para><link linkend="oxm-jibx-xsd"><literal>jibx-marshaller</literal></link></para>
-				</listitem>
-			</itemizedlist>
-		</para>
-		<para>
-			Each tag will be explained in its respective marshaller's section. As an example though, here is how
-			the configuration of a JAXB2 marshaller might look like:
-		</para>
-		<programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
-    </section>    
-    <section id="oxm-jaxb">
+        <para>
+            Currently, the following tags are available:
+            <itemizedlist>
+                <listitem>
+                    <para><link linkend="oxm-jaxb2-xsd"><literal>jaxb2-marshaller</literal></link></para>
+                </listitem>
+                <listitem>
+                    <para><link linkend="oxm-xmlbeans-xsd"><literal>xmlbeans-marshaller</literal></link></para>
+                </listitem>
+                <listitem>
+                    <para><link linkend="oxm-castor-xsd"><literal>castor-marshaller</literal></link></para>
+                </listitem>
+                <listitem>
+                    <para><link linkend="oxm-jibx-xsd"><literal>jibx-marshaller</literal></link></para>
+                </listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            Each tag will be explained in its respective marshaller's section. As an example though, here is how
+            the configuration of a JAXB2 marshaller might look like:
+        </para>
+        <programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
+    </section>
+    <section xml:id="oxm-jaxb">
         <title>JAXB</title>
         <para>
-            The JAXB binding compiler translates a W3C XML Schema into one or more Java classes, a 
-            <filename>jaxb.properties</filename> file, and possibly some resource files. JAXB also offers a 
+            The JAXB binding compiler translates a W3C XML Schema into one or more Java classes, a
+            <filename>jaxb.properties</filename> file, and possibly some resource files. JAXB also offers a
             way to generate a schema from annotated Java classes.
         </para>
         <para>
             Spring supports the JAXB 2.0 API as XML marshalling strategies, following the
             <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename>
-            interfaces described in <xref linkend="oxm-marshaller-unmarshaller"/>. The corresponding integration 
+            interfaces described in <xref linkend="oxm-marshaller-unmarshaller"/>. The corresponding integration
             classes reside in the <package>org.springframework.oxm.jaxb</package> package.
         </para>
-        <section id="oxm-jaxb2">
+        <section xml:id="oxm-jaxb2">
             <title>Jaxb2Marshaller</title>
             <para>
                 The <classname>Jaxb2Marshaller</classname> class implements both the Spring
                 <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename>interface. It
                 requires a context path to operate, which you can set using the <property>contextPath</property>
                 property. The context path is a list of colon (:) separated Java package names that contain schema
-                derived classes. It also offers a <property>classesToBeBound</property> property, which allows you to set an array of 
-                classes to be supported by the marshaller. Schema validation is performed by specifying one or more 
+                derived classes. It also offers a <property>classesToBeBound</property> property, which allows you to set an array of
+                classes to be supported by the marshaller. Schema validation is performed by specifying one or more
                 schema resource to the bean, like so:
             </para>
             <programlisting language="xml"><![CDATA[
@@ -384,7 +377,7 @@ public class Application {
         <property name="classesToBeBound">
             <list>
                 <value>org.springframework.oxm.jaxb.Flight</value>
-                <value>org.springframework.oxm.jaxb.Flights</value>                
+                <value>org.springframework.oxm.jaxb.Flights</value>
             </list>
         </property>
         <property name="schema" value="classpath:org/springframework/oxm/schema.xsd"/>
@@ -392,29 +385,29 @@ public class Application {
     ...
 
 </beans>]]></programlisting>
-			<section id="oxm-jaxb2-xsd">
-	        	<title>XML Schema-based Configuration</title>
-	        	<para>
-	        		The <literal>jaxb2-marshaller</literal> tag configures a <classname>org.springframework.oxm.jaxb.Jaxb2Marshaller</classname>.
-	        		Here is an example:
-	        	</para>
-	        	<programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
-	        	<para>
-	        		Alternatively, the list of classes to bind can be provided to the marshaller via the <literal>class-to-be-bound</literal> child tag:
-	        	</para>
-	        	<programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller">
+            <section xml:id="oxm-jaxb2-xsd">
+                <title>XML Schema-based Configuration</title>
+                <para>
+                    The <literal>jaxb2-marshaller</literal> tag configures a <classname>org.springframework.oxm.jaxb.Jaxb2Marshaller</classname>.
+                    Here is an example:
+                </para>
+                <programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>]]></programlisting>
+                <para>
+                    Alternatively, the list of classes to bind can be provided to the marshaller via the <literal>class-to-be-bound</literal> child tag:
+                </para>
+                <programlisting language="xml"><![CDATA[<oxm:jaxb2-marshaller id="marshaller">
     <oxm:class-to-be-bound name="org.springframework.ws.samples.airline.schema.Airport"/>
     <oxm:class-to-be-bound name="org.springframework.ws.samples.airline.schema.Flight"/>
     ...
 </oxm:jaxb2-marshaller>
-	        	]]></programlisting>
-	        	<para>
-	        		Available attributes are:
+                ]]></programlisting>
+                <para>
+                    Available attributes are:
                     <informaltable>
                         <tgroup cols="3">
-                        	<colspec colwidth="1.5*"/>
-                        	<colspec colwidth="4*"/>
-                        	<colspec colwidth="1*"/>
+                            <colspec colwidth="1.5*"/>
+                            <colspec colwidth="4*"/>
+                            <colspec colwidth="1*"/>
                             <thead>
                                 <row>
                                     <entry>Attribute</entry>
@@ -436,11 +429,11 @@ public class Application {
                             </tbody>
                         </tgroup>
                     </informaltable>
-	        	</para>
-	        </section>
+                </para>
+            </section>
         </section>
     </section>
-    <section id="oxm-castor">
+    <section xml:id="oxm-castor">
         <title>Castor</title>
         <para>
             Castor XML mapping is an open source XML binding framework. It allows you to transform the data contained in
@@ -448,15 +441,15 @@ public class Application {
             though a mapping file can be used to have more control over the behavior of Castor.
         </para>
         <para>
-            For more information on Castor, refer to the <ulink url="http://castor.org/xml-framework.html">
-            <citetitle>Castor web site</citetitle></ulink>. The Spring integration classes reside in the
+            For more information on Castor, refer to the <link xl:href="http://castor.codehaus.org/xml-framework.html">
+            <citetitle>Castor web site</citetitle></link>. The Spring integration classes reside in the
             <package>org.springframework.oxm.castor</package> package.
         </para>
-        <section id="oxm-castor-marshaller">
+        <section xml:id="oxm-castor-marshaller">
             <title>CastorMarshaller</title>
             <para>
-                As with JAXB, the <classname>CastorMarshaller</classname> implements both the 
-                <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface. 
+                As with JAXB, the <classname>CastorMarshaller</classname> implements both the
+                <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface.
                 It can be wired up as follows:
             </para>
             <programlisting language="xml"><![CDATA[
@@ -467,12 +460,12 @@ public class Application {
 
 </beans>]]></programlisting>
         </section>
-        <section id="oxm-castor-mapping">
+        <section xml:id="oxm-castor-mapping">
             <title>Mapping</title>
             <para>
                 Although it is possible to rely on Castor's default marshalling behavior, it might be necessary to have
                 more control over it. This can be accomplished using a Castor mapping file. For more information, refer
-                to <ulink url="http://castor.org/xml-mapping.html">Castor XML Mapping</ulink>.
+                to <link xl:href="http://castor.codehaus.org/xml-mapping.html">Castor XML Mapping</link>.
             </para>
             <para>
                 The mapping can be set using the <property>mappingLocation</property> resource property, indicated
@@ -485,10 +478,90 @@ public class Application {
     </bean>
 </beans>
 ]]></programlisting>
+            <section xml:id="oxm-castor-xsd">
+                <title>XML Schema-based Configuration</title>
+                <para>
+                    The <literal>castor-marshaller</literal> tag configures a
+                    <classname>org.springframework.oxm.castor.CastorMarshaller</classname>.
+                    Here is an example:
+                </para>
+
+                <programlisting language="xml">
+                    <![CDATA[<oxm:castor-marshaller id="marshaller" mapping-location="classpath:org/springframework/oxm/castor/mapping.xml"/>]]></programlisting>
+
+                <para>
+                    The marshaller instance can be configured in two ways, by specifying either the location of
+                    a mapping file (through the <property>mapping-location</property> property), or by
+                    identifying Java POJOs (through the <property>target-class</property> or
+                    <property>target-package</property> properties) for which there exist corresponding
+                    XML descriptor classes. The latter way is usually used in conjunction with XML code generation
+                    from XML schemas.
+                </para>
+
+                <para>
+                    Available attributes are:
+                    <informaltable>
+                        <tgroup cols="3">
+                            <colspec colwidth="1.5*"/>
+                            <colspec colwidth="4*"/>
+                            <colspec colwidth="1*"/>
+                            <thead>
+                                <row>
+                                    <entry>Attribute</entry>
+                                    <entry>Description</entry>
+                                    <entry>Required</entry>
+                                </row>
+                            </thead>
+                            <tbody>
+                                <row>
+                                    <entry>
+                                        <literal>id</literal>
+                                    </entry>
+                                    <entry>the id of the marshaller</entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>encoding</literal>
+                                    </entry>
+                                    <entry>the encoding to use for unmarshalling from XML</entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>target-class</literal>
+                                    </entry>
+                                    <entry>a Java class name for a POJO for which an XML class descriptor is available (as
+                                        generated through code generation)
+                                    </entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>target-package</literal>
+                                    </entry>
+                                    <entry>a Java package name that identifies a package that contains POJOs and their
+                                        corresponding Castor
+                                        XML descriptor classes (as generated through code generation from XML schemas)
+                                    </entry>
+                                    <entry>no</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>mapping-location</literal>
+                                    </entry>
+                                    <entry>location of a Castor XML mapping file</entry>
+                                    <entry>no</entry>
+                                </row>
+                            </tbody>
+                        </tgroup>
+                    </informaltable>
+                </para>
+            </section>
         </section>
     </section>
 
-    <section id="oxm-xmlbeans">
+    <section xml:id="oxm-xmlbeans">
         <title>XMLBeans</title>
         <para>
             XMLBeans is an XML binding tool that has full XML Schema support, and offers full XML Infoset
@@ -497,11 +570,11 @@ public class Application {
             <interfacename>XmlObject</interfacename>, and contain XML binding information in them.
         </para>
         <para>
-            For more information on XMLBeans, refer to the <ulink url="http://xmlbeans.apache.org/">
-			   <citetitle>XMLBeans web site </citetitle></ulink>. The Spring-WS integration classes reside
+            For more information on XMLBeans, refer to the <link xl:href="http://xmlbeans.apache.org/">
+               <citetitle>XMLBeans web site </citetitle></link>. The Spring-WS integration classes reside
             in the <package>org.springframework.oxm.xmlbeans</package> package.
         </para>
-        <section id="oxm-xmlbeans-marshaller">
+        <section xml:id="oxm-xmlbeans-marshaller">
             <title>XmlBeansMarshaller</title>
             <para>
                 The <classname>XmlBeansMarshaller</classname>
@@ -523,20 +596,20 @@ public class Application {
                     and not every <classname>java.lang.Object</classname>.
                 </para>
             </note>
-			<section id="oxm-xmlbeans-xsd">
-	        	<title>XML Schema-based Configuration</title>
-	        	<para>
-	        		The <literal>xmlbeans-marshaller</literal> tag configures a <classname>org.springframework.oxm.xmlbeans.XmlBeansMarshaller</classname>.
-	        		Here is an example:
-	        	</para>
-	        	<programlisting language="xml"><![CDATA[<oxm:xmlbeans-marshaller id="marshaller"/>]]></programlisting>
-	        	<para>
-	        		Available attributes are:
+            <section xml:id="oxm-xmlbeans-xsd">
+                <title>XML Schema-based Configuration</title>
+                <para>
+                    The <literal>xmlbeans-marshaller</literal> tag configures a <classname>org.springframework.oxm.xmlbeans.XmlBeansMarshaller</classname>.
+                    Here is an example:
+                </para>
+                <programlisting language="xml"><![CDATA[<oxm:xmlbeans-marshaller id="marshaller"/>]]></programlisting>
+                <para>
+                    Available attributes are:
                     <informaltable>
                         <tgroup cols="3">
-                        	<colspec colwidth="1.5*"/>
-                        	<colspec colwidth="4*"/>
-                        	<colspec colwidth="1*"/>
+                            <colspec colwidth="1.5*"/>
+                            <colspec colwidth="4*"/>
+                            <colspec colwidth="1*"/>
                             <thead>
                                 <row>
                                     <entry>Attribute</entry>
@@ -559,14 +632,14 @@ public class Application {
                             </tbody>
                         </tgroup>
                     </informaltable>
-	        	</para>
-	        </section>            
+                </para>
+            </section>
         </section>
 
 
     </section>
 
-    <section id="oxm-jibx">
+    <section xml:id="oxm-jibx">
         <title>JiBX</title>
         <para>
             The JiBX framework offers a solution similar to that which JDO provides for ORM: a binding definition defines the
@@ -575,18 +648,18 @@ public class Application {
             the classes from or to XML.
         </para>
         <para>
-            For more information on JiBX, refer to the <ulink url="http://jibx.sourceforge.net/">
-            <citetitle>JiBX web site</citetitle></ulink>. The Spring integration classes reside in the
+            For more information on JiBX, refer to the <link xl:href="http://jibx.sourceforge.net/">
+            <citetitle>JiBX web site</citetitle></link>. The Spring integration classes reside in the
             <package>org.springframework.oxm.jibx</package> package.
         </para>
-        <section id="oxm-jibx-marshaller">
+        <section xml:id="oxm-jibx-marshaller">
             <title>JibxMarshaller</title>
             <para>
-                The <classname>JibxMarshaller</classname> class implements both the 
+                The <classname>JibxMarshaller</classname> class implements both the
                 <interfacename>Marshaller</interfacename> and <interfacename>Unmarshaller</interfacename> interface.
                 To operate, it requires the name of the class to marshal in, which you can set using the
                 <property>targetClass</property> property. Optionally, you can set the binding name using the
-                <property>bindingName</property> property. In the next sample, we bind the 
+                <property>bindingName</property> property. In the next sample, we bind the
                 <classname>Flights</classname> class:
             </para>
             <programlisting language="xml"><![CDATA[
@@ -603,20 +676,20 @@ public class Application {
                 multiple classes, you have to configure multiple <classname>JibxMarshaller</classname>s with
                 different <property>targetClass</property> property values.
             </para>
-			<section id="oxm-jibx-xsd">
-	        	<title>XML Schema-based Configuration</title>
-	        	<para>
-	        		The <literal>jibx-marshaller</literal> tag configures a <classname>org.springframework.oxm.jibx.JibxMarshaller</classname>.
-	        		Here is an example:
-	        	</para>
-	        	<programlisting language="xml"><![CDATA[<oxm:jibx-marshaller id="marshaller" target-class="org.springframework.ws.samples.airline.schema.Flight"/>]]></programlisting>
-	        	<para>
-	        		Available attributes are:
+            <section xml:id="oxm-jibx-xsd">
+                <title>XML Schema-based Configuration</title>
+                <para>
+                    The <literal>jibx-marshaller</literal> tag configures a <classname>org.springframework.oxm.jibx.JibxMarshaller</classname>.
+                    Here is an example:
+                </para>
+                <programlisting language="xml"><![CDATA[<oxm:jibx-marshaller id="marshaller" target-class="org.springframework.ws.samples.airline.schema.Flight"/>]]></programlisting>
+                <para>
+                    Available attributes are:
                     <informaltable>
                         <tgroup cols="3">
-                        	<colspec colwidth="1.5*"/>
-                        	<colspec colwidth="4*"/>
-                        	<colspec colwidth="1*"/>
+                            <colspec colwidth="1.5*"/>
+                            <colspec colwidth="4*"/>
+                            <colspec colwidth="1*"/>
                             <thead>
                                 <row>
                                     <entry>Attribute</entry>
@@ -643,26 +716,26 @@ public class Application {
                             </tbody>
                         </tgroup>
                     </informaltable>
-	        	</para>
-	        </section>            
+                </para>
+            </section>
         </section>
     </section>
-    <section id="oxm-xstream">
+    <section xml:id="oxm-xstream">
         <title>XStream</title>
         <para>
             XStream is a simple library to serialize objects to XML and back again. It does not require any mapping, and
             generates clean XML.
         </para>
         <para>
-            For more information on XStream, refer to the <ulink url="http://xstream.codehaus.org/">
-			<citetitle>XStream web site</citetitle></ulink>. The Spring integration classes reside in the
+            For more information on XStream, refer to the <link xl:href="http://xstream.codehaus.org/">
+            <citetitle>XStream web site</citetitle></link>. The Spring integration classes reside in the
             <package>org.springframework.oxm.xstream</package> package.
         </para>
-        <section id="oxm-xstream-marshaller">
+        <section xml:id="oxm-xstream-marshaller">
             <title>XStreamMarshaller</title>
             <para>
                 The <classname>XStreamMarshaller</classname> does not require any configuration, and can be configured
-                in an application context directly. To further customize the XML, you can set an 
+                in an application context directly. To further customize the XML, you can set an
                 <emphasis>alias map</emphasis>, which consists of string aliases mapped to classes:
             </para>
             <programlisting language="xml"><![CDATA[
@@ -691,8 +764,8 @@ public class Application {
                   This will make sure that only the registered classes are eligible for unmarshalling.
                 </para>
                 <para>
-                  Additionally, you can register <ulink url="http://static.springsource.org/spring/docs/current/api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
-                  custom converters</ulink> to make sure that only your supported classes can be unmarshalled.
+                  Additionally, you can register <link xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
+                  custom converters</link> to make sure that only your supported classes can be unmarshalled.
                 </para>
             </warning>
           <note>

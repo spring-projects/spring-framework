@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -378,7 +378,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * Extract the invocation result from the response message.
 	 * <p>The default implementation expects a JMS ObjectMessage carrying
 	 * a RemoteInvocationResult object. If an invalid response message is
-	 * encountered, the <code>onInvalidResponse</code> callback gets invoked.
+	 * encountered, the {@code onInvalidResponse} callback gets invoked.
 	 * @param responseMessage the response message
 	 * @return the invocation result
 	 * @throws JMSException is thrown if a JMS exception occurs
@@ -393,7 +393,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	}
 
 	/**
-	 * Callback that is invoked by <code>extractInvocationResult</code>
+	 * Callback that is invoked by {@code extractInvocationResult}
 	 * when it encounters an invalid response message.
 	 * <p>The default implementation throws a MessageFormatException.
 	 * @param responseMessage the invalid response message

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,15 @@ import org.springframework.util.Assert;
  * @author Alef Arendsen
  * @since 11.07.2003
  * @see javax.servlet.jsp.el.ExpressionEvaluator#evaluate
+ * @deprecated as of Spring 3.2, in favor of the JSP 2.0+ native support
+ * for embedded expressions in JSP pages (also applying to tag attributes)
  */
+@Deprecated
 public abstract class ExpressionEvaluationUtils {
 
 	/**
 	 * Expression support parameter at the servlet context level
-	 * (i.e. a context-param in <code>web.xml</code>): "springJspExpressionSupport".
+	 * (i.e. a context-param in {@code web.xml}): "springJspExpressionSupport".
 	 */
 	public static final String EXPRESSION_SUPPORT_CONTEXT_PARAM = "springJspExpressionSupport";
 
@@ -57,23 +60,19 @@ public abstract class ExpressionEvaluationUtils {
 	 * Check whether Spring's JSP expression support is actually active.
 	 * <p>Note that JSP 2.0+ containers come with expression support themselves:
 	 * However, it will only be active for web applications declaring Servlet 2.4
-	 * or higher in their <code>web.xml</code> deployment descriptor.
-	 * <p>If a <code>web.xml</code> context-param named "springJspExpressionSupport" is
+	 * or higher in their {@code web.xml} deployment descriptor.
+	 * <p>If a {@code web.xml} context-param named "springJspExpressionSupport" is
 	 * found, its boolean value will be taken to decide whether this support is active.
 	 * If not found, the default is for expression support to be inactive on Servlet 3.0
 	 * containers with web applications declaring Servlet 2.4 or higher in their
-	 * <code>web.xml</code>. For backwards compatibility, Spring's expression support
+	 * {@code web.xml}. For backwards compatibility, Spring's expression support
 	 * will remain active for applications declaring Servlet 2.3 or earlier. However,
-	 * on Servlet 2.4/2.5 containers, we can't find out what the application has declared,
-	 * so we'll also fall back to keeping expression support active in such a case.
-	 * <p><b>Recommendations:</b> Explicitly set "springJspExpressionSupport" to "false"
-	 * in order to prevent double evaluation for Servlet 2.4+ based applications.
-	 * On Servlet 3.0 containers, this will be done for you by default by the framework.
-	 * If for some reason you nevertheless want Spring's JSP expression support to be
-	 * active, explicitly set the "springJspExpressionSupport" context-param to "true".
+	 * on Servlet 2.4/2.5 containers, we can't find out what the application has declared;
+	 * as of Spring 3.2, we won't activate Spring's expression support at all then since
+	 * it got deprecated and will be removed in the next iteration of the framework.
 	 * @param pageContext current JSP PageContext
-	 * @return <code>true</code> if active (ExpressionEvaluationUtils will actually evaluate expressions);
-	 * <code>false</code> if not active (ExpressionEvaluationUtils will return given values as-is,
+	 * @return {@code true} if active (ExpressionEvaluationUtils will actually evaluate expressions);
+	 * {@code false} if not active (ExpressionEvaluationUtils will return given values as-is,
 	 * relying on the JSP container pre-evaluating values before passing them to JSP tag attributes)
 	 */
 	public static boolean isSpringJspExpressionSupportActive(PageContext pageContext) {
@@ -84,20 +83,20 @@ public abstract class ExpressionEvaluationUtils {
 		}
 		if (sc.getMajorVersion() >= 3) {
 			// We're on a Servlet 3.0+ container: Let's check what the application declares...
-			if (sc.getEffectiveMajorVersion() > 2 || sc.getEffectiveMinorVersion() > 3) {
-				// Application declares Servlet 2.4+ in its web.xml: JSP 2.0 expressions active.
-				// Skip our own expression support in order to prevent double evaluation.
-				return false;
+			if (sc.getEffectiveMajorVersion() == 2 && sc.getEffectiveMinorVersion() < 4) {
+				// Application declares Servlet 2.3- in its web.xml: JSP 2.0 expressions not active.
+				// Activate our own expression support.
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
 	 * Check if the given expression value is an EL expression.
 	 * @param value the expression to check
-	 * @return <code>true</code> if the expression is an EL expression,
-	 * <code>false</code> otherwise
+	 * @return {@code true} if the expression is an EL expression,
+	 * {@code false} otherwise
 	 */
 	public static boolean isExpressionLanguage(String value) {
 		return (value != null && value.contains(EXPRESSION_PREFIX));

@@ -68,8 +68,7 @@ import org.springframework.stereotype.Component;
  * <beans>
  *    <context:annotation-config/>
  *    <bean class="com.acme.AppConfig"/>
- * </beans>
- * }</pre>
+ * </beans>}</pre>
  *
  * In the example above, {@code <context:annotation-config/>} is required in order to
  * enable {@link ConfigurationClassPostProcessor} and other annotation-related

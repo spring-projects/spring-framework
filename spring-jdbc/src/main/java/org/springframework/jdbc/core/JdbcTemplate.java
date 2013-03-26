@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * and extract results. This class executes SQL queries or updates, initiating
  * iteration over ResultSets and catching JDBC exceptions and translating
  * them to the generic, more informative exception hierarchy defined in the
- * <code>org.springframework.dao</code> package.
+ * {@code org.springframework.dao} package.
  *
  * <p>Code using this class need only implement callback interfaces, giving
  * them a clearly defined contract. The {@link PreparedStatementCreator} callback
@@ -134,8 +134,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * If this variable is set to true then all results from a stored procedure call
 	 * that don't have a corresponding SqlOutParameter declaration will be bypassed.
-	 * All other results processng will be take place unless the variable 
-	 * <code>skipResultsProcessing</code> is set to <code>true</code> 
+	 * All other results processing will be take place unless the variable
+	 * {@code skipResultsProcessing} is set to {@code true}.
 	 */
 	private boolean skipUndeclaredResults = false;
 
@@ -274,9 +274,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Set whether results processing should be skipped.  Can be used to optimize callable
+	 * Set whether results processing should be skipped. Can be used to optimize callable
 	 * statement processing when we know that no results are being passed back - the processing
-	 * of out parameter will still take place.  This can be used to avoid a bug in some older
+	 * of out parameter will still take place. This can be used to avoid a bug in some older
 	 * Oracle JDBC drivers like 10.1.0.2.
 	 */
 	public void setSkipResultsProcessing(boolean skipResultsProcessing) {
@@ -291,7 +291,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Set whether undelared results should be skipped.
+	 * Set whether undeclared results should be skipped.
 	 */
 	public void setSkipUndeclaredResults(boolean skipUndeclaredResults) {
 		this.skipUndeclaredResults = skipUndeclaredResults;
@@ -355,7 +355,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Create a close-suppressing proxy for the given JDBC Connection.
-	 * Called by the <code>execute</code> method.
+	 * Called by the {@code execute} method.
 	 * <p>The proxy also prepares returned JDBC Statements, applying
 	 * statement settings such as fetch size, max rows, and query timeout.
 	 * @param con the JDBC Connection to create a proxy for
@@ -477,11 +477,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, getSingleColumnRowMapper(requiredType));
 	}
 
+	@Deprecated
 	public long queryForLong(String sql) throws DataAccessException {
 		Number number = queryForObject(sql, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql) throws DataAccessException {
 		Number number = queryForObject(sql, Integer.class);
 		return (number != null ? number.intValue() : 0);
@@ -757,21 +759,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, getColumnMapRowMapper());
 	}
 
+	@Deprecated
 	public long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		Number number = queryForObject(sql, args, argTypes, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		Number number = queryForObject(sql, args, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException {
 		Number number = queryForObject(sql, args, argTypes, Integer.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
+	@Deprecated
 	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		Number number = queryForObject(sql, args, Integer.class);
 		return (number != null ? number.intValue() : 0);
@@ -934,7 +940,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.jdbc.core.JdbcOperations#batchUpdate(java.lang.String, java.util.Collection, int, org.springframework.jdbc.core.ParameterizedPreparedStatementSetter)
-	 * 
+	 *
 	 * Contribution by Nicolas Fabre
 	 */
 	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize, final ParameterizedPreparedStatementSetter<T> pss) {
@@ -1054,7 +1060,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					resultSetParameters.add(parameter);
 				}
 				else {
-					updateCountParameters.add(parameter);					
+					updateCountParameters.add(parameter);
 				}
 			}
 			else {
@@ -1083,9 +1089,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Extract returned ResultSets from the completed stored procedure.
 	 * @param cs JDBC wrapper for the stored procedure
 	 * @param updateCountParameters Parameter list of declared update count parameters for the stored procedure
-	 * @param resultSetParameters Parameter list of declared resturn resultSet parameters for the stored procedure
+	 * @param resultSetParameters Parameter list of declared resultSet parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
+	@SuppressWarnings("rawtypes")
 	protected Map<String, Object> extractReturnedResults(
 			CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
 			throws SQLException {
@@ -1189,7 +1196,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param param the corresponding stored procedure parameter
 	 * @return Map that contains returned results
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Map<String, Object> processResultSet(ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
 		if (rs == null) {
 			return Collections.emptyMap();
@@ -1284,24 +1291,26 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Create a new ArgPreparedStatementSetter using the args passed in. This method allows the
-	 * creation to be overridden by sub-classes.
-	 * @param args object array woth arguments
-	 * @return the new PreparedStatementSetter
+	 * Create a new arg-based PreparedStatementSetter using the args passed in.
+	 * <p>By default, we'll create an {@link ArgumentPreparedStatementSetter}.
+	 * This method allows for the creation to be overridden by subclasses.
+	 * @param args object array with arguments
+	 * @return the new PreparedStatementSetter to use
 	 */
 	protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
-		return new ArgPreparedStatementSetter(args);
+		return new ArgumentPreparedStatementSetter(args);
 	}
 
 	/**
-	 * Create a new ArgTypePreparedStatementSetter using the args and argTypes passed in.
-	 * This method allows the creation to be overridden by sub-classes.
-	 * @param args object array woth arguments
-	 * @param argTypes int array of SQLTypes for arguments
-	 * @return the new PreparedStatementSetter
+	 * Create a new arg-type-based PreparedStatementSetter using the args and types passed in.
+	 * <p>By default, we'll create an {@link ArgumentTypePreparedStatementSetter}.
+	 * This method allows for the creation to be overridden by subclasses.
+	 * @param args object array with arguments
+	 * @param argTypes int array of SQLTypes for the associated arguments
+	 * @return the new PreparedStatementSetter to use
 	 */
 	protected PreparedStatementSetter newArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
-		return new ArgTypePreparedStatementSetter(args, argTypes);
+		return new ArgumentTypePreparedStatementSetter(args, argTypes);
 	}
 
 	/**
@@ -1330,7 +1339,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Throw an SQLWarningException if encountering an actual warning.
 	 * @param warning the warnings object from the current statement.
-	 * May be <code>null</code>, in which case this method does nothing.
+	 * May be {@code null}, in which case this method does nothing.
 	 * @throws SQLWarningException in case of an actual warning to be raised
 	 */
 	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
@@ -1342,7 +1351,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Determine SQL from potential provider object.
 	 * @param sqlProvider object that's potentially a SqlProvider
-	 * @return the SQL string, or <code>null</code>
+	 * @return the SQL string, or {@code null}
 	 * @see SqlProvider
 	 */
 	private static String getSql(Object sqlProvider) {
@@ -1368,6 +1377,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			this.target = target;
 		}
 
+		@SuppressWarnings("rawtypes")
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

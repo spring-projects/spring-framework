@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import org.springframework.beans.factory.annotation.TestAutowired;
-import org.springframework.beans.factory.annotation.TestQualifier;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -147,7 +145,7 @@ public class AnnotationMetadataTests {
 			assertThat(specialAttrs.getString("clazz"), is(String.class.getName()));
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
-			assertArrayEquals(new String[]{String.class.getName()}, (String[])nestedAnno.getStringArray("classArray"));
+			assertArrayEquals(new String[]{String.class.getName()}, nestedAnno.getStringArray("classArray"));
 			assertArrayEquals(new String[]{String.class.getName()}, nestedAnno.getStringArray("classArray"));
 
 			AnnotationAttributes[] nestedAnnoArray = specialAttrs.getAnnotationArray("nestedAnnoArray");
@@ -214,7 +212,7 @@ public class AnnotationMetadataTests {
 			})
 	@SuppressWarnings({"serial", "unused"})
 	private static class AnnotatedComponent implements Serializable {
-		
+
 		@TestAutowired
 		public void doWork(@TestQualifier("myColor") java.awt.Color color) {
 		}

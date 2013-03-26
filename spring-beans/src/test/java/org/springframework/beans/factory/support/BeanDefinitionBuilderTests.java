@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import test.beans.TestBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.tests.sample.beans.TestBean;
+
 
 /**
  * @author Rod Johnson
@@ -31,7 +33,8 @@ public class BeanDefinitionBuilderTests extends TestCase {
 	public void testBeanClassWithSimpleProperty() {
 		String[] dependsOn = new String[] { "A", "B", "C" };
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
-		bdb.setSingleton(false).addPropertyReference("age", "15");
+		bdb.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bdb.addPropertyReference("age", "15");
 		for (int i = 0; i < dependsOn.length; i++) {
 			bdb.addDependsOn(dependsOn[i]);
 		}

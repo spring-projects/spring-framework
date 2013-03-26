@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="dynamic-language"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="dynamic-language">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Dynamic language support</title>
 
-  <section id="dynamic-language-introduction">
+  <section xml:id="dynamic-language-introduction">
     <title>Introduction</title>
     <sidebar>
       <title>Why only these languages?</title>
@@ -19,7 +23,7 @@
         There is nothing stopping the inclusion of further languages though. If you want
         to see support for &lt;<emphasis>insert your favourite dynamic language here</emphasis>&gt;,
         you can always raise an issue on Spring's
-        <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</ulink>
+        <link xl:href="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</link>
         page (or implement such support yourself).
       </para>
     </sidebar>
@@ -51,7 +55,7 @@
     </para>
   </section>
 
-  <section id="dynamic-language-a-first-example">
+  <section xml:id="dynamic-language-a-first-example">
     <title>A first example</title>
     <para>
       This bulk of this chapter is concerned with describing the dynamic language support
@@ -68,7 +72,7 @@
       <interfacename>Messenger</interfacename> won't know that the underlying
       implementation is a Groovy script.
     </para>
-    <programlisting source="java"><![CDATA[package org.springframework.scripting;
+    <programlisting language="java"><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
@@ -78,7 +82,7 @@ public interface Messenger {
       Here is the definition of a class that has a dependency on the
       <interfacename>Messenger</interfacename> interface.
     </para>
-    <programlisting source="java"><![CDATA[package org.springframework.scripting;
+    <programlisting language="java"><![CDATA[package org.springframework.scripting;
 
 public class DefaultBookingService implements BookingService {
 
@@ -94,7 +98,7 @@ public class DefaultBookingService implements BookingService {
 }]]></programlisting>
     <para>Here is an implementation of the <interfacename>Messenger</interfacename> interface
     in Groovy.</para>
-    <programlisting source="java"><![CDATA[// from the file 'Messenger.groovy'
+    <programlisting language="java"><![CDATA[// from the file 'Messenger.groovy'
 package org.springframework.scripting.groovy;
 
 // import the Messenger interface (written in Java) that is to be implemented
@@ -126,15 +130,15 @@ class GroovyMessenger implements Messenger {
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
-    ]]><lineannotation>&lt;!-- this is the bean definition for the Groovy-backed <interfacename>Messenger</interfacename> implementation --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- this is the bean definition for the Groovy-backed Messenger implementation --&gt;</lineannotation><![CDATA[
     <lang:groovy id="messenger" script-source="classpath:Messenger.groovy">
         <lang:property name="message" value="I Can Do The Frug" />
     </lang:groovy>
 
-    ]]><lineannotation>&lt;!-- an otherwise normal bean that will be injected by the Groovy-backed <interfacename>Messenger</interfacename> --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- an otherwise normal bean that will be injected by the Groovy-backed Messenger --&gt;</lineannotation><![CDATA[
     <bean id="bookingService" class="x.y.DefaultBookingService">
         <property name="messenger" ref="messenger" />
     </bean>
@@ -156,7 +160,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
     </para>
   </section>
 
-  <section id="dynamic-language-beans">
+  <section xml:id="dynamic-language-beans">
     <title>Defining beans that are backed by dynamic languages</title>
     <para>
       This section describes exactly how you define Spring managed beans in
@@ -171,7 +175,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
       <xref linkend="dynamic-language-resources" /> at the end of this chapter.
     </para>
 
-    <section id="dynamic-language-beans-concepts">
+    <section xml:id="dynamic-language-beans-concepts">
       <title>Common concepts</title>
       <para>The steps involved in using dynamic-language-backed beans are as follows:</para>
       <orderedlist numeration="arabic">
@@ -205,7 +209,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
         language source files.
       </para>
 
-      <section id="dynamic-language-beans-concepts-xml-language-element">
+      <section xml:id="dynamic-language-beans-concepts-xml-language-element">
         <title>The <literal>&lt;lang:language/&gt;</literal> element</title>
         <sidebar>
           <title>XML Schema</title>
@@ -252,7 +256,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
         </para>
       </section>
 
-      <section id="dynamic-language-refreshable-beans">
+      <section xml:id="dynamic-language-refreshable-beans">
         <title>Refreshable beans</title>
         <para>
           One of the (if not <emphasis>the</emphasis>) most compelling value adds
@@ -322,7 +326,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
           call is only there so that the execution of the program pauses while I (the author)
           go off and edit the underlying dynamic language source file so that the refresh will
           trigger on the dynamic-language-backed bean when the program resumes execution.</para>
-        <programlisting source="java"><![CDATA[import org.springframework.context.ApplicationContext;
+        <programlisting language="java"><![CDATA[import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scripting.Messenger;
 
@@ -347,7 +351,7 @@ public final class Boot {
           <filename>Messenger.groovy</filename> source file when the execution of
           the program is paused.
         </para>
-        <programlisting source="java"><![CDATA[package org.springframework.scripting
+        <programlisting language="java"><![CDATA[package org.springframework.scripting
 
 class GroovyMessenger implements Messenger {
 
@@ -396,7 +400,7 @@ class GroovyMessenger implements Messenger {
         </para>
       </section>
 
-      <section id="dynamic-language-beans-inline">
+      <section xml:id="dynamic-language-beans-inline">
         <title>Inline dynamic language source files</title>
         <para>
           The dynamic language support can also cater for dynamic language
@@ -451,14 +455,14 @@ class RubyMessenger &lt; Messenger
  def getMessage
   @@message
  end
- 
+
 end
     </lang:inline-script>
     <lang:property name="message" value="Hello World!" />
 </lang:jruby>]]></programlisting>
       </section>
 
-      <section id="dynamic-language-beans-ctor-injection">
+      <section xml:id="dynamic-language-beans-ctor-injection">
         <title>Understanding Constructor Injection in the context of dynamic-language-backed beans</title>
         <para>
           There is one <emphasis>very</emphasis> important thing to be aware of
@@ -469,7 +473,7 @@ end
           properties 100% clear, the following mixture of code and configuration
           will <emphasis>not</emphasis> work.
         </para>
-        <programlisting source="java"><![CDATA[// from the file 'Messenger.groovy'
+        <programlisting language="java"><![CDATA[// from the file 'Messenger.groovy'
 package org.springframework.scripting.groovy;
 
 import org.springframework.scripting.Messenger
@@ -490,11 +494,11 @@ class GroovyMessenger implements Messenger {
         <programlisting language="xml"><![CDATA[<lang:groovy id="badMessenger"
     script-source="classpath:Messenger.groovy">
 ]]>
-    <lineannotation>&lt;!-- this next constructor argument will *not* be injected into the <classname>GroovyMessenger</classname> --&gt;</lineannotation>
+    <lineannotation>&lt;!-- this next constructor argument will *not* be injected into the GroovyMessenger --&gt;</lineannotation>
     <lineannotation>&lt;!--     in fact, this isn't even allowed according to the schema --&gt;</lineannotation><![CDATA[
-    <constructor-arg value="]]><lineannotation><emphasis role="bold">This will *not* work</emphasis></lineannotation><![CDATA[" />]]>
-    
-    <lineannotation>&lt;!-- <emphasis role="bold">only</emphasis> property values are injected into the dynamic-language-backed object --&gt;</lineannotation><![CDATA[
+    <constructor-arg value="]]><lineannotation>This will *not* work</lineannotation><![CDATA[" />]]>
+
+    <lineannotation>&lt;!-- only property values are injected into the dynamic-language-backed object --&gt;</lineannotation><![CDATA[
     <lang:property name="anotherMessage" value="Passed straight through to the dynamic-language-backed object" />
 
 </lang>]]></programlisting>
@@ -507,7 +511,7 @@ class GroovyMessenger implements Messenger {
       </section>
     </section>
 
-    <section id="dynamic-language-beans-jruby">
+    <section xml:id="dynamic-language-beans-jruby">
       <title>JRuby beans</title>
 
       <sidebar>
@@ -523,9 +527,11 @@ class GroovyMessenger implements Messenger {
         </itemizedlist>
       </sidebar>
       <para>From the JRuby homepage...</para>
+      <para>
       <quote>
         <emphasis>JRuby is an 100% pure-Java implementation of the Ruby programming language.</emphasis>
       </quote>
+      </para>
       <para>
         In keeping with the Spring philosophy of offering choice, Spring's
         dynamic language support also supports beans defined in the JRuby
@@ -550,13 +556,13 @@ class GroovyMessenger implements Messenger {
         interface that was defined earlier in this chapter (for your convenience it
         is repeated below).
       </para>
-      <programlisting source="ruby"><![CDATA[package org.springframework.scripting;
+      <programlisting language="ruby"><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
     String getMessage();
 }]]></programlisting>
-      <programlisting source="ruby"><![CDATA[require 'java'
+      <programlisting language="ruby"><![CDATA[require 'java'
 
 class RubyMessenger
     include org.springframework.scripting.Messenger
@@ -579,7 +585,7 @@ RubyMessenger.new]]></programlisting>
       <programlisting language="xml"><![CDATA[<lang:jruby id="messageService"
             script-interfaces="org.springframework.scripting.Messenger"
             script-source="classpath:RubyMessenger.rb">
-    
+
     <lang:property name="message" value="Hello World!" />
 
 </lang:jruby>]]></programlisting>
@@ -591,7 +597,7 @@ RubyMessenger.new]]></programlisting>
         can achieve this by simply instantiating a new instance of your JRuby class on the last
         line of the source file like so:
       </para>
-      <programlisting source="ruby"><![CDATA[require 'java'
+      <programlisting language="ruby"><![CDATA[require 'java'
 
 include_class 'org.springframework.scripting.Messenger'
 
@@ -614,7 +620,9 @@ RubyMessenger.new]]></programlisting>
         and the following text is there in the corresponding stacktrace, this will hopefully
         allow you to identify and then easily rectify the issue):
       </para>
+      <para>
       <computeroutput><![CDATA[org.springframework.scripting.ScriptCompilationException: Compilation of JRuby script returned '']]></computeroutput>
+      </para>
       <para>
         To rectify this, simply instantiate a new instance of whichever class
         you want to expose as a JRuby-dynamic-language-backed bean (as shown above). Please
@@ -628,7 +636,7 @@ RubyMessenger.new]]></programlisting>
       </para>
     </section>
 
-    <section id="dynamic-language-beans-groovy">
+    <section xml:id="dynamic-language-beans-groovy">
       <title>Groovy beans</title>
       <sidebar>
         <title>The Groovy library dependencies</title>
@@ -649,19 +657,21 @@ RubyMessenger.new]]></programlisting>
         </itemizedlist>
       </sidebar>
       <para>From the Groovy homepage...</para>
+      <para>
       <quote>
         <emphasis>Groovy is an agile dynamic language for the Java 2 Platform that has
         many of the  features that people like so much in languages like Python, Ruby
         and Smalltalk, making them available to Java developers using a Java-like syntax.
         </emphasis>
       </quote>
+      </para>
       <para>
         If you have read this chapter straight from the top, you will already have
         <link linkend="dynamic-language-a-first-example">seen an example</link> of a
         Groovy-dynamic-language-backed bean. Let's look at another example (again
         using an example from the Spring test suite).
       </para>
-      <programlisting source="java"><![CDATA[package org.springframework.scripting;
+      <programlisting language="java"><![CDATA[package org.springframework.scripting;
 
 public interface Calculator {
 
@@ -671,7 +681,7 @@ public interface Calculator {
         Here is an implementation of the <interfacename>Calculator</interfacename>
         interface in Groovy.
       </para>
-      <programlisting source="java"><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy
 
 class GroovyCalculator implements Calculator {
@@ -687,7 +697,7 @@ class GroovyCalculator implements Calculator {
       <para>
         Lastly, here is a small application to exercise the above configuration.
       </para>
-      <programlisting source="java"><![CDATA[package org.springframework.scripting;
+      <programlisting language="java"><![CDATA[package org.springframework.scripting;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -716,7 +726,7 @@ public class Main {
         conventions of one (public) class per source file.
       </para>
 
-      <section id="dynamic-language-beans-groovy-customizer">
+      <section xml:id="dynamic-language-beans-groovy-customizer">
         <title>Customising Groovy objects via a callback</title>
         <para>
           The <interfacename>GroovyObjectCustomizer</interfacename>
@@ -726,7 +736,7 @@ public class Main {
           any required initialization method(s), or set some default property
           values, or specify a custom <classname>MetaClass</classname>.
         </para>
-        <programlisting source="java"><![CDATA[public interface GroovyObjectCustomizer {
+        <programlisting language="java"><![CDATA[public interface GroovyObjectCustomizer {
 
    void customize(GroovyObject goo);
 }]]></programlisting>
@@ -740,7 +750,7 @@ public class Main {
           folks will want to do with this callback, and you can see an example
           of doing that below.
         </para>
-        <programlisting source="java"><![CDATA[public final class SimpleMethodTracingCustomizer implements GroovyObjectCustomizer {
+        <programlisting language="java"><![CDATA[public final class SimpleMethodTracingCustomizer implements GroovyObjectCustomizer {
 
    public void customize(GroovyObject goo) {
       DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
@@ -762,10 +772,10 @@ public class Main {
           Actually making use of a <interfacename>GroovyObjectCustomizer</interfacename>
           is easy if you are using the Spring 2.0 namespace support.
         </para>
-        <programlisting language="xml"><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> just like any other bean --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- define the GroovyObjectCustomizer just like any other bean --&gt;</lineannotation>
 <![CDATA[<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
 
-   ]]><lineannotation>&lt;!-- ... and plug it into the desired Groovy bean via the '<literal>customizer-ref</literal>' attribute --&gt;</lineannotation><![CDATA[
+   ]]><lineannotation>&lt;!-- ... and plug it into the desired Groovy bean via the 'customizer-ref' attribute --&gt;</lineannotation><![CDATA[
    <lang:groovy id="calculator"
       script-source="classpath:org/springframework/scripting/groovy/Calculator.groovy"
       customizer-ref="tracingCustomizer" />]]></programlisting>
@@ -775,7 +785,7 @@ public class Main {
         </para>
         <programlisting language="xml"><![CDATA[<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
       <constructor-arg value="classpath:org/springframework/scripting/groovy/Calculator.groovy"/>
-      ]]><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> (as an inner bean) --&gt;</lineannotation><![CDATA[
+      ]]><lineannotation>&lt;!-- define the GroovyObjectCustomizer (as an inner bean) --&gt;</lineannotation><![CDATA[
       <constructor-arg>
          <bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
       </constructor-arg>
@@ -785,7 +795,7 @@ public class Main {
       </section>
     </section>
 
-    <section id="dynamic-language-beans-bsh">
+    <section xml:id="dynamic-language-beans-bsh">
       <title>BeanShell beans</title>
       <sidebar>
         <title>The BeanShell library dependencies</title>
@@ -800,6 +810,7 @@ public class Main {
         </itemizedlist>
       </sidebar>
       <para>From the BeanShell homepage...</para>
+      <para>
       <quote>
         <emphasis>BeanShell is a small, free, embeddable Java source interpreter
         with dynamic language features, written in Java. BeanShell dynamically
@@ -807,6 +818,7 @@ public class Main {
         conveniences such as loose types, commands, and method closures like those
         in Perl and JavaScript.</emphasis>
       </quote>
+      </para>
       <para>
         In contrast to Groovy, BeanShell-backed bean definitions require some (small)
         additional configuration. The implementation of the BeanShell dynamic language
@@ -825,7 +837,7 @@ public class Main {
         that was defined earlier in this chapter (repeated below for your
         convenience).
       </para>
-      <programlisting source="java"><![CDATA[package org.springframework.scripting;
+      <programlisting language="java"><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
@@ -833,7 +845,7 @@ public interface Messenger {
 }]]></programlisting>
       <para>Here is the BeanShell 'implementation' (the term is used loosely here) of the
           <interfacename>Messenger</interfacename> interface.</para>
-      <programlisting source="java"><![CDATA[String message;
+      <programlisting language="java"><![CDATA[String message;
 
 String getMessage() {
     return message;
@@ -856,7 +868,7 @@ void setMessage(String aMessage) {
     </section>
   </section>
 
-  <section id="dynamic-language-scenarios">
+  <section xml:id="dynamic-language-scenarios">
     <title>Scenarios</title>
     <para>
       The possible scenarios where defining Spring managed beans in a scripting
@@ -864,7 +876,7 @@ void setMessage(String aMessage) {
       describes two possible use cases for the dynamic language support in Spring.
     </para>
 
-    <section id="dynamic-language-scenarios-controllers">
+    <section xml:id="dynamic-language-scenarios-controllers">
       <title>Scripted Spring MVC Controllers</title>
       <para>
         One group of classes that may benefit from using dynamic-language-backed
@@ -903,7 +915,7 @@ void setMessage(String aMessage) {
         <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
         implemented using the Groovy dynamic language.
       </para>
-      <programlisting source="java"><![CDATA[// from the file '/WEB-INF/groovy/FortuneController.groovy'
+      <programlisting language="java"><![CDATA[// from the file '/WEB-INF/groovy/FortuneController.groovy'
 package org.springframework.showcase.fortune.web
 
 import org.springframework.showcase.fortune.service.FortuneService
@@ -932,7 +944,7 @@ class FortuneController implements Controller {
 ]]></programlisting>
     </section>
 
-    <section id="dynamic-language-scenarios-validators">
+    <section xml:id="dynamic-language-scenarios-validators">
       <title>Scripted Validators</title>
       <para>
         Another area of application development with Spring that may benefit
@@ -952,7 +964,7 @@ class FortuneController implements Controller {
         <para>
           Please note that in order to effect the automatic 'pickup' of any changes
           to dynamic-language-backed beans, you will have had to enable the
-          'refreshable beans' feature. See 
+          'refreshable beans' feature. See
           <xref linkend="dynamic-language-refreshable-beans"/> for a full and
           detailed treatment of this feature.
         </para>
@@ -963,7 +975,7 @@ class FortuneController implements Controller {
         implemented using the Groovy dynamic language. (See <xref linkend="validator"/>
         for a discussion of the <interfacename>Validator</interfacename> interface.)
       </para>
-      <programlisting source="java"><![CDATA[import org.springframework.validation.Validator
+      <programlisting language="java"><![CDATA[import org.springframework.validation.Validator
 import org.springframework.validation.Errors
 import org.springframework.beans.TestBean
 
@@ -972,7 +984,7 @@ class TestBeanValidator implements Validator {
     boolean supports(Class clazz) {
         return TestBean.class.isAssignableFrom(clazz)
     }
-    
+
     void validate(Object bean, Errors errors) {
         if(bean.name?.trim()?.size() > 0) {
             return
@@ -983,14 +995,14 @@ class TestBeanValidator implements Validator {
     </section>
   </section>
 
-  <section id="dynamic-language-final-notes">
+  <section xml:id="dynamic-language-final-notes">
     <title>Bits and bobs</title>
     <para>
       This last section contains some bits and bobs related to the dynamic language
       support.
     </para>
 
-    <section id="dynamic-language-final-notes-aop">
+    <section xml:id="dynamic-language-final-notes-aop">
       <title>AOP - advising scripted beans</title>
       <para>
         It is possible to use the Spring AOP framework to advise scripted beans.
@@ -1009,7 +1021,7 @@ class TestBeanValidator implements Validator {
       </para>
     </section>
 
-    <section id="dynamic-language-final-notes-scopes">
+    <section xml:id="dynamic-language-final-notes-scopes">
       <title>Scoping</title>
       <para>
         In case it is not immediately obvious, scripted beans can of course be scoped
@@ -1029,10 +1041,10 @@ class TestBeanValidator implements Validator {
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
-    <lang:groovy id="messenger" script-source="classpath:Messenger.groovy" ]]><lineannotation><emphasis role="bold">scope="prototype"</emphasis></lineannotation><![CDATA[>
+    <lang:groovy id="messenger" script-source="classpath:Messenger.groovy" ]]><lineannotation>scope="prototype"</lineannotation><![CDATA[>
         <lang:property name="message" value="I Can Do The RoboCop" />
     </lang:groovy>
 
@@ -1048,7 +1060,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
     </section>
   </section>
 
-  <section id="dynamic-language-resources">
+  <section xml:id="dynamic-language-resources">
     <title>Further Resources</title>
     <para>
       Find below links to further resources about the various dynamic languages described
@@ -1056,13 +1068,13 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
     </para>
     <itemizedlist>
       <listitem>
-        <para>The <ulink url="http://jruby.codehaus.org/">JRuby</ulink> homepage</para>
+        <para>The <link xl:href="http://jruby.codehaus.org/">JRuby</link> homepage</para>
       </listitem>
       <listitem>
-        <para>The <ulink url="http://groovy.codehaus.org/">Groovy</ulink> homepage</para>
+        <para>The <link xl:href="http://groovy.codehaus.org/">Groovy</link> homepage</para>
       </listitem>
       <listitem>
-        <para>The <ulink url="http://www.beanshell.org/">BeanShell</ulink> homepage</para>
+        <para>The <link xl:href="http://www.beanshell.org/">BeanShell</link> homepage</para>
       </listitem>
     </itemizedlist>
     <para>
@@ -1071,7 +1083,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
       chapter. While it is possible that such third party contributions may be added to the
       list of languages supported by the main Spring distribution, your best bet for seeing
       if your favourite scripting language is supported is the
-      <ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.
+      <link xl:href="https://springmodules.dev.java.net/">Spring Modules project</link>.
     </para>
   </section>
 

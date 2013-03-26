@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -112,12 +112,12 @@ import org.springframework.web.util.WebUtils;
  * cookie and session storage are included. The ThemeResolver bean name is "themeResolver"; default is {@link
  * org.springframework.web.servlet.theme.FixedThemeResolver}. </ul>
  *
- * <p><b>NOTE: The <code>@RequestMapping</code> annotation will only be processed if a corresponding
- * <code>HandlerMapping</code> (for type level annotations) and/or <code>HandlerAdapter</code> (for method level
+ * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed if a corresponding
+ * {@code HandlerMapping} (for type level annotations) and/or {@code HandlerAdapter} (for method level
  * annotations) is present in the dispatcher.</b> This is the case by default. However, if you are defining custom
- * <code>HandlerMappings</code> or <code>HandlerAdapters</code>, then you need to make sure that a corresponding custom
- * <code>DefaultAnnotationHandlerMapping</code> and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well -
- * provided that you intend to use <code>@RequestMapping</code>.
+ * {@code HandlerMappings} or {@code HandlerAdapters}, then you need to make sure that a corresponding custom
+ * {@code DefaultAnnotationHandlerMapping} and/or {@code AnnotationMethodHandlerAdapter} is defined as well -
+ * provided that you intend to use {@code @RequestMapping}.
  *
  * <p><b>A web application can define any number of DispatcherServlets.</b> Each servlet will operate in its own
  * namespace, loading its own application context with mappings, handlers, etc. Only the root application context as
@@ -715,7 +715,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Return this servlet's ThemeSource, if any; else return <code>null</code>.
+	 * Return this servlet's ThemeSource, if any; else return {@code null}.
 	 * <p>Default is to return the WebApplicationContext as ThemeSource,
 	 * provided that it implements the ThemeSource interface.
 	 * @return the ThemeSource, if any
@@ -732,7 +732,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Obtain this servlet's MultipartResolver, if any.
-	 * @return the MultipartResolver used by this servlet, or <code>null</code> if none
+	 * @return the MultipartResolver used by this servlet, or {@code null} if none
 	 * (indicating that no multipart support is available)
 	 */
 	public final MultipartResolver getMultipartResolver() {
@@ -810,13 +810,13 @@ public class DispatcherServlet extends FrameworkServlet {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);
 	}
 
+
 	/**
 	 * Exposes the DispatcherServlet-specific request attributes and delegates to {@link #doDispatch}
 	 * for the actual dispatching.
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		if (logger.isDebugEnabled()) {
 			String requestUri = urlPathHelper.getRequestUri(request);
 			String resumed = WebAsyncUtils.getAsyncManager(request).hasConcurrentResult() ? " resumed" : "";
@@ -1067,7 +1067,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Return the HandlerExecutionChain for this request. Try all handler mappings in order.
 	 * @param request current HTTP request
 	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
-	 * @return the HandlerExecutionChain, or <code>null</code> if no handler could be found
+	 * @return the HandlerExecutionChain, or {@code null} if no handler could be found
 	 * @deprecated as of Spring 3.0.4, in favor of {@link #getHandler(javax.servlet.http.HttpServletRequest)},
 	 * with this method's cache attribute now effectively getting ignored
 	 */
@@ -1080,7 +1080,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Return the HandlerExecutionChain for this request.
 	 * <p>Tries all handler mappings in order.
 	 * @param request current HTTP request
-	 * @return the HandlerExecutionChain, or <code>null</code> if no handler could be found
+	 * @return the HandlerExecutionChain, or {@code null} if no handler could be found
 	 */
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		for (HandlerMapping hm : this.handlerMappings) {
@@ -1133,7 +1133,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or <code>null</code> if none chosen at the time of the exception
+	 * @param handler the executed handler, or {@code null} if none chosen at the time of the exception
 	 * (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to
@@ -1211,7 +1211,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Translate the supplied request into a default view name.
 	 * @param request current HTTP servlet request
-	 * @return the view name (or <code>null</code> if no default found)
+	 * @return the view name (or {@code null} if no default found)
 	 * @throws Exception if view name translation failed
 	 */
 	protected String getDefaultViewName(HttpServletRequest request) throws Exception {
@@ -1227,7 +1227,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param model the model to be passed to the view
 	 * @param locale the current locale
 	 * @param request current HTTP servlet request
-	 * @return the View object, or <code>null</code> if none found
+	 * @return the View object, or {@code null} if none found
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)
 	 * @see ViewResolver#resolveViewName
@@ -1268,6 +1268,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
 	 */
+	@SuppressWarnings("unchecked")
 	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?,?> attributesSnapshot) {
 		logger.debug("Restoring snapshot of request attributes after include");
 
@@ -1281,6 +1282,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				attrsToCheck.add(attrName);
 			}
 		}
+
+		// Add attributes that may have been removed
+		attrsToCheck.addAll((Set<String>) attributesSnapshot.keySet());
 
 		// Iterate over the attributes to check, restoring the original value
 		// or removing the attribute, respectively, if appropriate.

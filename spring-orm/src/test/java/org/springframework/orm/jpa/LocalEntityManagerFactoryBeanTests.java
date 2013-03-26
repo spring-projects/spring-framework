@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,67 +23,72 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 
+import org.junit.After;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rod Johnson
+ * @author Phillip Webb
  */
 public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
-	
+
 	// Static fields set by inner class DummyPersistenceProvider
 
 	private static String actualName;
 
 	private static Map actualProps;
 
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		mockEmf.close();
-		emfMc.setVoidCallable();
-		emfMc.replay();
+	@After
+	public void verifyClosed() throws Exception {
+		verify(mockEmf).close();
 	}
-	
+
+	@Test
 	public void testValidUsageWithDefaultProperties() throws Exception {
 		testValidUsage(null);
 	}
-	
+
+	@Test
 	public void testValidUsageWithExplicitProperties() throws Exception {
 		testValidUsage(new Properties());
 	}
-	
+
 	protected void testValidUsage(Properties props) throws Exception {
 		// This will be set by DummyPersistenceProvider
 		actualName = null;
 		actualProps = null;
-		
+
 		LocalEntityManagerFactoryBean lemfb = new LocalEntityManagerFactoryBean();
 		String entityManagerName = "call me Bob";
-		
+
 		lemfb.setPersistenceUnitName(entityManagerName);
 		lemfb.setPersistenceProviderClass(DummyPersistenceProvider.class);
 		if (props != null) {
 			lemfb.setJpaProperties(props);
 		}
 		lemfb.afterPropertiesSet();
-		
+
 		assertSame(entityManagerName, actualName);
 		if (props != null) {
 			assertEquals(props, actualProps);
 		}
 		checkInvariants(lemfb);
-		
+
 		lemfb.destroy();
-		
-		emfMc.verify();
 	}
-	
-	
+
+
 	protected static class DummyPersistenceProvider implements PersistenceProvider {
-		
+
+		@Override
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
 			throw new UnsupportedOperationException();
 		}
-		
+
+		@Override
 		public EntityManagerFactory createEntityManagerFactory(String emfName, Map properties) {
 			actualName = emfName;
 			actualProps = properties;

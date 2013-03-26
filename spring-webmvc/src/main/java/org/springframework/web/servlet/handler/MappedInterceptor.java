@@ -48,7 +48,8 @@ public final class MappedInterceptor {
 
 	/**
 	 * Create a new MappedInterceptor instance.
-	 * @param pathPatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param excludePatterns the path patterns to exclude
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, HandlerInterceptor interceptor) {

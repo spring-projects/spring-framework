@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="beans"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>The IoC container</title>
 
-  <section id="beans-introduction">
+  <section xml:id="beans-introduction">
     <title>Introduction to the Spring IoC container and beans</title>
 
     <para>This chapter covers the Spring Framework implementation of the
@@ -28,13 +32,13 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 
     <para>The <literal>org.springframework.beans</literal> and
       <literal>org.springframework.context</literal> packages are the basis for
-      Spring Framework's IoC container. The <interfacename><ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/BeanFactory.html"
-      >BeanFactory</ulink></interfacename> interface provides an advanced
+      Spring Framework's IoC container. The <interfacename><link
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html"
+      >BeanFactory</link></interfacename> interface provides an advanced
       configuration mechanism capable of managing any type of object.
-      <literal><ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
-      >ApplicationContext</ulink></literal> is a sub-interface of
+      <literal><link
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
+      >ApplicationContext</link></literal> is a sub-interface of
       <interfacename>BeanFactory.</interfacename> It adds easier integration
       with Spring's AOP features; message resource handling (for use in
       internationalization), event publication; and application-layer specific
@@ -63,7 +67,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       container.</para>
   </section>
 
-  <section id="beans-basics">
+  <section xml:id="beans-basics">
     <title>Container overview</title>
 
     <para>The interface
@@ -79,11 +83,11 @@ The footnote should x-ref to first section in that chapter but I can't find the 
     <para>Several implementations of the
       <classname>ApplicationContext</classname> interface are supplied
       out-of-the-box with Spring. In standalone applications it is common to
-      create an instance of <ulink
-      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
-      ><classname>ClassPathXmlApplicationContext</classname></ulink> or <ulink
-      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
-      ><classname>FileSystemXmlApplicationContext</classname></ulink>.
+      create an instance of <link
+      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
+      ><classname>ClassPathXmlApplicationContext</classname></link> or <link
+      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
+      ><classname>FileSystemXmlApplicationContext</classname></link>.
       <!-- MLP: Beverly to review --> While XML has been the traditional format
       for defining configuration metadata you can instruct the container to use
       Java annotations or code as the metadata format by providing a small amount
@@ -95,9 +99,9 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       in a web application scenario, a simple eight (or so) lines of boilerplate
       J2EE web descriptor XML in the <literal>web.xml</literal> file of the
       application will typically suffice (see <xref linkend="context-create"/>).
-      If you are using the <ulink url="http://www.springsource.com/produts/sts"
-      >SpringSource Tool Suite</ulink> Eclipse-powered development environment
-      or <ulink url="http://www.springsource.org/roo">Spring Roo</ulink> this
+      If you are using the <link xl:href="http://www.springsource.com/produts/sts"
+      >SpringSource Tool Suite</link> Eclipse-powered development environment
+      or <link xl:href="http://www.springsource.org/roo">Spring Roo</link> this
       boilerplate configuration can be easily created with few mouse clicks or
       keystrokes.</para>
 
@@ -108,14 +112,13 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 
     <para><mediaobject>
       <imageobject>
-        <imagedata align="center" fileref="images/container-magic.png"
-          format="PNG" width="400" />
+        <imagedata align="center" fileref="images/container-magic.png" format="PNG" width="250" />
       </imageobject>
 
       <caption><para>The Spring IoC container</para></caption>
       </mediaobject></para>
 
-    <section id="beans-factory-metadata">
+    <section xml:id="beans-factory-metadata">
       <title>Configuration metadata</title>
 
       <para>As the preceding diagram shows, the Spring IoC container consumes a
@@ -147,9 +150,9 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 
         <listitem>
           <para><link linkend="beans-java">Java-based configuration</link>:
-            Starting with Spring 3.0, many features provided by the <ulink
-            url="http://www.springsource.org/javaconfig">Spring JavaConfig
-            project</ulink> became part of the core Spring Framework. Thus you
+            Starting with Spring 3.0, many features provided by the <link
+            xl:href="http://www.springsource.org/javaconfig">Spring JavaConfig
+            project</link> became part of the core Spring Framework. Thus you
             can define beans external to your application classes by using Java
             rather than XML files. To use these new features, see the
             <interfacename>@Configuration</interfacename>, <interfacename>@Bean,
@@ -184,7 +187,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="..." class="..."&gt;
     &lt;!-- collaborators and configuration for this bean go here --&gt;
@@ -207,7 +210,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
         for more information.</para>
     </section>
 
-    <section id="beans-factory-instantiation">
+    <section xml:id="beans-factory-instantiation">
       <title>Instantiating a container</title>
 
       <para>Instantiating a Spring IoC container is straightforward. The
@@ -238,7 +241,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;!-- services --&gt;
 
@@ -261,7 +264,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="accountDao"
       class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;
@@ -279,7 +282,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <para>In the preceding example, the service layer consists of the class
         <classname>PetStoreServiceImpl</classname>, and two data access objects
         of the type <classname>SqlMapAccountDao</classname> and SqlMapItemDao
-        are based on the <ulink url="http://ibatis.apache.org/">iBatis</ulink>
+        are based on the <link xl:href="http://ibatis.apache.org/">iBatis</link>
         Object/Relational mapping framework. The <literal>property
         name</literal> element refers to the name of the JavaBean property, and
         the <literal>ref</literal> element refers to the name of another bean
@@ -288,7 +291,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
         object's dependencies, see <link linkend="beans-dependencies"
         >Dependencies</link>.</para>
 
-      <section id="beans-factory-xml-import">
+      <section xml:id="beans-factory-xml-import">
         <title>Composing XML-based configuration metadata</title>
 
         <para>It can be useful to have bean definitions span multiple XML files.
@@ -350,7 +353,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       </section>
     </section>
 
-    <section id="beans-factory-client">
+    <section xml:id="beans-factory-client">
       <title>Using the container</title>
 
       <para>The <interfacename>ApplicationContext</interfacename> is the
@@ -385,7 +388,7 @@ List userList = service.getUsernameList();
     </section>
   </section>
 
-  <section id="beans-definition">
+  <section xml:id="beans-definition">
     <title>Bean overview</title>
 
     <para>A Spring IoC container manages one or more <emphasis>beans</emphasis>.
@@ -426,7 +429,7 @@ List userList = service.getUsernameList();
     <para>This metadata translates to a set of properties that make up each bean
       definition.</para>
 
-    <table id="beans-factory-bean-definition-tbl">
+    <table xml:id="beans-factory-bean-definition-tbl">
       <title>The bean definition</title>
 
       <tgroup cols="2">
@@ -522,7 +525,7 @@ List userList = service.getUsernameList();
       applications work solely with beans defined through metadata bean
       definitions.</para>
 
-    <section id="beans-beanname">
+    <section xml:id="beans-beanname">
       <title>Naming beans</title>
 
       <para>Every bean has one or more identifiers. These identifiers must be
@@ -548,7 +551,7 @@ List userList = service.getUsernameList();
       <para>You are not required to supply a name or id for a bean. If no name
         or id is supplied explicitly, the container generates a unique name for
         that bean. However, if you want to refer to that bean by name, through
-        the use of the <literal>ref</literal> element or <link lang=""
+        the use of the <literal>ref</literal> element or <link
         linkend="beans-servicelocator">Service Locator</link> style lookup,
         you must provide a name. Motivations for not supplying a name are
         related to using <link linkend="beans-inner-beans">inner beans</link>
@@ -570,7 +573,7 @@ List userList = service.getUsernameList();
           applying advice to a set of beans related by name.</para>
       </sidebar>
 
-      <section id="beans-beanname-alias">
+      <section xml:id="beans-beanname-alias">
         <title>Aliasing a bean outside the bean definition</title>
 
         <para>In a bean definition itself, you can supply more than one name for
@@ -617,7 +620,7 @@ List userList = service.getUsernameList();
       </section>
     </section>
 
-    <section id="beans-factory-class">
+    <section xml:id="beans-factory-class">
       <title>Instantiating beans</title>
 
       <para>A bean definition essentially is a recipe for creating one or more
@@ -675,7 +678,7 @@ List userList = service.getUsernameList();
           to separate the inner class name from the outer class name.</para>
       </sidebar>
 
-      <section id="beans-factory-class-ctor">
+      <section xml:id="beans-factory-class-ctor">
         <title>Instantiation with a constructor</title>
 
         <para>When you create a bean by the constructor approach, all normal
@@ -709,7 +712,7 @@ List userList = service.getUsernameList();
           Dependencies</link>.</para>
       </section>
 
-      <section id="beans-factory-class-static-factory-method">
+      <section xml:id="beans-factory-class-static-factory-method">
         <title>Instantiation with a static factory method</title>
 
         <para>When defining a bean that you create with a static factory method,
@@ -749,7 +752,7 @@ List userList = service.getUsernameList();
           configuration in detail</link>.</para>
       </section>
 
-      <section id="beans-factory-class-instance-factory-method">
+      <section xml:id="beans-factory-class-instance-factory-method">
         <title>Instantiation using an instance factory method</title>
 
         <para>Similar to instantiation through a <link
@@ -763,7 +766,7 @@ List userList = service.getUsernameList();
           to be invoked to create the object. Set the name of the factory method
           itself with the <literal>factory-method</literal> attribute.</para>
 
-        <programlisting language="xml"><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- the factory bean, which contains a method called createInstance() --&gt;</lineannotation>
 &lt;bean id="serviceLocator" class="examples.DefaultServiceLocator"&gt;
   <lineannotation>&lt;!-- inject any dependencies required by this locator bean --&gt;</lineannotation>
 &lt;/bean&gt;
@@ -835,15 +838,13 @@ List userList = service.getUsernameList();
     </section>
   </section>
 
-  <xi:include href="beans-dependencies.xml"
-    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="beans-dependencies.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
   <xi:include href="beans-scopes.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
-  <xi:include href="beans-customizing.xml"
-    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="beans-customizing.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
-  <section id="beans-child-bean-definitions">
+  <section xml:id="beans-child-bean-definitions">
     <title>Bean definition inheritance</title>
 
     <para>A bean definition can contain a lot of configuration information,
@@ -909,7 +910,7 @@ List userList = service.getUsernameList();
 &lt;bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
     parent="inheritedTestBeanWithoutClass" init-method="initialize"&gt;
   &lt;property name="name" value="override"/&gt;
-  <lineannotation>&lt;!-- age will inherit the value of <literal>1</literal> from the parent bean definition--&gt;</lineannotation>
+  <lineannotation>&lt;!-- age will inherit the value of 1 from the parent bean definition--&gt;</lineannotation>
 &lt;/bean&gt;</programlisting>
 
     <para>The parent bean cannot be instantiated on its own because it is
@@ -950,21 +951,28 @@ List userList = service.getUsernameList();
 
   <xi:include href="beans-java.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
-  <section id="context-load-time-weaver">
+  <section xml:id="context-load-time-weaver">
     <title>Registering a <interfacename>LoadTimeWeaver</interfacename></title>
 
-    <para>The <literal>context</literal> namespace introduced in Spring 2.5
-      provides a <literal>load-time-weaver</literal>
-      element.<!--Need to explain purpose of LoadTimeWeaver? Is this section ok here? --></para>
+    <para>The <interfacename>LoadTimeWeaver</interfacename> is used by Spring to dynamically
+    transform classes as they are loaded into the Java virtual machine (JVM).</para>
+
+    <para>To enable load-time weaving add the <interfacename>@EnableLoadTimeWeaving</interfacename>
+    to one of your <interfacename>@Configuration</interfacename> classes:</para>
+
+    <programlisting language="java">@Configuration
+@EnableLoadTimeWeaving
+public class AppConfig {
+
+}</programlisting>
+
+    <para>Alternatively for XML configuration use the  <literal>context:load-time-weaver</literal> element:</para>
 
     <programlisting language="xml">&lt;beans&gt;
-
      &lt;context:load-time-weaver/&gt;
-
 &lt;/beans&gt;</programlisting>
 
-    <para>Adding this element to an XML-based Spring configuration file
-      activates a Spring <interfacename>LoadTimeWeaver</interfacename> for the
+    <para>Once configured for the
       <interfacename>ApplicationContext</interfacename>. Any bean within that
       <interfacename>ApplicationContext</interfacename> may implement
       <interfacename>LoadTimeWeaverAware</interfacename>, thereby receiving a
@@ -979,7 +987,7 @@ List userList = service.getUsernameList();
   <xi:include href="beans-context-additional.xml"
     xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
-  <section id="beans-beanfactory">
+  <section xml:id="beans-beanfactory">
     <title>The BeanFactory</title>
 
     <para>The <classname>BeanFactory</classname> provides the underlying basis
@@ -1000,7 +1008,7 @@ List userList = service.getUsernameList();
       <interfacename>ApplicationContext</interfacename> and how one might access
       the IoC container directly through a classic singleton lookup.</para>
 
-    <section id="context-introduction-ctx-vs-beanfactory">
+    <section xml:id="context-introduction-ctx-vs-beanfactory">
       <title><interfacename>BeanFactory</interfacename> or
         <interfacename>ApplicationContext</interfacename>?</title>
 
@@ -1030,7 +1038,7 @@ List userList = service.getUsernameList();
         <interfacename>ApplicationContext</interfacename> interfaces and
         implementations.</para>
 
-      <table id="context-introduction-ctx-vs-beanfactory-feature-matrix"
+      <table xml:id="context-introduction-ctx-vs-beanfactory-feature-matrix"
         pgwide="1">
         <title>Feature Matrix</title>
 
@@ -1106,7 +1114,7 @@ List userList = service.getUsernameList();
 
       <programlisting language="java">ConfigurableBeanFactory factory = new XmlBeanFactory(...);
 
-<lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation>
+<lineannotation>// now register any needed BeanPostProcessor instances</lineannotation>
 MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
 factory.addBeanPostProcessor(postProcessor);
 
@@ -1119,7 +1127,7 @@ factory.addBeanPostProcessor(postProcessor);
 
       <programlisting language="java">XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
 
-<lineannotation>// bring in some property values from a <classname>Properties</classname> file</lineannotation>
+<lineannotation>// bring in some property values from a Properties file</lineannotation>
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
 cfg.setLocation(new FileSystemResource("jdbc.properties"));
 
@@ -1137,7 +1145,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         AOP.</para>
     </section>
 
-    <section id="beans-servicelocator">
+    <section xml:id="beans-servicelocator">
       <title>Glue code and the evil singleton</title>
 
       <para>It is best to write most application code in a dependency-injection
@@ -1169,12 +1177,12 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         components, such as in an EJB 2.1 environment, or when you want to share
         a single ApplicationContext as a parent to WebApplicationContexts across
         WAR files. In this case you should look into using the utility class
-        <ulink
-        url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
-        ><classname>ContextSingletonBeanFactoryLocator</classname></ulink>
-        locator that is described in this <ulink
-        url="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"
-        >SpringSource team blog entry</ulink>.</para>
+        <link
+        xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
+        ><classname>ContextSingletonBeanFactoryLocator</classname></link>
+        locator that is described in this <link
+        xl:href="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"
+        >SpringSource team blog entry</link>.</para>
     </section>
   </section>
 </chapter>

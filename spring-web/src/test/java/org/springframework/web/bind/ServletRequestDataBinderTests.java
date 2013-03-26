@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
  * @author Rod Johnson
@@ -44,6 +44,7 @@ public class ServletRequestDataBinderTests {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}
@@ -168,6 +169,7 @@ public class ServletRequestDataBinderTests {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}

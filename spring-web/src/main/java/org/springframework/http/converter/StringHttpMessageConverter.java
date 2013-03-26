@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -27,12 +25,12 @@ import java.util.List;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
- * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>),
+ * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}),
  * and writes with a {@code Content-Type} of {@code text/plain}. This can be overridden
  * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
@@ -84,7 +82,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
-		return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
+		return StreamUtils.copyToString(inputMessage.getBody(), charset);
 	}
 
 	@Override
@@ -105,7 +103,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
 		}
 		Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
-		FileCopyUtils.copy(s, new OutputStreamWriter(outputMessage.getBody(), charset));
+		StreamUtils.copy(s, charset, outputMessage.getBody());
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import org.springframework.util.Assert;
  *
  * <p>
  * <ul>
- * <li><code>page</code> will be transformed to
+ * <li>{@code page} will be transformed to
  * {@link javax.servlet.jsp.PageContext#PAGE_SCOPE PageContext.PAGE_SCOPE}
- * <li><code>request</code> will be transformed to
+ * <li>{@code request} will be transformed to
  * {@link javax.servlet.jsp.PageContext#REQUEST_SCOPE PageContext.REQUEST_SCOPE}
- * <li><code>session</code> will be transformed to
+ * <li>{@code session} will be transformed to
  * {@link javax.servlet.jsp.PageContext#SESSION_SCOPE PageContext.SESSION_SCOPE}
- * <li><code>application</code> will be transformed to
+ * <li>{@code application} will be transformed to
  * {@link javax.servlet.jsp.PageContext#APPLICATION_SCOPE PageContext.APPLICATION_SCOPE}
  * </ul>
  *
@@ -58,12 +58,12 @@ public abstract class TagUtils {
 
 
 	/**
-	 * Determines the scope for a given input <code>String</code>.
-	 * <p>If the <code>String</code> does not match 'request', 'session',
+	 * Determines the scope for a given input {@code String}.
+	 * <p>If the {@code String} does not match 'request', 'session',
 	 * 'page' or 'application', the method will return {@link PageContext#PAGE_SCOPE}.
-	 * @param scope the <code>String</code> to inspect
+	 * @param scope the {@code String} to inspect
 	 * @return the scope found, or {@link PageContext#PAGE_SCOPE} if no scope matched
-	 * @throws IllegalArgumentException if the supplied <code>scope</code> is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied {@code scope} is {@code null}
 	 */
 	public static int getScope(String scope) {
 		Assert.notNull(scope, "Scope to search for cannot be null");
@@ -86,11 +86,11 @@ public abstract class TagUtils {
 	 * of the supplied type.
 	 * @param tag the tag whose ancestors are to be checked
 	 * @param ancestorTagClass the ancestor {@link Class} being searched for
-	 * @return <code>true</code> if the supplied {@link Tag} has any ancestor tag
+	 * @return {@code true} if the supplied {@link Tag} has any ancestor tag
 	 * of the supplied type
-	 * @throws IllegalArgumentException if either of the supplied arguments is <code>null</code>;
-	 * or if the supplied <code>ancestorTagClass</code> is not type-assignable to
-	 * the {@link Tag} class 
+	 * @throws IllegalArgumentException if either of the supplied arguments is {@code null};
+	 * or if the supplied {@code ancestorTagClass} is not type-assignable to
+	 * the {@link Tag} class
 	 */
 	public static boolean hasAncestorOfType(Tag tag, Class ancestorTagClass) {
 		Assert.notNull(tag, "Tag cannot be null");
@@ -115,14 +115,14 @@ public abstract class TagUtils {
 	 * if not.
 	 * @param tag the tag whose ancestors are to be checked
 	 * @param ancestorTagClass the ancestor {@link Class} being searched for
-	 * @param tagName the name of the <code>tag</code>; for example '<code>option</code>'
-	 * @param ancestorTagName the name of the ancestor <code>tag</code>; for example '<code>select</code>'
-	 * @throws IllegalStateException if the supplied <code>tag</code> does not
-	 * have a tag of the supplied <code>parentTagClass</code> as an ancestor
-	 * @throws IllegalArgumentException if any of the supplied arguments is <code>null</code>,
+	 * @param tagName the name of the {@code tag}; for example '{@code option}'
+	 * @param ancestorTagName the name of the ancestor {@code tag}; for example '{@code select}'
+	 * @throws IllegalStateException if the supplied {@code tag} does not
+	 * have a tag of the supplied {@code parentTagClass} as an ancestor
+	 * @throws IllegalArgumentException if any of the supplied arguments is {@code null},
 	 * or in the case of the {@link String}-typed arguments, is composed wholly
-	 * of whitespace; or if the supplied <code>ancestorTagClass</code> is not
-	 * type-assignable to the {@link Tag} class 
+	 * of whitespace; or if the supplied {@code ancestorTagClass} is not
+	 * type-assignable to the {@link Tag} class
 	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
 	 */
 	public static void assertHasAncestorOfType(Tag tag, Class ancestorTagClass, String tagName, String ancestorTagName) {

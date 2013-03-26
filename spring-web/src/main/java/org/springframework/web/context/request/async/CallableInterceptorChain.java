@@ -15,8 +15,6 @@
  */
 package org.springframework.web.context.request.async;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -28,6 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * Assists with the invocation of {@link CallableProcessingInterceptor}'s.
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 3.2
  */
 class CallableInterceptorChain {
@@ -36,29 +35,71 @@ class CallableInterceptorChain {
 
 	private final List<CallableProcessingInterceptor> interceptors;
 
-	private int interceptorIndex = -1;
+	private int preProcessIndex = -1;
 
 
-	public CallableInterceptorChain(Collection<CallableProcessingInterceptor> interceptors) {
-		this.interceptors = new ArrayList<CallableProcessingInterceptor>(interceptors);
+	public CallableInterceptorChain(List<CallableProcessingInterceptor> interceptors) {
+		this.interceptors = interceptors;
+	}
+
+	public void applyBeforeConcurrentHandling(NativeWebRequest request, Callable<?> task) throws Exception {
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			interceptor.beforeConcurrentHandling(request, task);
+		}
 	}
 
 	public void applyPreProcess(NativeWebRequest request, Callable<?> task) throws Exception {
-		for (int i = 0; i < this.interceptors.size(); i++) {
-			this.interceptors.get(i).preProcess(request, task);
-			this.interceptorIndex = i;
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			interceptor.preProcess(request, task);
+			this.preProcessIndex++;
 		}
 	}
 
-	public void applyPostProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
-		for (int i = this.interceptorIndex; i >= 0; i--) {
+	public Object applyPostProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
+		Throwable exceptionResult = null;
+		for (int i = this.preProcessIndex; i >= 0; i--) {
 			try {
 				this.interceptors.get(i).postProcess(request, task, concurrentResult);
 			}
-			catch (Exception ex) {
-				logger.error("CallableProcessingInterceptor.postProcess threw exception", ex);
+			catch (Throwable t) {
+				// Save the first exception but invoke all interceptors
+				if (exceptionResult != null) {
+					logger.error("postProcess error", t);
+				}
+				else {
+					exceptionResult = t;
+				}
+			}
+		}
+		return (exceptionResult != null) ? exceptionResult : concurrentResult;
+	}
+
+	public Object triggerAfterTimeout(NativeWebRequest request, Callable<?> task) {
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			try {
+				Object result = interceptor.handleTimeout(request, task);
+				if (result == CallableProcessingInterceptor.RESPONSE_HANDLED) {
+					break;
+				}
+				else if (result != CallableProcessingInterceptor.RESULT_NONE) {
+					return result;
+				}
+			}
+			catch (Throwable t) {
+				return t;
+			}
+		}
+		return CallableProcessingInterceptor.RESULT_NONE;
+	}
+
+	public void triggerAfterCompletion(NativeWebRequest request, Callable<?> task) {
+		for (int i = this.interceptors.size()-1; i >= 0; i--) {
+			try {
+				this.interceptors.get(i).afterCompletion(request, task);
+			}
+			catch (Throwable t) {
+				logger.error("afterCompletion error", t);
 			}
 		}
 	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,31 +17,26 @@
 package org.springframework.test.context;
 
 /**
+ * {@code TestExecutionListener} defines a <em>listener</em> API for reacting to
+ * test execution events published by the {@link TestContextManager} with which
+ * the listener is registered.
  * <p>
- * <code>TestExecutionListener</code> defines a <em>listener</em> API for
- * reacting to test execution events published by the {@link TestContextManager}
- * with which the listener is registered.
- * </p>
- * <p>
- * Concrete implementations must provide a <code>public</code> no-args
- * constructor, so that listeners can be instantiated transparently by tools and
- * configuration mechanisms.
- * </p>
+ * Concrete implementations must provide a {@code public} no-args constructor,
+ * so that listeners can be instantiated transparently by tools and configuration
+ * mechanisms.
  * <p>
  * Spring provides the following out-of-the-box implementations:
- * </p>
  * <ul>
- * <li>
- * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  * DependencyInjectionTestExecutionListener}</li>
- * <li>
- * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
  * DirtiesContextTestExecutionListener}</li>
- * <li>
- * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * TransactionalTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
+ * ServletTestExecutionListener}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -58,8 +53,8 @@ public interface TestExecutionListener {
 	 * If a given testing framework (e.g., JUnit 3.8) does not support
 	 * <em>before class</em> lifecycle callbacks, this method will not be called
 	 * for that framework.
-	 * 
-	 * @param testContext the test context for the test; never <code>null</code>
+	 *
+	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void beforeTestClass(TestContext testContext) throws Exception;
@@ -70,8 +65,8 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately after instantiation of the test
 	 * instance but prior to any framework-specific lifecycle callbacks.
-	 * 
-	 * @param testContext the test context for the test; never <code>null</code>
+	 *
+	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void prepareTestInstance(TestContext testContext) throws Exception;
@@ -84,9 +79,9 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately prior to framework-specific
 	 * <em>before</em> lifecycle callbacks.
-	 * 
+	 *
 	 * @param testContext the test context in which the test method will be
-	 * executed; never <code>null</code>
+	 * executed; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void beforeTestMethod(TestContext testContext) throws Exception;
@@ -99,9 +94,9 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately after framework-specific
 	 * <em>after</em> lifecycle callbacks.
-	 * 
+	 *
 	 * @param testContext the test context in which the test method was
-	 * executed; never <code>null</code>
+	 * executed; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void afterTestMethod(TestContext testContext) throws Exception;
@@ -116,8 +111,8 @@ public interface TestExecutionListener {
 	 * If a given testing framework (e.g., JUnit 3.8) does not support
 	 * <em>after class</em> lifecycle callbacks, this method will not be called
 	 * for that framework.
-	 * 
-	 * @param testContext the test context for the test; never <code>null</code>
+	 *
+	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void afterTestClass(TestContext testContext) throws Exception;

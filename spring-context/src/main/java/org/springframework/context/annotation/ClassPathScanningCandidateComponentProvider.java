@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -78,7 +79,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+	private MetadataReaderFactory metadataReaderFactory =
+			new CachingMetadataReaderFactory(this.resourcePatternResolver);
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
@@ -121,6 +123,31 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
+	 * Return the ResourceLoader that this component provider uses.
+	 */
+	public final ResourceLoader getResourceLoader() {
+		return this.resourcePatternResolver;
+	}
+
+	/**
+	 * Set the {@link MetadataReaderFactory} to use.
+	 * <p>Default is a {@link CachingMetadataReaderFactory} for the specified
+	 * {@linkplain #setResourceLoader resource loader}.
+	 * <p>Call this setter method <i>after</i> {@link #setResourceLoader} in order
+	 * for the given MetadataReaderFactory to override the default factory.
+	 */
+	public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
+		this.metadataReaderFactory = metadataReaderFactory;
+	}
+
+	/**
+	 * Return the MetadataReaderFactory used by this component provider.
+	 */
+	public final MetadataReaderFactory getMetadataReaderFactory() {
+		return this.metadataReaderFactory;
+	}
+
+	/**
 	 * Set the Environment to use when resolving placeholders and evaluating
 	 * {@link Profile @Profile}-annotated component classes.
 	 * <p>The default is a {@link StandardEnvironment}
@@ -130,15 +157,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		this.environment = environment;
 	}
 
-	public Environment getEnvironment() {
+	public final Environment getEnvironment() {
 		return this.environment;
-	}
-
-	/**
-	 * Return the ResourceLoader that this component provider uses.
-	 */
-	public final ResourceLoader getResourceLoader() {
-		return this.resourcePatternResolver;
 	}
 
 	/**
@@ -322,6 +342,16 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
 		return (beanDefinition.getMetadata().isConcrete() && beanDefinition.getMetadata().isIndependent());
+	}
+
+
+	/**
+	 * Clear the underlying metadata cache, removing all cached class metadata.
+	 */
+	public void clearCache() {
+		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
+			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
+		}
 	}
 
 }

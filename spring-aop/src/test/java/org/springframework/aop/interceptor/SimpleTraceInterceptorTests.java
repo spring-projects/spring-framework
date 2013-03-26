@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.Method;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for the {@link SimpleTraceInterceptor} class.
@@ -35,39 +33,27 @@ public final class SimpleTraceInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
-		Log log = createMock(Log.class);
-		MethodInvocation mi = createMock(MethodInvocation.class);
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[]{}));
+		given(mi.getThis()).willReturn(this);
 
-		Method toString = String.class.getMethod("toString", new Class[]{});
-
-		expect(mi.getMethod()).andReturn(toString);
-		expect(mi.getThis()).andReturn(this);
-		log.trace(isA(String.class));
-		expect(mi.proceed()).andReturn(null);
-		log.trace(isA(String.class));
-
-		replay(mi, log);
+		Log log = mock(Log.class);
 
 		SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 		interceptor.invokeUnderTrace(mi, log);
 
-		verify(mi, log);
+		verify(log, times(2)).trace(anyString());
 	}
 
+	@Test
 	public void testExceptionPathStillLogsCorrectly() throws Throwable {
-		Log log = createMock(Log.class);
-		MethodInvocation mi = createMock(MethodInvocation.class);
-
-		Method toString = String.class.getMethod("toString", new Class[]{});
-
-		expect(mi.getMethod()).andReturn(toString);
-		expect(mi.getThis()).andReturn(this);
-		log.trace(isA(String.class));
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[]{}));
+		given(mi.getThis()).willReturn(this);
 		IllegalArgumentException exception = new IllegalArgumentException();
-		expect(mi.proceed()).andThrow(exception);
-		log.trace(isA(String.class));
+		given(mi.proceed()).willThrow(exception);
 
-		replay(mi, log);
+		Log log = mock(Log.class);
 
 		final SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 
@@ -77,7 +63,8 @@ public final class SimpleTraceInterceptorTests {
 		} catch (IllegalArgumentException expected) {
 		}
 
-		verify(mi, log);
+		verify(log).trace(anyString());
+		verify(log).trace(anyString(), eq(exception));
 	}
 
 }

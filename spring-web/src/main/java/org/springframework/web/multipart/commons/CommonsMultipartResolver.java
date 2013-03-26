@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	/**
-	 * Initialize the underlying <code>org.apache.commons.fileupload.servlet.ServletFileUpload</code>
+	 * Initialize the underlying {@code org.apache.commons.fileupload.servlet.ServletFileUpload}
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @param fileItemFactory the Commons FileItemFactory to use
 	 * @return the new ServletFileUpload instance
@@ -170,7 +170,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 * @see #setDefaultEncoding
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,18 @@
 
 package org.springframework.aop.framework;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.IOther;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @since 13.03.2003
@@ -42,22 +38,24 @@ import org.springframework.beans.TestBean;
 @SuppressWarnings("serial")
 public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
 
+	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
 		assertFalse("Not forcible CGLIB", as.isProxyTargetClass());
 		Object proxy = as.createAopProxy().getProxy();
 		assertTrue("Should be a JDK proxy: " + proxy.getClass(), AopUtils.isJdkDynamicProxy(proxy));
 		return proxy;
 	}
-	
+
+	@Override
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		return new JdkDynamicAopProxy(as);
 	}
-	
+
 	public void testNullConfig() {
 		try {
 			new JdkDynamicAopProxy(null);
 			fail("Shouldn't allow null interceptors");
-		} 
+		}
 		catch (IllegalArgumentException ex) {
 			// Ok
 		}
@@ -66,7 +64,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	public void testProxyIsJustInterface() throws Throwable {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		pc.setTarget(raw);
 		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
@@ -78,32 +76,32 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	public void testInterceptorIsInvokedWithNoTarget() throws Throwable {
 		// Test return value
 		int age = 25;
-		MethodInterceptor mi = createMock(MethodInterceptor.class);
+		MethodInterceptor mi = mock(MethodInterceptor.class);
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class });
 		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
 
-		expect(mi.invoke(null)).andReturn(age);
-		replay(mi);
+		given(mi.invoke(null)).willReturn(age);
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("correct return value", tb.getAge() == age);
-		verify(mi);
 	}
-	
+
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
+			@Override
 			protected void assertions(MethodInvocation invocation) {
 				assertTrue(invocation.getThis() == this);
-				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
 					invocation.getMethod().getDeclaringClass() == ITestBean.class);
 			}
 		};
-	
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
+
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class, IOther.class });
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				// Assert that target matches BEFORE invocation returns
 				assertEquals("Target is correct", expectedTarget, invocation.getThis());
@@ -118,7 +116,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		tb.getName();
 		// Not safe to trap invocation
 		//assertTrue(tii.invocation == target.invocation);
-	
+
 		//assertTrue(target.invocation.getProxy() == tb);
 
 		//	((IOther) tb).absquatulate();
@@ -130,7 +128,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	public void testProxyNotWrappedIfIncompatible() {
 		FooBar bean = new FooBar();
 		ProxyCreatorSupport as = new ProxyCreatorSupport();
-		as.setInterfaces(new Class[] {Foo.class});
+		as.setInterfaces(new Class<?>[] {Foo.class});
 		as.setTarget(bean);
 
 		Foo proxy = (Foo) createProxy(as);
@@ -140,7 +138,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	}
 
 	public void testEqualsAndHashCodeDefined() throws Exception {
-		AdvisedSupport as = new AdvisedSupport(new Class[]{Named.class});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{Named.class});
 		as.setTarget(new Person());
 		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
 		Named proxy = (Named) aopProxy.getProxy();
@@ -165,10 +163,12 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 	public static class FooBar implements Foo, Bar {
 
+		@Override
 		public Bar getBarThis() {
 			return this;
 		}
 
+		@Override
 		public Foo getFooThis() {
 			return this;
 		}
@@ -189,6 +189,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 		private final String name = "Rob Harrop";
 
+		@Override
 		public String getName() {
 			return this.name;
 		}

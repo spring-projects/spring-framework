@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,27 @@
 
 package org.springframework.beans.factory.xml.support;
 
-import java.io.IOException;
 import static java.lang.String.format;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import test.interceptor.NopInterceptor;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.config.AbstractInterceptorDrivenBeanDefinitionDecorator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanInstantiationException;
-import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -60,21 +56,28 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 /**
  * Unit tests for custom XML namespace handler implementations.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Chris Beams
  * @author Juergen Hoeller
  */
 public class CustomNamespaceHandlerTests {
-	
+
 	private static final Class<?> CLASS = CustomNamespaceHandlerTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
 	private static final String FQ_PATH = "org/springframework/beans/factory/xml/support";
-	
+
 	private static final String NS_PROPS = format("%s/%s.properties", FQ_PATH, CLASSNAME);
 	private static final String NS_XML = format("%s/%s-context.xml", FQ_PATH, CLASSNAME);
 	private static final String TEST_XSD = format("%s/%s.xsd", FQ_PATH, CLASSNAME);
@@ -194,6 +197,7 @@ public class CustomNamespaceHandlerTests {
 			super(CLASS.getClassLoader());
 		}
 
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 			InputSource source = super.resolveEntity(publicId, systemId);
 			if (source == null) {
@@ -211,11 +215,12 @@ public class CustomNamespaceHandlerTests {
 
 /**
  * Custom namespace handler implementation.
- * 
+ *
  * @author Rob Harrop
  */
 final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
+	@Override
 	public void init() {
 		registerBeanDefinitionParser("testBean", new TestBeanDefinitionParser());
 		registerBeanDefinitionParser("person", new PersonDefinitionParser());
@@ -228,6 +233,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
 
+		@Override
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			RootBeanDefinition definition = new RootBeanDefinition();
 			definition.setBeanClass(TestBean.class);
@@ -245,10 +251,12 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static final class PersonDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+		@Override
 		protected Class<?> getBeanClass(Element element) {
 			return TestBean.class;
 		}
 
+		@Override
 		protected void doParse(Element element, BeanDefinitionBuilder builder) {
 			builder.addPropertyValue("name", element.getAttribute("name"));
 			builder.addPropertyValue("age", element.getAttribute("age"));
@@ -257,6 +265,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
+		@Override
 		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 			Element element = (Element) node;
 			BeanDefinition def = definition.getBeanDefinition();
@@ -272,6 +281,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class DebugBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
+		@Override
 		protected BeanDefinition createInterceptorDefinition(Node node) {
 			return new RootBeanDefinition(DebugInterceptor.class);
 		}
@@ -279,6 +289,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class NopInterceptorBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
+		@Override
 		protected BeanDefinition createInterceptorDefinition(Node node) {
 			return new RootBeanDefinition(NopInterceptor.class);
 		}
@@ -286,6 +297,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
+		@Override
 		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 			Attr objectNameAttribute = (Attr) node;
 			definition.getBeanDefinition().setAttribute("objectName", objectNameAttribute.getValue());

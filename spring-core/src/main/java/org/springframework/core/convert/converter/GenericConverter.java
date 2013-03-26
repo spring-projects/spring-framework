@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,18 +34,24 @@ import java.util.Set;
  * <p>This interface should generally not be used when the simpler {@link Converter} or
  * {@link ConverterFactory} interfaces are sufficient.
  *
+ * <p>Implementations may additionally implement {@link ConditionalConverter}.
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0
  * @see TypeDescriptor
  * @see Converter
  * @see ConverterFactory
+ * @see ConditionalConverter
  */
 public interface GenericConverter {
 
 	/**
-	 * Return the source and target types which this converter can convert between.
-	 * <p>Each entry is a convertible source-to-target type pair.
+	 * Return the source and target types which this converter can convert between. Each
+	 * entry is a convertible source-to-target type pair.
+	 * <p>
+	 * For {@link ConditionalConverter conditional} converters this method may return
+	 * {@code null} to indicate all source-to-target pairs should be considered. *
 	 */
 	Set<ConvertiblePair> getConvertibleTypes();
 
@@ -88,23 +94,23 @@ public interface GenericConverter {
 			return this.targetType;
 		}
 
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
 				return true;
 			}
-            if (obj == null || obj.getClass() != ConvertiblePair.class) {
+			if (obj == null || obj.getClass() != ConvertiblePair.class) {
 				return false;
 			}
-            ConvertiblePair other = (ConvertiblePair) obj;
-            return this.sourceType.equals(other.sourceType) && this.targetType.equals(other.targetType);
+			ConvertiblePair other = (ConvertiblePair) obj;
+			return this.sourceType.equals(other.sourceType) && this.targetType.equals(other.targetType);
 
-        }
+		}
 
-        @Override
-        public int hashCode() {
-            return this.sourceType.hashCode() * 31 + this.targetType.hashCode();
-        }
-    }
+		@Override
+		public int hashCode() {
+			return this.sourceType.hashCode() * 31 + this.targetType.hashCode();
+		}
+	}
 
 }

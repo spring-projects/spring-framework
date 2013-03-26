@@ -37,7 +37,7 @@ public class Inventor {
 	public String[] stringArrayOfThreeItems = new String[]{"1","2","3"};
 	private String foo;
 	public int counter;
-	
+
 	public Inventor(String name, Date birthdate, String nationality) {
 		this.name = name;
 		this._name = name;
@@ -88,7 +88,7 @@ public class Inventor {
 	public String[] getInventions() {
 		return inventions;
 	}
-	
+
 	public void setInventions(String[] inventions) {
 		this.inventions = inventions;
 	}
@@ -96,7 +96,7 @@ public class Inventor {
 	public PlaceOfBirth getPlaceOfBirth() {
 		return placeOfBirth;
 	}
-	
+
 	public int throwException(int valueIn) throws Exception {
 		counter++;
 		if (valueIn==1) {
@@ -110,9 +110,10 @@ public class Inventor {
 		}
 		return valueIn;
 	}
-	
+
+	@SuppressWarnings("serial")
 	static class TestException extends Exception {}
-	
+
 	public String throwException(PlaceOfBirth pob) {
 		return pob.getCity();
 	}
@@ -120,7 +121,7 @@ public class Inventor {
 	public String getName() {
 		return name;
 	}
-	
+
 	public boolean getWonNobelPrize() {
 		return wonNobelPrize;
 	}
@@ -152,7 +153,7 @@ public class Inventor {
 	public String sayHelloTo(String person) {
 		return "hello " + person;
 	}
-	
+
 	public String printDouble(Double d) {
 		return d.toString();
 	}
@@ -187,7 +188,7 @@ public class Inventor {
 	public Inventor(String... strings) {
 
 	}
-	
+
 	public boolean getSomeProperty() {
 		return accessedThroughGetSet;
 	}
@@ -195,7 +196,7 @@ public class Inventor {
 	public void setSomeProperty(boolean b) {
 		this.accessedThroughGetSet = b;
 	}
-	
+
 	public Date getBirthdate() { return birthdate;}
 
 	public String getFoo() { return foo; }

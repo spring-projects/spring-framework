@@ -16,11 +16,6 @@
 
 package org.springframework.core;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
@@ -30,7 +25,6 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
- * @author Nikita Tovstoles
  */
 public class MethodParameterTests {
 
@@ -40,6 +34,7 @@ public class MethodParameterTests {
 
 	private MethodParameter intReturnType;
 
+
 	@Before
 	public void setUp() throws NoSuchMethodException {
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
@@ -47,7 +42,6 @@ public class MethodParameterTests {
 		longParameter = new MethodParameter(method, 1);
 		intReturnType = new MethodParameter(method, -1);
 	}
-
 
 	@Test
 	public void testEquals() throws NoSuchMethodException {
@@ -82,30 +76,9 @@ public class MethodParameterTests {
 		assertTrue(longParameter.hashCode() != methodParameter.hashCode());
 	}
 
-	@Test
-	public void testGetMethodParamaterAnnotations() {
-		Method method = stringParameter.getMethod();
-		Annotation[][] expectedAnnotations = method.getParameterAnnotations();
-		assertEquals(2, expectedAnnotations.length);
-		assertEquals(DummyAnnotation.class, expectedAnnotations[0][0].annotationType());
 
-		//start with empty cache
-		MethodParameter.methodParamAnnotationsCache.clear();
-
-		//check correctness
-		assertArrayEquals(expectedAnnotations, MethodParameter.getMethodParameterAnnotations(method));
-		//check that return value's been cached
-		assertArrayEquals(expectedAnnotations, MethodParameter.methodParamAnnotationsCache.get(method));
-	}
-
-
-	public int method(@DummyAnnotation String p1, long p2) {
+	public int method(String p1, long p2) {
 		return 42;
 	}
 
-	@Target(ElementType.PARAMETER)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface DummyAnnotation {
-
-	}
 }

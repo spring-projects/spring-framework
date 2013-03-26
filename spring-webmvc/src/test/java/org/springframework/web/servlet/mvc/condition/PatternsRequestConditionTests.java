@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rossen Stoyanchev
@@ -139,6 +140,22 @@ public class PatternsRequestConditionTests {
 	}
 
 	@Test
+	public void matchSuffixPatternUsingFileExtensions2() {
+		PatternsRequestCondition condition1 = new PatternsRequestCondition(
+				new String[] {"/prefix"}, null, null, true, false, Arrays.asList("json"));
+
+		PatternsRequestCondition condition2 = new PatternsRequestCondition(
+				new String[] {"/suffix"}, null, null, true, false, null);
+
+		PatternsRequestCondition combined = condition1.combine(condition2);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/prefix/suffix.json");
+		PatternsRequestCondition match = combined.getMatchingCondition(request);
+
+		assertNotNull(match);
+	}
+
+	@Test
 	public void matchTrailingSlash() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/");
 
@@ -167,6 +184,16 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo.html"));
 
 		assertNull(match);
+	}
+
+	@Test
+	public void matchIgnorePathParams() {
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setRemoveSemicolonContent(false);
+		PatternsRequestCondition condition = new PatternsRequestCondition(new String[] {"/foo/bar"}, pathHelper, null, true, true);
+		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo;q=1/bar;s=1"));
+
+		assertNotNull(match);
 	}
 
 	@Test

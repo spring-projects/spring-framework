@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.ejb.access;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Proxy;
 import java.rmi.RemoteException;
 
@@ -31,6 +28,9 @@ import org.junit.Test;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -38,10 +38,12 @@ import org.springframework.remoting.RemoteAccessException;
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRemoteSlsbInvokerInterceptorTests {
 
+	@Override
 	protected SimpleRemoteSlsbInvokerInterceptor createInterceptor() {
 		return new SimpleRemoteStatelessSessionProxyFactoryBean();
 	}
 
+	@Override
 	protected Object configuredProxy(SimpleRemoteSlsbInvokerInterceptor si, Class<?> ifc) throws NamingException {
 		SimpleRemoteStatelessSessionProxyFactoryBean fb = (SimpleRemoteStatelessSessionProxyFactoryBean) si;
 		fb.setBusinessInterface(ifc);
@@ -53,24 +55,22 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 	public void testInvokesMethod() throws Exception {
 		final int value = 11;
 		final String jndiName = "foo";
-		
-		MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andReturn(value);
-		myEjb.remove();
-		replay(myEjb);
-		
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andReturn(myEjb);
-		replay(home);
-		
+
+		MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willReturn(value);
+
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willReturn(myEjb);
+
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
 				return home;
 			}
 		};
-		
+
 		SimpleRemoteStatelessSessionProxyFactoryBean fb = new SimpleRemoteStatelessSessionProxyFactoryBean();
 		fb.setJndiName(jndiName);
 		fb.setResourceRef(true);
@@ -83,20 +83,19 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertEquals("Returns expected value", value, mbm.getValue());
-		verify(myEjb);	
-		verify(home);	
+		verify(myEjb).remove();
 	}
-	
+
 	@Test
 	public void testInvokesMethodOnEjb3StyleBean() throws Exception {
 		final int value = 11;
 		final String jndiName = "foo";
 
-		final MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andReturn(value);
-		replay(myEjb);
+		final MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willReturn(value);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -116,39 +115,37 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertEquals("Returns expected value", value, mbm.getValue());
-		verify(myEjb);
 	}
 
+	@Override
 	@Test
 	public void testRemoteException() throws Exception {
 		final RemoteException rex = new RemoteException();
 		final String jndiName = "foo";
-	
-		MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andThrow(rex);
+
+		MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willThrow(rex);
 		// TODO might want to control this behaviour...
 		// Do we really want to call remove after a remote exception?
-		myEjb.remove();
-		replay(myEjb);
-	
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andReturn(myEjb);
-		replay(home);
-	
+
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willReturn(myEjb);
+
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
 				return home;
 			}
 		};
-	
+
 		SimpleRemoteStatelessSessionProxyFactoryBean fb = new SimpleRemoteStatelessSessionProxyFactoryBean();
 		fb.setJndiName(jndiName);
 		fb.setResourceRef(true);
 		fb.setBusinessInterface(MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
-	
+
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
@@ -161,40 +158,39 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		catch (RemoteException ex) {
 			assertSame("Threw expected RemoteException", rex, ex);
 		}
-		verify(myEjb);	
-		verify(home);	
+		verify(myEjb).remove();
 	}
-	
+
 	@Test
 	public void testCreateException() throws Exception {
 		final String jndiName = "foo";
-	
+
 		final CreateException cex = new CreateException();
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andThrow(cex);
-		replay(home);
-	
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willThrow(cex);
+
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals(jndiName));
 				return home;
 			}
 		};
-	
+
 		SimpleRemoteStatelessSessionProxyFactoryBean fb = new SimpleRemoteStatelessSessionProxyFactoryBean();
 		fb.setJndiName(jndiName);
 		// rely on default setting of resourceRef=false, no auto addition of java:/comp/env prefix
 		fb.setBusinessInterface(MyBusinessMethods.class);
 		assertEquals(fb.getBusinessInterface(), MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
-	
+
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		
+
 		try {
 			mbm.getValue();
 			fail("Should have failed to create EJB");
@@ -202,20 +198,18 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		catch (RemoteException ex) {
 			// expected
 		}
-		
-		verify(home);	
 	}
-	
+
 	@Test
 	public void testCreateExceptionWithLocalBusinessInterface() throws Exception {
 		final String jndiName = "foo";
 
 		final CreateException cex = new CreateException();
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andThrow(cex);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willThrow(cex);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals(jndiName));
@@ -243,8 +237,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		catch (RemoteAccessException ex) {
 			assertTrue(ex.getCause() == cex);
 		}
-
-		verify(home);
 	}
 
 	@Test
@@ -253,10 +245,10 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		// Could actually try to figure out interface from create?
 		final String jndiName = "foo";
 
-		final MyHome home = createMock(MyHome.class);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals(jndiName));
@@ -269,7 +261,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		// rely on default setting of resourceRef=false, no auto addition of java:/comp/env prefix
 		// Don't set business interface
 		fb.setJndiTemplate(jt);
-		
+
 		// Check it's a singleton
 		assertTrue(fb.isSingleton());
 
@@ -281,12 +273,12 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			// TODO more appropriate exception?
 			assertTrue(ex.getMessage().indexOf("businessInterface") != 1);
 		}
-	
+
 		// Expect no methods on home
-		verify(home);	
+		verifyZeroInteractions(home);
 	}
-	
-	
+
+
 	protected static interface MyHome extends EJBHome {
 
 		MyBusinessMethods create() throws CreateException, RemoteException;
@@ -306,7 +298,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 
 
 	protected static interface MyEjb extends EJBObject, MyBusinessMethods {
-		
+
 	}
 
 }

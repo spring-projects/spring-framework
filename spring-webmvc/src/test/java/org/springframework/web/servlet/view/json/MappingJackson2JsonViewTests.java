@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,6 @@
 
 package org.springframework.web.servlet.view.json;
 
-import static org.easymock.EasyMock.createMock;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,10 +28,12 @@ import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.View;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -53,6 +48,9 @@ import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.databind.ser.Serializers;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Jeremy Grelle
@@ -91,7 +89,7 @@ public class MappingJackson2JsonViewTests {
 	public void renderSimpleMap() throws Exception {
 
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("bindingResult", createMock("binding_result", BindingResult.class));
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
 
 		view.setUpdateContentLength(true);
@@ -111,11 +109,27 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
+	public void renderWithSelectedContentType() throws Exception {
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar");
+
+		view.render(model, request, response);
+
+		assertEquals("application/json", response.getContentType());
+
+		request.setAttribute(View.SELECTED_CONTENT_TYPE, new MediaType("application", "vnd.example-v2+xml"));
+		view.render(model, request, response);
+
+		assertEquals("application/vnd.example-v2+xml", response.getContentType());
+	}
+
+	@Test
 	public void renderCaching() throws Exception {
 		view.setDisableCaching(false);
 
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("bindingResult", createMock("binding_result", BindingResult.class));
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
 
 		view.render(model, request, response);
@@ -136,7 +150,7 @@ public class MappingJackson2JsonViewTests {
 
 		Object bean = new TestBeanSimple();
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("bindingResult", createMock("binding_result", BindingResult.class));
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", bean);
 
 		view.setUpdateContentLength(true);
@@ -265,6 +279,7 @@ public class MappingJackson2JsonViewTests {
 		Object jsResult =
 				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "JSON Stream", 1, null);
 		assertNotNull("Json Result did not eval as valid JavaScript", jsResult);
+		assertEquals("application/json", response.getContentType());
 	}
 
 
@@ -349,7 +364,7 @@ public class MappingJackson2JsonViewTests {
 		}
 
 		@Override
-	    public JsonSerializer<Object> createSerializer(SerializerProvider prov, JavaType type, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<Object> createSerializer(SerializerProvider prov, JavaType type, BeanProperty property) throws JsonMappingException {
 			if (type.getRawClass() == TestBeanSimple.class) {
 				return new TestBeanSimpleSerializer();
 			}

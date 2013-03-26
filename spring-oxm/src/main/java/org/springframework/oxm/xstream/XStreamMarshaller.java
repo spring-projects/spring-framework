@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,13 +73,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the <code>Marshaller</code> interface for XStream.
+ * Implementation of the {@code Marshaller} interface for XStream.
  *
  * <p>By default, XStream does not require any further configuration,
  * though class aliases can be used to have more control over the behavior of XStream.
  *
  * <p>Due to XStream's API, it is required to set the encoding used for writing to OutputStreams.
- * It defaults to <code>UTF-8</code>.
+ * It defaults to {@code UTF-8}.
  *
  * <p><b>NOTE:</b> XStream is an XML serialization library, not a data binding library.
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for
@@ -114,7 +114,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	/**
 	 * Returns the XStream instance used by this marshaller.
 	 */
-	public XStream getXStream() {
+	public final XStream getXStream() {
 		return this.xstream;
 	}
 
@@ -125,22 +125,22 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @see XStream#NO_REFERENCES
 	 */
 	public void setMode(int mode) {
-		this.getXStream().setMode(mode);
+		this.xstream.setMode(mode);
 	}
 
 	/**
-	 * Set the <code>Converters</code> or <code>SingleValueConverters</code> to be registered
-	 * with the <code>XStream</code> instance.
+	 * Set the {@code Converters} or {@code SingleValueConverters} to be registered
+	 * with the {@code XStream} instance.
 	 * @see Converter
 	 * @see SingleValueConverter
 	 */
 	public void setConverters(ConverterMatcher[] converters) {
 		for (int i = 0; i < converters.length; i++) {
 			if (converters[i] instanceof Converter) {
-				this.getXStream().registerConverter((Converter) converters[i], i);
+				this.xstream.registerConverter((Converter) converters[i], i);
 			}
 			else if (converters[i] instanceof SingleValueConverter) {
-				this.getXStream().registerConverter((SingleValueConverter) converters[i], i);
+				this.xstream.registerConverter((SingleValueConverter) converters[i], i);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid ConverterMatcher [" + converters[i] + "]");
@@ -155,9 +155,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setAliases(Map<String, ?> aliases) throws ClassNotFoundException {
 		Map<String, Class<?>> classMap = toClassMap(aliases);
-
 		for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-			this.getXStream().alias(entry.getKey(), entry.getValue());
+			this.xstream.alias(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -169,15 +168,13 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setAliasesByType(Map<String, ?> aliases) throws ClassNotFoundException {
 		Map<String, Class<?>> classMap = toClassMap(aliases);
-
 		for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-			this.getXStream().aliasType(entry.getKey(), entry.getValue());
+			this.xstream.aliasType(entry.getKey(), entry.getValue());
 		}
 	}
 
 	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
 		Map<String, Class<?>> result = new LinkedHashMap<String, Class<?>>(map.size());
-
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
@@ -198,10 +195,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Sets a field alias/type map, consiting of field names
-	 * @param aliases
-	 * @throws ClassNotFoundException
-	 * @throws NoSuchFieldException
+	 * Set a field alias/type map, consiting of field names.
 	 * @see XStream#aliasField(String, Class, String)
 	 */
 	public void setFieldAliases(Map<String, String> aliases) throws ClassNotFoundException, NoSuchFieldException {
@@ -213,8 +207,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 				String className = field.substring(0, idx);
 				Class clazz = ClassUtils.forName(className, classLoader);
 				String fieldName = field.substring(idx + 1);
-				this.getXStream().aliasField(alias, clazz, fieldName);
-			} else {
+				this.xstream.aliasField(alias, clazz, fieldName);
+			}
+			else {
 				throw new IllegalArgumentException("Field name [" + field + "] does not contain '.'");
 			}
 		}
@@ -226,7 +221,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setUseAttributeForTypes(Class[] types) {
 		for (Class type : types) {
-			this.getXStream().useAttributeFor(type);
+			this.xstream.useAttributeFor(type);
 		}
 	}
 
@@ -242,7 +237,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<?, ?> entry : attributes.entrySet()) {
 			if (entry.getKey() instanceof String) {
 				if (entry.getValue() instanceof Class) {
-					this.getXStream().useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+					this.xstream.useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
 				}
 				else {
 					throw new IllegalArgumentException(
@@ -253,14 +248,14 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			else if (entry.getKey() instanceof Class) {
 				Class<?> key = (Class<?>) entry.getKey();
 				if (entry.getValue() instanceof String) {
-					this.getXStream().useAttributeFor(key, (String) entry.getValue());
+					this.xstream.useAttributeFor(key, (String) entry.getValue());
 				}
 				else if (entry.getValue() instanceof List) {
 					List list = (List) entry.getValue();
 
 					for (Object o : list) {
 						if (o instanceof String) {
-							this.getXStream().useAttributeFor(key, (String) o);
+							this.xstream.useAttributeFor(key, (String) o);
 						}
 					}
 				}
@@ -278,7 +273,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Specify implicit collection fields, as a Map consisting of <code>Class</code> instances
+	 * Specify implicit collection fields, as a Map consisting of {@code Class} instances
 	 * mapped to comma separated collection field names.
 	 *@see XStream#addImplicitCollection(Class, String)
 	 */
@@ -286,13 +281,13 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<Class<?>, String> entry : implicitCollections.entrySet()) {
 			String[] collectionFields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
 			for (String collectionField : collectionFields) {
-				this.getXStream().addImplicitCollection(entry.getKey(), collectionField);
+				this.xstream.addImplicitCollection(entry.getKey(), collectionField);
 			}
 		}
 	}
 
 	/**
-	 * Specify omitted fields, as a Map consisting of <code>Class</code> instances
+	 * Specify omitted fields, as a Map consisting of {@code Class} instances
 	 * mapped to comma separated field names.
 	 * @see XStream#omitField(Class, String)
 	 */
@@ -300,7 +295,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<Class<?>, String> entry : omittedFields.entrySet()) {
 			String[] fields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
 			for (String field : fields) {
-				this.getXStream().omitField(entry.getKey(), field);
+				this.xstream.omitField(entry.getKey(), field);
 			}
 		}
 	}
@@ -311,7 +306,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setAnnotatedClass(Class<?> annotatedClass) {
 		Assert.notNull(annotatedClass, "'annotatedClass' must not be null");
-		this.getXStream().processAnnotations(annotatedClass);
+		this.xstream.processAnnotations(annotatedClass);
 	}
 
 	/**
@@ -320,7 +315,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "'annotatedClasses' must not be empty");
-		this.getXStream().processAnnotations(annotatedClasses);
+		this.xstream.processAnnotations(annotatedClasses);
 	}
 
 	/**
@@ -330,7 +325,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @see XStream#autodetectAnnotations(boolean)
 	 */
 	public void setAutodetectAnnotations(boolean autodetectAnnotations) {
-		this.getXStream().autodetectAnnotations(autodetectAnnotations);
+		this.xstream.autodetectAnnotations(autodetectAnnotations);
 	}
 
 	/**
@@ -363,7 +358,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
 	public final void afterPropertiesSet() throws Exception {
-		customizeXStream(getXStream());
+		customizeXStream(this.xstream);
 	}
 
 	/**
@@ -425,12 +420,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            marshal(graph, this.streamDriver.createWriter(outputStream));
-        }
-        else {
-		    marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
-        }
+		if (this.streamDriver != null) {
+			marshal(graph, this.streamDriver.createWriter(outputStream));
+		}
+		else {
+			marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
+		}
 	}
 
 	@Override
@@ -458,7 +453,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	private void marshal(Object graph, HierarchicalStreamWriter streamWriter) {
 		try {
-			getXStream().marshal(graph, streamWriter);
+			this.xstream.marshal(graph, streamWriter);
 		}
 		catch (Exception ex) {
 			throw convertXStreamException(ex, true);
@@ -541,7 +536,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
      */
     private Object unmarshal(HierarchicalStreamReader streamReader) {
         try {
-            return getXStream().unmarshal(streamReader);
+            return this.xstream.unmarshal(streamReader);
         }
         catch (Exception ex) {
             throw convertXStreamException(ex, false);
@@ -550,15 +545,15 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
     /**
-	 * Convert the given XStream exception to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
-	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
-	 * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
-	 * @param ex XStream exception that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
-	 * or unmarshalling (<code>false</code>)
-	 * @return the corresponding <code>XmlMappingException</code>
-	 */
+     * Convert the given XStream exception to an appropriate exception from the
+     * {@code org.springframework.oxm} hierarchy.
+     * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
+     * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
+     * @param ex XStream exception that occured
+     * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+     * or unmarshalling ({@code false})
+     * @return the corresponding {@code XmlMappingException}
+     */
 	protected XmlMappingException convertXStreamException(Exception ex, boolean marshalling) {
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||
 				ex instanceof ConversionException) {
@@ -574,4 +569,5 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			return new UncategorizedMappingException("Unknown XStream exception", ex);
 		}
 	}
+
 }

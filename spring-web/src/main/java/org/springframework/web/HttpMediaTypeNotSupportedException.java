@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
  * @author Arjen Poutsma
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 
 	private final MediaType contentType;

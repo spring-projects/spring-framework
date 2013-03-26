@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
@@ -41,12 +43,12 @@ public class LiteralExpressionTests {
 		checkString("somevalue", lEx.getValue(new Rooty(), String.class));
 		checkString("somevalue", lEx.getValue(ctx, new Rooty()));
 		checkString("somevalue", lEx.getValue(ctx, new Rooty(),String.class));
-		Assert.assertEquals("somevalue", lEx.getExpressionString());
-		Assert.assertFalse(lEx.isWritable(new StandardEvaluationContext()));
-		Assert.assertFalse(lEx.isWritable(new Rooty()));
-		Assert.assertFalse(lEx.isWritable(new StandardEvaluationContext(), new Rooty()));
+		assertEquals("somevalue", lEx.getExpressionString());
+		assertFalse(lEx.isWritable(new StandardEvaluationContext()));
+		assertFalse(lEx.isWritable(new Rooty()));
+		assertFalse(lEx.isWritable(new StandardEvaluationContext(), new Rooty()));
 	}
-	
+
 	static class Rooty {}
 
 	@Test
@@ -54,51 +56,51 @@ public class LiteralExpressionTests {
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
 			lEx.setValue(new StandardEvaluationContext(), "flibble");
-			Assert.fail("Should have got an exception that the value cannot be set");
+			fail("Should have got an exception that the value cannot be set");
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			Assert.assertEquals(ee.getExpressionString(), "somevalue");
+			assertEquals(ee.getExpressionString(), "somevalue");
 		}
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
 			lEx.setValue(new Rooty(), "flibble");
-			Assert.fail("Should have got an exception that the value cannot be set");
+			fail("Should have got an exception that the value cannot be set");
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			Assert.assertEquals(ee.getExpressionString(), "somevalue");
+			assertEquals(ee.getExpressionString(), "somevalue");
 		}
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
 			lEx.setValue(new StandardEvaluationContext(), new Rooty(), "flibble");
-			Assert.fail("Should have got an exception that the value cannot be set");
+			fail("Should have got an exception that the value cannot be set");
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			Assert.assertEquals(ee.getExpressionString(), "somevalue");
+			assertEquals(ee.getExpressionString(), "somevalue");
 		}
 	}
 
 	@Test
 	public void testGetValueType() throws Exception {
 		LiteralExpression lEx = new LiteralExpression("somevalue");
-		Assert.assertEquals(String.class, lEx.getValueType());
-		Assert.assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext()));
-		Assert.assertEquals(String.class, lEx.getValueType(new Rooty()));
-		Assert.assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext(), new Rooty()));
-		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor().getType());
-		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext()).getType());
-		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor(new Rooty()).getType());
-		Assert.assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext(), new Rooty()).getType());
+		assertEquals(String.class, lEx.getValueType());
+		assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext()));
+		assertEquals(String.class, lEx.getValueType(new Rooty()));
+		assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext(), new Rooty()));
+		assertEquals(String.class, lEx.getValueTypeDescriptor().getType());
+		assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext()).getType());
+		assertEquals(String.class, lEx.getValueTypeDescriptor(new Rooty()).getType());
+		assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext(), new Rooty()).getType());
 	}
 
 	private void checkString(String expectedString, Object value) {
 		if (!(value instanceof String)) {
-			Assert.fail("Result was not a string, it was of type " + value.getClass() + "  (value=" + value + ")");
+			fail("Result was not a string, it was of type " + value.getClass() + "  (value=" + value + ")");
 		}
 		if (!((String) value).equals(expectedString)) {
-			Assert.fail("Did not get expected result.  Should have been '" + expectedString + "' but was '" + value + "'");
+			fail("Did not get expected result.  Should have been '" + expectedString + "' but was '" + value + "'");
 		}
 	}
 

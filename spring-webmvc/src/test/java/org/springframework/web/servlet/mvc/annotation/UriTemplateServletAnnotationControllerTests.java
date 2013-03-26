@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,9 +30,9 @@ import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletConfig;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -94,6 +96,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void doubles() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -266,6 +269,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -281,6 +285,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void noDefaultSuffixPattern() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -378,6 +383,7 @@ public class UriTemplateServletAnnotationControllerTests {
 
 	// SPR-6906
 	@Test
+	@SuppressWarnings("serial")
 	public void controllerClassName() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -482,7 +488,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		public void handle(@PathVariable("hotel") String hotel, @PathVariable Date date, Writer writer)
 				throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
-			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
+			assertEquals("Invalid path variable value", new GregorianCalendar(2008, 10, 18).getTime(), date);
 			writer.write("test-" + hotel);
 		}
 

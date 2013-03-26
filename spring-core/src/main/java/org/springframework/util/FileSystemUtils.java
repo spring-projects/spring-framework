@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ public abstract class FileSystemUtils {
 	/**
 	 * Delete the supplied {@link File} - for directories,
 	 * recursively delete any nested directories or files as well.
-	 * @param root the root <code>File</code> to delete
-	 * @return <code>true</code> if the <code>File</code> was deleted,
-	 * otherwise <code>false</code>
+	 * @param root the root {@code File} to delete
+	 * @return {@code true} if the {@code File} was deleted,
+	 * otherwise {@code false}
 	 */
 	public static boolean deleteRecursively(File root) {
 		if (root != null && root.exists()) {
@@ -51,8 +51,8 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
-	 * Recursively copy the contents of the <code>src</code> file/directory
-	 * to the <code>dest</code> file/directory.
+	 * Recursively copy the contents of the {@code src} file/directory
+	 * to the {@code dest} file/directory.
 	 * @param src the source directory
 	 * @param dest the destination directory
 	 * @throws IOException in the case of I/O errors
@@ -64,8 +64,8 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
-	 * Actually copy the contents of the <code>src</code> file/directory
-	 * to the <code>dest</code> file/directory.
+	 * Actually copy the contents of the {@code src} file/directory
+	 * to the {@code dest} file/directory.
 	 * @param src the source directory
 	 * @param dest the destination directory
 	 * @throws IOException in the case of I/O errors

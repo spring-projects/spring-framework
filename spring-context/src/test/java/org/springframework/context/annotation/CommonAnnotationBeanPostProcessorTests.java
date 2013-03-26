@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,22 +25,23 @@ import javax.ejb.EJB;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.INestedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.NestedTestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.sample.beans.INestedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
@@ -171,9 +172,15 @@ public class CommonAnnotationBeanPostProcessorTests {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ResourceInjectionBean.class, false));
-		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, false));
-		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class, false));
+		RootBeanDefinition abd = new RootBeanDefinition(ResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd1 = new RootBeanDefinition(TestBean.class);
+		tbd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tbd1);
+		RootBeanDefinition tbd2 = new RootBeanDefinition(TestBean.class);
+		tbd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean2", tbd2);
 
 		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
 		assertTrue(bean.initCalled);
@@ -202,11 +209,16 @@ public class CommonAnnotationBeanPostProcessorTests {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class, false));
-		bf.registerBeanDefinition("testBean4", new RootBeanDefinition(TestBean.class, false));
+		RootBeanDefinition abd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean4", tbd);
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
-		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory() {
+		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
+			@Override
 			public Object getObject() throws BeansException {
 				return new NestedTestBean();
 			}
@@ -452,6 +464,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 	public static class InitDestroyBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertFalse(((AnnotatedInitDestroyBean) bean).initCalled);
@@ -459,6 +472,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertTrue(((AnnotatedInitDestroyBean) bean).initCalled);
@@ -466,6 +480,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertFalse(((AnnotatedInitDestroyBean) bean).destroyCalled);
@@ -566,6 +581,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		@Resource
 		private BeanFactory beanFactory;
 
+		@Override
 		@Resource
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -597,6 +613,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean6;
 		}
 
+		@Override
 		@PostConstruct
 		protected void init2() {
 			if (this.testBean3 == null || this.testBean4 == null) {
@@ -605,6 +622,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.init2();
 		}
 
+		@Override
 		@PreDestroy
 		protected void destroy2() {
 			super.destroy2();
@@ -627,6 +645,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		@Resource
 		private BeanFactory beanFactory;
 
+		@Override
 		@EJB
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -650,6 +669,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean4;
 		}
 
+		@Override
 		@PostConstruct
 		protected void init2() {
 			if (this.testBean3 == null || this.testBean4 == null) {
@@ -658,6 +678,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.init2();
 		}
 
+		@Override
 		@PreDestroy
 		protected void destroy2() {
 			super.destroy2();
@@ -679,6 +700,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NullFactory {
 
 		public static Object create() {

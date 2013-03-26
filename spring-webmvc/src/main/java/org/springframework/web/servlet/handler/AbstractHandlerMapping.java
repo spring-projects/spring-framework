@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public final void setOrder(int order) {
@@ -89,7 +89,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	/**
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
-	 * <p>Default is <code>null</code>, indicating no default handler.
+	 * <p>Default is {@code null}, indicating no default handler.
 	 */
 	public void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
@@ -97,7 +97,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the default handler for this handler mapping,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 */
 	public Object getDefaultHandler() {
 		return this.defaultHandler;
@@ -127,6 +127,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI.
+	 * <p>The default value is {@code false}.
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
@@ -174,7 +175,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p>Supported interceptor types are HandlerInterceptor, WebRequestInterceptor, and MappedInterceptor.
 	 * Mapped interceptors apply only to request URLs that match its path patterns.
 	 * Mapped interceptor beans are also detected by type during initialization.
-	 * @param interceptors array of handler interceptors, or <code>null</code> if none
+	 * @param interceptors array of handler interceptors, or {@code null} if none
 	 * @see #adaptInterceptor
 	 * @see org.springframework.web.servlet.HandlerInterceptor
 	 * @see org.springframework.web.context.request.WebRequestInterceptor
@@ -202,7 +203,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p>Will be invoked before {@link #initInterceptors()} adapts the specified
 	 * interceptors into {@link HandlerInterceptor} instances.
 	 * <p>The default implementation is empty.
-	 * @param interceptors the configured interceptor List (never <code>null</code>),
+	 * @param interceptors the configured interceptor List (never {@code null}),
 	 * allowing to add further interceptors before as well as after the existing
 	 * interceptors
 	 */
@@ -270,7 +271,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the adapted interceptors as HandlerInterceptor array.
-	 * @return the array of HandlerInterceptors, or <code>null</code> if none
+	 * @return the array of HandlerInterceptors, or {@code null} if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
 		int count = adaptedInterceptors.size();
@@ -279,7 +280,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return all configured {@link MappedInterceptor}s as an array.
-	 * @return the array of {@link MappedInterceptor}s, or <code>null</code> if none
+	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
 	protected final MappedInterceptor[] getMappedInterceptors() {
 		int count = mappedInterceptors.size();
@@ -310,14 +311,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Look up a handler for the given request, returning <code>null</code> if no
+	 * Look up a handler for the given request, returning {@code null} if no
 	 * specific one is found. This method is called by {@link #getHandler};
-	 * a <code>null</code> return value will lead to the default handler, if one is set.
+	 * a {@code null} return value will lead to the default handler, if one is set.
 	 * <p>Note: This method may also return a pre-built {@link HandlerExecutionChain},
 	 * combining a handler object with dynamically determined interceptors.
 	 * Statically specified interceptors will get merged into such an existing chain.
 	 * @param request current HTTP request
-	 * @return the corresponding handler instance, or <code>null</code> if none found
+	 * @return the corresponding handler instance, or {@code null} if none found
 	 * @throws Exception if there is an internal error
 	 */
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;
@@ -331,11 +332,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a pre-built
 	 * HandlerExecutionChain. This method should handle those two cases explicitly,
 	 * either building a new HandlerExecutionChain or extending the existing chain.
-	 * <p>For simply adding an interceptor, consider calling <code>super.getHandlerExecutionChain</code>
+	 * <p>For simply adding an interceptor, consider calling {@code super.getHandlerExecutionChain}
 	 * and invoking {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
-	 * @param handler the resolved handler instance (never <code>null</code>)
+	 * @param handler the resolved handler instance (never {@code null})
 	 * @param request current HTTP request
-	 * @return the HandlerExecutionChain (never <code>null</code>)
+	 * @return the HandlerExecutionChain (never {@code null})
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {

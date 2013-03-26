@@ -46,9 +46,9 @@ import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -56,6 +56,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -167,10 +168,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
+
+	/**
+	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
+	 * looking up file extensions, etc.
+	 */
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	/**
+	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
+	 */
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
@@ -183,7 +192,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
-		handlerMapping.setRemoveSemicolonContent(false);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
 		return handlerMapping;
@@ -219,10 +227,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public ContentNegotiationManager mvcContentNegotiationManager() {
 		if (this.contentNegotiationManager == null) {
-			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer();
-			configurer.addMediaTypes(getDefaultMediaTypes());
+			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer(this.servletContext);
+			configurer.mediaTypes(getDefaultMediaTypes());
 			configureContentNegotiation(configurer);
-			this.contentNegotiationManager = configurer.getContentNegotiationManager();
+			try {
+				this.contentNegotiationManager = configurer.getContentNegotiationManager();
+			}
+			catch (Exception e) {
+				throw new BeanInitializationException("Could not create ContentNegotiationManager", e);
+			}
 		}
 		return this.contentNegotiationManager;
 	}
@@ -338,11 +351,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
-		ConfigurableWebBindingInitializer webBindingInitializer = new ConfigurableWebBindingInitializer();
-		webBindingInitializer.setConversionService(mvcConversionService());
-		webBindingInitializer.setValidator(mvcValidator());
-		webBindingInitializer.setMessageCodesResolver(getMessageCodesResolver());
-
 		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		addArgumentResolvers(argumentResolvers);
 
@@ -352,7 +360,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
 		adapter.setMessageConverters(getMessageConverters());
-		adapter.setWebBindingInitializer(webBindingInitializer);
+		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
@@ -365,12 +373,26 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (configurer.getTimeout() != null) {
 			adapter.setAsyncRequestTimeout(configurer.getTimeout());
 		}
+		adapter.setCallableInterceptors(configurer.getCallableInterceptors());
+		adapter.setDeferredResultInterceptors(configurer.getDeferredResultInterceptors());
 
 		return adapter;
 	}
 
 	/**
-	 * Returns a {@link FormattingConversionService} for use with annotated
+	 * Return the {@link ConfigurableWebBindingInitializer} to use for
+	 * initializing all {@link WebDataBinder} instances.
+	 */
+	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(mvcConversionService());
+		initializer.setValidator(mvcValidator());
+		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		return initializer;
+	}
+
+	/**
+	 * Return a {@link FormattingConversionService} for use with annotated
 	 * controller methods and the {@code spring:eval} JSP tag.
 	 * Also see {@link #addFormatters} as an alternative to overriding this method.
 	 */
@@ -382,7 +404,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Returns a global {@link Validator} instance for example for validating
+	 * Return a global {@link Validator} instance for example for validating
 	 * {@code @ModelAttribute} and {@code @RequestBody} method arguments.
 	 * Delegates to {@link #getValidator()} first and if that returns {@code null}
 	 * checks the classpath for the presence of a JSR-303 implementations
@@ -398,9 +420,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				try {
 					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
-				} catch (ClassNotFoundException e) {
+				}
+				catch (ClassNotFoundException e) {
 					throw new BeanInitializationException("Could not find default validator", e);
-				} catch (LinkageError e) {
+				}
+				catch (LinkageError e) {
 					throw new BeanInitializationException("Could not find default validator", e);
 				}
 				validator = (Validator) BeanUtils.instantiate(clazz);
@@ -506,7 +530,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(stringConverter);
 		messageConverters.add(new ResourceHttpMessageConverter());
 		messageConverters.add(new SourceHttpMessageConverter<Source>());
-		messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 		if (romePresent) {
 			messageConverters.add(new AtomFeedHttpMessageConverter());
 			messageConverters.add(new RssChannelHttpMessageConverter());
@@ -604,6 +628,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
+		exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
 		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
 		exceptionHandlerExceptionResolver.afterPropertiesSet();

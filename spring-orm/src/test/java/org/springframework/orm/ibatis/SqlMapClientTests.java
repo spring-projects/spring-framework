@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,28 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.ibatis.sqlmap.client.SqlMapClient;
-import com.ibatis.sqlmap.client.SqlMapExecutor;
-import com.ibatis.sqlmap.client.SqlMapSession;
-import com.ibatis.sqlmap.client.event.RowHandler;
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.ibatis.sqlmap.client.SqlMapExecutor;
+import com.ibatis.sqlmap.client.SqlMapSession;
+import com.ibatis.sqlmap.client.event.RowHandler;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @author Phillip Webb
  * @since 09.10.2004
  */
-public class SqlMapClientTests extends TestCase {
+public class SqlMapClientTests {
 
+	@Test
 	public void testSqlMapClientFactoryBeanWithoutConfig() throws Exception {
 		SqlMapClientFactoryBean factory = new SqlMapClientFactoryBean();
 		// explicitly set to null, don't know why ;-)
@@ -56,284 +60,207 @@ public class SqlMapClientTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSqlMapClientTemplate() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
-		con.close();
-		conControl.setVoidCallable(1);
-		dsControl.replay();
-		conControl.replay();
+		DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		final SqlMapSession session = mock(SqlMapSession.class);
+		SqlMapClient client = mock(SqlMapClient.class);
 
-		MockControl sessionControl = MockControl.createControl(SqlMapSession.class);
-		final SqlMapSession session = (SqlMapSession) sessionControl.getMock();
-		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient client = (SqlMapClient) clientControl.getMock();
-		client.openSession();
-		clientControl.setReturnValue(session, 1);
-		session.getCurrentConnection();
-		sessionControl.setReturnValue(null, 1);
-		session.setUserConnection(con);
-		sessionControl.setVoidCallable(1);
-		session.close();
-		sessionControl.setVoidCallable(1);
-		sessionControl.replay();
-		clientControl.replay();
+		given(ds.getConnection()).willReturn(con);
+		given(client.openSession()).willReturn(session);
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setDataSource(ds);
 		template.setSqlMapClient(client);
 		template.afterPropertiesSet();
 		Object result = template.execute(new SqlMapClientCallback() {
+			@Override
 			public Object doInSqlMapClient(SqlMapExecutor executor) {
 				assertTrue(executor == session);
 				return "done";
 			}
 		});
 		assertEquals("done", result);
-		dsControl.verify();
-		conControl.verify();
-		sessionControl.verify();
-		clientControl.verify();
+
+		verify(con).close();
+		verify(session).setUserConnection(con);
+		verify(session).close();
 	}
 
+	@Test
 	public void testSqlMapClientTemplateWithNestedSqlMapSession() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		final Connection con = (Connection) conControl.getMock();
-		dsControl.replay();
-		conControl.replay();
+		DataSource ds = mock(DataSource.class);
+		final Connection con = mock(Connection.class);
+		final SqlMapSession session = mock(SqlMapSession.class);
+		SqlMapClient client = mock(SqlMapClient.class);
 
-		MockControl sessionControl = MockControl.createControl(SqlMapSession.class);
-		final SqlMapSession session = (SqlMapSession) sessionControl.getMock();
-		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient client = (SqlMapClient) clientControl.getMock();
-		client.openSession();
-		clientControl.setReturnValue(session, 1);
-		session.getCurrentConnection();
-		sessionControl.setReturnValue(con, 1);
-		sessionControl.replay();
-		clientControl.replay();
+		given(client.openSession()).willReturn(session);
+		given(session.getCurrentConnection()).willReturn(con);
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setDataSource(ds);
 		template.setSqlMapClient(client);
 		template.afterPropertiesSet();
 		Object result = template.execute(new SqlMapClientCallback() {
+			@Override
 			public Object doInSqlMapClient(SqlMapExecutor executor) {
 				assertTrue(executor == session);
 				return "done";
 			}
 		});
 		assertEquals("done", result);
-		dsControl.verify();
-		conControl.verify();
-		sessionControl.verify();
-		clientControl.verify();
 	}
 
+	@Test
 	public void testQueryForObjectOnSqlMapSession() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient client = (SqlMapClient) clientControl.getMock();
-		MockControl sessionControl = MockControl.createControl(SqlMapSession.class);
-		SqlMapSession session = (SqlMapSession) sessionControl.getMock();
+		DataSource ds = mock(DataSource.class);
+		Connection con = mock(Connection.class);
+		SqlMapClient client = mock(SqlMapClient.class);
+		SqlMapSession session = mock(SqlMapSession.class);
 
-		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
-		con.close();
-		conControl.setVoidCallable(1);
-		client.getDataSource();
-		clientControl.setReturnValue(ds, 2);
-		client.openSession();
-		clientControl.setReturnValue(session, 1);
-		session.getCurrentConnection();
-		sessionControl.setReturnValue(null, 1);
-		session.setUserConnection(con);
-		sessionControl.setVoidCallable(1);
-		session.queryForObject("myStatement", "myParameter");
-		sessionControl.setReturnValue("myResult", 1);
-		session.close();
-		sessionControl.setVoidCallable(1);
-
-		dsControl.replay();
-		conControl.replay();
-		clientControl.replay();
-		sessionControl.replay();
+		given(ds.getConnection()).willReturn(con);
+		given(client.getDataSource()).willReturn(ds);
+		given(client.openSession()).willReturn(session);
+		given(session.queryForObject("myStatement", "myParameter")).willReturn("myResult");
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setSqlMapClient(client);
 		template.afterPropertiesSet();
 		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
 
-		dsControl.verify();
-		clientControl.verify();
+		verify(con).close();
+		verify(session).setUserConnection(con);
+		verify(session).close();
 	}
 
+	@Test
 	public void testQueryForObject() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForObject("myStatement", null);
-		template.executorControl.setReturnValue("myResult", 1);
-		template.executorControl.replay();
+		given(template.executor.queryForObject("myStatement", null)).willReturn("myResult");
 		assertEquals("myResult", template.queryForObject("myStatement"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForObjectWithParameter() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForObject("myStatement", "myParameter");
-		template.executorControl.setReturnValue("myResult", 1);
-		template.executorControl.replay();
+		given(template.executor.queryForObject("myStatement", "myParameter")).willReturn("myResult");
 		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForObjectWithParameterAndResultObject() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForObject("myStatement", "myParameter", "myResult");
-		template.executorControl.setReturnValue("myResult", 1);
-		template.executorControl.replay();
+		given(template.executor.queryForObject("myStatement", "myParameter",
+				"myResult")).willReturn("myResult");
 		assertEquals("myResult", template.queryForObject("myStatement", "myParameter", "myResult"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForList() throws SQLException {
 		List result = new ArrayList();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForList("myStatement", null);
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
+		given(template.executor.queryForList("myStatement", null)).willReturn(result);
 		assertEquals(result, template.queryForList("myStatement"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForListWithParameter() throws SQLException {
 		List result = new ArrayList();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForList("myStatement", "myParameter");
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
+		given(template.executor.queryForList("myStatement", "myParameter")).willReturn(result);
 		assertEquals(result, template.queryForList("myStatement", "myParameter"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForListWithResultSize() throws SQLException {
 		List result = new ArrayList();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForList("myStatement", null, 10, 20);
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
+		given(template.executor.queryForList("myStatement", null, 10, 20)).willReturn(result);
 		assertEquals(result, template.queryForList("myStatement", 10, 20));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForListParameterAndWithResultSize() throws SQLException {
 		List result = new ArrayList();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForList("myStatement", "myParameter", 10, 20);
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
+		given(template.executor.queryForList("myStatement", "myParameter", 10, 20)).willReturn(result);
 		assertEquals(result, template.queryForList("myStatement", "myParameter", 10, 20));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryWithRowHandler() throws SQLException {
 		RowHandler rowHandler = new TestRowHandler();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryWithRowHandler("myStatement", null, rowHandler);
-		template.executorControl.setVoidCallable(1);
-		template.executorControl.replay();
 		template.queryWithRowHandler("myStatement", rowHandler);
-		template.executorControl.verify();
+		verify(template.executor).queryWithRowHandler("myStatement", null, rowHandler);
 	}
 
+	@Test
 	public void testQueryWithRowHandlerWithParameter() throws SQLException {
 		RowHandler rowHandler = new TestRowHandler();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryWithRowHandler("myStatement", "myParameter", rowHandler);
-		template.executorControl.setVoidCallable(1);
-		template.executorControl.replay();
 		template.queryWithRowHandler("myStatement", "myParameter", rowHandler);
-		template.executorControl.verify();
+		verify(template.executor).queryWithRowHandler("myStatement", "myParameter", rowHandler);
 	}
 
+	@Test
 	public void testQueryForMap() throws SQLException {
 		Map result = new HashMap();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForMap("myStatement", "myParameter", "myKey");
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
+		given(template.executor.queryForMap("myStatement", "myParameter", "myKey")).willReturn(result);
 		assertEquals(result, template.queryForMap("myStatement", "myParameter", "myKey"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testQueryForMapWithValueProperty() throws SQLException {
 		Map result = new HashMap();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.queryForMap("myStatement", "myParameter", "myKey", "myValue");
-		template.executorControl.setReturnValue(result, 1);
-		template.executorControl.replay();
+		given(template.executor.queryForMap("myStatement", "myParameter", "myKey",
+				"myValue")).willReturn(result);
 		assertEquals(result, template.queryForMap("myStatement", "myParameter", "myKey", "myValue"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testInsert() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.insert("myStatement", null);
-		template.executorControl.setReturnValue("myResult", 1);
-		template.executorControl.replay();
+		given(template.executor.insert("myStatement", null)).willReturn("myResult");
 		assertEquals("myResult", template.insert("myStatement"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testInsertWithParameter() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.insert("myStatement", "myParameter");
-		template.executorControl.setReturnValue("myResult", 1);
-		template.executorControl.replay();
+		given(template.executor.insert("myStatement", "myParameter")).willReturn("myResult");
 		assertEquals("myResult", template.insert("myStatement", "myParameter"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testUpdate() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.update("myStatement", null);
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
+		given(template.executor.update("myStatement", null)).willReturn(10);
 		assertEquals(10, template.update("myStatement"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testUpdateWithParameter() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.update("myStatement", "myParameter");
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
+		given(template.executor.update("myStatement", "myParameter")).willReturn(10);
 		assertEquals(10, template.update("myStatement", "myParameter"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testUpdateWithRequiredRowsAffected() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.update("myStatement", "myParameter");
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
+		given(template.executor.update("myStatement", "myParameter")).willReturn(10);
 		template.update("myStatement", "myParameter", 10);
-		template.executorControl.verify();
+		verify(template.executor).update("myStatement", "myParameter");
 	}
 
+	@Test
 	public void testUpdateWithRequiredRowsAffectedAndInvalidRowCount() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.update("myStatement", "myParameter");
-		template.executorControl.setReturnValue(20, 1);
-		template.executorControl.replay();
+		given(template.executor.update("myStatement", "myParameter")).willReturn(20);
 		try {
 			template.update("myStatement", "myParameter", 10);
 			fail("Should have thrown JdbcUpdateAffectedIncorrectNumberOfRowsException");
@@ -343,41 +270,34 @@ public class SqlMapClientTests extends TestCase {
 			assertEquals(10, ex.getExpectedRowsAffected());
 			assertEquals(20, ex.getActualRowsAffected());
 		}
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testDelete() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.delete("myStatement", null);
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
+		given(template.executor.delete("myStatement", null)).willReturn(10);
 		assertEquals(10, template.delete("myStatement"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testDeleteWithParameter() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.delete("myStatement", "myParameter");
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
+		given(template.executor.delete("myStatement", "myParameter")).willReturn(10);
 		assertEquals(10, template.delete("myStatement", "myParameter"));
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testDeleteWithRequiredRowsAffected() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.delete("myStatement", "myParameter");
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
+		given(template.executor.delete("myStatement", "myParameter")).willReturn(10);
 		template.delete("myStatement", "myParameter", 10);
-		template.executorControl.verify();
+		verify(template.executor).delete("myStatement", "myParameter");
 	}
 
+	@Test
 	public void testDeleteWithRequiredRowsAffectedAndInvalidRowCount() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.delete("myStatement", "myParameter");
-		template.executorControl.setReturnValue(20, 1);
-		template.executorControl.replay();
+		given(template.executor.delete("myStatement", "myParameter")).willReturn(20);
 		try {
 			template.delete("myStatement", "myParameter", 10);
 			fail("Should have thrown JdbcUpdateAffectedIncorrectNumberOfRowsException");
@@ -387,20 +307,17 @@ public class SqlMapClientTests extends TestCase {
 			assertEquals(10, ex.getExpectedRowsAffected());
 			assertEquals(20, ex.getActualRowsAffected());
 		}
-		template.executorControl.verify();
 	}
 
+	@Test
 	public void testSqlMapClientDaoSupport() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
+		DataSource ds = mock(DataSource.class);
 		SqlMapClientDaoSupport testDao = new SqlMapClientDaoSupport() {
 		};
 		testDao.setDataSource(ds);
 		assertEquals(ds, testDao.getDataSource());
 
-		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient client = (SqlMapClient) clientControl.getMock();
-		clientControl.replay();
+		SqlMapClient client = mock(SqlMapClient.class);
 
 		testDao.setSqlMapClient(client);
 		assertEquals(client, testDao.getSqlMapClient());
@@ -417,9 +334,9 @@ public class SqlMapClientTests extends TestCase {
 
 	private static class TestSqlMapClientTemplate extends SqlMapClientTemplate {
 
-		public MockControl executorControl = MockControl.createControl(SqlMapExecutor.class);
-		public SqlMapExecutor executor = (SqlMapExecutor) executorControl.getMock();
+		public SqlMapExecutor executor = mock(SqlMapExecutor.class);
 
+		@Override
 		public Object execute(SqlMapClientCallback action) throws DataAccessException {
 			try {
 				return action.doInSqlMapClient(executor);
@@ -433,6 +350,7 @@ public class SqlMapClientTests extends TestCase {
 
 	private static class TestRowHandler implements RowHandler {
 
+		@Override
 		public void handleRow(Object row) {
 		}
 	}

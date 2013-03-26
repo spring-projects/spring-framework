@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,8 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
+
+		assertFalse(applicationWildcardXml.includes(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -84,6 +86,8 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
+
+		assertFalse(applicationWildcardXml.isCompatibleWith(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -93,12 +97,12 @@ public class MediaTypeTests {
 		assertEquals("Invalid toString() returned", "text/plain;q=0.7", result);
 	}
 
-	@Test(expected= IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void slashInType() {
 		new MediaType("text/plain");
 	}
 
-	@Test(expected= IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void slashInSubtype() {
 		new MediaType("text", "/");
 	}
@@ -118,57 +122,57 @@ public class MediaTypeTests {
 		assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeNoSubtype() {
 		MediaType.parseMediaType("audio");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeNoSubtypeSlash() {
 		MediaType.parseMediaType("audio/");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeTypeRange() {
 		MediaType.parseMediaType("*/json");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalType() {
 		MediaType.parseMediaType("audio(/basic");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalSubtype() {
 		MediaType.parseMediaType("audio/basic)");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeEmptyParameterAttribute() {
 		MediaType.parseMediaType("audio/*;=value");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeEmptyParameterValue() {
 		MediaType.parseMediaType("audio/*;attr=");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalParameterAttribute() {
 		MediaType.parseMediaType("audio/*;attr<=value");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalParameterValue() {
 		MediaType.parseMediaType("audio/*;attr=v>alue");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalQualityFactor() {
 		MediaType.parseMediaType("audio/basic;q=1.1");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalCharset() {
 		MediaType.parseMediaType("text/html; charset=foo-bar");
 	}
@@ -189,7 +193,7 @@ public class MediaTypeTests {
 		assertEquals("'v>alue'", mediaType.getParameter("attr"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalQuotedParameterValue() {
 		MediaType.parseMediaType("audio/*;attr=\"");
 	}
@@ -313,6 +317,7 @@ public class MediaTypeTests {
 		MediaType audio07 = new MediaType("audio", "*", 0.7);
 		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
 		MediaType textHtml = new MediaType("text", "html");
+		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
 		Comparator<MediaType> comp = MediaType.SPECIFICITY_COMPARATOR;
@@ -328,9 +333,11 @@ public class MediaTypeTests {
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, audio) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, all) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audio, all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(MediaType.APPLICATION_XHTML_XML, allXml) < 0);
 
 		// unspecific to specific
 		assertTrue("Invalid comparison result", comp.compare(audio, audioBasic) > 0);
+		assertTrue("Invalid comparison result", comp.compare(allXml, MediaType.APPLICATION_XHTML_XML) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audioBasic) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audio) > 0);
 
@@ -414,6 +421,7 @@ public class MediaTypeTests {
 		MediaType audio07 = new MediaType("audio", "*", 0.7);
 		MediaType audioBasicLevel = new MediaType("audio", "basic", Collections.singletonMap("level", "1"));
 		MediaType textHtml = new MediaType("text", "html");
+		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
 		Comparator<MediaType> comp = MediaType.QUALITY_VALUE_COMPARATOR;
@@ -429,11 +437,13 @@ public class MediaTypeTests {
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, audio) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audioBasic, all) < 0);
 		assertTrue("Invalid comparison result", comp.compare(audio, all) < 0);
+		assertTrue("Invalid comparison result", comp.compare(MediaType.APPLICATION_XHTML_XML, allXml) < 0);
 
 		// unspecific to specific
 		assertTrue("Invalid comparison result", comp.compare(audio, audioBasic) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audioBasic) > 0);
 		assertTrue("Invalid comparison result", comp.compare(all, audio) > 0);
+		assertTrue("Invalid comparison result", comp.compare(allXml, MediaType.APPLICATION_XHTML_XML) > 0);
 
 		// qualifiers
 		assertTrue("Invalid comparison result", comp.compare(audio, audio07) < 0);

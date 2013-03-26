@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.PageContext;
 
 /**
- * Utility class for generating '<code>id</code>' attributes values for JSP tags. Given the
+ * Utility class for generating '{@code id}' attributes values for JSP tags. Given the
  * name of a tag (the data bound path in most cases) returns a unique ID for that name within
  * the current {@link PageContext}. Each request for an ID for a given name will append an
- * ever increasing counter to the name itself. For instance, given the name '<code>person.name</code>',
- * the first request will give '<code>person.name1</code>' and the second will give
- * '<code>person.name2</code>'. This supports the common use case where a set of radio or check buttons
+ * ever increasing counter to the name itself. For instance, given the name '{@code person.name}',
+ * the first request will give '{@code person.name1}' and the second will give
+ * '{@code person.name2}'. This supports the common use case where a set of radio or check buttons
  * are generated for the same data field, with each button being a distinct tag instance.
  *
  * @author Rob Harrop

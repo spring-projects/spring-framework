@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,24 +31,24 @@ import org.springframework.util.StringUtils;
  * {@link javax.servlet.Filter} that converts posted method parameters into HTTP methods,
  * retrievable via {@link HttpServletRequest#getMethod()}. Since browsers currently only
  * support GET and POST, a common technique - used by the Prototype library, for instance -
- * is to use a normal POST with an additional hidden form field (<code>_method</code>)
+ * is to use a normal POST with an additional hidden form field ({@code _method})
  * to pass the "real" HTTP method along. This filter reads that parameter and changes
  * the {@link HttpServletRequestWrapper#getMethod()} return value accordingly.
  *
- * <p>The name of the request parameter defaults to <code>_method</code>, but can be
+ * <p>The name of the request parameter defaults to {@code _method}, but can be
  * adapted via the {@link #setMethodParam(String) methodParam} property.
  *
  * <p><b>NOTE: This filter needs to run after multipart processing in case of a multipart
  * POST request, due to its inherent need for checking a POST body parameter.</b>
  * So typically, put a Spring {@link org.springframework.web.multipart.support.MultipartFilter}
- * <i>before</i> this HiddenHttpMethodFilter in your <code>web.xml</code> filter chain.
+ * <i>before</i> this HiddenHttpMethodFilter in your {@code web.xml} filter chain.
  *
  * @author Arjen Poutsma
  * @since 3.0
  */
 public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 
-	/** Default method parameter: <code>_method</code> */
+	/** Default method parameter: {@code _method} */
 	public static final String DEFAULT_METHOD_PARAM = "_method";
 
 	private String methodParam = DEFAULT_METHOD_PARAM;

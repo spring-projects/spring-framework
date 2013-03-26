@@ -1,7 +1,6 @@
-
 /**
  *
- * Classes supporting the <code>org.springframework.orm.jpa</code> package.
+ * Classes supporting the {@code org.springframework.orm.jpa} package.
  * Contains a DAO base class for JpaTemplate usage.
  *
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 
 /**
  * Response extractor that uses the given {@linkplain HttpMessageConverter entity
- * converters} to convert the response into a type <code>T</code>.
+ * converters} to convert the response into a type {@code T}.
  *
  * @author Arjen Poutsma
  * @see RestTemplate
@@ -86,12 +86,12 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		for (HttpMessageConverter messageConverter : this.messageConverters) {
 			if (messageConverter instanceof GenericHttpMessageConverter) {
 				GenericHttpMessageConverter genericMessageConverter = (GenericHttpMessageConverter) messageConverter;
-				if (genericMessageConverter.canRead(this.responseType, contentType)) {
+				if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Reading [" + this.responseType + "] as \"" +
 								contentType + "\" using [" + messageConverter + "]");
 					}
-					return (T) genericMessageConverter.read(this.responseType, response);
+					return (T) genericMessageConverter.read(this.responseType, null, response);
 				}
 			}
 			if (this.responseClass != null) {
