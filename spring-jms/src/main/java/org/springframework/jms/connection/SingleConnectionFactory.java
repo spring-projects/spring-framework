@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -528,9 +528,20 @@ public class SingleConnectionFactory
 			}
 			else if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") ||
 					method.getName().equals("createTopicSession")) {
-				boolean transacted = (Boolean) args[0];
-				Integer ackMode = (Integer) args[1];
-				Integer mode = (transacted ? Session.SESSION_TRANSACTED : ackMode);
+				// Default: JMS 2.0 createSession() method
+				Integer mode = Session.AUTO_ACKNOWLEDGE;
+				if (args != null) {
+					if (args.length == 1) {
+						// JMS 2.0 createSession(int) method
+						mode = (Integer) args[0];
+					}
+					else if (args.length == 2) {
+						// JMS 1.1 createSession(boolean, int) method
+						boolean transacted = (Boolean) args[0];
+						Integer ackMode = (Integer) args[1];
+						mode = (transacted ? Session.SESSION_TRANSACTED : ackMode);
+					}
+				}
 				Session session = getSession(this.target, mode);
 				if (session != null) {
 					if (!method.getReturnType().isInstance(session)) {

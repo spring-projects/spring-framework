@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.core;
 
+import java.lang.reflect.Method;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
@@ -37,6 +38,8 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that simplifies synchronous JMS access code.
@@ -96,6 +99,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
 
 
+	private static final Method setDeliveryDelayMethod =
+			ClassUtils.getMethodIfAvailable(MessageProducer.class, "setDeliveryDelay", long.class);
+
 	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils */
 	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
 
@@ -112,6 +118,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	private boolean pubSubNoLocal = false;
 
 	private long receiveTimeout = RECEIVE_TIMEOUT_INDEFINITE_WAIT;
+
+	private long deliveryDelay = 0;
 
 
 	private boolean explicitQosEnabled = false;
@@ -319,6 +327,22 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	public long getReceiveTimeout() {
 		return this.receiveTimeout;
+	}
+
+	/**
+	 * Set the delivery delay to use for send calls (in milliseconds).
+	 * <p>The default is 0 (no delivery delay).
+	 * Note that this feature requires JMS 2.0.
+	 */
+	public void setDeliveryDelay(long deliveryDelay) {
+		this.deliveryDelay = deliveryDelay;
+	}
+
+	/**
+	 * Return the delivery delay to use for send calls (in milliseconds).
+	 */
+	public long getDeliveryDelay() {
+		return this.deliveryDelay;
 	}
 
 
@@ -585,6 +609,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected void doSend(MessageProducer producer, Message message) throws JMSException {
+		if (this.deliveryDelay > 0) {
+			if (setDeliveryDelayMethod == null) {
+				throw new IllegalStateException("setDeliveryDelay requires JMS 2.0");
+			}
+			ReflectionUtils.invokeMethod(setDeliveryDelayMethod, producer, this.deliveryDelay);
+		}
 		if (isExplicitQosEnabled()) {
 			producer.send(message, getDeliveryMode(), getPriority(), getTimeToLive());
 		}
