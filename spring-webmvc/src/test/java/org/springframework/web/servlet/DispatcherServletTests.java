@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.util.Locale;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -29,6 +30,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.DummyEnvironment;
@@ -37,6 +39,7 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ServletConfigAwareBean;
 import org.springframework.web.context.ServletContextAwareBean;
@@ -770,6 +773,18 @@ public class DispatcherServletTests extends TestCase {
 		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));
 	}
 
+	public void testApplicationContextAware() throws Exception {
+		DispatcherServlet dispatcherServlet = new DispatcherServlet();
+		ConfigurableWebApplicationContext applicationContext = spy(new SimpleWebApplicationContext());
+		given(applicationContext.getServletConfig()).willReturn(this.servletConfig);
+		dispatcherServlet.setApplicationContext(applicationContext);
+		dispatcherServlet.init(this.servletConfig);
+		assertThat(dispatcherServlet, instanceOf(ApplicationContextAware.class));
+		assertThat(dispatcherServlet.getWebApplicationContext(),
+				sameInstance((WebApplicationContext) applicationContext));
+		dispatcherServlet.destroy();
+		verify(applicationContext, never()).close();
+	}
 
 	public static class ControllerFromParent implements Controller {
 

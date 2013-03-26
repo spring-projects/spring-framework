@@ -28,7 +28,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -153,7 +152,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+		beanFactory.addBeanPostProcessor(new WebApplicationContextServletContextAwareProcessor(this));
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
@@ -214,8 +213,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	public ServletConfig getServletConfig() {
-		throw new UnsupportedOperationException(
-				"GenericWebApplicationContext does not support getServletConfig()");
+		return null;
 	}
 
 	public void setNamespace(String namespace) {

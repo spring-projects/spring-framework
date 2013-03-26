@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 /**
  * Interface to be implemented in Servlet 3.0+ environments in order to configure the
@@ -175,16 +174,6 @@ import javax.servlet.ServletException;
  * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
  * @see org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer
  */
-public interface WebApplicationInitializer {
-
-	/**
-	 * Configure the given {@link ServletContext} with any servlets, filters, listeners
-	 * context-params and attributes necessary for initializing this web application. See
-	 * examples {@linkplain WebApplicationInitializer above}.
-	 * @param servletContext the {@code ServletContext} to initialize
-	 * @throws ServletException if any call against the given {@code ServletContext}
-	 * throws a {@code ServletException}
-	 */
-	void onStartup(ServletContext servletContext) throws ServletException;
+public interface WebApplicationInitializer extends ServletContextInitializer {
 
 }

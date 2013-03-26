@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Callable;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
@@ -122,6 +125,7 @@ import org.springframework.web.util.WebUtils;
  * @author Sam Brannen
  * @author Chris Beams
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @see #doService
  * @see #setContextClass
  * @see #setContextConfigLocation
@@ -129,7 +133,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setNamespace
  */
 @SuppressWarnings("serial")
-public abstract class FrameworkServlet extends HttpServletBean {
+public abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
 
 	/**
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
@@ -189,6 +193,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/** WebApplicationContext for this servlet */
 	private WebApplicationContext webApplicationContext;
+
+	/** If the WebApplicationContext was injected via {@link #setApplicationContext} */
+	private boolean webApplicationContextInjected = false;
+
 
 	/** Flag used to detect whether onRefresh has already been called */
 	private boolean refreshEventReceived = false;
@@ -789,6 +797,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	@Override
 	public void destroy() {
+		if(this.webApplicationContextInjected) {
+			return;
+		}
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
@@ -1053,6 +1064,32 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected String getUsernameForRequest(HttpServletRequest request) {
 		Principal userPrincipal = request.getUserPrincipal();
 		return (userPrincipal != null ? userPrincipal.getName() : null);
+	}
+
+	/**
+	 * Called by Spring via {@link ApplicationContextAware} to inject the current
+	 * application context. This method allows FrameworkServlets to be registered as
+	 * Spring Beans inside an existing {@link WebApplicationContext} rather than
+	 * {@link #findWebApplicationContext() finding} a 
+	 * {@link org.springframework.web.context.ContextLoaderListener bootstrapped} 
+	 * context.
+	 *
+	 * <p>Primarily added to support use in
+	 * {@link org.springframework.web.context.embedded.EmbeddedWebApplicationContext embedded
+	 * servlet containers}, this method is not intended to be called directly.
+	 * @since 4.0
+	 */
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		if (this.webApplicationContext == null
+				&& applicationContext instanceof WebApplicationContext) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("Using existing application context for "
+						+ ClassUtils.getShortName(getClass()));
+			}
+			this.webApplicationContext = (WebApplicationContext) applicationContext;
+			this.webApplicationContextInjected = true;
+		}
 	}
 
 

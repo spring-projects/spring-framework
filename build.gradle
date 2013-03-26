@@ -459,12 +459,17 @@ project("spring-web") {
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
 		optional("taglibs:standard:1.1.2")
-		optional("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") {
+		optional("org.eclipse.jetty:jetty-servlet:8.1.10.v20130312") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}
-		optional("org.eclipse.jetty:jetty-server:8.1.5.v20120716") {
+		optional("org.eclipse.jetty:jetty-server:8.1.10.v20130312") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}
+		optional("org.eclipse.jetty:jetty-webapp:8.1.10.v20130312") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		optional("org.apache.tomcat.embed:tomcat-embed-core:7.0.37")
+		optional("org.apache.tomcat.embed:tomcat-embed-logging-juli:7.0.37")
 		optional("log4j:log4j:1.2.17")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.3")
@@ -762,6 +767,17 @@ configure(rootProject) {
 		testCompile("javax.resource:connector-api:1.5")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+		testCompile("org.eclipse.jetty:jetty-servlet:8.1.10.v20130312") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("org.eclipse.jetty:jetty-server:8.1.10.v20130312") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("org.eclipse.jetty:jetty-webapp:8.1.10.v20130312") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:7.0.37")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:7.0.37")
 	}
 
 	task api(type: Javadoc) {
