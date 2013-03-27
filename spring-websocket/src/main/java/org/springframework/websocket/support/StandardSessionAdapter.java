@@ -24,6 +24,7 @@ import org.springframework.websocket.Session;
 /**
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public class StandardSessionAdapter implements Session {
 

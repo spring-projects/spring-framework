@@ -15,7 +15,6 @@
  */
 package org.springframework.websocket.support;
 
-import javax.servlet.ServletContext;
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerContainerProvider;
@@ -23,12 +22,10 @@ import javax.websocket.server.ServerEndpointConfig;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.util.Assert;
-import org.springframework.web.context.ServletContextAware;
 
 /**
  * BeanPostProcessor that registers {@link javax.websocket.server.ServerEndpointConfig}
@@ -38,7 +35,7 @@ import org.springframework.web.context.ServletContextAware;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServerEndpointPostProcessor implements ServletContextAware, BeanPostProcessor, InitializingBean {
+public class ServerEndpointPostProcessor implements BeanPostProcessor, InitializingBean {
 
 	private static Log logger = LogFactory.getLog(ServerEndpointPostProcessor.class);
 
@@ -47,8 +44,6 @@ public class ServerEndpointPostProcessor implements ServletContextAware, BeanPos
 	private Integer maxTextMessageBufferSize;
 
 	private Integer maxBinaryMessageBufferSize;
-
-	private ServletContext servletContext;
 
 
 	/**
@@ -88,17 +83,7 @@ public class ServerEndpointPostProcessor implements ServletContextAware, BeanPos
 	}
 
 	@Override
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
-	public ServletContext getServletContext() {
-		return servletContext;
-	}
-
-	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		ServerContainer serverContainer = ServerContainerProvider.getServerContainer();
 		Assert.notNull(serverContainer, "javax.websocket.server.ServerContainer not available");
 
@@ -111,10 +96,6 @@ public class ServerEndpointPostProcessor implements ServletContextAware, BeanPos
 		if (this.maxBinaryMessageBufferSize != null) {
 			serverContainer.setDefaultMaxBinaryMessageBufferSize(this.maxBinaryMessageBufferSize);
 		}
-
-		// TODO: this is necessary but only done on Tomcat
-		WsServerContainer sc = WsServerContainer.getServerContainer();
-        sc.setServletContext(this.servletContext);
 	}
 
 	@Override

@@ -21,6 +21,7 @@ package org.springframework.websocket;
 /**
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public interface Session {
 

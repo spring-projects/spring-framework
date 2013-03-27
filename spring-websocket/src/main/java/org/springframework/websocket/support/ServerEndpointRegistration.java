@@ -49,6 +49,7 @@ import org.springframework.websocket.WebSocketHandler;
  * registered with a Java WebSocket runtime at startup.
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
 

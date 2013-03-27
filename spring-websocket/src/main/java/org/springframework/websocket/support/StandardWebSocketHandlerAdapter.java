@@ -34,6 +34,7 @@ import org.springframework.websocket.WebSocketHandler;
 /**
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public class StandardWebSocketHandlerAdapter extends Endpoint {
 

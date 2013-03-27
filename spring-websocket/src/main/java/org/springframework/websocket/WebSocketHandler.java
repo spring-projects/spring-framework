@@ -22,6 +22,7 @@ import java.io.InputStream;
 /**
  *
  * @author Rossen Stoyanchev
+ * @since 4.0
  */
 public interface WebSocketHandler {
 
