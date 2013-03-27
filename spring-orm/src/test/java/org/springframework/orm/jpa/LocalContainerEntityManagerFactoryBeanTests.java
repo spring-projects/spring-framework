@@ -324,12 +324,12 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
+		// JPA 2.1 method
 		public void generateSchema(PersistenceUnitInfo persistenceUnitInfo, Map map) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
+		// JPA 2.1 method
 		public boolean generateSchema(String persistenceUnitName, Map map) {
 			throw new UnsupportedOperationException();
 		}

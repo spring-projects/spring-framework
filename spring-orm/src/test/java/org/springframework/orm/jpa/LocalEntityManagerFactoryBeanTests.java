@@ -18,7 +18,6 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 import java.util.Properties;
-
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
@@ -101,12 +100,12 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
+		// JPA 2.1 method
 		public void generateSchema(PersistenceUnitInfo persistenceUnitInfo, Map map) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
+		// JPA 2.1 method
 		public boolean generateSchema(String persistenceUnitName, Map map) {
 			throw new UnsupportedOperationException();
 		}
