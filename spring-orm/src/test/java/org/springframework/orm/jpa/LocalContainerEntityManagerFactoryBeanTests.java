@@ -323,6 +323,16 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		public ProviderUtil getProviderUtil() {
 			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		public void generateSchema(PersistenceUnitInfo persistenceUnitInfo, Map map) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean generateSchema(String persistenceUnitName, Map map) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 

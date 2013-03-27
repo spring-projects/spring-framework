@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 
 	private Class<? extends EntityManager> entityManagerInterface;
 
+	private boolean synchronizedWithTransaction = true;
+
 	private EntityManager shared;
 
 
@@ -70,6 +72,14 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 		Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");
 		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
+	}
+
+	/**
+	 * Set whether to automatically join ongoing transactions (according
+	 * to the JPA 2.1 SynchronizationType rules). Default is "true".
+	 */
+	public void setSynchronizedWithTransaction(boolean synchronizedWithTransaction) {
+		this.synchronizedWithTransaction = synchronizedWithTransaction;
 	}
 
 
@@ -101,7 +111,8 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 			}
 			ifcs = new Class[] {this.entityManagerInterface};
 		}
-		this.shared = SharedEntityManagerCreator.createSharedEntityManager(emf, getJpaPropertyMap(), ifcs);
+		this.shared = SharedEntityManagerCreator.createSharedEntityManager(
+				emf, getJpaPropertyMap(), this.synchronizedWithTransaction, ifcs);
 	}
 
 

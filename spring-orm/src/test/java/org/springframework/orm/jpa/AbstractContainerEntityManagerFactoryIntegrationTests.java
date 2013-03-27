@@ -156,15 +156,6 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		}
 	}
 
-	public void testSharedEntityManagerProxyRejectsProgrammaticTxJoining() {
-		try {
-			sharedEntityManager.joinTransaction();
-			fail("Should not be able to join transactions with container managed EntityManager");
-		}
-		catch (IllegalStateException ex) {
-		}
-	}
-
 //	public void testAspectJInjectionOfConfigurableEntity() {
 //		Person p = new Person();
 //		System.err.println(p);

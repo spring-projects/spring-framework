@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -566,9 +566,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
-		// Remove the entity manager holder from the thread.
+		// Remove the entity manager holder from the thread, if still there.
+		// (Could have been removed by EntityManagerFactoryUtils in order
+		// to replace it with an unsynchronized EntityManager).
 		if (txObject.isNewEntityManagerHolder()) {
-			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+			TransactionSynchronizationManager.unbindResourceIfPossible(getEntityManagerFactory());
 		}
 		txObject.getEntityManagerHolder().clear();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,10 +373,22 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
 			return method.invoke(this.plusOperations, args);
 		}
+		else if (method.getName().equals("createEntityManager") && args != null && args.length > 0 &&
+				args[0] != null && args[0].getClass().isEnum() && "SYNCHRONIZED".equals(args[0].toString())) {
+			// JPA 2.1's createEntityManager(SynchronizationType, Map)
+			// Redirect to plain createEntityManager and add synchronization semantics through Spring proxy
+			EntityManager rawEntityManager = (args.length > 1 ?
+					this.nativeEntityManagerFactory.createEntityManager((Map) args[1]) :
+					this.nativeEntityManagerFactory.createEntityManager());
+			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
+		}
+
+		// Standard delegation to the native factory, just post-processing EntityManager return values
 		Object retVal = method.invoke(this.nativeEntityManagerFactory, args);
 		if (retVal instanceof EntityManager) {
+			// Any other createEntityManager variant - expecting non-synchronized semantics
 			EntityManager rawEntityManager = (EntityManager) retVal;
-			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this);
+			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, false);
 		}
 		return retVal;
 	}

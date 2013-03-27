@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa;
 
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -135,13 +134,15 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 
 	/**
 	 * Prepare a JPA transaction, applying the specified semantics. Called by
-	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction.
+	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction
+	 * or a locally joined transaction (e.g. after upgrading an unsynchronized
+	 * EntityManager to a synchronized one).
 	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
 	 * a transaction data object can be returned that holds the previous flush mode
 	 * (and possibly other data), to be reset in {@code cleanupTransaction}.
-	 * <p>Implementations can also use the Spring transaction name, as exposed by the
-	 * passed-in TransactionDefinition, to optimize for specific data access use cases
-	 * (effectively using the current transaction name as use case identifier).
+	 * <p>Implementations can also use the Spring transaction name to optimize for
+	 * specific data access use cases (effectively using the current transaction
+	 * name as use case identifier).
 	 * @param entityManager the EntityManager to begin a JPA transaction on
 	 * @param readOnly whether the transaction is supposed to be read-only
 	 * @param name the name of the transaction (if any)
