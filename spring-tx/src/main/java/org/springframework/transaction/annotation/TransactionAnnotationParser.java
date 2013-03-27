@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,15 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * Strategy interface for parsing known transaction annotation types.
  * {@link AnnotationTransactionAttributeSource} delegates to such
  * parsers for supporting specific annotation types such as Spring's own
- * {@link Transactional} or EJB3's {@link javax.ejb.TransactionAttribute}.
+ * {@link Transactional}, JTA 1.2's {@link javax.transaction.Transactional}
+ * or EJB3's {@link javax.ejb.TransactionAttribute}.
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see AnnotationTransactionAttributeSource
  * @see SpringTransactionAnnotationParser
  * @see Ejb3TransactionAnnotationParser
+ * @see JtaTransactionAnnotationParser
  */
 public interface TransactionAnnotationParser {
 

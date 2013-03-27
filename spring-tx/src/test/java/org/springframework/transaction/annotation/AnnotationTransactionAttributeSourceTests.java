@@ -258,6 +258,42 @@ public class AnnotationTransactionAttributeSourceTests {
 		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
 	}
 
+	@Test
+	public void testTransactionAttributeDeclaredOnClassMethodWithJta() throws Exception {
+		Method getAgeMethod = ITestBean.class.getMethod("getAge", (Class[]) null);
+		Method getNameMethod = ITestBean.class.getMethod("getName", (Class[]) null);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean1.class);
+		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, JtaAnnotatedBean1.class);
+		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+	}
+
+	@Test
+	public void testTransactionAttributeDeclaredOnClassWithJta() throws Exception {
+		Method getAgeMethod = ITestBean.class.getMethod("getAge", (Class[]) null);
+		Method getNameMethod = ITestBean.class.getMethod("getName", (Class[]) null);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean2.class);
+		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, JtaAnnotatedBean2.class);
+		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+	}
+
+	@Test
+	public void testTransactionAttributeDeclaredOnInterfaceWithJta() throws Exception {
+		Method getAgeMethod = ITestEjb.class.getMethod("getAge", (Class[]) null);
+		Method getNameMethod = ITestEjb.class.getMethod("getName", (Class[]) null);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean3.class);
+		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, JtaAnnotatedBean3.class);
+		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+	}
+
 
 	public interface ITestBean {
 
@@ -598,6 +634,108 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	public static class Ejb3AnnotatedBean3 implements ITestEjb {
+
+		private String name;
+
+		private int age;
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public int getAge() {
+			return age;
+		}
+
+		@Override
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
+
+	public static class JtaAnnotatedBean1 implements ITestBean {
+
+		private String name;
+
+		private int age;
+
+		@Override
+		@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		@javax.transaction.Transactional
+		public int getAge() {
+			return age;
+		}
+
+		@Override
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
+
+	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
+	public static class JtaAnnotatedBean2 implements ITestBean {
+
+		private String name;
+
+		private int age;
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		@javax.transaction.Transactional
+		public int getAge() {
+			return age;
+		}
+
+		@Override
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
+
+	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
+	public interface ITestJta {
+
+		@javax.transaction.Transactional
+		int getAge();
+
+		void setAge(int age);
+
+		String getName();
+
+		void setName(String name);
+	}
+
+
+	public static class JtaAnnotatedBean3 implements ITestEjb {
 
 		private String name;
 
