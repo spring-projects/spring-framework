@@ -74,20 +74,20 @@ configure(allprojects) { project ->
 		"http://docs.oracle.com/javase/6/docs/api",
 		"http://docs.oracle.com/javaee/6/api",
 		"http://portals.apache.org/pluto/portlet-2.0-apidocs/",
-		"http://commons.apache.org/lang/api-2.5",
-		"http://commons.apache.org/codec/apidocs",
-		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector",
-		"http://docs.jboss.org/jbossas/javadoc/7.1.2.Final",
-		"http://aopalliance.sourceforge.net/doc",
-		"http://glassfish.java.net/nonav/docs/v3/api",
-		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs", // commonj
-		"http://quartz-scheduler.org/api/2.1.5",
+		"http://commons.apache.org/proper/commons-lang/javadocs/api-release/",
+		"http://commons.apache.org/proper/commons-codec/apidocs/",
+		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
+		"http://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
+		"http://aopalliance.sourceforge.net/doc/",
+		"http://glassfish.java.net/nonav/docs/v3/api/",
+		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/", // commonj
+		"http://quartz-scheduler.org/api/2.1.5/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-		"http://fasterxml.github.com/jackson-core/javadoc/2.0.0",
-		"http://jackson.codehaus.org/1.4.2/javadoc",
-		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs",
-		"http://tiles.apache.org/framework/apidocs",
-		"http://commons.apache.org/dbcp/api-1.2.2",
+		"http://fasterxml.github.com/jackson-core/javadoc/2.0.0/",
+		"http://jackson.codehaus.org/1.4.2/javadoc/",
+		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
+		"http://tiles.apache.org/framework/apidocs/",
+		"http://commons.apache.org/proper/commons-dbcp/apidocs/",
 	] as String[]
 }
 
