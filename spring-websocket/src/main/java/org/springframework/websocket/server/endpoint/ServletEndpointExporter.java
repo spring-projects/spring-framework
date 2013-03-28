@@ -27,7 +27,7 @@ import org.springframework.web.context.ServletContextAware;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServletServerEndpointExporter extends ServerEndpointExporter implements ServletContextAware {
+public class ServletEndpointExporter extends EndpointExporter implements ServletContextAware {
 
 	private ServletContext servletContext;
 
@@ -43,7 +43,8 @@ public class ServletServerEndpointExporter extends ServerEndpointExporter implem
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		// TODO: remove hard dependency on Tomcat (see Tomcat's WsListener)
+
+		// TODO: this is needed (see WsListener) but remove hard dependency
 		WsServerContainer sc = WsServerContainer.getServerContainer();
         sc.setServletContext(this.servletContext);
 

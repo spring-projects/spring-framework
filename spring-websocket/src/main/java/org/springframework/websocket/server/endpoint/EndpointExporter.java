@@ -33,12 +33,14 @@ import org.springframework.util.Assert;
  * Java WebSocket runtime and also configures the underlying
  * {@link javax.websocket.server.ServerContainer}.
  *
+ * <p>If the runtime is a Servlet container, use {@link ServletEndpointExporter}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServerEndpointExporter implements BeanPostProcessor, InitializingBean {
+public class EndpointExporter implements BeanPostProcessor, InitializingBean {
 
-	private static Log logger = LogFactory.getLog(ServerEndpointExporter.class);
+	private static Log logger = LogFactory.getLog(EndpointExporter.class);
 
 	private Long maxSessionIdleTimeout;
 

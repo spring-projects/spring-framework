@@ -46,13 +46,13 @@ import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
  * which case it will be adapted via {@link StandardWebSocketHandlerAdapter}.
  *
  * <p>
- * Beans of this type are detected by {@link ServerEndpointExporter} and
+ * Beans of this type are detected by {@link EndpointExporter} and
  * registered with a Java WebSocket runtime at startup.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
+public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
 
 	private final String path;
 
@@ -69,14 +69,14 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 	private final Configurator configurator = new Configurator() {};
 
 
-	public ServerEndpointRegistration(String path, String beanName) {
+	public EndpointRegistration(String path, String beanName) {
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(beanName, "beanName is required");
 		this.path = path;
 		this.bean = beanName;
 	}
 
-	public ServerEndpointRegistration(String path, Object bean) {
+	public EndpointRegistration(String path, Object bean) {
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(bean, "bean is required");
 		this.path = path;
@@ -104,7 +104,7 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 		}
 	}
 
-	protected Endpoint getEndpoint() {
+	public Endpoint getEndpoint() {
 		Object bean = this.bean;
 		if (this.bean instanceof String) {
 			bean = this.beanFactory.getBean((String) this.bean);
@@ -166,23 +166,23 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 			@SuppressWarnings("unchecked")
 			@Override
 			public <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
-				return (T) ServerEndpointRegistration.this.getEndpoint();
+				return (T) EndpointRegistration.this.getEndpoint();
 			}
 			@Override
 			public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
-				ServerEndpointRegistration.this.modifyHandshake(request, response);
+				EndpointRegistration.this.modifyHandshake(request, response);
 			}
 			@Override
 			public boolean checkOrigin(String originHeaderValue) {
-				return ServerEndpointRegistration.this.checkOrigin(originHeaderValue);
+				return EndpointRegistration.this.checkOrigin(originHeaderValue);
 			}
 			@Override
 			public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-				return ServerEndpointRegistration.this.selectSubProtocol(requested);
+				return EndpointRegistration.this.selectSubProtocol(requested);
 			}
 			@Override
 			public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-				return ServerEndpointRegistration.this.selectExtensions(requested);
+				return EndpointRegistration.this.selectExtensions(requested);
 			}
 		};
 	}
