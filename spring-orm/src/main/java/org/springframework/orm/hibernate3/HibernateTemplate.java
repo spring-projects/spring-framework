@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -748,18 +748,6 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
 				session.saveOrUpdate(entityName, entity);
-				return null;
-			}
-		});
-	}
-
-	public void saveOrUpdateAll(final Collection entities) throws DataAccessException {
-		executeWithNativeSession(new HibernateCallback<Object>() {
-			public Object doInHibernate(Session session) throws HibernateException {
-				checkWriteOperationAllowed(session);
-				for (Object entity : entities) {
-					session.saveOrUpdate(entity);
-				}
 				return null;
 			}
 		});
