@@ -85,8 +85,12 @@ abstract class ConditionalAnnotationHelper {
 		if (configClass == null) {
 			return false;
 		}
-		return shouldSkip(configClass.getMetadata(), context)
-				|| shouldSkip(configClass.getImportedBy(), context);
+		return shouldSkip(configClass.getMetadata(), context);
+		//FIXME consider this, we should probably not check imported by
+		// because by definition they must have been considered valid when
+		// processed. Problems occur if a @Conditional imports a couple of configs
+		// and one adds beans such the condition no longer passes.
+				// || shouldSkip(configClass.getImportedBy(), context);
 	}
 
 	private static boolean shouldSkip(AnnotatedTypeMetadata metadata,
