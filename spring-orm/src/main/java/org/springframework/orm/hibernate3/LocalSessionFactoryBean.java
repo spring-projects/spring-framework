@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate3;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,7 +25,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
@@ -37,6 +35,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cache.RegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.cfg.Mappings;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
@@ -44,6 +43,7 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.event.EventListeners;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.io.ClassPathResource;
@@ -53,7 +53,6 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -89,7 +88,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p><b>Requires Hibernate 3.2 or later; tested with 3.3, 3.5 and 3.6.</b>
+ * <p><b>Requires Hibernate 3.6 or later.</b>
  * Note that this factory will use "on_close" as default Hibernate connection
  * release mode, unless in the case of a "jtaTransactionManager" specified,
  * for the reason that this is appropriate for most Spring-based applications
@@ -583,15 +582,9 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.typeDefinitions != null) {
 				// Register specified Hibernate type definitions.
-				// Use reflection for compatibility with both Hibernate 3.3 and 3.5:
-				// the returned Mappings object changed from a class to an interface.
-				Method createMappings = Configuration.class.getMethod("createMappings");
-				Method addTypeDef = createMappings.getReturnType().getMethod(
-						"addTypeDef", String.class, String.class, Properties.class);
-				Object mappings = ReflectionUtils.invokeMethod(createMappings, config);
+				Mappings mappings = config.createMappings();
 				for (TypeDefinitionBean typeDef : this.typeDefinitions) {
-					ReflectionUtils.invokeMethod(addTypeDef, mappings,
-							typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
+					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
 				}
 			}
 
@@ -628,8 +621,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.cacheRegionFactory != null) {
 				// Expose Spring-provided Hibernate RegionFactory.
-				config.setProperty(Environment.CACHE_REGION_FACTORY,
-						"org.springframework.orm.hibernate3.LocalRegionFactoryProxy");
+				config.setProperty(Environment.CACHE_REGION_FACTORY, LocalRegionFactoryProxy.class.getName());
 			}
 
 			if (this.mappingResources != null) {
@@ -685,12 +677,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 					String[] strategyAndRegion =
 							StringUtils.commaDelimitedListToStringArray(this.entityCacheStrategies.getProperty(className));
 					if (strategyAndRegion.length > 1) {
-						// method signature declares return type as Configuration on Hibernate 3.6
-						// but as void on Hibernate 3.3 and 3.5
-						Method setCacheConcurrencyStrategy = Configuration.class.getMethod(
-								"setCacheConcurrencyStrategy", String.class, String.class, String.class);
-						ReflectionUtils.invokeMethod(setCacheConcurrencyStrategy, config,
-								className, strategyAndRegion[0], strategyAndRegion[1]);
+						config.setCacheConcurrencyStrategy(className, strategyAndRegion[0], strategyAndRegion[1]);
 					}
 					else if (strategyAndRegion.length > 0) {
 						config.setCacheConcurrencyStrategy(className, strategyAndRegion[0]);

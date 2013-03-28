@@ -23,7 +23,6 @@ import javax.persistence.MappedSuperclass;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
-import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Configuration;
 
 import org.springframework.context.ResourceLoaderAware;
@@ -44,8 +43,8 @@ import org.springframework.util.ClassUtils;
  * Subclass of Spring's standard LocalSessionFactoryBean for Hibernate,
  * supporting JDK 1.5+ annotation metadata for mappings.
  *
- * <p>Note: This class requires Hibernate 3.2 or later, with the
- * Java Persistence API and the Hibernate Annotations add-on present.
+ * <p>Note: As of Spring 4.0, this class requires Hibernate 3.6 or later,
+ * with the Java Persistence API present.
  *
  * <p>Example for an AnnotationSessionFactoryBean bean definition:
  *
@@ -97,24 +96,10 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 
-	public AnnotationSessionFactoryBean() {
-		setConfigurationClass(AnnotationConfiguration.class);
-	}
-
-
-	@Override
-	public void setConfigurationClass(Class<?> configurationClass) {
-		if (configurationClass == null || !AnnotationConfiguration.class.isAssignableFrom(configurationClass)) {
-			throw new IllegalArgumentException(
-					"AnnotationSessionFactoryBean only supports AnnotationConfiguration or subclasses");
-		}
-		super.setConfigurationClass(configurationClass);
-	}
-
 	/**
 	 * Specify annotated classes, for which mappings will be read from
 	 * class-level JDK 1.5+ annotation metadata.
-	 * @see org.hibernate.cfg.AnnotationConfiguration#addAnnotatedClass(Class)
+	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
 	public void setAnnotatedClasses(Class[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
@@ -123,7 +108,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	/**
 	 * Specify the names of annotated packages, for which package-level
 	 * JDK 1.5+ annotation metadata will be read.
-	 * @see org.hibernate.cfg.AnnotationConfiguration#addPackage(String)
+	 * @see org.hibernate.cfg.Configuration#addPackage(String)
 	 */
 	public void setAnnotatedPackages(String[] annotatedPackages) {
 		this.annotatedPackages = annotatedPackages;
@@ -163,25 +148,24 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 */
 	@Override
 	protected void postProcessMappings(Configuration config) throws HibernateException {
-		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
 		if (this.annotatedClasses != null) {
 			for (Class annotatedClass : this.annotatedClasses) {
-				annConfig.addAnnotatedClass(annotatedClass);
+				config.addAnnotatedClass(annotatedClass);
 			}
 		}
 		if (this.annotatedPackages != null) {
 			for (String annotatedPackage : this.annotatedPackages) {
-				annConfig.addPackage(annotatedPackage);
+				config.addPackage(annotatedPackage);
 			}
 		}
-		scanPackages(annConfig);
+		scanPackages(config);
 	}
 
 	/**
 	 * Perform Spring-based scanning for entity classes.
 	 * @see #setPackagesToScan
 	 */
-	protected void scanPackages(AnnotationConfiguration config) {
+	protected void scanPackages(Configuration config) {
 		if (this.packagesToScan != null) {
 			try {
 				for (String pkg : this.packagesToScan) {
@@ -225,29 +209,6 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 			}
 		}
 		return false;
-	}
-
-
-	/**
-	 * This default implementation delegates to {@link #postProcessAnnotationConfiguration}.
-	 */
-	@Override
-	protected void postProcessConfiguration(Configuration config) throws HibernateException {
-		postProcessAnnotationConfiguration((AnnotationConfiguration) config);
-	}
-
-	/**
-	 * To be implemented by subclasses which want to to perform custom
-	 * post-processing of the AnnotationConfiguration object after this
-	 * FactoryBean performed its default initialization.
-	 * <p>Note: As of Hibernate 3.6, AnnotationConfiguration's features
-	 * have been rolled into Configuration itself. Simply overriding
-	 * {@link #postProcessConfiguration(org.hibernate.cfg.Configuration)}
-	 * becomes an option as well then.
-	 * @param config the current AnnotationConfiguration object
-	 * @throws HibernateException in case of Hibernate initialization errors
-	 */
-	protected void postProcessAnnotationConfiguration(AnnotationConfiguration config) throws HibernateException {
 	}
 
 }

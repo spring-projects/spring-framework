@@ -85,8 +85,7 @@ public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition
 	/**
 	 * Set the parameter types for the filter,
 	 * with parameter names as keys and type names as values.
-	 * See {@code org.hibernate.type.TypeFactory#heuristicType(String)} (Hibernate 3.x)
-	 * or {@code org.hibernate.type.TypeResolver#heuristicType(String)} (Hibernate 4.x)
+	 * See {@code org.hibernate.type.TypeResolver#heuristicType(String)}.
 	 */
 	public void setParameterTypes(Map<String, String> parameterTypes) {
 		if (parameterTypes != null) {
