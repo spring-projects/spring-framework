@@ -51,6 +51,10 @@ public class MethodReference extends SpelNodeImpl {
 		this.name = methodName;
 		this.nullSafe = nullSafe;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
 	class MethodValueRef implements ValueRef {
 
