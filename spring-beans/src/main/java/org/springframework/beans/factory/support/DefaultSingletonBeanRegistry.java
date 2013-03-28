@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -92,11 +93,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Set of registered singletons, containing the bean names in registration order */
 	private final Set<String> registeredSingletons = new LinkedHashSet<String>(64);
 
-	/** Names of beans that are currently in creation (using a ConcurrentHashMap as a Set) */
-	private final Map<String, Boolean> singletonsCurrentlyInCreation = new ConcurrentHashMap<String, Boolean>(16);
+	/** Names of beans that are currently in creation */
+	private final Set<String> singletonsCurrentlyInCreation =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
 
-	/** Names of beans currently excluded from in creation checks (using a ConcurrentHashMap as a Set) */
-	private final Map<String, Boolean> inCreationCheckExclusions = new ConcurrentHashMap<String, Boolean>(16);
+	/** Names of beans currently excluded from in creation checks */
+	private final Set<String> inCreationCheckExclusions =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
 
 	/** List of suppressed Exceptions, available for associating related causes */
 	private Set<Exception> suppressedExceptions;
@@ -290,7 +293,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public void setCurrentlyInCreation(String beanName, boolean inCreation) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		if (!inCreation) {
-			this.inCreationCheckExclusions.put(beanName, Boolean.TRUE);
+			this.inCreationCheckExclusions.add(beanName);
 		}
 		else {
 			this.inCreationCheckExclusions.remove(beanName);
@@ -299,7 +302,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	public boolean isCurrentlyInCreation(String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
-		return (!this.inCreationCheckExclusions.containsKey(beanName) && isActuallyInCreation(beanName));
+		return (!this.inCreationCheckExclusions.contains(beanName) && isActuallyInCreation(beanName));
 	}
 
 	protected boolean isActuallyInCreation(String beanName) {
@@ -312,18 +315,18 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param beanName the name of the bean
 	 */
 	public boolean isSingletonCurrentlyInCreation(String beanName) {
-		return this.singletonsCurrentlyInCreation.containsKey(beanName);
+		return this.singletonsCurrentlyInCreation.contains(beanName);
 	}
 
 	/**
 	 * Callback before singleton creation.
-	 * <p>Default implementation register the singleton as currently in creation.
+	 * <p>The default implementation register the singleton as currently in creation.
 	 * @param beanName the name of the singleton about to be created
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void beforeSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.containsKey(beanName) &&
-				this.singletonsCurrentlyInCreation.put(beanName, Boolean.TRUE) != null) {
+		if (!this.inCreationCheckExclusions.contains(beanName) &&
+				!this.singletonsCurrentlyInCreation.add(beanName)) {
 			throw new BeanCurrentlyInCreationException(beanName);
 		}
 	}
@@ -335,7 +338,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void afterSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.containsKey(beanName) &&
+		if (!this.inCreationCheckExclusions.contains(beanName) &&
 				!this.singletonsCurrentlyInCreation.remove(beanName)) {
 			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
 		}
