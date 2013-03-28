@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.servlet;
+package org.springframework.websocket.server.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -31,17 +31,16 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.websocket.AbstractHandshakeRequestHandler;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.support.ServerEndpointRegistration;
-import org.springframework.websocket.support.StandardWebSocketHandlerAdapter;
+import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
+import org.springframework.websocket.server.AbstractHandshakeRequestHandler;
 
 
 /**
-*
-* @author Rossen Stoyanchev
+ *
+ * @author Rossen Stoyanchev
  * @since 4.0
-*/
+ */
 public class TomcatHandshakeRequestHandler extends AbstractHandshakeRequestHandler {
 
 	private final Endpoint endpoint;
@@ -50,13 +49,12 @@ public class TomcatHandshakeRequestHandler extends AbstractHandshakeRequestHandl
 
 
 	public TomcatHandshakeRequestHandler(WebSocketHandler webSocketHandler) {
-		this.endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler);
-		this.endpointConfig = new ServerEndpointRegistration("/shouldnotmatter", this.endpoint);
+		this(new StandardWebSocketHandlerAdapter(webSocketHandler));
 	}
 
 	public TomcatHandshakeRequestHandler(Endpoint endpoint) {
 		this.endpoint = endpoint;
-		this.endpointConfig = new ServerEndpointRegistration("/shouldnotmatter", this.endpoint);
+		this.endpointConfig = new ServerEndpointRegistration("/dummy", this.endpoint);
 	}
 
 	@Override

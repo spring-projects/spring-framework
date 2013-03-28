@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.servlet;
+package org.springframework.websocket.server.endpoint;
 
 import javax.servlet.ServletContext;
 
 import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.websocket.support.ServerEndpointPostProcessor;
 
 
 /**
@@ -28,7 +27,7 @@ import org.springframework.websocket.support.ServerEndpointPostProcessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServletServerEndpointPostProcessor extends ServerEndpointPostProcessor implements ServletContextAware {
+public class ServletServerEndpointExporter extends ServerEndpointExporter implements ServletContextAware {
 
 	private ServletContext servletContext;
 

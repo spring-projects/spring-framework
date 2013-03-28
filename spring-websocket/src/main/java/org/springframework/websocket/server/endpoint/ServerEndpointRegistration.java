@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.support;
+package org.springframework.websocket.server.endpoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +36,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
 
 
 /**
@@ -45,7 +46,7 @@ import org.springframework.websocket.WebSocketHandler;
  * which case it will be adapted via {@link StandardWebSocketHandlerAdapter}.
  *
  * <p>
- * Beans of this type are detected by {@link ServerEndpointPostProcessor} and
+ * Beans of this type are detected by {@link ServerEndpointExporter} and
  * registered with a Java WebSocket runtime at startup.
  *
  * @author Rossen Stoyanchev

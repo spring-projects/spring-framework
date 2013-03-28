@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.websocket.support;
+package org.springframework.websocket.server.endpoint;
 
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
@@ -28,16 +28,17 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.util.Assert;
 
 /**
- * BeanPostProcessor that registers {@link javax.websocket.server.ServerEndpointConfig}
- * beans with a standard Java WebSocket runtime and also configures the underlying
+ * BeanPostProcessor that detects beans of type
+ * {@link javax.websocket.server.ServerEndpointConfig} and registers them with a standard
+ * Java WebSocket runtime and also configures the underlying
  * {@link javax.websocket.server.ServerContainer}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServerEndpointPostProcessor implements BeanPostProcessor, InitializingBean {
+public class ServerEndpointExporter implements BeanPostProcessor, InitializingBean {
 
-	private static Log logger = LogFactory.getLog(ServerEndpointPostProcessor.class);
+	private static Log logger = LogFactory.getLog(ServerEndpointExporter.class);
 
 	private Long maxSessionIdleTimeout;
 

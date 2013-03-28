@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket;
+package org.springframework.websocket.server;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

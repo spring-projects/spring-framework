@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket;
+package org.springframework.websocket.server;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;

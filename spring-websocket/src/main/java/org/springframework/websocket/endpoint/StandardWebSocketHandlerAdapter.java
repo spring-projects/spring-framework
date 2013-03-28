@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.support;
+package org.springframework.websocket.endpoint;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
