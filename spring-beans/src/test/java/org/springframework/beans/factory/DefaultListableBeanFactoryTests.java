@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
@@ -41,6 +40,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -1550,6 +1550,23 @@ public class DefaultListableBeanFactoryTests {
 		assertEquals(99, tb.getAge());
 		assertNull(tb.getBeanFactory());
 		assertNull(tb.getSpouse());
+	}
+
+	@Test
+	public void testCreateBean() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		TestBean tb = lbf.createBean(TestBean.class);
+		assertSame(lbf, tb.getBeanFactory());
+		lbf.destroyBean(tb);
+	}
+
+	@Test
+	public void testCreateBeanWithDisposableBean() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		DerivedTestBean tb = lbf.createBean(DerivedTestBean.class);
+		assertSame(lbf, tb.getBeanFactory());
+		lbf.destroyBean(tb);
+		assertTrue(tb.wasDestroyed());
 	}
 
 	@Test
