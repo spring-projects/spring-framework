@@ -56,9 +56,6 @@ public abstract class SharedEntityManagerCreator {
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory,
 	 * automatically joining ongoing transactions.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the {@link EntityManagerFactoryInfo} interface,
-	 * appropriate handling of the native EntityManagerFactory and available
-	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf) {
@@ -68,9 +65,6 @@ public abstract class SharedEntityManagerCreator {
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the {@link EntityManagerFactoryInfo} interface,
-	 * appropriate handling of the native EntityManagerFactory and available
-	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @return a shareable transaction EntityManager proxy
@@ -82,9 +76,6 @@ public abstract class SharedEntityManagerCreator {
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the {@link EntityManagerFactoryInfo} interface,
-	 * appropriate handling of the native EntityManagerFactory and available
-	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @param synchronizedWithTransaction whether to automatically join ongoing
@@ -94,25 +85,9 @@ public abstract class SharedEntityManagerCreator {
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) {
 
-		Class[] emIfcs;
-		if (emf instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			Class emIfc = emfInfo.getEntityManagerInterface();
-			if (emIfc == null) {
-				emIfc = EntityManager.class;
-			}
-			JpaDialect jpaDialect = emfInfo.getJpaDialect();
-			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
-				emIfcs = new Class[] {emIfc, EntityManagerPlus.class};
-			}
-			else {
-				emIfcs = new Class[] {emIfc};
-			}
-		}
-		else {
-			emIfcs = new Class[] {EntityManager.class};
-		}
-		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, emIfcs);
+		Class emIfc = (emf instanceof EntityManagerFactoryInfo ?
+				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
+		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, emIfc);
 	}
 
 	/**

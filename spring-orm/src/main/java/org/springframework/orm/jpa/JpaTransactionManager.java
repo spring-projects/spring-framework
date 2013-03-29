@@ -55,8 +55,8 @@ import org.springframework.util.CollectionUtils;
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
  * for a single JPA {@link javax.persistence.EntityManagerFactory}. Binds a JPA
  * EntityManager from the specified factory to the thread, potentially allowing for
- * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator}
- * and {@link JpaTemplate} are aware of thread-bound entity managers and participate
+ * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator} and
+ * {@code @PersistenceContext} are aware of thread-bound entity managers and participate
  * in such transactions automatically. Using either is required for JPA access code
  * supporting this transaction management mechanism.
  *
@@ -100,7 +100,6 @@ import org.springframework.util.CollectionUtils;
  * @see #setEntityManagerFactory
  * @see #setDataSource
  * @see LocalEntityManagerFactoryBean
- * @see JpaTemplate#execute
  * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection

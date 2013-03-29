@@ -110,8 +110,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/** Raw EntityManagerFactory as returned by the PersistenceProvider */
 	public EntityManagerFactory nativeEntityManagerFactory;
 
-	private EntityManagerFactoryPlusOperations plusOperations;
-
 	private EntityManagerFactory entityManagerFactory;
 
 
@@ -339,10 +337,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), this.beanClassLoader));
 		}
 		ifcs.add(EntityManagerFactoryInfo.class);
-		if (getJpaDialect() != null && getJpaDialect().supportsEntityManagerFactoryPlusOperations()) {
-			this.plusOperations = getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
-			ifcs.add(EntityManagerFactoryPlusOperations.class);
-		}
 		try {
 			return (EntityManagerFactory) Proxy.newProxyInstance(
 					this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
@@ -363,15 +357,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo /
-	 * EntityManagerFactoryPlusOperations / the native EntityManagerFactory accordingly.
+	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo
+	 * or the native EntityManagerFactory accordingly.
 	 */
 	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
 		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 			return method.invoke(this, args);
-		}
-		else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
-			return method.invoke(this.plusOperations, args);
 		}
 		else if (method.getName().equals("createEntityManager") && args != null && args.length > 0 &&
 				args[0] != null && args[0].getClass().isEnum() && "SYNCHRONIZED".equals(args[0].toString())) {

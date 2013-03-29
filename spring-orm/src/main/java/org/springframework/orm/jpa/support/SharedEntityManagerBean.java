@@ -23,8 +23,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
-import org.springframework.orm.jpa.EntityManagerPlus;
-import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 
@@ -88,7 +86,6 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 		if (emf == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
-		Class[] ifcs = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			if (this.entityManagerInterface == null) {
@@ -97,22 +94,14 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 					this.entityManagerInterface = EntityManager.class;
 				}
 			}
-			JpaDialect jpaDialect = emfInfo.getJpaDialect();
-			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
-				ifcs = new Class[] {this.entityManagerInterface, EntityManagerPlus.class};
-			}
-			else {
-				ifcs = new Class[] {this.entityManagerInterface};
-			}
 		}
 		else {
 			if (this.entityManagerInterface == null) {
 				this.entityManagerInterface = EntityManager.class;
 			}
-			ifcs = new Class[] {this.entityManagerInterface};
 		}
 		this.shared = SharedEntityManagerCreator.createSharedEntityManager(
-				emf, getJpaPropertyMap(), this.synchronizedWithTransaction, ifcs);
+				emf, getJpaPropertyMap(), this.synchronizedWithTransaction, this.entityManagerInterface);
 	}
 
 
