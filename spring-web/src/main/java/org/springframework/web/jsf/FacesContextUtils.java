@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Convenience methods to retrieve the root WebApplicationContext for a given
- * FacesContext. This is e.g. useful for accessing a Spring context from
- * custom JSF code.
+ * Convenience methods to retrieve Spring's root {@link WebApplicationContext}
+ * for a given JSF {@link FacesContext}. This is useful for accessing a
+ * Spring application context from custom JSF-based code.
  *
  * <p>Analogous to Spring's WebApplicationContextUtils for the ServletContext.
  *
@@ -38,8 +38,8 @@ import org.springframework.web.util.WebUtils;
 public abstract class FacesContextUtils {
 
 	/**
-	 * Find the root WebApplicationContext for this web app, which is
-	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * Find the root {@link WebApplicationContext} for this web app,
+	 * typically loaded via ContextLoaderListener.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param fc the FacesContext to find the web application context for
@@ -66,8 +66,8 @@ public abstract class FacesContextUtils {
 	}
 
 	/**
-	 * Find the root WebApplicationContext for this web app, which is
-	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
+	 * Find the root {@link WebApplicationContext} for this web app,
+	 * typically loaded via ContextLoaderListener.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param fc the FacesContext to find the web application context for
@@ -76,7 +76,7 @@ public abstract class FacesContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(FacesContext fc)
-		throws IllegalStateException {
+			throws IllegalStateException {
 
 		WebApplicationContext wac = getWebApplicationContext(fc);
 		if (wac == null) {
