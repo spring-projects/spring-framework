@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,11 @@ import org.springframework.web.context.request.WebRequestInterceptor;
  *
  * <p>In contrast to {@link OpenPersistenceManagerInViewFilter}, this interceptor
  * is set up in a Spring application context and can thus take advantage of
- * bean wiring. It inherits common JDO configuration properties from
- * {@link org.springframework.orm.jdo.JdoAccessor}, to be configured in a
- * bean definition.
+ * bean wiring.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see OpenPersistenceManagerInViewFilter
- * @see org.springframework.orm.jdo.JdoInterceptor
  * @see org.springframework.orm.jdo.JdoTransactionManager
  * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager

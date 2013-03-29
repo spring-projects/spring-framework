@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,12 +49,6 @@ import org.springframework.util.ClassUtils;
  * PersistenceManagerFactory and this proxy for a local PersistenceManagerFactory,
  * receiving the reference through Dependency Injection. This will work without
  * any Spring API dependencies in the DAO code!
- *
- * <p>It is usually preferable to write your JDO-based DAOs with Spring's
- * {@link JdoTemplate}, offering benefits such as consistent data access
- * exceptions instead of JDOExceptions at the DAO layer. However, Spring's
- * resource and transaction management (and Dependency	Injection) will work
- * for DAOs written against the plain JDO API as well.
  *
  * <p>Of course, you can still access the target PersistenceManagerFactory
  * even when your DAOs go through this proxy, by defining a bean reference
