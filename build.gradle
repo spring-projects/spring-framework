@@ -83,7 +83,6 @@ configure(allprojects) { project ->
 		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs", // commonj
 		"http://quartz-scheduler.org/api/2.1.5",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-		"http://hc.apache.org/httpclient-3.x/apidocs",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.0.0",
 		"http://jackson.codehaus.org/1.4.2/javadoc",
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs",
@@ -453,7 +452,6 @@ project("spring-web") {
 		optional("rome:rome:1.0")
 		optional("commons-fileupload:commons-fileupload:1.2")
 		optional("commons-io:commons-io:1.3")
-		optional("commons-httpclient:commons-httpclient:3.1")
 		optional("org.apache.httpcomponents:httpclient:4.2")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
