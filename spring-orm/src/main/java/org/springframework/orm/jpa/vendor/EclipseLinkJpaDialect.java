@@ -21,9 +21,6 @@ import java.sql.SQLException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
-import org.eclipse.persistence.internal.sessions.AbstractSession;
-import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.sessions.UnitOfWork;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -79,33 +76,19 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 		super.beginTransaction(entityManager, definition);
 		if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
-			// This is the magic bit. As with the existing Spring TopLink integration,
-			// begin an early transaction to force EclipseLink to get a JDBC Connection
+			// Begin an early transaction to force EclipseLink to get a JDBC Connection
 			// so that Spring can manage transactions with JDBC as well as EclipseLink.
-			UnitOfWork uow = (UnitOfWork) getSession(entityManager);
-			uow.beginEarlyTransaction();
+			entityManager.unwrap(UnitOfWork.class).beginEarlyTransaction();
 		}
-		// Could return the UOW, if there were any advantage in having it later.
 		return null;
 	}
 
 	@Override
-	public ConnectionHandle getJdbcConnection(EntityManager em, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
-		AbstractSession session = (AbstractSession) getSession(em);
-		// The connection was already acquired eagerly in beginTransaction,
-		// unless lazyDatabaseTransaction was set to true.
-		Connection con = session.getAccessor().getConnection();
+		Connection con = entityManager.unwrap(Connection.class);
 		return (con != null ? new SimpleConnectionHandle(con) : null);
-	}
-
-	/**
-	 * Get a traditional EclipseLink Session from the given EntityManager.
-	 */
-	protected Session getSession(EntityManager em) {
-		JpaEntityManager emi = (JpaEntityManager) em;
-		return emi.getActiveSession();
 	}
 
 }
