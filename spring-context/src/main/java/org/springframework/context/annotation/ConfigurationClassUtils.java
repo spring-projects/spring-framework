@@ -101,9 +101,12 @@ abstract class ConfigurationClassUtils {
 	}
 
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
-		return !metadata.isInterface() && // not an interface or an annotation
-				(metadata.isAnnotated(Component.class.getName()) ||
-				metadata.hasAnnotatedMethods(Bean.class.getName()));
+		if(metadata.isInterface()) {
+			return false; // do not consider an interface or an annotation
+		}
+		return metadata.isAnnotated(Import.class.getName()) ||
+				metadata.isAnnotated(Component.class.getName()) ||
+				metadata.hasAnnotatedMethods(Bean.class.getName());
 	}
 
 

@@ -80,7 +80,7 @@ final class ConfigurationClass {
 	/**
 	 * Create a new {@link ConfigurationClass} representing a class that was imported
 	 * using the {@link Import} annotation or automatically processed as a nested
-	 * configuration class (if imported is {@code true}).
+	 * configuration class (if importedBy is not {@code null}).
 	 * @param metadataReader reader used to parse the underlying {@link Class}
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @since 3.1.1

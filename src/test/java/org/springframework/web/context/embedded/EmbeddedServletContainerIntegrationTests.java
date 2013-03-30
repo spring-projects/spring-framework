@@ -101,7 +101,6 @@ public class EmbeddedServletContainerIntegrationTests {
 
 	@Configuration
 	@EnableWebMvc
-	@Import(HelloWorldController.class)
 	public static class Config {
 
 		@Bean
@@ -111,11 +110,15 @@ public class EmbeddedServletContainerIntegrationTests {
 			// ServletRegistration and FilterRegistration. Read the
 			// EmbeddedWebApplicationContext javadoc for details
 		}
+
+		@Bean
+		public HelloWorldController helloWorldController() {
+			return new HelloWorldController();
+		}
 	}
 
 	@Configuration
 	@EnableWebMvc
-	@Import(HelloWorldController.class)
 	@PropertySource("classpath:/org/springframework/web/context/embedded/conf.properties")
 	public static class AdvancedConfig {
 
@@ -145,6 +148,10 @@ public class EmbeddedServletContainerIntegrationTests {
 			return dispatcherServlet;
 		}
 
+		@Bean
+		public HelloWorldController helloWorldController() {
+			return new HelloWorldController();
+		}
 	}
 
 	@Controller
