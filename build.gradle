@@ -502,8 +502,8 @@ project("spring-orm-hibernate4") {
 	dependencies {
 		provided(project(":spring-tx"))
 		provided(project(":spring-jdbc"))
-		optional("org.hibernate:hibernate-core:4.1.9.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.1.9.Final")
+		optional("org.hibernate:hibernate-core:4.2.0.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.0.Final")
 		optional(project(":spring-web"))
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 	}
@@ -751,7 +751,7 @@ configure(rootProject) {
 		testCompile(project(":spring-web"))
 		testCompile(project(":spring-webmvc-portlet"))
 		testCompile(project(":spring-orm"))
-		testCompile("org.hibernate:hibernate-core:4.1.9.Final")
+		testCompile("org.hibernate:hibernate-core:4.2.0.Final")
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("javax.portlet:portlet-api:2.0")
 		testCompile("javax.inject:javax.inject:1")
