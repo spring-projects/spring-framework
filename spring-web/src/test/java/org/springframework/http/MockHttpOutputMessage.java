@@ -32,6 +32,9 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 
 	private final ByteArrayOutputStream body = spy(new ByteArrayOutputStream());
 
+	private final Cookies cookies = new Cookies();
+
+
 	@Override
 	public HttpHeaders getHeaders() {
 		return headers;
@@ -49,5 +52,10 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	public String getBodyAsString(Charset charset) {
 		byte[] bytes = getBodyAsBytes();
 		return new String(bytes, charset);
+	}
+
+	@Override
+	public Cookies getCookies() {
+		return this.cookies;
 	}
 }

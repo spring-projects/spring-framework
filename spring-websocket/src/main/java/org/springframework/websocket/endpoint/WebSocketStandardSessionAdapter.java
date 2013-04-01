@@ -18,7 +18,7 @@ package org.springframework.websocket.endpoint;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.websocket.Session;
+import org.springframework.websocket.WebSocketSession;
 
 
 /**
@@ -26,26 +26,33 @@ import org.springframework.websocket.Session;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardSessionAdapter implements Session {
+public class WebSocketStandardSessionAdapter implements WebSocketSession {
 
-	private static Log logger = LogFactory.getLog(StandardSessionAdapter.class);
+	private static Log logger = LogFactory.getLog(WebSocketStandardSessionAdapter.class);
 
-	private javax.websocket.Session sourceSession;
+	private javax.websocket.Session session;
 
 
-	public StandardSessionAdapter(javax.websocket.Session sourceSession) {
-		this.sourceSession = sourceSession;
+	public WebSocketStandardSessionAdapter(javax.websocket.Session session) {
+		this.session = session;
 	}
 
 	@Override
 	public void sendText(String text) throws Exception {
 		logger.trace("Sending text message: " + text);
-		this.sourceSession.getBasicRemote().sendText(text);
+		// TODO: check closed
+		this.session.getBasicRemote().sendText(text);
 	}
 
 	@Override
-	public void close(int code, String reason) throws Exception {
-		this.sourceSession = null;
+	public void close() {
+		// TODO: delegate with code and reason
+		this.session = null;
+	}
+
+	@Override
+	public void close(int code, String reason) {
+		this.session = null;
 	}
 
 }

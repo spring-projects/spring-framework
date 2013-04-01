@@ -526,6 +526,9 @@ project("spring-websocket") {
 
 		optional("org.eclipse.jetty:jetty-websocket:8.1.10.v20130312")
 		optional("org.glassfish.tyrus:tyrus-websocket-core:1.0-SNAPSHOT")
+
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+
 	}
 
 	repositories {

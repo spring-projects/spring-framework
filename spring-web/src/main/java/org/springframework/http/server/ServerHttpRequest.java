@@ -18,6 +18,7 @@ package org.springframework.http.server;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a server-side HTTP request.
@@ -26,5 +27,10 @@ import org.springframework.http.HttpRequest;
  * @since 3.0
  */
 public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
+
+	/**
+	 * Returns the map of query parameters. Empty if no query has been set.
+	 */
+	MultiValueMap<String, String> getQueryParams();
 
 }

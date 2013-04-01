@@ -14,35 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket;
+package org.springframework.sockjs;
 
-import java.io.InputStream;
 
 /**
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketHandlerAdapter implements WebSocketHandler {
+public class SockJsHandlerAdapter implements SockJsHandler {
 
 	@Override
-	public void newSession(WebSocketSession session) throws Exception {
+	public void newSession(SockJsSession session) throws Exception {
 	}
 
 	@Override
-	public void handleTextMessage(WebSocketSession session, String message) throws Exception {
+	public void handleMessage(SockJsSession session, String message) throws Exception {
 	}
 
 	@Override
-	public void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception {
+	public void handleException(SockJsSession session, Throwable exception) {
 	}
 
 	@Override
-	public void handleException(WebSocketSession session, Throwable exception) {
-	}
-
-	@Override
-	public void sessionClosed(WebSocketSession session, int statusCode, String reason) throws Exception {
+	public void sessionClosed(SockJsSession session) {
 	}
 
 }

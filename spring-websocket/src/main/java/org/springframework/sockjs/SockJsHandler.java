@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket;
+package org.springframework.sockjs;
 
 
 
@@ -23,10 +23,14 @@ package org.springframework.websocket;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface Session {
+public interface SockJsHandler {
 
-	void sendText(String text) throws Exception;
+	void newSession(SockJsSession session) throws Exception;
 
-	void close(int code, String reason) throws Exception;
+	void handleMessage(SockJsSession session, String message) throws Exception;
+
+	void handleException(SockJsSession session, Throwable exception);
+
+	void sessionClosed(SockJsSession session);
 
 }

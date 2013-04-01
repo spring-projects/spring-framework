@@ -27,7 +27,7 @@ import javax.websocket.MessageHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
-import org.springframework.websocket.Session;
+import org.springframework.websocket.WebSocketSession;
 import org.springframework.websocket.WebSocketHandler;
 
 
@@ -42,7 +42,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final Map<String, Session> sessionMap = new ConcurrentHashMap<String, Session>();
+	private final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<String, WebSocketSession>();
 
 
 	public StandardWebSocketHandlerAdapter(WebSocketHandler webSocketHandler) {
@@ -50,13 +50,13 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	}
 
 	@Override
-	public void onOpen(javax.websocket.Session sourceSession, EndpointConfig config) {
-		logger.debug("New WebSocket session: " + sourceSession);
+	public void onOpen(javax.websocket.Session session, EndpointConfig config) {
+		logger.debug("New WebSocket session: " + session);
 		try {
-			Session session = new StandardSessionAdapter(sourceSession);
-			this.sessionMap.put(sourceSession.getId(), session);
-			sourceSession.addMessageHandler(new StandardMessageHandler(sourceSession.getId()));
-			this.webSocketHandler.newSession(session);
+			WebSocketSession webSocketSession = new WebSocketStandardSessionAdapter(session);
+			this.sessionMap.put(session.getId(), webSocketSession);
+			session.addMessageHandler(new StandardMessageHandler(session.getId()));
+			this.webSocketHandler.newSession(webSocketSession);
 		}
 		catch (Throwable ex) {
 			// TODO
@@ -65,18 +65,18 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	}
 
 	@Override
-	public void onClose(javax.websocket.Session sourceSession, CloseReason closeReason) {
-		String id = sourceSession.getId();
+	public void onClose(javax.websocket.Session session, CloseReason closeReason) {
+		String id = session.getId();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing session: " + sourceSession + ", " + closeReason);
+			logger.debug("Closing session: " + session + ", " + closeReason);
 		}
 		try {
-			Session session = getSession(id);
+			WebSocketSession webSocketSession = getSession(id);
 			this.sessionMap.remove(id);
 			int code = closeReason.getCloseCode().getCode();
 			String reason = closeReason.getReasonPhrase();
-			session.close(code, reason);
-			this.webSocketHandler.sessionClosed(session, code, reason);
+			webSocketSession.close(code, reason);
+			this.webSocketHandler.sessionClosed(webSocketSession, code, reason);
 		}
 		catch (Throwable ex) {
 			// TODO
@@ -85,11 +85,11 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	}
 
 	@Override
-	public void onError(javax.websocket.Session sourceSession, Throwable exception) {
-		logger.error("Error for WebSocket session: " + sourceSession.getId(), exception);
+	public void onError(javax.websocket.Session session, Throwable exception) {
+		logger.error("Error for WebSocket session: " + session.getId(), exception);
 		try {
-			Session session = getSession(sourceSession.getId());
-			this.webSocketHandler.handleException(session, exception);
+			WebSocketSession webSocketSession = getSession(session.getId());
+			this.webSocketHandler.handleException(webSocketSession, exception);
 		}
 		catch (Throwable ex) {
 			// TODO
@@ -97,28 +97,28 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		}
 	}
 
-	private Session getSession(String sourceSessionId) {
-		Session session = this.sessionMap.get(sourceSessionId);
-		Assert.notNull(session, "No session");
-		return session;
+	private WebSocketSession getSession(String sourceSessionId) {
+		WebSocketSession webSocketSession = this.sessionMap.get(sourceSessionId);
+		Assert.notNull(webSocketSession, "No session");
+		return webSocketSession;
 	}
 
 
 	private class StandardMessageHandler implements MessageHandler.Whole<String> {
 
-		private final String sourceSessionId;
+		private final String sessionId;
 
-		public StandardMessageHandler(String sourceSessionId) {
-			this.sourceSessionId = sourceSessionId;
+		public StandardMessageHandler(String sessionId) {
+			this.sessionId = sessionId;
 		}
 
 		@Override
 		public void onMessage(String message) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message for session [" + this.sourceSessionId + "]: " + message);
+				logger.trace("Message for session [" + this.sessionId + "]: " + message);
 			}
 			try {
-				Session session = getSession(this.sourceSessionId);
+				WebSocketSession session = getSession(this.sessionId);
 				StandardWebSocketHandlerAdapter.this.webSocketHandler.handleTextMessage(session, message);
 			}
 			catch (Throwable ex) {

@@ -35,6 +35,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.context.ContextLoader;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
 
@@ -68,6 +69,8 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final Configurator configurator = new Configurator() {};
 
+
+	// ContextLoader.getCurrentWebApplicationContext().getAutowireCapableBeanFactory().createBean(Class<T>)
 
 	public EndpointRegistration(String path, String beanName) {
 		Assert.hasText(path, "path must not be empty");

@@ -26,14 +26,14 @@ import java.io.InputStream;
  */
 public interface WebSocketHandler {
 
-	void newSession(Session session) throws Exception;
+	void newSession(WebSocketSession session) throws Exception;
 
-	void handleTextMessage(Session session, String message) throws Exception;
+	void handleTextMessage(WebSocketSession session, String message) throws Exception;
 
-	void handleBinaryMessage(Session session, InputStream message) throws Exception;
+	void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception;
 
-	void handleException(Session session, Throwable exception);
+	void handleException(WebSocketSession session, Throwable exception);
 
-	void sessionClosed(Session session, int statusCode, String reason) throws Exception;
+	void sessionClosed(WebSocketSession session, int statusCode, String reason) throws Exception;
 
 }
