@@ -36,6 +36,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
 
@@ -57,6 +58,8 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final String path;
 
+	private final Class<? extends Endpoint> endpointClass;
+
 	private final Object bean;
 
 	private List<String> subprotocols = new ArrayList<String>();
@@ -70,20 +73,33 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	private final Configurator configurator = new Configurator() {};
 
 
-	// ContextLoader.getCurrentWebApplicationContext().getAutowireCapableBeanFactory().createBean(Class<T>)
-
-	public EndpointRegistration(String path, String beanName) {
-		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(beanName, "beanName is required");
-		this.path = path;
-		this.bean = beanName;
+	/**
+	 * Class constructor with the {@code javax.webscoket.Endpoint} class.
+	 * TODO
+	 *
+	 * @param path
+	 * @param endpointClass
+	 */
+	public EndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
+		this(path, endpointClass, null);
 	}
 
 	public EndpointRegistration(String path, Object bean) {
+		this(path, null, bean);
+	}
+
+	public EndpointRegistration(String path, String beanName) {
+		this(path, null, beanName);
+	}
+
+	private EndpointRegistration(String path, Class<? extends Endpoint> endpointClass, Object bean) {
 		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(bean, "bean is required");
+		Assert.isTrue((endpointClass != null || bean != null), "Neither endpoint class nor endpoint bean provided");
 		this.path = path;
+		this.endpointClass = endpointClass;
 		this.bean = bean;
+		// this will fail if the bean is not a valid Endpoint type
+		getEndpointClass();
 	}
 
 	@Override
@@ -94,20 +110,34 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends Endpoint> getEndpointClass() {
+		if (this.endpointClass != null) {
+			return this.endpointClass;
+		}
 		Class<?> beanClass = this.bean.getClass();
 		if (beanClass.equals(String.class)) {
 			beanClass = this.beanFactory.getType((String) this.bean);
 		}
 		beanClass = ClassUtils.getUserClass(beanClass);
-		if (WebSocketHandler.class.isAssignableFrom(beanClass)) {
+		if (Endpoint.class.isAssignableFrom(beanClass)) {
+			return (Class<? extends Endpoint>) beanClass;
+		}
+		else if (WebSocketHandler.class.isAssignableFrom(beanClass)) {
 			return StandardWebSocketHandlerAdapter.class;
 		}
 		else {
-			return (Class<? extends Endpoint>) beanClass;
+			throw new IllegalStateException("Invalid endpoint bean: must be of type ... TODO ");
 		}
 	}
 
 	public Endpoint getEndpoint() {
+		if (this.endpointClass != null) {
+			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
+			if (wac == null) {
+				throw new IllegalStateException("Failed to find WebApplicationContext. "
+						+ "Was org.springframework.web.context.ContextLoader used to load the WebApplicationContext?");
+			}
+			return wac.getAutowireCapableBeanFactory().createBean(this.endpointClass);
+		}
 		Object bean = this.bean;
 		if (this.bean instanceof String) {
 			bean = this.beanFactory.getBean((String) this.bean);
