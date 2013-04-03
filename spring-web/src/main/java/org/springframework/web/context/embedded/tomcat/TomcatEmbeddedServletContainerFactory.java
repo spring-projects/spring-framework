@@ -27,6 +27,8 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.web.ServletContextInitializer;
 import org.springframework.web.context.embedded.AbstractEmbeddedServletContainerFactory;
@@ -47,13 +49,16 @@ import org.springframework.web.context.embedded.EmbeddedServletContainerFactory;
  * @see #setContextLifecycleListeners(Collection)
  * @see TomcatEmbeddedServletContainer
  */
-public class TomcatEmbeddedServletContainerFactory extends AbstractEmbeddedServletContainerFactory {
+public class TomcatEmbeddedServletContainerFactory extends
+		AbstractEmbeddedServletContainerFactory implements ResourceLoaderAware {
 
 	private File baseDirectory;
 
 	private List<LifecycleListener> contextLifecycleListeners = new ArrayList<LifecycleListener>();
 
 	private boolean registerDefaultServlet = true;
+
+	private ResourceLoader resourceLoader;
 
 
 	/**
@@ -96,6 +101,9 @@ public class TomcatEmbeddedServletContainerFactory extends AbstractEmbeddedServl
 		File docBase = getValidDocumentRoot();
 		docBase = (docBase != null ? docBase : createTempDir("tomcat-docbase"));
 		Context context = tomcat.addContext(getContextPath(), docBase.getAbsolutePath());
+		if(this.resourceLoader != null) {
+			context.setParentClassLoader(this.resourceLoader.getClassLoader());
+		}
 		if(this.registerDefaultServlet) {
 			addDefaultServlet(context);
 		}
@@ -161,6 +169,10 @@ public class TomcatEmbeddedServletContainerFactory extends AbstractEmbeddedServl
 			throw new EmbeddedServletContainerException(
 					"Unable to create Tomcat baseDir", ex);
 		}
+	}
+
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 	/**

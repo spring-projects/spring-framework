@@ -27,6 +27,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.FileResource;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.ServletContextInitializer;
@@ -48,11 +50,13 @@ import org.springframework.web.context.embedded.EmbeddedServletContainerFactory;
  * @see JettyEmbeddedServletContainer
  */
 public class JettyEmbeddedServletContainerFactory extends
-		AbstractEmbeddedServletContainerFactory {
+		AbstractEmbeddedServletContainerFactory implements ResourceLoaderAware {
 
 	private List<Configuration> configurations = new ArrayList<Configuration>();
 
 	private boolean registerDefaultServlet = true;
+
+	private ResourceLoader resourceLoader;
 
 
 	/**
@@ -87,6 +91,9 @@ public class JettyEmbeddedServletContainerFactory extends
 		Server server = new Server(getPort());
 
 		WebAppContext context = new WebAppContext();
+		if(this.resourceLoader != null) {
+			context.setClassLoader(this.resourceLoader.getClassLoader());
+		}
 		String contextPath = getContextPath();
 		context.setContextPath(StringUtils.hasLength(contextPath) ? contextPath : "/");
 		configureDocumentRoot(context);
@@ -172,6 +179,10 @@ public class JettyEmbeddedServletContainerFactory extends
 	 */
 	protected JettyEmbeddedServletContainer getJettyEmbeddedServletContainer(Server server) {
 		return new JettyEmbeddedServletContainer(server);
+	}
+
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 	/**
