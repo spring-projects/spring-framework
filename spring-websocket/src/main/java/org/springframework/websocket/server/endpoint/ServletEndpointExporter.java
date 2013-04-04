@@ -17,18 +17,25 @@
 package org.springframework.websocket.server.endpoint;
 
 import javax.servlet.ServletContext;
+import javax.websocket.server.ServerContainer;
+import javax.websocket.server.ServerContainerProvider;
 
-import org.apache.tomcat.websocket.server.WsServerContainer;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
 
 /**
+ * A sub-class of {@link EndpointExporter} for use with a Servlet container runtime.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class ServletEndpointExporter extends EndpointExporter implements ServletContextAware {
 
+	/**
+	 *
+	 */
+	private static final String SERVER_CONTAINER_ATTR_NAME = "javax.websocket.server.ServerContainer";
 	private ServletContext servletContext;
 
 
@@ -38,17 +45,18 @@ public class ServletEndpointExporter extends EndpointExporter implements Servlet
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-
-		// TODO: this is needed (see WsListener) but remove hard dependency
-		WsServerContainer sc = WsServerContainer.getServerContainer();
-        sc.setServletContext(this.servletContext);
-
-        super.afterPropertiesSet();
+	protected ServerContainer getServerContainer() {
+		Assert.notNull(this.servletContext, "A ServletContext is needed to access the WebSocket ServerContainer");
+		ServerContainer container = (ServerContainer) this.servletContext.getAttribute(SERVER_CONTAINER_ATTR_NAME);
+		if (container == null) {
+			// Remove when Tomcat has caught up to http://java.net/jira/browse/WEBSOCKET_SPEC-165
+			return ServerContainerProvider.getServerContainer();
+		}
+		return container;
 	}
 
 }

@@ -19,7 +19,6 @@ import java.util.Map;
 
 import javax.websocket.DeploymentException;
 import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerContainerProvider;
 import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig;
 
@@ -44,7 +43,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointExporter implements InitializingBean, BeanPostProcessor, BeanFactoryAware {
+public abstract class EndpointExporter implements InitializingBean, BeanPostProcessor, BeanFactoryAware {
 
 	private static Log logger = LogFactory.getLog(EndpointExporter.class);
 
@@ -112,7 +111,7 @@ public class EndpointExporter implements InitializingBean, BeanPostProcessor, Be
 					if (logger.isInfoEnabled()) {
 						logger.info("Detected @ServerEndpoint bean '" + beanName + "', registering it as an endpoint by type");
 					}
-					ServerContainerProvider.getServerContainer().addEndpoint(beanType);
+					getServerContainer().addEndpoint(beanType);
 				}
 				catch (DeploymentException e) {
 					throw new IllegalStateException("Failed to register @ServerEndpoint bean type " + beanName, e);
@@ -121,10 +120,16 @@ public class EndpointExporter implements InitializingBean, BeanPostProcessor, Be
 		}
 	}
 
+	/**
+	 * Return the {@link ServerContainer} instance, a process which is undefined outside
+	 * of standalone containers (section 6.4 of the spec).
+	 */
+	protected abstract ServerContainer getServerContainer();
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		ServerContainer serverContainer = ServerContainerProvider.getServerContainer();
+		ServerContainer serverContainer = getServerContainer();
 		Assert.notNull(serverContainer, "javax.websocket.server.ServerContainer not available");
 
 		if (this.maxSessionIdleTimeout != null) {
@@ -159,7 +164,7 @@ public class EndpointExporter implements InitializingBean, BeanPostProcessor, Be
 					logger.info("Registering bean '" + beanName
 							+ "' as javax.websocket.Endpoint under path " + sec.getPath());
 				}
-				ServerContainerProvider.getServerContainer().addEndpoint(sec);
+				getServerContainer().addEndpoint(sec);
 			}
 			catch (DeploymentException e) {
 				throw new IllegalStateException("Failed to deploy Endpoint bean " + bean, e);

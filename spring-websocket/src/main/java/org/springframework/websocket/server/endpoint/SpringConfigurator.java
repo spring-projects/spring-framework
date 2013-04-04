@@ -21,6 +21,8 @@ import java.util.Map;
 import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -35,27 +37,36 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class SpringConfigurator extends Configurator {
 
+	private static Log logger = LogFactory.getLog(SpringConfigurator.class);
+
 
 	@Override
 	public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
 
 		WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
 		if (wac == null) {
-			throw new IllegalStateException("Failed to find WebApplicationContext. "
-					+ "Was org.springframework.web.context.ContextLoader used to load the WebApplicationContext?");
+			String message = "Failed to find the root WebApplicationContext. Was ContextLoaderListener not used?";
+			logger.error(message);
+			throw new IllegalStateException(message);
 		}
 
 		Map<String, T> beans = wac.getBeansOfType(endpointClass);
 		if (beans.isEmpty()) {
-			// Initialize a new bean instance
+			if (logger.isTraceEnabled()) {
+				logger.trace("Creating new @ServerEndpoint instance of type " + endpointClass);
+			}
 			return wac.getAutowireCapableBeanFactory().createBean(endpointClass);
 		}
 		if (beans.size() == 1) {
-			// Return the matching bean instance
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using @ServerEndpoint singleton " + beans.keySet().iterator().next());
+			}
 			return beans.values().iterator().next();
 		}
 		else {
-			// This should never happen (@ServerEndpoint has a single path mapping) ..
+			// This should never happen ..
+			String message = "Found more than one matching @ServerEndpoint beans of type " + endpointClass;
+			logger.error(message);
 			throw new IllegalStateException("Found more than one matching beans of type " + endpointClass);
 		}
 	}

@@ -37,8 +37,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
 
 
 /**
@@ -60,7 +58,7 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final Class<? extends Endpoint> endpointClass;
 
-	private final Object bean;
+	private final Object endpointBean;
 
 	private List<String> subprotocols = new ArrayList<String>();
 
@@ -97,9 +95,7 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		Assert.isTrue((endpointClass != null || bean != null), "Neither endpoint class nor endpoint bean provided");
 		this.path = path;
 		this.endpointClass = endpointClass;
-		this.bean = bean;
-		// this will fail if the bean is not a valid Endpoint type
-		getEndpointClass();
+		this.endpointBean = bean;
 	}
 
 	@Override
@@ -113,16 +109,13 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		if (this.endpointClass != null) {
 			return this.endpointClass;
 		}
-		Class<?> beanClass = this.bean.getClass();
+		Class<?> beanClass = this.endpointBean.getClass();
 		if (beanClass.equals(String.class)) {
-			beanClass = this.beanFactory.getType((String) this.bean);
+			beanClass = this.beanFactory.getType((String) this.endpointBean);
 		}
 		beanClass = ClassUtils.getUserClass(beanClass);
 		if (Endpoint.class.isAssignableFrom(beanClass)) {
 			return (Class<? extends Endpoint>) beanClass;
-		}
-		else if (WebSocketHandler.class.isAssignableFrom(beanClass)) {
-			return StandardWebSocketHandlerAdapter.class;
 		}
 		else {
 			throw new IllegalStateException("Invalid endpoint bean: must be of type ... TODO ");
@@ -138,16 +131,11 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 			}
 			return wac.getAutowireCapableBeanFactory().createBean(this.endpointClass);
 		}
-		Object bean = this.bean;
-		if (this.bean instanceof String) {
-			bean = this.beanFactory.getBean((String) this.bean);
+		Object bean = this.endpointBean;
+		if (this.endpointBean instanceof String) {
+			bean = this.beanFactory.getBean((String) this.endpointBean);
 		}
-		if (bean instanceof WebSocketHandler) {
-			return new StandardWebSocketHandlerAdapter((WebSocketHandler) bean);
-		}
-		else {
-			return (Endpoint) bean;
-		}
+		return (Endpoint) bean;
 	}
 
 	@Override
