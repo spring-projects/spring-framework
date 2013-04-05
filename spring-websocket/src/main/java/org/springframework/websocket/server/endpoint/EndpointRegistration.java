@@ -17,7 +17,6 @@
 package org.springframework.websocket.server.endpoint;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
 
 
 /**
@@ -60,15 +60,19 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final Object endpointBean;
 
+    private List<Class<? extends Encoder>> encoders;
+
+    private List<Class<? extends Decoder>> decoders;
+
 	private List<String> subprotocols = new ArrayList<String>();
 
 	private List<Extension> extensions = new ArrayList<Extension>();
 
-	private Map<String, Object> userProperties = new HashMap<String, Object>();
+	private final Map<String, Object> userProperties = new HashMap<String, Object>();
+
+	private Configurator configurator = new Configurator() {};
 
 	private BeanFactory beanFactory;
-
-	private final Configurator configurator = new Configurator() {};
 
 
 	/**
@@ -138,18 +142,13 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		return (Endpoint) bean;
 	}
 
-	@Override
-	public List<String> getSubprotocols() {
-		return this.subprotocols;
-	}
-
 	public void setSubprotocols(List<String> subprotocols) {
 		this.subprotocols = subprotocols;
 	}
 
 	@Override
-	public List<Extension> getExtensions() {
-		return this.extensions;
+	public List<String> getSubprotocols() {
+		return this.subprotocols;
 	}
 
 	public void setExtensions(List<Extension> extensions) {
@@ -158,27 +157,48 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	}
 
 	@Override
+	public List<Extension> getExtensions() {
+		return this.extensions;
+	}
+
+	public void setUserProperties(Map<String, Object> userProperties) {
+		this.userProperties.clear();
+		this.userProperties.putAll(userProperties);
+	}
+
+	@Override
 	public Map<String, Object> getUserProperties() {
 		return this.userProperties;
 	}
 
-	public void setUserProperties(Map<String, Object> userProperties) {
-		this.userProperties = userProperties;
+	public void setEncoders(List<Class<? extends Encoder>> encoders) {
+		this.encoders = encoders;
 	}
 
 	@Override
 	public List<Class<? extends Encoder>> getEncoders() {
-		return Collections.emptyList();
+		return this.encoders;
+	}
+
+	public void setDecoders(List<Class<? extends Decoder>> decoders) {
+		this.decoders = decoders;
 	}
 
 	@Override
 	public List<Class<? extends Decoder>> getDecoders() {
-		return Collections.emptyList();
+		return this.decoders;
 	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
+	}
+
+	/**
+	 * The {@link Configurator#getEndpointInstance(Class)} method is always ignored.
+	 */
+	public void setConfigurator(Configurator configurator) {
+		this.configurator = configurator;
 	}
 
 	@Override
@@ -191,37 +211,21 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 			}
 			@Override
 			public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
-				EndpointRegistration.this.modifyHandshake(request, response);
+				EndpointRegistration.this.configurator.modifyHandshake(sec, request, response);
 			}
 			@Override
 			public boolean checkOrigin(String originHeaderValue) {
-				return EndpointRegistration.this.checkOrigin(originHeaderValue);
+				return EndpointRegistration.this.configurator.checkOrigin(originHeaderValue);
 			}
 			@Override
 			public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-				return EndpointRegistration.this.selectSubProtocol(requested);
+				return EndpointRegistration.this.configurator.getNegotiatedSubprotocol(supported, requested);
 			}
 			@Override
 			public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-				return EndpointRegistration.this.selectExtensions(requested);
+				return EndpointRegistration.this.configurator.getNegotiatedExtensions(installed, requested);
 			}
 		};
-	}
-
-	protected void modifyHandshake(HandshakeRequest request, HandshakeResponse response) {
-		this.configurator.modifyHandshake(this, request, response);
-	}
-
-	protected boolean checkOrigin(String originHeaderValue) {
-		return this.configurator.checkOrigin(originHeaderValue);
-	}
-
-	protected String selectSubProtocol(List<String> requested) {
-		return this.configurator.getNegotiatedSubprotocol(getSubprotocols(), requested);
-	}
-
-	protected List<Extension> selectExtensions(List<Extension> requested) {
-		return this.configurator.getNegotiatedExtensions(getExtensions(), requested);
 	}
 
 }

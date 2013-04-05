@@ -101,9 +101,8 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 	}
 
 	/**
-	 * Set whether to auto-connect to the {@link #setDefaultUri(URI) default URI} after
-	 * this endpoint connection factory has been initialized and the Spring context has
-	 * been refreshed.
+	 * Set whether to auto-connect to the remote endpoint after this connection manager
+	 * has been initialized and the Spring context has been refreshed.
 	 * <p>Default is "false".
 	 */
 	public void setAutoStartup(boolean autoStartup) {
@@ -112,17 +111,17 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 
 	/**
 	 * Return the value for the 'autoStartup' property. If "true", this endpoint
-	 * connection factory will connect to the {@link #setDefaultUri(URI) default URI} upon
-	 * a ContextRefreshedEvent.
+	 * connection manager will connect to the remote endpoint upon a
+	 * ContextRefreshedEvent.
 	 */
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
 
 	/**
-	 * Specify the phase in which this endpoint connection factory should be
-	 * auto-connected and closed. The startup order proceeds from lowest to highest, and
-	 * the shutdown order is the reverse of that. By default this value is
+	 * Specify the phase in which a connection should be established to the remote
+	 * endpoint and subsequently closed. The startup order proceeds from lowest to
+	 * highest, and the shutdown order is the reverse of that. By default this value is
 	 * Integer.MAX_VALUE meaning that this endpoint connection factory connects as late as
 	 * possible and is closed as soon as possible.
 	 */
