@@ -32,28 +32,31 @@ import org.springframework.websocket.WebSocketHandler;
 
 
 /**
+ * An {@link Endpoint} that delegates to a {@link WebSocketHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardWebSocketHandlerAdapter extends Endpoint {
+public class WebSocketHandlerEndpoint extends Endpoint {
 
-	private static Log logger = LogFactory.getLog(StandardWebSocketHandlerAdapter.class);
+	private static Log logger = LogFactory.getLog(WebSocketHandlerEndpoint.class);
 
 	private final WebSocketHandler webSocketHandler;
 
 	private final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<String, WebSocketSession>();
 
 
-	public StandardWebSocketHandlerAdapter(WebSocketHandler webSocketHandler) {
+	public WebSocketHandlerEndpoint(WebSocketHandler webSocketHandler) {
 		this.webSocketHandler = webSocketHandler;
 	}
 
 	@Override
 	public void onOpen(javax.websocket.Session session, EndpointConfig config) {
-		logger.debug("New WebSocket session: " + session);
+		if (logger.isDebugEnabled()) {
+			logger.debug("New session: " + session);
+		}
 		try {
-			WebSocketSession webSocketSession = new WebSocketStandardSessionAdapter(session);
+			WebSocketSession webSocketSession = new StandardWebSocketSession(session);
 			this.sessionMap.put(session.getId(), webSocketSession);
 			session.addMessageHandler(new StandardMessageHandler(session.getId()));
 			this.webSocketHandler.newSession(webSocketSession);
@@ -75,7 +78,6 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.sessionMap.remove(id);
 			int code = closeReason.getCloseCode().getCode();
 			String reason = closeReason.getReasonPhrase();
-			webSocketSession.close(code, reason);
 			this.webSocketHandler.sessionClosed(webSocketSession, code, reason);
 		}
 		catch (Throwable ex) {
@@ -119,7 +121,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			}
 			try {
 				WebSocketSession session = getSession(this.sessionId);
-				StandardWebSocketHandlerAdapter.this.webSocketHandler.handleTextMessage(session, message);
+				WebSocketHandlerEndpoint.this.webSocketHandler.handleTextMessage(session, message);
 			}
 			catch (Throwable ex) {
 				// TODO

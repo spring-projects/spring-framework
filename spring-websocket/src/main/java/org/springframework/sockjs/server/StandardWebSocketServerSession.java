@@ -27,26 +27,27 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsWebSocketSessionAdapter extends AbstractServerSession {
+public class StandardWebSocketServerSession extends AbstractServerSession {
 
-	private static Log logger = LogFactory.getLog(SockJsWebSocketSessionAdapter.class);
+	private static Log logger = LogFactory.getLog(StandardWebSocketServerSession.class);
 
 	private WebSocketSession webSocketSession;
 
 
-	public SockJsWebSocketSessionAdapter(String sessionId, SockJsHandler delegate, SockJsConfiguration sockJsConfig) {
+	public StandardWebSocketServerSession(String sessionId, SockJsHandler delegate, SockJsConfiguration sockJsConfig) {
 		super(sessionId, delegate, sockJsConfig);
 	}
 
 	public void setWebSocketSession(WebSocketSession webSocketSession) throws Exception {
 		this.webSocketSession = webSocketSession;
+		webSocketSession.sendText(SockJsFrame.openFrame().getContent());
 		scheduleHeartbeat();
 		connectionInitialized();
 	}
 
 	@Override
 	public boolean isActive() {
-		return (this.webSocketSession != null);
+		return ((this.webSocketSession != null) && this.webSocketSession.isOpen());
 	}
 
 	@Override

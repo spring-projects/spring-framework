@@ -15,6 +15,8 @@
  */
 package org.springframework.sockjs.server.transport;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
@@ -37,13 +39,18 @@ public abstract class AbstractHttpSendingTransportHandler implements TransportHa
 
 
 	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
-			throws Exception {
-
-		AbstractHttpServerSession httpServerSession = (AbstractHttpServerSession) session;
+	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsSessionSupport session) throws Exception {
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
+
+		AbstractHttpServerSession httpServerSession = (AbstractHttpServerSession) session;
+		handleRequestInternal(request, response, httpServerSession);
+	}
+
+	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			AbstractHttpServerSession httpServerSession) throws Exception, IOException {
 
 		if (httpServerSession.isNew()) {
 			handleNewSession(request, response, httpServerSession);

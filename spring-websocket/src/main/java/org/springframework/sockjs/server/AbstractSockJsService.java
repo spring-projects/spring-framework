@@ -32,9 +32,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.TransportType;
-import org.springframework.sockjs.server.support.DefaultTransportHandlerRegistrar;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -56,7 +54,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	private static final int ONE_YEAR = 365 * 24 * 60 * 60;
 
 
-	private String sockJsServiceName = getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
+	private final String prefix;
 
 	private String clientLibraryUrl = "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js";
 
@@ -78,31 +76,28 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	/**
 	 * Class constructor...
 	 *
+	 * @param prefix the path prefix for the SockJS service. All requests with a path
+	 * that begins with the specified prefix will be handled by this service. In a
+	 * Servlet container this is the path within the current servlet mapping.
 	 */
-	public AbstractSockJsService() {
+	public AbstractSockJsService(String prefix) {
+		Assert.hasText(prefix, "prefix is required");
+		this.prefix = prefix;
 		this.heartbeatScheduler = createScheduler("SockJs-heartbeat-");
 	}
 
 	protected TaskScheduler createScheduler(String threadNamePrefix) {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix(threadNamePrefix);
+		scheduler.afterPropertiesSet();
 		return scheduler;
 	}
 
 	/**
-	 * A unique name for the service, possibly the prefix at which it is deployed.
-	 * Used mainly for logging purposes.
+	 * The path prefix to which the SockJS service is mapped.
 	 */
-	public void setSockJsServiceName(String serviceName) {
-		this.sockJsServiceName = serviceName;
-	}
-
-	/**
-	 * The SockJS service name.
-	 * @see #setSockJsServiceName(String)
-	 */
-	public String getSockJsServiceName() {
-		return this.sockJsServiceName;
+	public String getPrefix() {
+		return this.prefix;
 	}
 
 	/**
@@ -178,9 +173,8 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 		this.heartbeatScheduler = heartbeatScheduler;
 	}
 
-	public AbstractSockJsService setDisconnectDelay(long disconnectDelay) {
+	public void setDisconnectDelay(long disconnectDelay) {
 		this.disconnectDelay = disconnectDelay;
-		return this;
 	}
 
 	public long getDisconnectDelay() {
@@ -193,9 +187,8 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	 * <p>
 	 * The default value is "true".
 	 */
-	public AbstractSockJsService setWebSocketsEnabled(boolean webSocketsEnabled) {
+	public void setWebSocketsEnabled(boolean webSocketsEnabled) {
 		this.webSocketsEnabled = webSocketsEnabled;
-		return this;
 	}
 
 	/**
@@ -212,9 +205,8 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	 * heartbeats, only raw WebSocket protocol. This property allows setting a
 	 * handler for requests for raw WebSocket communication.
 	 */
-	public AbstractSockJsService setWebsocketHandler(HandshakeRequestHandler handshakeRequestHandler) {
+	public void setWebsocketHandler(HandshakeRequestHandler handshakeRequestHandler) {
 		this.handshakeRequestHandler = handshakeRequestHandler;
-		return this;
 	}
 
 

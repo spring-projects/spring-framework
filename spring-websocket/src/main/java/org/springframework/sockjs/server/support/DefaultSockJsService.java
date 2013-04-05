@@ -64,7 +64,8 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 	 * Class constructor...
 	 *
 	 */
-	public DefaultSockJsService(SockJsHandler sockJsHandler) {
+	public DefaultSockJsService(String prefix, SockJsHandler sockJsHandler) {
+		super(prefix);
 		Assert.notNull(sockJsHandler, "sockJsHandler is required");
 		this.sockJsHandler = sockJsHandler;
 		this.sessionTimeoutScheduler = createScheduler("SockJs-sessionTimeout-");
@@ -105,23 +106,23 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 				try {
 					int count = sessions.size();
 					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace("Checking " + count + " session(s) for timeouts [" + getSockJsServiceName() + "]");
+						logger.trace("Checking " + count + " session(s) for timeouts [" + getPrefix() + "]");
 					}
 					for (SockJsSessionSupport session : sessions.values()) {
 						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
 							if (logger.isTraceEnabled()) {
-								logger.trace("Removing " + session + " for [" + getSockJsServiceName() + "]");
+								logger.trace("Removing " + session + " for [" + getPrefix() + "]");
 							}
 							session.close();
 							sessions.remove(session.getId());
 						}
 					}
 					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace(sessions.size() + " remaining session(s) [" + getSockJsServiceName() + "]");
+						logger.trace(sessions.size() + " remaining session(s) [" + getPrefix() + "]");
 					}
 				}
 				catch (Throwable t) {
-					logger.error("Failed to complete session timeout checks for [" + getSockJsServiceName() + "]", t);
+					logger.error("Failed to complete session timeout checks for [" + getPrefix() + "]", t);
 				}
 			}
 		}, getDisconnectDelay());

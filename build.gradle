@@ -515,6 +515,7 @@ project("spring-websocket") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		compile(project(":spring-web"))
+		optional(project(":spring-webmvc"))
 
 		optional("org.apache.tomcat:tomcat-servlet-api:8.0-SNAPSHOT") // TODO: replace with "javax.servlet:javax.servlet-api"
 		optional("org.apache.tomcat:tomcat-websocket-api:8.0-SNAPSHOT") // TODO: replace with "javax.websocket:javax.websocket-api"

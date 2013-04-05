@@ -25,6 +25,8 @@ package org.springframework.websocket;
  */
 public interface WebSocketSession {
 
+	boolean isOpen();
+
 	void sendText(String text) throws Exception;
 
 	void close();

@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.TransportType;
 import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
@@ -78,8 +77,8 @@ public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler 
 	}
 
 	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
-			throws Exception {
+	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			AbstractHttpServerSession session) throws Exception {
 
 		String callback = request.getQueryParams().getFirst("c");
 		if (! StringUtils.hasText(callback)) {
@@ -87,8 +86,7 @@ public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler 
 			response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
 			return;
 		}
-
-		super.handleRequest(request, response, session);
+		super.handleRequestInternal(request, response, session);
 	}
 
 	@Override

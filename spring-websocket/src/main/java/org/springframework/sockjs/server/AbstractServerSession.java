@@ -17,12 +17,9 @@
 package org.springframework.sockjs.server;
 
 import java.io.EOFException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
-import org.springframework.sockjs.server.SockJsConfiguration;
-import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSession;
 import org.springframework.sockjs.SockJsSessionSupport;

@@ -36,14 +36,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
+import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 
 
 /**
  * An implementation of {@link javax.websocket.server.ServerEndpointConfig} that also
  * holds the target {@link javax.websocket.Endpoint} as a reference or a bean name.
  * The target can also be {@link org.springframework.websocket.WebSocketHandler}, in
- * which case it will be adapted via {@link StandardWebSocketHandlerAdapter}.
+ * which case it will be adapted via {@link WebSocketHandlerEndpoint}.
  *
  * <p>
  * Beans of this type are detected by {@link EndpointExporter} and
@@ -60,9 +60,9 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final Object endpointBean;
 
-    private List<Class<? extends Encoder>> encoders;
+    private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>();
 
-    private List<Class<? extends Decoder>> decoders;
+    private List<Class<? extends Decoder>> decoders = new ArrayList<Class<? extends Decoder>>();
 
 	private List<String> subprotocols = new ArrayList<String>();
 

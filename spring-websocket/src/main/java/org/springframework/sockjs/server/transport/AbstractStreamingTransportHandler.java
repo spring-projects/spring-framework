@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.SockJsConfiguration;
 
 
@@ -39,12 +38,11 @@ public abstract class AbstractStreamingTransportHandler extends AbstractHttpSend
 	}
 
 	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
-			throws Exception {
+	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			AbstractHttpServerSession session) throws Exception {
 
 		writePrelude(request, response);
-
-		super.handleRequest(request, response, session);
+		super.handleRequestInternal(request, response, session);
 	}
 
 	protected abstract void writePrelude(ServerHttpRequest request, ServerHttpResponse response)

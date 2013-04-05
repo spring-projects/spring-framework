@@ -21,6 +21,7 @@ import org.springframework.sockjs.server.transport.EventSourceTransportHandler;
 import org.springframework.sockjs.server.transport.HtmlFileTransportHandler;
 import org.springframework.sockjs.server.transport.JsonpPollingTransportHandler;
 import org.springframework.sockjs.server.transport.JsonpTransportHandler;
+import org.springframework.sockjs.server.transport.WebSocketTransportHandler;
 import org.springframework.sockjs.server.transport.XhrPollingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrStreamingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrTransportHandler;
@@ -35,6 +36,8 @@ import org.springframework.sockjs.server.transport.XhrTransportHandler;
 public class DefaultTransportHandlerRegistrar implements TransportHandlerRegistrar {
 
 	public void registerTransportHandlers(TransportHandlerRegistry registry) {
+
+		registry.registerHandler(new WebSocketTransportHandler());
 
 		registry.registerHandler(new XhrPollingTransportHandler());
 		registry.registerHandler(new XhrTransportHandler());

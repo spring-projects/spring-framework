@@ -22,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.TransportType;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
@@ -56,8 +55,8 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
-			throws Exception {
+	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			AbstractHttpServerSession session) throws Exception {
 
 		String callback = request.getQueryParams().getFirst("c");
 		if (! StringUtils.hasText(callback)) {
@@ -65,7 +64,6 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 			response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
 			return;
 		}
-
 		super.handleRequest(request, response, session);
 	}
 

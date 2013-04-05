@@ -23,7 +23,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.endpoint.StandardWebSocketHandlerAdapter;
+import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.server.AbstractHandshakeRequestHandler;
 
 
@@ -43,7 +43,7 @@ public class EndpointHandshakeRequestHandler extends AbstractHandshakeRequestHan
 
 
 	public EndpointHandshakeRequestHandler(WebSocketHandler webSocketHandler) {
-		this(new StandardWebSocketHandlerAdapter(webSocketHandler));
+		this(new WebSocketHandlerEndpoint(webSocketHandler));
 	}
 
 	public EndpointHandshakeRequestHandler(Endpoint endpoint) {

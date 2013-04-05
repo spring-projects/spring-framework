@@ -22,9 +22,9 @@ import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.TransportType;
 import org.springframework.sockjs.server.SockJsConfiguration;
-import org.springframework.sockjs.server.SockJsWebSocketSessionAdapter;
+import org.springframework.sockjs.server.StandardWebSocketServerSession;
 import org.springframework.sockjs.server.TransportHandler;
-import org.springframework.sockjs.server.WebSocketSockJsHandlerAdapter;
+import org.springframework.sockjs.server.SockJsWebSocketHandler;
 import org.springframework.websocket.server.HandshakeRequestHandler;
 import org.springframework.websocket.server.endpoint.EndpointHandshakeRequestHandler;
 
@@ -44,15 +44,15 @@ public class WebSocketTransportHandler implements TransportHandler {
 
 	@Override
 	public SockJsSessionSupport createSession(String sessionId, SockJsHandler handler, SockJsConfiguration config) {
-		return new SockJsWebSocketSessionAdapter(sessionId, handler, config);
+		return new StandardWebSocketServerSession(sessionId, handler, config);
 	}
 
 	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
 			throws Exception {
 
-		SockJsWebSocketSessionAdapter sockJsSession = (SockJsWebSocketSessionAdapter) session;
-		WebSocketSockJsHandlerAdapter webSocketHandler = new WebSocketSockJsHandlerAdapter(sockJsSession);
+		StandardWebSocketServerSession sockJsSession = (StandardWebSocketServerSession) session;
+		SockJsWebSocketHandler webSocketHandler = new SockJsWebSocketHandler(sockJsSession);
 		HandshakeRequestHandler handshakeRequestHandler = new EndpointHandshakeRequestHandler(webSocketHandler);
 		handshakeRequestHandler.doHandshake(request, response);
 	}

@@ -29,38 +29,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
+ * An implementation of {@link WebSocketHandler} supporting the SockJS protocol.
+ * Methods merely delegate to a {@link StandardWebSocketServerSession}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketSockJsHandlerAdapter implements WebSocketHandler {
+public class SockJsWebSocketHandler implements WebSocketHandler {
 
-	private static final Log logger = LogFactory.getLog(WebSocketSockJsHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(SockJsWebSocketHandler.class);
 
-	private final SockJsWebSocketSessionAdapter sockJsSession;
+	private final StandardWebSocketServerSession sockJsSession;
 
 	// TODO: the JSON library used must be configurable
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public WebSocketSockJsHandlerAdapter(SockJsWebSocketSessionAdapter sockJsSession) {
+	public SockJsWebSocketHandler(StandardWebSocketServerSession sockJsSession) {
 		this.sockJsSession = sockJsSession;
 	}
 
 	@Override
 	public void newSession(WebSocketSession webSocketSession) throws Exception {
-		logger.debug("WebSocket connection established");
-		webSocketSession.sendText(SockJsFrame.openFrame().getContent());
+		if (logger.isDebugEnabled()) {
+			logger.debug("New session: " + webSocketSession);
+		}
 		this.sockJsSession.setWebSocketSession(webSocketSession);
 	}
 
 	@Override
 	public void handleTextMessage(WebSocketSession session, String message) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Received payload " + message + " for " + sockJsSession);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Received payload " + message + " for " + sockJsSession);
 		}
 		if (StringUtils.isEmpty(message)) {
-			logger.debug("Ignoring empty payload");
+			logger.trace("Ignoring empty payload");
 			return;
 		}
 		try {

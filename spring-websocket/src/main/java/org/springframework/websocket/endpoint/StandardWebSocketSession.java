@@ -22,19 +22,25 @@ import org.springframework.websocket.WebSocketSession;
 
 
 /**
+ * A {@link WebSocketSession} that delegates to a {@link javax.websocket.Session}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketStandardSessionAdapter implements WebSocketSession {
+public class StandardWebSocketSession implements WebSocketSession {
 
-	private static Log logger = LogFactory.getLog(WebSocketStandardSessionAdapter.class);
+	private static Log logger = LogFactory.getLog(StandardWebSocketSession.class);
 
 	private javax.websocket.Session session;
 
 
-	public WebSocketStandardSessionAdapter(javax.websocket.Session session) {
+	public StandardWebSocketSession(javax.websocket.Session session) {
 		this.session = session;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return ((this.session != null) && this.session.isOpen());
 	}
 
 	@Override

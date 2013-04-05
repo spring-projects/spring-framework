@@ -43,7 +43,8 @@ public class StreamingHttpServerSession extends AbstractHttpServerSession {
 
 			this.byteCount += frame.getContentBytes().length + 1;
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.byteCount + " bytes written, " + getMessageCache().size() + " more messages");
+				logger.trace(this.byteCount + " bytes written so far, "
+						+ getMessageCache().size() + " more messages not flushed");
 			}
 			if (this.byteCount >= getSockJsConfig().getStreamBytesLimit()) {
 				if (logger.isTraceEnabled()) {
