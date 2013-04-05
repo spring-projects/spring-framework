@@ -37,8 +37,8 @@ import org.springframework.web.ServletContextInitializer;
  * friendly design.
  *
  * <p>The {@link #setServlet(Servlet) servlet} must be specified before calling
- * {@link #onStartup(ServletContext)}. URL mapping can be configured used
- * {@link #setUrlMappings(String[])} or omitted when mapping to '/*'. The servlet
+ * {@link #onStartup}. URL mapping can be configured used
+ * {@link #setUrlMappings} or omitted when mapping to '/*'. The servlet
  * name will be deduced if not specified.
  *
  * @author Phillip Webb
@@ -69,7 +69,6 @@ public class ServletRegistrationBean extends RegistrationBean {
 	/**
 	 * Create a new {@link ServletRegistrationBean} instance with the specified
 	 * {@link Servlet} and URL mapping.
-	 * @param name the servlet name
 	 * @param servlet the servlet being mapped
 	 * @param urlMappings the URLs being mapped
 	 */
@@ -110,7 +109,7 @@ public class ServletRegistrationBean extends RegistrationBean {
 	/**
 	 * Add URL mappings for the servlet.
 	 * @param urlMappings the mappings to add
-	 * @see #setUrlMappings(Set)
+	 * @see #setUrlMappings(Collection)
 	 */
 	public void addUrlMappings(String... urlMappings) {
 		Assert.notNull(urlMappings, "UrlMappings must not be null");

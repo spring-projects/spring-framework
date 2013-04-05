@@ -28,7 +28,11 @@ import java.util.Date;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -81,7 +85,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 	public void startServlet() throws Exception {
 		AbstractEmbeddedServletContainerFactory factory = getFactory();
 		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
-		this.container.start();
 		assertThat(getResponse("http://localhost:8080/hello"), equalTo("Hello World"));
 	}
 
@@ -89,10 +92,29 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 	public void stopServlet() throws Exception {
 		AbstractEmbeddedServletContainerFactory factory = getFactory();
 		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
-		this.container.start();
 		this.container.stop();
 		thrown.expect(ConnectException.class);
 		getResponse("http://localhost:8080/hello");
+	}
+
+	@Test
+	@Ignore // FIXME breaks with Tomcat
+	public void restartWithKeepAlive() throws Exception {
+		AbstractEmbeddedServletContainerFactory factory = getFactory();
+		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
+
+		MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+		HttpClient client = new HttpClient(connectionManager);
+		GetMethod get1 = new GetMethod("http://localhost:8080/hello");
+		assertThat(client.executeMethod(get1), equalTo(200));
+		get1.releaseConnection();
+
+		this.container.stop();
+		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
+
+		GetMethod get2 = new GetMethod("http://localhost:8080/hello");
+		assertThat(client.executeMethod(get2), equalTo(200));
+		get2.releaseConnection();
 	}
 
 	@Test
@@ -101,7 +123,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 		this.container = factory.getEmbdeddedServletContainer(
 				exampleServletRegistration(),
 				new FilterRegistrationBean(new ExampleFilter()));
-		this.container.start();
 		assertThat(getResponse("http://localhost:8080/hello"), equalTo("[Hello World]"));
 	}
 
@@ -122,7 +143,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 				}
 			}
 		});
-		this.container.start();
 		assertThat(date[0], notNullValue());
 	}
 
@@ -131,7 +151,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 		AbstractEmbeddedServletContainerFactory factory = getFactory();
 		factory.setPort(8081);
 		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
-		this.container.start();
 		assertThat(getResponse("http://localhost:8081/hello"), equalTo("Hello World"));
 	}
 
@@ -141,7 +160,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 		AbstractEmbeddedServletContainerFactory factory = getFactory();
 		factory.setContextPath("/say");
 		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
-		this.container.start();
 		assertThat(getResponse("http://localhost:8080/say/hello"), equalTo("Hello World"));
 	}
 
@@ -167,19 +185,9 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 	}
 
 	@Test
-	public void doubleStart() throws Exception {
-		AbstractEmbeddedServletContainerFactory factory = getFactory();
-		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
-		this.container.start();
-		this.container.start();
-		assertThat(getResponse("http://localhost:8080/hello"), equalTo("Hello World"));
-	}
-
-	@Test
 	public void doubleStop() throws Exception {
 		AbstractEmbeddedServletContainerFactory factory = getFactory();
 		this.container = factory.getEmbdeddedServletContainer(exampleServletRegistration());
-		this.container.start();
 		this.container.stop();
 		this.container.stop();
 	}
@@ -194,7 +202,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 		factory.setInitializers(Arrays.asList(initializers[2], initializers[3]));
 		factory.addInitializers(initializers[4], initializers[5]);
 		this.container = factory.getEmbdeddedServletContainer(initializers[0], initializers[1]);
-		this.container.start();
 		InOrder ordered = inOrder((Object[]) initializers);
 		for (ServletContextInitializer initializer : initializers) {
 			ordered.verify(initializer).onStartup((ServletContext) anyObject());
@@ -207,7 +214,6 @@ public abstract class AbstractEmbeddedServletContainerFactoryTests {
 		AbstractEmbeddedServletContainerFactory factory = getFactory();
 		factory.setDocumentRoot(temporaryFolder.getRoot());
 		this.container = factory.getEmbdeddedServletContainer();
-		this.container.start();
 		assertThat(getResponse("http://localhost:8080/test.txt"), equalTo("test"));
 	}
 

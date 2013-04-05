@@ -42,11 +42,11 @@ public class JettyEmbeddedServletContainer implements EmbeddedServletContainer {
 	public JettyEmbeddedServletContainer(Server server) {
 		Assert.notNull(server, "Jetty Server must not be null");
 		this.server = server;
+		start();
 	}
 
 
-	@Override
-	public synchronized void start() {
+	private synchronized void start() {
 		try {
 			this.server.start();
 		}

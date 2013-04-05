@@ -32,16 +32,16 @@ import org.springframework.util.Assert;
 import org.springframework.web.ServletContextInitializer;
 
 /**
- * A {@link ServletContextInitializer} to register {@link Filters}s in a Servlet 3.0+
+ * A {@link ServletContextInitializer} to register {@link Filter}s in a Servlet 3.0+
  * container. Similar to the {@link ServletContext#addFilter(String, Filter)
  * registration} features provided by {@link ServletContext} but with a Spring Bean
  * friendly design.
  *
  * <p>The {@link #setFilter(Filter) Filter} must be specified before calling
  * {@link #onStartup(ServletContext)}. Registrations can be associated with
- * {@link #setUrlPatterns(Set) URL patterns} and/or servlets (either by
- * {@link #setServletNames(Set) name} or via a
- * {@link #setServletRegistrationBeans(Set) ServletRegistrationBean}s. When no
+ * {@link #setUrlPatterns URL patterns} and/or servlets (either by
+ * {@link #setServletNames name} or via a
+ * {@link #setServletRegistrationBeans ServletRegistrationBean}s. When no
  * URL pattern or servlets are specified the filter will be associated to '/*'. The
  * filter name will be deduced if not specified.
  *

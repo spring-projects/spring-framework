@@ -91,10 +91,11 @@ public class MockEmbeddedServletContainerFactory implements
 		public MockEmbeddedServletContainer(ServletContextInitializer[] initializers, int port) {
 			this.initializers = initializers;
 			this.port = port;
+			start();
 		}
 
 
-		public void start() {
+		private void start() {
 			try {
 				this.servletContext = mock(ServletContext.class);
 				given(this.servletContext.addServlet(anyString(), (Servlet) anyObject())).willAnswer(

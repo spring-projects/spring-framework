@@ -95,9 +95,6 @@ public class TomcatEmbeddedServletContainerFactory extends
 		tomcat.setBaseDir(baseDir.getAbsolutePath());
 		tomcat.setPort(getPort());
 
-		// bindOnInit is critical to allow server restarts
-		tomcat.getConnector().setProperty("bindOnInit", "false");
-
 		File docBase = getValidDocumentRoot();
 		docBase = (docBase != null ? docBase : createTempDir("tomcat-docbase"));
 		Context context = tomcat.addContext(getContextPath(), docBase.getAbsolutePath());

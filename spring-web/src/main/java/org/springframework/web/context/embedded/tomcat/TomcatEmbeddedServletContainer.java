@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.embedded.tomcat;
 
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.util.Assert;
 import org.springframework.web.context.embedded.EmbeddedServletContainer;
@@ -42,10 +43,11 @@ public class TomcatEmbeddedServletContainer implements EmbeddedServletContainer 
 	public TomcatEmbeddedServletContainer(Tomcat tomcat) {
 		Assert.notNull(tomcat, "Tomcat Server must not be null");
 		this.tomcat = tomcat;
+		start();
 	}
 
 
-	public synchronized void start() throws EmbeddedServletContainerException {
+	private synchronized void start() throws EmbeddedServletContainerException {
 		try {
 			this.tomcat.start();
 			// Unlike Jetty, all Tomcat threads are daemon threads. We create a
@@ -66,10 +68,15 @@ public class TomcatEmbeddedServletContainer implements EmbeddedServletContainer 
 
 	public synchronized void stop() throws EmbeddedServletContainerException {
 		try {
-			this.tomcat.stop();
+			try {
+				this.tomcat.stop();
+			}
+			catch (LifecycleException e) {
+			}
+			this.tomcat.destroy();
 		}
 		catch (Exception ex) {
-			throw new EmbeddedServletContainerException("Unable to start embdedded Tomcat", ex);
+			throw new EmbeddedServletContainerException("Unable to stop embdedded Tomcat", ex);
 		}
 	}
 

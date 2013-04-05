@@ -35,10 +35,12 @@ import org.springframework.web.context.embedded.tomcat.TomcatEmbeddedServletCont
 public interface EmbeddedServletContainerFactory {
 
 	/**
-	 * Gets a new fully configured {@link EmbeddedServletContainer} instance.
-	 * @param initializers {@link ServletContextInitializer}s that should be applied when
+	 * Gets a new fully configured and started {@link EmbeddedServletContainer}
+	 * instance,blocking until the point that clients can connect.
+	 * @param initializers {@link ServletContextInitializer}s that should be applied as
 	 *        the container starts
-	 * @return a fully configured {@link EmbeddedServletContainer}
+	 * @return a fully configured and started {@link EmbeddedServletContainer}
+	 * @see EmbeddedServletContainer#stop()
 	 */
 	EmbeddedServletContainer getEmbdeddedServletContainer(
 			ServletContextInitializer... initializers);

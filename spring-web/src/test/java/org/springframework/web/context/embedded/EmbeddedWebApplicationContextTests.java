@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.junit.After;
@@ -39,7 +38,6 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.web.ServletContextInitializer;
-import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.SessionScope;
@@ -91,8 +89,6 @@ public class EmbeddedWebApplicationContextTests {
 
 		// Ensure WebApplicationContextUtils.registerEnvironmentBeans was called
 		assertThat(this.context.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME), equalTo(true));
-
-		verify(escf.getContainer()).start();
 	}
 
 	@Test

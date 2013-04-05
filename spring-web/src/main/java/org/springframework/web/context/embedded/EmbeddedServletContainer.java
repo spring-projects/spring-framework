@@ -17,9 +17,9 @@
 package org.springframework.web.context.embedded;
 
 /**
- * Simple interface that can be used to control a fully configure embedded servlet
- * container (for example Tomcat or Jetty). Allows the container to be {@link #start()
- * started} and {@link #stop() stopped}.
+ * Simple interface that represents a fully configure embedded servlet
+ * container (for example Tomcat or Jetty). Allows the container to be
+ * {@link #stop() stopped}.
  *
  * <p>Instances of this class are usually obtained via a
  * {@link EmbeddedServletContainerFactory}.
@@ -29,13 +29,6 @@ package org.springframework.web.context.embedded;
  * @see EmbeddedServletContainerFactory
  */
 public interface EmbeddedServletContainer {
-
-	/**
-	 * Starts the embedded servlet container, blocking until the point that clients
-	 * can connect. Calling this method on an already started container has no effect.
-	 * @throws EmbeddedServletContainerException if the container cannot be started
-	 */
-	void start() throws EmbeddedServletContainerException;
 
 	/**
 	 * Stops the embedded servlet container. Calling this method on an already stopped

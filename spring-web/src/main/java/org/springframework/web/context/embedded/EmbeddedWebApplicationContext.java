@@ -120,7 +120,6 @@ public class EmbeddedWebApplicationContext extends GenericWebApplicationContext 
 		if(this.embeddedServletContainer == null) {
 			EmbeddedServletContainerFactory containerFactory = getEmbeddedServletContainerFactory();
 			this.embeddedServletContainer = containerFactory.getEmbdeddedServletContainer(getServletContextInitializers());
-			this.embeddedServletContainer.start();
 			WebApplicationContextUtils.registerWebApplicationScopes(getBeanFactory(), getServletContext());
 			WebApplicationContextUtils.registerEnvironmentBeans(getBeanFactory(), getServletContext());
 			initPropertySources();
