@@ -282,8 +282,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String[] dependsOn = mbd.getDependsOn();
 			if (dependsOn != null) {
 				for (String dependsOnBean : dependsOn) {
-					getBean(dependsOnBean);
 					registerDependentBean(dependsOnBean, beanName);
+					checkCircularDependsOn(dependsOnBean, beanName);
+					registerDependenciesForBean(dependsOnBean, beanName);
+					getBean(dependsOnBean);
 				}
 			}
 
@@ -362,6 +364,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 		return (T) bean;
+	}
+
+	private void checkCircularDependsOn(String dependsOnBean, String beanName) {
+		String[] dependenciesForBean = this.getDependenciesForBean(dependsOnBean);
+		for (int i = 0; i < dependenciesForBean.length; i++) {
+			if(dependenciesForBean[i].equals(beanName)) {
+				throw new BeanCreationException(beanName,
+						"Beans with name '" + dependsOnBean + "' and '" + beanName + "' are dependent in circular manner; " +
+						"consider removing 'depends-on' attribute from one of them."); 
+			}else{
+				checkCircularDependsOn(dependenciesForBean[i], beanName);
+			}
+		}
 	}
 
 	public boolean containsBean(String name) {

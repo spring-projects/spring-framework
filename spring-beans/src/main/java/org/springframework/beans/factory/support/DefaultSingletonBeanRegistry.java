@@ -394,6 +394,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			}
 			dependentBeans.add(dependentBeanName);
 		}
+	}
+	
+	/**
+	 * Register a dependencies for the given bean.
+	 * @param beanName the name of the bean
+	 * @param dependentBeanName the name of the dependent bean
+	 */
+	public void registerDependenciesForBean(String beanName, String dependentBeanName) {
+		String canonicalName = canonicalName(beanName);
 		synchronized (this.dependenciesForBeanMap) {
 			Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(dependentBeanName);
 			if (dependenciesForBean == null) {
