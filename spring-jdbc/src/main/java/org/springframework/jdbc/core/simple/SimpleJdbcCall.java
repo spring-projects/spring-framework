@@ -42,7 +42,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * Sybase and PostgreSQL. For any other databases you are required to declare all
  * parameters explicitly. You can of course declare all parameters explicitly even
  * if the database provides the necessary meta data. In that case your declared
- * parameters will take precedence. You can also turn off any mete data processing
+ * parameters will take precedence. You can also turn off any meta data processing
  * if you want to use parameter names that do not match what is declared during
  * the stored procedure compilation.
  *
