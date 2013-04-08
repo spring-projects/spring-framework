@@ -27,8 +27,8 @@ package org.springframework.beans;
 public class BeanInstantiationException extends FatalBeanException {
 
 	private Class beanClass;
-	
-	
+
+
 	/**
 	 * Create a new BeanInstantiationException.
 	 * @param beanClass the offending bean class
