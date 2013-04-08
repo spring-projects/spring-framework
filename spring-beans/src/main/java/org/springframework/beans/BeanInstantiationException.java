@@ -27,32 +27,6 @@ package org.springframework.beans;
 public class BeanInstantiationException extends FatalBeanException {
 
 	private Class beanClass;
-
-	private String firstChange;
-	private String secondChange;
-	private String thirdChange;
-	
-	/**
-	 * @return the firstChange
-	 */
-	public String getFirstChange() {
-		return firstChange;
-	}
-	
-	
-	/**
-	 * @return the secondChange
-	 */
-	public String getSecondChange() {
-		return secondChange;
-	}
-
-	/**
-	 * @return the thirdChange
-	 */
-	public String getThirdChange() {
-		return thirdChange;
-	}
 	
 	/**
 	 * Create a new BeanInstantiationException.
