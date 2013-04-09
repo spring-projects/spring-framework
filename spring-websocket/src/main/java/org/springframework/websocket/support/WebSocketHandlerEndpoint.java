@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.endpoint;
+package org.springframework.websocket.support;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +43,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<String, WebSocketSession>();
+	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
 
 	public WebSocketHandlerEndpoint(WebSocketHandler webSocketHandler) {
@@ -57,7 +57,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		}
 		try {
 			WebSocketSession webSocketSession = new StandardWebSocketSession(session);
-			this.sessionMap.put(session.getId(), webSocketSession);
+			this.sessions.put(session.getId(), webSocketSession);
 			session.addMessageHandler(new StandardMessageHandler(session.getId()));
 			this.webSocketHandler.newSession(webSocketSession);
 		}
@@ -75,7 +75,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		}
 		try {
 			WebSocketSession webSocketSession = getSession(id);
-			this.sessionMap.remove(id);
+			this.sessions.remove(id);
 			int code = closeReason.getCloseCode().getCode();
 			String reason = closeReason.getReasonPhrase();
 			this.webSocketHandler.sessionClosed(webSocketSession, code, reason);
@@ -100,7 +100,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	}
 
 	private WebSocketSession getSession(String sourceSessionId) {
-		WebSocketSession webSocketSession = this.sessionMap.get(sourceSessionId);
+		WebSocketSession webSocketSession = this.sessions.get(sourceSessionId);
 		Assert.notNull(webSocketSession, "No session");
 		return webSocketSession;
 	}

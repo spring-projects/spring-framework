@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,31 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server.transport;
 
 import org.springframework.sockjs.server.SockJsConfiguration;
-import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.server.endpoint.EndpointHandshakeHandler;
 
 
-public class PollingHttpServerSession extends AbstractHttpServerSession {
+/**
+ *
+ * @author Rossen Stoyanchev
+ * @since 4.0
+ */
+public class EndpointWebSocketTransportHandler extends AbstractWebSocketTransportHandler {
 
-	public PollingHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
-		super(sessionId, sockJsConfig);
+
+	public EndpointWebSocketTransportHandler(SockJsConfiguration sockJsConfig) {
+		super(sockJsConfig);
 	}
 
 	@Override
-	protected void flush() {
-		cancelHeartbeat();
-		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
-		getMessageCache().clear();
-		writeFrame(SockJsFrame.messageFrame(messages));
-	}
-
-	@Override
-	protected void writeFrame(SockJsFrame frame) {
-		super.writeFrame(frame);
-		resetRequest();
+	protected HandshakeHandler createHandshakeHandler(WebSocketHandler webSocketHandler) {
+		return new EndpointHandshakeHandler(webSocketHandler);
 	}
 
 }
-

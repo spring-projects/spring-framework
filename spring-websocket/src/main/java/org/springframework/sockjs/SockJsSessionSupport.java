@@ -33,7 +33,7 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 
 	private final String sessionId;
 
-	private final SockJsHandler delegate;
+	private final SockJsHandler sockJsHandler;
 
 	private State state = State.NEW;
 
@@ -45,13 +45,13 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 	/**
 	 *
 	 * @param sessionId
-	 * @param delegate the recipient of SockJS messages
+	 * @param sockJsHandler the recipient of SockJS messages
 	 */
-	public SockJsSessionSupport(String sessionId, SockJsHandler delegate) {
+	public SockJsSessionSupport(String sessionId, SockJsHandler sockJsHandler) {
 		Assert.notNull(sessionId, "sessionId is required");
-		Assert.notNull(delegate, "SockJsHandler is required");
+		Assert.notNull(sockJsHandler, "SockJsHandler is required");
 		this.sessionId = sessionId;
-		this.delegate = delegate;
+		this.sockJsHandler = sockJsHandler;
 	}
 
 	public String getId() {
@@ -59,7 +59,7 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 	}
 
 	public SockJsHandler getSockJsHandler() {
-		return this.delegate;
+		return this.sockJsHandler;
 	}
 
 	public boolean isNew() {
@@ -105,17 +105,22 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 
 	public void connectionInitialized() throws Exception {
 		this.state = State.OPEN;
-		this.delegate.newSession(this);
+		this.sockJsHandler.newSession(this);
 	}
 
 	public void delegateMessages(String... messages) throws Exception {
 		for (String message : messages) {
-			this.delegate.handleMessage(this, message);
+			this.sockJsHandler.handleMessage(this, message);
 		}
+	}
+
+	public void delegateException(Throwable ex) {
+		this.sockJsHandler.handleException(this, ex);
 	}
 
 	public void close() {
 		this.state = State.CLOSED;
+		this.sockJsHandler.sessionClosed(this);
 	}
 
 	public String toString() {

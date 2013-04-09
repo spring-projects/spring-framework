@@ -22,7 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.SockJsSessionSupport;
-import org.springframework.sockjs.TransportType;
+import org.springframework.sockjs.server.TransportType;
 
 public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler {
 

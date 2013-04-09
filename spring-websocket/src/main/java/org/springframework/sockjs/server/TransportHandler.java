@@ -17,9 +17,7 @@ package org.springframework.sockjs.server;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
-import org.springframework.sockjs.TransportType;
 
 
 /**
@@ -31,7 +29,11 @@ public interface TransportHandler {
 
 	TransportType getTransportType();
 
-	SockJsSessionSupport createSession(String sessionId, SockJsHandler handler, SockJsConfiguration config);
+	boolean canCreateSession();
+
+	SockJsSessionSupport createSession(String sessionId);
+
+	boolean handleNoSession(ServerHttpRequest request, ServerHttpResponse response);
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
 			throws Exception;

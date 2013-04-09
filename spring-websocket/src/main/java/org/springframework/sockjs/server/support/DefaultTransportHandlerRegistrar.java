@@ -15,16 +15,21 @@
  */
 package org.springframework.sockjs.server.support;
 
+import java.lang.reflect.Constructor;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.sockjs.server.SockJsConfiguration;
+import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.TransportHandlerRegistrar;
 import org.springframework.sockjs.server.TransportHandlerRegistry;
 import org.springframework.sockjs.server.transport.EventSourceTransportHandler;
 import org.springframework.sockjs.server.transport.HtmlFileTransportHandler;
 import org.springframework.sockjs.server.transport.JsonpPollingTransportHandler;
 import org.springframework.sockjs.server.transport.JsonpTransportHandler;
-import org.springframework.sockjs.server.transport.WebSocketTransportHandler;
 import org.springframework.sockjs.server.transport.XhrPollingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrStreamingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrTransportHandler;
+import org.springframework.util.ClassUtils;
 
 
 /**
@@ -35,19 +40,38 @@ import org.springframework.sockjs.server.transport.XhrTransportHandler;
  */
 public class DefaultTransportHandlerRegistrar implements TransportHandlerRegistrar {
 
-	public void registerTransportHandlers(TransportHandlerRegistry registry) {
+	private static final boolean standardWebSocketApiPresent = ClassUtils.isPresent(
+			"javax.websocket.server.ServerEndpointConfig", DefaultTransportHandlerRegistrar.class.getClassLoader());
 
-		registry.registerHandler(new WebSocketTransportHandler());
 
-		registry.registerHandler(new XhrPollingTransportHandler());
+	public void registerTransportHandlers(TransportHandlerRegistry registry, SockJsConfiguration config) {
+
+		if (standardWebSocketApiPresent) {
+			registry.registerHandler(createEndpointWebSocketTransportHandler(config));
+		}
+
+		registry.registerHandler(new XhrPollingTransportHandler(config));
 		registry.registerHandler(new XhrTransportHandler());
 
-		registry.registerHandler(new JsonpPollingTransportHandler());
+		registry.registerHandler(new JsonpPollingTransportHandler(config));
 		registry.registerHandler(new JsonpTransportHandler());
 
-		registry.registerHandler(new XhrStreamingTransportHandler());
-		registry.registerHandler(new EventSourceTransportHandler());
-		registry.registerHandler(new HtmlFileTransportHandler());
+		registry.registerHandler(new XhrStreamingTransportHandler(config));
+		registry.registerHandler(new EventSourceTransportHandler(config));
+		registry.registerHandler(new HtmlFileTransportHandler(config));
+
+	}
+
+	private TransportHandler createEndpointWebSocketTransportHandler(SockJsConfiguration config) {
+		try {
+			String className = "org.springframework.sockjs.server.transport.EndpointWebSocketTransportHandler";
+			Class<?> clazz = ClassUtils.forName(className, DefaultTransportHandlerRegistrar.class.getClassLoader());
+			Constructor<?> constructor = clazz.getConstructor(SockJsConfiguration.class);
+			return (TransportHandler) BeanUtils.instantiateClass(constructor, config);
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Failed to instantiate EndpointWebSocketTransportHandler", t);
+		}
 	}
 
 }

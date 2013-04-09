@@ -40,13 +40,17 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSession(String sessionId, SockJsHandler delegate, SockJsConfiguration sockJsConfig) {
-		super(sessionId, delegate);
-		Assert.notNull(sockJsConfig, "sockJsConfig is required");
+	public AbstractServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
+		super(sessionId, getSockJsHandler(sockJsConfig));
 		this.sockJsConfig = sockJsConfig;
 	}
 
-	public SockJsConfiguration getSockJsConfig() {
+	private static SockJsHandler getSockJsHandler(SockJsConfiguration sockJsConfig) {
+		Assert.notNull(sockJsConfig, "sockJsConfig is required");
+		return sockJsConfig.getSockJsHandler();
+	}
+
+	protected SockJsConfiguration getSockJsConfig() {
 		return this.sockJsConfig;
 	}
 
@@ -61,18 +65,15 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 		if (!isClosed()) {
 			logger.debug("Closing session");
 
-			// set the status
-			super.close();
-
 			if (isActive()) {
 				// deliver messages "in flight" before sending close frame
 				writeFrame(SockJsFrame.closeFrameGoAway());
 			}
 
+			super.close();
+
 			cancelHeartbeat();
 			closeInternal();
-
-			getSockJsHandler().sessionClosed(this);
 		}
 	}
 
@@ -90,12 +91,12 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 			writeFrameInternal(frame);
 		}
 		catch (EOFException ex) {
-			logger.warn("Failed to send message due to client disconnect. Terminating connection abruptly");
+			logger.warn("Client went away. Terminating connection abruptly");
 			deactivate();
 			close();
 		}
 		catch (Throwable t) {
-			logger.error("Failed to send message. Terminating connection abruptly", t);
+			logger.warn("Failed to send message. Terminating connection abruptly: " + t.getMessage());
 			deactivate();
 			close();
 		}

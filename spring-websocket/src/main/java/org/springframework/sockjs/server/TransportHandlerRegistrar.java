@@ -23,6 +23,6 @@ package org.springframework.sockjs.server;
  */
 public interface TransportHandlerRegistrar {
 
-	void registerTransportHandlers(TransportHandlerRegistry registry);
+	void registerTransportHandlers(TransportHandlerRegistry registry, SockJsConfiguration config);
 
 }

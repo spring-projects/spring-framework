@@ -19,7 +19,7 @@ import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.sockjs.TransportType;
+import org.springframework.sockjs.server.TransportType;
 
 public class XhrTransportHandler extends AbstractHttpReceivingTransportHandler {
 

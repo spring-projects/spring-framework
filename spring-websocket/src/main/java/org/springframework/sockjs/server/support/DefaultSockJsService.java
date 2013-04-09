@@ -20,9 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.http.Cookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -32,12 +35,13 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
-import org.springframework.sockjs.TransportType;
 import org.springframework.sockjs.server.AbstractSockJsService;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.TransportHandlerRegistrar;
 import org.springframework.sockjs.server.TransportHandlerRegistry;
+import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
+import org.springframework.websocket.server.HandshakeHandler;
 
 
 /**
@@ -46,10 +50,10 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class DefaultSockJsService extends AbstractSockJsService implements TransportHandlerRegistry, InitializingBean {
+public class DefaultSockJsService extends AbstractSockJsService
+		implements TransportHandlerRegistry, BeanFactoryAware, InitializingBean {
 
-	private static final AtomicLong webSocketSessionIdSuffix = new AtomicLong();
-
+	private final Class<? extends SockJsHandler> sockJsHandlerClass;
 
 	private final SockJsHandler sockJsHandler;
 
@@ -59,17 +63,24 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 
 	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
 
+	private AutowireCapableBeanFactory beanFactory;
 
-	/**
-	 * Class constructor...
-	 *
-	 */
+
+	public DefaultSockJsService(String prefix, Class<? extends SockJsHandler> sockJsHandlerClass) {
+		this(prefix, sockJsHandlerClass, null);
+	}
+
 	public DefaultSockJsService(String prefix, SockJsHandler sockJsHandler) {
+		this(prefix, null, sockJsHandler);
+	}
+
+	private DefaultSockJsService(String prefix, Class<? extends SockJsHandler> handlerClass, SockJsHandler handler) {
 		super(prefix);
-		Assert.notNull(sockJsHandler, "sockJsHandler is required");
-		this.sockJsHandler = sockJsHandler;
+		Assert.isTrue(((handlerClass != null) || (handler != null)), "A sockJsHandler class or instance is required");
+		this.sockJsHandlerClass = handlerClass;
+		this.sockJsHandler = handler;
 		this.sessionTimeoutScheduler = createScheduler("SockJs-sessionTimeout-");
-		new DefaultTransportHandlerRegistrar().registerTransportHandlers(this);
+		new DefaultTransportHandlerRegistrar().registerTransportHandlers(this, this);
 	}
 
 	/**
@@ -95,11 +106,33 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 	public void setTransportHandlerRegistrar(TransportHandlerRegistrar registrar) {
 		Assert.notNull(registrar, "registrar is required");
 		this.transportHandlers.clear();
-		registrar.registerTransportHandlers(this);
+		registrar.registerTransportHandlers(this, this);
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (beanFactory instanceof AutowireCapableBeanFactory) {
+			this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
+		}
+	}
+
+	@Override
+	public SockJsHandler getSockJsHandler() {
+		return (this.sockJsHandlerClass != null) ?
+				this.beanFactory.createBean(this.sockJsHandlerClass) : this.sockJsHandler;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+
+		if (this.sockJsHandler != null) {
+			Assert.notNull(this.beanFactory,
+					"An AutowirecapableBeanFactory is required to initialize SockJS handler instances per request.");
+		}
+
+		if (this.transportHandlers.get(TransportType.WEBSOCKET) == null) {
+			logger.warn("No WebSocket transport handler was registered");
+		}
 
 		this.sessionTimeoutScheduler.scheduleAtFixedRate(new Runnable() {
 			public void run() {
@@ -126,6 +159,19 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 				}
 			}
 		}, getDisconnectDelay());
+	}
+
+	@Override
+	protected void handleRawWebSocket(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
+		TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
+		if ((transportHandler != null) && transportHandler instanceof HandshakeHandler) {
+			HandshakeHandler handshakeHandler = (HandshakeHandler) transportHandler;
+			handshakeHandler.doHandshake(request, response);
+		}
+		else {
+			logger.debug("No handler found for raw WebSocket messages");
+			response.setStatusCode(HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@Override
@@ -159,8 +205,7 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 		}
 
 		SockJsSessionSupport session = getSockJsSession(sessionId, transportHandler);
-		if (session == null) {
-			response.setStatusCode(HttpStatus.NOT_FOUND);
+		if ((session == null) && !transportHandler.handleNoSession(request, response)) {
 			return;
 		}
 
@@ -184,19 +229,12 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 
 	public SockJsSessionSupport getSockJsSession(String sessionId, TransportHandler transportHandler) {
 
-		TransportType transportType = transportHandler.getTransportType();
-
-		// Always create new session for WebSocket requests
-		sessionId = TransportType.WEBSOCKET.equals(transportType) ?
-				sessionId + "#" + webSocketSessionIdSuffix.getAndIncrement() : sessionId;
-
 		SockJsSessionSupport session = this.sessions.get(sessionId);
 		if (session != null) {
 			return session;
 		}
 
-		if (TransportType.XHR_SEND.equals(transportType) || TransportType.JSONP_SEND.equals(transportType)) {
-			logger.debug(transportType + " did not find session");
+		if (!transportHandler.canCreateSession()) {
 			return null;
 		}
 
@@ -207,7 +245,7 @@ public class DefaultSockJsService extends AbstractSockJsService implements Trans
 			}
 
 			logger.debug("Creating new session with session id \"" + sessionId + "\"");
-			session = transportHandler.createSession(sessionId, this.sockJsHandler, this);
+			session = transportHandler.createSession(sessionId);
 			this.sessions.put(sessionId, session);
 
 			return session;

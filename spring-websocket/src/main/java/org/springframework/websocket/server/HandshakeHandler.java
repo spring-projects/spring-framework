@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint;
+package org.springframework.websocket.server;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 
 
 /**
- * A strategy for performing the actual request upgrade after the handshake checks have
- * passed, encapsulating runtime-specific steps of the handshake.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface EndpointRequestUpgradeStrategy {
+public interface HandshakeHandler {
 
-	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol,
-			EndpointRegistration registration) throws Exception;
+
+	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response) throws Exception;
 
 }

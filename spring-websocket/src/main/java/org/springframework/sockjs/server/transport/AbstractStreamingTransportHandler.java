@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 
 
@@ -32,9 +31,13 @@ import org.springframework.sockjs.server.SockJsConfiguration;
 public abstract class AbstractStreamingTransportHandler extends AbstractHttpSendingTransportHandler {
 
 
+	public AbstractStreamingTransportHandler(SockJsConfiguration sockJsConfig) {
+		super(sockJsConfig);
+	}
+
 	@Override
-	public StreamingHttpServerSession createSession(String sessionId, SockJsHandler handler, SockJsConfiguration config) {
-		return new StreamingHttpServerSession(sessionId, handler, config);
+	public StreamingHttpServerSession createSession(String sessionId) {
+		return new StreamingHttpServerSession(sessionId, getSockJsConfig());
 	}
 
 	@Override

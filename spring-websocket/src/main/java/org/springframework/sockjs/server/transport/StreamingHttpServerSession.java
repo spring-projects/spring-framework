@@ -18,7 +18,6 @@ package org.springframework.sockjs.server.transport;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 
@@ -28,8 +27,8 @@ public class StreamingHttpServerSession extends AbstractHttpServerSession {
 	private int byteCount;
 
 
-	public StreamingHttpServerSession(String sessionId, SockJsHandler delegate, SockJsConfiguration sockJsConfig) {
-		super(sessionId, delegate, sockJsConfig);
+	public StreamingHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
+		super(sessionId, sockJsConfig);
 	}
 
 	protected void flush() {

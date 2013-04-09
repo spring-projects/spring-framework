@@ -25,9 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
-import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.TransportHandler;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -53,8 +51,19 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 	}
 
 	@Override
-	public SockJsSessionSupport createSession(String sessionId, SockJsHandler handler, SockJsConfiguration config) {
-		return null;
+	public boolean canCreateSession() {
+		return false;
+	}
+
+	@Override
+	public SockJsSessionSupport createSession(String sessionId) {
+		throw new IllegalStateException("Transport handlers receiving messages do not create new sessions");
+	}
+
+	@Override
+	public boolean handleNoSession(ServerHttpRequest request, ServerHttpResponse response) {
+		response.setStatusCode(HttpStatus.NOT_FOUND);
+		return false;
 	}
 
 	@Override

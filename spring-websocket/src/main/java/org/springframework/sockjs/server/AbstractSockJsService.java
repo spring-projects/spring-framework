@@ -32,13 +32,11 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.sockjs.TransportType;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.websocket.server.HandshakeRequestHandler;
 
 
 /**
@@ -69,8 +67,6 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	private long disconnectDelay = 5 * 1000;
 
 	private boolean webSocketsEnabled = true;
-
-	private HandshakeRequestHandler handshakeRequestHandler;
 
 
 	/**
@@ -199,16 +195,6 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 		return this.webSocketsEnabled;
 	}
 
-	/**
-	 * SockJS exposes an entry point at "/websocket" for raw WebSocket
-	 * communication without additional custom framing, e.g. no open frame, no
-	 * heartbeats, only raw WebSocket protocol. This property allows setting a
-	 * handler for requests for raw WebSocket communication.
-	 */
-	public void setWebsocketHandler(HandshakeRequestHandler handshakeRequestHandler) {
-		this.handshakeRequestHandler = handshakeRequestHandler;
-	}
-
 
 	/**
 	 * TODO
@@ -245,8 +231,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 			return;
 		}
 		else if (sockJsPath.equals("/websocket")) {
-			Assert.notNull(this.handshakeRequestHandler, "No handler for raw Websockets configured");
-			this.handshakeRequestHandler.doHandshake(request, response);
+			handleRawWebSocket(request, response);
 			return;
 		}
 
@@ -269,6 +254,9 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 		handleRequestInternal(request, response, sessionId, TransportType.fromValue(transport));
 
 	}
+
+	protected abstract void handleRawWebSocket(ServerHttpRequest request, ServerHttpResponse response)
+			throws Exception;
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 

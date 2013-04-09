@@ -36,7 +36,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class TomcatRequestUpgradeStrategy implements EndpointRequestUpgradeStrategy {
+public class TomcatRequestUpgradeStrategy implements WebSocketRequestUpgradeStrategy {
 
 
 	@Override

@@ -152,6 +152,8 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 
 	protected Object getEndpoint() {
 		if (this.endpointClass != null) {
+			Assert.notNull(this.applicationContext,
+					"An ApplicationContext is required to initialize endpoint instances per request.");
 			return this.applicationContext.getAutowireCapableBeanFactory().createBean(this.endpointClass);
 		}
 		else {

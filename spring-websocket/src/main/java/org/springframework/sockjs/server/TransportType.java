@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.sockjs;
+package org.springframework.sockjs.server;
 
 import org.springframework.http.HttpMethod;
 
@@ -25,7 +25,7 @@ import org.springframework.http.HttpMethod;
  */
 public enum TransportType {
 
-	WEBSOCKET("websocket", HttpMethod.GET, false /* CORS ? */),
+	WEBSOCKET("websocket", HttpMethod.GET, false),
 
 	XHR("xhr", HttpMethod.POST, true),
 	XHR_SEND("xhr_send", HttpMethod.POST, true),
@@ -45,10 +45,10 @@ public enum TransportType {
 	private final boolean corsSupported;
 
 
-	private TransportType(String value, HttpMethod httpMethod, boolean supportsCors) {
+	private TransportType(String value, HttpMethod httpMethod, boolean corsSupported) {
 		this.value = value;
 		this.httpMethod = httpMethod;
-		this.corsSupported = supportsCors;
+		this.corsSupported = corsSupported;
 	}
 
 	public String value() {

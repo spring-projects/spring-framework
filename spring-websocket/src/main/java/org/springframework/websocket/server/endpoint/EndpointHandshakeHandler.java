@@ -23,35 +23,36 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
-import org.springframework.websocket.server.AbstractHandshakeRequestHandler;
+import org.springframework.websocket.server.AbstractHandshakeHandler;
+import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.support.WebSocketHandlerEndpoint;
 
 
 /**
+ * A {@link HandshakeHandler} for use with standard Java WebSocket.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointHandshakeRequestHandler extends AbstractHandshakeRequestHandler {
+public class EndpointHandshakeHandler extends AbstractHandshakeHandler {
 
 	private static final boolean tomcatWebSocketPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHandshakeRequest", EndpointHandshakeRequestHandler.class.getClassLoader());
+			"org.apache.tomcat.websocket.server.WsHandshakeRequest", EndpointHandshakeHandler.class.getClassLoader());
 
-	private final EndpointRegistration endpointRegistration;
-
-	private final EndpointRequestUpgradeStrategy upgradeStrategy;
+	private final WebSocketRequestUpgradeStrategy upgradeStrategy;
 
 
-	public EndpointHandshakeRequestHandler(WebSocketHandler webSocketHandler) {
-		this(new WebSocketHandlerEndpoint(webSocketHandler));
-	}
-
-	public EndpointHandshakeRequestHandler(Endpoint endpoint) {
-		this.endpointRegistration = new EndpointRegistration("/dummy", endpoint);
+	public EndpointHandshakeHandler(WebSocketHandler webSocketHandler) {
+		super(webSocketHandler);
 		this.upgradeStrategy = createRequestUpgradeStrategy();
 	}
 
-	private static EndpointRequestUpgradeStrategy createRequestUpgradeStrategy() {
+	public EndpointHandshakeHandler(Class<? extends WebSocketHandler> handlerClass) {
+		super(handlerClass);
+		this.upgradeStrategy = createRequestUpgradeStrategy();
+	}
+
+	private static WebSocketRequestUpgradeStrategy createRequestUpgradeStrategy() {
 		String className;
 		if (tomcatWebSocketPresent) {
 			className = "org.springframework.websocket.server.endpoint.TomcatRequestUpgradeStrategy";
@@ -60,16 +61,12 @@ public class EndpointHandshakeRequestHandler extends AbstractHandshakeRequestHan
 			throw new IllegalStateException("No suitable EndpointRequestUpgradeStrategy");
 		}
 		try {
-			Class<?> clazz = ClassUtils.forName(className, EndpointHandshakeRequestHandler.class.getClassLoader());
-			return (EndpointRequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
+			Class<?> clazz = ClassUtils.forName(className, EndpointHandshakeHandler.class.getClassLoader());
+			return (WebSocketRequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
 		}
 		catch (Throwable t) {
 			throw new IllegalStateException("Failed to instantiate " + className, t);
 		}
-	}
-
-	public EndpointRegistration getEndpointRegistration() {
-		return this.endpointRegistration;
 	}
 
 	@Override
@@ -77,7 +74,8 @@ public class EndpointHandshakeRequestHandler extends AbstractHandshakeRequestHan
 			throws Exception {
 
 		logger.debug("Upgrading HTTP request");
-		this.upgradeStrategy.upgrade(request, response, protocol, this.endpointRegistration);
+		Endpoint endpoint = new WebSocketHandlerEndpoint(getWebSocketHandler());
+		this.upgradeStrategy.upgrade(request, response, protocol, new EndpointRegistration("/dummy", endpoint));
 	}
 
 }

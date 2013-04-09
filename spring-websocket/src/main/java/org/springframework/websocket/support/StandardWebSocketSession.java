@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.endpoint;
+package org.springframework.websocket.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -23,9 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
-import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportHandler;
 
 /**
  * TODO
@@ -37,6 +38,26 @@ public abstract class AbstractHttpSendingTransportHandler implements TransportHa
 
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
+	private final SockJsConfiguration sockJsConfig;
+
+
+	public AbstractHttpSendingTransportHandler(SockJsConfiguration sockJsConfig) {
+		this.sockJsConfig = sockJsConfig;
+	}
+
+	protected SockJsConfiguration getSockJsConfig() {
+		return this.sockJsConfig;
+	}
+
+	@Override
+	public boolean canCreateSession() {
+		return true;
+	}
+
+	@Override
+	public boolean handleNoSession(ServerHttpRequest request, ServerHttpResponse response) {
+		return true;
+	}
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,

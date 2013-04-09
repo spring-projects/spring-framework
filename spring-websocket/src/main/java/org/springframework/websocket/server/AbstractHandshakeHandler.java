@@ -28,11 +28,17 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -40,14 +46,32 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHandshakeRequestHandler implements HandshakeRequestHandler {
+public abstract class AbstractHandshakeHandler implements HandshakeHandler, BeanFactoryAware {
 
 	private static final String GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 	protected Log logger = LogFactory.getLog(getClass());
 
+	private final WebSocketHandler webSocketHandler;
+
+	private final Class<? extends WebSocketHandler> handlerClass;
+
 	private List<String> protocols;
 
+	private AutowireCapableBeanFactory beanFactory;
+
+
+	public AbstractHandshakeHandler(WebSocketHandler webSocketHandler) {
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		this.webSocketHandler = webSocketHandler;
+		this.handlerClass = null;
+	}
+
+	public AbstractHandshakeHandler(Class<? extends WebSocketHandler> handlerClass) {
+		Assert.notNull((handlerClass), "handlerClass is required");
+		this.webSocketHandler = null;
+		this.handlerClass = handlerClass;
+	}
 
 	public void setProtocols(String... protocols) {
 		this.protocols = Arrays.asList(protocols);
@@ -58,7 +82,24 @@ public abstract class AbstractHandshakeRequestHandler implements HandshakeReques
 	}
 
 	@Override
-	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (beanFactory instanceof AutowireCapableBeanFactory) {
+			this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
+		}
+	}
+
+	protected WebSocketHandler getWebSocketHandler() {
+		if (this.handlerClass != null) {
+			Assert.notNull(this.beanFactory, "BeanFactory is required for WebSocketHandler instance per request.");
+			return this.beanFactory.createBean(this.handlerClass);
+		}
+		else {
+			return this.webSocketHandler;
+		}
+	}
+
+	@Override
+	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
 
 		logger.debug("Starting handshake for " + request.getURI());
 
@@ -105,6 +146,9 @@ public abstract class AbstractHandshakeRequestHandler implements HandshakeReques
 
 		return true;
 	}
+
+	protected abstract void doHandshakeInternal(ServerHttpRequest request, ServerHttpResponse response,
+			String protocol) throws Exception;
 
 	protected boolean validateUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
@@ -167,8 +211,5 @@ public abstract class AbstractHandshakeRequestHandler implements HandshakeReques
         byte[] bytes = digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
 		return DatatypeConverter.printBase64Binary(bytes);
     }
-
-	protected abstract void doHandshakeInternal(ServerHttpRequest request, ServerHttpResponse response, String protocol)
-			throws Exception;
 
 }

@@ -19,9 +19,8 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.TransportType;
 import org.springframework.sockjs.server.SockJsConfiguration;
+import org.springframework.sockjs.server.TransportType;
 import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 
@@ -34,6 +33,10 @@ import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
  */
 public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHandler {
 
+
+	public XhrPollingTransportHandler(SockJsConfiguration sockJsConfig) {
+		super(sockJsConfig);
+	}
 
 	@Override
 	public TransportType getTransportType() {
@@ -50,8 +53,8 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 		return new DefaultFrameFormat("%s\n");
 	}
 
-	public PollingHttpServerSession createSession(String sessionId, SockJsHandler handler, SockJsConfiguration config) {
-		return new PollingHttpServerSession(sessionId, handler, config);
+	public PollingHttpServerSession createSession(String sessionId) {
+		return new PollingHttpServerSession(sessionId, getSockJsConfig());
 	}
 
 }

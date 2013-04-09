@@ -23,12 +23,11 @@ import java.util.concurrent.BlockingQueue;
 import org.springframework.http.server.AsyncServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.AbstractServerSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
-import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.util.Assert;
 
 /**
@@ -48,8 +47,8 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 	private OutputStream outputStream;
 
 
-	public AbstractHttpServerSession(String sessionId, SockJsHandler delegate, SockJsConfiguration sockJsConfig) {
-		super(sessionId, delegate, sockJsConfig);
+	public AbstractHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
+		super(sessionId, sockJsConfig);
 	}
 
 	public void setFrameFormat(FrameFormat frameFormat) {

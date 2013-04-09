@@ -17,6 +17,7 @@ package org.springframework.sockjs.server;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.sockjs.SockJsHandler;
 
 
 /**
@@ -65,5 +66,12 @@ public interface SockJsConfiguration {
 	 * By default a {@link ThreadPoolTaskScheduler} with default settings is used.
 	 */
 	public TaskScheduler getHeartbeatScheduler();
+
+	/**
+	 * Provides access to the {@link SockJsHandler} that will handle the request. This
+	 * method should be called once per SockJS session. It may return the same or a
+	 * different instance every time it is called.
+	 */
+	SockJsHandler getSockJsHandler();
 
 }

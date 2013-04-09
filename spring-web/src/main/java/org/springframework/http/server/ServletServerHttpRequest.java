@@ -134,8 +134,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	public Cookies getCookies() {
 		if (this.cookies == null) {
 			this.cookies = new Cookies();
-			for (Cookie cookie : this.servletRequest.getCookies()) {
-				this.cookies.addCookie(cookie.getName(), cookie.getValue());
+			if (this.servletRequest.getCookies() != null) {
+				for (Cookie cookie : this.servletRequest.getCookies()) {
+					this.cookies.addCookie(cookie.getName(), cookie.getValue());
+				}
 			}
 		}
 		return this.cookies;
