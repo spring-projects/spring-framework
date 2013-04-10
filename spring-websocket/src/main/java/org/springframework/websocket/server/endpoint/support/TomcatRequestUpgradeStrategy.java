@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint;
+package org.springframework.websocket.server.endpoint.support;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.Endpoint;
+import javax.websocket.server.ServerEndpointConfig;
 
 import org.apache.tomcat.websocket.server.WsHandshakeRequest;
 import org.apache.tomcat.websocket.server.WsHttpUpgradeHandler;
@@ -29,6 +31,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.websocket.server.endpoint.EndpointRegistration;
+import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrategy;
 
 
 /**
@@ -36,26 +40,35 @@ import org.springframework.util.ReflectionUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class TomcatRequestUpgradeStrategy implements WebSocketRequestUpgradeStrategy {
+public class TomcatRequestUpgradeStrategy implements EndpointRequestUpgradeStrategy {
 
 
 	@Override
+	public String[] getSupportedVersions() {
+		return new String[] { "13" };
+	}
+
+	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol,
-			EndpointRegistration registration) throws Exception {
+			Endpoint endpoint) throws Exception {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
-		WsHttpUpgradeHandler wsHandler = servletRequest.upgrade(WsHttpUpgradeHandler.class);
+		WsHttpUpgradeHandler upgradeHandler = servletRequest.upgrade(WsHttpUpgradeHandler.class);
 
-		WsHandshakeRequest wsRequest = new WsHandshakeRequest(servletRequest);
+		WsHandshakeRequest webSocketRequest = new WsHandshakeRequest(servletRequest);
 		Method method = ReflectionUtils.findMethod(WsHandshakeRequest.class, "finished");
 		ReflectionUtils.makeAccessible(method);
-		method.invoke(wsRequest);
+		method.invoke(webSocketRequest);
 
-		wsHandler.preInit(registration.getEndpoint(), registration,
-				WsServerContainer.getServerContainer(), wsRequest, protocol,
-				Collections.<String, String> emptyMap(), servletRequest.isSecure());
+		// TODO: use ServletContext attribute when Tomcat is updated
+		WsServerContainer serverContainer = WsServerContainer.getServerContainer();
+
+		ServerEndpointConfig endpointConfig = new EndpointRegistration("/shouldntmatter", endpoint);
+
+		upgradeHandler.preInit(endpoint, endpointConfig, serverContainer, webSocketRequest,
+				protocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());
 	}
 
 }

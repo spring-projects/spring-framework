@@ -37,6 +37,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.websocket.WebSocketHandler;
 
@@ -56,7 +57,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 
 	private final Class<? extends WebSocketHandler> handlerClass;
 
-	private List<String> protocols;
+	private List<String> supportedProtocols;
 
 	private AutowireCapableBeanFactory beanFactory;
 
@@ -73,12 +74,12 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 		this.handlerClass = handlerClass;
 	}
 
-	public void setProtocols(String... protocols) {
-		this.protocols = Arrays.asList(protocols);
+	public void setSupportedProtocols(String... protocols) {
+		this.supportedProtocols = Arrays.asList(protocols);
 	}
 
-	public String[] getProtocols() {
-		return this.protocols.toArray(new String[this.protocols.size()]);
+	public String[] getSupportedProtocols() {
+		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
 	}
 
 	@Override
@@ -109,16 +110,20 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 			logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
 			return false;
 		}
-		if (!validateUpgradeHeader(request, response)) {
+		if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+			handleInvalidUpgradeHeader(request, response);
 			return false;
 		}
-		if (!validateConnectHeader(request, response)) {
+		if (!request.getHeaders().getConnection().contains("Upgrade")) {
+			handleInvalidConnectHeader(request, response);
 			return false;
 		}
-		if (!validateWebSocketVersion(request, response)) {
+		if (!isWebSocketVersionSupported(request)) {
+			handleWebSocketVersionNotSupported(request, response);
 			return false;
 		}
-		if (!validateOrigin(request, response)) {
+		if (!isValidOrigin(request)) {
+			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;
 		}
 		String wsKey = request.getHeaders().getSecWebSocketKey();
@@ -127,8 +132,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 			response.setStatusCode(HttpStatus.BAD_REQUEST);
 			return false;
 		}
+
 		String protocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
-		// TODO: request.getHeaders().getSecWebSocketExtensions())
+		// TODO: select extensions
 
 		response.setStatusCode(HttpStatus.SWITCHING_PROTOCOLS);
 		response.getHeaders().setUpgrade("WebSocket");
@@ -139,7 +145,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 
 		logger.debug("Successfully negotiated WebSocket handshake");
 
-		// TODO: surely there is a better way to flush the headers
+		// TODO: surely there is a better way to flush headers
 		response.getBody();
 
 		doHandshakeInternal(request, response, protocol);
@@ -150,46 +156,46 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 	protected abstract void doHandshakeInternal(ServerHttpRequest request, ServerHttpResponse response,
 			String protocol) throws Exception;
 
-	protected boolean validateUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-		if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
-			response.setStatusCode(HttpStatus.BAD_REQUEST);
-			response.getBody().write("Can \"Upgrade\" only to \"websocket\".".getBytes("UTF-8"));
-			logger.debug("Invalid Upgrade header " + request.getHeaders().getUpgrade());
-			return false;
-		}
-		return true;
+
+	protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
+		logger.debug("Invalid Upgrade header " + request.getHeaders().getUpgrade());
+		response.setStatusCode(HttpStatus.BAD_REQUEST);
+		response.getBody().write("Can \"Upgrade\" only to \"websocket\".".getBytes("UTF-8"));
 	}
 
-	protected boolean validateConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-		if (!request.getHeaders().getConnection().contains("Upgrade")) {
-			response.setStatusCode(HttpStatus.BAD_REQUEST);
-			response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes("UTF-8"));
-			logger.debug("Invalid Connection header " + request.getHeaders().getConnection());
-			return false;
-		}
-		return true;
+	protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
+		logger.debug("Invalid Connection header " + request.getHeaders().getConnection());
+		response.setStatusCode(HttpStatus.BAD_REQUEST);
+		response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes("UTF-8"));
 	}
 
-	protected boolean validateWebSocketVersion(ServerHttpRequest request, ServerHttpResponse response) {
-		if (!"13".equals(request.getHeaders().getSecWebSocketVersion())) {
-			response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
-			response.getHeaders().set("Sec-WebSocket-Version", "13");
-			logger.debug("WebSocket version not supported " + request.getHeaders().get("Sec-WebSocket-Version"));
-			return false;
+	protected boolean isWebSocketVersionSupported(ServerHttpRequest request) {
+		String requestedVersion = request.getHeaders().getSecWebSocketVersion();
+		for (String supportedVersion : getSupportedVerions()) {
+			if (supportedVersion.equals(requestedVersion)) {
+				return true;
+			}
 		}
-		return true;
+		return false;
 	}
 
-	protected boolean validateOrigin(ServerHttpRequest request, ServerHttpResponse response) {
+	protected String[] getSupportedVerions() {
+		return new String[] { "13" };
+	}
+
+	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
+		logger.debug("WebSocket version not supported " + request.getHeaders().get("Sec-WebSocket-Version"));
+		response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
+		response.getHeaders().setSecWebSocketVersion(StringUtils.arrayToCommaDelimitedString(getSupportedVerions()));
+	}
+
+	protected boolean isValidOrigin(ServerHttpRequest request) {
 		String origin = request.getHeaders().getOrigin();
 		if (origin != null) {
-			UriComponentsBuilder originUriBuilder = UriComponentsBuilder.fromHttpUrl(origin);
-
+			// UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(origin);
 			// TODO
-			// Check scheme, port, and host against list of configured origins (allow wild cards in the host?)
-			// Another strategy might be to match current request's scheme/port/host
-
-			// response.setStatusCode(HttpStatus.FORBIDDEN);
+			// A simple strategy checks against the current request's scheme/port/host
+			// Or match scheme, port, and host against configured allowed origins (wild cards for hosts?)
 			// return false;
 		}
 		return true;
@@ -197,9 +203,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 
 	protected String selectProtocol(List<String> requestedProtocols) {
 		if (requestedProtocols != null) {
-			for (String p : requestedProtocols) {
-				if (this.protocols.contains(p)) {
-					return p;
+			for (String protocol : requestedProtocols) {
+				if (this.supportedProtocols.contains(protocol)) {
+					return protocol;
 				}
 			}
 		}

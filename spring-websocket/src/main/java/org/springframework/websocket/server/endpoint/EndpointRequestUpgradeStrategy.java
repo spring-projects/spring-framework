@@ -16,6 +16,8 @@
 
 package org.springframework.websocket.server.endpoint;
 
+import javax.websocket.Endpoint;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 
@@ -26,12 +28,14 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface WebSocketRequestUpgradeStrategy {
+public interface EndpointRequestUpgradeStrategy {
+
+	String[] getSupportedVersions();
 
 	/**
 	 * Invoked after the handshake checks have been performed and succeeded.
 	 */
-	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol,
-			EndpointRegistration registration) throws Exception;
+	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol, Endpoint endpoint)
+			throws Exception;
 
 }
