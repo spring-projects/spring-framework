@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint.support;
+package org.springframework.websocket.server.endpoint.handshake;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -36,6 +36,7 @@ import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrat
 
 
 /**
+ * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket handshake.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

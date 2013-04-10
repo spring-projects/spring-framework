@@ -15,18 +15,28 @@
  */
 package org.springframework.sockjs.server.support;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.server.AsyncServletServerHttpRequest;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.sockjs.server.AbstractSockJsService;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.web.util.NestedServletException;
 
 /**
- * A Spring MVC HandlerMapping matching requests to SockJS services by prefix.
+ * A Spring MVC HandlerMapping for matching requests to a SockJS services based on the
+ * {@link AbstractSockJsService#getPrefix() prefix} property of each service.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -56,7 +66,7 @@ public class SockJsServiceHandlerMapping extends AbstractHandlerMapping {
 					logger.debug("Matched to " + service);
 				}
 				String sockJsPath = lookupPath.substring(service.getPrefix().length());
-				return new SockJsServiceHttpRequestHandler(sockJsPath, service);
+				return new SockJsServiceHttpRequestHandler(service, sockJsPath);
 			}
 		}
 
@@ -65,6 +75,39 @@ public class SockJsServiceHandlerMapping extends AbstractHandlerMapping {
 		}
 
 		return null;
+	}
+
+
+	/**
+	 * {@link HttpRequestHandler} wrapping the invocation of the selected SockJS service.
+	 */
+	private static class SockJsServiceHttpRequestHandler implements HttpRequestHandler {
+
+		private final String sockJsPath;
+
+		private final AbstractSockJsService sockJsService;
+
+
+		public SockJsServiceHttpRequestHandler(AbstractSockJsService sockJsService, String sockJsPath) {
+			this.sockJsService = sockJsService;
+			this.sockJsPath = sockJsPath;
+		}
+
+		@Override
+		public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+
+			ServerHttpRequest httpRequest = new AsyncServletServerHttpRequest(request, response);
+			ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+
+			try {
+				this.sockJsService.handleRequest(httpRequest, httpResponse, this.sockJsPath);
+			}
+			catch (Exception ex) {
+				// TODO
+				throw new NestedServletException("SockJS service failure", ex);
+			}
+		}
 	}
 
 }

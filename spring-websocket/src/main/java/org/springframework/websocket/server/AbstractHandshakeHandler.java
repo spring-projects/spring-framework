@@ -38,8 +38,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -53,25 +51,25 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private final WebSocketHandler webSocketHandler;
+	private final Object webSocketHandler;
 
-	private final Class<? extends WebSocketHandler> handlerClass;
+	private final Class<?> webSocketHandlerClass;
 
 	private List<String> supportedProtocols;
 
 	private AutowireCapableBeanFactory beanFactory;
 
 
-	public AbstractHandshakeHandler(WebSocketHandler webSocketHandler) {
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.webSocketHandler = webSocketHandler;
-		this.handlerClass = null;
+	public AbstractHandshakeHandler(Object handler) {
+		Assert.notNull(handler, "webSocketHandler is required");
+		this.webSocketHandler = handler;
+		this.webSocketHandlerClass = null;
 	}
 
-	public AbstractHandshakeHandler(Class<? extends WebSocketHandler> handlerClass) {
+	public AbstractHandshakeHandler(Class<?> handlerClass) {
 		Assert.notNull((handlerClass), "handlerClass is required");
 		this.webSocketHandler = null;
-		this.handlerClass = handlerClass;
+		this.webSocketHandlerClass = handlerClass;
 	}
 
 	public void setSupportedProtocols(String... protocols) {
@@ -89,10 +87,10 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 		}
 	}
 
-	protected WebSocketHandler getWebSocketHandler() {
-		if (this.handlerClass != null) {
-			Assert.notNull(this.beanFactory, "BeanFactory is required for WebSocketHandler instance per request.");
-			return this.beanFactory.createBean(this.handlerClass);
+	protected Object getWebSocketHandler() {
+		if (this.webSocketHandlerClass != null) {
+			Assert.notNull(this.beanFactory, "BeanFactory is required for WebSocket handler instances per request.");
+			return this.beanFactory.createBean(this.webSocketHandlerClass);
 		}
 		else {
 			return this.webSocketHandler;

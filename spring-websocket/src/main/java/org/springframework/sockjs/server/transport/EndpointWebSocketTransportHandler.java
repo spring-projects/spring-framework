@@ -19,7 +19,7 @@ package org.springframework.sockjs.server.transport;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.HandshakeHandler;
-import org.springframework.websocket.server.endpoint.EndpointHandshakeHandler;
+import org.springframework.websocket.server.endpoint.handshake.EndpointHandshakeHandler;
 
 
 /**

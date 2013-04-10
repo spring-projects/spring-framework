@@ -35,7 +35,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * BeanPostProcessor that detects beans of type
- * {@link javax.websocket.server.ServerEndpointConfig} and registers the corresponding
+ * {@link javax.websocket.server.ServerEndpointConfig} and registers the provided
  * {@link javax.websocket.Endpoint} with a standard Java WebSocket runtime.
  *
  * <p>If the runtime is a Servlet container, use {@link ServletEndpointExporter}.

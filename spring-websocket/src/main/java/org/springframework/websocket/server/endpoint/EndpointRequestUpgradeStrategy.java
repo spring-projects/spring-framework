@@ -23,7 +23,8 @@ import org.springframework.http.server.ServerHttpResponse;
 
 
 /**
- * A strategy for performing the runtime-specific parts of a WebSocket upgrade request.
+ * A strategy for performing the container-specific steps for upgrading an HTTP request
+ * as part of a WebSocket handshake.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

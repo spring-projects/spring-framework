@@ -32,10 +32,8 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class ServletEndpointExporter extends EndpointExporter implements ServletContextAware {
 
-	/**
-	 *
-	 */
 	private static final String SERVER_CONTAINER_ATTR_NAME = "javax.websocket.server.ServerContainer";
+
 	private ServletContext servletContext;
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint;
+package org.springframework.websocket.server.endpoint.handshake;
 
 import javax.websocket.Endpoint;
 
@@ -23,13 +23,18 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.server.AbstractHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
-import org.springframework.websocket.support.WebSocketHandlerEndpoint;
+import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrategy;
 
 
 /**
- * A {@link HandshakeHandler} for use with standard Java WebSocket.
+ * A {@link HandshakeHandler} for use with standard Java WebSocket runtimes. A
+ * container-specific {@link EndpointRequestUpgradeStrategy} is required since standard
+ * Java WebSocket currently does not provide any means of integrating a WebSocket
+ * handshake into an HTTP request processing pipeline. Currently available are
+ * implementations for Tomcat and Glassfish.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -45,12 +50,17 @@ public class EndpointHandshakeHandler extends AbstractHandshakeHandler {
 	private final EndpointRequestUpgradeStrategy upgradeStrategy;
 
 
+	public EndpointHandshakeHandler(Endpoint endpoint) {
+		super(endpoint);
+		this.upgradeStrategy = createUpgradeStrategy();
+	}
+
 	public EndpointHandshakeHandler(WebSocketHandler webSocketHandler) {
 		super(webSocketHandler);
 		this.upgradeStrategy = createUpgradeStrategy();
 	}
 
-	public EndpointHandshakeHandler(Class<? extends WebSocketHandler> handlerClass) {
+	public EndpointHandshakeHandler(Class<?> handlerClass) {
 		super(handlerClass);
 		this.upgradeStrategy = createUpgradeStrategy();
 	}
@@ -85,7 +95,21 @@ public class EndpointHandshakeHandler extends AbstractHandshakeHandler {
 			throws Exception {
 
 		logger.debug("Upgrading HTTP request");
-		Endpoint endpoint = new WebSocketHandlerEndpoint(getWebSocketHandler());
+
+		Object webSocketHandler = getWebSocketHandler();
+
+		Endpoint endpoint;
+		if (webSocketHandler instanceof Endpoint) {
+			endpoint = (Endpoint) webSocketHandler;
+		}
+		else if (webSocketHandler instanceof WebSocketHandler) {
+			endpoint = new WebSocketHandlerEndpoint((WebSocketHandler) webSocketHandler);
+		}
+		else {
+			String className = webSocketHandler.getClass().getName();
+			throw new IllegalArgumentException("Unexpected WebSocket handler type: " + className);
+		}
+
 		this.upgradeStrategy.upgrade(request, response, protocol, endpoint);
 	}
 

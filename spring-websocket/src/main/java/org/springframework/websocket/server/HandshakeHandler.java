@@ -21,12 +21,12 @@ import org.springframework.http.server.ServerHttpResponse;
 
 
 /**
+ * Abstraction for integrating a WebSocket implementation some HTTP processing pipeline.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface HandshakeHandler {
-
 
 	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response) throws Exception;
 

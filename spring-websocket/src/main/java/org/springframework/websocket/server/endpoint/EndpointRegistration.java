@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.websocket.support.WebSocketHandlerEndpoint;
+import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint.support;
+package org.springframework.websocket.server.endpoint.handshake;
 
 import java.lang.reflect.Constructor;
 import java.net.URI;
@@ -49,6 +49,8 @@ import org.springframework.websocket.server.endpoint.EndpointRegistration;
 import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrategy;
 
 /**
+ * Glassfish support for upgrading an {@link HttpServletRequest} during a WebSocket
+ * handshake.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
