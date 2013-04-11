@@ -56,7 +56,7 @@ public class XhrStreamingTransportHandler extends AbstractStreamingTransportHand
 			response.getBody().write('h');
 		}
 		response.getBody().write('\n');
-		response.getBody().flush();
+		response.flush();
 	}
 
 	@Override

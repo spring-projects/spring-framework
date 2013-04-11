@@ -17,6 +17,8 @@
 package org.springframework.sockjs.server;
 
 import java.io.EOFException;
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
@@ -54,12 +56,12 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 		return this.sockJsConfig;
 	}
 
-	public final synchronized void sendMessage(String message) {
+	public final synchronized void sendMessage(String message) throws IOException {
 		Assert.isTrue(!isClosed(), "Cannot send a message, session has been closed");
 		sendMessageInternal(message);
 	}
 
-	protected abstract void sendMessageInternal(String message);
+	protected abstract void sendMessageInternal(String message) throws IOException;
 
 	public final synchronized void close() {
 		if (!isClosed()) {
@@ -67,7 +69,12 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 
 			if (isActive()) {
 				// deliver messages "in flight" before sending close frame
-				writeFrame(SockJsFrame.closeFrameGoAway());
+				try {
+					writeFrame(SockJsFrame.closeFrameGoAway());
+				}
+				catch (Exception e) {
+					// ignore
+				}
 			}
 
 			super.close();
@@ -83,26 +90,33 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 	 * For internal use within a TransportHandler and the (TransportHandler-specific)
 	 * session sub-class. The frame is written only if the connection is active.
 	 */
-	protected void writeFrame(SockJsFrame frame) {
+	protected void writeFrame(SockJsFrame frame) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Preparing to write " + frame);
 		}
 		try {
 			writeFrameInternal(frame);
 		}
-		catch (EOFException ex) {
-			logger.warn("Client went away. Terminating connection abruptly");
+		catch (IOException ex) {
+			if (ex instanceof EOFException || ex instanceof SocketException) {
+				logger.warn("Client went away. Terminating connection");
+			}
+			else {
+				logger.warn("Failed to send message. Terminating connection: " + ex.getMessage());
+			}
 			deactivate();
 			close();
+			throw ex;
 		}
 		catch (Throwable t) {
-			logger.warn("Failed to send message. Terminating connection abruptly: " + t.getMessage());
+			logger.warn("Failed to send message. Terminating connection: " + t.getMessage());
 			deactivate();
 			close();
+			throw new NestedSockJsRuntimeException("Failed to write frame " + frame, t);
 		}
 	}
 
-	protected abstract void writeFrameInternal(SockJsFrame frame) throws Exception;
+	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
 
 	/**
 	 * Some {@link TransportHandler} types cannot detect if a client connection is closed
@@ -111,7 +125,7 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 	 */
 	protected abstract void deactivate();
 
-	public synchronized void sendHeartbeat() {
+	public synchronized void sendHeartbeat() throws IOException {
 		if (isActive()) {
 			writeFrame(SockJsFrame.heartbeatFrame());
 			scheduleHeartbeat();
@@ -127,7 +141,12 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 		Date time = new Date(System.currentTimeMillis() + getSockJsConfig().getHeartbeatTime());
 		this.heartbeatTask = getSockJsConfig().getHeartbeatScheduler().schedule(new Runnable() {
 			public void run() {
-				sendHeartbeat();
+				try {
+					sendHeartbeat();
+				}
+				catch (IOException e) {
+					// ignore
+				}
 			}
 		}, time);
 		if (logger.isTraceEnabled()) {

@@ -16,6 +16,8 @@
 
 package org.springframework.sockjs.server.transport;
 
+import java.io.IOException;
+
 import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.SockJsConfiguration;
@@ -60,7 +62,7 @@ public class WebSocketSockJsHandlerAdapter extends AbstractSockJsWebSocketHandle
 		}
 
 		@Override
-		public void sendMessage(String message) throws Exception {
+		public void sendMessage(String message) throws IOException {
 			this.wsSession.sendText(message);
 		}
 

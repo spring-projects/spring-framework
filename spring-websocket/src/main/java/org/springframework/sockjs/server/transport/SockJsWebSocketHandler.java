@@ -92,14 +92,14 @@ public class SockJsWebSocketHandler extends AbstractSockJsWebSocketHandler {
 		}
 
 		@Override
-		public void sendMessageInternal(String message) {
+		public void sendMessageInternal(String message) throws IOException {
 			cancelHeartbeat();
 			writeFrame(SockJsFrame.messageFrame(message));
 			scheduleHeartbeat();
 		}
 
 		@Override
-		protected void writeFrameInternal(SockJsFrame frame) throws Exception {
+		protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Write " + frame);
 			}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint;
+package org.springframework.websocket.server.endpoint.handshake;
 
 import javax.websocket.Endpoint;
 
@@ -29,7 +29,7 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface EndpointRequestUpgradeStrategy {
+public interface RequestUpgradeStrategy {
 
 	String[] getSupportedVersions();
 

@@ -175,7 +175,7 @@ public class DefaultSockJsService extends AbstractSockJsService
 	}
 
 	@Override
-	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
 			String sessionId, TransportType transportType) throws Exception {
 
 		TransportHandler transportHandler = this.transportHandlers.get(transportType);
@@ -192,7 +192,6 @@ public class DefaultSockJsService extends AbstractSockJsService
 				response.setStatusCode(HttpStatus.NO_CONTENT);
 				addCorsHeaders(request, response, supportedMethod, HttpMethod.OPTIONS);
 				addCacheHeaders(response);
-				response.getBody(); // ensure headers are flushed (TODO!)
 			}
 			else {
 				List<HttpMethod> supportedMethods = Arrays.asList(supportedMethod);
@@ -214,7 +213,7 @@ public class DefaultSockJsService extends AbstractSockJsService
 		if (isJsessionIdCookieNeeded()) {
 			Cookie cookie = request.getCookies().getCookie("JSESSIONID");
 			String jsid = (cookie != null) ? cookie.getValue() : "dummy";
-			// TODO: Jetty sets Expires header, so bypass Cookie object for now
+			// TODO: bypass use of Cookie object (causes Jetty to set Expires header)
 			response.getHeaders().set("Set-Cookie", "JSESSIONID=" + jsid + ";path=/");	// TODO
 		}
 
@@ -223,8 +222,6 @@ public class DefaultSockJsService extends AbstractSockJsService
 		}
 
 		transportHandler.handleRequest(request, response, session);
-
-		response.close(); // ensure headers are flushed (TODO !!)
 	}
 
 	public SockJsSessionSupport getSockJsSession(String sessionId, TransportHandler transportHandler) {

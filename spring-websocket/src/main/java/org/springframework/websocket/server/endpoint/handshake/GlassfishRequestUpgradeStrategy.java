@@ -46,7 +46,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.websocket.server.endpoint.EndpointRegistration;
-import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrategy;
 
 /**
  * Glassfish support for upgrading an {@link HttpServletRequest} during a WebSocket
@@ -55,7 +54,7 @@ import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrat
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class GlassfishRequestUpgradeStrategy implements EndpointRequestUpgradeStrategy {
+public class GlassfishRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	private final static Random random = new Random();
 
@@ -77,7 +76,8 @@ public class GlassfishRequestUpgradeStrategy implements EndpointRequestUpgradeSt
 		servletResponse = new AlreadyUpgradedResponseWrapper(servletResponse);
 
 		TyrusEndpoint tyrusEndpoint = createTyrusEndpoint(servletRequest, endpoint);
-		WebSocketEngine.getEngine().register(tyrusEndpoint);
+		WebSocketEngine engine = WebSocketEngine.getEngine();
+		engine.register(tyrusEndpoint);
 
 		try {
 			if (!performUpgrade(servletRequest, servletResponse, request.getHeaders(), tyrusEndpoint)) {
@@ -85,7 +85,7 @@ public class GlassfishRequestUpgradeStrategy implements EndpointRequestUpgradeSt
 			}
 		}
 		finally {
-			WebSocketEngine.getEngine().unregister(tyrusEndpoint);
+			engine.unregister(tyrusEndpoint);
 		}
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.websocket.server.endpoint.handshake;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
@@ -29,10 +30,10 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.sockjs.server.NestedSockJsRuntimeException;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.websocket.server.endpoint.EndpointRegistration;
-import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrategy;
 
 
 /**
@@ -41,7 +42,7 @@ import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrat
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class TomcatRequestUpgradeStrategy implements EndpointRequestUpgradeStrategy {
+public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	@Override
@@ -51,7 +52,7 @@ public class TomcatRequestUpgradeStrategy implements EndpointRequestUpgradeStrat
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol,
-			Endpoint endpoint) throws Exception {
+			Endpoint endpoint) throws IOException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -59,9 +60,14 @@ public class TomcatRequestUpgradeStrategy implements EndpointRequestUpgradeStrat
 		WsHttpUpgradeHandler upgradeHandler = servletRequest.upgrade(WsHttpUpgradeHandler.class);
 
 		WsHandshakeRequest webSocketRequest = new WsHandshakeRequest(servletRequest);
-		Method method = ReflectionUtils.findMethod(WsHandshakeRequest.class, "finished");
-		ReflectionUtils.makeAccessible(method);
-		method.invoke(webSocketRequest);
+		try {
+			Method method = ReflectionUtils.findMethod(WsHandshakeRequest.class, "finished");
+			ReflectionUtils.makeAccessible(method);
+			method.invoke(webSocketRequest);
+		}
+		catch (Exception ex) {
+			throw new NestedSockJsRuntimeException("Failed to upgrade HttpServletRequest", ex);
+		}
 
 		// TODO: use ServletContext attribute when Tomcat is updated
 		WsServerContainer serverContainer = WsServerContainer.getServerContainer();

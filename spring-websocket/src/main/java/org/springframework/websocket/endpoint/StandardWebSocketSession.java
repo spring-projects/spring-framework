@@ -16,6 +16,8 @@
 
 package org.springframework.websocket.endpoint;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.websocket.WebSocketSession;
@@ -44,7 +46,7 @@ public class StandardWebSocketSession implements WebSocketSession {
 	}
 
 	@Override
-	public void sendText(String text) throws Exception {
+	public void sendText(String text) throws IOException {
 		logger.trace("Sending text message: " + text);
 		// TODO: check closed
 		this.session.getBasicRemote().sendText(text);

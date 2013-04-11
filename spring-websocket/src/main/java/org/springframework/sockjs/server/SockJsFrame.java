@@ -80,8 +80,11 @@ public class SockJsFrame {
 	}
 
 	public String toString() {
-		String quoted = this.content.replace("\n", "\\n").replace("\r", "\\r");
-		return "SockJsFrame content='" + quoted + "'";
+		String result = this.content;
+		if (result.length() > 80) {
+			result = result.substring(0, 80) + "...(truncated)";
+		}
+		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
 	}
 
 

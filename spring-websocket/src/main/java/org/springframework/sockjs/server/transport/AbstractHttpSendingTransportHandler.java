@@ -78,7 +78,7 @@ public abstract class AbstractHttpSendingTransportHandler implements TransportHa
 		}
 		else if (httpServerSession.isActive()) {
 			logger.debug("another " + getTransportType() + " connection still open: " + httpServerSession);
-			httpServerSession.writeFrame(response.getBody(), SockJsFrame.closeFrameAnotherConnectionOpen());
+			httpServerSession.writeFrame(response, SockJsFrame.closeFrameAnotherConnectionOpen());
 		}
 		else {
 			logger.debug("starting " + getTransportType() + " async request");
@@ -91,7 +91,7 @@ public abstract class AbstractHttpSendingTransportHandler implements TransportHa
 
 		logger.debug("Opening " + getTransportType() + " connection");
 		session.setFrameFormat(getFrameFormat(request));
-		session.writeFrame(response.getBody(), SockJsFrame.openFrame());
+		session.writeFrame(response, SockJsFrame.openFrame());
 		session.connectionInitialized();
 	}
 

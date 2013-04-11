@@ -16,8 +16,8 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 
@@ -31,7 +31,7 @@ public class StreamingHttpServerSession extends AbstractHttpServerSession {
 		super(sessionId, sockJsConfig);
 	}
 
-	protected void flush() {
+	protected void flushCache() throws IOException {
 
 		cancelHeartbeat();
 
@@ -64,9 +64,9 @@ public class StreamingHttpServerSession extends AbstractHttpServerSession {
 	}
 
 	@Override
-	public void writeFrame(OutputStream outputStream, SockJsFrame frame) throws IOException {
-		super.writeFrame(outputStream, frame);
-		outputStream.flush();
+	public void writeFrame(ServerHttpResponse response, SockJsFrame frame) throws IOException {
+		super.writeFrame(response, frame);
+		response.flush();
 	}
 }
 

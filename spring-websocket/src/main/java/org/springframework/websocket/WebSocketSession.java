@@ -16,6 +16,8 @@
 
 package org.springframework.websocket;
 
+import java.io.IOException;
+
 
 
 /**
@@ -27,7 +29,7 @@ public interface WebSocketSession {
 
 	boolean isOpen();
 
-	void sendText(String text) throws Exception;
+	void sendText(String text) throws IOException;
 
 	void close();
 

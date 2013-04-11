@@ -102,7 +102,7 @@ public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler 
 
 		String html = String.format(PARTIAL_HTML_CONTENT, callback);
 		response.getBody().write(html.getBytes("UTF-8"));
-		response.getBody().flush();
+		response.flush();
 	}
 
 	@Override

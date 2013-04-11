@@ -26,12 +26,11 @@ import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.server.AbstractHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
-import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrategy;
 
 
 /**
  * A {@link HandshakeHandler} for use with standard Java WebSocket runtimes. A
- * container-specific {@link EndpointRequestUpgradeStrategy} is required since standard
+ * container-specific {@link RequestUpgradeStrategy} is required since standard
  * Java WebSocket currently does not provide any means of integrating a WebSocket
  * handshake into an HTTP request processing pipeline. Currently available are
  * implementations for Tomcat and Glassfish.
@@ -41,48 +40,26 @@ import org.springframework.websocket.server.endpoint.EndpointRequestUpgradeStrat
  */
 public class EndpointHandshakeHandler extends AbstractHandshakeHandler {
 
-	private static final boolean tomcatWebSocketPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", EndpointHandshakeHandler.class.getClassLoader());
-
-	private static final boolean glassfishWebSocketPresent = ClassUtils.isPresent(
-			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", EndpointHandshakeHandler.class.getClassLoader());
-
-	private final EndpointRequestUpgradeStrategy upgradeStrategy;
+	private final RequestUpgradeStrategy upgradeStrategy;
 
 
 	public EndpointHandshakeHandler(Endpoint endpoint) {
 		super(endpoint);
-		this.upgradeStrategy = createUpgradeStrategy();
+		this.upgradeStrategy = createRequestUpgradeStrategy();
 	}
 
 	public EndpointHandshakeHandler(WebSocketHandler webSocketHandler) {
 		super(webSocketHandler);
-		this.upgradeStrategy = createUpgradeStrategy();
+		this.upgradeStrategy = createRequestUpgradeStrategy();
 	}
 
 	public EndpointHandshakeHandler(Class<?> handlerClass) {
 		super(handlerClass);
-		this.upgradeStrategy = createUpgradeStrategy();
+		this.upgradeStrategy = createRequestUpgradeStrategy();
 	}
 
-	private static EndpointRequestUpgradeStrategy createUpgradeStrategy() {
-		String className;
-		if (tomcatWebSocketPresent) {
-			className = "org.springframework.websocket.server.endpoint.support.TomcatRequestUpgradeStrategy";
-		}
-		else if (glassfishWebSocketPresent) {
-			className = "org.springframework.websocket.server.endpoint.support.GlassfishRequestUpgradeStrategy";
-		}
-		else {
-			throw new IllegalStateException("No suitable EndpointRequestUpgradeStrategy");
-		}
-		try {
-			Class<?> clazz = ClassUtils.forName(className, EndpointHandshakeHandler.class.getClassLoader());
-			return (EndpointRequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
-		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate " + className, t);
-		}
+	protected RequestUpgradeStrategy createRequestUpgradeStrategy() {
+		return new RequestUpgradeStrategyFactory().create();
 	}
 
 	@Override
@@ -111,6 +88,39 @@ public class EndpointHandshakeHandler extends AbstractHandshakeHandler {
 		}
 
 		this.upgradeStrategy.upgrade(request, response, protocol, endpoint);
+	}
+
+
+	private static class RequestUpgradeStrategyFactory {
+
+		private static final String packageName = EndpointHandshakeHandler.class.getPackage().getName();
+
+		private static final boolean tomcatWebSocketPresent = ClassUtils.isPresent(
+				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", EndpointHandshakeHandler.class.getClassLoader());
+
+		private static final boolean glassfishWebSocketPresent = ClassUtils.isPresent(
+				"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", EndpointHandshakeHandler.class.getClassLoader());
+
+
+		private RequestUpgradeStrategy create() {
+			String className;
+			if (tomcatWebSocketPresent) {
+				className = packageName + ".TomcatRequestUpgradeStrategy";
+			}
+			else if (glassfishWebSocketPresent) {
+				className = packageName + ".GlassfishRequestUpgradeStrategy";
+			}
+			else {
+				throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
+			}
+			try {
+				Class<?> clazz = ClassUtils.forName(className, EndpointHandshakeHandler.class.getClassLoader());
+				return (RequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
+			}
+			catch (Throwable t) {
+				throw new IllegalStateException("Failed to instantiate " + className, t);
+			}
+		}
 	}
 
 }

@@ -16,7 +16,6 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -44,7 +43,7 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 
 	private AsyncServerHttpRequest asyncRequest;
 
-	private OutputStream outputStream;
+	private ServerHttpResponse response;
 
 
 	public AbstractHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
@@ -60,7 +59,7 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 
 		if (isClosed()) {
 			logger.debug("connection already closed");
-			writeFrame(response.getBody(), SockJsFrame.closeFrameGoAway());
+			writeFrame(response, SockJsFrame.closeFrameGoAway());
 			return;
 		}
 
@@ -70,11 +69,11 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 		this.asyncRequest.setTimeout(-1);
 		this.asyncRequest.startAsync();
 
-		this.outputStream = response.getBody();
+		this.response = response;
 		this.frameFormat = frameFormat;
 
 		scheduleHeartbeat();
-		tryFlush();
+		tryFlushCache();
 	}
 
 	public synchronized boolean isActive() {
@@ -85,24 +84,28 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 		return this.messageCache;
 	}
 
-	protected final synchronized void sendMessageInternal(String message) {
+	protected ServerHttpResponse getResponse() {
+		return this.response;
+	}
+
+	protected final synchronized void sendMessageInternal(String message) throws IOException {
 		// assert close() was not called
 		// threads: TH-Session-Endpoint or any other thread
 		this.messageCache.add(message);
-		tryFlush();
+		tryFlushCache();
 	}
 
-	private void tryFlush() {
+	private void tryFlushCache() throws IOException {
 		if (isActive() && !getMessageCache().isEmpty()) {
 			logger.trace("Flushing messages");
-			flush();
+			flushCache();
 		}
 	}
 
 	/**
 	 * Only called if the connection is currently active
 	 */
-	protected abstract void flush();
+	protected abstract void flushCache() throws IOException;
 
 	protected void closeInternal() {
 		resetRequest();
@@ -110,7 +113,7 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 
 	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (isActive()) {
-			writeFrame(this.outputStream, frame);
+			writeFrame(this.response, frame);
 		}
 	}
 
@@ -119,18 +122,18 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 	 * even when the connection is not active, as long as a valid OutputStream
 	 * is provided.
 	 */
-	public void writeFrame(OutputStream outputStream, SockJsFrame frame) throws IOException {
+	public void writeFrame(ServerHttpResponse response, SockJsFrame frame) throws IOException {
 		frame = this.frameFormat.format(frame);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Writing " + frame);
 		}
-		outputStream.write(frame.getContentBytes());
+		response.getBody().write(frame.getContentBytes());
 	}
 
 	@Override
 	protected void deactivate() {
-		this.outputStream = null;
 		this.asyncRequest = null;
+		this.response = null;
 		updateLastActiveTime();
 	}
 
@@ -138,8 +141,8 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 		if (isActive()) {
 			this.asyncRequest.completeAsync();
 		}
-		this.outputStream = null;
 		this.asyncRequest = null;
+		this.response = null;
 		updateLastActiveTime();
 	}
 

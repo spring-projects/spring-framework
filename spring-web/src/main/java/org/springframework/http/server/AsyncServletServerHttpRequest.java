@@ -116,21 +116,35 @@ public class AsyncServletServerHttpRequest extends ServletServerHttpRequest
 	// Implementation of AsyncListener methods
 	// ---------------------------------------------------------------------
 
+	@Override
 	public void onStartAsync(AsyncEvent event) throws IOException {
 	}
 
+	@Override
 	public void onError(AsyncEvent event) throws IOException {
 	}
 
+	@Override
 	public void onTimeout(AsyncEvent event) throws IOException {
-		for (Runnable handler : this.timeoutHandlers) {
-			handler.run();
+		try {
+			for (Runnable handler : this.timeoutHandlers) {
+				handler.run();
+			}
+		}
+		catch (Throwable t) {
+			// ignore
 		}
 	}
 
+	@Override
 	public void onComplete(AsyncEvent event) throws IOException {
-		for (Runnable handler : this.completionHandlers) {
-			handler.run();
+		try {
+			for (Runnable handler : this.completionHandlers) {
+				handler.run();
+			}
+		}
+		catch (Throwable t) {
+			// ignore
 		}
 		this.asyncContext = null;
 		this.asyncCompleted.set(true);

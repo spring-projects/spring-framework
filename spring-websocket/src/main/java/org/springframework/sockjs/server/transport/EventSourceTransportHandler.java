@@ -54,7 +54,7 @@ public class EventSourceTransportHandler extends AbstractStreamingTransportHandl
 	protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		response.getBody().write('\r');
 		response.getBody().write('\n');
-		response.getBody().flush();
+		response.flush();
 	}
 
 	@Override

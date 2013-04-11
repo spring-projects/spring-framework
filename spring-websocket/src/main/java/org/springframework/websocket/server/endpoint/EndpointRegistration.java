@@ -29,6 +29,8 @@ import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -53,6 +55,8 @@ import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
  * @since 4.0
  */
 public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
+
+	private static Log logger = LogFactory.getLog(EndpointRegistration.class);
 
 	private final String path;
 
@@ -130,8 +134,9 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		if (this.endpointClass != null) {
 			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
 			if (wac == null) {
-				throw new IllegalStateException("Failed to find WebApplicationContext. "
-						+ "Was org.springframework.web.context.ContextLoader used to load the WebApplicationContext?");
+				String message = "Failed to find the root WebApplicationContext. Was ContextLoaderListener not used?";
+				logger.error(message);
+				throw new IllegalStateException();
 			}
 			return wac.getAutowireCapableBeanFactory().createBean(this.endpointClass);
 		}

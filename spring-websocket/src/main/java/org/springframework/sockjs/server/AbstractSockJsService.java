@@ -214,49 +214,56 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 			request.getHeaders();
 		}
 		catch (IllegalArgumentException ex) {
-			// Ignore invalid Content-Type (TODO!!)
+			// Ignore invalid Content-Type (TODO)
 		}
 
-		if (sockJsPath.equals("") || sockJsPath.equals("/")) {
-			response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
-			response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
-			return;
-		}
-		else if (sockJsPath.equals("/info")) {
-			this.infoHandler.handle(request, response);
-			return;
-		}
-		else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
-			this.iframeHandler.handle(request, response);
-			return;
-		}
-		else if (sockJsPath.equals("/websocket")) {
-			handleRawWebSocket(request, response);
-			return;
-		}
+		try {
+			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
+				response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
+				response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
+				return;
+			}
+			else if (sockJsPath.equals("/info")) {
+				this.infoHandler.handle(request, response);
+				return;
+			}
+			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
+				this.iframeHandler.handle(request, response);
+				return;
+			}
+			else if (sockJsPath.equals("/websocket")) {
+				handleRawWebSocket(request, response);
+				return;
+			}
 
-		String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
-		if (pathSegments.length != 3) {
-			logger.debug("Expected /{server}/{session}/{transport} but got " + sockJsPath);
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return;
+			String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
+			if (pathSegments.length != 3) {
+				logger.debug("Expected /{server}/{session}/{transport} but got " + sockJsPath);
+				response.setStatusCode(HttpStatus.NOT_FOUND);
+				return;
+			}
+
+			String serverId = pathSegments[0];
+			String sessionId = pathSegments[1];
+			String transport = pathSegments[2];
+
+			if (!validateRequest(serverId, sessionId, transport)) {
+				response.setStatusCode(HttpStatus.NOT_FOUND);
+				return;
+			}
+
+			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport));
 		}
-
-		String serverId = pathSegments[0];
-		String sessionId = pathSegments[1];
-		String transport = pathSegments[2];
-
-		if (!validateRequest(serverId, sessionId, transport)) {
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return;
+		finally {
+			response.flush();
 		}
-
-		handleRequestInternal(request, response, sessionId, TransportType.fromValue(transport));
-
 	}
 
 	protected abstract void handleRawWebSocket(ServerHttpRequest request, ServerHttpResponse response)
 			throws Exception;
+
+	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
+			String sessionId, TransportType transportType) throws Exception;
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 
@@ -278,9 +285,6 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 
 		return true;
 	}
-
-	protected abstract void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType) throws Exception;
 
 	protected void addCorsHeaders(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods) {
 
@@ -316,7 +320,6 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 		logger.debug("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 		response.getHeaders().setAllow(new HashSet<HttpMethod>(httpMethods));
-		response.getBody(); // ensure headers are flushed (TODO!)
 	}
 
 
@@ -350,8 +353,6 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 
 				addCorsHeaders(request, response, HttpMethod.GET, HttpMethod.OPTIONS);
 				addCacheHeaders(response);
-
-				response.getBody(); // ensure headers are flushed (TODO!)
 			}
 			else {
 				sendMethodNotAllowed(response, Arrays.asList(HttpMethod.OPTIONS, HttpMethod.GET));

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.sockjs;
+package org.springframework.sockjs.server;
 
-import java.io.IOException;
-
+import org.springframework.core.NestedRuntimeException;
 
 
 /**
@@ -25,10 +24,16 @@ import java.io.IOException;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SockJsSession {
+@SuppressWarnings("serial")
+public class NestedSockJsRuntimeException extends NestedRuntimeException {
 
-	void sendMessage(String text) throws IOException;
 
-	void close();
+	public NestedSockJsRuntimeException(String msg) {
+		super(msg);
+	}
+
+	public NestedSockJsRuntimeException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 
 }

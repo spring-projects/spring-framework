@@ -80,6 +80,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		return this.servletResponse.getOutputStream();
 	}
 
+	@Override
+	public void flush() throws IOException {
+		writeCookies();
+		writeHeaders();
+		this.servletResponse.flushBuffer();
+	}
+
 	public void close() {
 		writeCookies();
 		writeHeaders();
