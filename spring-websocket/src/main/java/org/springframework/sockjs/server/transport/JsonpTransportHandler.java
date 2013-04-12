@@ -33,7 +33,7 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 	}
 
 	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
 			SockJsSessionSupport sockJsSession) throws Exception {
 
 		if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {

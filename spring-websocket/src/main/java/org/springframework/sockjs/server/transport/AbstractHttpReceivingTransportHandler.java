@@ -51,24 +51,19 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 	}
 
 	@Override
-	public boolean canCreateSession() {
-		return false;
-	}
-
-	@Override
-	public SockJsSessionSupport createSession(String sessionId) {
-		throw new IllegalStateException("Transport handlers receiving messages do not create new sessions");
-	}
-
-	@Override
-	public boolean handleNoSession(ServerHttpRequest request, ServerHttpResponse response) {
-		response.setStatusCode(HttpStatus.NOT_FOUND);
-		return false;
-	}
-
-	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
+	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
 			throws Exception {
+
+		if (session == null) {
+			response.setStatusCode(HttpStatus.NOT_FOUND);
+			return;
+		}
+
+		handleRequestInternal(request, response, session);
+	}
+
+	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsSessionSupport session) throws Exception {
 
 		String[] messages = null;
 		try {

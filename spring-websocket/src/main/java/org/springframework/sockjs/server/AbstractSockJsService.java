@@ -58,7 +58,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 
 	private int streamBytesLimit = 128 * 1024;
 
-	private boolean jsessionIdCookieNeeded = true;
+	private boolean jsessionIdCookieRequired = true;
 
 	private long heartbeatTime = 25 * 1000;
 
@@ -138,17 +138,17 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	 * Set this option to indicate if a JSESSIONID cookie should be created. The
 	 * default value is "true".
 	 */
-	public AbstractSockJsService setJsessionIdCookieNeeded(boolean jsessionIdCookieNeeded) {
-		this.jsessionIdCookieNeeded = jsessionIdCookieNeeded;
+	public AbstractSockJsService setJsessionIdCookieRequired(boolean jsessionIdCookieRequired) {
+		this.jsessionIdCookieRequired = jsessionIdCookieRequired;
 		return this;
 	}
 
 	/**
 	 * Whether setting JSESSIONID cookie is necessary.
-	 * @see #setJsessionIdCookieNeeded(boolean)
+	 * @see #setJsessionIdCookieRequired(boolean)
 	 */
-	public boolean isJsessionIdCookieNeeded() {
-		return this.jsessionIdCookieNeeded;
+	public boolean isJsessionIdCookieRequired() {
+		return this.jsessionIdCookieRequired;
 	}
 
 	public AbstractSockJsService setHeartbeatTime(long heartbeatTime) {
@@ -344,7 +344,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 				addCorsHeaders(request, response);
 				addNoCacheHeaders(response);
 
-				String content = String.format(INFO_CONTENT, random.nextInt(), isJsessionIdCookieNeeded(), isWebSocketsEnabled());
+				String content = String.format(INFO_CONTENT, random.nextInt(), isJsessionIdCookieRequired(), isWebSocketsEnabled());
 				response.getBody().write(content.getBytes());
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {

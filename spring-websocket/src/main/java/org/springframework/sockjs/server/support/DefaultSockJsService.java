@@ -34,6 +34,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.sockjs.SockJsHandler;
+import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.AbstractSockJsService;
 import org.springframework.sockjs.server.TransportHandler;
@@ -188,14 +189,14 @@ public class DefaultSockJsService extends AbstractSockJsService
 
 		HttpMethod supportedMethod = transportType.getHttpMethod();
 		if (!supportedMethod.equals(request.getMethod())) {
-			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.isCorsSupported()) {
+			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
 				response.setStatusCode(HttpStatus.NO_CONTENT);
 				addCorsHeaders(request, response, supportedMethod, HttpMethod.OPTIONS);
 				addCacheHeaders(response);
 			}
 			else {
 				List<HttpMethod> supportedMethods = Arrays.asList(supportedMethod);
-				if (transportType.isCorsSupported()) {
+				if (transportType.supportsCors()) {
 					supportedMethods.add(HttpMethod.OPTIONS);
 				}
 				sendMethodNotAllowed(response, supportedMethods);
@@ -204,21 +205,22 @@ public class DefaultSockJsService extends AbstractSockJsService
 		}
 
 		SockJsSessionSupport session = getSockJsSession(sessionId, transportHandler);
-		if ((session == null) && !transportHandler.handleNoSession(request, response)) {
-			return;
-		}
 
-		addNoCacheHeaders(response);
+		if (session != null) {
+			if (transportType.setsNoCacheHeader()) {
+				addNoCacheHeaders(response);
+			}
 
-		if (isJsessionIdCookieNeeded()) {
-			Cookie cookie = request.getCookies().getCookie("JSESSIONID");
-			String jsid = (cookie != null) ? cookie.getValue() : "dummy";
-			// TODO: bypass use of Cookie object (causes Jetty to set Expires header)
-			response.getHeaders().set("Set-Cookie", "JSESSIONID=" + jsid + ";path=/");	// TODO
-		}
+			if (transportType.setsJsessionIdCookie() && isJsessionIdCookieRequired()) {
+				Cookie cookie = request.getCookies().getCookie("JSESSIONID");
+				String jsid = (cookie != null) ? cookie.getValue() : "dummy";
+				// TODO: bypass use of Cookie object (causes Jetty to set Expires header)
+				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + jsid + ";path=/");	// TODO
+			}
 
-		if (transportType.isCorsSupported()) {
-			addCorsHeaders(request, response);
+			if (transportType.supportsCors()) {
+				addCorsHeaders(request, response);
+			}
 		}
 
 		transportHandler.handleRequest(request, response, session);
@@ -231,22 +233,22 @@ public class DefaultSockJsService extends AbstractSockJsService
 			return session;
 		}
 
-		if (!transportHandler.canCreateSession()) {
-			return null;
-		}
+		if (transportHandler instanceof SockJsSessionFactory) {
+			SockJsSessionFactory<?> sessionFactory = (SockJsSessionFactory<?>) transportHandler;
 
-		synchronized (this.sessions) {
-			session = this.sessions.get(sessionId);
-			if (session != null) {
+			synchronized (this.sessions) {
+				session = this.sessions.get(sessionId);
+				if (session != null) {
+					return session;
+				}
+				logger.debug("Creating new session with session id \"" + sessionId + "\"");
+				session = (SockJsSessionSupport) sessionFactory.createSession(sessionId);
+				this.sessions.put(sessionId, session);
 				return session;
 			}
-
-			logger.debug("Creating new session with session id \"" + sessionId + "\"");
-			session = transportHandler.createSession(sessionId);
-			this.sessions.put(sessionId, session);
-
-			return session;
 		}
+
+		return null;
 	}
 
 }

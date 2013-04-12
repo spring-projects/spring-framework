@@ -15,6 +15,9 @@
  */
 package org.springframework.sockjs.server;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.http.HttpMethod;
 
 
@@ -25,30 +28,34 @@ import org.springframework.http.HttpMethod;
  */
 public enum TransportType {
 
-	WEBSOCKET("websocket", HttpMethod.GET, false),
+	WEBSOCKET("websocket", HttpMethod.GET),
 
-	XHR("xhr", HttpMethod.POST, true),
-	XHR_SEND("xhr_send", HttpMethod.POST, true),
+	XHR("xhr", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
-	JSONP("jsonp", HttpMethod.GET, false),
-	JSONP_SEND("jsonp_send", HttpMethod.POST, false),
+	XHR_SEND("xhr_send", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
 
-	XHR_STREAMING("xhr_streaming", HttpMethod.POST, true),
-	EVENT_SOURCE("eventsource", HttpMethod.GET, false),
-	HTML_FILE("htmlfile", HttpMethod.GET, false);
+	JSONP("jsonp", HttpMethod.GET, "jsessionid", "no_cache"),
+
+	JSONP_SEND("jsonp_send", HttpMethod.POST, "jsessionid", "no_cache"),
+
+	XHR_STREAMING("xhr_streaming", HttpMethod.POST, "cors", "jsessionid", "no_cache"),
+
+	EVENT_SOURCE("eventsource", HttpMethod.GET, "jsessionid", "no_cache"),
+
+	HTML_FILE("htmlfile", HttpMethod.GET, "jsessionid", "no_cache");
 
 
 	private final String value;
 
 	private final HttpMethod httpMethod;
 
-	private final boolean corsSupported;
+	private final List<String> headerHints;
 
 
-	private TransportType(String value, HttpMethod httpMethod, boolean corsSupported) {
+	private TransportType(String value, HttpMethod httpMethod, String... headerHints) {
 		this.value = value;
 		this.httpMethod = httpMethod;
-		this.corsSupported = corsSupported;
+		this.headerHints = Arrays.asList(headerHints);
 	}
 
 	public String value() {
@@ -62,11 +69,16 @@ public enum TransportType {
 		return this.httpMethod;
 	}
 
-	/**
-	 * Are cross-domain requests (CORS) supported?
-	 */
-	public boolean isCorsSupported() {
-		return this.corsSupported;
+	public boolean setsNoCacheHeader() {
+		return this.headerHints.contains("no_cache");
+	}
+
+	public boolean supportsCors() {
+		return this.headerHints.contains("cors");
+	}
+
+	public boolean setsJsessionIdCookie() {
+		return this.headerHints.contains("jsessionid");
 	}
 
 	public static TransportType fromValue(String transportValue) {

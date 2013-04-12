@@ -51,21 +51,6 @@ public abstract class AbstractWebSocketTransportHandler implements TransportHand
 	}
 
 	@Override
-	public boolean canCreateSession() {
-		return false;
-	}
-
-	@Override
-	public SockJsSessionSupport createSession(String sessionId) {
-		throw new IllegalStateException("WebSocket transport handlers do not create new sessions");
-	}
-
-	@Override
-	public boolean handleNoSession(ServerHttpRequest request, ServerHttpResponse response) {
-		return true;
-	}
-
-	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			SockJsSessionSupport session) throws Exception {
 
