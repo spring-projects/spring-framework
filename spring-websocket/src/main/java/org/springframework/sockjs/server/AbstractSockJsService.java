@@ -32,11 +32,13 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 
 
 /**
@@ -45,7 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractSockJsService implements SockJsConfiguration {
+public abstract class AbstractSockJsService implements SockJsService, SockJsConfiguration {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -169,10 +171,20 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 		this.heartbeatScheduler = heartbeatScheduler;
 	}
 
+	/**
+	 * The amount of time in milliseconds before a client is considered
+	 * disconnected after not having a receiving connection, i.e. an active
+	 * connection over which the server can send data to the client.
+	 * <p>
+	 * The default value is 5000.
+	 */
 	public void setDisconnectDelay(long disconnectDelay) {
 		this.disconnectDelay = disconnectDelay;
 	}
 
+	/**
+	 * Return the amount of time in milliseconds before a client is considered disconnected.
+	 */
 	public long getDisconnectDelay() {
 		return this.disconnectDelay;
 	}
@@ -191,7 +203,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	 * Whether WebSocket transport is enabled.
 	 * @see #setWebSocketsEnabled(boolean)
 	 */
-	public boolean isWebSocketsEnabled() {
+	public boolean isWebSocketEnabled() {
 		return this.webSocketsEnabled;
 	}
 
@@ -205,8 +217,8 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 	 *
 	 * @throws Exception
 	 */
-	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath)
-			throws Exception {
+	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+			String sockJsPath, SockJsHandler sockJsHandler) throws Exception {
 
 		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
 
@@ -216,6 +228,10 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 		catch (IllegalArgumentException ex) {
 			// Ignore invalid Content-Type (TODO)
 		}
+
+		String path = UriUtils.decode(request.getURI().getPath(), "URF-8");
+		int index = path.indexOf(this.prefix);
+		sockJsPath = path.substring(index + this.prefix.length());
 
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
@@ -232,7 +248,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 				return;
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocket(request, response);
+				handleRawWebSocketRequest(request, response, sockJsHandler);
 				return;
 			}
 
@@ -252,18 +268,19 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 				return;
 			}
 
-			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport));
+			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), sockJsHandler);
 		}
 		finally {
 			response.flush();
 		}
 	}
 
-	protected abstract void handleRawWebSocket(ServerHttpRequest request, ServerHttpResponse response)
-			throws Exception;
+	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsHandler sockJsHandler) throws Exception;
 
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType) throws Exception;
+			String sessionId, TransportType transportType, SockJsHandler sockJsHandler) throws Exception;
+
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 
@@ -278,7 +295,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 			return false;
 		}
 
-		if (!isWebSocketsEnabled() && transport.equals(TransportType.WEBSOCKET.value())) {
+		if (!isWebSocketEnabled() && transport.equals(TransportType.WEBSOCKET.value())) {
 			logger.debug("Websocket transport is disabled");
 			return false;
 		}
@@ -344,7 +361,7 @@ public abstract class AbstractSockJsService implements SockJsConfiguration {
 				addCorsHeaders(request, response);
 				addNoCacheHeaders(response);
 
-				String content = String.format(INFO_CONTENT, random.nextInt(), isJsessionIdCookieRequired(), isWebSocketsEnabled());
+				String content = String.format(INFO_CONTENT, random.nextInt(), isJsessionIdCookieRequired(), isWebSocketEnabled());
 				response.getBody().write(content.getBytes());
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {

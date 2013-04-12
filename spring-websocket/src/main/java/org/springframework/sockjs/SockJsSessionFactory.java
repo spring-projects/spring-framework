@@ -24,6 +24,6 @@ package org.springframework.sockjs;
  */
 public interface SockJsSessionFactory<S extends SockJsSession>{
 
-	S createSession(String sessionId);
+	S createSession(String sessionId, SockJsHandler sockJsHandler);
 
 }

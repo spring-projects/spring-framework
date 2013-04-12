@@ -21,10 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.server.SockJsConfiguration;
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsFrame;
-import org.springframework.sockjs.server.TransportType;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportType;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
 
@@ -38,10 +39,6 @@ import org.springframework.web.util.JavaScriptUtils;
 public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHandler {
 
 
-	public JsonpPollingTransportHandler(SockJsConfiguration sockJsConfig) {
-		super(sockJsConfig);
-	}
-
 	@Override
 	public TransportType getTransportType() {
 		return TransportType.JSONP;
@@ -53,8 +50,9 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public PollingHttpServerSession createSession(String sessionId) {
-		return new PollingHttpServerSession(sessionId, getSockJsConfig());
+	public PollingHttpServerSession createSession(String sessionId, SockJsHandler sockJsHandler) {
+		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
+		return new PollingHttpServerSession(sessionId, getSockJsConfig(), sockJsHandler);
 	}
 
 	@Override
@@ -67,7 +65,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 			response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
 			return;
 		}
-		super.handleRequest(request, response, session);
+		super.handleRequestInternal(request, response, session);
 	}
 
 	@Override

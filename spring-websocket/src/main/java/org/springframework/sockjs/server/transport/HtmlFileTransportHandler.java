@@ -22,10 +22,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.server.SockJsConfiguration;
-import org.springframework.sockjs.server.TransportType;
 import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
 
@@ -66,10 +65,6 @@ public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler 
 		PARTIAL_HTML_CONTENT = sb.toString();
 	}
 
-
-	public HtmlFileTransportHandler(SockJsConfiguration sockJsConfig) {
-		super(sockJsConfig);
-	}
 
 	@Override
 	public TransportType getTransportType() {

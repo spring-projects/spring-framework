@@ -26,13 +26,9 @@ import javax.websocket.WebSocketContainer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
@@ -41,13 +37,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractEndpointConnectionManager implements ApplicationContextAware, SmartLifecycle {
+public abstract class AbstractEndpointConnectionManager implements SmartLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private final Class<?> endpointClass;
-
-	private final Object endpointBean;
 
 	private final URI uri;
 
@@ -59,29 +51,13 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 
 	private Session session;
 
-	private ApplicationContext applicationContext;
-
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
 
 	private final Object lifecycleMonitor = new Object();
 
 
-	public AbstractEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
-		Assert.notNull(endpointClass, "endpointClass is required");
-		this.endpointClass = endpointClass;
-		this.endpointBean = null;
-		this.uri = initUri(uriTemplate, uriVariables);
-	}
-
-	public AbstractEndpointConnectionManager(Object endpointBean, String uriTemplate, Object... uriVariables) {
-		Assert.notNull(endpointBean, "endpointBean is required");
-		this.endpointClass = null;
-		this.endpointBean = endpointBean;
-		this.uri = initUri(uriTemplate, uriVariables);
-	}
-
-	private static URI initUri(String uri, Object... uriVariables) {
-		return UriComponentsBuilder.fromUriString(uri).buildAndExpand(uriVariables).encode().toUri();
+	public AbstractEndpointConnectionManager(String uriTemplate, Object... uriVariables) {
+		this.uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
 	}
 
 	public void setAsyncSendTimeout(long timeoutInMillis) {
@@ -137,28 +113,12 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 		return this.phase;
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
 	protected URI getUri() {
 		return this.uri;
 	}
 
 	protected WebSocketContainer getWebSocketContainer() {
 		return this.webSocketContainer;
-	}
-
-	protected Object getEndpoint() {
-		if (this.endpointClass != null) {
-			Assert.notNull(this.applicationContext,
-					"An ApplicationContext is required to initialize endpoint instances per request.");
-			return this.applicationContext.getAutowireCapableBeanFactory().createBean(this.endpointClass);
-		}
-		else {
-			return this.endpointBean;
-		}
 	}
 
 	/**
@@ -173,10 +133,10 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 						synchronized (lifecycleMonitor) {
 							try {
 								logger.info("Connecting to endpoint at URI " + uri);
-								session = connect(getEndpoint());
+								session = connect();
 								logger.info("Successfully connected");
 							}
-							catch (Exception ex) {
+							catch (Throwable ex) {
 								logger.error("Failed to connect to endpoint at " + uri, ex);
 							}
 						}
@@ -186,7 +146,7 @@ public abstract class AbstractEndpointConnectionManager implements ApplicationCo
 		}
 	}
 
-	protected abstract Session connect(Object endpoint) throws DeploymentException, IOException;
+	protected abstract Session connect() throws DeploymentException, IOException;
 
 	/**
 	 * Deactivates the configured message endpoint.

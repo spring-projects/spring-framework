@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint.handshake;
+package org.springframework.websocket.server.support;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -42,7 +42,7 @@ import org.springframework.websocket.server.endpoint.EndpointRegistration;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
+public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
 
 
 	@Override
@@ -51,8 +51,8 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	@Override
-	public void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol,
-			Endpoint endpoint) throws IOException {
+	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
+			String protocol, Endpoint endpoint) throws IOException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();

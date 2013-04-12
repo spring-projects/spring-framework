@@ -35,9 +35,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 
 
@@ -60,9 +58,7 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final String path;
 
-	private final Class<? extends Endpoint> endpointClass;
-
-	private final Object endpointBean;
+	private final HandlerProvider<Endpoint> endpointProvider;
 
     private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>();
 
@@ -76,8 +72,6 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private Configurator configurator = new Configurator() {};
 
-	private BeanFactory beanFactory;
-
 
 	/**
 	 * Class constructor with the {@code javax.webscoket.Endpoint} class.
@@ -87,23 +81,19 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	 * @param endpointClass
 	 */
 	public EndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
-		this(path, endpointClass, null);
-	}
-
-	public EndpointRegistration(String path, Object bean) {
-		this(path, null, bean);
-	}
-
-	public EndpointRegistration(String path, String beanName) {
-		this(path, null, beanName);
-	}
-
-	private EndpointRegistration(String path, Class<? extends Endpoint> endpointClass, Object bean) {
 		Assert.hasText(path, "path must not be empty");
-		Assert.isTrue((endpointClass != null || bean != null), "Neither endpoint class nor endpoint bean provided");
+		Assert.notNull(endpointClass, "endpointClass is required");
 		this.path = path;
-		this.endpointClass = endpointClass;
-		this.endpointBean = bean;
+		this.endpointProvider = new HandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider.setLogger(logger);
+	}
+
+	public EndpointRegistration(String path, Endpoint endpointBean) {
+		Assert.hasText(path, "path must not be empty");
+		Assert.notNull(endpointBean, "endpointBean is required");
+		this.path = path;
+		this.endpointProvider = new HandlerProvider<Endpoint>(endpointBean);
+		this.endpointProvider.setLogger(logger);
 	}
 
 	@Override
@@ -111,40 +101,13 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		return this.path;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends Endpoint> getEndpointClass() {
-		if (this.endpointClass != null) {
-			return this.endpointClass;
-		}
-		Class<?> beanClass = this.endpointBean.getClass();
-		if (beanClass.equals(String.class)) {
-			beanClass = this.beanFactory.getType((String) this.endpointBean);
-		}
-		beanClass = ClassUtils.getUserClass(beanClass);
-		if (Endpoint.class.isAssignableFrom(beanClass)) {
-			return (Class<? extends Endpoint>) beanClass;
-		}
-		else {
-			throw new IllegalStateException("Invalid endpoint bean: must be of type ... TODO ");
-		}
+		return this.endpointProvider.getHandlerType();
 	}
 
 	public Endpoint getEndpoint() {
-		if (this.endpointClass != null) {
-			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
-			if (wac == null) {
-				String message = "Failed to find the root WebApplicationContext. Was ContextLoaderListener not used?";
-				logger.error(message);
-				throw new IllegalStateException();
-			}
-			return wac.getAutowireCapableBeanFactory().createBean(this.endpointClass);
-		}
-		Object bean = this.endpointBean;
-		if (this.endpointBean instanceof String) {
-			bean = this.beanFactory.getBean((String) this.endpointBean);
-		}
-		return (Endpoint) bean;
+		return this.endpointProvider.getHandler();
 	}
 
 	public void setSubprotocols(List<String> subprotocols) {
@@ -194,11 +157,6 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		return this.decoders;
 	}
 
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
 	/**
 	 * The {@link Configurator#getEndpointInstance(Class)} method is always ignored.
 	 */
@@ -231,6 +189,11 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 				return EndpointRegistration.this.configurator.getNegotiatedExtensions(installed, requested);
 			}
 		};
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.endpointProvider.setBeanFactory(beanFactory);
 	}
 
 }

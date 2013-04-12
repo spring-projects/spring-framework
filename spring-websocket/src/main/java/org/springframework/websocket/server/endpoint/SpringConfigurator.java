@@ -64,10 +64,10 @@ public class SpringConfigurator extends Configurator {
 			return beans.values().iterator().next();
 		}
 		else {
-			// This should never happen ..
+			// Should not happen ..
 			String message = "Found more than one matching @ServerEndpoint beans of type " + endpointClass;
 			logger.error(message);
-			throw new IllegalStateException("Found more than one matching beans of type " + endpointClass);
+			throw new IllegalStateException(message);
 		}
 	}
 

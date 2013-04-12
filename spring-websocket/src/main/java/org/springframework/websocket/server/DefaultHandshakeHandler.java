@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,48 +29,53 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
+ * TODO
+ * <p>
+ * A container-specific {@link RequestUpgradeStrategy} is required since standard Java
+ * WebSocket currently does not provide a way to initiate a WebSocket handshake.
+ * Currently available are implementations for Tomcat and Glassfish.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHandshakeHandler implements HandshakeHandler, BeanFactoryAware {
+public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	private static final String GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private final Object webSocketHandler;
-
-	private final Class<?> webSocketHandlerClass;
-
 	private List<String> supportedProtocols;
 
-	private AutowireCapableBeanFactory beanFactory;
+	private RequestUpgradeStrategy requestUpgradeStrategy;
 
 
-	public AbstractHandshakeHandler(Object handler) {
-		Assert.notNull(handler, "webSocketHandler is required");
-		this.webSocketHandler = handler;
-		this.webSocketHandlerClass = null;
+	/**
+	 * Default constructor that auto-detects and instantiates a
+	 * {@link RequestUpgradeStrategy} suitable for the runtime container.
+	 *
+	 * @throws IllegalStateException if no {@link RequestUpgradeStrategy} can be found.
+	 */
+	public DefaultHandshakeHandler() {
+		this.requestUpgradeStrategy = new RequestUpgradeStrategyFactory().create();
 	}
 
-	public AbstractHandshakeHandler(Class<?> handlerClass) {
-		Assert.notNull((handlerClass), "handlerClass is required");
-		this.webSocketHandler = null;
-		this.webSocketHandlerClass = handlerClass;
+	/**
+	 * A constructor that accepts a runtime specific {@link RequestUpgradeStrategy}.
+	 * @param upgradeStrategy the upgrade strategy
+	 */
+	public DefaultHandshakeHandler(RequestUpgradeStrategy upgradeStrategy) {
+		this.requestUpgradeStrategy = upgradeStrategy;
 	}
 
 	public void setSupportedProtocols(String... protocols) {
@@ -81,24 +87,13 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (beanFactory instanceof AutowireCapableBeanFactory) {
-			this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
-		}
-	}
-
-	protected Object getWebSocketHandler() {
-		if (this.webSocketHandlerClass != null) {
-			Assert.notNull(this.beanFactory, "BeanFactory is required for WebSocket handler instances per request.");
-			return this.beanFactory.createBean(this.webSocketHandlerClass);
-		}
-		else {
-			return this.webSocketHandler;
-		}
+	public void registerWebSocketHandlers(Collection<WebSocketHandler> handlers) {
+		this.requestUpgradeStrategy.registerWebSocketHandlers(handlers);
 	}
 
 	@Override
-	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
+	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler webSocketHandler) throws Exception {
 
 		logger.debug("Starting handshake for " + request.getURI());
 
@@ -131,29 +126,28 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 			return false;
 		}
 
-		String protocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
+		String selectedProtocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
 		// TODO: select extensions
+
+		logger.debug("Upgrading HTTP request");
 
 		response.setStatusCode(HttpStatus.SWITCHING_PROTOCOLS);
 		response.getHeaders().setUpgrade("WebSocket");
 		response.getHeaders().setConnection("Upgrade");
-		response.getHeaders().setSecWebSocketProtocol(protocol);
+		response.getHeaders().setSecWebSocketProtocol(selectedProtocol);
 		response.getHeaders().setSecWebSocketAccept(getWebSocketKeyHash(wsKey));
 		// TODO: response.getHeaders().setSecWebSocketExtensions(extensions);
 
-		logger.debug("Successfully negotiated WebSocket handshake");
+		response.flush();
 
-		// TODO: surely there is a better way to flush headers
-		response.getBody();
+		if (logger.isTraceEnabled()) {
+			logger.trace("Upgrading with " + webSocketHandler);
+		}
 
-		doHandshakeInternal(request, response, protocol);
+		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, webSocketHandler);
 
 		return true;
 	}
-
-	protected abstract void doHandshakeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol) throws Exception;
-
 
 	protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		logger.debug("Invalid Upgrade header " + request.getHeaders().getUpgrade());
@@ -178,7 +172,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
 	}
 
 	protected String[] getSupportedVerions() {
-		return new String[] { "13" };
+		return this.requestUpgradeStrategy.getSupportedVersions();
 	}
 
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
@@ -215,5 +209,36 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Bean
         byte[] bytes = digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
 		return DatatypeConverter.printBase64Binary(bytes);
     }
+
+
+    private static class RequestUpgradeStrategyFactory {
+
+		private static final boolean tomcatWebSocketPresent = ClassUtils.isPresent(
+				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
+
+		private static final boolean glassfishWebSocketPresent = ClassUtils.isPresent(
+				"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
+
+
+		private RequestUpgradeStrategy create() {
+			String className;
+			if (tomcatWebSocketPresent) {
+				className = "org.springframework.websocket.server.support.TomcatRequestUpgradeStrategy";
+			}
+			else if (glassfishWebSocketPresent) {
+				className = "org.springframework.websocket.server.support.GlassfishRequestUpgradeStrategy";
+			}
+			else {
+				throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
+			}
+			try {
+				Class<?> clazz = ClassUtils.forName(className, DefaultHandshakeHandler.class.getClassLoader());
+				return (RequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
+			}
+			catch (Throwable t) {
+				throw new IllegalStateException("Failed to instantiate " + className, t);
+			}
+		}
+	}
 
 }

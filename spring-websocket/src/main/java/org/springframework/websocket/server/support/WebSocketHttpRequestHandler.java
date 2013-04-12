@@ -17,11 +17,15 @@
 package org.springframework.websocket.server.support;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -29,24 +33,48 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
+import org.springframework.websocket.HandlerProvider;
+import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.server.DefaultHandshakeHandler;
 
 
 /**
- * A Spring MVC {@link HttpRequestHandler} wrapping the invocation of a WebSocket
- * {@link HandshakeHandler};
+ * An {@link HttpRequestHandler} that wraps the invocation of a {@link HandshakeHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class HandshakeHttpRequestHandler implements HttpRequestHandler {
+public class WebSocketHttpRequestHandler implements HttpRequestHandler, BeanFactoryAware {
 
-	private final HandshakeHandler handshakeHandler;
+	private HandshakeHandler handshakeHandler;
+
+	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
 
-	public HandshakeHttpRequestHandler(HandshakeHandler handshakeHandler) {
+	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandler);
+		this.handshakeHandler = new DefaultHandshakeHandler();
+		this.handshakeHandler.registerWebSocketHandlers(Collections.singleton(webSocketHandler));
+	}
+
+	public WebSocketHttpRequestHandler(	Class<? extends WebSocketHandler> webSocketHandlerClass) {
+		Assert.notNull(webSocketHandlerClass, "webSocketHandlerClass is required");
+		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandlerClass);
+	}
+
+	public void setHandshakeHandler(HandshakeHandler handshakeHandler) {
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
 		this.handshakeHandler = handshakeHandler;
+		if (this.handlerProvider.isSingleton()) {
+			this.handshakeHandler.registerWebSocketHandlers(Collections.singleton(this.handlerProvider.getHandler()));
+		}
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.handlerProvider.setBeanFactory(beanFactory);
 	}
 
 	@Override
@@ -57,11 +85,15 @@ public class HandshakeHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
 		try {
-			this.handshakeHandler.doHandshake(httpRequest, httpResponse);
+			WebSocketHandler webSocketHandler = this.handlerProvider.getHandler();
+			this.handshakeHandler.doHandshake(httpRequest, httpResponse, webSocketHandler);
 		}
 		catch (Exception e) {
 			// TODO
 			throw new NestedServletException("HandshakeHandler failure", e);
+		}
+		finally {
+			httpResponse.flush();
 		}
 	}
 

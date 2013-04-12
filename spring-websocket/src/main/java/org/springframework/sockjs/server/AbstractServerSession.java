@@ -42,14 +42,9 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
-		super(sessionId, getSockJsHandler(sockJsConfig));
+	public AbstractServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+		super(sessionId, sockJsHandler);
 		this.sockJsConfig = sockJsConfig;
-	}
-
-	private static SockJsHandler getSockJsHandler(SockJsConfiguration sockJsConfig) {
-		Assert.notNull(sockJsConfig, "sockJsConfig is required");
-		return sockJsConfig.getSockJsHandler();
 	}
 
 	protected SockJsConfiguration getSockJsConfig() {

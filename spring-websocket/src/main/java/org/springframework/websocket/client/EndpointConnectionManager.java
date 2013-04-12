@@ -29,23 +29,41 @@ import javax.websocket.Endpoint;
 import javax.websocket.Extension;
 import javax.websocket.Session;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.util.Assert;
+import org.springframework.websocket.HandlerProvider;
+
 
 /**
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointConnectionManager extends AbstractEndpointConnectionManager {
+public class EndpointConnectionManager extends AbstractEndpointConnectionManager implements BeanFactoryAware {
+
+	private static Log logger = LogFactory.getLog(EndpointConnectionManager.class);
 
 	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
 
+	private final HandlerProvider<Endpoint> endpointProvider;
+
 
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVariables) {
-		super(endpointClass, uriTemplate, uriVariables);
+		super(uriTemplate, uriVariables);
+		Assert.notNull(endpointClass, "endpointClass is required");
+		this.endpointProvider = new HandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider.setLogger(logger);
 	}
 
 	public EndpointConnectionManager(Endpoint endpointBean, String uriTemplate, Object... uriVariables) {
-		super(endpointBean, uriTemplate, uriVariables);
+		super(uriTemplate, uriVariables);
+		Assert.notNull(endpointBean, "endpointBean is required");
+		this.endpointProvider = new HandlerProvider<Endpoint>(endpointBean);
+		this.endpointProvider.setLogger(logger);
 	}
 
 	public void setSubProtocols(String... subprotocols) {
@@ -69,8 +87,13 @@ public class EndpointConnectionManager extends AbstractEndpointConnectionManager
 	}
 
 	@Override
-	protected Session connect(Object endpoint) throws DeploymentException, IOException {
-		Endpoint typedEndpoint = (Endpoint) endpoint;
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.endpointProvider.setBeanFactory(beanFactory);
+	}
+
+	@Override
+	protected Session connect() throws DeploymentException, IOException {
+		Endpoint typedEndpoint = this.endpointProvider.getHandler();
 		ClientEndpointConfig endpointConfig = this.configBuilder.build();
 		return getWebSocketContainer().connectToServer(typedEndpoint, endpointConfig, getUri());
 	}

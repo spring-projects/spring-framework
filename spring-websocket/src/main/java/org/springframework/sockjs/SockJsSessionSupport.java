@@ -49,17 +49,13 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 	 */
 	public SockJsSessionSupport(String sessionId, SockJsHandler sockJsHandler) {
 		Assert.notNull(sessionId, "sessionId is required");
-		Assert.notNull(sockJsHandler, "SockJsHandler is required");
+		Assert.notNull(sockJsHandler, "sockJsHandler is required");
 		this.sessionId = sessionId;
 		this.sockJsHandler = sockJsHandler;
 	}
 
 	public String getId() {
 		return this.sessionId;
-	}
-
-	public SockJsHandler getSockJsHandler() {
-		return this.sockJsHandler;
 	}
 
 	public boolean isNew() {

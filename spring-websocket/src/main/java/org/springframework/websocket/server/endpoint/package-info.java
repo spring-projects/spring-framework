@@ -6,7 +6,7 @@
  * registering type-based endpoints,
  * {@link org.springframework.websocket.server.endpoint.SpringConfigurator} for
  * instantiating annotated endpoints through Spring, and
- * {@link org.springframework.websocket.server.endpoint.handshake.EndpointHandshakeHandler}
+ * {@link org.springframework.websocket.server.support.EndpointHandshakeHandler}
  * for integrating endpoints into HTTP request processing.
  */
 package org.springframework.websocket.server.endpoint;

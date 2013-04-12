@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the toriginal author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.sockjs.server;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
 
 
@@ -29,7 +30,7 @@ public interface TransportHandler {
 
 	TransportType getTransportType();
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, SockJsSessionSupport session)
-			throws Exception;
+	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsHandler sockJsHandler, SockJsSessionSupport session) throws Exception;
 
 }

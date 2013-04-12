@@ -43,8 +43,8 @@ public class SockJsWebSocketHandler extends AbstractSockJsWebSocketHandler {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public SockJsWebSocketHandler(SockJsConfiguration config) {
-		super(config);
+	public SockJsWebSocketHandler(SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+		super(sockJsConfig, sockJsHandler);
 	}
 
 	@Override
@@ -78,8 +78,8 @@ public class SockJsWebSocketHandler extends AbstractSockJsWebSocketHandler {
 		private WebSocketSession webSocketSession;
 
 
-		public WebSocketServerSession(WebSocketSession wsSession, SockJsConfiguration config) throws Exception {
-			super(String.valueOf(wsSession.hashCode()), config);
+		public WebSocketServerSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig) throws Exception {
+			super(String.valueOf(wsSession.hashCode()), sockJsConfig, getSockJsHandler());
 			this.webSocketSession = wsSession;
 			this.webSocketSession.sendText(SockJsFrame.openFrame().getContent());
 			scheduleHeartbeat();

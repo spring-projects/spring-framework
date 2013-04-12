@@ -17,17 +17,13 @@ package org.springframework.sockjs.server;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.sockjs.SockJsHandler;
-
 
 /**
- *
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SockJsConfiguration {
-
 
 	/**
 	 * Streaming transports save responses on the client side and don't free
@@ -41,15 +37,6 @@ public interface SockJsConfiguration {
 	 * The default value is 128K (i.e. 128 * 1024).
 	 */
 	public int getStreamBytesLimit();
-
-	/**
-	 * The amount of time in milliseconds before a client is considered
-	 * disconnected after not having a receiving connection, i.e. an active
-	 * connection over which the server can send data to the client.
-	 * <p>
-	 * The default value is 5000.
-	 */
-	public long getDisconnectDelay();
 
 	/**
 	 * The amount of time in milliseconds when the server has not sent any
@@ -66,12 +53,5 @@ public interface SockJsConfiguration {
 	 * By default a {@link ThreadPoolTaskScheduler} with default settings is used.
 	 */
 	public TaskScheduler getHeartbeatScheduler();
-
-	/**
-	 * Provides access to the {@link SockJsHandler} that will handle the request. This
-	 * method should be called once per SockJS session. It may return the same or a
-	 * different instance every time it is called.
-	 */
-	SockJsHandler getSockJsHandler();
 
 }

@@ -24,31 +24,34 @@ import org.springframework.websocket.WebSocketHandler;
 
 
 /**
- * Contract for processing a WebSocket handshake request.
+ * A strategy for performing container-specific steps to upgrade an HTTP request during a
+ * WebSocket handshake. Intended for use within {@link HandshakeHandler} implementations.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface HandshakeHandler {
+public interface RequestUpgradeStrategy {
+
+	/**
+	 * Return the supported WebSocket protocol versions.
+	 */
+	String[] getSupportedVersions();
 
 	/**
 	 * Pre-register {@link WebSocketHandler} instances so they can be adapted to the
 	 * underlying runtime and hence re-used at runtime when
-	 * {@link #doHandshake(ServerHttpRequest, ServerHttpResponse, WebSocketHandler) doHandshake}
-	 * is called.
+	 * {@link #upgrade(ServerHttpRequest, ServerHttpResponse, String, WebSocketHandler)
+	 * upgrade} is called.
 	 */
 	void registerWebSocketHandlers(Collection<WebSocketHandler> webSocketHandlers);
 
 	/**
+	 * Perform runtime specific steps to complete the upgrade.
+	 * Invoked only if the handshake is successful.
 	 *
-	 * @param request the HTTP request
-	 * @param response the HTTP response
-	 * @param webSocketMessageHandler the handler to process WebSocket messages with
-	 * @return a boolean indicating whether the handshake negotiation was successful
-	 *
-	 * @throws Exception
+	 * @param webSocketHandler the handler for WebSocket messages
 	 */
-	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler webSocketHandler)
-			throws Exception;
+	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
+			WebSocketHandler webSocketHandler) throws Exception;
 
 }

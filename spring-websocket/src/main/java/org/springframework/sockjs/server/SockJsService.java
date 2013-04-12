@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint.handshake;
+package org.springframework.sockjs.server;
 
-import javax.websocket.Endpoint;
+import java.util.Collection;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.sockjs.SockJsHandler;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
- * A strategy for performing the container-specific steps for upgrading an HTTP request
- * as part of a WebSocket handshake.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface RequestUpgradeStrategy {
+public interface SockJsService {
 
-	String[] getSupportedVersions();
+	String getPrefix();
 
 	/**
-	 * Invoked after the handshake checks have been performed and succeeded.
+	 * Pre-register {@link SockJsHandler} instances so they can be adapted to
+	 * {@link WebSocketHandler} and hence re-used at runtime when
+	 * {@link #handleRequest(ServerHttpRequest, ServerHttpResponse, String, SockJsHandler) handleRequest}
+	 * is called.
 	 */
-	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol, Endpoint endpoint)
-			throws Exception;
+	void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers);
+
+	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
+			SockJsHandler handler) throws Exception;
 
 }

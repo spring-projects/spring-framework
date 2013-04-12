@@ -16,18 +16,20 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
-import org.springframework.sockjs.server.TransportHandler;
 
 /**
  * TODO
@@ -36,24 +38,30 @@ import org.springframework.sockjs.server.TransportHandler;
  * @since 4.0
  */
 public abstract class AbstractHttpSendingTransportHandler
-		implements TransportHandler, SockJsSessionFactory<SockJsSessionSupport> {
+		implements ConfigurableTransportHandler, SockJsSessionFactory<SockJsSessionSupport> {
 
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
-	private final SockJsConfiguration sockJsConfig;
+	private SockJsConfiguration sockJsConfig;
 
 
-	public AbstractHttpSendingTransportHandler(SockJsConfiguration sockJsConfig) {
+	@Override
+	public void setSockJsConfiguration(SockJsConfiguration sockJsConfig) {
 		this.sockJsConfig = sockJsConfig;
 	}
 
-	protected SockJsConfiguration getSockJsConfig() {
+	@Override
+	public void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers) {
+		// ignore
+	}
+
+	public SockJsConfiguration getSockJsConfig() {
 		return this.sockJsConfig;
 	}
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsSessionSupport session) throws Exception {
+			SockJsHandler sockJsHandler, SockJsSessionSupport session) throws Exception {
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());

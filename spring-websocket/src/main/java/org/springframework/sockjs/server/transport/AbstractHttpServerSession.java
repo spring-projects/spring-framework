@@ -22,6 +22,7 @@ import java.util.concurrent.BlockingQueue;
 import org.springframework.http.server.AsyncServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.AbstractServerSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
@@ -46,8 +47,8 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 	private ServerHttpResponse response;
 
 
-	public AbstractHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
-		super(sessionId, sockJsConfig);
+	public AbstractHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+		super(sessionId, sockJsConfig, sockJsHandler);
 	}
 
 	public void setFrameFormat(FrameFormat frameFormat) {

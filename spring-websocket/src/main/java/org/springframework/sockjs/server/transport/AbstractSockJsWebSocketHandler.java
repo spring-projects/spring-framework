@@ -22,8 +22,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.SockJsConfiguration;
+import org.springframework.util.Assert;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -39,16 +41,25 @@ public abstract class AbstractSockJsWebSocketHandler implements WebSocketHandler
 
 	private final SockJsConfiguration sockJsConfig;
 
+	private final SockJsHandler sockJsHandler;
+
 	private final Map<WebSocketSession, SockJsSessionSupport> sessions =
 			new ConcurrentHashMap<WebSocketSession, SockJsSessionSupport>();
 
 
-	public AbstractSockJsWebSocketHandler(SockJsConfiguration sockJsConfig) {
+	public AbstractSockJsWebSocketHandler(SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+		Assert.notNull(sockJsConfig, "sockJsConfig is required");
+		Assert.notNull(sockJsHandler, "sockJsHandler is required");
 		this.sockJsConfig = sockJsConfig;
+		this.sockJsHandler = sockJsHandler;
 	}
 
 	protected SockJsConfiguration getSockJsConfig() {
 		return this.sockJsConfig;
+	}
+
+	protected SockJsHandler getSockJsHandler() {
+		return this.sockJsHandler;
 	}
 
 	protected SockJsSessionSupport getSockJsSession(WebSocketSession wsSession) {
@@ -62,7 +73,6 @@ public abstract class AbstractSockJsWebSocketHandler implements WebSocketHandler
 		}
 		SockJsSessionSupport session = createSockJsSession(wsSession);
 		this.sessions.put(wsSession, session);
-		session.connectionInitialized();
 	}
 
 	protected abstract SockJsSessionSupport createSockJsSession(WebSocketSession wsSession) throws Exception;

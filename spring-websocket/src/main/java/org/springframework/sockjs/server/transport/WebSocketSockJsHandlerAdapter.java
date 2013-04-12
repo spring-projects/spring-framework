@@ -36,12 +36,12 @@ import org.springframework.websocket.WebSocketSession;
 public class WebSocketSockJsHandlerAdapter extends AbstractSockJsWebSocketHandler {
 
 
-	public WebSocketSockJsHandlerAdapter(SockJsConfiguration sockJsConfig) {
-		super(sockJsConfig);
+	public WebSocketSockJsHandlerAdapter(SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+		super(sockJsConfig, sockJsHandler);
 	}
 
 	@Override
-	protected SockJsSessionSupport createSockJsSession(WebSocketSession wsSession) {
+	protected SockJsSessionSupport createSockJsSession(WebSocketSession wsSession) throws Exception {
 		return new WebSocketSessionAdapter(wsSession);
 	}
 
@@ -51,9 +51,10 @@ public class WebSocketSockJsHandlerAdapter extends AbstractSockJsWebSocketHandle
 		private final WebSocketSession wsSession;
 
 
-		public WebSocketSessionAdapter(WebSocketSession wsSession) {
-			super(String.valueOf(wsSession.hashCode()), getSockJsConfig().getSockJsHandler());
+		public WebSocketSessionAdapter(WebSocketSession wsSession) throws Exception {
+			super(String.valueOf(wsSession.hashCode()), getSockJsHandler());
 			this.wsSession = wsSession;
+			connectionInitialized();
 		}
 
 		@Override

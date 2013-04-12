@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server;
+
+import java.util.Collection;
+
+import org.springframework.sockjs.SockJsHandler;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -21,8 +27,14 @@ package org.springframework.sockjs.server;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface TransportHandlerRegistry {
+public interface ConfigurableTransportHandler extends TransportHandler {
 
-	void registerHandler(TransportHandler handler);
+	void setSockJsConfiguration(SockJsConfiguration sockJsConfig);
+
+	/**
+	 * Pre-register {@link SockJsHandler} instances so they can be adapted to
+	 * {@link WebSocketHandler} and hence re-used at runtime.
+	 */
+	void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers);
 
 }

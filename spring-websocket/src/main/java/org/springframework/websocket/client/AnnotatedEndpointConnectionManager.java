@@ -21,25 +21,47 @@ import java.io.IOException;
 import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.websocket.HandlerProvider;
+
 
 /**
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotatedEndpointConnectionManager extends AbstractEndpointConnectionManager {
+public class AnnotatedEndpointConnectionManager extends AbstractEndpointConnectionManager
+		implements BeanFactoryAware {
+
+	private static Log logger = LogFactory.getLog(AnnotatedEndpointConnectionManager.class);
+
+	private final HandlerProvider<Object> endpointProvider;
 
 
 	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
-		super(endpointClass, uriTemplate, uriVariables);
+		super(uriTemplate, uriVariables);
+		this.endpointProvider = new HandlerProvider<Object>(endpointClass);
+		this.endpointProvider.setLogger(logger);
 	}
 
 	public AnnotatedEndpointConnectionManager(Object endpointBean, String uriTemplate, Object... uriVariables) {
-		super(endpointBean, uriTemplate, uriVariables);
+		super(uriTemplate, uriVariables);
+		this.endpointProvider = new HandlerProvider<Object>(endpointBean);
+		this.endpointProvider.setLogger(logger);
 	}
 
 	@Override
-	protected Session connect(Object endpoint) throws DeploymentException, IOException {
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.endpointProvider.setBeanFactory(beanFactory);
+	}
+
+	@Override
+	protected Session connect() throws DeploymentException, IOException {
+		Object endpoint = this.endpointProvider.getHandler();
 		return getWebSocketContainer().connectToServer(endpoint, getUri());
 	}
 

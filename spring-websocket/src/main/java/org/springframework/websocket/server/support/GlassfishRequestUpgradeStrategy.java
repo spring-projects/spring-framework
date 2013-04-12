@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.server.endpoint.handshake;
+package org.springframework.websocket.server.support;
 
 import java.lang.reflect.Constructor;
 import java.net.URI;
@@ -54,7 +54,7 @@ import org.springframework.websocket.server.endpoint.EndpointRegistration;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class GlassfishRequestUpgradeStrategy implements RequestUpgradeStrategy {
+public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
 
 	private final static Random random = new Random();
 
@@ -65,8 +65,8 @@ public class GlassfishRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	@Override
-	public void upgrade(ServerHttpRequest request, ServerHttpResponse response, String protocol,
-			Endpoint endpoint) throws Exception {
+	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
+			String protocol, Endpoint endpoint) throws Exception {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();

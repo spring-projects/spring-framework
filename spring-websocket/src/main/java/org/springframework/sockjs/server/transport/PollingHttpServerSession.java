@@ -17,14 +17,15 @@ package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
 
+import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 
 
 public class PollingHttpServerSession extends AbstractHttpServerSession {
 
-	public PollingHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig) {
-		super(sessionId, sockJsConfig);
+	public PollingHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+		super(sessionId, sockJsConfig, sockJsHandler);
 	}
 
 	@Override

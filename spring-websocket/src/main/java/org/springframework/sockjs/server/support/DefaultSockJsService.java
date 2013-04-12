@@ -16,16 +16,13 @@
 package org.springframework.sockjs.server.support;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.http.Cookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -37,11 +34,21 @@ import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.AbstractSockJsService;
+import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.TransportHandler;
-import org.springframework.sockjs.server.TransportHandlerRegistrar;
-import org.springframework.sockjs.server.TransportHandlerRegistry;
 import org.springframework.sockjs.server.TransportType;
+import org.springframework.sockjs.server.transport.EventSourceTransportHandler;
+import org.springframework.sockjs.server.transport.HtmlFileTransportHandler;
+import org.springframework.sockjs.server.transport.JsonpPollingTransportHandler;
+import org.springframework.sockjs.server.transport.JsonpTransportHandler;
+import org.springframework.sockjs.server.transport.WebSocketSockJsHandlerAdapter;
+import org.springframework.sockjs.server.transport.WebSocketTransportHandler;
+import org.springframework.sockjs.server.transport.XhrPollingTransportHandler;
+import org.springframework.sockjs.server.transport.XhrStreamingTransportHandler;
+import org.springframework.sockjs.server.transport.XhrTransportHandler;
 import org.springframework.util.Assert;
+import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
 
 
@@ -51,37 +58,22 @@ import org.springframework.websocket.server.HandshakeHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class DefaultSockJsService extends AbstractSockJsService
-		implements TransportHandlerRegistry, BeanFactoryAware, InitializingBean {
+public class DefaultSockJsService extends AbstractSockJsService implements InitializingBean {
 
-	private final Class<? extends SockJsHandler> sockJsHandlerClass;
+	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
 
-	private final SockJsHandler sockJsHandler;
+	private final Map<TransportType, TransportHandler> transportHandlerOverrides = new HashMap<TransportType, TransportHandler>();
 
 	private TaskScheduler sessionTimeoutScheduler;
 
 	private final Map<String, SockJsSessionSupport> sessions = new ConcurrentHashMap<String, SockJsSessionSupport>();
 
-	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
-
-	private AutowireCapableBeanFactory beanFactory;
+	private final Map<SockJsHandler, WebSocketHandler> sockJsHandlers = new HashMap<SockJsHandler, WebSocketHandler>();
 
 
-	public DefaultSockJsService(String prefix, Class<? extends SockJsHandler> sockJsHandlerClass) {
-		this(prefix, sockJsHandlerClass, null);
-	}
-
-	public DefaultSockJsService(String prefix, SockJsHandler sockJsHandler) {
-		this(prefix, null, sockJsHandler);
-	}
-
-	private DefaultSockJsService(String prefix, Class<? extends SockJsHandler> handlerClass, SockJsHandler handler) {
+	public DefaultSockJsService(String prefix) {
 		super(prefix);
-		Assert.isTrue(((handlerClass != null) || (handler != null)), "A sockJsHandler class or instance is required");
-		this.sockJsHandlerClass = handlerClass;
-		this.sockJsHandler = handler;
 		this.sessionTimeoutScheduler = createScheduler("SockJs-sessionTimeout-");
-		new DefaultTransportHandlerRegistrar().registerTransportHandlers(this, this);
 	}
 
 	/**
@@ -98,42 +90,61 @@ public class DefaultSockJsService extends AbstractSockJsService
 		this.sessionTimeoutScheduler = sessionTimeoutScheduler;
 	}
 
-	@Override
-	public void registerHandler(TransportHandler transportHandler) {
-		Assert.notNull(transportHandler, "transportHandler is required");
-		this.transportHandlers.put(transportHandler.getTransportType(), transportHandler);
-	}
-
-	public void setTransportHandlerRegistrar(TransportHandlerRegistrar registrar) {
-		Assert.notNull(registrar, "registrar is required");
+	public void setTransportHandlers(TransportHandler... handlers) {
 		this.transportHandlers.clear();
-		registrar.registerTransportHandlers(this, this);
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (beanFactory instanceof AutowireCapableBeanFactory) {
-			this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
+		for (TransportHandler handler : handlers) {
+			this.transportHandlers.put(handler.getTransportType(), handler);
 		}
 	}
 
-	@Override
-	public SockJsHandler getSockJsHandler() {
-		return (this.sockJsHandlerClass != null) ?
-				this.beanFactory.createBean(this.sockJsHandlerClass) : this.sockJsHandler;
+	public void setTransportHandlerOverrides(TransportHandler... handlers) {
+		this.transportHandlerOverrides.clear();
+		for (TransportHandler handler : handlers) {
+			this.transportHandlerOverrides.put(handler.getTransportType(), handler);
+		}
+	}
+
+	public void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers) {
+		for (SockJsHandler sockJsHandler : sockJsHandlers) {
+			if (!this.sockJsHandlers.containsKey(sockJsHandler)) {
+				this.sockJsHandlers.put(sockJsHandler, adaptSockJsHandler(sockJsHandler));
+			}
+		}
+		configureTransportHandlers();
+	}
+
+	/**
+	 * Adapt the {@link SockJsHandler} to the {@link WebSocketHandler} contract for
+	 * <em>raw WebSocket</em> communication on SockJS path "/websocket".
+	 */
+	protected WebSocketSockJsHandlerAdapter adaptSockJsHandler(SockJsHandler sockJsHandler) {
+		return new WebSocketSockJsHandlerAdapter(this, sockJsHandler);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		if (this.sockJsHandler != null) {
-			Assert.notNull(this.beanFactory,
-					"An AutowirecapableBeanFactory is required to initialize SockJS handler instances per request.");
+		if (this.transportHandlers.isEmpty()) {
+			if (isWebSocketEnabled() && (this.transportHandlerOverrides.get(TransportType.WEBSOCKET) == null)) {
+				this.transportHandlers.put(TransportType.WEBSOCKET,
+						new WebSocketTransportHandler(new DefaultHandshakeHandler()));
+			}
+			this.transportHandlers.put(TransportType.XHR, new XhrPollingTransportHandler());
+			this.transportHandlers.put(TransportType.XHR_SEND, new XhrTransportHandler());
+			this.transportHandlers.put(TransportType.JSONP, new JsonpPollingTransportHandler());
+			this.transportHandlers.put(TransportType.JSONP_SEND, new JsonpTransportHandler());
+			this.transportHandlers.put(TransportType.XHR_STREAMING, new XhrStreamingTransportHandler());
+			this.transportHandlers.put(TransportType.EVENT_SOURCE, new EventSourceTransportHandler());
+			this.transportHandlers.put(TransportType.HTML_FILE, new HtmlFileTransportHandler());
 		}
 
-		if (this.transportHandlers.get(TransportType.WEBSOCKET) == null) {
-			logger.warn("No WebSocket transport handler was registered");
+		if (!this.transportHandlerOverrides.isEmpty()) {
+			for (TransportHandler transportHandler : this.transportHandlerOverrides.values()) {
+				this.transportHandlers.put(transportHandler.getTransportType(), transportHandler);
+			}
 		}
+
+		configureTransportHandlers();
 
 		this.sessionTimeoutScheduler.scheduleAtFixedRate(new Runnable() {
 			public void run() {
@@ -162,22 +173,45 @@ public class DefaultSockJsService extends AbstractSockJsService
 		}, getDisconnectDelay());
 	}
 
-	@Override
-	protected void handleRawWebSocket(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
-		TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
-		if ((transportHandler != null) && transportHandler instanceof HandshakeHandler) {
-			HandshakeHandler handshakeHandler = (HandshakeHandler) transportHandler;
-			handshakeHandler.doHandshake(request, response);
-		}
-		else {
-			logger.debug("No handler found for raw WebSocket messages");
-			response.setStatusCode(HttpStatus.NOT_FOUND);
+
+	private void configureTransportHandlers() {
+		for (TransportHandler h : this.transportHandlers.values()) {
+			if (h instanceof ConfigurableTransportHandler) {
+				((ConfigurableTransportHandler) h).setSockJsConfiguration(this);
+				if (!this.sockJsHandlers.isEmpty()) {
+					((ConfigurableTransportHandler) h).registerSockJsHandlers(this.sockJsHandlers.keySet());
+					if (h instanceof HandshakeHandler) {
+						((HandshakeHandler) h).registerWebSocketHandlers(this.sockJsHandlers.values());
+					}
+				}
+			}
 		}
 	}
 
 	@Override
+	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
+			SockJsHandler sockJsHandler) throws Exception {
+
+		if (isWebSocketEnabled()) {
+			TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
+			if (transportHandler != null) {
+				if (transportHandler instanceof HandshakeHandler) {
+					WebSocketHandler webSocketHandler = this.sockJsHandlers.get(sockJsHandler);
+					if (webSocketHandler == null) {
+						webSocketHandler = adaptSockJsHandler(sockJsHandler);
+					}
+					((HandshakeHandler) transportHandler).doHandshake(request, response, webSocketHandler);
+					return;
+				}
+			}
+			logger.warn("No handler for raw WebSocket messages");
+		}
+		response.setStatusCode(HttpStatus.NOT_FOUND);
+	}
+
+	@Override
 	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType) throws Exception {
+			String sessionId, TransportType transportType, SockJsHandler sockJsHandler) throws Exception {
 
 		TransportHandler transportHandler = this.transportHandlers.get(transportType);
 
@@ -204,7 +238,7 @@ public class DefaultSockJsService extends AbstractSockJsService
 			return;
 		}
 
-		SockJsSessionSupport session = getSockJsSession(sessionId, transportHandler);
+		SockJsSessionSupport session = getSockJsSession(sessionId, sockJsHandler, transportHandler);
 
 		if (session != null) {
 			if (transportType.setsNoCacheHeader()) {
@@ -215,7 +249,7 @@ public class DefaultSockJsService extends AbstractSockJsService
 				Cookie cookie = request.getCookies().getCookie("JSESSIONID");
 				String jsid = (cookie != null) ? cookie.getValue() : "dummy";
 				// TODO: bypass use of Cookie object (causes Jetty to set Expires header)
-				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + jsid + ";path=/");	// TODO
+				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + jsid + ";path=/");
 			}
 
 			if (transportType.supportsCors()) {
@@ -223,10 +257,11 @@ public class DefaultSockJsService extends AbstractSockJsService
 			}
 		}
 
-		transportHandler.handleRequest(request, response, session);
+		transportHandler.handleRequest(request, response, sockJsHandler, session);
 	}
 
-	public SockJsSessionSupport getSockJsSession(String sessionId, TransportHandler transportHandler) {
+	public SockJsSessionSupport getSockJsSession(String sessionId, SockJsHandler sockJsHandler,
+			TransportHandler transportHandler) {
 
 		SockJsSessionSupport session = this.sessions.get(sessionId);
 		if (session != null) {
@@ -242,7 +277,7 @@ public class DefaultSockJsService extends AbstractSockJsService
 					return session;
 				}
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
-				session = (SockJsSessionSupport) sessionFactory.createSession(sessionId);
+				session = (SockJsSessionSupport) sessionFactory.createSession(sessionId, sockJsHandler);
 				this.sessions.put(sessionId, session);
 				return session;
 			}

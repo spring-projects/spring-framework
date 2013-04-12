@@ -44,7 +44,7 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 			}
 		}
 
-		super.handleRequest(request, response, sockJsSession);
+		super.handleRequestInternal(request, response, sockJsSession);
 
 		response.getBody().write("ok".getBytes("UTF-8"));
 	}
