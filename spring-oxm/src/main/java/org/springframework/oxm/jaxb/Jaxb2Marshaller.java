@@ -720,7 +720,7 @@ public class Jaxb2Marshaller
 				return unmarshalStaxSource(unmarshaller, source);
 			}
 			else if (this.mappedClass != null) {
-				return unmarshaller.unmarshal(source, this.mappedClass);
+				return unmarshaller.unmarshal(source, this.mappedClass).getValue();
 			}
 			else {
 				return unmarshaller.unmarshal(source);
@@ -734,12 +734,16 @@ public class Jaxb2Marshaller
 	protected Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
 		XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(staxSource);
 		if (streamReader != null) {
-			return jaxbUnmarshaller.unmarshal(streamReader);
+			return (this.mappedClass != null ?
+					jaxbUnmarshaller.unmarshal(streamReader, this.mappedClass).getValue() :
+					jaxbUnmarshaller.unmarshal(streamReader));
 		}
 		else {
 			XMLEventReader eventReader = StaxUtils.getXMLEventReader(staxSource);
 			if (eventReader != null) {
-				return jaxbUnmarshaller.unmarshal(eventReader);
+				return (this.mappedClass != null ?
+						jaxbUnmarshaller.unmarshal(eventReader, this.mappedClass).getValue() :
+						jaxbUnmarshaller.unmarshal(eventReader));
 			}
 			else {
 				throw new IllegalArgumentException("StaxSource contains neither XMLStreamReader nor XMLEventReader");

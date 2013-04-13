@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
- * Simple adapter for PreparedStatementSetter that applies
+ * Simple adapter for {@link PreparedStatementSetter} that applies
  * given arrays of arguments and JDBC argument types.
  *
  * @author Juergen Hoeller
+ * @since 3.2.3
  */
-class ArgTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
+public class ArgumentTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
 	private final Object[] args;
 
@@ -42,7 +42,7 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 	 * @param args the arguments to set
 	 * @param argTypes the corresponding SQL types of the arguments
 	 */
-	public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
+	public ArgumentTypePreparedStatementSetter(Object[] args, int[] argTypes) {
 		if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
 				(args != null && args.length != argTypes.length)) {
 			throw new InvalidDataAccessApiUsageException("args and argTypes parameters must match");
@@ -59,12 +59,10 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 				Object arg = this.args[i];
 				if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
 					Collection entries = (Collection) arg;
-					for (Iterator it = entries.iterator(); it.hasNext();) {
-						Object entry = it.next();
+					for (Object entry : entries) {
 						if (entry instanceof Object[]) {
-							Object[] valueArray = ((Object[])entry);
-							for (int k = 0; k < valueArray.length; k++) {
-								Object argValue = valueArray[k];
+							Object[] valueArray = ((Object[]) entry);
+							for (Object argValue : valueArray) {
 								doSetValue(ps, parameterPosition, this.argTypes[i], argValue);
 								parameterPosition++;
 							}
@@ -94,6 +92,7 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 	 */
 	protected void doSetValue(PreparedStatement ps, int parameterPosition, int argType, Object argValue)
 			throws SQLException {
+
 		StatementCreatorUtils.setParameterValue(ps, parameterPosition, argType, argValue);
 	}
 

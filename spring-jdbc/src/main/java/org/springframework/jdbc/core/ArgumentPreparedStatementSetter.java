@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Simple adapter for PreparedStatementSetter that applies
- * a given array of arguments.
+ * Simple adapter for {@link PreparedStatementSetter} that applies a given array of arguments.
  *
  * @author Juergen Hoeller
+ * @since 3.2.3
  */
-class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
+public class ArgumentPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
 
 	private final Object[] args;
 
@@ -34,7 +34,7 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 	 * Create a new ArgPreparedStatementSetter for the given arguments.
 	 * @param args the arguments to set
 	 */
-	public ArgPreparedStatementSetter(Object[] args) {
+	public ArgumentPreparedStatementSetter(Object[] args) {
 		this.args = args;
 	}
 

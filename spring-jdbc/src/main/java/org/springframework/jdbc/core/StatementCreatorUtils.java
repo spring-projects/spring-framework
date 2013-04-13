@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.DatabaseMetaData;
-import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -229,18 +228,13 @@ public abstract class StatementCreatorUtils {
 			boolean useSetObject = false;
 			sqlType = Types.NULL;
 			try {
-				ParameterMetaData pmd = null;
+				sqlType = ps.getParameterMetaData().getParameterType(paramIndex);
+			}
+			catch (Throwable ex) {
+				logger.debug("JDBC 3.0 getParameterType call not supported", ex);
+				// JDBC driver not compliant with JDBC 3.0
+				// -> proceed with database-specific checks
 				try {
-					pmd = ps.getParameterMetaData();
-				}
-				catch (Throwable ex) {
-					// JDBC driver not compliant with JDBC 3.0
-					// -> proceed with database-specific checks
-				}
-				if (pmd != null) {
-					sqlType = pmd.getParameterType(paramIndex);
-				}
-				else {
 					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
 					String databaseProductName = dbmd.getDatabaseProductName();
 					String jdbcDriverName = dbmd.getDriverName();
@@ -255,9 +249,9 @@ public abstract class StatementCreatorUtils {
 						sqlType = Types.VARCHAR;
 					}
 				}
-			}
-			catch (Throwable ex) {
-				logger.debug("Could not check database or driver name", ex);
+				catch (Throwable ex2) {
+					logger.debug("Could not check database or driver name", ex2);
+				}
 			}
 			if (useSetObject) {
 				ps.setObject(paramIndex, null);
