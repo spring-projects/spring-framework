@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.TimeZone;
 
 /**
  * Annotation that marks a method to be scheduled. Exactly one of the
@@ -56,6 +57,15 @@ public @interface Scheduled {
 	 * @see org.springframework.scheduling.support.CronSequenceGenerator
 	 */
 	String cron() default "";
+
+	/**
+	 * A time zone for which cron expression will be resolved.
+	 * When left unspecified defaults to default {@link TimeZone}.
+	 * @return a time zone id
+	 * @see org.springframework.scheduling.support.CronSequenceGenerator
+	 * @see java.util.TimeZone
+	 */
+	String timezone() default "";
 
 	/**
 	 * Execute the annotated method with a fixed period between the end
