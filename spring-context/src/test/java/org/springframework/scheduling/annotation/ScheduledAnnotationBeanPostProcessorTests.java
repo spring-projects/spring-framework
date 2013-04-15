@@ -209,6 +209,20 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Thread.sleep(10000);
 	}
 
+	@Test(expected = BeanCreationException.class)
+	public void cronTaskWithInvalidTimezone() throws InterruptedException {
+		Assume.group(TestGroup.LONG_RUNNING);
+
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.CronWithInvalidTimezoneTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+		Thread.sleep(10000);
+	}
+
 	@Test
 	public void metaAnnotationWithFixedRate() {
 		StaticApplicationContext context = new StaticApplicationContext();
@@ -469,6 +483,16 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	static class CronWithTimezoneTestBean {
 
 		@Scheduled(cron="0 0 0-4,6-23 * * ?", timezone = "GMT+10")
+		public void cron() throws IOException {
+			throw new IOException("no no no");
+		}
+
+	}
+
+
+	static class CronWithInvalidTimezoneTestBean {
+
+		@Scheduled(cron="0 0 0-4,6-23 * * ?", timezone = "FOO")
 		public void cron() throws IOException {
 			throw new IOException("no no no");
 		}

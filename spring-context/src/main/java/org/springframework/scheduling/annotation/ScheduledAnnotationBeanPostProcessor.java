@@ -165,6 +165,7 @@ public class ScheduledAnnotationBeanPostProcessor
 							String timezoneId = annotation.timezone();
 							if (!"".equals(timezoneId)) {
 								TimeZone timezone = TimeZone.getTimeZone(timezoneId);
+								Assert.isTrue(timezoneId.equals(timezone.getID()), "Invalid timezone \"" + timezoneId + "\" - given timezone ID could not be understood.");
 								registrar.addCronTask(new CronTask(runnable, new CronTrigger(cron, timezone)));
 							} else {
 								registrar.addCronTask(new CronTask(runnable, cron));
