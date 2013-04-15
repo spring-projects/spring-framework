@@ -30,7 +30,6 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.sockjs.server.NestedSockJsRuntimeException;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.websocket.server.endpoint.EndpointRegistration;
@@ -66,7 +65,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrateg
 			method.invoke(webSocketRequest);
 		}
 		catch (Exception ex) {
-			throw new NestedSockJsRuntimeException("Failed to upgrade HttpServletRequest", ex);
+			throw new IllegalStateException("Failed to upgrade HttpServletRequest", ex);
 		}
 
 		// TODO: use ServletContext attribute when Tomcat is updated

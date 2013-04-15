@@ -29,7 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.SockJsSessionSupport;
@@ -64,7 +63,7 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 
 	private final Map<TransportType, TransportHandler> transportHandlerOverrides = new HashMap<TransportType, TransportHandler>();
 
-	private TaskScheduler sessionTimeoutScheduler;
+	private TaskSchedulerHolder sessionTimeoutSchedulerHolder;
 
 	private final Map<String, SockJsSessionSupport> sessions = new ConcurrentHashMap<String, SockJsSessionSupport>();
 
@@ -73,21 +72,13 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 
 	public DefaultSockJsService(String prefix) {
 		super(prefix);
-		this.sessionTimeoutScheduler = createScheduler("SockJs-sessionTimeout-");
+		this.sessionTimeoutSchedulerHolder = new TaskSchedulerHolder("SockJs-sessionTimeout-");
 	}
 
-	/**
-	 * A scheduler instance to use for scheduling periodic expires session cleanup.
-	 * <p>
-	 * By default a {@link ThreadPoolTaskScheduler} with default settings is used.
-	 */
-	public TaskScheduler getSessionTimeoutScheduler() {
-		return this.sessionTimeoutScheduler;
-	}
-
-	public void setSessionTimeoutScheduler(TaskScheduler sessionTimeoutScheduler) {
+	public DefaultSockJsService(String prefix, TaskScheduler heartbeatScheduler, TaskScheduler sessionTimeoutScheduler) {
+		super(prefix, heartbeatScheduler);
 		Assert.notNull(sessionTimeoutScheduler, "sessionTimeoutScheduler is required");
-		this.sessionTimeoutScheduler = sessionTimeoutScheduler;
+		this.sessionTimeoutSchedulerHolder = new TaskSchedulerHolder(sessionTimeoutScheduler);
 	}
 
 	public void setTransportHandlers(TransportHandler... handlers) {
@@ -124,6 +115,8 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
+		super.afterPropertiesSet();
+
 		if (this.transportHandlers.isEmpty()) {
 			if (isWebSocketEnabled() && (this.transportHandlerOverrides.get(TransportType.WEBSOCKET) == null)) {
 				this.transportHandlers.put(TransportType.WEBSOCKET,
@@ -146,7 +139,9 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 
 		configureTransportHandlers();
 
-		this.sessionTimeoutScheduler.scheduleAtFixedRate(new Runnable() {
+		this.sessionTimeoutSchedulerHolder.initialize();
+
+		this.sessionTimeoutSchedulerHolder.getScheduler().scheduleAtFixedRate(new Runnable() {
 			public void run() {
 				try {
 					int count = sessions.size();
@@ -173,6 +168,11 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 		}, getDisconnectDelay());
 	}
 
+	@Override
+	public void destroy() throws Exception {
+		super.destroy();
+		this.sessionTimeoutSchedulerHolder.destroy();
+	}
 
 	private void configureTransportHandlers() {
 		for (TransportHandler h : this.transportHandlers.values()) {
