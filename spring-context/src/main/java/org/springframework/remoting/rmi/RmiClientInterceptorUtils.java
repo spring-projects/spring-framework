@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,6 @@ import org.springframework.util.ReflectionUtils;
  * @since 1.1
  */
 public abstract class RmiClientInterceptorUtils {
-
-	private static final String ORACLE_CONNECTION_EXCEPTION = "com.evermind.server.rmi.RMIConnectionException";
 
 	private static final Log logger = LogFactory.getLog(RmiClientInterceptorUtils.class);
 
@@ -198,9 +196,7 @@ public abstract class RmiClientInterceptorUtils {
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
 	 * <p>Treats RMI's ConnectException, ConnectIOException, UnknownHostException,
-	 * NoSuchObjectException and StubNotFoundException as connect failure,
-	 * as well as Oracle's OC4J {@code com.evermind.server.rmi.RMIConnectionException}
-	 * (which doesn't derive from from any well-known RMI connect exception).
+	 * NoSuchObjectException and StubNotFoundException as connect failure.
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
 	 * @see java.rmi.ConnectException
@@ -213,7 +209,7 @@ public abstract class RmiClientInterceptorUtils {
 		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
 				ex instanceof UnknownHostException || ex instanceof NoSuchObjectException ||
 				ex instanceof StubNotFoundException || ex.getCause() instanceof SocketException ||
-				isCorbaConnectFailure(ex.getCause()) || ORACLE_CONNECTION_EXCEPTION.equals(ex.getClass().getName()));
+				isCorbaConnectFailure(ex.getCause()));
 	}
 
 	/**

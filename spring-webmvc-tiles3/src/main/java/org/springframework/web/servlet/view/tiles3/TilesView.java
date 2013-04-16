@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.tiles3;
 
 import java.util.Locale;
 import java.util.Map;
-
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +29,7 @@ import org.apache.tiles.request.Request;
 import org.apache.tiles.request.render.Renderer;
 import org.apache.tiles.request.servlet.ServletRequest;
 import org.apache.tiles.request.servlet.ServletUtil;
+
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -37,7 +37,6 @@ import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
-import org.springframework.web.util.WebUtils;
 
 /**
  * {@link org.springframework.web.servlet.View} implementation that renders
@@ -52,8 +51,6 @@ import org.springframework.web.util.WebUtils;
 public class TilesView extends AbstractUrlBasedView {
 
 	private Renderer renderer;
-
-	private boolean exposeForwardAttributes = false;
 
 	private boolean exposeJstlAttributes = true;
 
@@ -77,31 +74,23 @@ public class TilesView extends AbstractUrlBasedView {
 	}
 
 	@Override
-	protected void initServletContext(ServletContext servletContext) {
-		super.initServletContext(servletContext);
-		if (servletContext.getMajorVersion() == 2 && servletContext.getMinorVersion() < 5) {
-			this.exposeForwardAttributes = true;
-		}
-	}
-
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		super.afterPropertiesSet();
 
 		this.applicationContext = ServletUtil.getApplicationContext(getServletContext());
-
 		if (this.renderer == null) {
 			TilesContainer container = TilesAccess.getContainer(this.applicationContext);
 			this.renderer = new DefinitionRenderer(container);
 		}
 	}
 
+
 	@Override
 	public boolean checkResource(final Locale locale) throws Exception {
 		HttpServletRequest servletRequest = null;
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		if(requestAttributes != null && requestAttributes instanceof ServletRequestAttributes) {
-			servletRequest = ((ServletRequestAttributes)requestAttributes).getRequest();
+		if (requestAttributes instanceof ServletRequestAttributes) {
+			servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		}
 		Request request = new ServletRequest(this.applicationContext, servletRequest, null) {
 			@Override
@@ -117,28 +106,8 @@ public class TilesView extends AbstractUrlBasedView {
 			HttpServletResponse response) throws Exception {
 
 		exposeModelAsRequestAttributes(model, request);
-
 		if (this.exposeJstlAttributes) {
-			ServletContext servletContext = getServletContext();
-			JstlUtils.exposeLocalizationContext(new RequestContext(request, servletContext));
-		}
-
-		if (!response.isCommitted()) {
-			// Tiles is going to use a forward, but some web containers (e.g.
-			// OC4J 10.1.3)
-			// do not properly expose the Servlet 2.4 forward request
-			// attributes... However,
-			// must not do this on Servlet 2.5 or above, mainly for GlassFish
-			// compatibility.
-			if (this.exposeForwardAttributes) {
-				try {
-					WebUtils.exposeForwardRequestAttributes(request);
-				} catch (Exception ex) {
-					// Servlet container rejected to set internal attributes,
-					// e.g. on TriFork.
-					this.exposeForwardAttributes = false;
-				}
-			}
+			JstlUtils.exposeLocalizationContext(new RequestContext(request, getServletContext()));
 		}
 
 		Request tilesRequest = createTilesRequest(request, response);
@@ -146,9 +115,8 @@ public class TilesView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Create a Tiles {@link Request}. This implementation creates a
-	 * {@link ServletRequest}.
-	 *
+	 * Create a Tiles {@link Request}.
+	 * <p>This implementation creates a {@link ServletRequest}.
 	 * @param request the current request
 	 * @param response the current response
 	 * @return the Tiles request

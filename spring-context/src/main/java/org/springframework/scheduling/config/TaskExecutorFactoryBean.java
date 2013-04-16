@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.StringUtils;
@@ -73,10 +72,7 @@ public class TaskExecutorFactoryBean implements
 
 
 	public void afterPropertiesSet() throws Exception {
-		Class<?> executorClass = (shouldUseBackport() ?
-				getClass().getClassLoader().loadClass("org.springframework.scheduling.backportconcurrent.ThreadPoolTaskExecutor") :
-				ThreadPoolTaskExecutor.class);
-		BeanWrapper bw = new BeanWrapperImpl(executorClass);
+		BeanWrapper bw = new BeanWrapperImpl(ThreadPoolTaskExecutor.class);
 		determinePoolSizeRange(bw);
 		if (this.queueCapacity != null) {
 			bw.setPropertyValue("queueCapacity", this.queueCapacity);
@@ -94,11 +90,6 @@ public class TaskExecutorFactoryBean implements
 		if (this.target instanceof InitializingBean) {
 			((InitializingBean) this.target).afterPropertiesSet();
 		}
-	}
-
-	private boolean shouldUseBackport() {
-		return (StringUtils.hasText(this.poolSize) && this.poolSize.startsWith("0") &&
-				JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16);
 	}
 
 	private void determinePoolSizeRange(BeanWrapper bw) {
@@ -150,10 +141,7 @@ public class TaskExecutorFactoryBean implements
 	}
 
 	public Class<? extends TaskExecutor> getObjectType() {
-		if (this.target != null) {
-			return this.target.getClass();
-		}
-		return (!shouldUseBackport() ? ThreadPoolTaskExecutor.class : TaskExecutor.class);
+		return (this.target != null ? this.target.getClass() : ThreadPoolTaskExecutor.class);
 	}
 
 	public boolean isSingleton() {

@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.Test;
@@ -492,6 +493,16 @@ public class CommonsMultipartResolverTests {
 
 		@Override
 		public OutputStream getOutputStream() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public FileItemHeaders getHeaders() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setHeaders(FileItemHeaders headers) {
 			throw new UnsupportedOperationException();
 		}
 	}

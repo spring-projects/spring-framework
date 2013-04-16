@@ -140,43 +140,6 @@ public class LocalSessionFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void testLocalSessionFactoryBeanWithCacheProvider() throws Exception {
-		final CacheProvider cacheProvider = new NoCacheProvider();
-		final List invocations = new ArrayList();
-		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
-			protected Configuration newConfiguration() {
-				return new Configuration() {
-					@Override
-					public Configuration addInputStream(InputStream is) {
-						try {
-							is.close();
-						}
-						catch (IOException ex) {
-						}
-						invocations.add("addResource");
-						return this;
-					}
-				};
-			}
-
-			@Override
-			protected SessionFactory newSessionFactory(Configuration config) {
-				assertEquals(LocalCacheProviderProxy.class.getName(),
-						config.getProperty(Environment.CACHE_PROVIDER));
-				assertSame(cacheProvider, LocalSessionFactoryBean.getConfigTimeCacheProvider());
-				invocations.add("newSessionFactory");
-				return null;
-			}
-		};
-		sfb.setCacheProvider(cacheProvider);
-		sfb.afterPropertiesSet();
-		assertTrue(sfb.getConfiguration() != null);
-		assertEquals("newSessionFactory", invocations.get(0));
-	}
-
-	@Test
-	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithTransactionAwareDataSource() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final List invocations = new ArrayList();
@@ -513,10 +476,10 @@ public class LocalSessionFactoryBeanTests {
 			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
-					// changed from return type 'void' to 'Configuration' in Hibernate 3.6
 					@Override
-					public void setCacheConcurrencyStrategy(String clazz, String concurrencyStrategy, String regionName) {
+					public Configuration setCacheConcurrencyStrategy(String clazz, String concurrencyStrategy, String regionName) {
 						registeredClassCache.setProperty(clazz, concurrencyStrategy + "," + regionName);
+						return this;
 					}
 					@Override
 					public void setCollectionCacheConcurrencyStrategy(String collectionRole, String concurrencyStrategy, String regionName) {

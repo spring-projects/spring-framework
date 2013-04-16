@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,6 @@ import org.springframework.util.ReflectionUtils;
  * Quartz {@link org.quartz.Job} interface. Let your subclass explicitly
  * implement the Quartz {@link org.quartz.StatefulJob} interface to
  * mark your concrete job bean as stateful.
- *
- * <p>This version of QuartzJobBean requires Quartz 1.5 or higher,
- * due to the support for trigger-specific job data.
  *
  * <p><b>Note that as of Spring 2.0 and Quartz 1.5, the preferred way
  * to apply dependency injection to Job instances is via a JobFactory:</b>

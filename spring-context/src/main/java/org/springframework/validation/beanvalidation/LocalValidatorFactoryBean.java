@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,14 @@
 package org.springframework.validation.beanvalidation;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import javax.validation.Configuration;
@@ -31,12 +38,18 @@ import javax.validation.ValidatorFactory;
 
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceResourceBundle;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * This is the central class for {@code javax.validation} (JSR-303) setup
@@ -51,6 +64,15 @@ import org.springframework.util.CollectionUtils;
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
+ * <p>As of Spring 4.0, this class supports Bean Validation 1.0 and 1.1, with special support
+ * for Hibernate Validator 4.x and 5.0 (see {@link #setValidationMessageSource}).
+ *
+ * <p>Note that Bean Validation 1.1's {@code #forExecutables} method isn't supported: We do not
+ * expect that method to be called by application code; consider {@link MethodValidationInterceptor}
+ * instead. If you really need programmatic {@code #forExecutables} access, inject this class as
+ * a {@link ValidatorFactory} and call {@link #getValidator()} on it, then {@code #forExecutables}
+ * on the returned native {@link Validator} reference instead of directly on this class.
+ *
  * @author Juergen Hoeller
  * @since 3.0
  * @see javax.validation.ValidatorFactory
@@ -59,7 +81,10 @@ import org.springframework.util.CollectionUtils;
  * @see javax.validation.ValidatorFactory#getValidator()
  */
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
-		implements ValidatorFactory, ApplicationContextAware, InitializingBean {
+		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
+
+	private static final Method closeMethod = ClassUtils.getMethodIfAvailable(ValidatorFactory.class, "close");
+
 
 	@SuppressWarnings("rawtypes")
 	private Class providerClass;
@@ -69,6 +94,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	private TraversableResolver traversableResolver;
 
 	private ConstraintValidatorFactory constraintValidatorFactory;
+
+	private ParameterNameDiscoverer parameterNameDiscoverer;
 
 	private Resource[] mappingLocations;
 
@@ -109,9 +136,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * <p>Specify either this property or {@link #setMessageInterpolator "messageInterpolator"},
 	 * not both. If you would like to build a custom MessageInterpolator, consider deriving from
 	 * Hibernate Validator's {@link ResourceBundleMessageInterpolator} and passing in a
-	 * Spring {@link MessageSourceResourceBundleLocator} when constructing your interpolator.
+	 * Spring-based {@code ResourceBundleLocator} when constructing your interpolator.
 	 * @see ResourceBundleMessageInterpolator
-	 * @see MessageSourceResourceBundleLocator
 	 */
 	public void setValidationMessageSource(MessageSource messageSource) {
 		this.messageInterpolator = HibernateValidatorDelegate.buildMessageInterpolator(messageSource);
@@ -132,6 +158,15 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 */
 	public void setConstraintValidatorFactory(ConstraintValidatorFactory constraintValidatorFactory) {
 		this.constraintValidatorFactory = constraintValidatorFactory;
+	}
+
+	/**
+	 * Set the ParameterNameDiscoverer to use for resolving method and constructor
+	 * parameter names if needed for message interpolation.
+	 * <p>Default is a {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}.
+	 */
+	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
+		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
 	/**
@@ -202,6 +237,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			configuration.constraintValidatorFactory(targetConstraintValidatorFactory);
 		}
 
+		configureParameterNameProviderIfPossible(configuration);
+
 		if (this.mappingLocations != null) {
 			for (Resource location : this.mappingLocations) {
 				try {
@@ -219,6 +256,58 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 		this.validatorFactory = configuration.buildValidatorFactory();
 		setTargetValidator(this.validatorFactory.getValidator());
+	}
+
+	private void configureParameterNameProviderIfPossible(Configuration configuration) {
+		try {
+			Class<?> parameterNameProviderClass =
+					ClassUtils.forName("javax.validation.ParameterNameProvider", getClass().getClassLoader());
+			Method parameterNameProviderMethod =
+					Configuration.class.getMethod("parameterNameProvider", parameterNameProviderClass);
+			final Object defaultProvider = ReflectionUtils.invokeMethod(
+					Configuration.class.getMethod("getDefaultParameterNameProvider"), configuration);
+			final ParameterNameDiscoverer discoverer = (this.parameterNameDiscoverer != null ?
+					this.parameterNameDiscoverer : new LocalVariableTableParameterNameDiscoverer());
+			Object parameterNameProvider = Proxy.newProxyInstance(getClass().getClassLoader(),
+					new Class[] {parameterNameProviderClass}, new InvocationHandler() {
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					if (method.getName().equals("getParameterNames")) {
+						String[] result = null;
+						if (args[0] instanceof Constructor) {
+							result = discoverer.getParameterNames((Constructor) args[0]);
+						}
+						else if (args[0] instanceof Method) {
+							result = discoverer.getParameterNames((Method) args[0]);
+						}
+						if (result != null) {
+							return Arrays.asList(result);
+						}
+						else {
+							try {
+								return method.invoke(defaultProvider, args);
+							}
+							catch (InvocationTargetException ex) {
+								throw ex.getTargetException();
+							}
+						}
+					}
+					else {
+						// toString, equals, hashCode
+						try {
+							return method.invoke(this, args);
+						}
+						catch (InvocationTargetException ex) {
+							throw ex.getTargetException();
+						}
+					}
+				}
+			});
+			ReflectionUtils.invokeMethod(parameterNameProviderMethod, configuration, parameterNameProvider);
+
+		}
+		catch (Exception ex) {
+			// Bean Validation 1.1 API not available - simply not applying the ParameterNameDiscoverer
+		}
 	}
 
 
@@ -242,14 +331,61 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}
 
+	public void close() {
+		ReflectionUtils.invokeMethod(closeMethod, this.validatorFactory);
+	}
+
+	public void destroy() {
+		close();
+	}
+
 
 	/**
-	 * Inner class to avoid a hard-coded Hibernate Validator 4.1 dependency.
+	 * Inner class to avoid a hard-coded Hibernate Validator dependency.
 	 */
 	private static class HibernateValidatorDelegate {
 
-		public static MessageInterpolator buildMessageInterpolator(MessageSource messageSource) {
-			return new ResourceBundleMessageInterpolator(new MessageSourceResourceBundleLocator(messageSource));
+		public static MessageInterpolator buildMessageInterpolator(final MessageSource messageSource) {
+			Class<?> locatorClass;
+			try {
+				// Hibernate Validator 5.x
+				locatorClass = ClassUtils.forName(
+						"org.hibernate.validator.spi.resourceloading.ResourceBundleLocator",
+						HibernateValidatorDelegate.class.getClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				try {
+					// Hibernate Validator 4.x
+					locatorClass = ClassUtils.forName(
+							"org.hibernate.validator.resourceloading.ResourceBundleLocator",
+							HibernateValidatorDelegate.class.getClassLoader());
+				}
+				catch (ClassNotFoundException ex2) {
+					throw new IllegalStateException("Neither Hibernate Validator 5.x nor 4.x API found");
+				}
+			}
+			Object locator = Proxy.newProxyInstance(HibernateValidatorDelegate.class.getClassLoader(),
+					new Class[] {locatorClass}, new InvocationHandler() {
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					if (method.getName().equals("getResourceBundle")) {
+						return new MessageSourceResourceBundle(messageSource, (Locale) args[0]);
+					}
+					else {
+						try {
+							return method.invoke(this, args);
+						}
+						catch (InvocationTargetException ex) {
+							throw ex.getTargetException();
+						}
+					}
+				}
+			});
+			try {
+				return ResourceBundleMessageInterpolator.class.getConstructor(locatorClass).newInstance(locator);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Unexpected Hibernate Validator API mismatch", ex);
+			}
 		}
 	}
 

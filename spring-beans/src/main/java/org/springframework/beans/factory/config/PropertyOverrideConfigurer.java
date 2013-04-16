@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
@@ -72,9 +73,8 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 
 	/**
 	 * Contains names of beans that have overrides
-	 * (using a ConcurrentHashMap as a Set)
 	 */
-	private Map<String, Boolean> beanNames = new ConcurrentHashMap<String, Boolean>(16);
+	private final Set<String> beanNames = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
 
 
 	/**
@@ -130,7 +130,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 		}
 		String beanName = key.substring(0, separatorIndex);
 		String beanProperty = key.substring(separatorIndex+1);
-		this.beanNames.put(beanName, Boolean.TRUE);
+		this.beanNames.add(beanName);
 		applyPropertyValue(factory, beanName, beanProperty, value);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Property '" + key + "' set to value [" + value + "]");
@@ -161,7 +161,7 @@ public class PropertyOverrideConfigurer extends PropertyResourceConfigurer {
 	 * the named bean
 	 */
 	public boolean hasPropertyOverridesFor(String beanName) {
-		return this.beanNames.containsKey(beanName);
+		return this.beanNames.contains(beanName);
 	}
 
 }

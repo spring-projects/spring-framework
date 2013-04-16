@@ -876,7 +876,6 @@ public class QuartzSupportTests {
 		SchedulerFactoryBean bean = new SchedulerFactoryBean();
 		bean.setJobFactory(new SpringBeanJobFactory());
 		bean.setJobSchedulingDataLocation("org/springframework/scheduling/quartz/job-scheduling-data.xml");
-		bean.setResourceLoader(new FileSystemResourceLoader());
 		bean.afterPropertiesSet();
 		bean.start();
 
@@ -1034,6 +1033,26 @@ public class QuartzSupportTests {
 
 		@Override
 		public void schedulerShutdown() {
+		}
+
+		@Override
+		public void jobAdded(JobDetail jobDetail) {
+		}
+
+		@Override
+		public void jobDeleted(String s, String s1) {
+		}
+
+		@Override
+		public void schedulerInStandbyMode() {
+		}
+
+		@Override
+		public void schedulerStarted() {
+		}
+
+		@Override
+		public void schedulerShuttingdown() {
 		}
 	}
 

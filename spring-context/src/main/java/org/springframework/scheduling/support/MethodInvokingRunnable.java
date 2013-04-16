@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 1.2.4
- * @see org.springframework.scheduling.timer.ScheduledTimerTask#setRunnable(Runnable)
  * @see java.util.concurrent.Executor#execute(Runnable)
  */
 public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker

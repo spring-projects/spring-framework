@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,18 +39,15 @@ import org.springframework.util.Assert;
  * Spring-style PersistenceManager proxy available for bean references.
  *
  * <p>The main advantage of this proxy is that it allows DAOs to work with a
- * plain JDO PersistenceManager reference in JDO 2.1 style
+ * plain JDO PersistenceManager reference in JDO 3.0 style
  * (see {@link javax.jdo.PersistenceManagerFactory#getPersistenceManagerProxy()}),
  * while still participating in Spring's resource and transaction management.
  *
- * <p>The behavior of this proxy matches the behavior that the JDO 2.1 spec
+ * <p>The behavior of this proxy matches the behavior that the JDO 3.0 spec
  * defines for a PersistenceManager proxy. Hence, DAOs could seamlessly switch
  * between {@link StandardPersistenceManagerProxyBean} and this Spring-style proxy,
  * receiving the reference through Dependency Injection. This will work without
  * any Spring API dependencies in the DAO code!
- *
- * <p>Note: In contrast to {@link StandardPersistenceManagerProxyBean}, this proxy
- * works with JDO 2.0 and higher. It does not require JDO 2.1.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -212,7 +209,7 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 				Object retVal = method.invoke(pm, args);
 				if (retVal instanceof Query) {
 					PersistenceManagerFactoryUtils.applyTransactionTimeout(
-							(Query) retVal, getPersistenceManagerFactory(), getJdoDialect());
+							(Query) retVal, getPersistenceManagerFactory());
 				}
 				return retVal;
 			}

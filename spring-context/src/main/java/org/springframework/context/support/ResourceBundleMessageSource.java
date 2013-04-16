@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -153,8 +152,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Set the default charset to use for parsing resource bundle files.
 	 * <p>Default is none, using the {@code java.util.ResourceBundle}
 	 * default encoding: ISO-8859-1.
-	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
-	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support
 	 * and more flexibility in setting of an encoding per file.
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
@@ -170,8 +167,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: Set this flag to "false" in such a scenario.
-	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
-	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support.
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -193,10 +188,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
 	 * with resource bundle files in a non-classpath location.
 	 * </ul>
-	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
-	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support
-	 * and more flexibility in terms of the kinds of resources to load from
-	 * (in particular from outside of the classpath where expiration works reliably).
 	 */
 	public void setCacheSeconds(int cacheSeconds) {
 		this.cacheMillis = (cacheSeconds * 1000);
@@ -318,13 +309,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
 		if ((this.defaultEncoding != null && !"ISO-8859-1".equals(this.defaultEncoding)) ||
 				!this.fallbackToSystemLocale || this.cacheMillis >= 0) {
-			// Custom Control required...
-			if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
-				throw new IllegalStateException("Cannot use 'defaultEncoding', 'fallbackToSystemLocale' and " +
-						"'cacheSeconds' on the standard ResourceBundleMessageSource when running on Java 5. " +
-						"Consider using ReloadableResourceBundleMessageSource instead.");
-			}
-			return new ControlBasedResourceBundleFactory().getBundle(basename, locale);
+			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
 		}
 		else {
 			// Good old standard call...
@@ -395,20 +380,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	public String toString() {
 		return getClass().getName() + ": basenames=[" +
 				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
-	}
-
-
-	/**
-	 * Factory indirection for runtime isolation of the optional dependencv on
-	 * Java 6's Control class.
-	 * @see ResourceBundle#getBundle(String, java.util.Locale, ClassLoader, java.util.ResourceBundle.Control)
-	 * @see MessageSourceControl
-	 */
-	private class ControlBasedResourceBundleFactory {
-
-		public ResourceBundle getBundle(String basename, Locale locale) {
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
-		}
 	}
 
 

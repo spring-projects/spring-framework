@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.CommonsLogLogChute;
 
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -198,8 +199,7 @@ public class VelocityEngineFactory {
 
 	/**
 	 * Set whether Velocity should log via Commons Logging, i.e. whether Velocity's
-	 * log system should be set to CommonsLoggingLogSystem. Default value is true.
-	 * @see CommonsLoggingLogSystem
+	 * log system should be set to {@link CommonsLogLogChute}. Default is "true".
 	 */
 	public void setOverrideLogging(boolean overrideLogging) {
 		this.overrideLogging = overrideLogging;
@@ -236,7 +236,7 @@ public class VelocityEngineFactory {
 
 		// Log via Commons Logging?
 		if (this.overrideLogging) {
-			velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM, new CommonsLoggingLogSystem());
+			velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
 		}
 
 		// Apply properties to VelocityEngine.
@@ -246,23 +246,8 @@ public class VelocityEngineFactory {
 
 		postProcessVelocityEngine(velocityEngine);
 
-		try {
-			// Perform actual initialization.
-			velocityEngine.init();
-		}
-		catch (IOException ex) {
-			throw ex;
-		}
-		catch (VelocityException ex) {
-			throw ex;
-		}
-		catch (RuntimeException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
-			throw new VelocityException(ex.toString());
-		}
+		// Perform actual initialization.
+		velocityEngine.init();
 
 		return velocityEngine;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,6 @@ import org.springframework.util.ReflectionUtils;
  * Proxy for a Hibernate RegionFactory, delegating to a Spring-managed
  * RegionFactory instance, determined by LocalSessionFactoryBean's
  * "cacheRegionFactory" property.
- *
- * <p>Compatible with Hibernate 3.3 as well as Hibernate 3.5's version
- * of the RegionFactory SPI.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -83,13 +80,7 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 	}
 
 	public AccessType getDefaultAccessType() {
-		try {
-			Method method = RegionFactory.class.getMethod("getDefaultAccessType");
-			return (AccessType) ReflectionUtils.invokeMethod(method, this.regionFactory);
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("getDefaultAccessType requires Hibernate 3.5+");
-		}
+		return this.regionFactory.getDefaultAccessType();
 	}
 
 	public long nextTimestamp() {

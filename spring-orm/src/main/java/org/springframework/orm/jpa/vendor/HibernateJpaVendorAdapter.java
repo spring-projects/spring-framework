@@ -41,7 +41,7 @@ import org.springframework.orm.jpa.JpaDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
- * Hibernate EntityManager. Developed and tested against Hibernate 3.3.
+ * Hibernate EntityManager. Developed and tested against Hibernate 3.6 and 4.2.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.

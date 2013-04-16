@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.jsf.el;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
-
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
@@ -32,9 +31,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
 /**
- * Special JSF 1.2 {@code ELResolver} that exposes the Spring
- * {@code WebApplicationContext} instance under a variable named
- * "webApplicationContext".
+ * Special JSF {@code ELResolver} that exposes the Spring {@code WebApplicationContext}
+ * instance under a variable named "webApplicationContext".
  *
  * <p>In contrast to {@link SpringBeanFacesELResolver}, this ELResolver variant
  * does <i>not</i> resolve JSF variable names as Spring bean names. It rather

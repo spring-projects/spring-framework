@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.bind.annotation.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,8 +65,8 @@ public class HandlerMethodResolver {
 
 	private final Set<Class> sessionAttributeTypes = new HashSet<Class>();
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<String, Boolean> actualSessionAttributeNames = new ConcurrentHashMap<String, Boolean>(4);
+	private final Set<String> actualSessionAttributeNames =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(4));
 
 
 	/**
@@ -154,7 +154,7 @@ public class HandlerMethodResolver {
 
 	public boolean isSessionAttribute(String attrName, Class attrType) {
 		if (this.sessionAttributeNames.contains(attrName) || this.sessionAttributeTypes.contains(attrType)) {
-			this.actualSessionAttributeNames.put(attrName, Boolean.TRUE);
+			this.actualSessionAttributeNames.add(attrName);
 			return true;
 		}
 		else {
@@ -163,7 +163,7 @@ public class HandlerMethodResolver {
 	}
 
 	public Set<String> getActualSessionAttributeNames() {
-		return this.actualSessionAttributeNames.keySet();
+		return this.actualSessionAttributeNames;
 	}
 
 }

@@ -133,7 +133,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		String lang = "en";
 		String dir = "ltr";
 		String tabindex = "2";
-		String disabled = "true";
+		boolean disabled = true;
 		String onclick = "doClick()";
 		String ondblclick = "doDblclick()";
 		String onkeydown = "doKeydown()";
@@ -151,7 +151,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		String maxlength = "12";
 		String alt = "Some text";
 		String onselect = "doSelect()";
-		String readonly = "true";
+		boolean readonly = true;
 		String autocomplete = "off";
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
@@ -285,7 +285,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 	public void testDisabledFalse() throws Exception {
 		this.tag.setPath("name");
-		this.tag.setDisabled("false");
+		this.tag.setDisabled(false);
 		this.tag.doStartTag();
 
 		String output = getOutput();
@@ -314,7 +314,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	 */
 	public void testReadOnlyAttributeRenderingWhenReadonlyIsTrue() throws Exception {
 		this.tag.setPath("name");
-		this.tag.setReadonly("true");
+		this.tag.setReadonly(true);
 
 		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
 
@@ -324,24 +324,6 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertContainsAttribute(output, "type", getType());
 		assertContainsAttribute(output, "readonly", "readonly");
-		assertValueAttribute(output, "Rob");
-	}
-
-	/**
-	 * See SPR-3127 (http://opensource.atlassian.com/projects/spring/browse/SPR-3127)
-	 */
-	public void testReadOnlyAttributeRenderingWhenReadonlyIsFalse() throws Exception {
-		this.tag.setPath("name");
-		this.tag.setReadonly("nope, this is not readonly");
-
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
-
-		String output = getOutput();
-		assertTagOpened(output);
-		assertTagClosed(output);
-
-		assertContainsAttribute(output, "type", getType());
-		assertAttributeNotPresent(output, "readonly");
 		assertValueAttribute(output, "Rob");
 	}
 

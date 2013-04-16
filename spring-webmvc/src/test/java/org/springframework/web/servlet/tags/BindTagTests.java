@@ -22,15 +22,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -228,7 +227,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.name");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertTrue("Has status variable", status != null);
@@ -298,7 +297,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.name");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertTrue("Has status variable", status != null);
@@ -354,7 +353,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.name");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertTrue("Has status variable", status != null);
@@ -412,8 +411,7 @@ public class BindTagTests extends AbstractTagTests {
 		pc.getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "tb", errors);
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
-		pc.setAttribute("myattr", "tb.spouse.name");
-		tag.setPath("${myattr}");
+		tag.setPath("tb.spouse.name");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertTrue("Has status variable", status != null);
@@ -536,7 +534,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.doctor");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		TestBean tb = new TestBean("somebody", 99);
 		NestedTestBean ntb = new NestedTestBean("juergen&eva");
 		tb.setDoctor(ntb);
@@ -553,7 +551,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.someSet");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		pc.getRequest().setAttribute("tb", new TestBean("juergen&eva", 99));
 		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
@@ -578,7 +576,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb.name");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		pc.getRequest().setAttribute("tb", new TestBean("juergen&eva", 99));
 		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
@@ -799,9 +797,8 @@ public class BindTagTests extends AbstractTagTests {
 		// transform stuff
 		TransformTag transform = new TransformTag();
 		transform.setPageContext(pc);
-		pc.setAttribute("date", tb.getDate());
 		transform.setParent(bind);
-		transform.setValue("${date}");
+		transform.setValue(tb.getDate());
 		transform.setVar("theDate");
 		transform.doStartTag();
 
@@ -816,14 +813,13 @@ public class BindTagTests extends AbstractTagTests {
 
 		transform = new TransformTag();
 		transform.setPageContext(pc);
-		pc.setAttribute("string", "name");
-		transform.setValue("${string}");
+		transform.setValue("name");
 		transform.setParent(bind);
 		transform.setVar("theString");
 		transform.doStartTag();
 
 		assertNotNull(pc.getAttribute("theString"));
-		assertEquals(pc.getAttribute("theString"), "name");
+		assertEquals("name", pc.getAttribute("theString"));
 	}
 
 	public void testTransformTagWithHtmlEscape() throws JspException {
@@ -844,15 +840,14 @@ public class BindTagTests extends AbstractTagTests {
 
 		TransformTag transform = new TransformTag();
 		transform.setPageContext(pc);
-		pc.setAttribute("string", "na<me");
-		transform.setValue("${string}");
+		transform.setValue("na<me");
 		transform.setParent(bind);
 		transform.setVar("theString");
-		transform.setHtmlEscape("true");
+		transform.setHtmlEscape(true);
 		transform.doStartTag();
 
 		assertNotNull(pc.getAttribute("theString"));
-		assertEquals(pc.getAttribute("theString"), "na&lt;me");
+		assertEquals("na&lt;me", pc.getAttribute("theString"));
 	}
 
 	public void testTransformTagOutsideBindTag() throws JspException {
@@ -913,7 +908,7 @@ public class BindTagTests extends AbstractTagTests {
 
 		TransformTag transform = new TransformTag();
 		transform.setPageContext(pc);
-		transform.setValue("${string2}");
+		transform.setValue(null);
 		transform.setParent(bind);
 		transform.setVar("theString2");
 		transform.doStartTag();
@@ -940,9 +935,8 @@ public class BindTagTests extends AbstractTagTests {
 		// transform stuff
 		TransformTag transform = new TransformTag();
 		transform.setPageContext(pc);
-		pc.setAttribute("date", tb.getDate());
 		transform.setParent(bind);
-		transform.setValue("${date}");
+		transform.setValue(tb.getDate());
 		transform.setVar("theDate");
 		transform.setScope("page");
 		transform.doStartTag();
@@ -950,7 +944,7 @@ public class BindTagTests extends AbstractTagTests {
 		transform.release();
 
 		assertNotNull(pc.getAttribute("theDate"));
-		assertEquals(pc.getAttribute("theDate"), df.format(tb.getDate()));
+		assertEquals(df.format(tb.getDate()), pc.getAttribute("theDate"));
 
 		// try another time, this time using Strings
 		bind = new BindTag();
@@ -960,18 +954,16 @@ public class BindTagTests extends AbstractTagTests {
 
 		transform = new TransformTag();
 		transform.setPageContext(pc);
-		pc.setAttribute("string", "name");
-		pc.setAttribute("scopy", "page");
-		transform.setValue("${string}");
+		transform.setValue("name");
 		transform.setParent(bind);
 		transform.setVar("theString");
-		transform.setScope("${scopy}");
+		transform.setScope("page");
 		transform.doStartTag();
 
 		transform.release();
 
 		assertNotNull(pc.getAttribute("theString"));
-		assertEquals(pc.getAttribute("theString"), "name");
+		assertEquals("name", pc.getAttribute("theString"));
 	}
 
 	/**

@@ -45,7 +45,6 @@ public class Person {
 	private transient TestBean testBean;
 
 	// Lazy relationship to force use of instrumentation in JPA implementation.
-	// TopLink, at least, will not instrument classes unless absolutely necessary.
 	@OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST)
 	@JoinColumn(name="DRIVERS_LICENSE_ID")
 	private DriversLicense driversLicense;

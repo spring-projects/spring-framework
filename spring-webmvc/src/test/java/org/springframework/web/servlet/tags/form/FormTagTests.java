@@ -211,7 +211,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 	public void testWithNullResolvedCommand() throws Exception {
 		try {
-			tag.setCommandName("${null}");
+			tag.setCommandName(null);
 			tag.doStartTag();
 			fail("Must not be able to have a command name that resolves to null");
 		}

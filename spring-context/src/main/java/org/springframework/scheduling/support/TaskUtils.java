@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import org.springframework.util.ReflectionUtils;
  * Utility methods for decorating tasks with error handling.
  *
  * <p><b>NOTE:</b> This class is intended for internal use by Spring's scheduler
- * implementations. It is only public so that it may be accessed from
- * implementations within other packages. It is <i>not</i> intended for general
- * use and may change in the future.
+ * implementations. It is only public so that it may be accessed from impl classes
+ * within other packages. It is <i>not</i> intended for general use.
  *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public abstract class TaskUtils {
@@ -53,12 +53,11 @@ public abstract class TaskUtils {
 
 
 	/**
-	 * Decorates the task for error handling. If the provided
-	 * {@link ErrorHandler} is not null, it will be used. Otherwise,
-	 * repeating tasks will have errors suppressed by default whereas
-	 * one-shot tasks will have errors propagated by default since those
-	 * errors may be expected through the returned {@link Future}. In both
-	 * cases, the errors will be logged.
+	 * Decorate the task for error handling. If the provided {@link ErrorHandler}
+	 * is not {@code null}, it will be used. Otherwise, repeating tasks will have
+	 * errors suppressed by default whereas one-shot tasks will have errors
+	 * propagated by default since those errors may be expected through the
+	 * returned {@link Future}. In both cases, the errors will be logged.
 	 */
 	public static DelegatingErrorHandlingRunnable decorateTaskWithErrorHandler(
 			Runnable task, ErrorHandler errorHandler, boolean isRepeatingTask) {
@@ -66,7 +65,7 @@ public abstract class TaskUtils {
 		if (task instanceof DelegatingErrorHandlingRunnable) {
 			return (DelegatingErrorHandlingRunnable) task;
 		}
-		ErrorHandler eh = errorHandler != null ? errorHandler : getDefaultErrorHandler(isRepeatingTask);
+		ErrorHandler eh = (errorHandler != null ? errorHandler : getDefaultErrorHandler(isRepeatingTask));
 		return new DelegatingErrorHandlingRunnable(task, eh);
 	}
 
@@ -86,7 +85,7 @@ public abstract class TaskUtils {
  	 * level. It does not perform any additional error handling. This can be
  	 * useful when suppression of errors is the intended behavior.
 	 */
-	static class LoggingErrorHandler implements ErrorHandler {
+	private static class LoggingErrorHandler implements ErrorHandler {
 
 		private final Log logger = LogFactory.getLog(LoggingErrorHandler.class);
 
@@ -102,7 +101,7 @@ public abstract class TaskUtils {
 	 * An {@link ErrorHandler} implementation that logs the Throwable at error
 	 * level and then propagates it.
 	 */
-	static class PropagatingErrorHandler extends LoggingErrorHandler {
+	private static class PropagatingErrorHandler extends LoggingErrorHandler {
 
 		public void handleError(Throwable t) {
 			super.handleError(t);

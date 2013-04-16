@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,25 +55,6 @@ import org.springframework.web.util.WebUtils;
  */
 public class TilesView extends AbstractUrlBasedView {
 
-	private volatile boolean exposeForwardAttributes = false;
-
-
-	/**
-	 * Checks whether we need to explicitly expose the Servlet 2.4 request attributes
-	 * by default.
-	 * <p>This will be done by default on Servlet containers up until 2.4, and skipped
-	 * for Servlet 2.5 and above. Note that Servlet containers at 2.4 level and above
-	 * should expose those attributes automatically! This feature exists for
-	 * Servlet 2.3 containers and misbehaving 2.4 containers only.
-	 */
-	@Override
-	protected void initServletContext(ServletContext sc) {
-		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-			this.exposeForwardAttributes = true;
-		}
-	}
-
-
 	@Override
 	public boolean checkResource(final Locale locale) throws Exception {
 		TilesContainer container = ServletUtil.getContainer(getServletContext());
@@ -105,22 +86,6 @@ public class TilesView extends AbstractUrlBasedView {
 
 		exposeModelAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(new RequestContext(request, servletContext));
-
-		if (!response.isCommitted()) {
-			// Tiles is going to use a forward, but some web containers (e.g. OC4J 10.1.3)
-			// do not properly expose the Servlet 2.4 forward request attributes... However,
-			// must not do this on Servlet 2.5 or above, mainly for GlassFish compatibility.
-			if (this.exposeForwardAttributes) {
-				try {
-					WebUtils.exposeForwardRequestAttributes(request);
-				}
-				catch (Exception ex) {
-					// Servlet container rejected to set internal attributes, e.g. on TriFork.
-					this.exposeForwardAttributes = false;
-				}
-			}
-		}
-
 		container.render(getUrl(), request, response);
 	}
 

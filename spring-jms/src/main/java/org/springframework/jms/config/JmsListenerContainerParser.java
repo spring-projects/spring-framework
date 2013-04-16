@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,21 +62,15 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		if (!"".equals(containerClass)) {
 			containerDef.setBeanClassName(containerClass);
 		}
-		else if ("".equals(containerType) || "default".equals(containerType)) {
+		else if ("".equals(containerType) || containerType.startsWith("default")) {
 			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer");
 		}
-		else if ("default102".equals(containerType)) {
-			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer102");
-		}
-		else if ("simple".equals(containerType)) {
+		else if (containerType.startsWith("simple")) {
 			containerDef.setBeanClassName("org.springframework.jms.listener.SimpleMessageListenerContainer");
-		}
-		else if ("simple102".equals(containerType)) {
-			containerDef.setBeanClassName("org.springframework.jms.listener.SimpleMessageListenerContainer102");
 		}
 		else {
 			parserContext.getReaderContext().error(
-					"Invalid 'container-type' attribute: only \"default(102)\" and \"simple(102)\" supported.", containerEle);
+					"Invalid 'container-type' attribute: only \"default\" and \"simple\" supported.", containerEle);
 		}
 
 		String connectionFactoryBeanName = "connectionFactory";
@@ -176,11 +170,6 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	@Override
 	protected boolean indicatesPubSub(BeanDefinition containerDef) {
 		return indicatesPubSubConfig(containerDef);
-	}
-
-	@Override
-	protected boolean indicatesJms102(BeanDefinition containerDef) {
-		return containerDef.getBeanClassName().endsWith("102");
 	}
 
 }

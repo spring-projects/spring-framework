@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -432,19 +432,6 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Session#saveOrUpdate(String, Object)
 	 */
 	void saveOrUpdate(String entityName, Object entity) throws DataAccessException;
-
-	/**
-	 * Save or update all given persistent instances,
-	 * according to its id (matching the configured "unsaved-value"?).
-	 * Associates the instances with the current Hibernate {@code Session}.
-	 * @param entities the persistent instances to save or update
-	 * (to be associated with the Hibernate {@code Session})
-	 * @throws DataAccessException in case of Hibernate errors
-	 * @deprecated as of Spring 2.5, in favor of individual
-	 * {@code saveOrUpdate} or {@code merge} usage
-	 */
-	@Deprecated
-	void saveOrUpdateAll(Collection entities) throws DataAccessException;
 
 	/**
 	 * Persist the state of the given detached instance according to the

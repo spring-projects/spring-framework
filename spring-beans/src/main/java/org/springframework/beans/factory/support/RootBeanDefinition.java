@@ -18,7 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -48,14 +49,14 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<Member, Boolean> externallyManagedConfigMembers = new ConcurrentHashMap<Member, Boolean>(0);
+	private final Set<Member> externallyManagedConfigMembers =
+			Collections.newSetFromMap(new ConcurrentHashMap<Member, Boolean>(0));
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<String, Boolean> externallyManagedInitMethods = new ConcurrentHashMap<String, Boolean>(0);
+	private final Set<String> externallyManagedInitMethods =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(0));
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<String, Boolean> externallyManagedDestroyMethods = new ConcurrentHashMap<String, Boolean>(0);
+	private final Set<String> externallyManagedDestroyMethods =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(0));
 
 	private BeanDefinitionHolder decoratedDefinition;
 
@@ -299,27 +300,27 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 
 	public void registerExternallyManagedConfigMember(Member configMember) {
-		this.externallyManagedConfigMembers.put(configMember, Boolean.TRUE);
+		this.externallyManagedConfigMembers.add(configMember);
 	}
 
 	public boolean isExternallyManagedConfigMember(Member configMember) {
-		return this.externallyManagedConfigMembers.containsKey(configMember);
+		return this.externallyManagedConfigMembers.contains(configMember);
 	}
 
 	public void registerExternallyManagedInitMethod(String initMethod) {
-		this.externallyManagedInitMethods.put(initMethod, Boolean.TRUE);
+		this.externallyManagedInitMethods.add(initMethod);
 	}
 
 	public boolean isExternallyManagedInitMethod(String initMethod) {
-		return this.externallyManagedInitMethods.containsKey(initMethod);
+		return this.externallyManagedInitMethods.contains(initMethod);
 	}
 
 	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
-		this.externallyManagedDestroyMethods.put(destroyMethod, Boolean.TRUE);
+		this.externallyManagedDestroyMethods.add(destroyMethod);
 	}
 
 	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
-		return this.externallyManagedDestroyMethods.containsKey(destroyMethod);
+		return this.externallyManagedDestroyMethods.contains(destroyMethod);
 	}
 
 	public void setDecoratedDefinition(BeanDefinitionHolder decoratedDefinition) {

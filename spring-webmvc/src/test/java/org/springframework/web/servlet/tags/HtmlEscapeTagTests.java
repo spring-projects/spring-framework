@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,29 +47,29 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 
 		assertTrue("Correct default", !tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", !testTag.isHtmlEscape());
-		tag.setDefaultHtmlEscape("true");
+		tag.setDefaultHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly enabled", tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", testTag.isHtmlEscape());
-		tag.setDefaultHtmlEscape("false");
+		tag.setDefaultHtmlEscape(false);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", !testTag.isHtmlEscape());
 
-		tag.setDefaultHtmlEscape("true");
+		tag.setDefaultHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		testTag.setHtmlEscape("true");
+		testTag.setHtmlEscape(true);
 		assertTrue("Correctly enabled", tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", testTag.isHtmlEscape());
-		testTag.setHtmlEscape("false");
+		testTag.setHtmlEscape(false);
 		assertTrue("Correctly enabled", tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", !testTag.isHtmlEscape());
-		tag.setDefaultHtmlEscape("false");
+		tag.setDefaultHtmlEscape(false);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		testTag.setHtmlEscape("true");
+		testTag.setHtmlEscape(true);
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", testTag.isHtmlEscape());
-		testTag.setHtmlEscape("false");
+		testTag.setHtmlEscape(false);
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 		assertTrue("Correctly applied", !testTag.isHtmlEscape());
 	}
@@ -79,15 +79,15 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		MockServletContext sc = (MockServletContext) pc.getServletContext();
 		sc.addInitParameter(WebUtils.HTML_ESCAPE_CONTEXT_PARAM, "true");
 		HtmlEscapeTag tag = new HtmlEscapeTag();
-		tag.setDefaultHtmlEscape("false");
+		tag.setDefaultHtmlEscape(false);
 		tag.setPageContext(pc);
 		tag.doStartTag();
 
 		assertTrue("Correct default", !tag.getRequestContext().isDefaultHtmlEscape());
-		tag.setDefaultHtmlEscape("true");
+		tag.setDefaultHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly enabled", tag.getRequestContext().isDefaultHtmlEscape());
-		tag.setDefaultHtmlEscape("false");
+		tag.setDefaultHtmlEscape(false);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 	}
@@ -101,10 +101,10 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 
 		sc.addInitParameter(WebUtils.HTML_ESCAPE_CONTEXT_PARAM, "false");
 		assertTrue("Correct default", !tag.getRequestContext().isDefaultHtmlEscape());
-		tag.setDefaultHtmlEscape("true");
+		tag.setDefaultHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly enabled", tag.getRequestContext().isDefaultHtmlEscape());
-		tag.setDefaultHtmlEscape("false");
+		tag.setDefaultHtmlEscape(false);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 	}
@@ -144,7 +144,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
 		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
 		assertEquals("test &amp; text", result.toString());
@@ -165,7 +165,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setJavaScriptEscape("true");
+		tag.setJavaScriptEscape(true);
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
 		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
 		assertEquals("Correct content", "\\' test & text \\\\", result.toString());
@@ -186,8 +186,8 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 			}
 		};
 		tag.setPageContext(pc);
-		tag.setHtmlEscape("true");
-		tag.setJavaScriptEscape("true");
+		tag.setHtmlEscape(true);
+		tag.setJavaScriptEscape(true);
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, tag.doStartTag());
 		assertEquals(Tag.SKIP_BODY, tag.doAfterBody());
 		assertEquals("Correct content", "&#39; test &amp; text \\\\", result.toString());

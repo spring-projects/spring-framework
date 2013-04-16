@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,16 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 */
 	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException;
+
+	/**
+	 * Destroy the given bean instance (typically coming from {@link #createBean}),
+	 * applying the {@link org.springframework.beans.factory.DisposableBean} contract as well as
+	 * registered {@link DestructionAwareBeanPostProcessor DestructionAwareBeanPostProcessors}.
+	 * <p>Any exception that arises during destruction should be caught
+	 * and logged instead of propagated to the caller of this method.
+	 * @param existingBean the bean instance to destroy
+	 */
+	void destroyBean(Object existingBean);
 
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.

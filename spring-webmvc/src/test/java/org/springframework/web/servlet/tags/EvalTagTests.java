@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class EvalTagTests extends AbstractTagTests {
 
 	public void testPrintHtmlEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.html()");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();
@@ -90,7 +90,7 @@ public class EvalTagTests extends AbstractTagTests {
 
 	public void testPrintJavaScriptEscapedAttributeResult() throws Exception {
 		tag.setExpression("bean.js()");
-		tag.setJavaScriptEscape("true");
+		tag.setJavaScriptEscape(true);
 		int action = tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
 		action = tag.doEndTag();

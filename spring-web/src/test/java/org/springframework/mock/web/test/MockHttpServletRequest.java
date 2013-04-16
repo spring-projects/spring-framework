@@ -28,9 +28,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -54,12 +54,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface. Supports the Servlet 2.5 API level; throws
- * {@link UnsupportedOperationException} for some methods introduced in Servlet 3.0.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>Used for testing the web framework; also useful for testing
- * application controllers.
+ * <p>As of Spring 4.0, this set of mocks is entirely based on Servlet 3.0.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -150,7 +147,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private int localPort = DEFAULT_SERVER_PORT;
 
-	private final Map<String, Part> parts = new HashMap<String, Part>();
+	private boolean asyncStarted = false;
+
+	private boolean asyncSupported = false;
+
+	private MockAsyncContext asyncContext;
+
+	private DispatcherType dispatcherType = DispatcherType.REQUEST;
 
 
 	// ---------------------------------------------------------------------
@@ -191,13 +194,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
-	private boolean asyncSupported = false;
-
-	private boolean asyncStarted = false;
-
-	private MockAsyncContext asyncContext;
-
-	private DispatcherType dispatcherType = DispatcherType.REQUEST;
+	private final Map<String, Part> parts = new LinkedHashMap<String, Part>();
 
 
 	// ---------------------------------------------------------------------
@@ -228,8 +225,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Create a new {@code MockHttpServletRequest} with the supplied {@link ServletContext}.
-	 * @param servletContext the ServletContext that the request runs in (may be
-	 * {@code null} to use a default {@link MockServletContext})
+	 * @param servletContext the ServletContext that the request runs in
+	 * (may be {@code null} to use a default {@link MockServletContext})
 	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
@@ -688,10 +685,61 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.localPort;
 	}
 
+	@Override
+	public AsyncContext startAsync() {
+		return startAsync(this, null);
+	}
 
-	//---------------------------------------------------------------------
+	@Override
+	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
+		if (!this.asyncSupported) {
+			throw new IllegalStateException("Async not supported");
+		}
+		this.asyncStarted = true;
+		this.asyncContext = new MockAsyncContext(request, response);
+		return this.asyncContext;
+	}
+
+	public void setAsyncStarted(boolean asyncStarted) {
+		this.asyncStarted = asyncStarted;
+	}
+
+	@Override
+	public boolean isAsyncStarted() {
+		return this.asyncStarted;
+	}
+
+	public void setAsyncSupported(boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
+	}
+
+	@Override
+	public boolean isAsyncSupported() {
+		return this.asyncSupported;
+	}
+
+	public void setAsyncContext(MockAsyncContext asyncContext) {
+		this.asyncContext = asyncContext;
+	}
+
+	@Override
+	public AsyncContext getAsyncContext() {
+		return this.asyncContext;
+	}
+
+	public void setDispatcherType(DispatcherType dispatcherType) {
+		this.dispatcherType = dispatcherType;
+	}
+
+	@Override
+	public DispatcherType getDispatcherType() {
+		return this.dispatcherType;
+	}
+
+
+	// ---------------------------------------------------------------------
 	// HttpServletRequest interface
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	public void setAuthType(String authType) {
 		this.authType = authType;
@@ -713,15 +761,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a header entry for the given name.
-	 * <p>If there was no entry for that header name before,
-	 * the value will be used as-is. In case of an existing entry,
-	 * a String array will be created, adding the given value (more
-	 * specifically, its toString representation) as further element.
-	 * <p>Multiple values can only be stored as list of Strings,
-	 * following the Servlet spec (see {@code getHeaders} accessor).
-	 * As alternative to repeated {@code addHeader} calls for
-	 * individual elements, you can use a single call with an entire
-	 * array or Collection of values as parameter.
+	 * <p>If there was no entry for that header name before, the value will be used
+	 * as-is. In case of an existing entry, a String array will be created,
+	 * adding the given value (more specifically, its toString representation)
+	 * as further element.
+	 * <p>Multiple values can only be stored as list of Strings, following the
+	 * Servlet spec (see {@code getHeaders} accessor). As alternative to
+	 * repeated {@code addHeader} calls for individual elements, you can
+	 * use a single call with an entire array or Collection of values as
+	 * parameter.
 	 * @see #getHeaderNames
 	 * @see #getHeader
 	 * @see #getHeaders
@@ -972,89 +1020,35 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return isRequestedSessionIdFromURL();
 	}
 
-
-	//---------------------------------------------------------------------
-	// Methods introduced in Servlet 3.0
-	//---------------------------------------------------------------------
-
 	@Override
-	public AsyncContext getAsyncContext() {
-		return this.asyncContext;
-	}
-
-	public void setAsyncContext(MockAsyncContext asyncContext) {
-		this.asyncContext = asyncContext;
-	}
-
-	@Override
-	public DispatcherType getDispatcherType() {
-		return this.dispatcherType;
-	}
-
-	public void setDispatcherType(DispatcherType dispatcherType) {
-		this.dispatcherType = dispatcherType;
-	}
-
-	public void setAsyncSupported(boolean asyncSupported) {
-		this.asyncSupported = asyncSupported;
-	}
-
-	@Override
-	public boolean isAsyncSupported() {
-		return this.asyncSupported;
-	}
-
-	@Override
-	public AsyncContext startAsync() {
-		return startAsync(this, null);
-	}
-
-	@Override
-	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
-		if (!this.asyncSupported) {
-			throw new IllegalStateException("Async not supported");
-		}
-		this.asyncStarted = true;
-		this.asyncContext = new MockAsyncContext(request, response);
-		return this.asyncContext;
-	}
-
-	public void setAsyncStarted(boolean asyncStarted) {
-		this.asyncStarted = asyncStarted;
-	}
-
-	@Override
-	public boolean isAsyncStarted() {
-		return this.asyncStarted;
-	}
-
-	@Override
-	public boolean authenticate(HttpServletResponse arg0) throws IOException, ServletException {
+	public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
 		throw new UnsupportedOperationException();
 	}
 
-	public void addPart(Part part) {
-		parts.put(part.getName(), part);
-	}
-
 	@Override
-	public Part getPart(String key) throws IOException, IllegalStateException, ServletException {
-		return parts.get(key);
-	}
-
-	@Override
-	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		return parts.values();
-	}
-
-	@Override
-	public void login(String arg0, String arg1) throws ServletException {
+	public void login(String username, String password) throws ServletException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void logout() throws ServletException {
-		throw new UnsupportedOperationException();
+		this.userPrincipal = null;
+		this.remoteUser = null;
+		this.authType = null;
+	}
+
+	public void addPart(Part part) {
+		this.parts.put(part.getName(), part);
+	}
+
+	@Override
+	public Part getPart(String name) throws IOException, IllegalStateException, ServletException {
+		return this.parts.get(name);
+	}
+
+	@Override
+	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
+		return this.parts.values();
 	}
 
 }

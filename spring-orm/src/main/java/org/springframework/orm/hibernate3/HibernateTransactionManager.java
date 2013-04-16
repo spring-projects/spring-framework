@@ -110,7 +110,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.2 or later, as of Spring 3.0.
+ * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 1.2

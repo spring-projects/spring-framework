@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,16 +45,16 @@ import org.springframework.util.CollectionUtils;
  * dependency injection. Note that switching to a JNDI lookup or to a bean-style
  * PersistenceManagerFactory instance is just a matter of configuration!
  *
- * <p><b>NOTE: This class requires JDO 2.0 or higher, as of Spring 2.5.</b>
- * Since JDO 2.1, it will also expose the JPA {@link javax.persistence.EntityManagerFactory}
- * as long as the JDO provider creates a {@link javax.jdo.JDOEntityManagerFactory} reference
+ * <p><b>NOTE: This class requires JDO 3.0 or higher, as of Spring 4.0.</b>
+ * It will also expose the JPA {@link javax.persistence.EntityManagerFactory} as long
+ * as the JDO provider creates a {@link javax.jdo.JDOEntityManagerFactory} reference
  * underneath, which means that this class can be used as a replacement for
  * {@link org.springframework.orm.jpa.LocalEntityManagerFactoryBean} in such a scenario.
  *
  * <p>Configuration settings can either be read from a properties file,
  * specified as "configLocation", or locally specified. Properties
  * specified as "jdoProperties" here will override any settings in a file.
- * On JDO 2.1, you may alternatively specify a "persistenceManagerFactoryName",
+ * You may alternatively specify a "persistenceManagerFactoryName",
  * referring to a PMF definition in "META-INF/jdoconfig.xml"
  * (see {@link #setPersistenceManagerFactoryName}).
  *
@@ -100,7 +100,6 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @see JdoTemplate#setPersistenceManagerFactory
  * @see JdoTransactionManager#setPersistenceManagerFactory
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
@@ -128,10 +127,10 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 
 	/**
 	 * Specify the name of the desired PersistenceManagerFactory.
-	 * <p>This may either be a properties resource in the classpath if such a resource exists
-	 * (JDO 2.0), or a PMF definition with that name from "META-INF/jdoconfig.xml" (JDO 2.1),
+	 * <p>This may either be a properties resource in the classpath if such a resource
+	 * exists, or a PMF definition with that name from "META-INF/jdoconfig.xml",
 	 * or a JPA EntityManagerFactory cast to a PersistenceManagerFactory based on the
-	 * persistence-unit name from "META-INF/persistence.xml" (JDO 2.1 / JPA 1.0).
+	 * persistence-unit name from "META-INF/persistence.xml" (JPA).
 	 * <p>Default is none: Either 'persistenceManagerFactoryName' or 'configLocation'
 	 * or 'jdoProperties' needs to be specified.
 	 * @see #setConfigLocation

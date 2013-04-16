@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.support;
 
 import java.util.concurrent.Callable;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -49,16 +48,12 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  *
  * <p>In contrast to {@link OpenEntityManagerInViewFilter}, this interceptor
  * is set up in a Spring application context and can thus take advantage of
- * bean wiring. It inherits common JPA configuration properties from
- * {@link org.springframework.orm.jpa.JpaAccessor}, to be configured in a
- * bean definition.
+ * bean wiring.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see OpenEntityManagerInViewFilter
- * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager
- * @see org.springframework.orm.jpa.JpaTemplate#execute
  * @see org.springframework.orm.jpa.SharedEntityManagerCreator
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */

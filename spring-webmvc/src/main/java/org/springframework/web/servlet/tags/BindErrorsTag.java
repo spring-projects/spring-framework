@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
 import org.springframework.validation.Errors;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * JSP tag that evaluates content if there are binding errors
@@ -61,9 +60,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 
 	@Override
 	protected final int doStartTagInternal() throws ServletException, JspException {
-		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", this.name, pageContext);
-		this.errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
-
+		this.errors = getRequestContext().getErrors(this.name, isHtmlEscape());
 		if (this.errors != null && this.errors.hasErrors()) {
 			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors, PageContext.REQUEST_SCOPE);
 			return EVAL_BODY_INCLUDE;

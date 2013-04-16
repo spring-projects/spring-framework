@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class featuring methods for JDO PersistenceManager handling,
+ * Helper class featuring methods for JDO {@link PersistenceManager} handling,
  * allowing for reuse of PersistenceManager instances within transactions.
  * Also provides support for exception translation.
  *
- * <p>Used internally by {@link JdoTemplate}, {@link JdoInterceptor} and
- * {@link JdoTransactionManager}. Can also be used directly in application code.
+ * <p>Used internally by {@link JdoTransactionManager}.
+ * Can also be used directly in application code.
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
@@ -194,32 +194,28 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * Apply the current transaction timeout, if any, to the given JDO Query object.
 	 * @param query the JDO Query object
 	 * @param pmf JDO PersistenceManagerFactory that the Query was created for
-	 * @param jdoDialect the JdoDialect to use for applying a query timeout
-	 * (must not be {@code null})
 	 * @throws JDOException if thrown by JDO methods
-	 * @see JdoDialect#applyQueryTimeout
 	 */
-	public static void applyTransactionTimeout(
-			Query query, PersistenceManagerFactory pmf, JdoDialect jdoDialect) throws JDOException {
-
+	public static void applyTransactionTimeout(Query query, PersistenceManagerFactory pmf) throws JDOException {
 		Assert.notNull(query, "No Query object specified");
 		PersistenceManagerHolder pmHolder =
-			(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
-		if (pmHolder != null && pmHolder.hasTimeout()) {
-			jdoDialect.applyQueryTimeout(query, pmHolder.getTimeToLiveInSeconds());
+				(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
+		if (pmHolder != null && pmHolder.hasTimeout() &&
+				pmf.supportedOptions().contains("javax.jdo.option.DatastoreTimeout")) {
+			int timeout = (int) pmHolder.getTimeToLiveInMillis();
+			query.setDatastoreReadTimeoutMillis(timeout);
+			query.setDatastoreWriteTimeoutMillis(timeout);
 		}
 	}
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
 	 * {@code org.springframework.dao} hierarchy.
-	 * <p>The most important cases like object not found or optimistic locking
-	 * failure are covered here. For more fine-granular conversion, JdoAccessor and
-	 * JdoTransactionManager support sophisticated translation of exceptions via a
-	 * JdoDialect.
+	 * <p>The most important cases like object not found or optimistic locking failure
+	 * are covered here. For more fine-granular conversion, JdoTransactionManager
+	 * supports sophisticated translation of exceptions via a JdoDialect.
 	 * @param ex JDOException that occured
 	 * @return the corresponding DataAccessException instance
-	 * @see JdoAccessor#convertJdoAccessException
 	 * @see JdoTransactionManager#convertJdoAccessException
 	 * @see JdoDialect#translateException
 	 */

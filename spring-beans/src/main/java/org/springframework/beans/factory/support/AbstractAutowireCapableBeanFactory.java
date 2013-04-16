@@ -417,6 +417,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	public void destroyBean(Object existingBean) {
+		new DisposableBeanAdapter(existingBean, getBeanPostProcessors(), getAccessControlContext()).destroy();
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of relevant AbstractBeanFactory template methods

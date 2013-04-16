@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,47 +53,41 @@ import org.springframework.util.CollectionUtils;
 public abstract class SharedEntityManagerCreator {
 
 	/**
-	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory,
+	 * automatically joining ongoing transactions.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the {@link EntityManagerFactoryInfo} interface,
-	 * appropriate handling of the native EntityManagerFactory and available
-	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf) {
-		return createSharedEntityManager(emf, null);
+		return createSharedEntityManager(emf, null, true);
 	}
 
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
 	 * @param emf the EntityManagerFactory to delegate to.
-	 * If this implements the {@link EntityManagerFactoryInfo} interface,
-	 * appropriate handling of the native EntityManagerFactory and available
-	 * {@link EntityManagerPlusOperations} will automatically apply.
 	 * @param properties the properties to be passed into the
 	 * {@code createEntityManager} call (may be {@code null})
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
-		Class[] emIfcs;
-		if (emf instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			Class emIfc = emfInfo.getEntityManagerInterface();
-			if (emIfc == null) {
-				emIfc = EntityManager.class;
-			}
-			JpaDialect jpaDialect = emfInfo.getJpaDialect();
-			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
-				emIfcs = new Class[] {emIfc, EntityManagerPlus.class};
-			}
-			else {
-				emIfcs = new Class[] {emIfc};
-			}
-		}
-		else {
-			emIfcs = new Class[] {EntityManager.class};
-		}
-		return createSharedEntityManager(emf, properties, emIfcs);
+		return createSharedEntityManager(emf, properties, true);
+	}
+
+	/**
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
+	 * @param emf the EntityManagerFactory to delegate to.
+	 * @param properties the properties to be passed into the
+	 * {@code createEntityManager} call (may be {@code null})
+	 * @param synchronizedWithTransaction whether to automatically join ongoing
+	 * transactions (according to the JPA 2.1 SynchronizationType rules)
+	 * @return a shareable transaction EntityManager proxy
+	 */
+	public static EntityManager createSharedEntityManager(
+			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) {
+
+		Class emIfc = (emf instanceof EntityManagerFactoryInfo ?
+				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
+		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, emIfc);
 	}
 
 	/**
@@ -108,6 +102,23 @@ public abstract class SharedEntityManagerCreator {
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
 
+		return createSharedEntityManager(emf, properties, true, entityManagerInterfaces);
+	}
+
+	/**
+	 * Create a transactional EntityManager proxy for the given EntityManagerFactory.
+	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @param properties the properties to be passed into the
+	 * {@code createEntityManager} call (may be {@code null})
+	 * @param synchronizedWithTransaction whether to automatically join ongoing
+	 * transactions (according to the JPA 2.1 SynchronizationType rules)
+	 * @param entityManagerInterfaces the interfaces to be implemented by the
+	 * EntityManager. Allows the addition or specification of proprietary interfaces.
+	 * @return a shareable transactional EntityManager proxy
+	 */
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties,
+			boolean synchronizedWithTransaction, Class... entityManagerInterfaces) {
+
 		ClassLoader cl = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			cl = ((EntityManagerFactoryInfo) emf).getBeanClassLoader();
@@ -117,7 +128,7 @@ public abstract class SharedEntityManagerCreator {
 		ifcs[entityManagerInterfaces.length] = EntityManagerProxy.class;
 		return (EntityManager) Proxy.newProxyInstance(
 				(cl != null ? cl : SharedEntityManagerCreator.class.getClassLoader()),
-				ifcs, new SharedEntityManagerInvocationHandler(emf, properties));
+				ifcs, new SharedEntityManagerInvocationHandler(emf, properties, synchronizedWithTransaction));
 	}
 
 
@@ -135,11 +146,15 @@ public abstract class SharedEntityManagerCreator {
 
 		private final Map properties;
 
+		private final boolean synchronizedWithTransaction;
+
 		private transient volatile ClassLoader proxyClassLoader;
 
-		public SharedEntityManagerInvocationHandler(EntityManagerFactory target, Map properties) {
+		public SharedEntityManagerInvocationHandler(
+				EntityManagerFactory target, Map properties, boolean synchronizedWithTransaction) {
 			this.targetFactory = target;
 			this.properties = properties;
+			this.synchronizedWithTransaction = synchronizedWithTransaction;
 			initProxyClassLoader();
 		}
 
@@ -200,16 +215,11 @@ public abstract class SharedEntityManagerCreator {
 						"Not allowed to create transaction on shared EntityManager - " +
 						"use Spring transactions or EJB CMT instead");
 			}
-			else if (method.getName().equals("joinTransaction")) {
-				throw new IllegalStateException(
-						"Not allowed to join transaction on shared EntityManager - " +
-						"use Spring transactions or EJB CMT instead");
-			}
 
 			// Determine current EntityManager: either the transactional one
 			// managed by the factory or a temporary one for the given invocation.
-			EntityManager target =
-					EntityManagerFactoryUtils.doGetTransactionalEntityManager(this.targetFactory, this.properties);
+			EntityManager target = EntityManagerFactoryUtils.doGetTransactionalEntityManager(
+					this.targetFactory, this.properties, this.synchronizedWithTransaction);
 
 			if (method.getName().equals("getTargetEntityManager")) {
 				// Handle EntityManagerProxy interface.

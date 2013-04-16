@@ -40,7 +40,8 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
  *
- * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
+ * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline. Beyond that,
+ * this MockHttpServletResponse is also compatible with Servlet 3.1's setContentLengthLong.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -75,7 +76,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private PrintWriter writer;
 
-	private int contentLength = 0;
+	private long contentLength = 0;
 
 	private String contentType;
 
@@ -193,6 +194,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public int getContentLength() {
+		return (int) this.contentLength;
+	}
+
+	public void setContentLengthLong(long contentLength) {
+		this.contentLength = contentLength;
+		doAddHeaderValue(CONTENT_LENGTH_HEADER, contentLength, true);
+	}
+
+	public long getContentLengthLong() {
 		return this.contentLength;
 	}
 

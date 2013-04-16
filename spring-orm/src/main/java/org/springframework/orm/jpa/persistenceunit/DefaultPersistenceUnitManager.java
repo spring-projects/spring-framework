@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,8 +92,6 @@ public class DefaultPersistenceUnitManager
 
 	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
 
-
-	private static final boolean jpa2ApiPresent = ClassUtils.hasMethod(PersistenceUnitInfo.class, "getSharedCacheMode");
 
 	private static final TypeFilter[] entityTypeFilters = new TypeFilter[] {
 			new AnnotationTypeFilter(Entity.class, false),
@@ -384,12 +379,7 @@ public class DefaultPersistenceUnitManager
 				msg.append(this.persistenceUnitInfos.get(name).getPersistenceUnitRootUrl());
 				throw new IllegalStateException(msg.toString());
 			}
-			PersistenceUnitInfo puiToStore = pui;
-			if (jpa2ApiPresent) {
-				puiToStore = (PersistenceUnitInfo) Proxy.newProxyInstance(SmartPersistenceUnitInfo.class.getClassLoader(),
-						new Class[] {SmartPersistenceUnitInfo.class}, new Jpa2PersistenceUnitInfoDecorator(pui));
-			}
-			this.persistenceUnitInfos.put(name, puiToStore);
+			this.persistenceUnitInfos.put(name, pui);
 		}
 	}
 
@@ -503,15 +493,7 @@ public class DefaultPersistenceUnitManager
 	 */
 	protected final MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
 		PersistenceUnitInfo pui = this.persistenceUnitInfos.get(persistenceUnitName);
-		if (pui != null && Proxy.isProxyClass(pui.getClass())) {
-			// JPA 2.0 PersistenceUnitInfo decorator with a SpringPersistenceUnitInfo as target
-			Jpa2PersistenceUnitInfoDecorator dec = (Jpa2PersistenceUnitInfoDecorator) Proxy.getInvocationHandler(pui);
-			return dec.getTarget();
-		}
-		else {
-			// Must be a raw JPA 1.0 SpringPersistenceUnitInfo instance
-			return (MutablePersistenceUnitInfo) pui;
-		}
+		return (MutablePersistenceUnitInfo) pui;
 	}
 
 	/**
@@ -572,51 +554,6 @@ public class DefaultPersistenceUnitManager
 			}
 		}
 		return pui;
-	}
-
-
-	/**
-	 * Decorator that exposes a JPA 2.0 compliant PersistenceUnitInfo interface for a
-	 * JPA 1.0 based SpringPersistenceUnitInfo object, adapting the {@code getSharedCacheMode}
-	 * and {@code getValidationMode} methods from String names to enum return values.
-	 */
-	private static class Jpa2PersistenceUnitInfoDecorator implements InvocationHandler {
-
-		private final SpringPersistenceUnitInfo target;
-
-		private final Class<? extends Enum> sharedCacheModeEnum;
-
-		private final Class<? extends Enum> validationModeEnum;
-
-		@SuppressWarnings("unchecked")
-		public Jpa2PersistenceUnitInfoDecorator(SpringPersistenceUnitInfo target) {
-			this.target = target;
-			try {
-				this.sharedCacheModeEnum = (Class<? extends Enum>)
-						ClassUtils.forName("javax.persistence.SharedCacheMode", PersistenceUnitInfo.class.getClassLoader());
-				this.validationModeEnum = (Class<? extends Enum>)
-						ClassUtils.forName("javax.persistence.ValidationMode", PersistenceUnitInfo.class.getClassLoader());
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("JPA 2.0 API enum types not present", ex);
-			}
-		}
-
-		public final SpringPersistenceUnitInfo getTarget() {
-			return this.target;
-		}
-
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("getSharedCacheMode")) {
-				return Enum.valueOf(this.sharedCacheModeEnum, this.target.getSharedCacheModeName());
-			}
-			else if (method.getName().equals("getValidationMode")) {
-				return Enum.valueOf(this.validationModeEnum, this.target.getValidationModeName());
-			}
-			else {
-				return method.invoke(this.target, args);
-			}
-		}
 	}
 
 }

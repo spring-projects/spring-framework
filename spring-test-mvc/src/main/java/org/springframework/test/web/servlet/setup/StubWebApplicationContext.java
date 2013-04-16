@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
@@ -290,53 +289,55 @@ class StubWebApplicationContext implements WebApplicationContext {
 			return existingBean;
 		}
 
-		public <T> T createBean(Class<T> beanClass) throws BeansException {
-			throw new UnsupportedOperationException("Bean creation is not supported");
+		public <T> T createBean(Class<T> beanClass) {
+			throw new UnsupportedOperationException();
 		}
 
 		@SuppressWarnings("rawtypes")
-		public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
-			throw new UnsupportedOperationException("Bean creation is not supported");
+		public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) {
+			throw new UnsupportedOperationException();
 		}
 
 		@SuppressWarnings("rawtypes")
-		public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
-			return null;
+		public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) {
+			throw new UnsupportedOperationException();
 		}
 
 		public void autowireBean(Object existingBean) throws BeansException {
-			throw new UnsupportedOperationException("Autowiring is not supported");
+			throw new UnsupportedOperationException();
 		}
 
-		public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck) throws BeansException {
-			throw new UnsupportedOperationException("Autowiring is not supported");
+		public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck) {
+			throw new UnsupportedOperationException();
 		}
 
-		public Object configureBean(Object existingBean, String beanName) throws BeansException {
-			throw new UnsupportedOperationException("Configuring a bean is not supported");
+		public Object configureBean(Object existingBean, String beanName) {
+			throw new UnsupportedOperationException();
 		}
 
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
-			throw new UnsupportedOperationException("Dependency resolution is not supported");
+		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
+			throw new UnsupportedOperationException();
 		}
 
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName, Set<String> autowiredBeanNames,
-				TypeConverter typeConverter) throws BeansException {
-			throw new UnsupportedOperationException("Dependency resolution is not supported");
+		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+			throw new UnsupportedOperationException();
 		}
 
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
-			throw new UnsupportedOperationException("Bean property initialization is not supported");
+			throw new UnsupportedOperationException();
 		}
 
-		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
-				throws BeansException {
-			throw new UnsupportedOperationException("Post processing is not supported");
+		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
+			throw new UnsupportedOperationException();
 		}
 
-		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
-				throws BeansException {
-			throw new UnsupportedOperationException("Post processing is not supported");
+		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void destroyBean(Object existingBean) {
+			throw new UnsupportedOperationException();
 		}
 	}
 

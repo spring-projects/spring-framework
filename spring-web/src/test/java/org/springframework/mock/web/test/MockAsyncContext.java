@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.mock.web.test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -56,6 +55,7 @@ public class MockAsyncContext implements AsyncContext {
 		this.response = (HttpServletResponse) response;
 	}
 
+
 	@Override
 	public ServletRequest getRequest() {
 		return this.request;
@@ -71,11 +71,6 @@ public class MockAsyncContext implements AsyncContext {
 		return (this.request instanceof MockHttpServletRequest) && (this.response instanceof MockHttpServletResponse);
 	}
 
-	public String getDispatchedPath() {
-		return this.dispatchedPath;
-	}
-
-	@Override
 	public void dispatch() {
 		dispatch(this.request.getRequestURI());
  	}
@@ -90,7 +85,10 @@ public class MockAsyncContext implements AsyncContext {
 		this.dispatchedPath = path;
 	}
 
-	@Override
+	public String getDispatchedPath() {
+		return this.dispatchedPath;
+	}
+
 	public void complete() {
 		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
 		if (mockRequest != null) {
@@ -111,11 +109,6 @@ public class MockAsyncContext implements AsyncContext {
 		runnable.run();
 	}
 
-	public List<AsyncListener> getListeners() {
-		return this.listeners;
-	}
-
-	@Override
 	public void addListener(AsyncListener listener) {
 		this.listeners.add(listener);
 	}
@@ -125,19 +118,20 @@ public class MockAsyncContext implements AsyncContext {
 		this.listeners.add(listener);
 	}
 
-	@Override
+	public List<AsyncListener> getListeners() {
+		return this.listeners;
+	}
+
 	public <T extends AsyncListener> T createListener(Class<T> clazz) throws ServletException {
 		return BeanUtils.instantiateClass(clazz);
 	}
 
-	@Override
-	public long getTimeout() {
-		return this.timeout;
-	}
-
-	@Override
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;
+	}
+
+	public long getTimeout() {
+		return this.timeout;
 	}
 
 }

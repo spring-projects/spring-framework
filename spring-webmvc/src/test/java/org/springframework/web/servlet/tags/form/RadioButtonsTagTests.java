@@ -524,7 +524,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 	public void testHiddenElementOmittedOnDisabled() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
-		this.tag.setDisabled("true");
+		this.tag.setDisabled(true);
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();

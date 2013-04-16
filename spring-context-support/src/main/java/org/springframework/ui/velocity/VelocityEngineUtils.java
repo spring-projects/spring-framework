@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
@@ -34,9 +32,6 @@ import org.apache.velocity.exception.VelocityException;
  * @since 22.01.2004
  */
 public abstract class VelocityEngineUtils {
-
-	private static final Log logger = LogFactory.getLog(VelocityEngineUtils.class);
-
 
 	/**
 	 * Merge the specified Velocity template with the given model and write
@@ -54,20 +49,8 @@ public abstract class VelocityEngineUtils {
 			VelocityEngine velocityEngine, String templateLocation, Map<String, Object> model, Writer writer)
 			throws VelocityException {
 
-		try {
-			VelocityContext velocityContext = new VelocityContext(model);
-			velocityEngine.mergeTemplate(templateLocation, velocityContext, writer);
-		}
-		catch (VelocityException ex) {
-			throw ex;
-		}
-		catch (RuntimeException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
-			throw new VelocityException(ex.toString());
-		}
+		VelocityContext velocityContext = new VelocityContext(model);
+		velocityEngine.mergeTemplate(templateLocation, velocityContext, writer);
 	}
 
 	/**
@@ -84,20 +67,8 @@ public abstract class VelocityEngineUtils {
 			VelocityEngine velocityEngine, String templateLocation, String encoding,
 			Map<String, Object> model, Writer writer) throws VelocityException {
 
-		try {
-			VelocityContext velocityContext = new VelocityContext(model);
-			velocityEngine.mergeTemplate(templateLocation, encoding, velocityContext, writer);
-		}
-		catch (VelocityException ex) {
-			throw ex;
-		}
-		catch (RuntimeException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
-			throw new VelocityException(ex.toString());
-		}
+		VelocityContext velocityContext = new VelocityContext(model);
+		velocityEngine.mergeTemplate(templateLocation, encoding, velocityContext, writer);
 	}
 
 	/**

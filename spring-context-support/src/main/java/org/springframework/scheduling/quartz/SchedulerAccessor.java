@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.spi.ClassLoadHelper;
+import org.quartz.xml.XMLSchedulingDataProcessor;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
@@ -51,7 +52,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>For concrete usage, check out the {@link SchedulerFactoryBean} and
  * {@link SchedulerAccessorBean} classes.
  *
- * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0/2.1, as of Spring 3.1.
+ * <p>Compatible with Quartz 1.8 as well as Quartz 2.0/2.1, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 2.5.6
@@ -115,7 +116,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * "job_scheduling_data_1_5" XSD or better. Can be specified to automatically
 	 * register jobs that are defined in such a file, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see org.quartz.xml.XmlSchedulingDataProcessor
+	 * @see org.quartz.xml.XMLSchedulingDataProcessor
 	 */
 	public void setJobSchedulingDataLocation(String jobSchedulingDataLocation) {
 		this.jobSchedulingDataLocations = new String[] {jobSchedulingDataLocation};
@@ -126,7 +127,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * "job_scheduling_data_1_5" XSD or better. Can be specified to automatically
 	 * register jobs that are defined in such files, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see org.quartz.xml.XmlSchedulingDataProcessor
+	 * @see org.quartz.xml.XMLSchedulingDataProcessor
 	 */
 	public void setJobSchedulingDataLocations(String[] jobSchedulingDataLocations) {
 		this.jobSchedulingDataLocations = jobSchedulingDataLocations;
@@ -251,30 +252,14 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		if (this.transactionManager != null) {
 			transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 		}
-		try {
 
+		try {
 			if (this.jobSchedulingDataLocations != null) {
 				ClassLoadHelper clh = new ResourceLoaderClassLoadHelper(this.resourceLoader);
 				clh.initialize();
-				try {
-					// Quartz 1.8 or higher?
-					Class dataProcessorClass = getClass().getClassLoader().loadClass("org.quartz.xml.XMLSchedulingDataProcessor");
-					logger.debug("Using Quartz 1.8 XMLSchedulingDataProcessor");
-					Object dataProcessor = dataProcessorClass.getConstructor(ClassLoadHelper.class).newInstance(clh);
-					Method processFileAndScheduleJobs = dataProcessorClass.getMethod("processFileAndScheduleJobs", String.class, Scheduler.class);
-					for (String location : this.jobSchedulingDataLocations) {
-						processFileAndScheduleJobs.invoke(dataProcessor, location, getScheduler());
-					}
-				}
-				catch (ClassNotFoundException ex) {
-					// Quartz 1.6
-					Class dataProcessorClass = getClass().getClassLoader().loadClass("org.quartz.xml.JobSchedulingDataProcessor");
-					logger.debug("Using Quartz 1.6 JobSchedulingDataProcessor");
-					Object dataProcessor = dataProcessorClass.getConstructor(ClassLoadHelper.class, boolean.class, boolean.class).newInstance(clh, true, true);
-					Method processFileAndScheduleJobs = dataProcessorClass.getMethod("processFileAndScheduleJobs", String.class, Scheduler.class, boolean.class);
-					for (String location : this.jobSchedulingDataLocations) {
-						processFileAndScheduleJobs.invoke(dataProcessor, location, getScheduler(), this.overwriteExistingJobs);
-					}
+				XMLSchedulingDataProcessor dataProcessor = new XMLSchedulingDataProcessor(clh);
+				for (String location : this.jobSchedulingDataLocations) {
+					dataProcessor.processFileAndScheduleJobs(location, getScheduler());
 				}
 			}
 
