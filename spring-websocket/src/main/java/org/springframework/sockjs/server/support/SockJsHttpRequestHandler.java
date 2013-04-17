@@ -46,6 +46,8 @@ import org.springframework.websocket.HandlerProvider;
  */
 public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactoryAware {
 
+	private final String prefix;
+
 	private final SockJsService sockJsService;
 
 	private final HandlerProvider<SockJsHandler> handlerProvider;
@@ -53,23 +55,50 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactory
 	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 
-	public SockJsHttpRequestHandler(SockJsService sockJsService, SockJsHandler sockJsHandler) {
+	/**
+	 * Class constructor with {@link SockJsHandler} instance ...
+	 *
+	 * @param prefix the path prefix for the SockJS service. All requests with a path
+	 * that begins with the specified prefix will be handled by this service. In a
+	 * Servlet container this is the path within the current servlet mapping.
+	 */
+	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService, SockJsHandler sockJsHandler) {
+
+		Assert.hasText(prefix, "prefix is required");
 		Assert.notNull(sockJsService, "sockJsService is required");
 		Assert.notNull(sockJsHandler, "sockJsHandler is required");
+
+		this.prefix = prefix;
 		this.sockJsService = sockJsService;
 		this.sockJsService.registerSockJsHandlers(Collections.singleton(sockJsHandler));
 		this.handlerProvider = new HandlerProvider<SockJsHandler>(sockJsHandler);
 	}
 
-	public SockJsHttpRequestHandler(SockJsService sockJsService, Class<? extends SockJsHandler> sockJsHandlerClass) {
+	/**
+	 * Class constructor with {@link SockJsHandler} type (per request) ...
+	 *
+	 * @param prefix the path prefix for the SockJS service. All requests with a path
+	 * that begins with the specified prefix will be handled by this service. In a
+	 * Servlet container this is the path within the current servlet mapping.
+	 */
+	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService,
+			Class<? extends SockJsHandler> sockJsHandlerClass) {
+
+		Assert.hasText(prefix, "prefix is required");
 		Assert.notNull(sockJsService, "sockJsService is required");
 		Assert.notNull(sockJsHandlerClass, "sockJsHandlerClass is required");
+
+		this.prefix = prefix;
 		this.sockJsService = sockJsService;
 		this.handlerProvider = new HandlerProvider<SockJsHandler>(sockJsHandlerClass);
 	}
 
-	public String getMappingPattern() {
-		return this.sockJsService.getPrefix() + "/**";
+	public String getPrefix() {
+		return this.prefix;
+	}
+
+	public String getPattern() {
+		return this.prefix + "/**";
 	}
 
 	@Override
@@ -82,10 +111,9 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactory
 			throws ServletException, IOException {
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		String prefix = this.sockJsService.getPrefix();
 
-		Assert.isTrue(lookupPath.startsWith(prefix),
-				"Request path does not match the prefix of the SockJsService " + prefix);
+		Assert.isTrue(lookupPath.startsWith(this.prefix),
+				"Request path does not match the prefix of the SockJsService " + this.prefix);
 
 		String sockJsPath = lookupPath.substring(prefix.length());
 

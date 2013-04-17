@@ -114,6 +114,11 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 		this.sockJsHandler.handleException(this, ex);
 	}
 
+	public void connectionClosed() {
+		this.state = State.CLOSED;
+		this.sockJsHandler.sessionClosed(this);
+	}
+
 	public void close() {
 		this.state = State.CLOSED;
 		this.sockJsHandler.sessionClosed(this);

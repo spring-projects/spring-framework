@@ -17,12 +17,18 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.AbstractServerSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -37,19 +43,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsWebSocketHandler extends AbstractSockJsWebSocketHandler {
+public class SockJsWebSocketHandler implements WebSocketHandler {
+
+	private static final Log logger = LogFactory.getLog(SockJsWebSocketHandler.class);
+
+	private final SockJsConfiguration sockJsConfig;
+
+	private final SockJsHandler sockJsHandler;
+
+	private final Map<WebSocketSession, SockJsSessionSupport> sessions =
+			new ConcurrentHashMap<WebSocketSession, SockJsSessionSupport>();
 
 	// TODO: JSON library used must be configurable
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
 	public SockJsWebSocketHandler(SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
-		super(sockJsConfig, sockJsHandler);
+		Assert.notNull(sockJsConfig, "sockJsConfig is required");
+		Assert.notNull(sockJsHandler, "sockJsHandler is required");
+		this.sockJsConfig = sockJsConfig;
+		this.sockJsHandler = sockJsHandler;
+	}
+
+	protected SockJsConfiguration getSockJsConfig() {
+		return this.sockJsConfig;
+	}
+
+	protected SockJsHandler getSockJsHandler() {
+		return this.sockJsHandler;
+	}
+
+	protected SockJsSessionSupport getSockJsSession(WebSocketSession wsSession) {
+		return this.sessions.get(wsSession);
 	}
 
 	@Override
-	protected SockJsSessionSupport createSockJsSession(WebSocketSession wsSession) throws Exception {
-		return new WebSocketServerSession(wsSession, getSockJsConfig());
+	public void newSession(WebSocketSession wsSession) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug("New session: " + wsSession);
+		}
+		SockJsSessionSupport session = new WebSocketServerSession(wsSession, getSockJsConfig());
+		this.sessions.put(wsSession, session);
 	}
 
 	@Override
@@ -70,6 +104,25 @@ public class SockJsWebSocketHandler extends AbstractSockJsWebSocketHandler {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", e);
 			wsSession.close();
 		}
+	}
+
+	@Override
+	public void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception {
+		// should not happen
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void handleException(WebSocketSession webSocketSession, Throwable exception) {
+		SockJsSessionSupport session = getSockJsSession(webSocketSession);
+		session.delegateException(exception);
+	}
+
+	@Override
+	public void sessionClosed(WebSocketSession webSocketSession, int statusCode, String reason) throws Exception {
+		logger.debug("WebSocket session closed " + webSocketSession);
+		SockJsSessionSupport session = this.sessions.remove(webSocketSession);
+		session.connectionClosed();
 	}
 
 
@@ -107,15 +160,23 @@ public class SockJsWebSocketHandler extends AbstractSockJsWebSocketHandler {
 		}
 
 		@Override
-		public void closeInternal() {
-			this.webSocketSession.close();
+		public void connectionClosed() {
+			super.connectionClosed();
 			this.webSocketSession = null;
+		}
+
+		@Override
+		public void closeInternal() {
+			deactivate();
 			updateLastActiveTime();
 		}
 
 		@Override
 		protected void deactivate() {
-			this.webSocketSession.close();
+			if (this.webSocketSession != null) {
+				this.webSocketSession.close();
+				this.webSocketSession = null;
+			}
 		}
 	}
 

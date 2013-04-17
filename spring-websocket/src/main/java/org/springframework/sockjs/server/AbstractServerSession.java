@@ -58,10 +58,18 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 
 	protected abstract void sendMessageInternal(String message) throws IOException;
 
+
+	@Override
+	public void connectionClosed() {
+		logger.debug("Session closed");
+		super.close();
+		cancelHeartbeat();
+	}
+
+	@Override
 	public final synchronized void close() {
 		if (!isClosed()) {
 			logger.debug("Closing session");
-
 			if (isActive()) {
 				// deliver messages "in flight" before sending close frame
 				try {
@@ -71,9 +79,7 @@ public abstract class AbstractServerSession extends SockJsSessionSupport {
 					// ignore
 				}
 			}
-
 			super.close();
-
 			cancelHeartbeat();
 			closeInternal();
 		}

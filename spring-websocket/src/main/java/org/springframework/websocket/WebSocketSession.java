@@ -27,6 +27,8 @@ import java.io.IOException;
  */
 public interface WebSocketSession {
 
+	String getId();
+
 	boolean isOpen();
 
 	void sendText(String text) throws IOException;

@@ -70,13 +70,11 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 	private final Map<SockJsHandler, WebSocketHandler> sockJsHandlers = new HashMap<SockJsHandler, WebSocketHandler>();
 
 
-	public DefaultSockJsService(String prefix) {
-		super(prefix);
+	public DefaultSockJsService() {
 		this.sessionTimeoutSchedulerHolder = new TaskSchedulerHolder("SockJs-sessionTimeout-");
 	}
 
-	public DefaultSockJsService(String prefix, TaskScheduler heartbeatScheduler, TaskScheduler sessionTimeoutScheduler) {
-		super(prefix, heartbeatScheduler);
+	public DefaultSockJsService(TaskScheduler heartbeatScheduler, TaskScheduler sessionTimeoutScheduler) {
 		Assert.notNull(sessionTimeoutScheduler, "sessionTimeoutScheduler is required");
 		this.sessionTimeoutSchedulerHolder = new TaskSchedulerHolder(sessionTimeoutScheduler);
 	}
@@ -146,23 +144,23 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 				try {
 					int count = sessions.size();
 					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace("Checking " + count + " session(s) for timeouts [" + getPrefix() + "]");
+						logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
 					}
 					for (SockJsSessionSupport session : sessions.values()) {
 						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
 							if (logger.isTraceEnabled()) {
-								logger.trace("Removing " + session + " for [" + getPrefix() + "]");
+								logger.trace("Removing " + session + " for [" + getName() + "]");
 							}
 							session.close();
 							sessions.remove(session.getId());
 						}
 					}
 					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace(sessions.size() + " remaining session(s) [" + getPrefix() + "]");
+						logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
 					}
 				}
 				catch (Throwable t) {
-					logger.error("Failed to complete session timeout checks for [" + getPrefix() + "]", t);
+					logger.error("Failed to complete session timeout checks for [" + getName() + "]", t);
 				}
 			}
 		}, getDisconnectDelay());

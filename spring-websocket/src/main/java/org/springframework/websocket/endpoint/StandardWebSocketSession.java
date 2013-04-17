@@ -41,6 +41,11 @@ public class StandardWebSocketSession implements WebSocketSession {
 	}
 
 	@Override
+	public String getId() {
+		return this.session.getId();
+	}
+
+	@Override
 	public boolean isOpen() {
 		return ((this.session != null) && this.session.isOpen());
 	}

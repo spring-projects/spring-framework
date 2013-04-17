@@ -27,6 +27,8 @@ import java.io.IOException;
  */
 public interface SockJsSession {
 
+	String getId();
+
 	void sendMessage(String text) throws IOException;
 
 	void close();

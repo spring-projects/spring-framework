@@ -31,8 +31,6 @@ import org.springframework.websocket.WebSocketHandler;
  */
 public interface SockJsService {
 
-	String getPrefix();
-
 	/**
 	 * Pre-register {@link SockJsHandler} instances so they can be adapted to
 	 * {@link WebSocketHandler} and hence re-used at runtime when

@@ -40,7 +40,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriUtils;
 
 
 /**
@@ -57,7 +56,7 @@ public abstract class AbstractSockJsService
 	private static final int ONE_YEAR = 365 * 24 * 60 * 60;
 
 
-	private final String prefix;
+	private String name = getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
 
 	private String clientLibraryUrl = "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js";
 
@@ -74,31 +73,25 @@ public abstract class AbstractSockJsService
 	private final TaskSchedulerHolder heartbeatSchedulerHolder;
 
 
-	/**
-	 * Class constructor...
-	 *
-	 * @param prefix the path prefix for the SockJS service. All requests with a path
-	 * that begins with the specified prefix will be handled by this service. In a
-	 * Servlet container this is the path within the current servlet mapping.
-	 */
-	public AbstractSockJsService(String prefix) {
-		Assert.hasText(prefix, "prefix is required");
-		this.prefix = prefix;
+
+	public AbstractSockJsService() {
 		this.heartbeatSchedulerHolder = new TaskSchedulerHolder("SockJs-heartbeat-");
 	}
 
-	public AbstractSockJsService(String prefix, TaskScheduler heartbeatScheduler) {
-		Assert.hasText(prefix, "prefix is required");
+	public AbstractSockJsService(TaskScheduler heartbeatScheduler) {
 		Assert.notNull(heartbeatScheduler, "heartbeatScheduler is required");
-		this.prefix = prefix;
 		this.heartbeatSchedulerHolder = new TaskSchedulerHolder(heartbeatScheduler);
 	}
 
 	/**
-	 * The path prefix to which the SockJS service is mapped.
+	 * A unique name for the service mainly for logging purposes.
 	 */
-	public String getPrefix() {
-		return this.prefix;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	/**
@@ -235,10 +228,6 @@ public abstract class AbstractSockJsService
 		catch (IllegalArgumentException ex) {
 			// Ignore invalid Content-Type (TODO)
 		}
-
-		String path = UriUtils.decode(request.getURI().getPath(), "URF-8");
-		int index = path.indexOf(this.prefix);
-		sockJsPath = path.substring(index + this.prefix.length());
 
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {

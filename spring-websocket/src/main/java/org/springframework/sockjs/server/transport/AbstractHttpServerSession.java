@@ -108,6 +108,13 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 	 */
 	protected abstract void flushCache() throws IOException;
 
+	@Override
+	public void connectionClosed() {
+		super.connectionClosed();
+		resetRequest();
+	}
+
+	@Override
 	protected void closeInternal() {
 		resetRequest();
 	}
