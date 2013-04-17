@@ -41,7 +41,7 @@ Check out Tomcat trunk:
     svn co http://svn.apache.org/repos/asf/tomcat/trunk/
     cd trunk
 
-Create `build.properties` in the trunk directory with content similar to the one below:
+Create `build.properties` in the trunk directory with similar content:
 
     # ----- Default Base Path for Dependent Packages -----
     # Replace this path with the path where dependencies binaries should be downloaded
@@ -63,12 +63,14 @@ Download a [Glassfish 4 build](http://dlc.sun.com.edgesuite.net/glassfish/4.0/) 
 Unzip the downloaded file.
 
 Start the server:
+
     cd <unzip_dir>/glassfish4
     bin/asadmin start-domain
 
 Deploy a WAR file. Here is [a sample script](https://github.com/rstoyanchev/spring-websocket-test/blob/master/redeploy-glassfish.sh).
 
 Watch the logs:
+
     cd <unzip_dir>/glassfish4
     less `glassfish/domains/domain1/logs/server.log`
 
