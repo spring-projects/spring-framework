@@ -78,7 +78,7 @@ public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler 
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSession session) throws Exception {
+			AbstractHttpServerSockJsSession session) throws Exception {
 
 		String callback = request.getQueryParams().getFirst("c");
 		if (! StringUtils.hasText(callback)) {

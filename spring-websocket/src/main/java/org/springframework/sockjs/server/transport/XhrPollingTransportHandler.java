@@ -50,9 +50,9 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 		return new DefaultFrameFormat("%s\n");
 	}
 
-	public PollingHttpServerSession createSession(String sessionId, SockJsHandler sockJsHandler) {
+	public PollingServerSockJsSession createSession(String sessionId, SockJsHandler sockJsHandler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new PollingHttpServerSession(sessionId, getSockJsConfig(), sockJsHandler);
+		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), sockJsHandler);
 	}
 
 }

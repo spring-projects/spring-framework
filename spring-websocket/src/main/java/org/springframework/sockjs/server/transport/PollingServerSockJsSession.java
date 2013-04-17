@@ -22,9 +22,9 @@ import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 
 
-public class PollingHttpServerSession extends AbstractHttpServerSession {
+public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
-	public PollingHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+	public PollingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
 		super(sessionId, sockJsConfig, sockJsHandler);
 	}
 

@@ -23,12 +23,12 @@ import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 
 
-public class StreamingHttpServerSession extends AbstractHttpServerSession {
+public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
 	private int byteCount;
 
 
-	public StreamingHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+	public StreamingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
 		super(sessionId, sockJsConfig, sockJsHandler);
 	}
 

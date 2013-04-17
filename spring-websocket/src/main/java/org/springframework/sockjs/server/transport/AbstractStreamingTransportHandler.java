@@ -33,14 +33,14 @@ public abstract class AbstractStreamingTransportHandler extends AbstractHttpSend
 
 
 	@Override
-	public StreamingHttpServerSession createSession(String sessionId, SockJsHandler sockJsHandler) {
+	public StreamingServerSockJsSession createSession(String sessionId, SockJsHandler sockJsHandler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new StreamingHttpServerSession(sessionId, getSockJsConfig(), sockJsHandler);
+		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), sockJsHandler);
 	}
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSession session) throws Exception {
+			AbstractHttpServerSockJsSession session) throws Exception {
 
 		writePrelude(request, response);
 		super.handleRequestInternal(request, response, session);
@@ -51,7 +51,7 @@ public abstract class AbstractStreamingTransportHandler extends AbstractHttpSend
 
 	@Override
 	protected void handleNewSession(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSession session) throws IOException, Exception {
+			AbstractHttpServerSockJsSession session) throws IOException, Exception {
 
 		super.handleNewSession(request, response, session);
 

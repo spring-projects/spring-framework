@@ -35,14 +35,14 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractServerSession extends SockJsSessionSupport {
+public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 
 	private final SockJsConfiguration sockJsConfig;
 
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
 		super(sessionId, sockJsHandler);
 		this.sockJsConfig = sockJsConfig;
 	}

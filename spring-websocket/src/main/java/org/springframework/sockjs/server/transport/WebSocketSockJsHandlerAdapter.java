@@ -75,7 +75,7 @@ public class WebSocketSockJsHandlerAdapter implements WebSocketHandler {
 		if (logger.isDebugEnabled()) {
 			logger.debug("New session: " + wsSession);
 		}
-		SockJsSessionSupport session = new WebSocketSessionAdapter(wsSession);
+		SockJsSessionSupport session = new SockJsWebSocketSessionAdapter(wsSession);
 		this.sessions.put(wsSession, session);
 	}
 
@@ -108,12 +108,12 @@ public class WebSocketSockJsHandlerAdapter implements WebSocketHandler {
 	}
 
 
-	private class WebSocketSessionAdapter extends SockJsSessionSupport {
+	private class SockJsWebSocketSessionAdapter extends SockJsSessionSupport {
 
 		private WebSocketSession wsSession;
 
 
-		public WebSocketSessionAdapter(WebSocketSession wsSession) throws Exception {
+		public SockJsWebSocketSessionAdapter(WebSocketSession wsSession) throws Exception {
 			super(String.valueOf(wsSession.hashCode()), getSockJsHandler());
 			this.wsSession = wsSession;
 			connectionInitialized();

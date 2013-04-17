@@ -23,7 +23,7 @@ import org.springframework.http.server.AsyncServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.server.AbstractServerSession;
+import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpServerSession extends AbstractServerSession {
+public abstract class AbstractHttpServerSockJsSession extends AbstractServerSockJsSession {
 
 	private FrameFormat frameFormat;
 
@@ -47,7 +47,7 @@ public abstract class AbstractHttpServerSession extends AbstractServerSession {
 	private ServerHttpResponse response;
 
 
-	public AbstractHttpServerSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
 		super(sessionId, sockJsConfig, sockJsHandler);
 	}
 

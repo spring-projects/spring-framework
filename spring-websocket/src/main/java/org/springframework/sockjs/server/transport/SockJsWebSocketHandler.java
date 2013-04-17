@@ -25,7 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
-import org.springframework.sockjs.server.AbstractServerSession;
+import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.util.Assert;
@@ -82,7 +82,7 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 		if (logger.isDebugEnabled()) {
 			logger.debug("New session: " + wsSession);
 		}
-		SockJsSessionSupport session = new WebSocketServerSession(wsSession, getSockJsConfig());
+		SockJsSessionSupport session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
 		this.sessions.put(wsSession, session);
 	}
 
@@ -126,12 +126,12 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 	}
 
 
-	private class WebSocketServerSession extends AbstractServerSession {
+	private class WebSocketServerSockJsSession extends AbstractServerSockJsSession {
 
 		private WebSocketSession webSocketSession;
 
 
-		public WebSocketServerSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig) throws Exception {
+		public WebSocketServerSockJsSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig) throws Exception {
 			super(String.valueOf(wsSession.hashCode()), sockJsConfig, getSockJsHandler());
 			this.webSocketSession = wsSession;
 			this.webSocketSession.sendText(SockJsFrame.openFrame().getContent());

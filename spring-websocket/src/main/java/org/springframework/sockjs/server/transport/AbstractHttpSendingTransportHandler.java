@@ -66,12 +66,12 @@ public abstract class AbstractHttpSendingTransportHandler
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
 
-		AbstractHttpServerSession httpServerSession = (AbstractHttpServerSession) session;
+		AbstractHttpServerSockJsSession httpServerSession = (AbstractHttpServerSockJsSession) session;
 		handleRequestInternal(request, response, httpServerSession);
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSession httpServerSession) throws Exception, IOException {
+			AbstractHttpServerSockJsSession httpServerSession) throws Exception, IOException {
 
 		if (httpServerSession.isNew()) {
 			handleNewSession(request, response, httpServerSession);
@@ -87,7 +87,7 @@ public abstract class AbstractHttpSendingTransportHandler
 	}
 
 	protected void handleNewSession(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSession session) throws Exception {
+			AbstractHttpServerSockJsSession session) throws Exception {
 
 		logger.debug("Opening " + getTransportType() + " connection");
 		session.setFrameFormat(getFrameFormat(request));

@@ -50,14 +50,14 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public PollingHttpServerSession createSession(String sessionId, SockJsHandler sockJsHandler) {
+	public PollingServerSockJsSession createSession(String sessionId, SockJsHandler sockJsHandler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new PollingHttpServerSession(sessionId, getSockJsConfig(), sockJsHandler);
+		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), sockJsHandler);
 	}
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSession session) throws Exception {
+			AbstractHttpServerSockJsSession session) throws Exception {
 
 		String callback = request.getQueryParams().getFirst("c");
 		if (! StringUtils.hasText(callback)) {
