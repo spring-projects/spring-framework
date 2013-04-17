@@ -35,17 +35,20 @@ Use version `4.0.0.WEBSOCKET-SNAPSHOT`, for example:
 Tomcat provides early JSR-356 support. You'll need to build the latest source, which is relatively easy to do.
 
 Check out Tomcat trunk:
+
     mkdir tomcat
     cd tomcat
     svn co http://svn.apache.org/repos/asf/tomcat/trunk/
     cd trunk
 
 Create `build.properties` in the trunk directory with content similar to the one below:
+
     # ----- Default Base Path for Dependent Packages -----
     # Replace this path with the path where dependencies binaries should be downloaded
     base.path=~/dev/sources/apache/tomcat/download
 
 Run the ant build:
+
     ant clean
     ant
 
