@@ -101,4 +101,9 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 		return (getPayload() != null) ? getPayload().remaining() : 0;
 	}
 
+	@Override
+	protected String toStringPayload() {
+		return (getPayload() != null) ? getPayload().toString() : null;
+	}
+
 }

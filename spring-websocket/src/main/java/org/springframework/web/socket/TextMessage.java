@@ -49,4 +49,9 @@ public final class TextMessage extends WebSocketMessage<String> {
 		return getPayload().length();
 	}
 
+	@Override
+	protected String toStringPayload() {
+		return (getPayloadSize() > 25) ? getPayload().substring(0, 25) + "..." : getPayload();
+	}
+
 }

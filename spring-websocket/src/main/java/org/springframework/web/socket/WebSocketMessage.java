@@ -79,8 +79,11 @@ public abstract class WebSocketMessage<T> {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [payload length=" + getPayloadSize() + ", last=" + isLast() + "]";
+		return getClass().getSimpleName() + " payload= " + toStringPayload()
+				+ ", length=" + getPayloadSize() + ", last=" + isLast() + "]";
 	}
+
+	protected abstract String toStringPayload();
 
 	protected abstract int getPayloadSize();
 

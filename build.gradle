@@ -483,11 +483,13 @@ project("spring-websocket") {
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.3.v20130506")
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.3.v20130506")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // required for SockJS support currently
+		optional("reactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
 	}
 
 	repositories {
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
+		maven { url 'http://repo.springsource.org/libs-snapshot' } // reactor
 	}
 }
 
