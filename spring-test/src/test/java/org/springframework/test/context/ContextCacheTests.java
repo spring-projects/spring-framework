@@ -24,8 +24,10 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.Assert.*;
 import static org.springframework.test.context.SpringRunnerContextCacheTests.*;
+
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for verifying proper behavior of the {@link ContextCache} in

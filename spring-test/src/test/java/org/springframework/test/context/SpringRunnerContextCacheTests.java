@@ -18,19 +18,19 @@ package org.springframework.test.context;
 
 import static org.junit.Assert.*;
 
-import java.util.Comparator;
-import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.InitializationError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.SpringRunnerContextCacheTests.OrderedMethodsSpringJUnit4ClassRunner;
+import org.springframework.test.context.ContextCache;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit4.OrderedMethodsSpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -128,33 +128,6 @@ public class SpringRunnerContextCacheTests {
 		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		assertSame("The application context should NOT have been 'dirtied'.",
 			SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
-	}
-
-
-	/**
-	 * @since 3.2
-	 */
-	public static class OrderedMethodsSpringJUnit4ClassRunner extends SpringJUnit4ClassRunner {
-
-		public OrderedMethodsSpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
-			super(clazz);
-		}
-
-		@Override
-		protected List<FrameworkMethod> computeTestMethods() {
-			List<FrameworkMethod> testMethods = super.computeTestMethods();
-
-			java.util.Collections.sort(testMethods, new Comparator<FrameworkMethod>() {
-
-				@Override
-				public int compare(FrameworkMethod method1, FrameworkMethod method2) {
-					return method1.getName().compareTo(method2.getName());
-				}
-			});
-
-			return testMethods;
-		}
-
 	}
 
 }

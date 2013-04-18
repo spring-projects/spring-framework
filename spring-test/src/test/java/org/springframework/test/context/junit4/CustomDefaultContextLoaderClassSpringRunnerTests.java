@@ -56,7 +56,7 @@ public class CustomDefaultContextLoaderClassSpringRunnerTests {
 	}
 
 
-	public static final class PropertiesBasedSpringJUnit4ClassRunner extends SpringJUnit4ClassRunner {
+	public static final class PropertiesBasedSpringJUnit4ClassRunner extends InternalSpringJUnit4ClassRunner {
 
 		public PropertiesBasedSpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
 			super(clazz);
