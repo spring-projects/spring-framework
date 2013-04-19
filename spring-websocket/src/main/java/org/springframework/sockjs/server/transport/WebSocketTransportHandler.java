@@ -50,9 +50,9 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	private SockJsConfiguration sockJsConfig;
 
-	private final Map<SockJsHandler, WebSocketHandler> sockJsHandlers = new HashMap<SockJsHandler, WebSocketHandler>();
+	private final Map<SockJsHandler, WebSocketHandler> sockJsHandlerCache = new HashMap<SockJsHandler, WebSocketHandler>();
 
-	private final Collection<WebSocketHandler> rawWebSocketHandlers = new ArrayList<WebSocketHandler>();
+	private final Collection<WebSocketHandler> rawWebSocketHandlerCache = new ArrayList<WebSocketHandler>();
 
 
 	public WebSocketTransportHandler(HandshakeHandler handshakeHandler) {
@@ -72,9 +72,9 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	@Override
 	public void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers) {
-		this.sockJsHandlers.clear();
+		this.sockJsHandlerCache.clear();
 		for (SockJsHandler sockJsHandler : sockJsHandlers) {
-			this.sockJsHandlers.put(sockJsHandler, adaptSockJsHandler(sockJsHandler));
+			this.sockJsHandlerCache.put(sockJsHandler, adaptSockJsHandler(sockJsHandler));
 		}
 		this.handshakeHandler.registerWebSocketHandlers(getAllWebSocketHandlers());
 	}
@@ -89,8 +89,8 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	private Collection<WebSocketHandler> getAllWebSocketHandlers() {
 		Set<WebSocketHandler> handlers = new HashSet<WebSocketHandler>();
-		handlers.addAll(this.sockJsHandlers.values());
-		handlers.addAll(this.rawWebSocketHandlers);
+		handlers.addAll(this.sockJsHandlerCache.values());
+		handlers.addAll(this.rawWebSocketHandlerCache);
 		return handlers;
 	}
 
@@ -98,7 +98,7 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			SockJsHandler sockJsHandler, SockJsSessionSupport session) throws Exception {
 
-		WebSocketHandler webSocketHandler = this.sockJsHandlers.get(sockJsHandler);
+		WebSocketHandler webSocketHandler = this.sockJsHandlerCache.get(sockJsHandler);
 		if (webSocketHandler == null) {
 			webSocketHandler = adaptSockJsHandler(sockJsHandler);
 		}
@@ -110,8 +110,8 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	@Override
 	public void registerWebSocketHandlers(Collection<WebSocketHandler> webSocketHandlers) {
-		this.rawWebSocketHandlers.clear();
-		this.rawWebSocketHandlers.addAll(webSocketHandlers);
+		this.rawWebSocketHandlerCache.clear();
+		this.rawWebSocketHandlerCache.addAll(webSocketHandlers);
 		this.handshakeHandler.registerWebSocketHandlers(getAllWebSocketHandlers());
 	}
 

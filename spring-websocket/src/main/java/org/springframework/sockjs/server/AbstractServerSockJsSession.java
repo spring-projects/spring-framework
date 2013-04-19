@@ -26,6 +26,7 @@ import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSession;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.util.Assert;
+import org.springframework.websocket.CloseStatus;
 
 
 /**
@@ -42,9 +43,9 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config, SockJsHandler sockJsHandler) {
 		super(sessionId, sockJsHandler);
-		this.sockJsConfig = sockJsConfig;
+		this.sockJsConfig = config;
 	}
 
 	protected SockJsConfiguration getSockJsConfig() {
@@ -60,36 +61,34 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 
 
 	@Override
-	public void connectionClosed() {
-		logger.debug("Session closed");
-		super.close();
+	public void connectionClosedInternal(CloseStatus status) {
+		updateLastActiveTime();
 		cancelHeartbeat();
 	}
 
 	@Override
-	public final synchronized void close() {
-		if (!isClosed()) {
-			logger.debug("Closing session");
-			if (isActive()) {
-				// deliver messages "in flight" before sending close frame
-				try {
-					writeFrame(SockJsFrame.closeFrameGoAway());
-				}
-				catch (Exception e) {
-					// ignore
-				}
+	public final synchronized void closeInternal(CloseStatus status) throws IOException {
+		if (isActive()) {
+			// TODO: deliver messages "in flight" before sending close frame
+			try {
+				// bypass writeFrame
+				writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));
 			}
-			super.close();
-			cancelHeartbeat();
-			closeInternal();
+			catch (Throwable ex) {
+				logger.warn("Failed to send SockJS close frame: " + ex.getMessage());
+			}
 		}
+		updateLastActiveTime();
+		cancelHeartbeat();
+		disconnect(status);
 	}
 
-	protected abstract void closeInternal();
+	// TODO: close status/reason
+	protected abstract void disconnect(CloseStatus status) throws IOException;
 
 	/**
 	 * For internal use within a TransportHandler and the (TransportHandler-specific)
-	 * session sub-class. The frame is written only if the connection is active.
+	 * session sub-class.
 	 */
 	protected void writeFrame(SockJsFrame frame) throws IOException {
 		if (logger.isTraceEnabled()) {
@@ -103,28 +102,19 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 				logger.warn("Client went away. Terminating connection");
 			}
 			else {
-				logger.warn("Failed to send message. Terminating connection: " + ex.getMessage());
+				logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
 			}
-			deactivate();
 			close();
 			throw ex;
 		}
-		catch (Throwable t) {
-			logger.warn("Failed to send message. Terminating connection: " + t.getMessage());
-			deactivate();
+		catch (Throwable ex) {
+			logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
 			close();
-			throw new NestedSockJsRuntimeException("Failed to write frame " + frame, t);
+			throw new NestedSockJsRuntimeException("Failed to write frame " + frame, ex);
 		}
 	}
 
 	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
-
-	/**
-	 * Some {@link TransportHandler} types cannot detect if a client connection is closed
-	 * or lost and will eventually fail to send messages. When that happens, we need a way
-	 * to disconnect the underlying connection before calling {@link #close()}.
-	 */
-	protected abstract void deactivate();
 
 	public synchronized void sendHeartbeat() throws IOException {
 		if (isActive()) {

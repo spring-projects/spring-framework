@@ -16,9 +16,12 @@
 
 package org.springframework.sockjs;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.websocket.CloseStatus;
 
 
 /**
@@ -99,33 +102,78 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 		this.timeLastActive = System.currentTimeMillis();
 	}
 
-	public void connectionInitialized() throws Exception {
+	public void delegateConnectionEstablished() throws Exception {
 		this.state = State.OPEN;
-		this.sockJsHandler.newSession(this);
+		this.sockJsHandler.afterConnectionEstablished(this);
 	}
 
-	public void delegateMessages(String... messages) throws Exception {
+	public void delegateMessages(String[] messages) throws Exception {
 		for (String message : messages) {
-			this.sockJsHandler.handleMessage(this, message);
+			this.sockJsHandler.handleMessage(message, this);
 		}
 	}
 
-	public void delegateException(Throwable ex) {
-		this.sockJsHandler.handleException(this, ex);
+	public void delegateError(Throwable ex) {
+		this.sockJsHandler.handleError(ex, this);
 	}
 
-	public void connectionClosed() {
-		this.state = State.CLOSED;
-		this.sockJsHandler.sessionClosed(this);
+	/**
+	 * Invoked in reaction to the underlying connection being closed by the remote side
+	 * (or the WebSocket container) in order to perform cleanup and notify the
+	 * {@link SockJsHandler}. This is in contrast to {@link #close()} that pro-actively
+	 * closes the connection.
+	 */
+	public final void delegateConnectionClosed(CloseStatus status) {
+		if (!isClosed()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(this + " was closed, " + status);
+			}
+			try {
+				connectionClosedInternal(status);
+			}
+			finally {
+				this.state = State.CLOSED;
+				this.sockJsHandler.afterConnectionClosed(status, this);
+			}
+		}
 	}
 
-	public void close() {
-		this.state = State.CLOSED;
-		this.sockJsHandler.sessionClosed(this);
+	protected void connectionClosedInternal(CloseStatus status) {
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
+	 */
+	public final void close() throws IOException {
+		close(CloseStatus.NORMAL);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
+	 */
+	public final void close(CloseStatus status) throws IOException {
+		if (!isClosed()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Closing " + this + ", " + status);
+			}
+			try {
+				closeInternal(status);
+			}
+			finally {
+				this.state = State.CLOSED;
+				this.sockJsHandler.afterConnectionClosed(status, this);
+			}
+		}
+	}
+
+	protected abstract void closeInternal(CloseStatus status) throws IOException;
+
+
+	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [id=" + sessionId + "]";
+		return "SockJS session id=" + this.sessionId;
 	}
 
 

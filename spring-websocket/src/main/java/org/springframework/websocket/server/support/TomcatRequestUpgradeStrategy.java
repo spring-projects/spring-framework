@@ -51,7 +51,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrateg
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, Endpoint endpoint) throws IOException {
+			String selectedProtocol, Endpoint endpoint) throws IOException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -74,7 +74,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrateg
 		ServerEndpointConfig endpointConfig = new EndpointRegistration("/shouldntmatter", endpoint);
 
 		upgradeHandler.preInit(endpoint, endpointConfig, serverContainer, webSocketRequest,
-				protocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());
+				selectedProtocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());
 	}
 
 }

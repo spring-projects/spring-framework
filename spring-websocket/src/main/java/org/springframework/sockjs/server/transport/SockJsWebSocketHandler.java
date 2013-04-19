@@ -17,7 +17,6 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +29,7 @@ import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -78,21 +78,15 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 	}
 
 	@Override
-	public void newSession(WebSocketSession wsSession) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("New session: " + wsSession);
-		}
+	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
 		SockJsSessionSupport session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
 		this.sessions.put(wsSession, session);
 	}
 
 	@Override
-	public void handleTextMessage(WebSocketSession wsSession, String message) throws Exception {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Received payload " + message + " for " + wsSession);
-		}
+	public void handleTextMessage(String message, WebSocketSession wsSession) throws Exception {
 		if (StringUtils.isEmpty(message)) {
-			logger.trace("Ignoring empty payload");
+			logger.trace("Ignoring empty message");
 			return;
 		}
 		try {
@@ -107,41 +101,50 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 	}
 
 	@Override
-	public void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception {
-		// should not happen
-		throw new UnsupportedOperationException();
+	public void handleBinaryMessage(byte[] message, WebSocketSession session) throws Exception {
+		logger.warn("Unexpected binary message for " + session);
+		session.close(CloseStatus.NOT_ACCEPTABLE);
 	}
 
 	@Override
-	public void handleException(WebSocketSession webSocketSession, Throwable exception) {
+	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) throws Exception {
+		SockJsSessionSupport session = this.sessions.remove(wsSession);
+		session.delegateConnectionClosed(status);
+	}
+
+	@Override
+	public void handleError(Throwable exception, WebSocketSession webSocketSession) {
 		SockJsSessionSupport session = getSockJsSession(webSocketSession);
-		session.delegateException(exception);
+		session.delegateError(exception);
 	}
 
-	@Override
-	public void sessionClosed(WebSocketSession webSocketSession, int statusCode, String reason) throws Exception {
-		logger.debug("WebSocket session closed " + webSocketSession);
-		SockJsSessionSupport session = this.sessions.remove(webSocketSession);
-		session.connectionClosed();
+	private static String getSockJsSessionId(WebSocketSession wsSession) {
+		Assert.notNull(wsSession, "wsSession is required");
+		String path = wsSession.getURI().getPath();
+		String[] segments = StringUtils.tokenizeToStringArray(path, "/");
+		Assert.isTrue(segments.length > 3, "SockJS request should have at least 3 patgh segments: " + path);
+		return segments[segments.length-2];
 	}
 
 
 	private class WebSocketServerSockJsSession extends AbstractServerSockJsSession {
 
-		private WebSocketSession webSocketSession;
+		private final WebSocketSession wsSession;
 
 
-		public WebSocketServerSockJsSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig) throws Exception {
-			super(String.valueOf(wsSession.hashCode()), sockJsConfig, getSockJsHandler());
-			this.webSocketSession = wsSession;
-			this.webSocketSession.sendText(SockJsFrame.openFrame().getContent());
+		public WebSocketServerSockJsSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig)
+				throws Exception {
+
+			super(getSockJsSessionId(wsSession), sockJsConfig, getSockJsHandler());
+			this.wsSession = wsSession;
+			this.wsSession.sendTextMessage(SockJsFrame.openFrame().getContent());
 			scheduleHeartbeat();
-			connectionInitialized();
+			delegateConnectionEstablished();
 		}
 
 		@Override
 		public boolean isActive() {
-			return ((this.webSocketSession != null) && this.webSocketSession.isOpen());
+			return this.wsSession.isOpen();
 		}
 
 		@Override
@@ -156,27 +159,12 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Write " + frame);
 			}
-			this.webSocketSession.sendText(frame.getContent());
+			this.wsSession.sendTextMessage(frame.getContent());
 		}
 
 		@Override
-		public void connectionClosed() {
-			super.connectionClosed();
-			this.webSocketSession = null;
-		}
-
-		@Override
-		public void closeInternal() {
-			deactivate();
-			updateLastActiveTime();
-		}
-
-		@Override
-		protected void deactivate() {
-			if (this.webSocketSession != null) {
-				this.webSocketSession.close();
-				this.webSocketSession = null;
-			}
+		protected void disconnect(CloseStatus status) throws IOException {
+			this.wsSession.close(status);
 		}
 	}
 

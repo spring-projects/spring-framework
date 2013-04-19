@@ -75,6 +75,6 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, Endpoint endpoint) throws Exception;
+			String selectedProtocol, Endpoint endpoint) throws Exception;
 
 }

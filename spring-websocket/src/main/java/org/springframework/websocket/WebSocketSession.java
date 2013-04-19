@@ -17,24 +17,60 @@
 package org.springframework.websocket;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.ByteBuffer;
 
 
 
 /**
+ * Allows sending messages over a WebSocket connection as well as closing it.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface WebSocketSession {
 
+	/**
+	 * Return a unique session identifier.
+	 */
 	String getId();
 
+	/**
+	 * Return whether the connection is still open.
+	 */
 	boolean isOpen();
 
-	void sendText(String text) throws IOException;
+	/**
+     * Return whether the underlying socket is using a secure transport.
+	 */
+	boolean isSecure();
 
-	void close();
+	/**
+	 * Return the URI used to open the WebSocket connection.
+	 */
+	URI getURI();
 
-	void close(int code, String reason);
+	/**
+	 * Send a text message.
+	 */
+	void sendTextMessage(String message) throws IOException;
+
+	/**
+	 * Send a binary message.
+	 */
+	void sendBinaryMessage(ByteBuffer message) throws IOException;
+
+	/**
+	 * Close the WebSocket connection with status 1000, i.e. equivalent to:
+	 * <pre>
+	 * session.close(CloseStatus.NORMAL);
+	 * </pre>
+	 */
+	void close() throws IOException;
+
+	/**
+	 * Close the WebSocket connection with the given close status.
+	 */
+	void close(CloseStatus status) throws IOException;
 
 }

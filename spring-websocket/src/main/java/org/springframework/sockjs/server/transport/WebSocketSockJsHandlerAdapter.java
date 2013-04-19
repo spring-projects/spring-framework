@@ -17,7 +17,6 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,14 +26,15 @@ import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.SockJsSessionSupport;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.util.Assert;
+import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
 
 /**
- * A {@link WebSocketHandler} that merely delegates to a {@link SockJsHandler} without any
- * SockJS message framing. For use with raw WebSocket communication at SockJS path
- * "/websocket".
+ * A plain {@link WebSocketHandler} to {@link SockJsHandler} adapter that merely delegates
+ * without any additional SockJS message framing. Used for raw WebSocket communication at
+ * SockJS path "/websocket".
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -71,79 +71,61 @@ public class WebSocketSockJsHandlerAdapter implements WebSocketHandler {
 	}
 
 	@Override
-	public void newSession(WebSocketSession wsSession) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("New session: " + wsSession);
-		}
+	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
 		SockJsSessionSupport session = new SockJsWebSocketSessionAdapter(wsSession);
 		this.sessions.put(wsSession, session);
 	}
 
 	@Override
-	public void handleTextMessage(WebSocketSession wsSession, String message) throws Exception {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Received payload " + message);
-		}
+	public void handleTextMessage(String message, WebSocketSession wsSession) throws Exception {
 		SockJsSessionSupport session = getSockJsSession(wsSession);
-		session.delegateMessages(message);
+		session.delegateMessages(new String[] { message });
 	}
 
 	@Override
-	public void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception {
-		// should not happen
-		throw new UnsupportedOperationException();
+	public void handleBinaryMessage(byte[] message, WebSocketSession session) throws Exception {
+		logger.warn("Unexpected binary message for " + session);
+		session.close(CloseStatus.NOT_ACCEPTABLE);
 	}
 
 	@Override
-	public void handleException(WebSocketSession webSocketSession, Throwable exception) {
-		SockJsSessionSupport session = getSockJsSession(webSocketSession);
-		session.delegateException(exception);
+	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) throws Exception {
+		SockJsSessionSupport session = this.sessions.remove(wsSession);
+		session.delegateConnectionClosed(status);
 	}
 
 	@Override
-	public void sessionClosed(WebSocketSession webSocketSession, int statusCode, String reason) throws Exception {
-		logger.debug("WebSocket session closed " + webSocketSession);
-		SockJsSessionSupport session = this.sessions.remove(webSocketSession);
-		session.connectionClosed();
+	public void handleError(Throwable exception, WebSocketSession wsSession) {
+		logger.error("Error for " + wsSession);
+		SockJsSessionSupport session = getSockJsSession(wsSession);
+		session.delegateError(exception);
 	}
 
 
 	private class SockJsWebSocketSessionAdapter extends SockJsSessionSupport {
 
-		private WebSocketSession wsSession;
+		private final WebSocketSession wsSession;
 
 
 		public SockJsWebSocketSessionAdapter(WebSocketSession wsSession) throws Exception {
-			super(String.valueOf(wsSession.hashCode()), getSockJsHandler());
+			super(wsSession.getId(), getSockJsHandler());
 			this.wsSession = wsSession;
-			connectionInitialized();
+			delegateConnectionEstablished();
 		}
 
 		@Override
 		public boolean isActive() {
-			return (!isClosed() && this.wsSession.isOpen());
+			return this.wsSession.isOpen();
 		}
 
 		@Override
 		public void sendMessage(String message) throws IOException {
-			this.wsSession.sendText(message);
+			this.wsSession.sendTextMessage(message);
 		}
 
 		@Override
-		public void connectionClosed() {
-			logger.debug("Session closed");
-			super.connectionClosed();
-			this.wsSession = null;
-		}
-
-		@Override
-		public void close() {
-			if (!isClosed()) {
-				logger.debug("Closing session");
-				super.close();
-				this.wsSession.close();
-				this.wsSession = null;
-			}
+		public void closeInternal(CloseStatus status) throws IOException {
+			this.wsSession.close(status);
 		}
 	}
 

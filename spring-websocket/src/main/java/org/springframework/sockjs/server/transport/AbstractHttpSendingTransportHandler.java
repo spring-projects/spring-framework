@@ -92,7 +92,7 @@ public abstract class AbstractHttpSendingTransportHandler
 		logger.debug("Opening " + getTransportType() + " connection");
 		session.setFrameFormat(getFrameFormat(request));
 		session.writeFrame(response, SockJsFrame.openFrame());
-		session.connectionInitialized();
+		session.delegateConnectionEstablished();
 	}
 
 	protected abstract MediaType getContentType();

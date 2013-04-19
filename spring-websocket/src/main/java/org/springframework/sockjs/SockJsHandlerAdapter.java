@@ -16,6 +16,8 @@
 
 package org.springframework.sockjs;
 
+import org.springframework.websocket.CloseStatus;
+
 
 /**
  *
@@ -25,19 +27,19 @@ package org.springframework.sockjs;
 public class SockJsHandlerAdapter implements SockJsHandler {
 
 	@Override
-	public void newSession(SockJsSession session) throws Exception {
+	public void afterConnectionEstablished(SockJsSession session) throws Exception {
 	}
 
 	@Override
-	public void handleMessage(SockJsSession session, String message) throws Exception {
+	public void handleMessage(String message, SockJsSession session) throws Exception {
 	}
 
 	@Override
-	public void handleException(SockJsSession session, Throwable exception) {
+	public void handleError(Throwable exception, SockJsSession session) {
 	}
 
 	@Override
-	public void sessionClosed(SockJsSession session) {
+	public void afterConnectionClosed(CloseStatus status, SockJsSession session) {
 	}
 
 }

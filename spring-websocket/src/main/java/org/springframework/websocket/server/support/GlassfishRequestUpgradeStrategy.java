@@ -18,6 +18,7 @@ package org.springframework.websocket.server.support;
 
 import java.lang.reflect.Constructor;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,7 +67,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, Endpoint endpoint) throws Exception {
+			String selectedProtocol, Endpoint endpoint) throws Exception {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -75,7 +76,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 		servletResponse = new AlreadyUpgradedResponseWrapper(servletResponse);
 
-		TyrusEndpoint tyrusEndpoint = createTyrusEndpoint(servletRequest, endpoint);
+		TyrusEndpoint tyrusEndpoint = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
 		WebSocketEngine engine = WebSocketEngine.getEngine();
 		engine.register(tyrusEndpoint);
 
@@ -112,7 +113,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 		});
 	}
 
-	private TyrusEndpoint createTyrusEndpoint(HttpServletRequest request, Endpoint endpoint) {
+	private TyrusEndpoint createTyrusEndpoint(HttpServletRequest request, Endpoint endpoint, String selectedProtocol) {
 
 		// Use randomized path
 		String requestUri = request.getRequestURI();
@@ -120,6 +121,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 		String endpointPath = requestUri.endsWith("/") ? requestUri + randomValue : requestUri + "/" + randomValue;
 
 		EndpointRegistration endpointConfig = new EndpointRegistration(endpointPath, endpoint);
+		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
 
 		return new TyrusEndpoint(new EndpointWrapper(endpoint, endpointConfig,
 				ComponentProviderService.create(), null, "/", new ErrorCollector(),

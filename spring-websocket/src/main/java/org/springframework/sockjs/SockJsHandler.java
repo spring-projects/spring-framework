@@ -16,21 +16,36 @@
 
 package org.springframework.sockjs;
 
+import org.springframework.websocket.CloseStatus;
+
 
 
 /**
+ * A handler for SockJS messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SockJsHandler {
 
-	void newSession(SockJsSession session) throws Exception;
+	/**
+	 * A new connection was opened and is ready for use.
+	 */
+	void afterConnectionEstablished(SockJsSession session) throws Exception;
 
-	void handleMessage(SockJsSession session, String message) throws Exception;
+	/**
+	 * Handle an incoming message.
+	 */
+	void handleMessage(String message, SockJsSession session) throws Exception;
 
-	void handleException(SockJsSession session, Throwable exception);
+	/**
+	 * TODO
+	 */
+	void handleError(Throwable exception, SockJsSession session);
 
-	void sessionClosed(SockJsSession session);
+	/**
+	 * A connection has been closed.
+	 */
+	void afterConnectionClosed(CloseStatus status, SockJsSession session);
 
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.websocket;
 
-import java.io.InputStream;
 
 /**
  *
@@ -26,23 +25,23 @@ import java.io.InputStream;
 public class WebSocketHandlerAdapter implements WebSocketHandler {
 
 	@Override
-	public void newSession(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 	}
 
 	@Override
-	public void handleTextMessage(WebSocketSession session, String message) throws Exception {
+	public void handleTextMessage(String message, WebSocketSession session) throws Exception {
 	}
 
 	@Override
-	public void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception {
+	public void handleBinaryMessage(byte[] message, WebSocketSession session) throws Exception {
 	}
 
 	@Override
-	public void handleException(WebSocketSession session, Throwable exception) {
+	public void handleError(Throwable exception, WebSocketSession session) {
 	}
 
 	@Override
-	public void sessionClosed(WebSocketSession session, int statusCode, String reason) throws Exception {
+	public void afterConnectionClosed(CloseStatus status, WebSocketSession session) throws Exception {
 	}
 
 }

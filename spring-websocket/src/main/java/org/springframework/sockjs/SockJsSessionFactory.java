@@ -18,6 +18,7 @@ package org.springframework.sockjs;
 
 
 /**
+ * A factory for creating a SockJS session.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

@@ -16,24 +16,39 @@
 
 package org.springframework.websocket;
 
-import java.io.InputStream;
 
 
 /**
+ * A handler for WebSocket messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface WebSocketHandler {
 
-	void newSession(WebSocketSession session) throws Exception;
+	/**
+	 * A new WebSocket connection has been opened and is ready to be used.
+	 */
+	void afterConnectionEstablished(WebSocketSession session) throws Exception;
 
-	void handleTextMessage(WebSocketSession session, String message) throws Exception;
+	/**
+	 * Handle an incoming text message.
+	 */
+	void handleTextMessage(String message, WebSocketSession session) throws Exception;
 
-	void handleBinaryMessage(WebSocketSession session, InputStream message) throws Exception;
+	/**
+	 * Handle an incoming binary message.
+	 */
+	void handleBinaryMessage(byte[] bytes, WebSocketSession session) throws Exception;
 
-	void handleException(WebSocketSession session, Throwable exception);
+	/**
+	 * TODO
+	 */
+	void handleError(Throwable exception, WebSocketSession session);
 
-	void sessionClosed(WebSocketSession session, int statusCode, String reason) throws Exception;
+	/**
+	 * A WebSocket connection has been closed.
+	 */
+	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session) throws Exception;
 
 }

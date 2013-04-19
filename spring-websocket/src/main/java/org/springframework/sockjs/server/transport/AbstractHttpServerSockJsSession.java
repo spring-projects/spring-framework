@@ -29,6 +29,7 @@ import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.util.Assert;
+import org.springframework.websocket.CloseStatus;
 
 /**
  * An abstract base class for use with HTTP-based transports.
@@ -109,14 +110,22 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	protected abstract void flushCache() throws IOException;
 
 	@Override
-	public void connectionClosed() {
-		super.connectionClosed();
+	protected void disconnect(CloseStatus status) {
 		resetRequest();
 	}
 
-	@Override
-	protected void closeInternal() {
-		resetRequest();
+	protected synchronized void resetRequest() {
+		updateLastActiveTime();
+		if (isActive()) {
+			try {
+				this.asyncRequest.completeAsync();
+			}
+			catch (Throwable ex) {
+				logger.warn("Failed to complete async request: " + ex.getMessage());
+			}
+		}
+		this.asyncRequest = null;
+		this.response = null;
 	}
 
 	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
@@ -136,22 +145,6 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 			logger.trace("Writing " + frame);
 		}
 		response.getBody().write(frame.getContentBytes());
-	}
-
-	@Override
-	protected void deactivate() {
-		this.asyncRequest = null;
-		this.response = null;
-		updateLastActiveTime();
-	}
-
-	protected synchronized void resetRequest() {
-		if (isActive()) {
-			this.asyncRequest.completeAsync();
-		}
-		this.asyncRequest = null;
-		this.response = null;
-		updateLastActiveTime();
 	}
 
 }

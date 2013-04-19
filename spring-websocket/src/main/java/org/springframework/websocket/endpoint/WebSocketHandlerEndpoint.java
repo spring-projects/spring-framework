@@ -27,6 +27,7 @@ import javax.websocket.MessageHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketSession;
 import org.springframework.websocket.WebSocketHandler;
 
@@ -53,13 +54,14 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	@Override
 	public void onOpen(javax.websocket.Session session, EndpointConfig config) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("New session: " + session);
+			logger.debug("Client connected, WebSocket session id=" + session.getId()
+					+ ", path=" + session.getRequestURI().getPath());
 		}
 		try {
 			WebSocketSession webSocketSession = new StandardWebSocketSession(session);
 			this.sessions.put(session.getId(), webSocketSession);
 			session.addMessageHandler(new StandardMessageHandler(session));
-			this.webSocketHandler.newSession(webSocketSession);
+			this.webSocketHandler.afterConnectionEstablished(webSocketSession);
 		}
 		catch (Throwable ex) {
 			// TODO
@@ -68,16 +70,15 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	}
 
 	@Override
-	public void onClose(javax.websocket.Session session, CloseReason closeReason) {
+	public void onClose(javax.websocket.Session session, CloseReason reason) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Session closed: " + session + ", " + closeReason);
+			logger.debug("Client disconnected, WebSocket session id=" + session.getId() + ", " + reason);
 		}
 		try {
 			WebSocketSession wsSession = this.sessions.remove(session.getId());
 			if (wsSession != null) {
-				int code = closeReason.getCloseCode().getCode();
-				String reason = closeReason.getReasonPhrase();
-				this.webSocketHandler.sessionClosed(wsSession, code, reason);
+				CloseStatus closeStatus = new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase());
+				this.webSocketHandler.afterConnectionClosed(closeStatus, wsSession);
 			}
 			else {
 				Assert.notNull(wsSession, "No WebSocket session");
@@ -91,11 +92,11 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 
 	@Override
 	public void onError(javax.websocket.Session session, Throwable exception) {
-		logger.error("Error for WebSocket session: " + session.getId(), exception);
+		logger.error("Error for WebSocket session id=" + session.getId(), exception);
 		try {
 			WebSocketSession wsSession = getWebSocketSession(session);
 			if (wsSession != null) {
-				this.webSocketHandler.handleException(wsSession, exception);
+				this.webSocketHandler.handleError(exception, wsSession);
 			}
 			else {
 				logger.warn("WebSocketSession not found. Perhaps onError was called after onClose?");
@@ -123,12 +124,12 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		@Override
 		public void onMessage(String message) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Message for session [" + this.session + "]: " + message);
+				logger.trace("Received message for WebSocket session id=" + this.session.getId() + ": " + message);
 			}
 			WebSocketSession wsSession = getWebSocketSession(this.session);
 			Assert.notNull(wsSession, "WebSocketSession not found");
 			try {
-				WebSocketHandlerEndpoint.this.webSocketHandler.handleTextMessage(wsSession, message);
+				WebSocketHandlerEndpoint.this.webSocketHandler.handleTextMessage(message, wsSession);
 			}
 			catch (Throwable ex) {
 				// TODO

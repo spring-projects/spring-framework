@@ -18,19 +18,45 @@ package org.springframework.sockjs;
 
 import java.io.IOException;
 
+import org.springframework.websocket.CloseStatus;
+
 
 
 /**
+ * Allows sending SockJS messages as well as closing the underlying connection.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SockJsSession {
 
+	/**
+	 * Return a unique SockJS session identifier.
+	 */
 	String getId();
 
+	/**
+	 * Return whether the connection is still open.
+	 */
+	boolean isOpen();
+
+	/**
+	 * Send a message.
+	 */
 	void sendMessage(String text) throws IOException;
 
-	void close();
+	/**
+	 * Close the underlying connection with status 1000, i.e. equivalent to:
+	 * <pre>
+	 * session.close(CloseStatus.NORMAL);
+	 * </pre>
+	 */
+	void close() throws IOException;
+
+	/**
+	 * Close the underlying connection with the given close status.
+	 */
+	void close(CloseStatus status) throws IOException;
+
 
 }

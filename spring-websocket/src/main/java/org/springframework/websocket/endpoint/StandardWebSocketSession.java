@@ -17,14 +17,22 @@
 package org.springframework.websocket.endpoint;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.ByteBuffer;
+
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
+import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketSession;
 
 
 /**
- * A {@link WebSocketSession} that delegates to a {@link javax.websocket.Session}.
+ * A standard Java implementation of {@link WebSocketSession} that delegates to
+ * {@link javax.websocket.Session}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -33,10 +41,11 @@ public class StandardWebSocketSession implements WebSocketSession {
 
 	private static Log logger = LogFactory.getLog(StandardWebSocketSession.class);
 
-	private javax.websocket.Session session;
+	private final javax.websocket.Session session;
 
 
 	public StandardWebSocketSession(javax.websocket.Session session) {
+		Assert.notNull(session, "session is required");
 		this.session = session;
 	}
 
@@ -47,25 +56,53 @@ public class StandardWebSocketSession implements WebSocketSession {
 
 	@Override
 	public boolean isOpen() {
-		return ((this.session != null) && this.session.isOpen());
+		return this.session.isOpen();
 	}
 
 	@Override
-	public void sendText(String text) throws IOException {
-		logger.trace("Sending text message: " + text);
-		// TODO: check closed
+	public boolean isSecure() {
+		return this.session.isSecure();
+	}
+
+	@Override
+	public URI getURI() {
+		return this.session.getRequestURI();
+	}
+
+	@Override
+	public void sendTextMessage(String text) throws IOException {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Sending text message: " + text + ", " + this);
+		}
+		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
 		this.session.getBasicRemote().sendText(text);
 	}
 
 	@Override
-	public void close() {
-		// TODO: delegate with code and reason
-		this.session = null;
+	public void sendBinaryMessage(ByteBuffer message) throws IOException {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Sending binary message, " + this);
+		}
+		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
+		this.session.getBasicRemote().sendBinary(message);
 	}
 
 	@Override
-	public void close(int code, String reason) {
-		this.session = null;
+	public void close() throws IOException {
+		close(CloseStatus.NORMAL);
+	}
+
+	@Override
+	public void close(CloseStatus status) throws IOException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Closing " + this);
+		}
+		this.session.close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
+	}
+
+	@Override
+	public String toString() {
+		return "WebSocket session id=" + getId();
 	}
 
 }
