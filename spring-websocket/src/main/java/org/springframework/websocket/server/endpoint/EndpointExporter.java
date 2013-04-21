@@ -15,6 +15,10 @@
  */
 package org.springframework.websocket.server.endpoint;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.websocket.DeploymentException;
@@ -25,13 +29,13 @@ import javax.websocket.server.ServerEndpointConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * BeanPostProcessor that detects beans of type
@@ -43,114 +47,79 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class EndpointExporter implements InitializingBean, BeanPostProcessor, BeanFactoryAware {
+public class EndpointExporter implements InitializingBean, BeanPostProcessor, ApplicationContextAware {
+
+	private static final boolean isServletApiPresent =
+			ClassUtils.isPresent("javax.servlet.ServletContext", EndpointExporter.class.getClassLoader());
 
 	private static Log logger = LogFactory.getLog(EndpointExporter.class);
 
-	private Class<?>[] annotatedEndpointClasses;
+	private final List<Class<?>> annotatedEndpointClasses = new ArrayList<Class<?>>();
 
-	private Long maxSessionIdleTimeout;
+	private final List<Class<?>> annotatedEndpointBeanTypes = new ArrayList<Class<?>>();
 
-	private Integer maxTextMessageBufferSize;
+	private ApplicationContext applicationContext;
 
-	private Integer maxBinaryMessageBufferSize;
-
+	private ServerContainer serverContainer;
 
 	/**
 	 * TODO
 	 * @param annotatedEndpointClasses
 	 */
 	public void setAnnotatedEndpointClasses(Class<?>... annotatedEndpointClasses) {
-		this.annotatedEndpointClasses = annotatedEndpointClasses;
-	}
-
-	/**
-	 * If this property set it is in turn used to configure
-	 * {@link ServerContainer#setDefaultMaxSessionIdleTimeout(long)}.
-	 */
-	public void setMaxSessionIdleTimeout(long maxSessionIdleTimeout) {
-		this.maxSessionIdleTimeout = maxSessionIdleTimeout;
-	}
-
-	public Long getMaxSessionIdleTimeout() {
-		return this.maxSessionIdleTimeout;
-	}
-
-	/**
-	 * If this property set it is in turn used to configure
-	 * {@link ServerContainer#setDefaultMaxTextMessageBufferSize(int)}
-	 */
-	public void setMaxTextMessageBufferSize(int maxTextMessageBufferSize) {
-		this.maxTextMessageBufferSize = maxTextMessageBufferSize;
-	}
-
-	public Integer getMaxTextMessageBufferSize() {
-		return this.maxTextMessageBufferSize;
-	}
-
-	/**
-	 * If this property set it is in turn used to configure
-	 * {@link ServerContainer#setDefaultMaxBinaryMessageBufferSize(int)}.
-	 */
-	public void setMaxBinaryMessageBufferSize(int maxBinaryMessageBufferSize) {
-		this.maxBinaryMessageBufferSize = maxBinaryMessageBufferSize;
-	}
-
-	public Integer getMaxBinaryMessageBufferSize() {
-		return this.maxBinaryMessageBufferSize;
+		this.annotatedEndpointClasses.clear();
+		this.annotatedEndpointClasses.addAll(Arrays.asList(annotatedEndpointClasses));
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (beanFactory instanceof ListableBeanFactory) {
-			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
-			Map<String, Object> annotatedEndpoints = lbf.getBeansWithAnnotation(ServerEndpoint.class);
-			for (String beanName : annotatedEndpoints.keySet()) {
-				Class<?> beanType = lbf.getType(beanName);
-				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Detected @ServerEndpoint bean '" + beanName + "', registering it as an endpoint by type");
-					}
-					getServerContainer().addEndpoint(beanType);
-				}
-				catch (DeploymentException e) {
-					throw new IllegalStateException("Failed to register @ServerEndpoint bean type " + beanName, e);
-				}
+	public void setApplicationContext(ApplicationContext applicationContext) {
+
+		this.applicationContext = applicationContext;
+
+		this.serverContainer = getServerContainer();
+
+		Map<String, Object> beans = applicationContext.getBeansWithAnnotation(ServerEndpoint.class);
+		for (String beanName : beans.keySet()) {
+			Class<?> beanType = applicationContext.getType(beanName);
+			if (logger.isInfoEnabled()) {
+				logger.info("Detected @ServerEndpoint bean '" + beanName + "', registering it as an endpoint by type");
 			}
+			this.annotatedEndpointBeanTypes.add(beanType);
 		}
 	}
 
-	/**
-	 * Return the {@link ServerContainer} instance, a process which is undefined outside
-	 * of standalone containers (section 6.4 of the spec).
-	 */
-	protected abstract ServerContainer getServerContainer();
+	protected ServerContainer getServerContainer() {
+		if (isServletApiPresent) {
+			try {
+				Method getter = ReflectionUtils.findMethod(this.applicationContext.getClass(), "getServletContext");
+				Object servletContext = getter.invoke(this.applicationContext);
+
+				Method attrMethod = ReflectionUtils.findMethod(servletContext.getClass(), "getAttribute", String.class);
+				return (ServerContainer) attrMethod.invoke(servletContext, "javax.websocket.server.ServerContainer");
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(
+						"Failed to get javax.websocket.server.ServerContainer via ServletContext attribute", ex);
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		ServerContainer serverContainer = getServerContainer();
 		Assert.notNull(serverContainer, "javax.websocket.server.ServerContainer not available");
 
-		if (this.maxSessionIdleTimeout != null) {
-			serverContainer.setDefaultMaxSessionIdleTimeout(this.maxSessionIdleTimeout);
-		}
-		if (this.maxTextMessageBufferSize != null) {
-			serverContainer.setDefaultMaxTextMessageBufferSize(this.maxTextMessageBufferSize);
-		}
-		if (this.maxBinaryMessageBufferSize != null) {
-			serverContainer.setDefaultMaxBinaryMessageBufferSize(this.maxBinaryMessageBufferSize);
-		}
+		List<Class<?>> allClasses = new ArrayList<Class<?>>(this.annotatedEndpointClasses);
+		allClasses.addAll(this.annotatedEndpointBeanTypes);
 
-		if (!ObjectUtils.isEmpty(this.annotatedEndpointClasses)) {
-			for (Class<?> clazz : this.annotatedEndpointClasses) {
-				try {
-					logger.info("Registering @ServerEndpoint type " + clazz);
-					serverContainer.addEndpoint(clazz);
-				}
-				catch (DeploymentException e) {
-					throw new IllegalStateException("Failed to register @ServerEndpoint type " + clazz, e);
-				}
+		for (Class<?> clazz : allClasses) {
+			try {
+				logger.info("Registering @ServerEndpoint type " + clazz);
+				this.serverContainer.addEndpoint(clazz);
+			}
+			catch (DeploymentException e) {
+				throw new IllegalStateException("Failed to register @ServerEndpoint type " + clazz, e);
 			}
 		}
 	}

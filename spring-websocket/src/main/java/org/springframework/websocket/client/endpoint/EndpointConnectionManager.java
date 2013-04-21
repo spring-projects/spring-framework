@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.client;
+package org.springframework.websocket.client.endpoint;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.Decoder;
-import javax.websocket.DeploymentException;
 import javax.websocket.Encoder;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
 import javax.websocket.Session;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -43,27 +39,23 @@ import org.springframework.websocket.HandlerProvider;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointConnectionManager extends AbstractEndpointConnectionManager implements BeanFactoryAware {
-
-	private static Log logger = LogFactory.getLog(EndpointConnectionManager.class);
+public class EndpointConnectionManager extends EndpointConnectionManagerSupport implements BeanFactoryAware {
 
 	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
 
 	private final HandlerProvider<Endpoint> endpointProvider;
 
 
-	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVariables) {
-		super(uriTemplate, uriVariables);
-		Assert.notNull(endpointClass, "endpointClass is required");
-		this.endpointProvider = new HandlerProvider<Endpoint>(endpointClass);
-		this.endpointProvider.setLogger(logger);
-	}
-
 	public EndpointConnectionManager(Endpoint endpointBean, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		Assert.notNull(endpointBean, "endpointBean is required");
 		this.endpointProvider = new HandlerProvider<Endpoint>(endpointBean);
-		this.endpointProvider.setLogger(logger);
+	}
+
+	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
+		super(uriTemplate, uriVars);
+		Assert.notNull(endpointClass, "endpointClass is required");
+		this.endpointProvider = new HandlerProvider<Endpoint>(endpointClass);
 	}
 
 	public void setSubProtocols(String... subprotocols) {
@@ -92,10 +84,11 @@ public class EndpointConnectionManager extends AbstractEndpointConnectionManager
 	}
 
 	@Override
-	protected Session connect() throws DeploymentException, IOException {
-		Endpoint typedEndpoint = this.endpointProvider.getHandler();
+	protected void openConnection() throws Exception {
+		Endpoint endpoint = this.endpointProvider.getHandler();
 		ClientEndpointConfig endpointConfig = this.configBuilder.build();
-		return getWebSocketContainer().connectToServer(typedEndpoint, endpointConfig, getUri());
+		Session session = getWebSocketContainer().connectToServer(endpoint, endpointConfig, getUri());
+		updateSession(session);
 	}
 
 }

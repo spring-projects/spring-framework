@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.websocket.client;
 
-import java.io.IOException;
 import java.net.URI;
-
-import javax.websocket.ContainerProvider;
-import javax.websocket.DeploymentException;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractEndpointConnectionManager implements SmartLifecycle {
+public abstract class AbstractWebSocketConnectionManager implements SmartLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -47,33 +40,13 @@ public abstract class AbstractEndpointConnectionManager implements SmartLifecycl
 
 	private int phase = Integer.MAX_VALUE;
 
-	private final WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
-
-	private Session session;
-
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
 
 	private final Object lifecycleMonitor = new Object();
 
 
-	public AbstractEndpointConnectionManager(String uriTemplate, Object... uriVariables) {
+	public AbstractWebSocketConnectionManager(String uriTemplate, Object... uriVariables) {
 		this.uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
-	}
-
-	public void setAsyncSendTimeout(long timeoutInMillis) {
-		this.webSocketContainer.setAsyncSendTimeout(timeoutInMillis);
-	}
-
-	public void setMaxSessionIdleTimeout(long timeoutInMillis) {
-		this.webSocketContainer.setDefaultMaxSessionIdleTimeout(timeoutInMillis);
-	}
-
-	public void setMaxTextMessageBufferSize(int bufferSize) {
-		this.webSocketContainer.setDefaultMaxTextMessageBufferSize(bufferSize);
-	}
-
-	public void setMaxBinaryMessageBufferSize(Integer bufferSize) {
-		this.webSocketContainer.setDefaultMaxBinaryMessageBufferSize(bufferSize);
 	}
 
 	/**
@@ -117,14 +90,11 @@ public abstract class AbstractEndpointConnectionManager implements SmartLifecycl
 		return this.uri;
 	}
 
-	protected WebSocketContainer getWebSocketContainer() {
-		return this.webSocketContainer;
-	}
-
 	/**
-	 * Auto-connects to the configured {@link #setDefaultUri(URI) default URI}.
+	 * Connect to the configured {@link #setDefaultUri(URI) default URI}. If already
+	 * connected, the method has no impact.
 	 */
-	public void start() {
+	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
 				this.taskExecutor.execute(new Runnable() {
@@ -132,12 +102,12 @@ public abstract class AbstractEndpointConnectionManager implements SmartLifecycl
 					public void run() {
 						synchronized (lifecycleMonitor) {
 							try {
-								logger.info("Connecting to endpoint at URI " + uri);
-								session = connect();
+								logger.info("Connecting to WebSocket at " + uri);
+								openConnection();
 								logger.info("Successfully connected");
 							}
 							catch (Throwable ex) {
-								logger.error("Failed to connect to endpoint at " + uri, ex);
+								logger.error("Failed to connect", ex);
 							}
 						}
 					}
@@ -146,24 +116,25 @@ public abstract class AbstractEndpointConnectionManager implements SmartLifecycl
 		}
 	}
 
-	protected abstract Session connect() throws DeploymentException, IOException;
+	protected abstract void openConnection() throws Exception;
 
 	/**
-	 * Deactivates the configured message endpoint.
+	 * Closes the configured message WebSocket connection.
 	 */
-	public void stop() {
+	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
 				try {
-					this.session.close();
+					closeConnection();
 				}
-				catch (IOException e) {
-					// ignore
+				catch (Throwable e) {
+					logger.error("Failed to stop WebSocket connection", e);
 				}
 			}
-			this.session = null;
 		}
 	}
+
+	protected abstract void closeConnection() throws Exception;
 
 	public void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
@@ -177,12 +148,10 @@ public abstract class AbstractEndpointConnectionManager implements SmartLifecycl
 	 */
 	public boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
-			if ((this.session != null) && this.session.isOpen()) {
-				return true;
-			}
-			this.session = null;
-			return false;
+			return isConnected();
 		}
 	}
+
+	protected abstract boolean isConnected();
 
 }

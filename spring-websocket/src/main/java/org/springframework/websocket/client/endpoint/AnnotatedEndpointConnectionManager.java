@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.client;
+package org.springframework.websocket.client.endpoint;
 
-import java.io.IOException;
-
-import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -34,10 +29,8 @@ import org.springframework.websocket.HandlerProvider;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotatedEndpointConnectionManager extends AbstractEndpointConnectionManager
+public class AnnotatedEndpointConnectionManager extends EndpointConnectionManagerSupport
 		implements BeanFactoryAware {
-
-	private static Log logger = LogFactory.getLog(AnnotatedEndpointConnectionManager.class);
 
 	private final HandlerProvider<Object> endpointProvider;
 
@@ -45,13 +38,11 @@ public class AnnotatedEndpointConnectionManager extends AbstractEndpointConnecti
 	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		this.endpointProvider = new HandlerProvider<Object>(endpointClass);
-		this.endpointProvider.setLogger(logger);
 	}
 
 	public AnnotatedEndpointConnectionManager(Object endpointBean, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		this.endpointProvider = new HandlerProvider<Object>(endpointBean);
-		this.endpointProvider.setLogger(logger);
 	}
 
 	@Override
@@ -59,10 +50,12 @@ public class AnnotatedEndpointConnectionManager extends AbstractEndpointConnecti
 		this.endpointProvider.setBeanFactory(beanFactory);
 	}
 
+
 	@Override
-	protected Session connect() throws DeploymentException, IOException {
+	protected void openConnection() throws Exception {
 		Object endpoint = this.endpointProvider.getHandler();
-		return getWebSocketContainer().connectToServer(endpoint, getUri());
+		Session session = getWebSocketContainer().connectToServer(endpoint, getUri());
+		updateSession(session);
 	}
 
 }

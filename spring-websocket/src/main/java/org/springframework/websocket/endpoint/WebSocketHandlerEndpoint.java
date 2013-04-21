@@ -54,8 +54,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	@Override
 	public void onOpen(javax.websocket.Session session, EndpointConfig config) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Client connected, WebSocket session id=" + session.getId()
-					+ ", path=" + session.getRequestURI().getPath());
+			logger.debug("Client connected, WebSocket session id=" + session.getId() + ", uri=" + session.getRequestURI());
 		}
 		try {
 			WebSocketSession webSocketSession = new StandardWebSocketSession(session);

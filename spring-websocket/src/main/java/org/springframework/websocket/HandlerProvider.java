@@ -17,6 +17,7 @@
 package org.springframework.websocket;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -32,13 +33,13 @@ import org.springframework.util.ClassUtils;
  */
 public class HandlerProvider<T> implements BeanFactoryAware {
 
+	private Log logger = LogFactory.getLog(this.getClass());
+
 	private final T handlerBean;
 
 	private final Class<? extends T> handlerClass;
 
 	private AutowireCapableBeanFactory beanFactory;
-
-	private Log logger;
 
 
 	public HandlerProvider(T handlerBean) {
