@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.io.Serializable;
 
 import org.junit.Test;
 
@@ -128,8 +129,7 @@ public class TypeUtilsTests {
 
 	@Test
 	public void withTypeVariableType() throws Exception {
-		Type[] paramTypes = TypeUtilsTest.class.getDeclaredMethod("typeTestMethod", Serializable.class).getGenericParameterTypes();;
+		Type[] paramTypes = TypeUtilsTests.class.getDeclaredMethod("typeTestMethod", Serializable.class).getGenericParameterTypes();
 		assertTrue(TypeUtils.isAssignable(Object.class, paramTypes[0]));
-
 	}
 }
