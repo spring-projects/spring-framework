@@ -130,5 +130,6 @@ public class TypeUtilsTests {
 	public void withTypeVariableType() throws Exception {
 		Type[] paramTypes = TypeUtilsTest.class.getDeclaredMethod("typeTestMethod", Serializable.class).getGenericParameterTypes();;
 		assertTrue(TypeUtils.isAssignable(Object.class, paramTypes[0]));
+
 	}
 }

@@ -74,6 +74,7 @@ public abstract class TypeUtils {
 			else if(rhsType instanceof TypeVariable) {
 				Type[] types = ((TypeVariable<?>)rhsType).getBounds();
 
+
 				for(int i=0; i<types.length; i++) {
 					if(isAssignable(lhsClass, types[i])) return true;
 				}
