@@ -71,6 +71,13 @@ public abstract class TypeUtils {
 
 				return isAssignable(lhsClass.getComponentType(), rhsComponent);
 			}
+			else if(rhsType instanceof TypeVariable) {
+				Type[] types = ((TypeVariable<?>)rhsType).getBounds();
+
+				for(int i=0; i<types.length; i++) {
+					if(isAssignable(lhsClass, types[i])) return true;
+				}
+			}
 		}
 
 		// parameterized types are only assignable to other parameterized types and class types

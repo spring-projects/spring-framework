@@ -56,6 +56,7 @@ public class TypeUtilsTests {
 
 	public static List<? extends Number>[] openArray;
 
+	private <T extends Serializable> void typeTestMethod(T arg) {}
 
 	@Test
 	public void withClasses() {
@@ -125,4 +126,9 @@ public class TypeUtilsTests {
 		assertTrue(TypeUtils.isAssignable(openArrayType, arrayType));
 	}
 
+	@Test
+	public void withTypeVariableType() throws Exception {
+		Type[] paramTypes = TypeUtilsTest.class.getDeclaredMethod("typeTestMethod", Serializable.class).getGenericParameterTypes();;
+		assertTrue(TypeUtils.isAssignable(Object.class, paramTypes[0]));
+	}
 }
