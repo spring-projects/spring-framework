@@ -19,8 +19,10 @@ package org.springframework.util;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -73,7 +75,6 @@ public abstract class TypeUtils {
 			}
 			else if(rhsType instanceof TypeVariable) {
 				Type[] types = ((TypeVariable<?>)rhsType).getBounds();
-
 
 				for(int i=0; i<types.length; i++) {
 					if(isAssignable(lhsClass, types[i])) return true;
