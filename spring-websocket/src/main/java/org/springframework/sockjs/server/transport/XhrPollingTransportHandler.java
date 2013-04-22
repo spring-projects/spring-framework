@@ -19,11 +19,11 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -50,9 +50,9 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 		return new DefaultFrameFormat("%s\n");
 	}
 
-	public PollingServerSockJsSession createSession(String sessionId, SockJsHandler sockJsHandler) {
+	public PollingServerSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), sockJsHandler);
+		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), webSocketHandler);
 	}
 
 }

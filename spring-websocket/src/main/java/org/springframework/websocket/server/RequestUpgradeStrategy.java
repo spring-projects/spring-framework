@@ -16,8 +16,6 @@
 
 package org.springframework.websocket.server;
 
-import java.util.Collection;
-
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.WebSocketHandler;
@@ -36,14 +34,6 @@ public interface RequestUpgradeStrategy {
 	 * Return the supported WebSocket protocol versions.
 	 */
 	String[] getSupportedVersions();
-
-	/**
-	 * Pre-register {@link WebSocketHandler} instances so they can be adapted to the
-	 * underlying runtime and hence re-used at runtime when
-	 * {@link #upgrade(ServerHttpRequest, ServerHttpResponse, String, WebSocketHandler)
-	 * upgrade} is called.
-	 */
-	void registerWebSocketHandlers(Collection<WebSocketHandler> webSocketHandlers);
 
 	/**
 	 * Perform runtime specific steps to complete the upgrade.

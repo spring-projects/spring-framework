@@ -16,10 +16,6 @@
 
 package org.springframework.websocket.server.support;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.websocket.Endpoint;
 
 import org.apache.commons.logging.Log;
@@ -42,36 +38,16 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<WebSocketHandler, Endpoint> webSocketHandlers = new HashMap<WebSocketHandler, Endpoint>();
-
-
-	@Override
-	public void registerWebSocketHandlers(Collection<WebSocketHandler> webSocketHandlers) {
-		for (WebSocketHandler webSocketHandler : webSocketHandlers) {
-			if (!this.webSocketHandlers.containsKey(webSocketHandler)) {
-				this.webSocketHandlers.put(webSocketHandler, adaptWebSocketHandler(webSocketHandler));
-			}
-		}
-	}
-
-	protected Endpoint adaptWebSocketHandler(WebSocketHandler handler) {
-		return new WebSocketHandlerEndpoint(handler);
-	}
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
 			String protocol, WebSocketHandler webSocketHandler) throws Exception {
 
-		Endpoint endpoint = this.webSocketHandlers.get(webSocketHandler);
-		if (endpoint == null) {
-			endpoint = adaptWebSocketHandler(webSocketHandler);
-		}
+		upgradeInternal(request, response, protocol, adaptWebSocketHandler(webSocketHandler));
+	}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Upgrading with " + endpoint);
-		}
-
-		upgradeInternal(request, response, protocol, endpoint);
+	protected Endpoint adaptWebSocketHandler(WebSocketHandler handler) {
+		return new WebSocketHandlerEndpoint(handler);
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,

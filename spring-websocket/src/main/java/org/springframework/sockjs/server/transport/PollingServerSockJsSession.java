@@ -15,21 +15,21 @@
  */
 package org.springframework.sockjs.server.transport;
 
-import java.io.IOException;
-
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.websocket.WebSocketHandler;
 
 
 public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
-	public PollingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
-		super(sessionId, sockJsConfig, sockJsHandler);
+	public PollingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
+			WebSocketHandler webSocketHandler) {
+
+		super(sessionId, sockJsConfig, webSocketHandler);
 	}
 
 	@Override
-	protected void flushCache() throws IOException {
+	protected void flushCache() throws Exception {
 		cancelHeartbeat();
 		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
 		getMessageCache().clear();
@@ -37,7 +37,7 @@ public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession 
 	}
 
 	@Override
-	protected void writeFrame(SockJsFrame frame) throws IOException {
+	protected void writeFrame(SockJsFrame frame) throws Exception {
 		super.writeFrame(frame);
 		resetRequest();
 	}

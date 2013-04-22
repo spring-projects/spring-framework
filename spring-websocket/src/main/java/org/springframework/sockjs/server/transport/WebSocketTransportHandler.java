@@ -16,17 +16,9 @@
 
 package org.springframework.sockjs.server.transport;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.TransportHandler;
@@ -50,10 +42,6 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	private SockJsConfiguration sockJsConfig;
 
-	private final Map<SockJsHandler, WebSocketHandler> sockJsHandlerCache = new HashMap<SockJsHandler, WebSocketHandler>();
-
-	private final Collection<WebSocketHandler> rawWebSocketHandlerCache = new ArrayList<WebSocketHandler>();
-
 
 	public WebSocketTransportHandler(HandshakeHandler handshakeHandler) {
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
@@ -71,49 +59,21 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 	}
 
 	@Override
-	public void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers) {
-		this.sockJsHandlerCache.clear();
-		for (SockJsHandler sockJsHandler : sockJsHandlers) {
-			this.sockJsHandlerCache.put(sockJsHandler, adaptSockJsHandler(sockJsHandler));
-		}
-		this.handshakeHandler.registerWebSocketHandlers(getAllWebSocketHandlers());
+	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws Exception {
+
+		this.handshakeHandler.doHandshake(request, response, adaptSockJsHandler(webSocketHandler));
 	}
 
 	/**
 	 * Adapt the {@link SockJsHandler} to the {@link WebSocketHandler} contract for
 	 * exchanging SockJS message over WebSocket.
 	 */
-	protected WebSocketHandler adaptSockJsHandler(SockJsHandler sockJsHandler) {
-		return new SockJsWebSocketHandler(this.sockJsConfig, sockJsHandler);
-	}
-
-	private Collection<WebSocketHandler> getAllWebSocketHandlers() {
-		Set<WebSocketHandler> handlers = new HashSet<WebSocketHandler>();
-		handlers.addAll(this.sockJsHandlerCache.values());
-		handlers.addAll(this.rawWebSocketHandlerCache);
-		return handlers;
-	}
-
-	@Override
-	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsHandler sockJsHandler, SockJsSessionSupport session) throws Exception {
-
-		WebSocketHandler webSocketHandler = this.sockJsHandlerCache.get(sockJsHandler);
-		if (webSocketHandler == null) {
-			webSocketHandler = adaptSockJsHandler(sockJsHandler);
-		}
-
-		this.handshakeHandler.doHandshake(request, response, webSocketHandler);
+	protected WebSocketHandler adaptSockJsHandler(WebSocketHandler handler) {
+		return new SockJsWebSocketHandler(this.sockJsConfig, handler);
 	}
 
 	// HandshakeHandler methods
-
-	@Override
-	public void registerWebSocketHandlers(Collection<WebSocketHandler> webSocketHandlers) {
-		this.rawWebSocketHandlerCache.clear();
-		this.rawWebSocketHandlerCache.addAll(webSocketHandlers);
-		this.handshakeHandler.registerWebSocketHandlers(getAllWebSocketHandlers());
-	}
 
 	@Override
 	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,

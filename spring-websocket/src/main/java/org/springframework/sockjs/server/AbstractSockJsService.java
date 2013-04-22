@@ -34,12 +34,12 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -218,7 +218,7 @@ public abstract class AbstractSockJsService
 	 * @throws Exception
 	 */
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, SockJsHandler sockJsHandler) throws Exception {
+			String sockJsPath, WebSocketHandler webSocketHandler) throws Exception {
 
 		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
 
@@ -244,7 +244,7 @@ public abstract class AbstractSockJsService
 				return;
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocketRequest(request, response, sockJsHandler);
+				handleRawWebSocketRequest(request, response, webSocketHandler);
 				return;
 			}
 
@@ -264,7 +264,7 @@ public abstract class AbstractSockJsService
 				return;
 			}
 
-			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), sockJsHandler);
+			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), webSocketHandler);
 		}
 		finally {
 			response.flush();
@@ -272,10 +272,10 @@ public abstract class AbstractSockJsService
 	}
 
 	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsHandler sockJsHandler) throws Exception;
+			WebSocketHandler webSocketHandler) throws Exception;
 
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, SockJsHandler sockJsHandler) throws Exception;
+			String sessionId, TransportType transportType, WebSocketHandler webSocketHandler) throws Exception;
 
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {

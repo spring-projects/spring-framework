@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.websocket;
 
-package org.springframework.sockjs.server;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.websocket.WebSocketHandler;
+import java.io.Reader;
+import java.io.StringReader;
 
 
 /**
+ * Represents a text WebSocket message.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SockJsService {
+public final class TextMessage extends WebSocketMessage<String> {
 
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
-			WebSocketHandler webSocketHandler) throws Exception;
+	public TextMessage(String payload) {
+		super(payload);
+	}
+
+	public Reader getReader() {
+		return new StringReader(getPayload());
+	}
 
 }

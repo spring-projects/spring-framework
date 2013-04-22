@@ -15,34 +15,14 @@
  */
 package org.springframework.websocket;
 
-import java.net.URI;
-
-import org.springframework.http.HttpHeaders;
-
 
 /**
+ * A "marker" interface for {@link BinaryMessageHandler} types that wish to handle partial
+ * messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketHandshakeRequest {
-
-    private final URI uri;
-
-    private final HttpHeaders headers;
-
-
-	public WebSocketHandshakeRequest(HttpHeaders headers, URI uri) {
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-		this.uri = uri;
-	}
-
-	public URI getUri() {
-		return this.uri;
-	}
-
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
+public interface PartialMessageHandler {
 
 }

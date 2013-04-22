@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.websocket;
 
-package org.springframework.sockjs.server;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketHandlerAdapter.TextAndBinaryMessageHandlerAdapter;
+import org.springframework.websocket.WebSocketHandlerAdapter.TextMessageHandlerAdapter;
 
 
 /**
+ * A handler for WebSocket text messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see TextMessageHandlerAdapter
+ * @see TextAndBinaryMessageHandlerAdapter
  */
-public interface SockJsService {
+public interface TextMessageHandler extends WebSocketHandler {
 
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
-			WebSocketHandler webSocketHandler) throws Exception;
+	/**
+	 * Handle an incoming text message.
+	 */
+	void handleTextMessage(TextMessage message, WebSocketSession session)
+			throws Exception;
 
 }

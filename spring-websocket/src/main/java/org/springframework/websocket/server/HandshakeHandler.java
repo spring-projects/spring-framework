@@ -16,8 +16,6 @@
 
 package org.springframework.websocket.server;
 
-import java.util.Collection;
-
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.WebSocketHandler;
@@ -30,14 +28,6 @@ import org.springframework.websocket.WebSocketHandler;
  * @since 4.0
  */
 public interface HandshakeHandler {
-
-	/**
-	 * Pre-register {@link WebSocketHandler} instances so they can be adapted to the
-	 * underlying runtime and hence re-used at runtime when
-	 * {@link #doHandshake(ServerHttpRequest, ServerHttpResponse, WebSocketHandler) doHandshake}
-	 * is called.
-	 */
-	void registerWebSocketHandlers(Collection<WebSocketHandler> webSocketHandlers);
 
 	/**
 	 *

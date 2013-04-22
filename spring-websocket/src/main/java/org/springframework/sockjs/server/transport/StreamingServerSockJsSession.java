@@ -18,9 +18,9 @@ package org.springframework.sockjs.server.transport;
 import java.io.IOException;
 
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.websocket.WebSocketHandler;
 
 
 public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSession {
@@ -28,11 +28,13 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 	private int byteCount;
 
 
-	public StreamingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
-		super(sessionId, sockJsConfig, sockJsHandler);
+	public StreamingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
+			WebSocketHandler webSocketHandler) {
+
+		super(sessionId, sockJsConfig, webSocketHandler);
 	}
 
-	protected void flushCache() throws IOException {
+	protected void flushCache() throws Exception {
 
 		cancelHeartbeat();
 

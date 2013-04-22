@@ -18,6 +18,7 @@ package org.springframework.websocket;
 
 
 /**
+ * A {@link WebSocketHandler} with empty methods.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -29,19 +30,24 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 	}
 
 	@Override
-	public void handleTextMessage(String message, WebSocketSession session) throws Exception {
-	}
-
-	@Override
-	public void handleBinaryMessage(byte[] message, WebSocketSession session) throws Exception {
+	public void afterConnectionClosed(CloseStatus status, WebSocketSession session) throws Exception {
 	}
 
 	@Override
 	public void handleError(Throwable exception, WebSocketSession session) {
 	}
 
-	@Override
-	public void afterConnectionClosed(CloseStatus status, WebSocketSession session) throws Exception {
+
+	public static abstract class TextMessageHandlerAdapter
+			extends WebSocketHandlerAdapter implements TextMessageHandler {
+	}
+
+	public static abstract class BinaryMessageHandlerAdapter
+		extends WebSocketHandlerAdapter implements BinaryMessageHandler {
+	}
+
+	public static abstract class TextAndBinaryMessageHandlerAdapter extends WebSocketHandlerAdapter
+			implements TextMessageHandler, BinaryMessageHandler {
 	}
 
 }

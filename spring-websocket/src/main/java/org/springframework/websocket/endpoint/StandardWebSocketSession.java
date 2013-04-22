@@ -18,15 +18,18 @@ package org.springframework.websocket.endpoint;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.ByteBuffer;
 
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
+import javax.websocket.RemoteEndpoint.Basic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.TextMessage;
+import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 
@@ -70,21 +73,21 @@ public class StandardWebSocketSession implements WebSocketSession {
 	}
 
 	@Override
-	public void sendTextMessage(String text) throws IOException {
+	public void sendMessage(WebSocketMessage message) throws IOException {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Sending text message: " + text + ", " + this);
+			logger.trace("Sending: " + message + ", " + this);
 		}
 		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
-		this.session.getBasicRemote().sendText(text);
-	}
-
-	@Override
-	public void sendBinaryMessage(ByteBuffer message) throws IOException {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Sending binary message, " + this);
+		Basic remote = this.session.getBasicRemote();
+		if (message instanceof TextMessage) {
+			remote.sendText(((TextMessage) message).getPayload());
 		}
-		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
-		this.session.getBasicRemote().sendBinary(message);
+		else if (message instanceof BinaryMessage) {
+			remote.sendBinary(((BinaryMessage) message).getPayload());
+		}
+		else {
+			throw new IllegalStateException("Unexpected WebSocketMessage type: " + message);
+		}
 	}
 
 	@Override

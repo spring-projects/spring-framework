@@ -22,14 +22,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.TextMessage;
+import org.springframework.websocket.TextMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -43,55 +44,52 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsWebSocketHandler implements WebSocketHandler {
+public class SockJsWebSocketHandler implements TextMessageHandler {
 
 	private static final Log logger = LogFactory.getLog(SockJsWebSocketHandler.class);
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private final SockJsHandler sockJsHandler;
+	private final WebSocketHandler webSocketHandler;
 
-	private final Map<WebSocketSession, SockJsSessionSupport> sessions =
-			new ConcurrentHashMap<WebSocketSession, SockJsSessionSupport>();
+	private final Map<WebSocketSession, AbstractSockJsSession> sessions =
+			new ConcurrentHashMap<WebSocketSession, AbstractSockJsSession>();
 
 	// TODO: JSON library used must be configurable
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public SockJsWebSocketHandler(SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
+	public SockJsWebSocketHandler(SockJsConfiguration sockJsConfig, WebSocketHandler webSocketHandler) {
 		Assert.notNull(sockJsConfig, "sockJsConfig is required");
-		Assert.notNull(sockJsHandler, "sockJsHandler is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.sockJsConfig = sockJsConfig;
-		this.sockJsHandler = sockJsHandler;
+		this.webSocketHandler = webSocketHandler;
 	}
 
 	protected SockJsConfiguration getSockJsConfig() {
 		return this.sockJsConfig;
 	}
 
-	protected SockJsHandler getSockJsHandler() {
-		return this.sockJsHandler;
-	}
-
-	protected SockJsSessionSupport getSockJsSession(WebSocketSession wsSession) {
+	protected AbstractSockJsSession getSockJsSession(WebSocketSession wsSession) {
 		return this.sessions.get(wsSession);
 	}
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
-		SockJsSessionSupport session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
+		AbstractSockJsSession session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
 		this.sessions.put(wsSession, session);
 	}
 
 	@Override
-	public void handleTextMessage(String message, WebSocketSession wsSession) throws Exception {
-		if (StringUtils.isEmpty(message)) {
+	public void handleTextMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
+		String payload = message.getPayload();
+		if (StringUtils.isEmpty(payload)) {
 			logger.trace("Ignoring empty message");
 			return;
 		}
 		try {
-			String[] messages = this.objectMapper.readValue(message, String[].class);
-			SockJsSessionSupport session = getSockJsSession(wsSession);
+			String[] messages = this.objectMapper.readValue(payload, String[].class);
+			AbstractSockJsSession session = getSockJsSession(wsSession);
 			session.delegateMessages(messages);
 		}
 		catch (IOException e) {
@@ -101,20 +99,14 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 	}
 
 	@Override
-	public void handleBinaryMessage(byte[] message, WebSocketSession session) throws Exception {
-		logger.warn("Unexpected binary message for " + session);
-		session.close(CloseStatus.NOT_ACCEPTABLE);
-	}
-
-	@Override
 	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) throws Exception {
-		SockJsSessionSupport session = this.sessions.remove(wsSession);
+		AbstractSockJsSession session = this.sessions.remove(wsSession);
 		session.delegateConnectionClosed(status);
 	}
 
 	@Override
 	public void handleError(Throwable exception, WebSocketSession webSocketSession) {
-		SockJsSessionSupport session = getSockJsSession(webSocketSession);
+		AbstractSockJsSession session = getSockJsSession(webSocketSession);
 		session.delegateError(exception);
 	}
 
@@ -135,9 +127,10 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 		public WebSocketServerSockJsSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig)
 				throws Exception {
 
-			super(getSockJsSessionId(wsSession), sockJsConfig, getSockJsHandler());
+			super(getSockJsSessionId(wsSession), sockJsConfig, SockJsWebSocketHandler.this.webSocketHandler);
 			this.wsSession = wsSession;
-			this.wsSession.sendTextMessage(SockJsFrame.openFrame().getContent());
+			TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
+			this.wsSession.sendMessage(message);
 			scheduleHeartbeat();
 			delegateConnectionEstablished();
 		}
@@ -148,22 +141,23 @@ public class SockJsWebSocketHandler implements WebSocketHandler {
 		}
 
 		@Override
-		public void sendMessageInternal(String message) throws IOException {
+		public void sendMessageInternal(String message) throws Exception {
 			cancelHeartbeat();
 			writeFrame(SockJsFrame.messageFrame(message));
 			scheduleHeartbeat();
 		}
 
 		@Override
-		protected void writeFrameInternal(SockJsFrame frame) throws IOException {
+		protected void writeFrameInternal(SockJsFrame frame) throws Exception {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Write " + frame);
 			}
-			this.wsSession.sendTextMessage(frame.getContent());
+			TextMessage message = new TextMessage(frame.getContent());
+			this.wsSession.sendMessage(message);
 		}
 
 		@Override
-		protected void disconnect(CloseStatus status) throws IOException {
+		protected void disconnect(CloseStatus status) throws Exception {
 			this.wsSession.close(status);
 		}
 	}

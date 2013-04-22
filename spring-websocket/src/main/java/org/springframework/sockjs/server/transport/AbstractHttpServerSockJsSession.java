@@ -22,7 +22,6 @@ import java.util.concurrent.BlockingQueue;
 import org.springframework.http.server.AsyncServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
@@ -30,6 +29,7 @@ import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.WebSocketHandler;
 
 /**
  * An abstract base class for use with HTTP-based transports.
@@ -48,8 +48,10 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	private ServerHttpResponse response;
 
 
-	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig, SockJsHandler sockJsHandler) {
-		super(sessionId, sockJsConfig, sockJsHandler);
+	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
+			WebSocketHandler webSocketHandler) {
+
+		super(sessionId, sockJsConfig, webSocketHandler);
 	}
 
 	public void setFrameFormat(FrameFormat frameFormat) {
@@ -57,7 +59,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	}
 
 	public synchronized void setCurrentRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws IOException {
+			FrameFormat frameFormat) throws Exception {
 
 		if (isClosed()) {
 			logger.debug("connection already closed");
@@ -90,14 +92,14 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 		return this.response;
 	}
 
-	protected final synchronized void sendMessageInternal(String message) throws IOException {
+	protected final synchronized void sendMessageInternal(String message) throws Exception {
 		// assert close() was not called
 		// threads: TH-Session-Endpoint or any other thread
 		this.messageCache.add(message);
 		tryFlushCache();
 	}
 
-	private void tryFlushCache() throws IOException {
+	private void tryFlushCache() throws Exception {
 		if (isActive() && !getMessageCache().isEmpty()) {
 			logger.trace("Flushing messages");
 			flushCache();
@@ -107,7 +109,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	/**
 	 * Only called if the connection is currently active
 	 */
-	protected abstract void flushCache() throws IOException;
+	protected abstract void flushCache() throws Exception;
 
 	@Override
 	protected void disconnect(CloseStatus status) {

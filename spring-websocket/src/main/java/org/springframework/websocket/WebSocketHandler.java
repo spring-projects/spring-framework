@@ -19,7 +19,7 @@ package org.springframework.websocket;
 
 
 /**
- * A handler for WebSocket messages.
+ * A handler for WebSocket sessions.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -32,23 +32,13 @@ public interface WebSocketHandler {
 	void afterConnectionEstablished(WebSocketSession session) throws Exception;
 
 	/**
-	 * Handle an incoming text message.
+	 * A WebSocket connection has been closed.
 	 */
-	void handleTextMessage(String message, WebSocketSession session) throws Exception;
-
-	/**
-	 * Handle an incoming binary message.
-	 */
-	void handleBinaryMessage(byte[] bytes, WebSocketSession session) throws Exception;
+	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session) throws Exception;
 
 	/**
 	 * TODO
 	 */
 	void handleError(Throwable exception, WebSocketSession session);
-
-	/**
-	 * A WebSocket connection has been closed.
-	 */
-	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session) throws Exception;
 
 }

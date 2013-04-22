@@ -21,13 +21,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -50,9 +50,9 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public PollingServerSockJsSession createSession(String sessionId, SockJsHandler sockJsHandler) {
+	public PollingServerSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), sockJsHandler);
+		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), webSocketHandler);
 	}
 
 	@Override

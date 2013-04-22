@@ -25,9 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.TransportHandler;
+import org.springframework.websocket.WebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +53,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsHandler sockJsHandler, SockJsSessionSupport session) throws Exception {
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws Exception {
 
 		if (session == null) {
 			response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -64,7 +64,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsSessionSupport session) throws Exception {
+			AbstractSockJsSession session) throws Exception {
 
 		String[] messages = null;
 		try {

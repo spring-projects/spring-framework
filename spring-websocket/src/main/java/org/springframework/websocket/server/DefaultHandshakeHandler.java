@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -84,11 +83,6 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	public String[] getSupportedProtocols() {
 		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
-	}
-
-	@Override
-	public void registerWebSocketHandlers(Collection<WebSocketHandler> handlers) {
-		this.requestUpgradeStrategy.registerWebSocketHandlers(handlers);
 	}
 
 	@Override

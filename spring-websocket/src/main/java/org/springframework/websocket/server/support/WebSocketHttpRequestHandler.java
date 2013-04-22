@@ -17,7 +17,6 @@
 package org.springframework.websocket.server.support;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +34,8 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.server.HandshakeHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
+import org.springframework.websocket.server.HandshakeHandler;
 
 
 /**
@@ -56,7 +55,6 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, BeanFact
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandler);
 		this.handshakeHandler = new DefaultHandshakeHandler();
-		this.handshakeHandler.registerWebSocketHandlers(Collections.singleton(webSocketHandler));
 	}
 
 	public WebSocketHttpRequestHandler(	Class<? extends WebSocketHandler> webSocketHandlerClass) {
@@ -67,9 +65,6 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, BeanFact
 	public void setHandshakeHandler(HandshakeHandler handshakeHandler) {
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
 		this.handshakeHandler = handshakeHandler;
-		if (this.handlerProvider.isSingleton()) {
-			this.handshakeHandler.registerWebSocketHandlers(Collections.singleton(this.handlerProvider.getHandler()));
-		}
 	}
 
 	@Override

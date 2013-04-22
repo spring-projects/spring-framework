@@ -16,6 +16,9 @@
 
 package org.springframework.sockjs;
 
+import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketSession;
+
 
 /**
  * A factory for creating a SockJS session.
@@ -23,8 +26,8 @@ package org.springframework.sockjs;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SockJsSessionFactory<S extends SockJsSession>{
+public interface SockJsSessionFactory<S extends WebSocketSession>{
 
-	S createSession(String sessionId, SockJsHandler sockJsHandler);
+	S createSession(String sessionId, WebSocketHandler webSocketHandler);
 
 }

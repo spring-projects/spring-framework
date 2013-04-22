@@ -16,9 +16,7 @@
 
 package org.springframework.websocket;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.ByteBuffer;
 
 
 
@@ -51,14 +49,10 @@ public interface WebSocketSession {
 	URI getURI();
 
 	/**
-	 * Send a text message.
+	 * Send a WebSocket message either {@link TextMessage} or
+	 * {@link BinaryMessage}.
 	 */
-	void sendTextMessage(String message) throws IOException;
-
-	/**
-	 * Send a binary message.
-	 */
-	void sendBinaryMessage(ByteBuffer message) throws IOException;
+	void sendMessage(WebSocketMessage message) throws Exception;
 
 	/**
 	 * Close the WebSocket connection with status 1000, i.e. equivalent to:
@@ -66,11 +60,11 @@ public interface WebSocketSession {
 	 * session.close(CloseStatus.NORMAL);
 	 * </pre>
 	 */
-	void close() throws IOException;
+	void close() throws Exception;
 
 	/**
 	 * Close the WebSocket connection with the given close status.
 	 */
-	void close(CloseStatus status) throws IOException;
+	void close(CloseStatus status) throws Exception;
 
 }

@@ -16,11 +16,6 @@
 
 package org.springframework.sockjs.server;
 
-import java.util.Collection;
-
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.websocket.WebSocketHandler;
-
 
 /**
  *
@@ -30,11 +25,5 @@ import org.springframework.websocket.WebSocketHandler;
 public interface ConfigurableTransportHandler extends TransportHandler {
 
 	void setSockJsConfiguration(SockJsConfiguration sockJsConfig);
-
-	/**
-	 * Pre-register {@link SockJsHandler} instances so they can be adapted to
-	 * {@link WebSocketHandler} and hence re-used at runtime.
-	 */
-	void registerSockJsHandlers(Collection<SockJsHandler> sockJsHandlers);
 
 }

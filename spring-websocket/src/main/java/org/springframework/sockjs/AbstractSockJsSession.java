@@ -16,12 +16,16 @@
 
 package org.springframework.sockjs;
 
-import java.io.IOException;
+import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.TextMessage;
+import org.springframework.websocket.TextMessageHandler;
+import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketSession;
 
 
 /**
@@ -30,13 +34,13 @@ import org.springframework.websocket.CloseStatus;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class SockJsSessionSupport implements SockJsSession {
+public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	protected Log logger = LogFactory.getLog(this.getClass());
 
 	private final String sessionId;
 
-	private final SockJsHandler sockJsHandler;
+	private final TextMessageHandler handler;
 
 	private State state = State.NEW;
 
@@ -48,17 +52,30 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 	/**
 	 *
 	 * @param sessionId
-	 * @param sockJsHandler the recipient of SockJS messages
+	 * @param handler the recipient of SockJS messages
 	 */
-	public SockJsSessionSupport(String sessionId, SockJsHandler sockJsHandler) {
+	public AbstractSockJsSession(String sessionId, WebSocketHandler webSocketHandler) {
 		Assert.notNull(sessionId, "sessionId is required");
-		Assert.notNull(sockJsHandler, "sockJsHandler is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		Assert.isInstanceOf(TextMessageHandler.class, webSocketHandler, "Expected a TextMessageHandler");
 		this.sessionId = sessionId;
-		this.sockJsHandler = sockJsHandler;
+		this.handler = (TextMessageHandler) webSocketHandler;
 	}
 
 	public String getId() {
 		return this.sessionId;
+	}
+
+	@Override
+	public boolean isSecure() {
+		// TODO
+		return false;
+	}
+
+	@Override
+	public URI getURI() {
+		// TODO
+		return null;
 	}
 
 	public boolean isNew() {
@@ -104,26 +121,26 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 
 	public void delegateConnectionEstablished() throws Exception {
 		this.state = State.OPEN;
-		this.sockJsHandler.afterConnectionEstablished(this);
+		this.handler.afterConnectionEstablished(this);
 	}
 
 	public void delegateMessages(String[] messages) throws Exception {
 		for (String message : messages) {
-			this.sockJsHandler.handleMessage(message, this);
+			this.handler.handleTextMessage(new TextMessage(message), this);
 		}
 	}
 
 	public void delegateError(Throwable ex) {
-		this.sockJsHandler.handleError(ex, this);
+		this.handler.handleError(ex, this);
 	}
 
 	/**
 	 * Invoked in reaction to the underlying connection being closed by the remote side
 	 * (or the WebSocket container) in order to perform cleanup and notify the
-	 * {@link SockJsHandler}. This is in contrast to {@link #close()} that pro-actively
+	 * {@link TextMessageHandler}. This is in contrast to {@link #close()} that pro-actively
 	 * closes the connection.
 	 */
-	public final void delegateConnectionClosed(CloseStatus status) {
+	public final void delegateConnectionClosed(CloseStatus status) throws Exception {
 		if (!isClosed()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(this + " was closed, " + status);
@@ -133,7 +150,7 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.sockJsHandler.afterConnectionClosed(status, this);
+				this.handler.afterConnectionClosed(status, this);
 			}
 		}
 	}
@@ -145,7 +162,7 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 	 * {@inheritDoc}
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
-	public final void close() throws IOException {
+	public final void close() throws Exception {
 		close(CloseStatus.NORMAL);
 	}
 
@@ -153,7 +170,7 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 	 * {@inheritDoc}
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
-	public final void close(CloseStatus status) throws IOException {
+	public final void close(CloseStatus status) throws Exception {
 		if (!isClosed()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing " + this + ", " + status);
@@ -163,12 +180,12 @@ public abstract class SockJsSessionSupport implements SockJsSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.sockJsHandler.afterConnectionClosed(status, this);
+				this.handler.afterConnectionClosed(status, this);
 			}
 		}
 	}
 
-	protected abstract void closeInternal(CloseStatus status) throws IOException;
+	protected abstract void closeInternal(CloseStatus status) throws Exception;
 
 
 	@Override

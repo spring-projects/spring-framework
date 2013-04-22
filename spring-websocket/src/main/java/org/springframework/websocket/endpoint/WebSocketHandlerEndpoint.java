@@ -28,8 +28,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.BinaryMessage;
+import org.springframework.websocket.BinaryMessageHandler;
+import org.springframework.websocket.PartialMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.TextMessage;
+import org.springframework.websocket.TextMessageHandler;
 
 
 /**
@@ -47,24 +52,87 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
 
-	public WebSocketHandlerEndpoint(WebSocketHandler webSocketHandler) {
-		this.webSocketHandler = webSocketHandler;
+	public WebSocketHandlerEndpoint(WebSocketHandler handler) {
+		Assert.notNull(handler, "webSocketHandler is required");
+		this.webSocketHandler = handler;
 	}
 
 	@Override
-	public void onOpen(javax.websocket.Session session, EndpointConfig config) {
+	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Client connected, WebSocket session id=" + session.getId() + ", uri=" + session.getRequestURI());
 		}
 		try {
 			WebSocketSession webSocketSession = new StandardWebSocketSession(session);
 			this.sessions.put(session.getId(), webSocketSession);
-			session.addMessageHandler(new StandardMessageHandler(session));
+
+			if (this.webSocketHandler instanceof TextMessageHandler) {
+				session.addMessageHandler(new MessageHandler.Whole<String>() {
+					@Override
+					public void onMessage(String message) {
+						handleTextMessage(session, message);
+					}
+				});
+			}
+			else if (this.webSocketHandler instanceof BinaryMessageHandler) {
+				if (this.webSocketHandler instanceof PartialMessageHandler) {
+					session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
+						@Override
+						public void onMessage(byte[] messagePart, boolean isLast) {
+							handleBinaryMessage(session, messagePart, isLast);
+						}
+					});
+				}
+				else {
+					session.addMessageHandler(new MessageHandler.Whole<byte[]>() {
+						@Override
+						public void onMessage(byte[] message) {
+							handleBinaryMessage(session, message, true);
+						}
+					});
+				}
+			}
+			else {
+				logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.webSocketHandler);
+			}
+
 			this.webSocketHandler.afterConnectionEstablished(webSocketSession);
 		}
 		catch (Throwable ex) {
 			// TODO
 			logger.error("Error while processing new session", ex);
+		}
+	}
+
+	private void handleTextMessage(javax.websocket.Session session, String message) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Received message for WebSocket session id=" + session.getId() + ": " + message);
+		}
+		WebSocketSession wsSession = getWebSocketSession(session);
+		Assert.notNull(wsSession, "WebSocketSession not found");
+		try {
+			TextMessage textMessage = new TextMessage(message);
+			((TextMessageHandler) webSocketHandler).handleTextMessage(textMessage, wsSession);
+		}
+		catch (Throwable ex) {
+			// TODO
+			logger.error("Error while processing message", ex);
+		}
+	}
+
+	private void handleBinaryMessage(javax.websocket.Session session, byte[] message, boolean isLast) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Received binary data for WebSocket session id=" + session.getId());
+		}
+		WebSocketSession wsSession = getWebSocketSession(session);
+		Assert.notNull(wsSession, "WebSocketSession not found");
+		try {
+			BinaryMessage binaryMessage = new BinaryMessage(message, isLast);
+			((BinaryMessageHandler) webSocketHandler).handleBinaryMessage(binaryMessage, wsSession);
+		}
+		catch (Throwable ex) {
+			// TODO
+			logger.error("Error while processing message", ex);
 		}
 	}
 
@@ -109,33 +177,6 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 
 	private WebSocketSession getWebSocketSession(javax.websocket.Session session) {
 		return this.sessions.get(session.getId());
-	}
-
-
-	private class StandardMessageHandler implements MessageHandler.Whole<String> {
-
-		private final javax.websocket.Session session;
-
-		public StandardMessageHandler(javax.websocket.Session session) {
-			this.session = session;
-		}
-
-		@Override
-		public void onMessage(String message) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Received message for WebSocket session id=" + this.session.getId() + ": " + message);
-			}
-			WebSocketSession wsSession = getWebSocketSession(this.session);
-			Assert.notNull(wsSession, "WebSocketSession not found");
-			try {
-				WebSocketHandlerEndpoint.this.webSocketHandler.handleTextMessage(message, wsSession);
-			}
-			catch (Throwable ex) {
-				// TODO
-				logger.error("Error while processing message", ex);
-			}
-		}
-
 	}
 
 }

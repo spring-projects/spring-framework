@@ -22,11 +22,12 @@ import java.net.SocketException;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSession;
-import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.TextMessage;
+import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketMessage;
 
 
 /**
@@ -36,15 +37,17 @@ import org.springframework.websocket.CloseStatus;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
+public abstract class AbstractServerSockJsSession extends AbstractSockJsSession {
 
 	private final SockJsConfiguration sockJsConfig;
 
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config, SockJsHandler sockJsHandler) {
-		super(sessionId, sockJsHandler);
+	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config,
+			WebSocketHandler webSocketHandler) {
+
+		super(sessionId, webSocketHandler);
 		this.sockJsConfig = config;
 	}
 
@@ -52,12 +55,13 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 		return this.sockJsConfig;
 	}
 
-	public final synchronized void sendMessage(String message) throws IOException {
+	public final synchronized void sendMessage(WebSocketMessage message) throws Exception {
 		Assert.isTrue(!isClosed(), "Cannot send a message, session has been closed");
-		sendMessageInternal(message);
+		Assert.isInstanceOf(TextMessage.class, message, "Expected text message: " + message);
+		sendMessageInternal(((TextMessage) message).getPayload());
 	}
 
-	protected abstract void sendMessageInternal(String message) throws IOException;
+	protected abstract void sendMessageInternal(String message) throws Exception;
 
 
 	@Override
@@ -67,7 +71,7 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 	}
 
 	@Override
-	public final synchronized void closeInternal(CloseStatus status) throws IOException {
+	public final synchronized void closeInternal(CloseStatus status) throws Exception {
 		if (isActive()) {
 			// TODO: deliver messages "in flight" before sending close frame
 			try {
@@ -84,13 +88,13 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 	}
 
 	// TODO: close status/reason
-	protected abstract void disconnect(CloseStatus status) throws IOException;
+	protected abstract void disconnect(CloseStatus status) throws Exception;
 
 	/**
 	 * For internal use within a TransportHandler and the (TransportHandler-specific)
 	 * session sub-class.
 	 */
-	protected void writeFrame(SockJsFrame frame) throws IOException {
+	protected void writeFrame(SockJsFrame frame) throws Exception {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Preparing to write " + frame);
 		}
@@ -114,9 +118,9 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 		}
 	}
 
-	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
+	protected abstract void writeFrameInternal(SockJsFrame frame) throws Exception;
 
-	public synchronized void sendHeartbeat() throws IOException {
+	public synchronized void sendHeartbeat() throws Exception {
 		if (isActive()) {
 			writeFrame(SockJsFrame.heartbeatFrame());
 			scheduleHeartbeat();
@@ -135,7 +139,7 @@ public abstract class AbstractServerSockJsSession extends SockJsSessionSupport {
 				try {
 					sendHeartbeat();
 				}
-				catch (IOException e) {
+				catch (Exception e) {
 					// ignore
 				}
 			}

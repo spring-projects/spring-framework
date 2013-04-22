@@ -17,8 +17,8 @@ package org.springframework.sockjs.server;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsHandler;
-import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.AbstractSockJsSession;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -31,6 +31,6 @@ public interface TransportHandler {
 	TransportType getTransportType();
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsHandler sockJsHandler, SockJsSessionSupport session) throws Exception;
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws Exception;
 
 }

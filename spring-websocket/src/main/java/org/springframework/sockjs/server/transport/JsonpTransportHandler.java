@@ -21,7 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.SockJsSessionSupport;
+import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.TransportType;
 
 public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler {
@@ -34,7 +34,7 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			SockJsSessionSupport sockJsSession) throws Exception {
+			AbstractSockJsSession sockJsSession) throws Exception {
 
 		if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {
 			if (request.getQueryParams().getFirst("d") == null) {
