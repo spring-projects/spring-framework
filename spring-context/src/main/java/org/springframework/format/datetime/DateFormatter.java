@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class DateFormatter implements Formatter<Date> {
 
 	private static final Map<ISO, String> ISO_PATTERNS;
 	static {
-		Map<ISO, String> formats = new HashMap<DateTimeFormat.ISO, String>();
+		Map<ISO, String> formats = new HashMap<DateTimeFormat.ISO, String>(4);
 		formats.put(ISO.DATE, "yyyy-MM-dd");
 		formats.put(ISO.TIME, "HH:mm:ss.SSSZ");
 		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -90,6 +90,15 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 	/**
+	 * Set the ISO format used for this date.
+	 * @param iso the {@link ISO} format
+	 * @since 3.2
+	 */
+	public void setIso(ISO iso) {
+		this.iso = iso;
+	}
+
+	/**
 	 * Set the style to use to format date values.
 	 * <p>If not specified, DateFormat's default style will be used.
 	 * @see DateFormat#DEFAULT
@@ -112,7 +121,7 @@ public class DateFormatter implements Formatter<Date> {
 	 * <li>'F' = Full</li>
 	 * <li>'-' = Omitted</li>
 	 * <ul>
-	 * This method mimics the styles supported by Joda Time.
+	 * This method mimics the styles supported by Joda-Time.
 	 * @param stylePattern two characters from the set {"S", "M", "L", "F", "-"}
 	 * @since 3.2
 	 */
@@ -120,14 +129,6 @@ public class DateFormatter implements Formatter<Date> {
 		this.stylePattern = stylePattern;
 	}
 
-	/**
-	 * Set the ISO format used for this date.
-	 * @param iso the {@link ISO} format
-	 * @since 3.2
-	 */
-	public void setIso(ISO iso) {
-		this.iso = iso;
-	}
 	/**
 	 * Set the TimeZone to normalize the date values into, if any.
 	 */
@@ -204,4 +205,5 @@ public class DateFormatter implements Formatter<Date> {
 		}
 		throw new IllegalStateException("Unsupported style pattern '"+ stylePattern+ "'");
 	}
+
 }

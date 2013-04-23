@@ -116,7 +116,7 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
-	public void testBindLocalDateWithSpecifcFormatter() throws Exception {
+	public void testBindLocalDateWithSpecificFormatter() throws Exception {
 		JodaTimeFormatterRegistrar registrar = new JodaTimeFormatterRegistrar();
 		registrar.setDateFormatter(org.joda.time.format.DateTimeFormat.forPattern("yyyyMMdd"));
 		setUp(registrar);
