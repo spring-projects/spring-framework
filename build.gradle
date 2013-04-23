@@ -528,6 +528,11 @@ project("spring-websocket") {
 		optional("org.glassfish.tyrus:tyrus-websocket-core:1.0-SNAPSHOT")
 		optional("org.glassfish.tyrus:tyrus-container-servlet:1.0-SNAPSHOT")
 
+		optional("org.eclipse.jetty:jetty-webapp:9.0.1.v20130408") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		optional("org.eclipse.jetty.websocket:websocket-server:9.0.1.v20130408")
+
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1") // required for SockJS support currently
 
 	}
