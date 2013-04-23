@@ -104,7 +104,7 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 		Assert.notNull(wsSession, "wsSession is required");
 		String path = wsSession.getURI().getPath();
 		String[] segments = StringUtils.tokenizeToStringArray(path, "/");
-		Assert.isTrue(segments.length > 3, "SockJS request should have at least 3 patgh segments: " + path);
+		Assert.isTrue(segments.length > 3, "SockJS request should have at least 3 path segments: " + path);
 		return segments[segments.length-2];
 	}
 

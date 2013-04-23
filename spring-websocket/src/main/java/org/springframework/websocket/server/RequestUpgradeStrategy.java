@@ -43,6 +43,7 @@ public interface RequestUpgradeStrategy {
 	 * @param handler the handler for WebSocket messages
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			HandlerProvider<WebSocketHandler> handler) throws Exception;
+			HandlerProvider<WebSocketHandler> handlerProvider) throws Exception;
+	// FIXME how to indicate failure to upgrade?
 
 }
