@@ -17,6 +17,7 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +54,8 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 
 	private AbstractSockJsSession session;
 
+	private final AtomicInteger sessionCount = new AtomicInteger(0);
+
 	// TODO: JSON library used must be configurable
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -70,6 +73,7 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
+		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
 		this.session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
 	}
 
@@ -80,14 +84,16 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 			logger.trace("Ignoring empty message");
 			return;
 		}
+		String[] messages;
 		try {
-			String[] messages = this.objectMapper.readValue(payload, String[].class);
-			this.session.delegateMessages(messages);
+			messages = this.objectMapper.readValue(payload, String[].class);
 		}
 		catch (IOException e) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", e);
 			wsSession.close();
+			return;
 		}
+		this.session.delegateMessages(messages);
 	}
 
 	@Override

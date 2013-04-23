@@ -16,6 +16,8 @@
 
 package org.springframework.websocket.endpoint;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
@@ -51,6 +53,8 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 
 	private WebSocketSession webSocketSession;
 
+	private final AtomicInteger sessionCount = new AtomicInteger(0);
+
 
 	public WebSocketHandlerEndpoint(HandlerProvider<WebSocketHandler> handlerProvider) {
 		Assert.notNull(handlerProvider, "handlerProvider is required");
@@ -59,48 +63,54 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 
 	@Override
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Client connected, WebSocket session id=" + session.getId() + ", uri=" + session.getRequestURI());
-		}
-		try {
-			this.handler = handlerProvider.getHandler();
-			this.webSocketSession = new StandardWebSocketSession(session);
 
-			if (this.handler instanceof TextMessageHandler) {
-				session.addMessageHandler(new MessageHandler.Whole<String>() {
+		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Client connected, javax.websocket.Session id="
+					+ session.getId() + ", uri=" + session.getRequestURI());
+		}
+
+		this.webSocketSession = new StandardWebSocketSession(session);
+		this.handler = handlerProvider.getHandler();
+
+		if (this.handler instanceof TextMessageHandler) {
+			session.addMessageHandler(new MessageHandler.Whole<String>() {
+				@Override
+				public void onMessage(String message) {
+					handleTextMessage(session, message);
+				}
+			});
+		}
+		else if (this.handler instanceof BinaryMessageHandler) {
+			if (this.handler instanceof PartialMessageHandler) {
+				session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
 					@Override
-					public void onMessage(String message) {
-						handleTextMessage(session, message);
+					public void onMessage(byte[] messagePart, boolean isLast) {
+						handleBinaryMessage(session, messagePart, isLast);
 					}
 				});
 			}
-			else if (this.handler instanceof BinaryMessageHandler) {
-				if (this.handler instanceof PartialMessageHandler) {
-					session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
-						@Override
-						public void onMessage(byte[] messagePart, boolean isLast) {
-							handleBinaryMessage(session, messagePart, isLast);
-						}
-					});
-				}
-				else {
-					session.addMessageHandler(new MessageHandler.Whole<byte[]>() {
-						@Override
-						public void onMessage(byte[] message) {
-							handleBinaryMessage(session, message, true);
-						}
-					});
-				}
-			}
 			else {
+				session.addMessageHandler(new MessageHandler.Whole<byte[]>() {
+					@Override
+					public void onMessage(byte[] message) {
+						handleBinaryMessage(session, message, true);
+					}
+				});
+			}
+		}
+		else {
+			if (logger.isWarnEnabled()) {
 				logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.handler);
 			}
+		}
 
+		try {
 			this.handler.afterConnectionEstablished(this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			// TODO
-			logger.error("Error while processing new session", ex);
+			this.handler.handleError(ex, this.webSocketSession);
 		}
 	}
 
@@ -113,8 +123,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			((TextMessageHandler) handler).handleTextMessage(textMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			// TODO
-			logger.error("Error while processing message", ex);
+			this.handler.handleError(ex, this.webSocketSession);
 		}
 	}
 
@@ -127,8 +136,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			((BinaryMessageHandler) handler).handleBinaryMessage(binaryMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			// TODO
-			logger.error("Error while processing message", ex);
+			this.handler.handleError(ex, this.webSocketSession);
 		}
 	}
 
@@ -142,7 +150,6 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			this.handler.afterConnectionClosed(closeStatus, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			// TODO
 			logger.error("Error while processing session closing", ex);
 		}
 		finally {
@@ -157,7 +164,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			this.handler.handleError(exception, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			// TODO
+			// TODO: close the session?
 			logger.error("Failed to handle error", ex);
 		}
 	}

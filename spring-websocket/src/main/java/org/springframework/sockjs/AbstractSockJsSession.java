@@ -43,7 +43,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
-	private final TextMessageHandler handler;
+	private TextMessageHandler handler;
 
 	private State state = State.NEW;
 
@@ -61,10 +61,6 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		Assert.notNull(sessionId, "sessionId is required");
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		this.sessionId = sessionId;
-
-		WebSocketHandler webSocketHandler = handlerProvider.getHandler();
-		Assert.isInstanceOf(TextMessageHandler.class, webSocketHandler, "Expected a TextMessageHandler");
-		this.handler = (TextMessageHandler) webSocketHandler;
 		this.handlerProvider = handlerProvider;
 	}
 
@@ -127,7 +123,14 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	public void delegateConnectionEstablished() throws Exception {
 		this.state = State.OPEN;
+		initHandler();
 		this.handler.afterConnectionEstablished(this);
+	}
+
+	private void initHandler() {
+		WebSocketHandler webSocketHandler = handlerProvider.getHandler();
+		Assert.isInstanceOf(TextMessageHandler.class, webSocketHandler, "Expected a TextMessageHandler");
+		this.handler = (TextMessageHandler) webSocketHandler;
 	}
 
 	public void delegateMessages(String[] messages) throws Exception {
