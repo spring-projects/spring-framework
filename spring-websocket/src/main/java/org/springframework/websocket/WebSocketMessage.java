@@ -15,6 +15,7 @@
  */
 package org.springframework.websocket;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 
@@ -29,6 +30,7 @@ public abstract class WebSocketMessage<T> {
 
 
 	WebSocketMessage(T payload) {
+		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
 	}
 

@@ -19,6 +19,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import org.springframework.util.Assert;
+
 
 /**
  * Represents a binary WebSocket message.
@@ -28,7 +30,7 @@ import java.nio.ByteBuffer;
  */
 public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
-	private final byte[] bytes;
+	private byte[] bytes;
 
 	private final boolean last;
 
@@ -48,8 +50,19 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	}
 
 	public BinaryMessage(byte[] payload, boolean isLast) {
-		super((payload != null) ? ByteBuffer.wrap(payload) : null);
-		this.bytes = payload;
+		this(payload, 0, (payload == null ? 0 : payload.length), isLast);
+	}
+
+	public BinaryMessage(byte[] payload, int offset, int len) {
+		this(payload, offset, len, true);
+	}
+
+	public BinaryMessage(byte[] payload, int offset, int len, boolean isLast) {
+		super(payload != null ? ByteBuffer.wrap(payload, offset, len) : null);
+		if(payload != null && offset == 0 && len == payload.length) {
+			// FIXME better if a message always needs a payload?
+			this.bytes = payload;
+		}
 		this.last = isLast;
 	}
 
@@ -58,17 +71,16 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	}
 
 	public byte[] getByteArray() {
-		if (this.bytes != null) {
-			return this.bytes;
+		if(this.bytes == null && getPayload() != null) {
+			this.bytes = getRemainingBytes(getPayload());
 		}
-		else if (getPayload() != null){
-			byte[] result = new byte[getPayload().remaining()];
-			getPayload().get(result);
-			return result;
-		}
-		else {
-			return null;
-		}
+		return this.bytes;
+	}
+
+	private byte[] getRemainingBytes(ByteBuffer payload) {
+		byte[] result = new byte[getPayload().remaining()];
+		getPayload().get(result);
+		return result;
 	}
 
 	public InputStream getInputStream() {

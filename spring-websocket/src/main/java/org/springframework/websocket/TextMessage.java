@@ -18,7 +18,6 @@ package org.springframework.websocket;
 import java.io.Reader;
 import java.io.StringReader;
 
-
 /**
  * Represents a text WebSocket message.
  *
@@ -26,7 +25,6 @@ import java.io.StringReader;
  * @since 4.0
  */
 public final class TextMessage extends WebSocketMessage<String> {
-
 
 	public TextMessage(String payload) {
 		super(payload);
