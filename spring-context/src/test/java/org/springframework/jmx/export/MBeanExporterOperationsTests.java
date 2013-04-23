@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import javax.management.modelmbean.RequiredModelMBean;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
 
+import org.junit.Test;
+
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.naming.ObjectNamingStrategy;
@@ -36,6 +38,7 @@ import static org.junit.Assert.*;
  */
 public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 
+	@Test
 	public void testRegisterManagedResourceWithUserSuppliedObjectName() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Foo");
 
@@ -50,6 +53,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		assertEquals("Incorrect name on MBean", name, bean.getName());
 	}
 
+	@Test
 	public void testRegisterExistingMBeanWithUserSuppliedObjectName() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Foo");
 		ModelMBeanInfo info = new ModelMBeanInfoSupport("myClass", "myDescription", null, null, null, null);
@@ -63,6 +67,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		assertEquals(info, infoFromServer);
 	}
 
+	@Test
 	public void testRegisterManagedResourceWithGeneratedObjectName() throws Exception {
 		final ObjectName objectNameTemplate = ObjectNameManager.getInstance("spring:type=Test");
 
@@ -88,6 +93,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		assertObjectNameMatchesTemplate(objectNameTemplate, reg2);
 	}
 
+	@Test
 	public void testRegisterManagedResourceWithGeneratedObjectNameWithoutUniqueness() throws Exception {
 		final ObjectName objectNameTemplate = ObjectNameManager.getInstance("spring:type=Test");
 
