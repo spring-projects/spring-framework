@@ -1,5 +1,5 @@
 /*
- * Copyright ${YEAR} the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.view.feed;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -27,16 +27,20 @@ import javax.servlet.http.HttpServletResponse;
 import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.custommonkey.xmlunit.XMLUnit.setIgnoreWhitespace;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-public class AtomFeedViewTest {
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.custommonkey.xmlunit.XMLUnit.*;
+import static org.junit.Assert.assertEquals;
+
+/**
+ * @author Arjen Poutsma
+ */
+public class AtomFeedViewTests {
 
 	private AbstractAtomFeedView view;
 
@@ -51,9 +55,9 @@ public class AtomFeedViewTest {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, String> model = new HashMap<String, String>();
-		model.put("1", "This is entry 1");
+		Map<String, String> model = new LinkedHashMap<String, String>();
 		model.put("2", "This is entry 2");
+		model.put("1", "This is entry 1");
 
 		view.render(model, request, response);
 		assertEquals("Invalid content-type", "application/atom+xml", response.getContentType());

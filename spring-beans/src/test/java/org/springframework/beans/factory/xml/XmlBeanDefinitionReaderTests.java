@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
-
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Rick Evans
@@ -38,13 +38,13 @@ import org.springframework.tests.sample.beans.TestBean;
 public class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testSetParserClassSunnyDay() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(DefaultBeanDefinitionDocumentReader.class);
 	}
 
 	public void testSetParserClassToNull() {
 		try {
-			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 			new XmlBeanDefinitionReader(registry).setDocumentReaderClass(null);
 			fail("Should have thrown IllegalArgumentException (null parserClass)");
 		}
@@ -54,7 +54,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testSetParserClassToUnsupportedParserType() throws Exception {
 		try {
-			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 			new XmlBeanDefinitionReader(registry).setDocumentReaderClass(String.class);
 			fail("Should have thrown IllegalArgumentException (unsupported parserClass)");
 		}
@@ -64,7 +64,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testWithOpenInputStream() {
 		try {
-			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 			Resource resource = new InputStreamResource(getClass().getResourceAsStream("test.xml"));
 			new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 			fail("Should have thrown BeanDefinitionStoreException (can't determine validation mode)");
@@ -74,7 +74,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 	}
 
 	public void testWithOpenInputStreamAndExplicitValidationMode() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		Resource resource = new InputStreamResource(getClass().getResourceAsStream("test.xml"));
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_DTD);
@@ -83,14 +83,14 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 	}
 
 	public void testWithImport() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		Resource resource = new ClassPathResource("import.xml", getClass());
 		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 		testBeanDefinitions(registry);
 	}
 
 	public void testWithWildcardImport() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		Resource resource = new ClassPathResource("importPattern.xml", getClass());
 		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 		testBeanDefinitions(registry);
@@ -98,7 +98,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testWithInputSource() {
 		try {
-			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+			SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 			InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));
 			new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 			fail("Should have thrown BeanDefinitionStoreException (can't determine validation mode)");
@@ -108,7 +108,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 	}
 
 	public void testWithInputSourceAndExplicitValidationMode() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_DTD);
@@ -117,7 +117,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 	}
 
 	public void testWithFreshInputStream() {
-		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		Resource resource = new ClassPathResource("test.xml", getClass());
 		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 		testBeanDefinitions(registry);
@@ -133,9 +133,10 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 		assertEquals(TestBean.class.getName(), registry.getBeanDefinition("rod").getBeanClassName());
 		assertEquals(TestBean.class.getName(), registry.getBeanDefinition("aliased").getBeanClassName());
 		assertTrue(registry.isAlias("youralias"));
-		assertEquals(2, registry.getAliases("aliased").length);
-		assertEquals("myalias", registry.getAliases("aliased")[0]);
-		assertEquals("youralias", registry.getAliases("aliased")[1]);
+		String[] aliases = registry.getAliases("aliased");
+		assertEquals(2, aliases.length);
+		assertTrue(ObjectUtils.containsElement(aliases, "myalias"));
+		assertTrue(ObjectUtils.containsElement(aliases, "youralias"));
 	}
 
 	public void testDtdValidationAutodetect() throws Exception {
@@ -147,7 +148,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 	}
 
 	private void doTestValidation(String resourceName) throws Exception {
-		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();;
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		Resource resource = new ClassPathResource(resourceName, getClass());
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
 		TestBean bean = (TestBean) factory.getBean("testBean");

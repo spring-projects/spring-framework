@@ -16,25 +16,25 @@
 
 package org.springframework.ui;
 
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
@@ -226,12 +226,12 @@ public final class ModelMapTests {
 	public void testAopCglibProxy() throws Exception {
 		ModelMap map = new ModelMap();
 		ProxyFactory factory = new ProxyFactory();
-		Date date = new Date();
-		factory.setTarget(date);
+		SomeInnerClass val = new SomeInnerClass();
+		factory.setTarget(val);
 		factory.setProxyTargetClass(true);
 		map.addAttribute(factory.getProxy());
-		assertTrue(map.containsKey("date"));
-		assertEquals(date, map.get("date"));
+		assertTrue(map.containsKey("someInnerClass"));
+		assertEquals(val, map.get("someInnerClass"));
 	}
 
 	@Test
@@ -288,11 +288,20 @@ public final class ModelMapTests {
 	}
 
 
-	private static class SomeInnerClass {
+	public static class SomeInnerClass {
+
+		public boolean equals(Object obj) {
+			return (obj instanceof SomeInnerClass);
+		}
+
+		@Override
+		public int hashCode() {
+			return SomeInnerClass.class.hashCode();
+		}
 	}
 
 
-	private static class UKInnerClass {
+	public static class UKInnerClass {
 	}
 
 }
