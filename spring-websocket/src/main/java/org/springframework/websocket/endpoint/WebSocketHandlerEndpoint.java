@@ -47,7 +47,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 
 	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
-	private final WebSocketHandler handler;
+	private WebSocketHandler handler;
 
 	private WebSocketSession webSocketSession;
 
@@ -55,7 +55,6 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	public WebSocketHandlerEndpoint(HandlerProvider<WebSocketHandler> handlerProvider) {
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		this.handlerProvider = handlerProvider;
-		this.handler = handlerProvider.getHandler();
 	}
 
 	@Override
@@ -64,6 +63,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			logger.debug("Client connected, WebSocket session id=" + session.getId() + ", uri=" + session.getRequestURI());
 		}
 		try {
+			this.handler = handlerProvider.getHandler();
 			this.webSocketSession = new StandardWebSocketSession(session);
 
 			if (this.handler instanceof TextMessageHandler) {
