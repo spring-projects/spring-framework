@@ -134,8 +134,6 @@ class ConfigurationClassBeanDefinitionReader {
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
-		String className = metadata.getClassName();
-		configBeanDef.setBeanClassName(className);
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
 			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
@@ -146,7 +144,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		else {
 			this.problemReporter.error(
-					new InvalidConfigurationImportProblem(className, configClass.getResource(), metadata));
+					new InvalidConfigurationImportProblem(metadata.getClassName(), configClass.getResource(), metadata));
 		}
 	}
 

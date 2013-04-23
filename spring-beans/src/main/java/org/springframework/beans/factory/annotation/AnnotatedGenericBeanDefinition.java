@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,15 +58,19 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 	 * allowing for ASM-based processing and avoidance of early loading of the bean class.
 	 * Note that this constructor is functionally equivalent to
 	 * {@link org.springframework.context.annotation.ScannedGenericBeanDefinition
-	 * ScannedGenericBeanDefinition}, however the semantics of the latter indicate that
-	 * a bean was discovered specifically via component-scanning as opposed to other
-	 * means.
+	 * ScannedGenericBeanDefinition}, however the semantics of the latter indicate that a
+	 * bean was discovered specifically via component-scanning as opposed to other means.
 	 * @param metadata the annotation metadata for the bean class in question
 	 * @since 3.1.1
 	 */
 	public AnnotatedGenericBeanDefinition(AnnotationMetadata metadata) {
 		Assert.notNull(metadata, "AnnotationMetadata must not be null");
-		setBeanClassName(metadata.getClassName());
+		if (metadata instanceof StandardAnnotationMetadata) {
+			setBeanClass(((StandardAnnotationMetadata) metadata).getIntrospectedClass());
+		}
+		else {
+			setBeanClassName(metadata.getClassName());
+		}
 		this.metadata = metadata;
 	}
 
