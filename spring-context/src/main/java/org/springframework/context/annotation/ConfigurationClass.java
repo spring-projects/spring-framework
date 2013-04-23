@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ final class ConfigurationClass {
 	 * using the {@link Import} annotation or automatically processed as a nested
 	 * configuration class (if imported is {@code true}).
 	 * @param metadataReader reader used to parse the underlying {@link Class}
-	 * @param beanName name of the {@code @Configuration} class bean
+	 * @param imported whether the given configuration class is being imported
 	 * @since 3.1.1
 	 */
 	public ConfigurationClass(MetadataReader metadataReader, boolean imported) {
@@ -110,7 +110,7 @@ final class ConfigurationClass {
 	 * using the {@link Import} annotation or automatically processed as a nested
 	 * configuration class (if imported is {@code true}).
 	 * @param clazz the underlying {@link Class} to represent
-	 * @param beanName name of the {@code @Configuration} class bean
+	 * @param imported whether the given configuration class is being imported
 	 * @since 3.1.1
 	 */
 	public ConfigurationClass(Class<?> clazz, boolean imported) {
@@ -118,6 +118,7 @@ final class ConfigurationClass {
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.imported = imported;
 	}
+
 
 	public AnnotationMetadata getMetadata() {
 		return this.metadata;

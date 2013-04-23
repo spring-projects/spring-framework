@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,8 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 				return AnnotationUtils.getAnnotationAttributes(
 						ann, classValuesAsString, this.nestedAnnotationsAsMap);
 			}
+		}
+		for (Annotation ann : anns) {
 			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
 				if (metaAnn.annotationType().getName().equals(annotationType)) {
 					return AnnotationUtils.getAnnotationAttributes(

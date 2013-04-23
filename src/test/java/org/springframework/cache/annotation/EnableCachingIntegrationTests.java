@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 package org.springframework.cache.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -35,6 +32,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Repository;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for the @EnableCaching annotation.
@@ -60,11 +60,12 @@ public class EnableCachingIntegrationTests {
 		ctx.register(Config.class, AspectJCacheConfig.class);
 		try {
 			ctx.refresh();
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// this test is a bit fragile, but gets the job done, proving that an
 			// attempt was made to look up the AJ aspect. It's due to classpath issues
 			// in .integration-tests that it's not found.
-			assertTrue(ex.getMessage().endsWith("AspectJCachingConfiguration.class] cannot be opened because it does not exist"));
+			assertTrue(ex.getMessage().contains("AspectJCachingConfiguration"));
 		}
 	}
 
