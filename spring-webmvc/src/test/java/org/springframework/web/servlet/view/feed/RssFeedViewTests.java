@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.view.feed;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -27,16 +27,20 @@ import javax.servlet.http.HttpServletResponse;
 import com.sun.syndication.feed.rss.Channel;
 import com.sun.syndication.feed.rss.Description;
 import com.sun.syndication.feed.rss.Item;
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.custommonkey.xmlunit.XMLUnit.setIgnoreWhitespace;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-public class RssFeedViewTest {
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.custommonkey.xmlunit.XMLUnit.*;
+import static org.junit.Assert.assertEquals;
+
+/**
+ * @author Arjen Poutsma
+ */
+public class RssFeedViewTests {
 
 	private AbstractRssFeedView view;
 
@@ -52,9 +56,9 @@ public class RssFeedViewTest {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, String> model = new HashMap<String, String>();
-		model.put("1", "This is entry 1");
+		Map<String, String> model = new LinkedHashMap<String, String>();
 		model.put("2", "This is entry 2");
+		model.put("1", "This is entry 1");
 
 		view.render(model, request, response);
 		assertEquals("Invalid content-type", "application/rss+xml", response.getContentType());
