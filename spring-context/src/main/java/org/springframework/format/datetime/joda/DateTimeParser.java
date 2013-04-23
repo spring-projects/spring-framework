@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.format.Parser;
 
 /**
- * Parses Joda Time {@link DateTime} instances using a {@link DateTimeFormatter}.
+ * Parses Joda {@link DateTime} instances using a {@link DateTimeFormatter}.
  *
  * @author Keith Donald
  * @since 3.0
@@ -34,6 +34,7 @@ public final class DateTimeParser implements Parser<DateTime> {
 
 	private final DateTimeFormatter formatter;
 
+
 	/**
 	 * Create a new DateTimeParser.
 	 * @param formatter the Joda DateTimeFormatter instance
@@ -41,6 +42,7 @@ public final class DateTimeParser implements Parser<DateTime> {
 	public DateTimeParser(DateTimeFormatter formatter) {
 		this.formatter = formatter;
 	}
+
 
 	public DateTime parse(String text, Locale locale) throws ParseException {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).parseDateTime(text);

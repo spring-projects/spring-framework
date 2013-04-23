@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.format.Printer;
 
 /**
- * Prints Long instances using a {@link DateTimeFormatter}.
+ * Prints Long instances using a Joda {@link DateTimeFormatter}.
  *
  * @author Keith Donald
  * @since 3.0
@@ -32,6 +32,7 @@ public final class MillisecondInstantPrinter implements Printer<Long> {
 
 	private final DateTimeFormatter formatter;
 
+
 	/**
 	 * Create a new ReadableInstantPrinter.
 	 * @param formatter the Joda DateTimeFormatter instance
@@ -39,6 +40,7 @@ public final class MillisecondInstantPrinter implements Printer<Long> {
 	public MillisecondInstantPrinter(DateTimeFormatter formatter) {
 		this.formatter = formatter;
 	}
+
 
 	public String print(Long instant, Locale locale) {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).print(instant);

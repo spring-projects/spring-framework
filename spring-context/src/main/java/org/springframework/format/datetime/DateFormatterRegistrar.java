@@ -27,8 +27,8 @@ import org.springframework.util.Assert;
 
 /**
  * Configures Date formatting for use with Spring.
- * <p>
- * Designed for direct instantiation but also exposes the static
+ *
+ * <p>Designed for direct instantiation but also exposes the static
  * {@link #addDateConverters(ConverterRegistry)} utility method for ad hoc use
  * against any {@code ConverterRegistry} instance.
  *
@@ -39,8 +39,18 @@ import org.springframework.util.Assert;
  */
 public class DateFormatterRegistrar implements FormatterRegistrar {
 
-
 	private DateFormatter dateFormatter;
+
+
+	/**
+	 * Set the date formatter to register. If not specified no formatter is registered.
+	 * This method can be used if global formatter configuration is required.
+	 * @param dateFormatter the date formatter
+	 */
+	public void setFormatter(DateFormatter dateFormatter) {
+		Assert.notNull(dateFormatter, "DateFormatter must not be null");
+		this.dateFormatter = dateFormatter;
+	}
 
 
 	public void registerFormatters(FormatterRegistry registry) {
@@ -53,16 +63,6 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 			registry.addFormatter(this.dateFormatter);
 			registry.addFormatterForFieldType(Calendar.class, this.dateFormatter);
 		}
-	}
-
-	/**
-	 * Set the date formatter to register. If not specified no formatter is registered.
-	 * This method can be used if global formatter configuration is required.
-	 * @param dateFormatter the date formatter
-	 */
-	public void setFormatter(DateFormatter dateFormatter) {
-		Assert.notNull(dateFormatter, "DateFormatter must not be null");
-		this.dateFormatter = dateFormatter;
 	}
 
 	/**
@@ -80,6 +80,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
 	private static class DateToLongConverter implements Converter<Date, Long> {
+
 		public Long convert(Date source) {
 			return source.getTime();
 		}
@@ -87,6 +88,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
 	private static class DateToCalendarConverter implements Converter<Date, Calendar> {
+
 		public Calendar convert(Date source) {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(source);
@@ -96,6 +98,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
 	private static class CalendarToDateConverter implements Converter<Calendar, Date> {
+
 		public Date convert(Calendar source) {
 			return source.getTime();
 		}
@@ -103,6 +106,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
 	private static class CalendarToLongConverter implements Converter<Calendar, Long> {
+
 		public Long convert(Calendar source) {
 			return source.getTime().getTime();
 		}
@@ -110,6 +114,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 
 	private static class LongToDateConverter implements Converter<Long, Date> {
+
 		public Date convert(Long source) {
 			return new Date(source);
 		}
@@ -118,10 +123,11 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class LongToCalendarConverter implements Converter<Long, Calendar> {
 
-		private DateToCalendarConverter dateToCalendarConverter = new DateToCalendarConverter();
+		private final DateToCalendarConverter dateToCalendarConverter = new DateToCalendarConverter();
 
 		public Calendar convert(Long source) {
 			return this.dateToCalendarConverter.convert(new Date(source));
 		}
 	}
+
 }

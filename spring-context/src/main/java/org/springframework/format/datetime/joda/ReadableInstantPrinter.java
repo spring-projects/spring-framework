@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.util.Locale;
 
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormatter;
+
 import org.springframework.format.Printer;
 
 /**
- * Prints JodaTime {@link ReadableInstant} instances using a {@link DateTimeFormatter}.
+ * Prints Joda-Time {@link ReadableInstant} instances using a {@link DateTimeFormatter}.
  *
  * @author Keith Donald
  * @since 3.0
@@ -32,6 +33,7 @@ public final class ReadableInstantPrinter implements Printer<ReadableInstant> {
 
 	private final DateTimeFormatter formatter;
 
+
 	/**
 	 * Create a new ReadableInstantPrinter.
 	 * @param formatter the Joda DateTimeFormatter instance
@@ -39,6 +41,7 @@ public final class ReadableInstantPrinter implements Printer<ReadableInstant> {
 	public ReadableInstantPrinter(DateTimeFormatter formatter) {
 		this.formatter = formatter;
 	}
+
 
 	public String print(ReadableInstant instant, Locale locale) {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).print(instant);

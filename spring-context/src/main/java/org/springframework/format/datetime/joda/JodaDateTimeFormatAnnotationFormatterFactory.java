@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		// (if we did not do this, the default byType rules for LocalDate, LocalTime,
 		// and LocalDateTime would take precedence over the annotation rule, which
 		// is not what we want)
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(7);
+		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
 		fieldTypes.add(ReadableInstant.class);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
@@ -71,10 +71,6 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	private StringValueResolver embeddedValueResolver;
 
 
-	public final Set<Class<?>> getFieldTypes() {
-		return FIELD_TYPES;
-	}
-
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
@@ -83,20 +79,24 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
+
+	public final Set<Class<?>> getFieldTypes() {
+		return FIELD_TYPES;
+	}
+
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
-		if (ReadableInstant.class.isAssignableFrom(fieldType)) {
-			return new ReadableInstantPrinter(formatter);
-		}
 		if (ReadablePartial.class.isAssignableFrom(fieldType)) {
 			return new ReadablePartialPrinter(formatter);
 		}
-		if (Calendar.class.isAssignableFrom(fieldType)) {
+		else if (ReadableInstant.class.isAssignableFrom(fieldType) || Calendar.class.isAssignableFrom(fieldType)) {
 			// assumes Calendar->ReadableInstant converter is registered
 			return new ReadableInstantPrinter(formatter);
 		}
-		// assumes Date->Long converter is registered
-		return new MillisecondInstantPrinter(formatter);
+		else {
+			// assumes Date->Long converter is registered
+			return new MillisecondInstantPrinter(formatter);
+		}
 	}
 
 	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
