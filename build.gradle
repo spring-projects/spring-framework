@@ -28,8 +28,8 @@ configure(allprojects) { project ->
 		targetCompatibility=1.6
 	}
 	compileTestJava {
-		sourceCompatibility=1.7
-		targetCompatibility=1.7
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
 	}
 
 	[compileJava, compileTestJava]*.options*.compilerArgs = [
@@ -58,6 +58,9 @@ configure(allprojects) { project ->
 	test {
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
+		scanForTestClasses = false
+		include '**/*Tests.*'
+		exclude '**/*Abstract*.*'
 	}
 
 	repositories {
@@ -155,37 +158,15 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	// As of Spring 3.2 spring-core repackages both asm 4.0 and cglib 3.0 and inlines both
-	// into the spring-core jar. cglib 3.0 itself depends on asm 4.0, and is therefore
+	// As of Spring 4.0, spring-core includes asm 4.1 and repackages cglib 3.0, inlining
+	// both into the spring-core jar. cglib 3.0 itself depends on asm 4, and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
-	// avoids including two different copies of asm unnecessarily. If however future cglib
-	// versions drift from the version of asm used by Spring internally, this duplication
-	// will become necessary.
-	def asmVersion = "4.0"
+	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.0"
 
 	configurations {
 		jarjar
-		asm
 		cglib
-	}
-
-	task asmRepackJar(type: Jar) { repackJar ->
-		repackJar.baseName = "spring-asm-repack"
-		repackJar.version = asmVersion
-
-		doLast() {
-			project.ant {
-				taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
-					classpath: configurations.jarjar.asPath
-				jarjar(destfile: repackJar.archivePath) {
-					configurations.asm.each { originalJar ->
-						zipfileset(src: originalJar)
-					}
-					rule(pattern: "org.objectweb.asm.**", result: "org.springframework.asm.@1")
-				}
-			}
-		}
 	}
 
 	task cglibRepackJar(type: Jar) { repackJar ->
@@ -212,12 +193,9 @@ project("spring-core") {
 	}
 
 	dependencies {
-		asm("org.ow2.asm:asm:${asmVersion}@jar")
-		asm("org.ow2.asm:asm-commons:${asmVersion}@jar")
 		cglib("cglib:cglib:${cglibVersion}@jar")
 		jarjar("com.googlecode.jarjar:jarjar:1.3")
 
-		compile(files(asmRepackJar))
 		compile("commons-logging:commons-logging:1.1.1")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:3.0")
@@ -229,11 +207,7 @@ project("spring-core") {
 	}
 
 	jar {
-		// inline all repackaged asm and cglib classes directly into the spring-core jar
-		dependsOn asmRepackJar
-		from(zipTree(asmRepackJar.archivePath)) {
-			include "org/springframework/asm/**"
-		}
+		// inline repackaged cglib classes directly into the spring-core jar
 		dependsOn cglibRepackJar
 		from(zipTree(cglibRepackJar.archivePath)) {
 			include "org/springframework/cglib/**"
@@ -243,6 +217,7 @@ project("spring-core") {
 
 project("spring-beans") {
 	description = "Spring Beans"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
@@ -254,6 +229,7 @@ project("spring-beans") {
 
 project("spring-aop") {
 	description = "Spring AOP"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
@@ -267,6 +243,7 @@ project("spring-aop") {
 
 project("spring-expression") {
 	description = "Spring Expression Language (SpEL)"
+
 	dependencies {
 		compile(project(":spring-core"))
 	}
@@ -274,9 +251,11 @@ project("spring-expression") {
 
 project("spring-instrument") {
 	description = "Spring Instrument"
+
 	dependencies {
 		compile(project(":spring-core"))
 	}
+
 	jar {
 		manifest.attributes["Premain-Class"] =
 			"org.springframework.instrument.InstrumentationSavingAgent"
@@ -285,6 +264,7 @@ project("spring-instrument") {
 
 project("spring-instrument-tomcat") {
 	description = "Spring Instrument Tomcat"
+
 	dependencies {
 		provided("org.apache.tomcat:catalina:6.0.16")
 	}
@@ -292,6 +272,7 @@ project("spring-instrument-tomcat") {
 
 project("spring-context") {
 	description = "Spring Context"
+
 	dependencies {
 		optional(project(":spring-instrument"))
 		compile(project(":spring-aop"))
@@ -307,7 +288,7 @@ project("spring-context") {
 		optional("org.beanshell:bsh:2.0b4")
 		optional("org.codehaus.groovy:groovy-all:1.8.8")
 		optional("org.jruby:jruby:1.6.5.1")
-		optional("joda-time:joda-time:2.1")
+		optional("joda-time:joda-time:2.2")
 		optional("org.slf4j:slf4j-api:${slf4jVersion}")
 		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.hibernate:hibernate-validator:4.3.0.Final")
@@ -324,6 +305,7 @@ project("spring-context") {
 
 project("spring-tx") {
 	description = "Spring Transaction"
+
 	dependencies {
 		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
 		optional(project(":spring-aop"))
@@ -370,6 +352,7 @@ project("spring-oxm") {
 
 project("spring-jms") {
 	description = "Spring JMS"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -388,6 +371,7 @@ project("spring-jms") {
 
 project("spring-jdbc") {
 	description = "Spring JDBC"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -404,6 +388,7 @@ project("spring-jdbc") {
 
 project("spring-context-support") {
 	description = "Spring Context Support"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -499,6 +484,7 @@ project("spring-orm") {
 project("spring-orm-hibernate4") {
 	description = "Spring Object/Relational Mapping - Hibernate 4 support"
 	merge.into = project(":spring-orm")
+
 	dependencies {
 		provided(project(":spring-tx"))
 		provided(project(":spring-jdbc"))
@@ -511,6 +497,7 @@ project("spring-orm-hibernate4") {
 
 project("spring-webmvc") {
 	description = "Spring Web MVC"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-expression"))
@@ -570,6 +557,7 @@ project("spring-webmvc") {
 project("spring-webmvc-tiles3") {
 	description = "Spring Framework Tiles3 Integration"
 	merge.into = project(":spring-webmvc")
+
 	dependencies {
 		provided(project(":spring-context"))
 		provided(project(":spring-web"))
@@ -600,6 +588,7 @@ project("spring-webmvc-tiles3") {
 
 project("spring-webmvc-portlet") {
 	description = "Spring Web Portlet"
+
 	dependencies {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.portlet:portlet-api:2.0")
@@ -617,21 +606,6 @@ project("spring-webmvc-portlet") {
 
 project("spring-test") {
 	description = "Spring TestContext Framework"
-
-	task testNG(type: Test) {
-		useTestNG()
-		// "TestCase" classes are run by other test classes, not the build.
-		exclude "**/*TestCase.class"
-		// Generate TestNG reports alongside JUnit reports.
-		testReport true
-	}
-
-	test {
-		dependsOn testNG
-		useJUnit()
-		// "TestCase" classes are run by other test classes, not the build.
-		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
-	}
 
 	dependencies {
 		compile(project(":spring-core"))
@@ -657,11 +631,31 @@ project("spring-test") {
 		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
+
+	task testNG(type: Test) {
+		useTestNG()
+		scanForTestClasses = false
+		include "**/testng/*.*"
+		exclude "**/FailingBeforeAndAfterMethodsTests.class"
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude "**/*TestCase.class"
+		// Generate TestNG reports alongside JUnit reports.
+		testReport true
+	}
+
+	test {
+		dependsOn testNG
+		useJUnit()
+		exclude "**/testng/*.*"
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
+	}
 }
 
 project("spring-test-mvc") {
 	description = "Spring Test MVC Framework"
 	merge.into = project(":spring-test")
+
 	dependencies {
 		optional(project(":spring-context"))
 		provided(project(":spring-webmvc"))
@@ -695,6 +689,7 @@ project("spring-test-mvc") {
 project("spring-aspects") {
 	description = "Spring Aspects"
 	apply from: "aspects.gradle"
+
 	dependencies {
 		optional(project(":spring-beans")) // for @Configurable support
 		optional(project(":spring-aop")) // for @Async support
@@ -712,6 +707,7 @@ project("spring-aspects") {
 		compile(project(":spring-beans")) // for "p" namespace visibility
 		testCompile(project(":spring-test"))
 	}
+
 	eclipse.project {
 		natures += "org.eclipse.ajdt.ui.ajnature"
 		buildCommands = [new org.gradle.plugins.ide.eclipse.model.

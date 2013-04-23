@@ -61,7 +61,7 @@ task compileTestJava(overwrite: true)  {
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
 				classpath: configurations.ajc.asPath)
 
-		ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+		ant.iajc(source: compileJava.sourceCompatibility, target: compileJava.targetCompatibility,
 				maxmem: "1024m", fork: "true", Xlint: "ignore",
 				destDir: outputDir.absolutePath,
 				aspectPath: jar.archivePath,
