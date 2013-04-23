@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketMessage;
@@ -45,9 +46,9 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 
 
 	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config,
-			WebSocketHandler webSocketHandler) {
+			HandlerProvider<WebSocketHandler> handler) {
 
-		super(sessionId, webSocketHandler);
+		super(sessionId, handler);
 		this.sockJsConfig = config;
 	}
 

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.Cookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -43,6 +42,7 @@ import org.springframework.sockjs.server.transport.XhrPollingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrStreamingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrTransportHandler;
 import org.springframework.util.Assert;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
@@ -54,7 +54,7 @@ import org.springframework.websocket.server.HandshakeHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class DefaultSockJsService extends AbstractSockJsService implements InitializingBean {
+public class DefaultSockJsService extends AbstractSockJsService {
 
 	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
 
@@ -157,13 +157,13 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 
 	@Override
 	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler) throws Exception {
+			HandlerProvider<WebSocketHandler> handler) throws Exception {
 
 		if (isWebSocketEnabled()) {
 			TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
 			if (transportHandler != null) {
 				if (transportHandler instanceof HandshakeHandler) {
-					((HandshakeHandler) transportHandler).doHandshake(request, response, webSocketHandler);
+					((HandshakeHandler) transportHandler).doHandshake(request, response, handler);
 					return;
 				}
 			}
@@ -174,7 +174,7 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 
 	@Override
 	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, WebSocketHandler webSocketHandler) throws Exception {
+			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler) throws Exception {
 
 		TransportHandler transportHandler = this.transportHandlers.get(transportType);
 
@@ -201,7 +201,7 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 			return;
 		}
 
-		AbstractSockJsSession session = getSockJsSession(sessionId, webSocketHandler, transportHandler);
+		AbstractSockJsSession session = getSockJsSession(sessionId, handler, transportHandler);
 
 		if (session != null) {
 			if (transportType.setsNoCacheHeader()) {
@@ -220,10 +220,10 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 			}
 		}
 
-		transportHandler.handleRequest(request, response, webSocketHandler, session);
+		transportHandler.handleRequest(request, response, handler, session);
 	}
 
-	public AbstractSockJsSession getSockJsSession(String sessionId, WebSocketHandler webSocketHandler,
+	public AbstractSockJsSession getSockJsSession(String sessionId, HandlerProvider<WebSocketHandler> handler,
 			TransportHandler transportHandler) {
 
 		AbstractSockJsSession session = this.sessions.get(sessionId);
@@ -240,7 +240,7 @@ public class DefaultSockJsService extends AbstractSockJsService implements Initi
 					return session;
 				}
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
-				session = (AbstractSockJsSession) sessionFactory.createSession(sessionId, webSocketHandler);
+				session = (AbstractSockJsSession) sessionFactory.createSession(sessionId, handler);
 				this.sessions.put(sessionId, session);
 				return session;
 			}

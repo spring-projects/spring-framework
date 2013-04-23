@@ -22,9 +22,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.http.server.AsyncServletServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -36,6 +33,7 @@ import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -43,7 +41,7 @@ import org.springframework.websocket.WebSocketHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactoryAware {
+public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 	private final String prefix;
 
@@ -61,15 +59,15 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactory
 	 * that begins with the specified prefix will be handled by this service. In a
 	 * Servlet container this is the path within the current servlet mapping.
 	 */
-	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService, WebSocketHandler webSocketHandler) {
+	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService, WebSocketHandler handler) {
 
 		Assert.hasText(prefix, "prefix is required");
 		Assert.notNull(sockJsService, "sockJsService is required");
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		Assert.notNull(handler, "webSocketHandler is required");
 
 		this.prefix = prefix;
 		this.sockJsService = sockJsService;
-		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandler);
+		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler>(handler);
 	}
 
 	/**
@@ -80,15 +78,15 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactory
 	 * Servlet container this is the path within the current servlet mapping.
 	 */
 	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService,
-			Class<? extends WebSocketHandler> webSocketHandlerClass) {
+			HandlerProvider<WebSocketHandler> handlerProvider) {
 
 		Assert.hasText(prefix, "prefix is required");
 		Assert.notNull(sockJsService, "sockJsService is required");
-		Assert.notNull(webSocketHandlerClass, "webSocketHandlerClass is required");
+		Assert.notNull(handlerProvider, "handlerProvider is required");
 
 		this.prefix = prefix;
 		this.sockJsService = sockJsService;
-		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandlerClass);
+		this.handlerProvider = handlerProvider;
 	}
 
 	public String getPrefix() {
@@ -97,11 +95,6 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactory
 
 	public String getPattern() {
 		return this.prefix + "/**";
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.handlerProvider.setBeanFactory(beanFactory);
 	}
 
 	@Override
@@ -119,8 +112,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, BeanFactory
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
 		try {
-			WebSocketHandler webSocketHandler = this.handlerProvider.getHandler();
-			this.sockJsService.handleRequest(httpRequest, httpResponse, sockJsPath, webSocketHandler);
+			this.sockJsService.handleRequest(httpRequest, httpResponse, sockJsPath, this.handlerProvider);
 		}
 		catch (Exception ex) {
 			// TODO

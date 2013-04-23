@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 
@@ -33,9 +34,9 @@ public abstract class AbstractStreamingTransportHandler extends AbstractHttpSend
 
 
 	@Override
-	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
+	public StreamingServerSockJsSession createSession(String sessionId, HandlerProvider<WebSocketHandler> handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), webSocketHandler);
+		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 
 	@Override

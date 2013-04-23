@@ -22,9 +22,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -36,6 +33,7 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -44,7 +42,7 @@ import org.springframework.websocket.server.HandshakeHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketHttpRequestHandler implements HttpRequestHandler, BeanFactoryAware {
+public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 	private HandshakeHandler handshakeHandler;
 
@@ -53,23 +51,18 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, BeanFact
 
 	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandler);
+		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler>(webSocketHandler);
 		this.handshakeHandler = new DefaultHandshakeHandler();
 	}
 
-	public WebSocketHttpRequestHandler(	Class<? extends WebSocketHandler> webSocketHandlerClass) {
-		Assert.notNull(webSocketHandlerClass, "webSocketHandlerClass is required");
-		this.handlerProvider = new HandlerProvider<WebSocketHandler>(webSocketHandlerClass);
+	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler> handlerProvider) {
+		Assert.notNull(handlerProvider, "handlerProvider is required");
+		this.handlerProvider = handlerProvider;
 	}
 
 	public void setHandshakeHandler(HandshakeHandler handshakeHandler) {
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
 		this.handshakeHandler = handshakeHandler;
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.handlerProvider.setBeanFactory(beanFactory);
 	}
 
 	@Override
@@ -80,8 +73,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, BeanFact
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
 		try {
-			WebSocketHandler webSocketHandler = this.handlerProvider.getHandler();
-			this.handshakeHandler.doHandshake(httpRequest, httpResponse, webSocketHandler);
+			this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.handlerProvider);
 		}
 		catch (Exception e) {
 			// TODO

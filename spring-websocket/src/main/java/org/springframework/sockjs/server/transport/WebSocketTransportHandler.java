@@ -24,8 +24,10 @@ import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -60,26 +62,19 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws Exception {
+			HandlerProvider<WebSocketHandler> handler, AbstractSockJsSession session) throws Exception {
 
-		this.handshakeHandler.doHandshake(request, response, adaptSockJsHandler(webSocketHandler));
-	}
-
-	/**
-	 * Adapt the {@link SockJsHandler} to the {@link WebSocketHandler} contract for
-	 * exchanging SockJS message over WebSocket.
-	 */
-	protected WebSocketHandler adaptSockJsHandler(WebSocketHandler handler) {
-		return new SockJsWebSocketHandler(this.sockJsConfig, handler);
+		WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, handler);
+		this.handshakeHandler.doHandshake(request, response, new SimpleHandlerProvider<WebSocketHandler>(sockJsWrapper));
 	}
 
 	// HandshakeHandler methods
 
 	@Override
 	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler) throws Exception {
+			HandlerProvider<WebSocketHandler> handler) throws Exception {
 
-		return this.handshakeHandler.doHandshake(request, response, webSocketHandler);
+		return this.handshakeHandler.doHandshake(request, response, handler);
 	}
 
 }

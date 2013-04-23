@@ -17,15 +17,16 @@ package org.springframework.sockjs.server.transport;
 
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 
 public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
 	public PollingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
-			WebSocketHandler webSocketHandler) {
+			HandlerProvider<WebSocketHandler> handler) {
 
-		super(sessionId, sockJsConfig, webSocketHandler);
+		super(sessionId, sockJsConfig, handler);
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.TransportHandler;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -53,7 +54,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws Exception {
+			HandlerProvider<WebSocketHandler> webSocketHandler, AbstractSockJsSession session) throws Exception {
 
 		if (session == null) {
 			response.setStatusCode(HttpStatus.NOT_FOUND);

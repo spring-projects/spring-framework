@@ -29,6 +29,7 @@ import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -49,9 +50,9 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 
 
 	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
-			WebSocketHandler webSocketHandler) {
+			HandlerProvider<WebSocketHandler> handler) {
 
-		super(sessionId, sockJsConfig, webSocketHandler);
+		super(sessionId, sockJsConfig, handler);
 	}
 
 	public void setFrameFormat(FrameFormat frameFormat) {

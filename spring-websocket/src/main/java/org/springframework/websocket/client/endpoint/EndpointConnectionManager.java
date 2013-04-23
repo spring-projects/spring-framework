@@ -32,6 +32,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.websocket.HandlerProvider;
+import org.springframework.websocket.support.BeanCreatingHandlerProvider;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -43,19 +45,19 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 
 	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
 
-	private final HandlerProvider<Endpoint> endpointProvider;
+	private final HandlerProvider<Endpoint> handlerProvider;
 
 
 	public EndpointConnectionManager(Endpoint endpointBean, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 		Assert.notNull(endpointBean, "endpointBean is required");
-		this.endpointProvider = new HandlerProvider<Endpoint>(endpointBean);
+		this.handlerProvider = new SimpleHandlerProvider<Endpoint>(endpointBean);
 	}
 
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass is required");
-		this.endpointProvider = new HandlerProvider<Endpoint>(endpointClass);
+		this.handlerProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
 	}
 
 	public void setSubProtocols(String... subprotocols) {
@@ -80,12 +82,14 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.endpointProvider.setBeanFactory(beanFactory);
+		if (this.handlerProvider instanceof BeanFactoryAware) {
+			((BeanFactoryAware) this.handlerProvider).setBeanFactory(beanFactory);
+		}
 	}
 
 	@Override
 	protected void openConnection() throws Exception {
-		Endpoint endpoint = this.endpointProvider.getHandler();
+		Endpoint endpoint = this.handlerProvider.getHandler();
 		ClientEndpointConfig endpointConfig = this.configBuilder.build();
 		Session session = getWebSocketContainer().connectToServer(endpoint, endpointConfig, getUri());
 		updateSession(session);

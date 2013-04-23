@@ -31,6 +31,7 @@ import javax.websocket.WebSocketContainer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 import org.springframework.websocket.client.WebSocketClient;
@@ -40,6 +41,7 @@ import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 
 
 /**
+ * A standard Java {@link WebSocketClient}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -57,21 +59,16 @@ public class StandardWebSocketClient implements WebSocketClient {
 		this.webSocketContainer = container;
 	}
 
-	public WebSocketSession doHandshake(WebSocketHandler handler, String uriTemplate,
-			Object... uriVariables) throws WebSocketConnectFailureException {
+	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,
+			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException {
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
-		return doHandshake(handler, uri);
-	}
-
-	@Override
-	public WebSocketSession doHandshake(WebSocketHandler handler, URI uri) throws WebSocketConnectFailureException {
 		return doHandshake(handler, null, uri);
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler handler, final HttpHeaders httpHeaders, URI uri)
-			throws WebSocketConnectFailureException {
+	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,
+			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
 		Endpoint endpoint = new WebSocketHandlerEndpoint(handler);
 

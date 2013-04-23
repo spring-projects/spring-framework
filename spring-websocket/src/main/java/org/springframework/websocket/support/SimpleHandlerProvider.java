@@ -13,25 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.sockjs.server;
+package org.springframework.websocket.support;
 
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.sockjs.AbstractSockJsSession;
+import org.springframework.util.ClassUtils;
 import org.springframework.websocket.HandlerProvider;
-import org.springframework.websocket.WebSocketHandler;
 
 
 /**
+ * A {@link HandlerProvider} that returns a singleton instance.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface TransportHandler {
+public class SimpleHandlerProvider<T> implements HandlerProvider<T> {
 
-	TransportType getTransportType();
+	private final T handler;
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler, AbstractSockJsSession session) throws Exception;
+
+	public SimpleHandlerProvider(T handler) {
+		this.handler = handler;
+	}
+
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
+
+	@Override
+	public Class<?> getHandlerType() {
+		return ClassUtils.getUserClass(this.handler);
+	}
+
+	@Override
+	public T getHandler() {
+		return this.handler;
+	}
+
+	@Override
+	public void destroy(T handler) {
+	}
+
+	@Override
+	public String toString() {
+		return "SimpleHandlerProvider [handler=" + handler + "]";
+	}
 
 }

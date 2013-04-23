@@ -22,6 +22,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.websocket.HandlerProvider;
+import org.springframework.websocket.support.BeanCreatingHandlerProvider;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -32,28 +34,29 @@ import org.springframework.websocket.HandlerProvider;
 public class AnnotatedEndpointConnectionManager extends EndpointConnectionManagerSupport
 		implements BeanFactoryAware {
 
-	private final HandlerProvider<Object> endpointProvider;
+	private final HandlerProvider<Object> handlerProvider;
 
-
-	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
-		super(uriTemplate, uriVariables);
-		this.endpointProvider = new HandlerProvider<Object>(endpointClass);
-	}
 
 	public AnnotatedEndpointConnectionManager(Object endpointBean, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.endpointProvider = new HandlerProvider<Object>(endpointBean);
+		this.handlerProvider = new SimpleHandlerProvider<Object>(endpointBean);
+	}
+
+	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
+		super(uriTemplate, uriVariables);
+		this.handlerProvider = new BeanCreatingHandlerProvider<Object>(endpointClass);
 	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.endpointProvider.setBeanFactory(beanFactory);
+		if (this.handlerProvider instanceof BeanFactoryAware) {
+			((BeanFactoryAware) this.handlerProvider).setBeanFactory(beanFactory);
+		}
 	}
-
 
 	@Override
 	protected void openConnection() throws Exception {
-		Object endpoint = this.endpointProvider.getHandler();
+		Object endpoint = this.handlerProvider.getHandler();
 		Session session = getWebSocketContainer().connectToServer(endpoint, getUri());
 		updateSession(session);
 	}

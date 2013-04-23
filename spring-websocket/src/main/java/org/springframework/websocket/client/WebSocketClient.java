@@ -18,6 +18,7 @@ package org.springframework.websocket.client;
 import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -36,13 +37,10 @@ import org.springframework.websocket.WebSocketSession;
 public interface WebSocketClient {
 
 
-	WebSocketSession doHandshake(WebSocketHandler handler, String uriTemplate, Object... uriVariables)
-			throws WebSocketConnectFailureException;
+	WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,
+			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException;
 
-	WebSocketSession doHandshake(WebSocketHandler handler, URI uri)
-			throws WebSocketConnectFailureException;
-
-	WebSocketSession doHandshake(WebSocketHandler handler, HttpHeaders headers, URI uri)
+	WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException;
 
 }

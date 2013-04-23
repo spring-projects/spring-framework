@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.TextMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
@@ -40,6 +41,8 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	private final String sessionId;
 
+	private final HandlerProvider<WebSocketHandler> handlerProvider;
+
 	private final TextMessageHandler handler;
 
 	private State state = State.NEW;
@@ -52,14 +55,17 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	/**
 	 *
 	 * @param sessionId
-	 * @param handler the recipient of SockJS messages
+	 * @param handlerProvider the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, WebSocketHandler webSocketHandler) {
+	public AbstractSockJsSession(String sessionId, HandlerProvider<WebSocketHandler> handlerProvider) {
 		Assert.notNull(sessionId, "sessionId is required");
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		Assert.isInstanceOf(TextMessageHandler.class, webSocketHandler, "Expected a TextMessageHandler");
+		Assert.notNull(handlerProvider, "handlerProvider is required");
 		this.sessionId = sessionId;
+
+		WebSocketHandler webSocketHandler = handlerProvider.getHandler();
+		Assert.isInstanceOf(TextMessageHandler.class, webSocketHandler, "Expected a TextMessageHandler");
 		this.handler = (TextMessageHandler) webSocketHandler;
+		this.handlerProvider = handlerProvider;
 	}
 
 	public String getId() {
@@ -180,7 +186,12 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.handler.afterConnectionClosed(status, this);
+				try {
+					this.handler.afterConnectionClosed(status, this);
+				}
+				finally {
+					this.handlerProvider.destroy(this.handler);
+				}
 			}
 		}
 	}

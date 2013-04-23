@@ -23,6 +23,7 @@ import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 
@@ -50,9 +51,9 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 		return new DefaultFrameFormat("%s\n");
 	}
 
-	public PollingServerSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
+	public PollingServerSockJsSession createSession(String sessionId, HandlerProvider<WebSocketHandler> handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), webSocketHandler);
+		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 
 }

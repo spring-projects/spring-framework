@@ -39,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 
@@ -218,7 +219,7 @@ public abstract class AbstractSockJsService
 	 * @throws Exception
 	 */
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, WebSocketHandler webSocketHandler) throws Exception {
+			String sockJsPath, HandlerProvider<WebSocketHandler> handler) throws Exception {
 
 		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
 
@@ -244,7 +245,7 @@ public abstract class AbstractSockJsService
 				return;
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocketRequest(request, response, webSocketHandler);
+				handleRawWebSocketRequest(request, response, handler);
 				return;
 			}
 
@@ -264,7 +265,7 @@ public abstract class AbstractSockJsService
 				return;
 			}
 
-			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), webSocketHandler);
+			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), handler);
 		}
 		finally {
 			response.flush();
@@ -272,10 +273,10 @@ public abstract class AbstractSockJsService
 	}
 
 	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler) throws Exception;
+			HandlerProvider<WebSocketHandler> handler) throws Exception;
 
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, WebSocketHandler webSocketHandler) throws Exception;
+			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler) throws Exception;
 
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {

@@ -37,6 +37,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
+import org.springframework.websocket.support.BeanCreatingHandlerProvider;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -54,11 +56,9 @@ import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
  */
 public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
 
-	private static Log logger = LogFactory.getLog(EndpointRegistration.class);
-
 	private final String path;
 
-	private final HandlerProvider<Endpoint> endpointProvider;
+	private final HandlerProvider<Endpoint> handlerProvider;
 
     private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>();
 
@@ -84,16 +84,14 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpointClass, "endpointClass is required");
 		this.path = path;
-		this.endpointProvider = new HandlerProvider<Endpoint>(endpointClass);
-		this.endpointProvider.setLogger(logger);
+		this.handlerProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
 	}
 
 	public EndpointRegistration(String path, Endpoint endpointBean) {
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpointBean, "endpointBean is required");
 		this.path = path;
-		this.endpointProvider = new HandlerProvider<Endpoint>(endpointBean);
-		this.endpointProvider.setLogger(logger);
+		this.handlerProvider = new SimpleHandlerProvider<Endpoint>(endpointBean);
 	}
 
 	@Override
@@ -102,12 +100,13 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Class<? extends Endpoint> getEndpointClass() {
-		return this.endpointProvider.getHandlerType();
+		return (Class<? extends Endpoint>) this.handlerProvider.getHandlerType();
 	}
 
 	public Endpoint getEndpoint() {
-		return this.endpointProvider.getHandler();
+		return this.handlerProvider.getHandler();
 	}
 
 	public void setSubprotocols(List<String> subprotocols) {
@@ -193,7 +192,9 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.endpointProvider.setBeanFactory(beanFactory);
+		if (this.handlerProvider instanceof BeanFactoryAware) {
+			((BeanFactoryAware) this.handlerProvider).setBeanFactory(beanFactory);
+		}
 	}
 
 }

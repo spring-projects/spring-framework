@@ -17,8 +17,6 @@
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +27,7 @@ import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.TextMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
@@ -38,8 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
- * A SockJS implementation of {@link WebSocketHandler}. Delegates messages to and from a
- * {@link SockJsHandler} and adds SockJS message framing.
+ * A wrapper around a {@link WebSocketHandler} instance that parses and adds SockJS
+ * messages frames as well as sends SockJS heartbeat messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -50,34 +49,28 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private final WebSocketHandler webSocketHandler;
+	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
-	private final Map<WebSocketSession, AbstractSockJsSession> sessions =
-			new ConcurrentHashMap<WebSocketSession, AbstractSockJsSession>();
+	private AbstractSockJsSession session;
 
 	// TODO: JSON library used must be configurable
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public SockJsWebSocketHandler(SockJsConfiguration sockJsConfig, WebSocketHandler webSocketHandler) {
-		Assert.notNull(sockJsConfig, "sockJsConfig is required");
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.sockJsConfig = sockJsConfig;
-		this.webSocketHandler = webSocketHandler;
+	public SockJsWebSocketHandler(SockJsConfiguration config, HandlerProvider<WebSocketHandler> handlerProvider) {
+		Assert.notNull(config, "sockJsConfig is required");
+		Assert.notNull(handlerProvider, "handlerProvider is required");
+		this.sockJsConfig = config;
+		this.handlerProvider = handlerProvider;
 	}
 
 	protected SockJsConfiguration getSockJsConfig() {
 		return this.sockJsConfig;
 	}
 
-	protected AbstractSockJsSession getSockJsSession(WebSocketSession wsSession) {
-		return this.sessions.get(wsSession);
-	}
-
 	@Override
 	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
-		AbstractSockJsSession session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
-		this.sessions.put(wsSession, session);
+		this.session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
 	}
 
 	@Override
@@ -89,8 +82,7 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 		}
 		try {
 			String[] messages = this.objectMapper.readValue(payload, String[].class);
-			AbstractSockJsSession session = getSockJsSession(wsSession);
-			session.delegateMessages(messages);
+			this.session.delegateMessages(messages);
 		}
 		catch (IOException e) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", e);
@@ -100,14 +92,12 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 
 	@Override
 	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) throws Exception {
-		AbstractSockJsSession session = this.sessions.remove(wsSession);
-		session.delegateConnectionClosed(status);
+		this.session.delegateConnectionClosed(status);
 	}
 
 	@Override
 	public void handleError(Throwable exception, WebSocketSession webSocketSession) {
-		AbstractSockJsSession session = getSockJsSession(webSocketSession);
-		session.delegateError(exception);
+		this.session.delegateError(exception);
 	}
 
 	private static String getSockJsSessionId(WebSocketSession wsSession) {
@@ -127,7 +117,7 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 		public WebSocketServerSockJsSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig)
 				throws Exception {
 
-			super(getSockJsSessionId(wsSession), sockJsConfig, SockJsWebSocketHandler.this.webSocketHandler);
+			super(getSockJsSessionId(wsSession), sockJsConfig, SockJsWebSocketHandler.this.handlerProvider);
 			this.wsSession = wsSession;
 			TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
 			this.wsSession.sendMessage(message);

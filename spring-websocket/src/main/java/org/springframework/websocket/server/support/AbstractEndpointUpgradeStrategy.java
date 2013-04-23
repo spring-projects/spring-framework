@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
@@ -41,12 +42,12 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler webSocketHandler) throws Exception {
+			String protocol, HandlerProvider<WebSocketHandler> handler) throws Exception {
 
-		upgradeInternal(request, response, protocol, adaptWebSocketHandler(webSocketHandler));
+		upgradeInternal(request, response, protocol, adaptWebSocketHandler(handler));
 	}
 
-	protected Endpoint adaptWebSocketHandler(WebSocketHandler handler) {
+	protected Endpoint adaptWebSocketHandler(HandlerProvider<WebSocketHandler> handler) {
 		return new WebSocketHandlerEndpoint(handler);
 	}
 

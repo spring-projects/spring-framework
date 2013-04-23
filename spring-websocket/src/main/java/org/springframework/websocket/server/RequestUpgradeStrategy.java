@@ -18,6 +18,7 @@ package org.springframework.websocket.server;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 
@@ -39,9 +40,9 @@ public interface RequestUpgradeStrategy {
 	 * Perform runtime specific steps to complete the upgrade.
 	 * Invoked only if the handshake is successful.
 	 *
-	 * @param webSocketHandler the handler for WebSocket messages
+	 * @param handler the handler for WebSocket messages
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			WebSocketHandler webSocketHandler) throws Exception;
+			HandlerProvider<WebSocketHandler> handler) throws Exception;
 
 }
