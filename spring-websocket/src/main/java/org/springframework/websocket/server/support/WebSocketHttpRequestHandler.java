@@ -44,25 +44,26 @@ import org.springframework.websocket.support.SimpleHandlerProvider;
  */
 public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
-	private HandshakeHandler handshakeHandler;
+	private final HandshakeHandler handshakeHandler;
 
 	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
 
 	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler>(webSocketHandler);
-		this.handshakeHandler = new DefaultHandshakeHandler();
+		this(new SimpleHandlerProvider<WebSocketHandler>(webSocketHandler));
 	}
 
 	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler> handlerProvider) {
-		Assert.notNull(handlerProvider, "handlerProvider is required");
-		this.handlerProvider = handlerProvider;
+		this(handlerProvider, new DefaultHandshakeHandler());
 	}
 
-	public void setHandshakeHandler(HandshakeHandler handshakeHandler) {
+	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler> handlerProvider,
+			HandshakeHandler handshakeHandler) {
+
+		Assert.notNull(handlerProvider, "handlerProvider is required");
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
-		this.handshakeHandler = handshakeHandler;
+		this.handlerProvider = handlerProvider;
+		this.handshakeHandler = new DefaultHandshakeHandler();
 	}
 
 	@Override

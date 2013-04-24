@@ -139,7 +139,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		}
 	}
 
-	public void delegateError(Throwable ex) {
+	public void delegateError(Throwable ex) throws Exception {
 		this.handler.handleError(ex, this);
 	}
 

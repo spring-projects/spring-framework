@@ -38,6 +38,7 @@ import org.springframework.websocket.client.WebSocketClient;
 import org.springframework.websocket.client.WebSocketConnectFailureException;
 import org.springframework.websocket.endpoint.StandardWebSocketSession;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
+import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -57,6 +58,13 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 	public void setWebSocketContainer(WebSocketContainer container) {
 		this.webSocketContainer = container;
+	}
+
+	@Override
+	public WebSocketSession doHandshake(WebSocketHandler handler, String uriTemplate, Object... uriVariables)
+			throws WebSocketConnectFailureException {
+
+		return doHandshake(new SimpleHandlerProvider<WebSocketHandler>(handler), uriTemplate, uriVariables);
 	}
 
 	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,

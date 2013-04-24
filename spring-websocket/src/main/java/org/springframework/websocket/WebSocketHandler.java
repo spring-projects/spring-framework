@@ -39,6 +39,6 @@ public interface WebSocketHandler {
 	/**
 	 * TODO
 	 */
-	void handleError(Throwable exception, WebSocketSession session);
+	void handleError(Throwable exception, WebSocketSession session) throws Exception;
 
 }

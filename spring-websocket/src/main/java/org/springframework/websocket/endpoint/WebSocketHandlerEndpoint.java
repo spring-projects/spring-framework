@@ -67,7 +67,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Client connected, javax.websocket.Session id="
+			logger.debug("Connection established, javax.websocket.Session id="
 					+ session.getId() + ", uri=" + session.getRequestURI());
 		}
 
@@ -110,7 +110,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			this.handler.afterConnectionEstablished(this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			this.handler.handleError(ex, this.webSocketSession);
+			onError(session, ex);
 		}
 	}
 
@@ -123,7 +123,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			((TextMessageHandler) handler).handleTextMessage(textMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			this.handler.handleError(ex, this.webSocketSession);
+			onError(session, ex);
 		}
 	}
 
@@ -136,21 +136,21 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			((BinaryMessageHandler) handler).handleBinaryMessage(binaryMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			this.handler.handleError(ex, this.webSocketSession);
+			onError(session, ex);
 		}
 	}
 
 	@Override
 	public void onClose(javax.websocket.Session session, CloseReason reason) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Client disconnected, WebSocket session id=" + session.getId() + ", " + reason);
+			logger.debug("Connection closed, WebSocket session id=" + session.getId() + ", " + reason);
 		}
 		try {
 			CloseStatus closeStatus = new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase());
 			this.handler.afterConnectionClosed(closeStatus, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			logger.error("Error while processing session closing", ex);
+			onError(session, ex);
 		}
 		finally {
 			this.handlerProvider.destroy(this.handler);

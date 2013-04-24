@@ -113,19 +113,15 @@ public final class CloseStatus {
 	public static final CloseStatus SERVER_ERROR = new CloseStatus(1011);
 
 	/**
-	 * 1012 indicates that the service is restarted. A client may reconnect, and if it
-	 * choses to do, should reconnect using a randomized delay of 5 - 30s.
-     * <p>See <a href="https://www.ietf.org/mail-archive/web/hybi/current/msg09649.html">
-     * [hybi] Additional WebSocket Close Error Codes</a>
+	 * "1012 indicates that the service is restarted. A client may reconnect, and if it
+	 * chooses to do, should reconnect using a randomized delay of 5 - 30s."
 	 */
 	public static final CloseStatus SERVICE_RESTARTED = new CloseStatus(1012);
 
 	/**
-	 * 1013 indicates that the service is experiencing overload. A client should only
+	 * "1013 indicates that the service is experiencing overload. A client should only
 	 * connect to a different IP (when there are multiple for the target) or reconnect to
-	 * the same IP upon user action.
-     * <p>See <a href="https://www.ietf.org/mail-archive/web/hybi/current/msg09649.html">
-     * [hybi] Additional WebSocket Close Error Codes</a>
+	 * the same IP upon user action."
 	 */
 	public static final CloseStatus SERVICE_OVERLOAD = new CloseStatus(1013);
 

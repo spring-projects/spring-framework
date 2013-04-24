@@ -143,7 +143,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			try {
 				this.session = new WebSocketSessionAdapter(session);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Client connected, WebSocket session id="
+					logger.debug("Connection established, WebSocket session id="
 							+ this.session.getId() + ", uri=" + this.session.getURI());
 				}
 				this.handler = this.provider.getHandler();
@@ -167,7 +167,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			try {
 				CloseStatus closeStatus = new CloseStatus(statusCode, reason);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Client disconnected, WebSocket session id="
+					logger.debug("Connection closed, WebSocket session id="
 							+ this.session.getId() + ", " + closeStatus);
 				}
 				this.handler.afterConnectionClosed(closeStatus, this.session);

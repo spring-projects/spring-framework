@@ -102,7 +102,7 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 	}
 
 	@Override
-	public void handleError(Throwable exception, WebSocketSession webSocketSession) {
+	public void handleError(Throwable exception, WebSocketSession webSocketSession) throws Exception {
 		this.session.delegateError(exception);
 	}
 

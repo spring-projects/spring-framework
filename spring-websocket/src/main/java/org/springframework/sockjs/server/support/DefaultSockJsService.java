@@ -36,6 +36,7 @@ import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.server.AbstractSockJsService;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
+import org.springframework.sockjs.server.SockJsService;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.sockjs.server.transport.EventSourceTransportHandler;
@@ -54,7 +55,8 @@ import org.springframework.websocket.server.HandshakeHandler;
 
 
 /**
- * TODO
+ * A default implementation of {@link SockJsService} adding support for transport handling
+ * and session management.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -68,10 +70,31 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	private ScheduledFuture sessionCleanupTask;
 
 
+	/**
+	 * Create an instance with default {@link TransportHandler transport handler} types.
+	 *
+	 * @param taskScheduler a task scheduler for heart-beat messages and removing
+	 *        timed-out sessions; the provided TaskScheduler should be declared as a
+	 *        Spring bean to ensure it is initialized at start up and shut down when the
+	 *        application stops.
+	 */
 	public DefaultSockJsService(TaskScheduler taskScheduler) {
 		this(taskScheduler, null);
 	}
 
+	/**
+	 * Create an instance by overriding or replacing completely the default
+	 * {@link TransportHandler transport handler} types.
+	 *
+	 * @param taskScheduler a task scheduler for heart-beat messages and removing
+	 *        timed-out sessions; the provided TaskScheduler should be declared as a
+	 *        Spring bean to ensure it is initialized at start up and shut down when the
+	 *        application stops.
+	 * @param transportHandlers the transport handlers to use (replaces the default ones);
+	 *        can be {@code null}.
+	 * @param transportHandlerOverrides zero or more overrides to the default transport
+	 *        handler types.
+	 */
 	public DefaultSockJsService(TaskScheduler taskScheduler, Set<TransportHandler> transportHandlers,
 			TransportHandler... transportHandlerOverrides) {
 
@@ -82,7 +105,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		addTransportHandlers(Arrays.asList(transportHandlerOverrides));
 	}
 
-	protected Set<TransportHandler> getDefaultTransportHandlers() {
+	protected final Set<TransportHandler> getDefaultTransportHandlers() {
 		Set<TransportHandler> result = new HashSet<TransportHandler>();
 		result.add(new XhrPollingTransportHandler());
 		result.add(new XhrTransportHandler());
@@ -91,14 +114,12 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		result.add(new XhrStreamingTransportHandler());
 		result.add(new EventSourceTransportHandler());
 		result.add(new HtmlFileTransportHandler());
-		if (isWebSocketEnabled()) {
-			try {
-				result.add(new WebSocketTransportHandler(new DefaultHandshakeHandler()));
-			}
-			catch (Exception ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to add default WebSocketTransportHandler: " + ex.getMessage());
-				}
+		try {
+			result.add(new WebSocketTransportHandler(new DefaultHandshakeHandler()));
+		}
+		catch (Exception ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to add default WebSocketTransportHandler: " + ex.getMessage());
 			}
 		}
 		return result;
