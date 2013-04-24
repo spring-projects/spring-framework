@@ -129,13 +129,13 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 	}
 
 	protected void scheduleHeartbeat() {
-		Assert.notNull(getSockJsConfig().getHeartbeatScheduler(), "heartbeatScheduler not configured");
+		Assert.notNull(getSockJsConfig().getTaskScheduler(), "heartbeatScheduler not configured");
 		cancelHeartbeat();
 		if (!isActive()) {
 			return;
 		}
 		Date time = new Date(System.currentTimeMillis() + getSockJsConfig().getHeartbeatTime());
-		this.heartbeatTask = getSockJsConfig().getHeartbeatScheduler().schedule(new Runnable() {
+		this.heartbeatTask = getSockJsConfig().getTaskScheduler().schedule(new Runnable() {
 			public void run() {
 				try {
 					sendHeartbeat();

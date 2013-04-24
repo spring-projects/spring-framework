@@ -25,15 +25,12 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -49,8 +46,7 @@ import org.springframework.websocket.WebSocketHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractSockJsService
-		implements SockJsService, SockJsConfiguration, InitializingBean, DisposableBean {
+public abstract class AbstractSockJsService implements SockJsService, SockJsConfiguration {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -71,17 +67,13 @@ public abstract class AbstractSockJsService
 
 	private boolean webSocketsEnabled = true;
 
-	private final TaskSchedulerHolder heartbeatSchedulerHolder;
+	private final TaskScheduler taskScheduler;
 
 
 
-	public AbstractSockJsService() {
-		this.heartbeatSchedulerHolder = new TaskSchedulerHolder("SockJs-heartbeat-");
-	}
-
-	public AbstractSockJsService(TaskScheduler heartbeatScheduler) {
-		Assert.notNull(heartbeatScheduler, "heartbeatScheduler is required");
-		this.heartbeatSchedulerHolder = new TaskSchedulerHolder(heartbeatScheduler);
+	public AbstractSockJsService(TaskScheduler scheduler) {
+		Assert.notNull(scheduler, "scheduler is required");
+		this.taskScheduler = scheduler;
 	}
 
 	/**
@@ -159,8 +151,8 @@ public abstract class AbstractSockJsService
 		return this.heartbeatTime;
 	}
 
-	public TaskScheduler getHeartbeatScheduler() {
-		return this.heartbeatSchedulerHolder.getScheduler();
+	public TaskScheduler getTaskScheduler() {
+		return this.taskScheduler;
 	}
 
 	/**
@@ -197,16 +189,6 @@ public abstract class AbstractSockJsService
 	 */
 	public boolean isWebSocketEnabled() {
 		return this.webSocketsEnabled;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		this.heartbeatSchedulerHolder.initialize();
-	}
-
-	@Override
-	public void destroy() throws Exception {
-		this.heartbeatSchedulerHolder.destroy();
 	}
 
 	/**
@@ -422,47 +404,5 @@ public abstract class AbstractSockJsService
 			response.getBody().write(contentBytes);
 		}
 	};
-
-
-	/**
-	 * Holds an externally provided or an internally managed TaskScheduler. Provides
-	 * initialize and destroy methods have no effect if the scheduler is externally
-	 * managed.
-	 */
-	protected static class TaskSchedulerHolder {
-
-		private final TaskScheduler taskScheduler;
-
-		private final boolean isDefaultTaskScheduler;
-
-		public TaskSchedulerHolder(TaskScheduler taskScheduler) {
-			Assert.notNull(taskScheduler, "taskScheduler is required");
-			this.taskScheduler = taskScheduler;
-			this.isDefaultTaskScheduler = false;
-		}
-
-		public TaskSchedulerHolder(String threadNamePrefix) {
-			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-			scheduler.setThreadNamePrefix(threadNamePrefix);
-			this.taskScheduler = scheduler;
-			this.isDefaultTaskScheduler = true;
-		}
-
-		public TaskScheduler getScheduler() {
-			return this.taskScheduler;
-		}
-
-		public void initialize() {
-			if (this.isDefaultTaskScheduler) {
-				((ThreadPoolTaskScheduler) this.taskScheduler).afterPropertiesSet();
-			}
-		}
-
-		public void destroy() {
-			if (this.isDefaultTaskScheduler) {
-				((ThreadPoolTaskScheduler) this.taskScheduler).shutdown();
-			}
-		}
-	}
 
 }

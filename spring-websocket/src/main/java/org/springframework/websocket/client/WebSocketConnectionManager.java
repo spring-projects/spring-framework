@@ -15,9 +15,11 @@
  */
 package org.springframework.websocket.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.CollectionUtils;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -37,7 +39,7 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 	private WebSocketSession webSocketSession;
 
-	private List<String> subProtocols;
+	private final List<String> subProtocols = new ArrayList<String>();
 
 
 	public WebSocketConnectionManager(WebSocketClient webSocketClient,
@@ -57,7 +59,10 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 	}
 
 	public void setSubProtocols(List<String> subProtocols) {
-		this.subProtocols = subProtocols;
+		this.subProtocols.clear();
+		if (!CollectionUtils.isEmpty(subProtocols)) {
+			this.subProtocols.addAll(subProtocols);
+		}
 	}
 
 	public List<String> getSubProtocols() {

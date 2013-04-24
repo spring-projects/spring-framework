@@ -16,10 +16,15 @@
 package org.springframework.sockjs.server.support;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 import org.springframework.http.Cookie;
 import org.springframework.http.HttpMethod;
@@ -41,7 +46,7 @@ import org.springframework.sockjs.server.transport.WebSocketTransportHandler;
 import org.springframework.sockjs.server.transport.XhrPollingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrStreamingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrTransportHandler;
-import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
@@ -58,101 +63,58 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
 
-	private final Map<TransportType, TransportHandler> transportHandlerOverrides = new HashMap<TransportType, TransportHandler>();
-
-	private TaskSchedulerHolder sessionTimeoutSchedulerHolder;
-
 	private final Map<String, AbstractSockJsSession> sessions = new ConcurrentHashMap<String, AbstractSockJsSession>();
 
+	private ScheduledFuture sessionCleanupTask;
 
-	public DefaultSockJsService() {
-		this.sessionTimeoutSchedulerHolder = new TaskSchedulerHolder("SockJs-sessionTimeout-");
+
+	public DefaultSockJsService(TaskScheduler taskScheduler) {
+		this(taskScheduler, null);
 	}
 
-	public DefaultSockJsService(TaskScheduler heartbeatScheduler, TaskScheduler sessionTimeoutScheduler) {
-		Assert.notNull(sessionTimeoutScheduler, "sessionTimeoutScheduler is required");
-		this.sessionTimeoutSchedulerHolder = new TaskSchedulerHolder(sessionTimeoutScheduler);
+	public DefaultSockJsService(TaskScheduler taskScheduler, Set<TransportHandler> transportHandlers,
+			TransportHandler... transportHandlerOverrides) {
+
+		super(taskScheduler);
+
+		transportHandlers = CollectionUtils.isEmpty(transportHandlers) ? getDefaultTransportHandlers() : transportHandlers;
+		addTransportHandlers(transportHandlers);
+		addTransportHandlers(Arrays.asList(transportHandlerOverrides));
 	}
 
-	public void setTransportHandlers(TransportHandler... handlers) {
-		this.transportHandlers.clear();
+	protected Set<TransportHandler> getDefaultTransportHandlers() {
+		Set<TransportHandler> result = new HashSet<TransportHandler>();
+		result.add(new XhrPollingTransportHandler());
+		result.add(new XhrTransportHandler());
+		result.add(new JsonpPollingTransportHandler());
+		result.add(new JsonpTransportHandler());
+		result.add(new XhrStreamingTransportHandler());
+		result.add(new EventSourceTransportHandler());
+		result.add(new HtmlFileTransportHandler());
+		if (isWebSocketEnabled()) {
+			try {
+				result.add(new WebSocketTransportHandler(new DefaultHandshakeHandler()));
+			}
+			catch (Exception ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Failed to add default WebSocketTransportHandler: " + ex.getMessage());
+				}
+			}
+		}
+		return result;
+	}
+
+	protected void addTransportHandlers(Collection<TransportHandler> handlers) {
 		for (TransportHandler handler : handlers) {
+			if (handler instanceof ConfigurableTransportHandler) {
+				((ConfigurableTransportHandler) handler).setSockJsConfiguration(this);
+			}
 			this.transportHandlers.put(handler.getTransportType(), handler);
 		}
 	}
 
-	public void setTransportHandlerOverrides(TransportHandler... handlers) {
-		this.transportHandlerOverrides.clear();
-		for (TransportHandler handler : handlers) {
-			this.transportHandlerOverrides.put(handler.getTransportType(), handler);
-		}
-	}
-
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-
-		super.afterPropertiesSet();
-
-		if (this.transportHandlers.isEmpty()) {
-			if (isWebSocketEnabled() && (this.transportHandlerOverrides.get(TransportType.WEBSOCKET) == null)) {
-				this.transportHandlers.put(TransportType.WEBSOCKET,
-						new WebSocketTransportHandler(new DefaultHandshakeHandler()));
-			}
-			this.transportHandlers.put(TransportType.XHR, new XhrPollingTransportHandler());
-			this.transportHandlers.put(TransportType.XHR_SEND, new XhrTransportHandler());
-			this.transportHandlers.put(TransportType.JSONP, new JsonpPollingTransportHandler());
-			this.transportHandlers.put(TransportType.JSONP_SEND, new JsonpTransportHandler());
-			this.transportHandlers.put(TransportType.XHR_STREAMING, new XhrStreamingTransportHandler());
-			this.transportHandlers.put(TransportType.EVENT_SOURCE, new EventSourceTransportHandler());
-			this.transportHandlers.put(TransportType.HTML_FILE, new HtmlFileTransportHandler());
-		}
-
-		if (!this.transportHandlerOverrides.isEmpty()) {
-			for (TransportHandler transportHandler : this.transportHandlerOverrides.values()) {
-				this.transportHandlers.put(transportHandler.getTransportType(), transportHandler);
-			}
-		}
-
-		for (TransportHandler h : this.transportHandlers.values()) {
-			if (h instanceof ConfigurableTransportHandler) {
-				((ConfigurableTransportHandler) h).setSockJsConfiguration(this);
-			}
-		}
-
-		this.sessionTimeoutSchedulerHolder.initialize();
-
-		this.sessionTimeoutSchedulerHolder.getScheduler().scheduleAtFixedRate(new Runnable() {
-			public void run() {
-				try {
-					int count = sessions.size();
-					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
-					}
-					for (AbstractSockJsSession session : sessions.values()) {
-						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-							if (logger.isTraceEnabled()) {
-								logger.trace("Removing " + session + " for [" + getName() + "]");
-							}
-							session.close();
-							sessions.remove(session.getId());
-						}
-					}
-					if (logger.isTraceEnabled() && (count != 0)) {
-						logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
-					}
-				}
-				catch (Throwable t) {
-					logger.error("Failed to complete session timeout checks for [" + getName() + "]", t);
-				}
-			}
-		}, getDisconnectDelay());
-	}
-
-	@Override
-	public void destroy() throws Exception {
-		super.destroy();
-		this.sessionTimeoutSchedulerHolder.destroy();
+	public Map<TransportType, TransportHandler> getTransportHandlers() {
+		return Collections.unmodifiableMap(this.transportHandlers);
 	}
 
 	@Override
@@ -239,6 +201,9 @@ public class DefaultSockJsService extends AbstractSockJsService {
 				if (session != null) {
 					return session;
 				}
+				if (this.sessionCleanupTask == null) {
+					scheduleSessionTask();
+				}
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
 				session = (AbstractSockJsSession) sessionFactory.createSession(sessionId, handler);
 				this.sessions.put(sessionId, session);
@@ -247,6 +212,34 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		}
 
 		return null;
+	}
+
+	private void scheduleSessionTask() {
+		this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
+			public void run() {
+				try {
+					int count = sessions.size();
+					if (logger.isTraceEnabled() && (count != 0)) {
+						logger.trace("Checking " + count + " session(s) for timeouts [" + getName() + "]");
+					}
+					for (AbstractSockJsSession session : sessions.values()) {
+						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
+							if (logger.isTraceEnabled()) {
+								logger.trace("Removing " + session + " for [" + getName() + "]");
+							}
+							session.close();
+							sessions.remove(session.getId());
+						}
+					}
+					if (logger.isTraceEnabled() && (count != 0)) {
+						logger.trace(sessions.size() + " remaining session(s) [" + getName() + "]");
+					}
+				}
+				catch (Throwable t) {
+					logger.error("Failed to complete session timeout checks for [" + getName() + "]", t);
+				}
+			}
+		}, getDisconnectDelay());
 	}
 
 }

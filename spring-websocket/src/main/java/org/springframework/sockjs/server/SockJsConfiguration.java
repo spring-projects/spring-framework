@@ -48,10 +48,8 @@ public interface SockJsConfiguration {
 	public long getHeartbeatTime();
 
 	/**
-	 * A scheduler instance to use for scheduling heartbeat frames.
-	 * <p>
-	 * By default a {@link ThreadPoolTaskScheduler} with default settings is used.
+	 * A scheduler instance to use for scheduling heart-beat messages.
 	 */
-	public TaskScheduler getHeartbeatScheduler();
+	public TaskScheduler getTaskScheduler();
 
 }
