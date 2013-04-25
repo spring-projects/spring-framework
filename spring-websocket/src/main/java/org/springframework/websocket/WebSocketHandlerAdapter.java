@@ -34,20 +34,15 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 	}
 
 	@Override
+	public void handleTextMessage(TextMessage message, WebSocketSession session) {
+	}
+
+	@Override
+	public void handleBinaryMessage(BinaryMessage message, WebSocketSession session) {
+	}
+
+	@Override
 	public void handleTransportError(Throwable exception, WebSocketSession session) {
-	}
-
-
-	public static abstract class TextMessageHandlerAdapter
-			extends WebSocketHandlerAdapter implements TextMessageHandler {
-	}
-
-	public static abstract class BinaryMessageHandlerAdapter
-		extends WebSocketHandlerAdapter implements BinaryMessageHandler {
-	}
-
-	public static abstract class TextAndBinaryMessageHandlerAdapter extends WebSocketHandlerAdapter
-			implements TextMessageHandler, BinaryMessageHandler {
 	}
 
 }

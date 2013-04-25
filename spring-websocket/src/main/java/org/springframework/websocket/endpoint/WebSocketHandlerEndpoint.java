@@ -27,12 +27,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.BinaryMessage;
-import org.springframework.websocket.BinaryMessageHandler;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.PartialMessageHandler;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.TextMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -74,36 +72,27 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		this.webSocketSession = new StandardWebSocketSession(session);
 		this.handler = handlerProvider.getHandler();
 
-		if (this.handler instanceof TextMessageHandler) {
-			session.addMessageHandler(new MessageHandler.Whole<String>() {
+		session.addMessageHandler(new MessageHandler.Whole<String>() {
+			@Override
+			public void onMessage(String message) {
+				handleTextMessage(session, message);
+			}
+		});
+		if (this.handler instanceof PartialMessageHandler) {
+			session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
 				@Override
-				public void onMessage(String message) {
-					handleTextMessage(session, message);
+				public void onMessage(byte[] messagePart, boolean isLast) {
+					handleBinaryMessage(session, messagePart, isLast);
 				}
 			});
 		}
-		else if (this.handler instanceof BinaryMessageHandler) {
-			if (this.handler instanceof PartialMessageHandler) {
-				session.addMessageHandler(new MessageHandler.Partial<byte[]>() {
-					@Override
-					public void onMessage(byte[] messagePart, boolean isLast) {
-						handleBinaryMessage(session, messagePart, isLast);
-					}
-				});
-			}
-			else {
-				session.addMessageHandler(new MessageHandler.Whole<byte[]>() {
-					@Override
-					public void onMessage(byte[] message) {
-						handleBinaryMessage(session, message, true);
-					}
-				});
-			}
-		}
 		else {
-			if (logger.isWarnEnabled()) {
-				logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.handler);
-			}
+			session.addMessageHandler(new MessageHandler.Whole<byte[]>() {
+				@Override
+				public void onMessage(byte[] message) {
+					handleBinaryMessage(session, message, true);
+				}
+			});
 		}
 
 		try {
@@ -147,7 +136,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		}
 		try {
 			TextMessage textMessage = new TextMessage(message);
-			((TextMessageHandler) handler).handleTextMessage(textMessage, this.webSocketSession);
+			this.handler.handleTextMessage(textMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(ex);
@@ -160,7 +149,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 		}
 		try {
 			BinaryMessage binaryMessage = new BinaryMessage(message, isLast);
-			((BinaryMessageHandler) handler).handleBinaryMessage(binaryMessage, this.webSocketSession);
+			this.handler.handleBinaryMessage(binaryMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(ex);

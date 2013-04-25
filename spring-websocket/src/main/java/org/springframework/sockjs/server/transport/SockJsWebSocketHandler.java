@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.TextMessageHandler;
+import org.springframework.websocket.TextWebSocketHandlerAdapter;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SockJsWebSocketHandler implements TextMessageHandler {
+public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final SockJsConfiguration sockJsConfig;
 

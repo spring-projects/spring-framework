@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.TextMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -44,7 +43,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
-	private TextMessageHandler handler;
+	private WebSocketHandler handler;
 
 	private State state = State.NEW;
 
@@ -124,19 +123,13 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	public void delegateConnectionEstablished() {
 		this.state = State.OPEN;
-		initHandler();
+		this.handler = handlerProvider.getHandler();
 		try {
 			this.handler.afterConnectionEstablished(this);
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(ex, null);
 		}
-	}
-
-	private void initHandler() {
-		WebSocketHandler webSocketHandler = handlerProvider.getHandler();
-		Assert.isInstanceOf(TextMessageHandler.class, webSocketHandler, "Expected a TextMessageHandler");
-		this.handler = (TextMessageHandler) webSocketHandler;
 	}
 
 	/**

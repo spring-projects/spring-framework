@@ -40,11 +40,9 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.websocket.BinaryMessage;
-import org.springframework.websocket.BinaryMessageHandler;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.TextMessageHandler;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
@@ -213,9 +211,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 					logger.trace("Received message for WebSocket session id="
 							+ this.session.getId() + ": " + message);
 				}
-				if (this.handler instanceof TextMessageHandler) {
-					((TextMessageHandler) this.handler).handleTextMessage(message, this.session);
-				}
+				this.handler.handleTextMessage(message, this.session);
 			}
 			catch(Throwable ex) {
 				tryCloseWithError(ex);
@@ -230,10 +226,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 					logger.trace("Received binary data for WebSocket session id="
 							+ this.session.getId() + ": " + message);
 				}
-				if (this.handler instanceof BinaryMessageHandler) {
-					((BinaryMessageHandler) this.handler).handleBinaryMessage(message,
-							this.session);
-				}
+				this.handler.handleBinaryMessage(message, this.session);
 			}
 			catch(Throwable ex) {
 				tryCloseWithError(ex);

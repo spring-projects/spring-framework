@@ -37,6 +37,16 @@ public interface WebSocketHandler {
 	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session);
 
 	/**
+	 * Handle an incoming text message.
+	 */
+	void handleTextMessage(TextMessage message, WebSocketSession session);
+
+	/**
+	 * Handle an incoming binary message.
+	 */
+	void handleBinaryMessage(BinaryMessage message, WebSocketSession session);
+
+	/**
 	 * TODO
 	 */
 	void handleTransportError(Throwable exception, WebSocketSession session);
