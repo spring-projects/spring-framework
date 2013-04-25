@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
@@ -33,7 +34,6 @@ import org.springframework.websocket.WebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 /**
  * TODO

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -21,9 +22,7 @@ import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

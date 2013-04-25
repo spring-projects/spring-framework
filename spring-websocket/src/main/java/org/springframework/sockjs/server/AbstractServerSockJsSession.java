@@ -30,7 +30,6 @@ import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketMessage;
 
-
 /**
  * Provides partial implementations of {@link SockJsSession} methods to send messages,
  * including heartbeat messages and to manage session state.

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket.client.endpoint;
 
 import java.net.URI;
@@ -39,7 +40,6 @@ import org.springframework.websocket.client.WebSocketConnectFailureException;
 import org.springframework.websocket.endpoint.StandardWebSocketSession;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.support.SimpleHandlerProvider;
-
 
 /**
  * A standard Java {@link WebSocketClient}.

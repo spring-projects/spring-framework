@@ -35,7 +35,6 @@ import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
-
 /**
  * An {@link HttpRequestHandler} that wraps the invocation of a {@link HandshakeHandler}.
  *
@@ -59,7 +58,6 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler> handlerProvider,
 			HandshakeHandler handshakeHandler) {
-
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
 		this.handlerProvider = handlerProvider;

@@ -19,7 +19,6 @@ package org.springframework.websocket;
 import java.io.IOException;
 import java.net.URI;
 
-
 /**
  * Allows sending messages over a WebSocket connection as well as closing it.
  *

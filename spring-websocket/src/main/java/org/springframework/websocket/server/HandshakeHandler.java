@@ -23,7 +23,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
  * Contract for processing a WebSocket handshake request.
  *

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket.client;
 
 import java.util.ArrayList;
@@ -25,9 +26,7 @@ import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -57,6 +56,7 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 		this.client = webSocketClient;
 		this.handlerProvider = handlerProvider;
 	}
+
 
 	public void setSubProtocols(List<String> subProtocols) {
 		this.subProtocols.clear();

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.websocket;
 
+package org.springframework.websocket;
 
 /**
  * A "marker" interface for {@link BinaryMessageHandler} types that wish to handle partial

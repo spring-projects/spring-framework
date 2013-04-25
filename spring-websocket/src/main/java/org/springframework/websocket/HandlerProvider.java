@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.websocket;
 
+package org.springframework.websocket;
 
 /**
  * A strategy for obtaining a handler instance that is scoped to external lifecycle events

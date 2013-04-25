@@ -22,6 +22,7 @@ package org.springframework.websocket;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see WebSocketHandler
  */
 public class WebSocketHandlerAdapter implements WebSocketHandler {
 

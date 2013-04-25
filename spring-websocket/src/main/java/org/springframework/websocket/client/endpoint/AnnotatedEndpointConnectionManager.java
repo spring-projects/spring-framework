@@ -25,9 +25,7 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -46,6 +44,7 @@ public class AnnotatedEndpointConnectionManager extends EndpointConnectionManage
 		super(uriTemplate, uriVariables);
 		this.handlerProvider = new BeanCreatingHandlerProvider<Object>(endpointClass);
 	}
+
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

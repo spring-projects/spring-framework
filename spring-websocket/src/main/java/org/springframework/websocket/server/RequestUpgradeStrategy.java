@@ -23,7 +23,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
  * A strategy for performing container-specific steps to upgrade an HTTP request during a
  * WebSocket handshake. Intended for use within {@link HandshakeHandler} implementations.

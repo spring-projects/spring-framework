@@ -23,14 +23,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SockJsService {
-
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
 			HandlerProvider<WebSocketHandler> handler) throws IOException, TransportErrorException;

@@ -15,9 +15,9 @@
  */
 package org.springframework.websocket;
 
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-
 
 /**
  * Represents a WebSocket close status code and reason. Status codes in the 1xxx range are
@@ -28,11 +28,10 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  */
 public final class CloseStatus {
 
-    /**
+	/**
 	 * "1000 indicates a normal closure, meaning that the purpose for which the connection
 	 * was established has been fulfilled."
 	 */
@@ -44,13 +43,13 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus GOING_AWAY = new CloseStatus(1001);
 
-    /**
+	/**
 	 * "1002 indicates that an endpoint is terminating the connection due to a protocol
 	 * error."
 	 */
 	public static final CloseStatus PROTOCOL_ERROR  = new CloseStatus(1002);
 
-    /**
+	/**
 	 * "1003 indicates that an endpoint is terminating the connection because it has
 	 * received a type of data it cannot accept (e.g., an endpoint that understands only
 	 * text data MAY send this if it receives a binary message)."
@@ -82,7 +81,7 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus BAD_DATA = new CloseStatus(1007);
 
-    /**
+	/**
 	 * "1008 indicates that an endpoint is terminating the connection because it has
 	 * received a message that violates its policy. This is a generic status code that can
 	 * be returned when there is no other more suitable status code (e.g., 1003 or 1009)
@@ -90,13 +89,13 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus POLICY_VIOLATION = new CloseStatus(1008);
 
-    /**
+	/**
 	 * "1009 indicates that an endpoint is terminating the connection because it has
 	 * received a message that is too big for it to process."
 	 */
 	public static final CloseStatus TOO_BIG_TO_PROCESS = new CloseStatus(1009);
 
-    /**
+	/**
 	 * "1010 indicates that an endpoint (client) is terminating the connection because it
 	 * has expected the server to negotiate one or more extension, but the server didn't
 	 * return them in the response message of the WebSocket handshake. The list of
@@ -106,7 +105,7 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus REQUIRED_EXTENSION = new CloseStatus(1010);
 
-    /**
+	/**
 	 * "1011 indicates that a server is terminating the connection because it encountered
 	 * an unexpected condition that prevented it from fulfilling the request."
 	 */
@@ -125,7 +124,7 @@ public final class CloseStatus {
 	 */
 	public static final CloseStatus SERVICE_OVERLOAD = new CloseStatus(1013);
 
-    /**
+	/**
 	 * "1015 is a reserved value and MUST NOT be set as a status code in a Close control
 	 * frame by an endpoint. It is designated for use in applications expecting a status
 	 * code to indicate that the connection was closed due to a failure to perform a TLS
@@ -134,32 +133,51 @@ public final class CloseStatus {
 	public static final CloseStatus TLS_HANDSHAKE_FAILURE = new CloseStatus(1015);
 
 
-
 	private final int code;
 
 	private final String reason;
 
 
+	/**
+	 * Create a new {@link CloseStatus} instance.
+	 * @param code the status code
+	 */
 	public CloseStatus(int code) {
 		this(code, null);
 	}
 
+	/**
+	 * Create a new {@link CloseStatus} instance.
+	 * @param code
+	 * @param reason
+	 */
 	public CloseStatus(int code, String reason) {
 		Assert.isTrue((code >= 1000 && code < 5000), "Invalid code");
 		this.code = code;
 		this.reason = reason;
 	}
 
+	/**
+	 * Returns the status code.
+	 */
 	public int getCode() {
 		return this.code;
 	}
 
+	/**
+	 * Returns the reason or {@code null}.
+	 */
 	public String getReason() {
 		return this.reason;
 	}
 
+	/**
+	 * Crate a new {@link CloseStatus} from this one with the specified reason.
+	 * @param reason the reason
+	 * @return a new {@link StatusCode} instance
+	 */
 	public CloseStatus withReason(String reason) {
-		Assert.hasText(reason, "Expected non-empty reason");
+		Assert.hasText(reason, "Reason must not be empty");
 		return new CloseStatus(this.code, reason);
 	}
 

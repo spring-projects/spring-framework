@@ -18,7 +18,6 @@ package org.springframework.sockjs.server;
 
 import org.springframework.core.NestedRuntimeException;
 
-
 /**
  *
  * @author Rossen Stoyanchev
@@ -26,7 +25,6 @@ import org.springframework.core.NestedRuntimeException;
  */
 @SuppressWarnings("serial")
 public class NestedSockJsRuntimeException extends NestedRuntimeException {
-
 
 	public NestedSockJsRuntimeException(String msg) {
 		super(msg);

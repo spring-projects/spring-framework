@@ -26,7 +26,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.HandlerProvider;
 
-
 /**
  * A {@link HandlerProvider} that uses {@link AutowireCapableBeanFactory#createBean(Class)
  * creating a fresh instance every time #getHandler() is called.
@@ -47,6 +46,7 @@ public class BeanCreatingHandlerProvider<T> implements HandlerProvider<T>, BeanF
 		Assert.notNull(handlerClass, "handlerClass is required");
 		this.handlerClass = handlerClass;
 	}
+
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

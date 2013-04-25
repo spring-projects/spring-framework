@@ -13,27 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-
 /**
+ * A message that can be sent or received over a WebSocket connection. A WebSocket
+ * message must be either a {@link BinaryMessage} or a {@link TextMessage} depending
+ * on the payload. No further subclasses are supported.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see BinaryMessage
+ * @see TextMessage
  */
 public abstract class WebSocketMessage<T> {
 
 	private final T payload;
 
 
+	/**
+	 * Create a new {@link WebSocketMessage} instance.
+	 * @param payload a non-null payload
+	 */
 	WebSocketMessage(T payload) {
 		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
 	}
 
+
+	/**
+	 * Returns the message payload. This will never be {@code null}.
+	 */
 	public T getPayload() {
 		return this.payload;
 	}

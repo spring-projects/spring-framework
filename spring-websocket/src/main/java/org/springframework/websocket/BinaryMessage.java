@@ -23,10 +23,11 @@ import org.springframework.util.Assert;
 
 
 /**
- * Represents a binary WebSocket message.
+ * A {@link WebSocketMessage} that contains a binary {@link ByteBuffer} payload.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see WebSocketMessage
  */
 public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
@@ -35,41 +36,80 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	private final boolean last;
 
 
+	/**
+	 * Create a new {@link BinaryMessage} instance.
+	 * @param payload a non-null payload
+	 */
 	public BinaryMessage(ByteBuffer payload) {
 		this(payload, true);
 	}
 
+	/**
+	 * Create a new {@link BinaryMessage} instance.
+	 * @param payload a non-null payload
+	 * @param isLast if the message is the last of a series of partial messages
+	 */
 	public BinaryMessage(ByteBuffer payload, boolean isLast) {
 		super(payload);
 		this.bytes = null;
 		this.last = isLast;
 	}
 
+	/**
+	 * Create a new {@link BinaryMessage} instance.
+	 * @param payload a non-null payload
+	 */
 	public BinaryMessage(byte[] payload) {
 		this(payload, true);
 	}
 
+	/**
+	 * Create a new {@link BinaryMessage} instance.
+	 * @param payload a non-null payload
+	 * @param isLast if the message is the last of a series of partial messages
+	 */
 	public BinaryMessage(byte[] payload, boolean isLast) {
 		this(payload, 0, (payload == null ? 0 : payload.length), isLast);
 	}
 
+	/**
+	 * Create a new {@link BinaryMessage} instance by wrapping an existing byte array.
+	 * @param payload a non-null payload, NOTE: this value is not copied so care must be
+	 *        taken not to modify the array.
+	 * @param isLast if the message is the last of a series of partial messages
+	 */
 	public BinaryMessage(byte[] payload, int offset, int len) {
 		this(payload, offset, len, true);
 	}
 
+	/**
+	 * Create a new {@link BinaryMessage} instance by wrapping an existing byte array.
+	 * @param payload a non-null payload, NOTE: this value is not copied so care must be
+	 *        taken not to modify the array.
+	 * @param offset the offet into the array where the payload starts
+	 * @param len the length of the array considered for the payload
+	 * @param isLast if the message is the last of a series of partial messages
+	 */
 	public BinaryMessage(byte[] payload, int offset, int len, boolean isLast) {
 		super(payload != null ? ByteBuffer.wrap(payload, offset, len) : null);
-		if(payload != null && offset == 0 && len == payload.length) {
-			// FIXME better if a message always needs a payload?
+		if(offset == 0 && len == payload.length) {
 			this.bytes = payload;
 		}
 		this.last = isLast;
 	}
 
+	/**
+	 * Returns if this is the last part in a series of partial messages. If this is
+	 * not a partial message this method will return {@code true}.
+	 */
 	public boolean isLast() {
 		return this.last;
 	}
 
+	/**
+	 * Returns access to the message payload as a byte array. NOTE: the returned array
+	 * should be considered read-only and should not be modified.
+	 */
 	public byte[] getByteArray() {
 		if(this.bytes == null && getPayload() != null) {
 			this.bytes = getRemainingBytes(getPayload());
@@ -83,6 +123,9 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 		return result;
 	}
 
+	/**
+	 * Returns access to the message payload as an {@link InputStream}.
+	 */
 	public InputStream getInputStream() {
 		byte[] array = getByteArray();
 		return (array != null) ? new ByteArrayInputStream(array) : null;

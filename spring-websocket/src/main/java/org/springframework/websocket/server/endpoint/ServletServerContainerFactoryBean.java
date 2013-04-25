@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket.server.endpoint;
 
 import javax.servlet.ServletContext;
@@ -25,7 +26,6 @@ import org.springframework.sockjs.server.SockJsService;
 import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
-
 
 /**
  * A FactoryBean for {@link javax.websocket.server.ServerContainer}. Since
@@ -46,6 +46,7 @@ public class ServletServerContainerFactoryBean
 
 	private static final String SERVER_CONTAINER_ATTR_NAME = "javax.websocket.server.ServerContainer";
 
+
 	private Long asyncSendTimeout;
 
 	private Long maxSessionIdleTimeout;
@@ -53,7 +54,6 @@ public class ServletServerContainerFactoryBean
 	private Integer maxTextMessageBufferSize;
 
 	private Integer maxBinaryMessageBufferSize;
-
 
 	private ServerContainer serverContainer;
 

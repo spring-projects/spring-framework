@@ -13,23 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket;
 
 import java.io.Reader;
 import java.io.StringReader;
 
 /**
- * Represents a text WebSocket message.
+ * A {@link WebSocketMessage} that contains a textual {@link String} payload.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public final class TextMessage extends WebSocketMessage<String> {
 
-	public TextMessage(String payload) {
-		super(payload);
+	/**
+	 * Create a new {@link TextMessage} instance.
+	 * @param payload the payload
+	 */
+	public TextMessage(CharSequence payload) {
+		super(payload.toString());
 	}
 
+	/**
+	 * Returns access to the message payload as a {@link Reader}.
+	 */
 	public Reader getReader() {
 		return new StringReader(getPayload());
 	}

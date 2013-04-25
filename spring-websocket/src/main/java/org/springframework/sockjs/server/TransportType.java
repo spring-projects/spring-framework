@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server;
 
 import java.util.Arrays;
@@ -20,9 +21,7 @@ import java.util.List;
 
 import org.springframework.http.HttpMethod;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

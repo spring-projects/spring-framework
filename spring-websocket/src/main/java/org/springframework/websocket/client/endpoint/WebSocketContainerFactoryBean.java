@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket.client.endpoint;
 
 import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 
 import org.springframework.beans.factory.FactoryBean;
-
 
 /**
  * A FactoryBean for creating and configuring a {@link javax.websocket.WebSocketContainer}

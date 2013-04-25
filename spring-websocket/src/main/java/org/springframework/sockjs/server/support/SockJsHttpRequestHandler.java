@@ -35,9 +35,7 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -88,6 +86,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		this.sockJsService = sockJsService;
 		this.handlerProvider = handlerProvider;
 	}
+
 
 	public String getPrefix() {
 		return this.prefix;

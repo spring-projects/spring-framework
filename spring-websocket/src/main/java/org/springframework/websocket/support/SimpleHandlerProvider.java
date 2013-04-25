@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.websocket.support;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.websocket.HandlerProvider;
-
 
 /**
  * A {@link HandlerProvider} that returns a singleton instance.
@@ -33,6 +33,7 @@ public class SimpleHandlerProvider<T> implements HandlerProvider<T> {
 	public SimpleHandlerProvider(T handler) {
 		this.handler = handler;
 	}
+
 
 	@Override
 	public boolean isSingleton() {

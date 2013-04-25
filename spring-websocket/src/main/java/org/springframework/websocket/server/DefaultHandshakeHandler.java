@@ -38,7 +38,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
  * TODO
  * <p>
@@ -77,6 +76,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	public DefaultHandshakeHandler(RequestUpgradeStrategy upgradeStrategy) {
 		this.requestUpgradeStrategy = upgradeStrategy;
 	}
+
 
 	public void setSupportedProtocols(String... protocols) {
 		this.supportedProtocols = Arrays.asList(protocols);

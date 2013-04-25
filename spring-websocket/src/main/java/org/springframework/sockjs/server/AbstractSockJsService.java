@@ -39,7 +39,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
  * Provides support for SockJS configuration options and serves the static SockJS URLs.
  *

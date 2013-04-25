@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server.transport;
 
 import java.nio.charset.Charset;
@@ -31,7 +32,6 @@ import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 /**
  * TODO
  *
@@ -39,7 +39,6 @@ import org.springframework.websocket.WebSocketHandler;
  * @since 4.0
  */
 public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHandler {
-
 
 	@Override
 	public TransportType getTransportType() {

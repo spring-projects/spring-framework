@@ -92,6 +92,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		}
 	}
 
+
 	@Override
 	public String[] getSupportedVersions() {
 		return new String[] { String.valueOf(HandshakeRFC6455.VERSION) };

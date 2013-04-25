@@ -29,7 +29,6 @@ import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
 
-
 /**
  * A {@link RequestUpgradeStrategy} that supports WebSocket handlers of type
  * {@link WebSocketHandler} as well as {@link javax.websocket.Endpoint}.

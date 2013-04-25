@@ -16,9 +16,7 @@
 
 package org.springframework.sockjs.server;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

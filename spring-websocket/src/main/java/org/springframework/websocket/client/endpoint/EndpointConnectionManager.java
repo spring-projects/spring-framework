@@ -35,9 +35,7 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -59,6 +57,7 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 		Assert.notNull(endpointClass, "endpointClass is required");
 		this.handlerProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
 	}
+
 
 	public void setSubProtocols(String... subprotocols) {
 		this.configBuilder.preferredSubprotocols(Arrays.asList(subprotocols));

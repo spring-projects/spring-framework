@@ -37,7 +37,8 @@ import org.springframework.websocket.WebSocketSession;
  */
 public abstract class AbstractSockJsSession implements WebSocketSession {
 
-	protected Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	private final String sessionId;
 

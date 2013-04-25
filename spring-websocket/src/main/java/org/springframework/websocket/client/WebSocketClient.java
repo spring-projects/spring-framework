@@ -22,7 +22,6 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
-
 /**
  * Contract for starting a WebSocket handshake request.
  *
@@ -35,7 +34,6 @@ import org.springframework.websocket.WebSocketSession;
  * @see WebSocketConnectionManager
  */
 public interface WebSocketClient {
-
 
 	WebSocketSession doHandshake(WebSocketHandler handler,
 			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException;

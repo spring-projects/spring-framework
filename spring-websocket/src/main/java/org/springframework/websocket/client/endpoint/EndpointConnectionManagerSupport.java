@@ -22,9 +22,7 @@ import javax.websocket.WebSocketContainer;
 
 import org.springframework.websocket.client.AbstractWebSocketConnectionManager;
 
-
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -38,6 +36,7 @@ public abstract class EndpointConnectionManagerSupport extends AbstractWebSocket
 	public EndpointConnectionManagerSupport(String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
 	}
+
 
 	public void setWebSocketContainer(WebSocketContainer webSocketContainer) {
 		this.webSocketContainer = webSocketContainer;

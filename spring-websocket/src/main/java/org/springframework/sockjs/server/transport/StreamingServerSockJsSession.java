@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
@@ -26,7 +27,6 @@ import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
-
 public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
 	private int byteCount;
@@ -37,6 +37,7 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 
 		super(sessionId, sockJsConfig, handler);
 	}
+
 
 	@Override
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,

@@ -20,15 +20,21 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
-
 /**
  * A factory for creating a SockJS session.
  *
+ * @param <S> The type of session being created
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SockJsSessionFactory<S extends WebSocketSession>{
 
+	/**
+	 * Create a new SockJS session.
+	 * @param sessionId the ID of the session
+	 * @param handler the underlying {@link WebSocketHandler}
+	 * @return a new non-null session
+	 */
 	S createSession(String sessionId, HandlerProvider<WebSocketHandler> handler);
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.sockjs.server;
 
 import java.nio.charset.Charset;
@@ -21,10 +22,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 
-
 /**
- *
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -45,6 +43,7 @@ public class SockJsFrame {
 	private SockJsFrame(String content) {
 		this.content = content;
 	}
+
 
 	public static SockJsFrame openFrame() {
 		return OPEN_FRAME;

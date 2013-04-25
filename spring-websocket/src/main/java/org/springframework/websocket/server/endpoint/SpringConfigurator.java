@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
-
 /**
  * This should be used in conjuction with {@link ServerEndpoint @ServerEndpoint} classes.
  *

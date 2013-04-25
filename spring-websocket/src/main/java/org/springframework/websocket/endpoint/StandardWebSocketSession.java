@@ -32,7 +32,6 @@ import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
-
 /**
  * A standard Java implementation of {@link WebSocketSession} that delegates to
  * {@link javax.websocket.Session}.
@@ -51,6 +50,7 @@ public class StandardWebSocketSession implements WebSocketSession {
 		Assert.notNull(session, "session is required");
 		this.session = session;
 	}
+
 
 	@Override
 	public String getId() {

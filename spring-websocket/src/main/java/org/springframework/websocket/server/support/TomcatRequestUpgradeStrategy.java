@@ -34,7 +34,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.websocket.server.endpoint.EndpointRegistration;
 
-
 /**
  * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket handshake.
  *
@@ -42,7 +41,6 @@ import org.springframework.websocket.server.endpoint.EndpointRegistration;
  * @since 4.0
  */
 public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
-
 
 	@Override
 	public String[] getSupportedVersions() {

@@ -16,8 +16,6 @@
 
 package org.springframework.websocket;
 
-
-
 /**
  * A handler for WebSocket sessions.
  *
