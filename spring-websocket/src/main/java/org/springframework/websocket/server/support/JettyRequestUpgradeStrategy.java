@@ -18,6 +18,7 @@ package org.springframework.websocket.server.support;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -101,7 +102,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
 			String selectedProtocol, HandlerProvider<WebSocketHandler> handlerProvider)
-			throws Exception {
+			throws IOException {
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
 		upgrade(((ServletServerHttpRequest) request).getServletRequest(),
@@ -111,7 +112,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	private void upgrade(HttpServletRequest request, HttpServletResponse response,
 			String selectedProtocol, final HandlerProvider<WebSocketHandler> handlerProvider)
-			throws Exception {
+			throws IOException {
 		request.setAttribute(HANDLER_PROVIDER, handlerProvider);
 		Assert.state(factory.isUpgradeRequest(request, response), "Not a suitable WebSocket upgrade request");
 		Assert.state(factory.acceptWebSocket(request, response), "Unable to accept WebSocket");
@@ -129,6 +130,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		private WebSocketSession session;
 
+		private final AtomicInteger sessionCount = new AtomicInteger(0);
+
 
 		public WebSocketHandlerAdapter(HandlerProvider<WebSocketHandler> provider) {
 			Assert.notNull(provider, "Provider must not be null");
@@ -139,31 +142,53 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		@Override
 		public void onWebSocketConnect(Session session) {
-			Assert.state(this.session == null, "WebSocket already open");
+
+			Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
+
+			this.session = new WebSocketSessionAdapter(session);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connection established, WebSocket session id="
+						+ this.session.getId() + ", uri=" + this.session.getURI());
+			}
+			this.handler = this.provider.getHandler();
+
 			try {
-				this.session = new WebSocketSessionAdapter(session);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Connection established, WebSocket session id="
-							+ this.session.getId() + ", uri=" + this.session.getURI());
-				}
-				this.handler = this.provider.getHandler();
 				this.handler.afterConnectionEstablished(this.session);
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
+				tryCloseWithError(ex);
+			}
+		}
+
+		private void tryCloseWithError(Throwable ex) {
+			logger.error("Unhandled error for " + this.session, ex);
+			if (this.session.isOpen()) {
 				try {
-					// FIXME revisit after error handling
-					onWebSocketError(ex);
+					this.session.close(CloseStatus.SERVER_ERROR);
 				}
-				finally {
-					this.session = null;
-					this.handler = null;
+				catch (Throwable t) {
+					destroyHandler();
 				}
+			}
+		}
+
+		private void destroyHandler() {
+			try {
+				if (this.handler != null) {
+					this.provider.destroy(this.handler);
+				}
+			}
+			catch (Throwable t) {
+				logger.warn("Error while destroying handler", t);
+			}
+			finally {
+				this.session = null;
+				this.handler = null;
 			}
 		}
 
 		@Override
 		public void onWebSocketClose(int statusCode, String reason) {
-			Assert.state(this.session != null, "WebSocket not open");
 			try {
 				CloseStatus closeStatus = new CloseStatus(statusCode, reason);
 				if (logger.isDebugEnabled()) {
@@ -172,19 +197,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 				}
 				this.handler.afterConnectionClosed(closeStatus, this.session);
 			}
-			catch (Exception ex) {
-				onWebSocketError(ex);
+			catch (Throwable ex) {
+				logger.error("Unhandled error for " + this.session, ex);
 			}
 			finally {
-				try {
-					if (this.handler != null) {
-						this.provider.destroy(this.handler);
-					}
-				}
-				finally {
-					this.session = null;
-					this.handler = null;
-				}
+				destroyHandler();
 			}
 		}
 
@@ -200,8 +217,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 					((TextMessageHandler) this.handler).handleTextMessage(message, this.session);
 				}
 			}
-			catch(Exception ex) {
-				ex.printStackTrace(); //FIXME
+			catch(Throwable ex) {
+				tryCloseWithError(ex);
 			}
 		}
 
@@ -218,20 +235,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 							this.session);
 				}
 			}
-			catch(Exception ex) {
-				ex.printStackTrace(); //FIXME
+			catch(Throwable ex) {
+				tryCloseWithError(ex);
 			}
 		}
 
 		@Override
 		public void onWebSocketError(Throwable cause) {
 			try {
-				this.handler.handleError(cause, this.session);
+				this.handler.handleTransportError(cause, this.session);
 			}
 			catch (Throwable ex) {
-				// FIXME exceptions
-				logger.error("Error for WebSocket session id=" + this.session.getId(),
-						cause);
+				tryCloseWithError(ex);
 			}
 		}
 	}
@@ -271,7 +286,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		}
 
 		@Override
-		public void sendMessage(WebSocketMessage message) throws Exception {
+		public void sendMessage(WebSocketMessage message) throws IOException {
 			if (message instanceof BinaryMessage) {
 				sendMessage((BinaryMessage) message);
 			}
@@ -283,11 +298,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			}
 		}
 
-		private void sendMessage(BinaryMessage message) throws Exception {
+		private void sendMessage(BinaryMessage message) throws IOException {
 			this.session.getRemote().sendBytes(message.getPayload());
 		}
 
-		private void sendMessage(TextMessage message) throws Exception {
+		private void sendMessage(TextMessage message) throws IOException {
 			this.session.getRemote().sendString(message.getPayload());
 		}
 

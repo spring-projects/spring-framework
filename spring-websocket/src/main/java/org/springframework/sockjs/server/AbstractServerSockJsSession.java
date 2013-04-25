@@ -56,13 +56,13 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 		return this.sockJsConfig;
 	}
 
-	public final synchronized void sendMessage(WebSocketMessage message) throws Exception {
-		Assert.isTrue(!isClosed(), "Cannot send a message, session has been closed");
+	public final synchronized void sendMessage(WebSocketMessage message) throws IOException {
+		Assert.isTrue(!isClosed(), "Cannot send a message when session is closed");
 		Assert.isInstanceOf(TextMessage.class, message, "Expected text message: " + message);
 		sendMessageInternal(((TextMessage) message).getPayload());
 	}
 
-	protected abstract void sendMessageInternal(String message) throws Exception;
+	protected abstract void sendMessageInternal(String message) throws IOException;
 
 
 	@Override
@@ -72,7 +72,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 	}
 
 	@Override
-	public final synchronized void closeInternal(CloseStatus status) throws Exception {
+	public final synchronized void closeInternal(CloseStatus status) throws IOException {
 		if (isActive()) {
 			// TODO: deliver messages "in flight" before sending close frame
 			try {
@@ -89,13 +89,13 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 	}
 
 	// TODO: close status/reason
-	protected abstract void disconnect(CloseStatus status) throws Exception;
+	protected abstract void disconnect(CloseStatus status) throws IOException;
 
 	/**
 	 * For internal use within a TransportHandler and the (TransportHandler-specific)
 	 * session sub-class.
 	 */
-	protected void writeFrame(SockJsFrame frame) throws Exception {
+	protected void writeFrame(SockJsFrame frame) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Preparing to write " + frame);
 		}
@@ -115,7 +115,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 		catch (Throwable ex) {
 			logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
 			close();
-			throw new NestedSockJsRuntimeException("Failed to write frame " + frame, ex);
+			throw new NestedSockJsRuntimeException("Failed to write " + frame, ex);
 		}
 	}
 
@@ -140,7 +140,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 				try {
 					sendHeartbeat();
 				}
-				catch (Exception e) {
+				catch (Throwable t) {
 					// ignore
 				}
 			}

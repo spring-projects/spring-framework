@@ -17,9 +17,12 @@ package org.springframework.sockjs.server.transport;
 
 import java.io.IOException;
 
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
@@ -35,7 +38,15 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 		super(sessionId, sockJsConfig, handler);
 	}
 
-	protected void flushCache() throws Exception {
+	@Override
+	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+			FrameFormat frameFormat) throws TransportErrorException {
+
+		super.setInitialRequest(request, response, frameFormat);
+		super.setLongPollingRequest(request, response, frameFormat);
+	}
+
+	protected void flushCache() throws IOException {
 
 		cancelHeartbeat();
 
@@ -68,9 +79,12 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 	}
 
 	@Override
-	public void writeFrame(ServerHttpResponse response, SockJsFrame frame) throws IOException {
-		super.writeFrame(response, frame);
-		response.flush();
+	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
+		if (isActive()) {
+			super.writeFrameInternal(frame);
+			getResponse().flush();
+		}
 	}
+
 }
 

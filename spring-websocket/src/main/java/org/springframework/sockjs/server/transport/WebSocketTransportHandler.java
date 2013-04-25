@@ -16,11 +16,14 @@
 
 package org.springframework.sockjs.server.transport;
 
+import java.io.IOException;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
@@ -62,17 +65,22 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler, AbstractSockJsSession session) throws Exception {
+			HandlerProvider<WebSocketHandler> handler, AbstractSockJsSession session) throws TransportErrorException {
 
-		WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, handler);
-		this.handshakeHandler.doHandshake(request, response, new SimpleHandlerProvider<WebSocketHandler>(sockJsWrapper));
+		try {
+			WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, handler);
+			this.handshakeHandler.doHandshake(request, response, new SimpleHandlerProvider<WebSocketHandler>(sockJsWrapper));
+		}
+		catch (Throwable t) {
+			throw new TransportErrorException("Failed to start handshake request", t, session.getId());
+		}
 	}
 
 	// HandshakeHandler methods
 
 	@Override
 	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler) throws Exception {
+			HandlerProvider<WebSocketHandler> handler) throws IOException {
 
 		return this.handshakeHandler.doHandshake(request, response, handler);
 	}

@@ -26,15 +26,15 @@ package org.springframework.websocket;
 public class WebSocketHandlerAdapter implements WebSocketHandler {
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablished(WebSocketSession session) {
 	}
 
 	@Override
-	public void afterConnectionClosed(CloseStatus status, WebSocketSession session) throws Exception {
+	public void afterConnectionClosed(CloseStatus status, WebSocketSession session) {
 	}
 
 	@Override
-	public void handleError(Throwable exception, WebSocketSession session) {
+	public void handleTransportError(Throwable exception, WebSocketSession session) {
 	}
 
 

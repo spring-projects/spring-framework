@@ -16,6 +16,7 @@
 
 package org.springframework.sockjs;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
@@ -121,10 +122,15 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		this.timeLastActive = System.currentTimeMillis();
 	}
 
-	public void delegateConnectionEstablished() throws Exception {
+	public void delegateConnectionEstablished() {
 		this.state = State.OPEN;
 		initHandler();
-		this.handler.afterConnectionEstablished(this);
+		try {
+			this.handler.afterConnectionEstablished(this);
+		}
+		catch (Throwable ex) {
+			tryCloseWithError(ex, null);
+		}
 	}
 
 	private void initHandler() {
@@ -133,14 +139,61 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		this.handler = (TextMessageHandler) webSocketHandler;
 	}
 
-	public void delegateMessages(String[] messages) throws Exception {
-		for (String message : messages) {
-			this.handler.handleTextMessage(new TextMessage(message), this);
+	/**
+	 * Close due to unhandled runtime error from WebSocketHandler.
+	 * @param closeStatus TODO
+	 */
+	private void tryCloseWithError(Throwable ex, CloseStatus closeStatus) {
+		logger.error("Unhandled error for " + this, ex);
+		try {
+			closeStatus = (closeStatus != null) ? closeStatus : CloseStatus.SERVER_ERROR;
+			close(closeStatus);
+		}
+		catch (Throwable t) {
+			destroyHandler();
 		}
 	}
 
-	public void delegateError(Throwable ex) throws Exception {
-		this.handler.handleError(ex, this);
+	private void destroyHandler() {
+		try {
+			if (this.handler != null) {
+				this.handlerProvider.destroy(this.handler);
+			}
+		}
+		catch (Throwable t) {
+			logger.warn("Error while destroying handler", t);
+		}
+		finally {
+			this.handler = null;
+		}
+	}
+
+	/**
+	 * Close due to error arising from SockJS transport handling.
+	 */
+	protected void tryCloseWithSockJsTransportError(Throwable ex, CloseStatus closeStatus) {
+		delegateError(ex);
+		tryCloseWithError(ex, closeStatus);
+	}
+
+	public void delegateMessages(String[] messages) {
+		try {
+			for (String message : messages) {
+				this.handler.handleTextMessage(new TextMessage(message), this);
+			}
+		}
+		catch (Throwable ex) {
+			tryCloseWithError(ex, null);
+		}
+	}
+
+	public void delegateError(Throwable ex) {
+		try {
+			this.handler.handleTransportError(ex, this);
+		}
+		catch (Throwable t) {
+			tryCloseWithError(t, null);
+		}
 	}
 
 	/**
@@ -149,7 +202,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * {@link TextMessageHandler}. This is in contrast to {@link #close()} that pro-actively
 	 * closes the connection.
 	 */
-	public final void delegateConnectionClosed(CloseStatus status) throws Exception {
+	public final void delegateConnectionClosed(CloseStatus status) {
 		if (!isClosed()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(this + " was closed, " + status);
@@ -159,7 +212,12 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.handler.afterConnectionClosed(status, this);
+				try {
+					this.handler.afterConnectionClosed(status, this);
+				}
+				finally {
+					destroyHandler();
+				}
 			}
 		}
 	}
@@ -171,7 +229,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * {@inheritDoc}
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
-	public final void close() throws Exception {
+	public final void close() throws IOException {
 		close(CloseStatus.NORMAL);
 	}
 
@@ -179,7 +237,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * {@inheritDoc}
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
-	public final void close(CloseStatus status) throws Exception {
+	public final void close(CloseStatus status) throws IOException {
 		if (!isClosed()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing " + this + ", " + status);
@@ -193,13 +251,13 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 					this.handler.afterConnectionClosed(status, this);
 				}
 				finally {
-					this.handlerProvider.destroy(this.handler);
+					destroyHandler();
 				}
 			}
 		}
 	}
 
-	protected abstract void closeInternal(CloseStatus status) throws Exception;
+	protected abstract void closeInternal(CloseStatus status) throws IOException;
 
 
 	@Override

@@ -201,7 +201,8 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 * @throws Exception
 	 */
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, HandlerProvider<WebSocketHandler> handler) throws Exception {
+			String sockJsPath, HandlerProvider<WebSocketHandler> handler)
+					throws IOException, TransportErrorException {
 
 		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
 
@@ -255,10 +256,11 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	}
 
 	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler) throws Exception;
+			HandlerProvider<WebSocketHandler> handler) throws IOException;
 
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler) throws Exception;
+			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler)
+					throws IOException, TransportErrorException;
 
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
@@ -321,7 +323,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	private interface SockJsRequestHandler {
 
-		void handle(ServerHttpRequest request, ServerHttpResponse response) throws Exception;
+		void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException;
 	}
 
 	private static final Random random = new Random();
@@ -331,7 +333,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		private static final String INFO_CONTENT =
 				"{\"entropy\":%s,\"origins\":[\"*:*\"],\"cookie_needed\":%s,\"websocket\":%s}";
 
-		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
+		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 
 			if (HttpMethod.GET.equals(request.getMethod())) {
 
@@ -376,7 +378,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		        "</body>\n" +
 		        "</html>";
 
-		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws Exception {
+		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 
 			if (!HttpMethod.GET.equals(request.getMethod())) {
 				sendMethodNotAllowed(response, Arrays.asList(HttpMethod.GET));

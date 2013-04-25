@@ -27,6 +27,7 @@ import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
@@ -56,7 +57,8 @@ public abstract class AbstractHttpSendingTransportHandler
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> webSocketHandler, AbstractSockJsSession session) throws Exception {
+			HandlerProvider<WebSocketHandler> webSocketHandler, AbstractSockJsSession session)
+					throws TransportErrorException {
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
@@ -66,28 +68,26 @@ public abstract class AbstractHttpSendingTransportHandler
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSockJsSession httpServerSession) throws Exception, IOException {
+			AbstractHttpServerSockJsSession httpServerSession) throws TransportErrorException {
 
 		if (httpServerSession.isNew()) {
-			handleNewSession(request, response, httpServerSession);
+			logger.debug("Opening " + getTransportType() + " connection");
+			httpServerSession.setInitialRequest(request, response, getFrameFormat(request));
 		}
-		else if (httpServerSession.isActive()) {
-			logger.debug("another " + getTransportType() + " connection still open: " + httpServerSession);
-			httpServerSession.writeFrame(response, SockJsFrame.closeFrameAnotherConnectionOpen());
+		else if (!httpServerSession.isActive()) {
+			logger.debug("starting " + getTransportType() + " async request");
+			httpServerSession.setLongPollingRequest(request, response, getFrameFormat(request));
 		}
 		else {
-			logger.debug("starting " + getTransportType() + " async request");
-			httpServerSession.setCurrentRequest(request, response, getFrameFormat(request));
+			try {
+				logger.debug("another " + getTransportType() + " connection still open: " + httpServerSession);
+				SockJsFrame closeFrame = SockJsFrame.closeFrameAnotherConnectionOpen();
+				response.getBody().write(getFrameFormat(request).format(closeFrame).getContentBytes());
+			}
+			catch (IOException e) {
+				throw new TransportErrorException("Failed to send SockJS close frame", e, httpServerSession.getId());
+			}
 		}
-	}
-
-	protected void handleNewSession(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSockJsSession session) throws Exception {
-
-		logger.debug("Opening " + getTransportType() + " connection");
-		session.setFrameFormat(getFrameFormat(request));
-		session.writeFrame(response, SockJsFrame.openFrame());
-		session.delegateConnectionEstablished();
 	}
 
 	protected abstract MediaType getContentType();

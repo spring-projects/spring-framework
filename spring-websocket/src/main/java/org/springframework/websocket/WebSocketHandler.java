@@ -29,16 +29,16 @@ public interface WebSocketHandler {
 	/**
 	 * A new WebSocket connection has been opened and is ready to be used.
 	 */
-	void afterConnectionEstablished(WebSocketSession session) throws Exception;
+	void afterConnectionEstablished(WebSocketSession session);
 
 	/**
 	 * A WebSocket connection has been closed.
 	 */
-	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session) throws Exception;
+	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session);
 
 	/**
 	 * TODO
 	 */
-	void handleError(Throwable exception, WebSocketSession session) throws Exception;
+	void handleTransportError(Throwable exception, WebSocketSession session);
 
 }

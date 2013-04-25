@@ -15,6 +15,7 @@
  */
 package org.springframework.sockjs.server.support;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.server.AbstractSockJsService;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsService;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.sockjs.server.transport.EventSourceTransportHandler;
@@ -140,7 +142,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler) throws Exception {
+			HandlerProvider<WebSocketHandler> handler) throws IOException {
 
 		if (isWebSocketEnabled()) {
 			TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
@@ -157,7 +159,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler) throws Exception {
+			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler)
+					throws IOException, TransportErrorException {
 
 		TransportHandler transportHandler = this.transportHandlers.get(transportType);
 

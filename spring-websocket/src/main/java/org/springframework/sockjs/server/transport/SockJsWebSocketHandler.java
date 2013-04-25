@@ -19,9 +19,6 @@ package org.springframework.sockjs.server.transport;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
@@ -38,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
- * A wrapper around a {@link WebSocketHandler} instance that parses and adds SockJS
+ * A wrapper around a {@link WebSocketHandler} instance that parses as well as adds SockJS
  * messages frames as well as sends SockJS heartbeat messages.
  *
  * @author Rossen Stoyanchev
@@ -46,13 +43,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SockJsWebSocketHandler implements TextMessageHandler {
 
-	private static final Log logger = LogFactory.getLog(SockJsWebSocketHandler.class);
-
 	private final SockJsConfiguration sockJsConfig;
 
 	private final HandlerProvider<WebSocketHandler> handlerProvider;
 
-	private AbstractSockJsSession session;
+	private WebSocketServerSockJsSession sockJsSession;
 
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
@@ -72,38 +67,25 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 	}
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
+	public void afterConnectionEstablished(WebSocketSession wsSession) {
 		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
-		this.session = new WebSocketServerSockJsSession(wsSession, getSockJsConfig());
+		this.sockJsSession = new WebSocketServerSockJsSession(getSockJsSessionId(wsSession), getSockJsConfig());
+		this.sockJsSession.initWebSocketSession(wsSession);
 	}
 
 	@Override
-	public void handleTextMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
-		String payload = message.getPayload();
-		if (StringUtils.isEmpty(payload)) {
-			logger.trace("Ignoring empty message");
-			return;
-		}
-		String[] messages;
-		try {
-			messages = this.objectMapper.readValue(payload, String[].class);
-		}
-		catch (IOException e) {
-			logger.error("Broken data received. Terminating WebSocket connection abruptly", e);
-			wsSession.close();
-			return;
-		}
-		this.session.delegateMessages(messages);
+	public void handleTextMessage(TextMessage message, WebSocketSession wsSession) {
+		this.sockJsSession.handleMessage(message, wsSession);
 	}
 
 	@Override
-	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) throws Exception {
-		this.session.delegateConnectionClosed(status);
+	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) {
+		this.sockJsSession.delegateConnectionClosed(status);
 	}
 
 	@Override
-	public void handleError(Throwable exception, WebSocketSession webSocketSession) throws Exception {
-		this.session.delegateError(exception);
+	public void handleTransportError(Throwable exception, WebSocketSession webSocketSession) {
+		this.sockJsSession.delegateError(exception);
 	}
 
 	private static String getSockJsSessionId(WebSocketSession wsSession) {
@@ -117,16 +99,23 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 
 	private class WebSocketServerSockJsSession extends AbstractServerSockJsSession {
 
-		private final WebSocketSession wsSession;
+		private WebSocketSession wsSession;
 
 
-		public WebSocketServerSockJsSession(WebSocketSession wsSession, SockJsConfiguration sockJsConfig)
-				throws Exception {
+		public WebSocketServerSockJsSession(String sessionId, SockJsConfiguration config) {
+			super(sessionId, config, SockJsWebSocketHandler.this.handlerProvider);
+		}
 
-			super(getSockJsSessionId(wsSession), sockJsConfig, SockJsWebSocketHandler.this.handlerProvider);
+		public void initWebSocketSession(WebSocketSession wsSession) {
 			this.wsSession = wsSession;
-			TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
-			this.wsSession.sendMessage(message);
+			try {
+				TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
+				this.wsSession.sendMessage(message);
+			}
+			catch (IOException ex) {
+				tryCloseWithSockJsTransportError(ex, null);
+				return;
+			}
 			scheduleHeartbeat();
 			delegateConnectionEstablished();
 		}
@@ -136,15 +125,33 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 			return this.wsSession.isOpen();
 		}
 
+		public void handleMessage(TextMessage message, WebSocketSession wsSession) {
+			String payload = message.getPayload();
+			if (StringUtils.isEmpty(payload)) {
+				logger.trace("Ignoring empty message");
+				return;
+			}
+			String[] messages;
+			try {
+				messages = objectMapper.readValue(payload, String[].class);
+			}
+			catch (IOException ex) {
+				logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);
+				tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
+				return;
+			}
+			delegateMessages(messages);
+		}
+
 		@Override
-		public void sendMessageInternal(String message) throws Exception {
+		public void sendMessageInternal(String message) throws IOException {
 			cancelHeartbeat();
 			writeFrame(SockJsFrame.messageFrame(message));
 			scheduleHeartbeat();
 		}
 
 		@Override
-		protected void writeFrameInternal(SockJsFrame frame) throws Exception {
+		protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Write " + frame);
 			}
@@ -153,7 +160,7 @@ public class SockJsWebSocketHandler implements TextMessageHandler {
 		}
 
 		@Override
-		protected void disconnect(CloseStatus status) throws Exception {
+		protected void disconnect(CloseStatus status) throws IOException {
 			this.wsSession.close(status);
 		}
 	}

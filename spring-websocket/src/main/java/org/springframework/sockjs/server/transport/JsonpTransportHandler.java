@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportType;
 
 public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler {
@@ -34,19 +35,23 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractSockJsSession sockJsSession) throws Exception {
+			AbstractSockJsSession sockJsSession) throws TransportErrorException {
 
 		if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {
 			if (request.getQueryParams().getFirst("d") == null) {
-				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				response.getBody().write("Payload expected.".getBytes("UTF-8"));
+				sendInternalServerError(response, "Payload expected.", sockJsSession.getId());
 				return;
 			}
 		}
 
 		super.handleRequestInternal(request, response, sockJsSession);
 
-		response.getBody().write("ok".getBytes("UTF-8"));
+		try {
+			response.getBody().write("ok".getBytes("UTF-8"));
+		}
+		catch (Throwable t) {
+			throw new TransportErrorException("Failed to write response body", t, sockJsSession.getId());
+		}
 	}
 
 	@Override

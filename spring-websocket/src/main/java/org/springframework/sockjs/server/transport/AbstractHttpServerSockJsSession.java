@@ -25,8 +25,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
-import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
@@ -55,31 +55,63 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 		super(sessionId, sockJsConfig, handler);
 	}
 
-	public void setFrameFormat(FrameFormat frameFormat) {
-		this.frameFormat = frameFormat;
+	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
+			FrameFormat frameFormat) throws TransportErrorException {
+
+		try {
+			udpateRequest(request, response, frameFormat);
+			writePrelude();
+			writeFrame(SockJsFrame.openFrame());
+		}
+		catch (Throwable t) {
+			tryCloseWithSockJsTransportError(t, null);
+			throw new TransportErrorException("Failed open SockJS session", t, getId());
+		}
+		delegateConnectionEstablished();
 	}
 
-	public synchronized void setCurrentRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws Exception {
+	protected void writePrelude() throws IOException {
+	}
 
-		if (isClosed()) {
-			logger.debug("connection already closed");
-			writeFrame(response, SockJsFrame.closeFrameGoAway());
-			return;
+	public synchronized void setLongPollingRequest(ServerHttpRequest request, ServerHttpResponse response,
+			FrameFormat frameFormat) throws TransportErrorException {
+
+		try {
+			udpateRequest(request, response, frameFormat);
+
+			if (isClosed()) {
+				logger.debug("connection already closed");
+				try {
+					writeFrame(SockJsFrame.closeFrameGoAway());
+				}
+				catch (IOException ex) {
+					throw new TransportErrorException("Failed to send SockJS close frame", ex, getId());
+				}
+				return;
+			}
+
+			this.asyncRequest.setTimeout(-1);
+			this.asyncRequest.startAsync();
+
+			scheduleHeartbeat();
+			tryFlushCache();
 		}
+		catch (Throwable t) {
+			tryCloseWithSockJsTransportError(t, null);
+			throw new TransportErrorException("Failed to start long running request and flush messages", t, getId());
+		}
+	}
 
+	private void udpateRequest(ServerHttpRequest request, ServerHttpResponse response, FrameFormat frameFormat) {
+		Assert.notNull(request, "expected request");
+		Assert.notNull(response, "expected response");
+		Assert.notNull(frameFormat, "expected frameFormat");
 		Assert.isInstanceOf(AsyncServerHttpRequest.class, request, "Expected AsyncServerHttpRequest");
-
 		this.asyncRequest = (AsyncServerHttpRequest) request;
-		this.asyncRequest.setTimeout(-1);
-		this.asyncRequest.startAsync();
-
 		this.response = response;
 		this.frameFormat = frameFormat;
-
-		scheduleHeartbeat();
-		tryFlushCache();
 	}
+
 
 	public synchronized boolean isActive() {
 		return ((this.asyncRequest != null) && (!this.asyncRequest.isAsyncCompleted()));
@@ -89,18 +121,20 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 		return this.messageCache;
 	}
 
+	protected ServerHttpRequest getRequest() {
+		return this.asyncRequest;
+	}
+
 	protected ServerHttpResponse getResponse() {
 		return this.response;
 	}
 
-	protected final synchronized void sendMessageInternal(String message) throws Exception {
-		// assert close() was not called
-		// threads: TH-Session-Endpoint or any other thread
+	protected final synchronized void sendMessageInternal(String message) throws IOException {
 		this.messageCache.add(message);
 		tryFlushCache();
 	}
 
-	private void tryFlushCache() throws Exception {
+	private void tryFlushCache() throws IOException {
 		if (isActive() && !getMessageCache().isEmpty()) {
 			logger.trace("Flushing messages");
 			flushCache();
@@ -110,7 +144,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	/**
 	 * Only called if the connection is currently active
 	 */
-	protected abstract void flushCache() throws Exception;
+	protected abstract void flushCache() throws IOException;
 
 	@Override
 	protected void disconnect(CloseStatus status) {
@@ -133,21 +167,12 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 
 	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (isActive()) {
-			writeFrame(this.response, frame);
+			frame = this.frameFormat.format(frame);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Writing " + frame);
+			}
+			this.response.getBody().write(frame.getContentBytes());
 		}
-	}
-
-	/**
-	 * This method may be called by a {@link TransportHandler} to write a frame
-	 * even when the connection is not active, as long as a valid OutputStream
-	 * is provided.
-	 */
-	public void writeFrame(ServerHttpResponse response, SockJsFrame frame) throws IOException {
-		frame = this.frameFormat.format(frame);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Writing " + frame);
-		}
-		response.getBody().write(frame.getContentBytes());
 	}
 
 }

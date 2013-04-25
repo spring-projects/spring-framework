@@ -15,6 +15,8 @@
  */
 package org.springframework.sockjs.server.transport;
 
+import java.io.IOException;
+
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.websocket.HandlerProvider;
@@ -30,7 +32,7 @@ public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession 
 	}
 
 	@Override
-	protected void flushCache() throws Exception {
+	protected void flushCache() throws IOException {
 		cancelHeartbeat();
 		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
 		getMessageCache().clear();
@@ -38,7 +40,7 @@ public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession 
 	}
 
 	@Override
-	protected void writeFrame(SockJsFrame frame) throws Exception {
+	protected void writeFrame(SockJsFrame frame) throws IOException {
 		super.writeFrame(frame);
 		resetRequest();
 	}

@@ -16,8 +16,8 @@
 
 package org.springframework.websocket;
 
+import java.io.IOException;
 import java.net.URI;
-
 
 
 /**
@@ -52,7 +52,7 @@ public interface WebSocketSession {
 	 * Send a WebSocket message either {@link TextMessage} or
 	 * {@link BinaryMessage}.
 	 */
-	void sendMessage(WebSocketMessage message) throws Exception;
+	void sendMessage(WebSocketMessage<?> message) throws IOException;
 
 	/**
 	 * Close the WebSocket connection with status 1000, i.e. equivalent to:
@@ -60,11 +60,11 @@ public interface WebSocketSession {
 	 * session.close(CloseStatus.NORMAL);
 	 * </pre>
 	 */
-	void close() throws Exception;
+	void close() throws IOException;
 
 	/**
 	 * Close the WebSocket connection with the given close status.
 	 */
-	void close(CloseStatus status) throws Exception;
+	void close(CloseStatus status) throws IOException;
 
 }

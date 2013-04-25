@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
@@ -54,7 +55,8 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> webSocketHandler, AbstractSockJsSession session) throws Exception {
+			HandlerProvider<WebSocketHandler> webSocketHandler, AbstractSockJsSession session)
+					throws TransportErrorException {
 
 		if (session == null) {
 			response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -65,20 +67,22 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractSockJsSession session) throws Exception {
+			AbstractSockJsSession session) throws TransportErrorException {
 
 		String[] messages = null;
 		try {
 			messages = readMessages(request);
 		}
 		catch (JsonMappingException ex) {
-			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getBody().write("Payload expected.".getBytes("UTF-8"));
+			sendInternalServerError(response, "Payload expected.", session.getId());
 			return;
 		}
 		catch (IOException ex) {
-			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getBody().write("Broken JSON encoding.".getBytes("UTF-8"));
+			sendInternalServerError(response, "Broken JSON encoding.", session.getId());
+			return;
+		}
+		catch (Throwable t) {
+			sendInternalServerError(response, "Failed to process messages", session.getId());
 			return;
 		}
 
@@ -90,6 +94,18 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 		response.setStatusCode(getResponseStatus());
 		response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
+	}
+
+	protected void sendInternalServerError(ServerHttpResponse response, String error,
+			String sessionId) throws TransportErrorException {
+
+		try {
+			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			response.getBody().write(error.getBytes("UTF-8"));
+		}
+		catch (Throwable t) {
+			throw new TransportErrorException("Failed to send error message to client", t, sessionId);
+		}
 	}
 
 	protected abstract String[] readMessages(ServerHttpRequest request) throws IOException;

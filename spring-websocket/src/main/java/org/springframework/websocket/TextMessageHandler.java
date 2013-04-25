@@ -34,7 +34,6 @@ public interface TextMessageHandler extends WebSocketHandler {
 	/**
 	 * Handle an incoming text message.
 	 */
-	void handleTextMessage(TextMessage message, WebSocketSession session)
-			throws Exception;
+	void handleTextMessage(TextMessage message, WebSocketSession session);
 
 }

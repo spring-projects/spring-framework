@@ -16,6 +16,8 @@
 
 package org.springframework.websocket.server.support;
 
+import java.io.IOException;
+
 import javax.websocket.Endpoint;
 
 import org.apache.commons.logging.Log;
@@ -42,7 +44,7 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, HandlerProvider<WebSocketHandler> handler) throws Exception {
+			String protocol, HandlerProvider<WebSocketHandler> handler) throws IOException {
 
 		upgradeInternal(request, response, protocol, adaptWebSocketHandler(handler));
 	}
@@ -52,6 +54,6 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws Exception;
+			String selectedProtocol, Endpoint endpoint) throws IOException;
 
 }

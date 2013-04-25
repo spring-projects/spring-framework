@@ -20,10 +20,12 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportType;
+import org.springframework.util.Assert;
+import org.springframework.websocket.HandlerProvider;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -32,7 +34,7 @@ import org.springframework.sockjs.server.TransportType;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EventSourceTransportHandler extends AbstractStreamingTransportHandler {
+public class EventSourceTransportHandler extends AbstractHttpSendingTransportHandler {
 
 
 	@Override
@@ -46,10 +48,16 @@ public class EventSourceTransportHandler extends AbstractStreamingTransportHandl
 	}
 
 	@Override
-	protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-		response.getBody().write('\r');
-		response.getBody().write('\n');
-		response.flush();
+	public StreamingServerSockJsSession createSession(String sessionId, HandlerProvider<WebSocketHandler> handler) {
+		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
+		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {
+			@Override
+			protected void writePrelude() throws IOException {
+				getResponse().getBody().write('\r');
+				getResponse().getBody().write('\n');
+				getResponse().flush();
+			}
+		};
 	}
 
 	@Override

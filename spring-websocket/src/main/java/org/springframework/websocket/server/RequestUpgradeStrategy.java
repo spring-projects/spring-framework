@@ -16,6 +16,8 @@
 
 package org.springframework.websocket.server;
 
+import java.io.IOException;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.HandlerProvider;
@@ -43,7 +45,7 @@ public interface RequestUpgradeStrategy {
 	 * @param handler the handler for WebSocket messages
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			HandlerProvider<WebSocketHandler> handlerProvider) throws Exception;
+			HandlerProvider<WebSocketHandler> handlerProvider) throws IOException;
 	// FIXME how to indicate failure to upgrade?
 
 }

@@ -23,6 +23,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -58,14 +59,20 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSockJsSession session) throws Exception {
+			AbstractHttpServerSockJsSession session) throws TransportErrorException {
 
-		String callback = request.getQueryParams().getFirst("c");
-		if (! StringUtils.hasText(callback)) {
-			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
-			return;
+		try {
+			String callback = request.getQueryParams().getFirst("c");
+			if (! StringUtils.hasText(callback)) {
+				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				return;
+			}
 		}
+		catch (Throwable t) {
+			throw new TransportErrorException("Failed to send error to client", t, session.getId());
+		}
+
 		super.handleRequestInternal(request, response, session);
 	}
 

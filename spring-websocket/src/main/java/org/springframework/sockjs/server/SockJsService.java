@@ -16,6 +16,8 @@
 
 package org.springframework.sockjs.server;
 
+import java.io.IOException;
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.HandlerProvider;
@@ -31,6 +33,6 @@ public interface SockJsService {
 
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
-			HandlerProvider<WebSocketHandler> handler) throws Exception;
+			HandlerProvider<WebSocketHandler> handler) throws IOException, TransportErrorException;
 
 }

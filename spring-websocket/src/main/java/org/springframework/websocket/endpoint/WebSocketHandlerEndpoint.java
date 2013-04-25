@@ -110,7 +110,34 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			this.handler.afterConnectionEstablished(this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			onError(session, ex);
+			tryCloseWithError(ex);
+		}
+	}
+
+	private void tryCloseWithError(Throwable ex) {
+		logger.error("Unhandled error for " + this.webSocketSession, ex);
+		if (this.webSocketSession.isOpen()) {
+			try {
+				this.webSocketSession.close(CloseStatus.SERVER_ERROR);
+			}
+			catch (Throwable t) {
+				destroyHandler();
+			}
+		}
+	}
+
+	private void destroyHandler() {
+		try {
+			if (this.handler != null) {
+				this.handlerProvider.destroy(this.handler);
+			}
+		}
+		catch (Throwable t) {
+			logger.warn("Error while destroying handler", t);
+		}
+		finally {
+			this.webSocketSession = null;
+			this.handler = null;
 		}
 	}
 
@@ -123,7 +150,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			((TextMessageHandler) handler).handleTextMessage(textMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			onError(session, ex);
+			tryCloseWithError(ex);
 		}
 	}
 
@@ -136,7 +163,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			((BinaryMessageHandler) handler).handleBinaryMessage(binaryMessage, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			onError(session, ex);
+			tryCloseWithError(ex);
 		}
 	}
 
@@ -150,7 +177,7 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 			this.handler.afterConnectionClosed(closeStatus, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			onError(session, ex);
+			logger.error("Unhandled error for " + this.webSocketSession, ex);
 		}
 		finally {
 			this.handlerProvider.destroy(this.handler);
@@ -161,11 +188,10 @@ public class WebSocketHandlerEndpoint extends Endpoint {
 	public void onError(javax.websocket.Session session, Throwable exception) {
 		logger.error("Error for WebSocket session id=" + session.getId(), exception);
 		try {
-			this.handler.handleError(exception, this.webSocketSession);
+			this.handler.handleTransportError(exception, this.webSocketSession);
 		}
 		catch (Throwable ex) {
-			// TODO: close the session?
-			logger.error("Failed to handle error", ex);
+			tryCloseWithError(ex);
 		}
 	}
 

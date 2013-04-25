@@ -16,6 +16,7 @@
 
 package org.springframework.websocket.server.support;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.Arrays;
@@ -24,6 +25,7 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.websocket.DeploymentException;
 import javax.websocket.Endpoint;
 
 import org.glassfish.tyrus.core.ComponentProviderService;
@@ -67,7 +69,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws Exception {
+			String selectedProtocol, Endpoint endpoint) throws IOException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -78,7 +80,13 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 
 		TyrusEndpoint tyrusEndpoint = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
 		WebSocketEngine engine = WebSocketEngine.getEngine();
-		engine.register(tyrusEndpoint);
+
+		try {
+			engine.register(tyrusEndpoint);
+		}
+		catch (DeploymentException ex) {
+			throw new IllegalStateException("Failed to deploy endpoint in Glassfish", ex);
+		}
 
 		try {
 			if (!performUpgrade(servletRequest, servletResponse, request.getHeaders(), tyrusEndpoint)) {
@@ -91,7 +99,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 	}
 
 	private boolean performUpgrade(HttpServletRequest request, HttpServletResponse response,
-			HttpHeaders headers, TyrusEndpoint tyrusEndpoint) throws Exception {
+			HttpHeaders headers, TyrusEndpoint tyrusEndpoint) throws IOException {
 
 		final TyrusHttpUpgradeHandler upgradeHandler = request.upgrade(TyrusHttpUpgradeHandler.class);
 
@@ -128,12 +136,17 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 				endpointConfig.getConfigurator()));
 	}
 
-	private Connection createConnection(TyrusHttpUpgradeHandler handler, HttpServletResponse response) throws Exception {
-		String name = "org.glassfish.tyrus.servlet.ConnectionImpl";
-		Class<?> clazz = ClassUtils.forName(name, GlassfishRequestUpgradeStrategy.class.getClassLoader());
-		Constructor<?> constructor = clazz.getDeclaredConstructor(TyrusHttpUpgradeHandler.class, HttpServletResponse.class);
-		ReflectionUtils.makeAccessible(constructor);
-		return (Connection) constructor.newInstance(handler, response);
+	private Connection createConnection(TyrusHttpUpgradeHandler handler, HttpServletResponse response) {
+		try {
+			String name = "org.glassfish.tyrus.servlet.ConnectionImpl";
+			Class<?> clazz = ClassUtils.forName(name, GlassfishRequestUpgradeStrategy.class.getClassLoader());
+			Constructor<?> constructor = clazz.getDeclaredConstructor(TyrusHttpUpgradeHandler.class, HttpServletResponse.class);
+			ReflectionUtils.makeAccessible(constructor);
+			return (Connection) constructor.newInstance(handler, response);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to instantiate Glassfish connection", ex);
+		}
 	}
 
 

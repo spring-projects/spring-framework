@@ -29,7 +29,6 @@ public interface BinaryMessageHandler extends WebSocketHandler {
 	/**
 	 * Handle an incoming binary message.
 	 */
-	void handleBinaryMessage(BinaryMessage message, WebSocketSession session)
-			throws Exception;
+	void handleBinaryMessage(BinaryMessage message, WebSocketSession session);
 
 }

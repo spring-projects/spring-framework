@@ -24,9 +24,13 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportType;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
+import org.springframework.websocket.HandlerProvider;
+import org.springframework.websocket.WebSocketHandler;
 
 
 /**
@@ -35,7 +39,7 @@ import org.springframework.web.util.JavaScriptUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler {
+public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandler {
 
 	private static final String PARTIAL_HTML_CONTENT;
 
@@ -77,27 +81,40 @@ public class HtmlFileTransportHandler extends AbstractStreamingTransportHandler 
 	}
 
 	@Override
-	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSockJsSession session) throws Exception {
+	public StreamingServerSockJsSession createSession(String sessionId, HandlerProvider<WebSocketHandler> handler) {
+		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
 
-		String callback = request.getQueryParams().getFirst("c");
-		if (! StringUtils.hasText(callback)) {
-			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
-			return;
-		}
-		super.handleRequestInternal(request, response, session);
+		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {
+
+			@Override
+			protected void writePrelude() throws IOException {
+				// we already validated the parameter..
+				String callback = getRequest().getQueryParams().getFirst("c");
+
+				String html = String.format(PARTIAL_HTML_CONTENT, callback);
+				getResponse().getBody().write(html.getBytes("UTF-8"));
+				getResponse().flush();
+			}
+		};
 	}
 
 	@Override
-	protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
+	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
+			AbstractHttpServerSockJsSession session) throws TransportErrorException {
 
-		// we already validated the parameter..
-		String callback = request.getQueryParams().getFirst("c");
+		try {
+			String callback = request.getQueryParams().getFirst("c");
+			if (! StringUtils.hasText(callback)) {
+				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				return;
+			}
+		}
+		catch (Throwable t) {
+			throw new TransportErrorException("Failed to send error to client", t, session.getId());
+		}
 
-		String html = String.format(PARTIAL_HTML_CONTENT, callback);
-		response.getBody().write(html.getBytes("UTF-8"));
-		response.flush();
+		super.handleRequestInternal(request, response, session);
 	}
 
 	@Override
