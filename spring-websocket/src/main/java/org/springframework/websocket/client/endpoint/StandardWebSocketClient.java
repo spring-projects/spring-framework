@@ -35,10 +35,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.adapter.StandardWebSocketSessionAdapter;
+import org.springframework.websocket.adapter.StandardEndpointAdapter;
 import org.springframework.websocket.client.WebSocketClient;
 import org.springframework.websocket.client.WebSocketConnectFailureException;
-import org.springframework.websocket.endpoint.StandardWebSocketSession;
-import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
@@ -78,7 +78,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,
 			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
-		Endpoint endpoint = new WebSocketHandlerEndpoint(handler);
+		Endpoint endpoint = new StandardEndpointAdapter(handler);
 
 		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		if (httpHeaders != null) {
@@ -100,7 +100,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 		try {
 			Session session = this.webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
-			return new StandardWebSocketSession(session);
+			return new StandardWebSocketSessionAdapter(session);
 		}
 		catch (Exception e) {
 			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket.endpoint;
+package org.springframework.websocket.adapter;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,14 +39,14 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardWebSocketSession implements WebSocketSession {
+public class StandardWebSocketSessionAdapter implements WebSocketSession {
 
-	private static Log logger = LogFactory.getLog(StandardWebSocketSession.class);
+	private static Log logger = LogFactory.getLog(StandardWebSocketSessionAdapter.class);
 
 	private final javax.websocket.Session session;
 
 
-	public StandardWebSocketSession(javax.websocket.Session session) {
+	public StandardWebSocketSessionAdapter(javax.websocket.Session session) {
 		Assert.notNull(session, "session is required");
 		this.session = session;
 	}

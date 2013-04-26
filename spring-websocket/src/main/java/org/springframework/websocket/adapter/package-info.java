@@ -15,8 +15,8 @@
  */
 
 /**
- * Classes for use with the standard Java WebSocket endpoints from both client and
- * server code.
+ * Adapters for the {@link org.springframework.websocket.WebSocketHandler} and
+ * {@link org.springframework.websocket.WebSocketSession} contracts.
  */
-package org.springframework.websocket.endpoint;
+package org.springframework.websocket.adapter;
 

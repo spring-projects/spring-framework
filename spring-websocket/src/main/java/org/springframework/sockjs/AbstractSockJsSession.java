@@ -27,6 +27,7 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.adapter.WebSocketHandlerInvoker;
 
 
 /**
@@ -42,9 +43,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	private final String sessionId;
 
-	private final HandlerProvider<WebSocketHandler> handlerProvider;
-
-	private WebSocketHandler handler;
+	private WebSocketHandlerInvoker handler;
 
 	private State state = State.NEW;
 
@@ -62,7 +61,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		Assert.notNull(sessionId, "sessionId is required");
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		this.sessionId = sessionId;
-		this.handlerProvider = handlerProvider;
+		this.handler = new WebSocketHandlerInvoker(handlerProvider).setLogger(logger);
 	}
 
 	public String getId() {
@@ -124,42 +123,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	public void delegateConnectionEstablished() {
 		this.state = State.OPEN;
-		this.handler = handlerProvider.getHandler();
-		try {
-			this.handler.afterConnectionEstablished(this);
-		}
-		catch (Throwable ex) {
-			tryCloseWithError(ex, null);
-		}
-	}
-
-	/**
-	 * Close due to unhandled runtime error from WebSocketHandler.
-	 * @param closeStatus TODO
-	 */
-	private void tryCloseWithError(Throwable ex, CloseStatus closeStatus) {
-		logger.error("Unhandled error for " + this, ex);
-		try {
-			closeStatus = (closeStatus != null) ? closeStatus : CloseStatus.SERVER_ERROR;
-			close(closeStatus);
-		}
-		catch (Throwable t) {
-			destroyHandler();
-		}
-	}
-
-	private void destroyHandler() {
-		try {
-			if (this.handler != null) {
-				this.handlerProvider.destroy(this.handler);
-			}
-		}
-		catch (Throwable t) {
-			logger.warn("Error while destroying handler", t);
-		}
-		finally {
-			this.handler = null;
-		}
+		this.handler.afterConnectionEstablished(this);
 	}
 
 	/**
@@ -167,27 +131,17 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 */
 	protected void tryCloseWithSockJsTransportError(Throwable ex, CloseStatus closeStatus) {
 		delegateError(ex);
-		tryCloseWithError(ex, closeStatus);
+		this.handler.tryCloseWithError(this, ex, closeStatus);
 	}
 
 	public void delegateMessages(String[] messages) {
-		try {
-			for (String message : messages) {
-				this.handler.handleTextMessage(new TextMessage(message), this);
-			}
-		}
-		catch (Throwable ex) {
-			tryCloseWithError(ex, null);
+		for (String message : messages) {
+			this.handler.handleTextMessage(new TextMessage(message), this);
 		}
 	}
 
 	public void delegateError(Throwable ex) {
-		try {
-			this.handler.handleTransportError(ex, this);
-		}
-		catch (Throwable t) {
-			tryCloseWithError(t, null);
-		}
+		this.handler.handleTransportError(ex, this);
 	}
 
 	/**
@@ -206,12 +160,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				try {
-					this.handler.afterConnectionClosed(status, this);
-				}
-				finally {
-					destroyHandler();
-				}
+				this.handler.afterConnectionClosed(status, this);
 			}
 		}
 	}
@@ -241,12 +190,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				try {
-					this.handler.afterConnectionClosed(status, this);
-				}
-				finally {
-					destroyHandler();
-				}
+				this.handler.afterConnectionClosed(status, this);
 			}
 		}
 	}

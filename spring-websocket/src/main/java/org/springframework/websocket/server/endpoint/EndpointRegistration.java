@@ -29,14 +29,11 @@ import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.websocket.HandlerProvider;
-import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
 import org.springframework.websocket.support.SimpleHandlerProvider;
 
@@ -44,8 +41,6 @@ import org.springframework.websocket.support.SimpleHandlerProvider;
 /**
  * An implementation of {@link javax.websocket.server.ServerEndpointConfig} that also
  * holds the target {@link javax.websocket.Endpoint} as a reference or a bean name.
- * The target can also be {@link org.springframework.websocket.WebSocketHandler}, in
- * which case it will be adapted via {@link WebSocketHandlerEndpoint}.
  *
  * <p>
  * Beans of this type are detected by {@link EndpointExporter} and

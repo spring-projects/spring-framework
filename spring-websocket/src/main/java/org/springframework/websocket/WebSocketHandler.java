@@ -30,11 +30,6 @@ public interface WebSocketHandler {
 	void afterConnectionEstablished(WebSocketSession session);
 
 	/**
-	 * A WebSocket connection has been closed.
-	 */
-	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session);
-
-	/**
 	 * Handle an incoming text message.
 	 */
 	void handleTextMessage(TextMessage message, WebSocketSession session);
@@ -48,5 +43,10 @@ public interface WebSocketHandler {
 	 * TODO
 	 */
 	void handleTransportError(Throwable exception, WebSocketSession session);
+
+	/**
+	 * A WebSocket connection has been closed.
+	 */
+	void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session);
 
 }

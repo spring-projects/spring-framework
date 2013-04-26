@@ -26,7 +26,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.endpoint.WebSocketHandlerEndpoint;
+import org.springframework.websocket.adapter.StandardEndpointAdapter;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
 
 /**
@@ -49,7 +49,7 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 	}
 
 	protected Endpoint adaptWebSocketHandler(HandlerProvider<WebSocketHandler> handler) {
-		return new WebSocketHandlerEndpoint(handler);
+		return new StandardEndpointAdapter(handler);
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
