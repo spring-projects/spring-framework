@@ -26,6 +26,7 @@ import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 /**
@@ -38,12 +39,12 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	private static Log logger = LogFactory.getLog(JettyWebSocketListenerAdapter.class);
 
-	private final WebSocketHandler handler;
+	private final WebSocketHandler<WebSocketMessage<?>> handler;
 
 	private WebSocketSession wsSession;
 
 
-	public JettyWebSocketListenerAdapter(HandlerProvider<WebSocketHandler> provider) {
+	public JettyWebSocketListenerAdapter(HandlerProvider<WebSocketHandler<?>> provider) {
 		Assert.notNull(provider, "provider is required");
 		this.handler = new WebSocketHandlerInvoker(provider).setLogger(logger);
 	}
@@ -58,23 +59,23 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		CloseStatus closeStatus = new CloseStatus(statusCode, reason);
-		this.handler.afterConnectionClosed(closeStatus, this.wsSession);
+		this.handler.afterConnectionClosed(this.wsSession, closeStatus);
 	}
 
 	@Override
 	public void onWebSocketText(String payload) {
 		TextMessage message = new TextMessage(payload);
-		this.handler.handleTextMessage(message, this.wsSession);
+		this.handler.handleMessage(this.wsSession, message);
 	}
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
 		BinaryMessage message = new BinaryMessage(payload, offset, len);
-		this.handler.handleBinaryMessage(message, this.wsSession);
+		this.handler.handleMessage(this.wsSession, message);
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
-		this.handler.handleTransportError(cause, this.wsSession);
+		this.handler.handleTransportError(this.wsSession, cause);
 	}
 }

@@ -64,10 +64,10 @@ public class StandardWebSocketClient implements WebSocketClient {
 	public WebSocketSession doHandshake(WebSocketHandler handler, String uriTemplate, Object... uriVariables)
 			throws WebSocketConnectFailureException {
 
-		return doHandshake(new SimpleHandlerProvider<WebSocketHandler>(handler), uriTemplate, uriVariables);
+		return doHandshake(new SimpleHandlerProvider<WebSocketHandler<?>>(handler), uriTemplate, uriVariables);
 	}
 
-	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,
+	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler<?>> handler,
 			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException {
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
@@ -75,7 +75,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
-	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler> handler,
+	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler<?>> handler,
 			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
 		Endpoint endpoint = new StandardEndpointAdapter(handler);

@@ -45,7 +45,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 	private final SockJsService sockJsService;
 
-	private final HandlerProvider<WebSocketHandler> handlerProvider;
+	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
 
 	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
@@ -65,7 +65,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 		this.prefix = prefix;
 		this.sockJsService = sockJsService;
-		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler>(handler);
+		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler<?>>(handler);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	 * Servlet container this is the path within the current servlet mapping.
 	 */
 	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService,
-			HandlerProvider<WebSocketHandler> handlerProvider) {
+			HandlerProvider<WebSocketHandler<?>> handlerProvider) {
 
 		Assert.hasText(prefix, "prefix is required");
 		Assert.notNull(sockJsService, "sockJsService is required");

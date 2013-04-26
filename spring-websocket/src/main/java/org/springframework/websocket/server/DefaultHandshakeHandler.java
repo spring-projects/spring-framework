@@ -88,7 +88,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	@Override
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler) throws IOException {
+			HandlerProvider<WebSocketHandler<?>> handler) throws IOException {
 
 		logger.debug("Starting handshake for " + request.getURI());
 

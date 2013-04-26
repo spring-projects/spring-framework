@@ -34,7 +34,7 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 	private final WebSocketClient client;
 
-	private final HandlerProvider<WebSocketHandler> handlerProvider;
+	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
 
 	private WebSocketSession webSocketSession;
 
@@ -46,11 +46,11 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 		super(uriTemplate, uriVariables);
 		this.client = webSocketClient;
-		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler>(webSocketHandler);
+		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler<?>>(webSocketHandler);
 	}
 
 	public WebSocketConnectionManager(WebSocketClient webSocketClient,
-			HandlerProvider<WebSocketHandler> handlerProvider, String uriTemplate, Object... uriVariables) {
+			HandlerProvider<WebSocketHandler<?>> handlerProvider, String uriTemplate, Object... uriVariables) {
 
 		super(uriTemplate, uriVariables);
 		this.client = webSocketClient;

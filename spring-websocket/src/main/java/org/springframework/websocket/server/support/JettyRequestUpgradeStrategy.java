@@ -67,8 +67,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
 				Assert.isInstanceOf(ServletWebSocketRequest.class, request);
 				ServletWebSocketRequest servletRequest = (ServletWebSocketRequest) request;
-				HandlerProvider<WebSocketHandler> handlerProvider =
-						(HandlerProvider<WebSocketHandler>) servletRequest.getServletAttributes().get(
+				HandlerProvider<WebSocketHandler<?>> handlerProvider =
+						(HandlerProvider<WebSocketHandler<?>>) servletRequest.getServletAttributes().get(
 								HANDLER_PROVIDER_ATTR_NAME);
 				return new JettyWebSocketListenerAdapter(handlerProvider);
 			}
@@ -89,7 +89,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, HandlerProvider<WebSocketHandler> handlerProvider) throws IOException {
+			String selectedProtocol, HandlerProvider<WebSocketHandler<?>> handlerProvider) throws IOException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -101,7 +101,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	}
 
 	private void upgrade(HttpServletRequest request, HttpServletResponse response,
-			String selectedProtocol, final HandlerProvider<WebSocketHandler> handlerProvider) throws IOException {
+			String selectedProtocol, final HandlerProvider<WebSocketHandler<?>> handlerProvider) throws IOException {
 
 		Assert.state(this.factory.isUpgradeRequest(request, response), "Not a suitable WebSocket upgrade request");
 		Assert.state(this.factory.acceptWebSocket(request, response), "Unable to accept WebSocket");

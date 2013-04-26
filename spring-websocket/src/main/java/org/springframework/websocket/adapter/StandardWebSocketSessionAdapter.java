@@ -21,15 +21,11 @@ import java.net.URI;
 
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.RemoteEndpoint.Basic;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 /**
@@ -39,9 +35,7 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardWebSocketSessionAdapter implements WebSocketSession {
-
-	private static Log logger = LogFactory.getLog(StandardWebSocketSessionAdapter.class);
+public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAdapter {
 
 	private final javax.websocket.Session session;
 
@@ -73,39 +67,18 @@ public class StandardWebSocketSessionAdapter implements WebSocketSession {
 	}
 
 	@Override
-	public void sendMessage(WebSocketMessage message) throws IOException {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Sending: " + message + ", " + this);
-		}
-		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
-		Basic remote = this.session.getBasicRemote();
-		if (message instanceof TextMessage) {
-			remote.sendText(((TextMessage) message).getPayload());
-		}
-		else if (message instanceof BinaryMessage) {
-			remote.sendBinary(((BinaryMessage) message).getPayload());
-		}
-		else {
-			throw new IllegalStateException("Unexpected WebSocketMessage type: " + message);
-		}
+	protected void sendTextMessage(TextMessage message) throws IOException {
+		this.session.getBasicRemote().sendText(message.getPayload());
 	}
 
 	@Override
-	public void close() throws IOException {
-		close(CloseStatus.NORMAL);
+	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
+		this.session.getBasicRemote().sendBinary(message.getPayload());
 	}
 
 	@Override
-	public void close(CloseStatus status) throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Closing " + this);
-		}
+	protected void closeInternal(CloseStatus status) throws IOException {
 		this.session.close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
-	}
-
-	@Override
-	public String toString() {
-		return "WebSocket session id=" + getId();
 	}
 
 }

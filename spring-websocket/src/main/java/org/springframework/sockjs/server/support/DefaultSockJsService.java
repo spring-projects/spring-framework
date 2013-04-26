@@ -143,7 +143,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> handler) throws IOException {
+			HandlerProvider<WebSocketHandler<?>> handler) throws IOException {
 
 		if (isWebSocketEnabled()) {
 			TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
@@ -160,7 +160,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler> handler)
+			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler<?>> handler)
 					throws IOException, TransportErrorException {
 
 		TransportHandler transportHandler = this.transportHandlers.get(transportType);
@@ -210,7 +210,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		transportHandler.handleRequest(request, response, handler, session);
 	}
 
-	public AbstractSockJsSession getSockJsSession(String sessionId, HandlerProvider<WebSocketHandler> handler,
+	public AbstractSockJsSession getSockJsSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handler,
 			TransportHandler transportHandler) {
 
 		AbstractSockJsSession session = this.sessions.get(sessionId);

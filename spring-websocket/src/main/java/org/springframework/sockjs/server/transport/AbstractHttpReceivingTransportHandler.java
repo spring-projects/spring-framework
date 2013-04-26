@@ -55,7 +55,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler> webSocketHandler, AbstractSockJsSession session)
+			HandlerProvider<WebSocketHandler<?>> webSocketHandler, AbstractSockJsSession session)
 					throws TransportErrorException {
 
 		if (session == null) {

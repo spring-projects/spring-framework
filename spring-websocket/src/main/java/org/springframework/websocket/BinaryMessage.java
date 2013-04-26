@@ -19,8 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import org.springframework.util.Assert;
-
 
 /**
  * A {@link WebSocketMessage} that contains a binary {@link ByteBuffer} payload.

@@ -45,7 +45,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 
 
 	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config,
-			HandlerProvider<WebSocketHandler> handler) {
+			HandlerProvider<WebSocketHandler<?>> handler) {
 
 		super(sessionId, handler);
 		this.sockJsConfig = config;

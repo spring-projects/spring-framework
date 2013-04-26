@@ -14,27 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.sockjs;
+package org.springframework.websocket.adapter;
 
-import org.springframework.websocket.HandlerProvider;
+import org.springframework.websocket.BinaryMessage;
+import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
+
 /**
- * A factory for creating a SockJS session.
+ * A {@link WebSocketHandler} for binary messages with empty methods.
  *
- * @param <S> The type of session being created
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 4.0
  */
-public interface SockJsSessionFactory<S extends WebSocketSession>{
+public class BinaryWebSocketHandlerAdapter implements WebSocketHandler<BinaryMessage> {
 
-	/**
-	 * Create a new SockJS session.
-	 * @param sessionId the ID of the session
-	 * @param handler the underlying {@link WebSocketHandler}
-	 * @return a new non-null session
-	 */
-	S createSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handler);
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) {
+	}
+
+	@Override
+	public void handleMessage(WebSocketSession session, BinaryMessage message) {
+	}
+
+	@Override
+	public void handleTransportError(WebSocketSession session, Throwable exception) {
+	}
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+	}
 
 }

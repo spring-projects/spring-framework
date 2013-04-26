@@ -30,6 +30,6 @@ import org.springframework.websocket.WebSocketHandler;
 public interface SockJsService {
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
-			HandlerProvider<WebSocketHandler> handler) throws IOException, TransportErrorException;
+			HandlerProvider<WebSocketHandler<?>> handler) throws IOException, TransportErrorException;
 
 }

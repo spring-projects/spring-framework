@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket;
+package org.springframework.websocket.adapter;
+
+import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.TextMessage;
+import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketSession;
 
 
 /**
- * A {@link WebSocketHandler} with empty methods.
+ * A {@link WebSocketHandler} for text messages with empty methods.
  *
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 4.0
- * @see WebSocketHandler
  */
-public class WebSocketHandlerAdapter implements WebSocketHandler {
+public class TextWebSocketHandlerAdapter implements WebSocketHandler<TextMessage> {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
 	}
 
 	@Override
-	public void afterConnectionClosed(CloseStatus status, WebSocketSession session) {
+	public void handleMessage(WebSocketSession session, TextMessage message) {
 	}
 
 	@Override
-	public void handleTextMessage(TextMessage message, WebSocketSession session) {
+	public void handleTransportError(WebSocketSession session, Throwable exception) {
 	}
 
 	@Override
-	public void handleBinaryMessage(BinaryMessage message, WebSocketSession session) {
-	}
-
-	@Override
-	public void handleTransportError(Throwable exception, WebSocketSession session) {
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 	}
 
 }

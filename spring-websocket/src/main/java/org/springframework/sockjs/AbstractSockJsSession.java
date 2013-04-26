@@ -57,7 +57,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * @param sessionId
 	 * @param handlerProvider the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, HandlerProvider<WebSocketHandler> handlerProvider) {
+	public AbstractSockJsSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handlerProvider) {
 		Assert.notNull(sessionId, "sessionId is required");
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		this.sessionId = sessionId;
@@ -136,12 +136,12 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	public void delegateMessages(String[] messages) {
 		for (String message : messages) {
-			this.handler.handleTextMessage(new TextMessage(message), this);
+			this.handler.handleMessage(this, new TextMessage(message));
 		}
 	}
 
 	public void delegateError(Throwable ex) {
-		this.handler.handleTransportError(ex, this);
+		this.handler.handleTransportError(this, ex);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.handler.afterConnectionClosed(status, this);
+				this.handler.afterConnectionClosed(this, status);
 			}
 		}
 	}
@@ -190,7 +190,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.handler.afterConnectionClosed(status, this);
+				this.handler.afterConnectionClosed(this, status);
 			}
 		}
 	}

@@ -27,9 +27,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.TextWebSocketHandlerAdapter;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.adapter.TextWebSocketHandlerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,7 +45,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private final HandlerProvider<WebSocketHandler> handlerProvider;
+	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
 
 	private WebSocketServerSockJsSession sockJsSession;
 
@@ -55,7 +55,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public SockJsWebSocketHandler(SockJsConfiguration config, HandlerProvider<WebSocketHandler> handlerProvider) {
+	public SockJsWebSocketHandler(SockJsConfiguration config, HandlerProvider<WebSocketHandler<?>> handlerProvider) {
 		Assert.notNull(config, "sockJsConfig is required");
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		this.sockJsConfig = config;
@@ -74,17 +74,17 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	}
 
 	@Override
-	public void handleTextMessage(TextMessage message, WebSocketSession wsSession) {
+	public void handleMessage(WebSocketSession wsSession, TextMessage message) {
 		this.sockJsSession.handleMessage(message, wsSession);
 	}
 
 	@Override
-	public void afterConnectionClosed(CloseStatus status, WebSocketSession wsSession) {
+	public void afterConnectionClosed(WebSocketSession wsSession, CloseStatus status) {
 		this.sockJsSession.delegateConnectionClosed(status);
 	}
 
 	@Override
-	public void handleTransportError(Throwable exception, WebSocketSession webSocketSession) {
+	public void handleTransportError(WebSocketSession webSocketSession, Throwable exception) {
 		this.sockJsSession.delegateError(exception);
 	}
 

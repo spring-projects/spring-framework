@@ -32,6 +32,7 @@ import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.PartialMessageHandler;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 
@@ -45,7 +46,7 @@ public class StandardEndpointAdapter extends Endpoint {
 
 	private static Log logger = LogFactory.getLog(StandardEndpointAdapter.class);
 
-	private final WebSocketHandler handler;
+	private final WebSocketHandler<WebSocketMessage<?>> handler;
 
 	private final Class<?> handlerClass;
 
@@ -53,7 +54,7 @@ public class StandardEndpointAdapter extends Endpoint {
 
 
 
-	public StandardEndpointAdapter(HandlerProvider<WebSocketHandler> provider) {
+	public StandardEndpointAdapter(HandlerProvider<WebSocketHandler<?>> provider) {
 		Assert.notNull(provider, "provider is required");
 		this.handler = new WebSocketHandlerInvoker(provider).setLogger(logger);
 		this.handlerClass= provider.getHandlerType();
@@ -69,19 +70,20 @@ public class StandardEndpointAdapter extends Endpoint {
 				handleTextMessage(session, message);
 			}
 		});
-		if (PartialMessageHandler.class.isAssignableFrom(this.handlerClass)) {
-			session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>() {
-				@Override
-				public void onMessage(ByteBuffer messagePart, boolean isLast) {
-					handleBinaryMessage(session, messagePart, isLast);
-				}
-			});
-		}
-		else {
+
+		if (!PartialMessageHandler.class.isAssignableFrom(this.handlerClass)) {
 			session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
 				@Override
 				public void onMessage(ByteBuffer message) {
 					handleBinaryMessage(session, message, true);
+				}
+			});
+		}
+		else {
+			session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>() {
+				@Override
+				public void onMessage(ByteBuffer messagePart, boolean isLast) {
+					handleBinaryMessage(session, messagePart, isLast);
 				}
 			});
 		}
@@ -91,24 +93,24 @@ public class StandardEndpointAdapter extends Endpoint {
 	}
 
 	private void handleTextMessage(javax.websocket.Session session, String payload) {
-		TextMessage message = new TextMessage(payload);
-		this.handler.handleTextMessage(message, this.wsSession);
+		TextMessage textMessage = new TextMessage(payload);
+		this.handler.handleMessage(this.wsSession, textMessage);
 	}
 
 	private void handleBinaryMessage(javax.websocket.Session session, ByteBuffer payload, boolean isLast) {
-		BinaryMessage message = new BinaryMessage(payload, isLast);
-		this.handler.handleBinaryMessage(message, this.wsSession);
+		BinaryMessage binaryMessage = new BinaryMessage(payload, isLast);
+		this.handler.handleMessage(this.wsSession, binaryMessage);
 	}
 
 	@Override
 	public void onClose(javax.websocket.Session session, CloseReason reason) {
 		CloseStatus closeStatus = new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase());
-		this.handler.afterConnectionClosed(closeStatus, this.wsSession);
+		this.handler.afterConnectionClosed(this.wsSession, closeStatus);
 	}
 
 	@Override
 	public void onError(javax.websocket.Session session, Throwable exception) {
-		this.handler.handleTransportError(exception, this.wsSession);
+		this.handler.handleTransportError(this.wsSession, exception);
 	}
 
 }

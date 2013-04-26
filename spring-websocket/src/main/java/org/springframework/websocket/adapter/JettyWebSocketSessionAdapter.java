@@ -24,7 +24,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
-import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 
@@ -34,7 +33,7 @@ import org.springframework.websocket.WebSocketSession;
  * @author Phillip Webb
  * @since 4.0
  */
-public class JettyWebSocketSessionAdapter implements WebSocketSession {
+public class JettyWebSocketSessionAdapter extends AbstractWebSocketSesssionAdapter {
 
 	private Session session;
 
@@ -65,33 +64,17 @@ public class JettyWebSocketSessionAdapter implements WebSocketSession {
 	}
 
 	@Override
-	public void sendMessage(WebSocketMessage message) throws IOException {
-		if (message instanceof BinaryMessage) {
-			sendMessage((BinaryMessage) message);
-		}
-		else if (message instanceof TextMessage) {
-			sendMessage((TextMessage) message);
-		}
-		else {
-			throw new IllegalArgumentException("Unsupported message type");
-		}
-	}
-
-	private void sendMessage(BinaryMessage message) throws IOException {
-		this.session.getRemote().sendBytes(message.getPayload());
-	}
-
-	private void sendMessage(TextMessage message) throws IOException {
+	protected void sendTextMessage(TextMessage message) throws IOException {
 		this.session.getRemote().sendString(message.getPayload());
 	}
 
 	@Override
-	public void close() throws IOException {
-		this.session.close();
+	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
+		this.session.getRemote().sendBytes(message.getPayload());
 	}
 
 	@Override
-	public void close(CloseStatus status) throws IOException {
+	protected void closeInternal(CloseStatus status) throws IOException {
 		this.session.close(status.getCode(), status.getReason());
 	}
 

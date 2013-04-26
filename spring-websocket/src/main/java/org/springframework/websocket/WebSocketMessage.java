@@ -20,9 +20,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A message that can be sent or received over a WebSocket connection. A WebSocket
- * message must be either a {@link BinaryMessage} or a {@link TextMessage} depending
- * on the payload. No further subclasses are supported.
+ * A message that can be handled or sent during a WebSocket interaction. There are only
+ * two sub-classes {@link BinaryMessage} or a {@link TextMessage} with no further
+ * sub-classing expected.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -35,7 +35,7 @@ public abstract class WebSocketMessage<T> {
 
 
 	/**
-	 * Create a new {@link WebSocketMessage} instance.
+	 * Create a new {@link WebSocketMessage} instance with the given payload.
 	 * @param payload a non-null payload
 	 */
 	WebSocketMessage(T payload) {

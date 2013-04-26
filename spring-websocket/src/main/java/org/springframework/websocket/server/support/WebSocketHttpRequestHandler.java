@@ -45,18 +45,18 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 	private final HandshakeHandler handshakeHandler;
 
-	private final HandlerProvider<WebSocketHandler> handlerProvider;
+	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
 
 
 	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
-		this(new SimpleHandlerProvider<WebSocketHandler>(webSocketHandler));
+		this(new SimpleHandlerProvider<WebSocketHandler<?>>(webSocketHandler));
 	}
 
-	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler> handlerProvider) {
+	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler<?>> handlerProvider) {
 		this(handlerProvider, new DefaultHandshakeHandler());
 	}
 
-	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler> handlerProvider,
+	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler<?>> handlerProvider,
 			HandshakeHandler handshakeHandler) {
 		Assert.notNull(handlerProvider, "handlerProvider is required");
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");

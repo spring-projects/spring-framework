@@ -20,36 +20,39 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.Assert;
-import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.HandlerProvider;
-import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 /**
- * A class for managing and delegating to a {@link WebSocketHandler} instance, applying
- * initialization and destruction as necessary at the start and end of the WebSocket
- * session, ensuring that any unhandled exceptions from its methods are caught and handled
- * by closing the session, and also adding uniform logging.
+ * A class for managing and delegating to a {@link WebSocketHandler} instance, ensuring
+ * the handler is initialized and destroyed, that any unhandled exceptions from handler
+ * are caught (and handled by closing the session), as well as adding logging.
  *
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 4.0
  */
-public class WebSocketHandlerInvoker implements WebSocketHandler {
+public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessage<?>> {
 
 	private Log logger = LogFactory.getLog(WebSocketHandlerInvoker.class);
 
-	private final HandlerProvider<WebSocketHandler> handlerProvider;
+	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
 
-	private WebSocketHandler handler;
+	private final Class<?> supportedMessageType;
+
+	private WebSocketHandler<?> handler;
 
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
 
-	public WebSocketHandlerInvoker(HandlerProvider<WebSocketHandler> handlerProvider) {
-		this.handlerProvider = handlerProvider;
+	public WebSocketHandlerInvoker(HandlerProvider<WebSocketHandler<?>> provider) {
+		this.handlerProvider = provider;
+		this.supportedMessageType = GenericTypeResolver.resolveTypeArgument(provider.getHandlerType(), WebSocketHandler.class);
 	}
 
 	public WebSocketHandlerInvoker setLogger(Log logger) {
@@ -77,8 +80,10 @@ public class WebSocketHandlerInvoker implements WebSocketHandler {
 		tryCloseWithError(session, ex, null);
 	}
 
-	public void tryCloseWithError(WebSocketSession session, Throwable ex, CloseStatus status) {
-		logger.error("Unhandled error for " + session, ex);
+	public void tryCloseWithError(WebSocketSession session, Throwable exeption, CloseStatus status) {
+		if (exeption != null) {
+			logger.error("Closing due to exception for " + session, exeption);
+		}
 		if (session.isOpen()) {
 			try {
 				session.close(CloseStatus.SERVER_ERROR);
@@ -103,13 +108,18 @@ public class WebSocketHandlerInvoker implements WebSocketHandler {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void handleTextMessage(TextMessage message, WebSocketSession session) {
+	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Received text message for " + session + ": " + message);
+			logger.trace("Received " + message + ", " + session);
+		}
+		if (!this.supportedMessageType.isAssignableFrom(message.getClass())) {
+			tryCloseWithError(session, null, CloseStatus.NOT_ACCEPTABLE.withReason("Message type not supported"));
+			return;
 		}
 		try {
-			this.handler.handleTextMessage(message, session);
+			((WebSocketHandler) this.handler).handleMessage(session, message);
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(session,ex);
@@ -117,25 +127,12 @@ public class WebSocketHandlerInvoker implements WebSocketHandler {
 	}
 
 	@Override
-	public void handleBinaryMessage(BinaryMessage message, WebSocketSession session) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Received binary message for " + session);
-		}
-		try {
-			this.handler.handleBinaryMessage(message, session);
-		}
-		catch (Throwable ex) {
-			tryCloseWithError(session, ex);
-		}
-	}
-
-	@Override
-	public void handleTransportError(Throwable exception, WebSocketSession session) {
+	public void handleTransportError(WebSocketSession session, Throwable exception) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Transport error for " + session, exception);
 		}
 		try {
-			this.handler.handleTransportError(exception, session);
+			this.handler.handleTransportError(session, exception);
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(session, ex);
@@ -143,12 +140,12 @@ public class WebSocketHandlerInvoker implements WebSocketHandler {
 	}
 
 	@Override
-	public void afterConnectionClosed(CloseStatus closeStatus, WebSocketSession session) {
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Connection closed for " + session + ", " + closeStatus);
 		}
 		try {
-			this.handler.afterConnectionClosed(closeStatus, session);
+			this.handler.afterConnectionClosed(session, closeStatus);
 		}
 		catch (Throwable ex) {
 			logger.error("Unhandled error for " + this, ex);
