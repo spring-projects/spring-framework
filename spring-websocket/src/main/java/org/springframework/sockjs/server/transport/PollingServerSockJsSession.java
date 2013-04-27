@@ -24,7 +24,7 @@ import org.springframework.websocket.WebSocketHandler;
 
 public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
-	public PollingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
+	public PollingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 

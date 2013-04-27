@@ -42,7 +42,7 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler<?> webSocketHandler) throws IOException {
+			String protocol, WebSocketHandler webSocketHandler) throws IOException {
 
 		upgradeInternal(request, response, protocol, new StandardEndpointAdapter(webSocketHandler));
 	}

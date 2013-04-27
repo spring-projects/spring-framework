@@ -43,7 +43,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
+	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, handler);
 		this.sockJsConfig = config;
 	}

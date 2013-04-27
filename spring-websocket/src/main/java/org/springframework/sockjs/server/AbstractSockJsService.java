@@ -199,7 +199,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 * @throws Exception
 	 */
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, WebSocketHandler<?> webSocketHandler) throws IOException, TransportErrorException {
+			String sockJsPath, WebSocketHandler webSocketHandler) throws IOException, TransportErrorException {
 
 		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
 
@@ -253,10 +253,10 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	}
 
 	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
-			ServerHttpResponse response, WebSocketHandler<?> webSocketHandler) throws IOException;
+			ServerHttpResponse response, WebSocketHandler webSocketHandler) throws IOException;
 
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, WebSocketHandler<?> webSocketHandler)
+			String sessionId, TransportType transportType, WebSocketHandler webSocketHandler)
 					throws IOException, TransportErrorException;
 
 

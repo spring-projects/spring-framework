@@ -57,7 +57,7 @@ public abstract class AbstractHttpSendingTransportHandler
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler<?> webSocketHandler, AbstractSockJsSession session)
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session)
 					throws TransportErrorException {
 
 		// Set content type before writing

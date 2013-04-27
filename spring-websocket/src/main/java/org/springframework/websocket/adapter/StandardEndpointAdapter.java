@@ -52,7 +52,7 @@ public class StandardEndpointAdapter extends Endpoint {
 
 
 
-	public StandardEndpointAdapter(WebSocketHandler<?> webSocketHandler) {
+	public StandardEndpointAdapter(WebSocketHandler webSocketHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.handler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
 		this.handlerClass= webSocketHandler.getClass();

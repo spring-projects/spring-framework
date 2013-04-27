@@ -31,7 +31,7 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 	private int byteCount;
 
 
-	public StreamingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
+	public StreamingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 

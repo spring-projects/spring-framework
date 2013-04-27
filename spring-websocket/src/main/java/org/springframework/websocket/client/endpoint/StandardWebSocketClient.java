@@ -67,7 +67,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler<?> webSocketHandler,
+	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
 			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
 		Endpoint endpoint = new StandardEndpointAdapter(webSocketHandler);

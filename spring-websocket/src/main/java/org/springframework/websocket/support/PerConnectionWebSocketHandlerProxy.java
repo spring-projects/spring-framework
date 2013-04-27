@@ -16,7 +16,6 @@
 
 package org.springframework.websocket.support;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketHandler;
@@ -50,21 +48,18 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler<WebSocketMessage<?>>, BeanFactoryAware {
+public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler, BeanFactoryAware {
 
 	private Log logger = LogFactory.getLog(PerConnectionWebSocketHandlerProxy.class);
 
-	private final BeanCreatingHandlerProvider<WebSocketHandler<?>> provider;
+	private final BeanCreatingHandlerProvider<WebSocketHandler> provider;
 
-	private Map<WebSocketSession, WebSocketHandler<?>> handlers =
-			new ConcurrentHashMap<WebSocketSession, WebSocketHandler<?>>();
-
-	private final Class<?> supportedMessageType;
+	private Map<WebSocketSession, WebSocketHandler> handlers =
+			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
 
 
-	public PerConnectionWebSocketHandlerProxy(Class<? extends WebSocketHandler<?>> handlerType) {
-		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler<?>>(handlerType);
-		this.supportedMessageType = GenericTypeResolver.resolveTypeArgument(handlerType, WebSocketHandler.class);
+	public PerConnectionWebSocketHandlerProxy(Class<? extends WebSocketHandler> handlerType) {
+		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
 	}
 
 
@@ -75,29 +70,18 @@ public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler<WebS
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
-		WebSocketHandler<?> handler = this.provider.getHandler();
+		WebSocketHandler handler = this.provider.getHandler();
 		this.handlers.put(session, handler);
 		handler.afterConnectionEstablished(session);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-		if (!this.supportedMessageType.isAssignableFrom(message.getClass())) {
-			try {
-				session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Message type not supported"));
-			}
-			catch (IOException e) {
-				destroy(session);
-			}
-		}
-		else {
-			((WebSocketHandler) getHandler(session)).handleMessage(session, message);
-		}
+		getHandler(session).handleMessage(session, message);
 	}
 
-	private WebSocketHandler<?> getHandler(WebSocketSession session) {
-		WebSocketHandler<?> handler = this.handlers.get(session);
+	private WebSocketHandler getHandler(WebSocketSession session) {
+		WebSocketHandler handler = this.handlers.get(session);
 		Assert.isTrue(handler != null, "WebSocketHandler not found for " + session);
 		return handler;
 	}
@@ -118,7 +102,7 @@ public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler<WebS
 	}
 
 	private void destroy(WebSocketSession session) {
-		WebSocketHandler<?> handler = this.handlers.remove(session);
+		WebSocketHandler handler = this.handlers.remove(session);
 		try {
 			if (handler != null) {
 				this.provider.destroy(handler);

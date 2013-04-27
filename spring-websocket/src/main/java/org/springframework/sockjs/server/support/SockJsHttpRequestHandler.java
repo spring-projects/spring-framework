@@ -43,7 +43,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 	private final SockJsService sockJsService;
 
-	private final WebSocketHandler<?> webSocketHandler;
+	private final WebSocketHandler webSocketHandler;
 
 	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 

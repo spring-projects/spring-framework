@@ -25,7 +25,6 @@ import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 /**
@@ -38,12 +37,12 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	private static Log logger = LogFactory.getLog(JettyWebSocketListenerAdapter.class);
 
-	private final WebSocketHandler<WebSocketMessage<?>> webSocketHandler;
+	private final WebSocketHandler webSocketHandler;
 
 	private WebSocketSession wsSession;
 
 
-	public JettyWebSocketListenerAdapter(WebSocketHandler<?> webSocketHandler) {
+	public JettyWebSocketListenerAdapter(WebSocketHandler webSocketHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.webSocketHandler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
 	}

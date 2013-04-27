@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketHandler;
@@ -36,22 +35,18 @@ import org.springframework.websocket.WebSocketSession;
  * @author Phillip Webb
  * @since 4.0
  */
-public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessage<?>> {
+public class WebSocketHandlerInvoker implements WebSocketHandler {
 
 	private Log logger = LogFactory.getLog(WebSocketHandlerInvoker.class);
 
-	private final WebSocketHandler<?> handler;
-
-	private final Class<?> supportedMessageType;
+	private final WebSocketHandler handler;
 
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
 
-	public WebSocketHandlerInvoker(WebSocketHandler<?> webSocketHandler) {
+	public WebSocketHandlerInvoker(WebSocketHandler webSocketHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.handler = webSocketHandler;
-		Class<?> handlerType = webSocketHandler.getClass();
-		this.supportedMessageType = GenericTypeResolver.resolveTypeArgument(handlerType, WebSocketHandler.class);
 	}
 
 	public WebSocketHandlerInvoker setLogger(Log logger) {
@@ -79,9 +74,7 @@ public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessag
 	}
 
 	public void tryCloseWithError(WebSocketSession session, Throwable exeption, CloseStatus status) {
-		if (exeption != null) {
-			logger.error("Closing due to exception for " + session, exeption);
-		}
+		logger.error("Closing due to exception for " + session, exeption);
 		if (session.isOpen()) {
 			try {
 				session.close((status != null) ? status : CloseStatus.SERVER_ERROR);
@@ -92,18 +85,13 @@ public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessag
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Received " + message + ", " + session);
 		}
-		if (!this.supportedMessageType.isAssignableFrom(message.getClass())) {
-			tryCloseWithError(session, null, CloseStatus.NOT_ACCEPTABLE.withReason("Message type not supported"));
-			return;
-		}
 		try {
-			((WebSocketHandler) this.handler).handleMessage(session, message);
+			this.handler.handleMessage(session, message);
 		}
 		catch (Throwable ex) {
 			tryCloseWithError(session,ex);

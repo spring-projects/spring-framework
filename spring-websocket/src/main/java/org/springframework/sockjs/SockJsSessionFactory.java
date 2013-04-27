@@ -34,6 +34,6 @@ public interface SockJsSessionFactory<S extends WebSocketSession>{
 	 * @param webSocketHandler the underlying {@link WebSocketHandler}
 	 * @return a new non-null session
 	 */
-	S createSession(String sessionId, WebSocketHandler<?> webSocketHandler);
+	S createSession(String sessionId, WebSocketHandler webSocketHandler);
 
 }

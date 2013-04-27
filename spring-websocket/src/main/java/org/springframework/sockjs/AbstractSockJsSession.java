@@ -55,7 +55,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * @param sessionId
 	 * @param webSocketHandler the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, WebSocketHandler<?> webSocketHandler) {
+	public AbstractSockJsSession(String sessionId, WebSocketHandler webSocketHandler) {
 		Assert.notNull(sessionId, "sessionId is required");
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.sessionId = sessionId;

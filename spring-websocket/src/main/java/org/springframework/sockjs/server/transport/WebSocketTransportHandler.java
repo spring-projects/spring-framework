@@ -63,10 +63,10 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 
 	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler<?> webSocketHandler, AbstractSockJsSession session) throws TransportErrorException {
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws TransportErrorException {
 
 		try {
-			WebSocketHandler<?> sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, webSocketHandler);
+			WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, webSocketHandler);
 			this.handshakeHandler.doHandshake(request, response, sockJsWrapper);
 		}
 		catch (Throwable t) {
@@ -77,7 +77,7 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 	// HandshakeHandler methods
 
 	@Override
-	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler<?> handler)
+	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
 			throws IOException {
 
 		return this.handshakeHandler.doHandshake(request, response, handler);

@@ -80,7 +80,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler<?> handler) {
+	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
 
 		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {

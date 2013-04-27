@@ -30,6 +30,6 @@ public interface SockJsService {
 
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, WebSocketHandler<?> webSocketHandler) throws IOException, TransportErrorException;
+			String sockJsPath, WebSocketHandler webSocketHandler) throws IOException, TransportErrorException;
 
 }

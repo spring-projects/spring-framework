@@ -26,7 +26,7 @@ package org.springframework.websocket;
  * @author Phillip Webb
  * @since 4.0
  */
-public interface WebSocketHandler<T extends WebSocketMessage<?>> {
+public interface WebSocketHandler {
 
 	/**
 	 * A new WebSocket connection has been opened and is ready to be used.
@@ -36,7 +36,7 @@ public interface WebSocketHandler<T extends WebSocketMessage<?>> {
 	/**
 	 * Handle an incoming WebSocket message.
 	 */
-	void handleMessage(WebSocketSession session, T message);
+	void handleMessage(WebSocketSession session, WebSocketMessage<?> message);
 
 	/**
 	 * Handle an error from the underlying WebSocket message transport.

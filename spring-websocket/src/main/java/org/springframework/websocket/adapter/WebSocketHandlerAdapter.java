@@ -34,7 +34,7 @@ import org.springframework.websocket.WebSocketSession;
  * @see TextWebSocketHandlerAdapter
  * @see BinaryWebSocketHandlerAdapter
  */
-public class WebSocketHandlerAdapter implements WebSocketHandler<WebSocketMessage<?>> {
+public class WebSocketHandlerAdapter implements WebSocketHandler {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
@@ -49,6 +49,7 @@ public class WebSocketHandlerAdapter implements WebSocketHandler<WebSocketMessag
 			handleBinaryMessage(session, (BinaryMessage) message);
 		}
 		else {
+			// should not happen
 			throw new IllegalStateException("Unexpected WebSocket message type: " + message);
 		}
 	}

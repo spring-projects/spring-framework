@@ -38,7 +38,7 @@ public interface WebSocketClient {
 	WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
 			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException;
 
-	WebSocketSession doHandshake(WebSocketHandler<?> webSocketHandler, HttpHeaders headers, URI uri)
+	WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException;
 
 }

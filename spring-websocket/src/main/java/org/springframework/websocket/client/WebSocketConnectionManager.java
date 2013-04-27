@@ -32,7 +32,7 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 	private final WebSocketClient client;
 
-	private final WebSocketHandler<?> webSocketHandler;
+	private final WebSocketHandler webSocketHandler;
 
 	private WebSocketSession webSocketSession;
 

@@ -44,7 +44,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private final WebSocketHandler<?> webSocketHandler;
+	private final WebSocketHandler webSocketHandler;
 
 	private WebSocketServerSockJsSession sockJsSession;
 
@@ -54,7 +54,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public SockJsWebSocketHandler(SockJsConfiguration config, WebSocketHandler<?> webSocketHandler) {
+	public SockJsWebSocketHandler(SockJsConfiguration config, WebSocketHandler webSocketHandler) {
 		Assert.notNull(config, "sockJsConfig is required");
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.sockJsConfig = config;
@@ -73,7 +73,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	}
 
 	@Override
-	public void handleMessage(WebSocketSession wsSession, TextMessage message) {
+	public void handleTextMessage(WebSocketSession wsSession, TextMessage message) {
 		this.sockJsSession.handleMessage(message, wsSession);
 	}
 

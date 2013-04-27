@@ -40,9 +40,9 @@ public interface RequestUpgradeStrategy {
 	 * Perform runtime specific steps to complete the upgrade.
 	 * Invoked only if the handshake is successful.
 	 *
-	 * @param handler the handler for WebSocket messages
+	 * @param webSocketHandler the handler for WebSocket messages
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			WebSocketHandler<?> webSocketHandler) throws IOException;
+			WebSocketHandler webSocketHandler) throws IOException;
 
 }

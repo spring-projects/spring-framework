@@ -16,8 +16,10 @@
 
 package org.springframework.websocket.adapter;
 
-import org.springframework.websocket.BinaryMessage;
+import java.io.IOException;
+
 import org.springframework.websocket.CloseStatus;
+import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -29,22 +31,17 @@ import org.springframework.websocket.WebSocketSession;
  * @author Phillip Webb
  * @since 4.0
  */
-public class BinaryWebSocketHandlerAdapter implements WebSocketHandler<BinaryMessage> {
+public class BinaryWebSocketHandlerAdapter extends WebSocketHandlerAdapter {
+
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) {
-	}
-
-	@Override
-	public void handleMessage(WebSocketSession session, BinaryMessage message) {
-	}
-
-	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) {
-	}
-
-	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+		try {
+			session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Text messages not supported"));
+		}
+		catch (IOException e) {
+			// ignore
+		}
 	}
 
 }

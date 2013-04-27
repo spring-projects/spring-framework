@@ -49,7 +49,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	private ServerHttpResponse response;
 
 
-	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
+	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 
