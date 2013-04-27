@@ -19,16 +19,13 @@ import java.io.IOException;
 
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 
 public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession {
 
-	public PollingServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
-			HandlerProvider<WebSocketHandler<?>> handler) {
-
-		super(sessionId, sockJsConfig, handler);
+	public PollingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
+		super(sessionId, config, handler);
 	}
 
 	@Override

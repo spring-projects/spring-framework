@@ -24,16 +24,13 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
-import org.springframework.websocket.HandlerProvider;
 
 /**
- * A {@link HandlerProvider} that uses {@link AutowireCapableBeanFactory#createBean(Class)
- * creating a fresh instance every time #getHandler() is called.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class BeanCreatingHandlerProvider<T> implements HandlerProvider<T>, BeanFactoryAware {
+public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 	private static final Log logger = LogFactory.getLog(BeanCreatingHandlerProvider.class);
 
@@ -76,7 +73,6 @@ public class BeanCreatingHandlerProvider<T> implements HandlerProvider<T>, BeanF
 		}
 	}
 
-	@Override
 	public void destroy(T handler) {
 		if (this.beanFactory != null) {
 			if (logger.isTraceEnabled()) {

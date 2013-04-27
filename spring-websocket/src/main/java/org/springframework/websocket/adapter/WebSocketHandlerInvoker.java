@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
@@ -41,18 +40,18 @@ public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessag
 
 	private Log logger = LogFactory.getLog(WebSocketHandlerInvoker.class);
 
-	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
+	private final WebSocketHandler<?> handler;
 
 	private final Class<?> supportedMessageType;
-
-	private WebSocketHandler<?> handler;
 
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
 
-	public WebSocketHandlerInvoker(HandlerProvider<WebSocketHandler<?>> provider) {
-		this.handlerProvider = provider;
-		this.supportedMessageType = GenericTypeResolver.resolveTypeArgument(provider.getHandlerType(), WebSocketHandler.class);
+	public WebSocketHandlerInvoker(WebSocketHandler<?> webSocketHandler) {
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		this.handler = webSocketHandler;
+		Class<?> handlerType = webSocketHandler.getClass();
+		this.supportedMessageType = GenericTypeResolver.resolveTypeArgument(handlerType, WebSocketHandler.class);
 	}
 
 	public WebSocketHandlerInvoker setLogger(Log logger) {
@@ -68,7 +67,6 @@ public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessag
 		try {
 			Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected new session");
 
-			this.handler = this.handlerProvider.getHandler();
 			this.handler.afterConnectionEstablished(session);
 		}
 		catch (Throwable ex) {
@@ -86,25 +84,11 @@ public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessag
 		}
 		if (session.isOpen()) {
 			try {
-				session.close(CloseStatus.SERVER_ERROR);
+				session.close((status != null) ? status : CloseStatus.SERVER_ERROR);
 			}
 			catch (Throwable t) {
-				destroyHandler();
+				// ignore
 			}
-		}
-	}
-
-	private void destroyHandler() {
-		try {
-			if (this.handler != null) {
-				this.handlerProvider.destroy(this.handler);
-			}
-		}
-		catch (Throwable t) {
-			logger.warn("Error while destroying handler", t);
-		}
-		finally {
-			this.handler = null;
 		}
 	}
 
@@ -149,9 +133,6 @@ public class WebSocketHandlerInvoker implements WebSocketHandler<WebSocketMessag
 		}
 		catch (Throwable ex) {
 			logger.error("Unhandled error for " + this, ex);
-		}
-		finally {
-			this.handlerProvider.destroy(this.handler);
 		}
 	}
 

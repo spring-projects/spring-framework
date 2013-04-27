@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -33,6 +32,6 @@ public interface HandshakeHandler {
 
 
 	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler<?>> handler) throws IOException;
+			WebSocketHandler<?> webSocketHandler) throws IOException;
 
 }

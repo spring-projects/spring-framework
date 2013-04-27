@@ -23,7 +23,6 @@ import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.springframework.util.Assert;
 import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketMessage;
@@ -39,43 +38,43 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	private static Log logger = LogFactory.getLog(JettyWebSocketListenerAdapter.class);
 
-	private final WebSocketHandler<WebSocketMessage<?>> handler;
+	private final WebSocketHandler<WebSocketMessage<?>> webSocketHandler;
 
 	private WebSocketSession wsSession;
 
 
-	public JettyWebSocketListenerAdapter(HandlerProvider<WebSocketHandler<?>> provider) {
-		Assert.notNull(provider, "provider is required");
-		this.handler = new WebSocketHandlerInvoker(provider).setLogger(logger);
+	public JettyWebSocketListenerAdapter(WebSocketHandler<?> webSocketHandler) {
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		this.webSocketHandler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
 	}
 
 
 	@Override
 	public void onWebSocketConnect(Session session) {
 		this.wsSession = new JettyWebSocketSessionAdapter(session);
-		this.handler.afterConnectionEstablished(this.wsSession);
+		this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 	}
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		CloseStatus closeStatus = new CloseStatus(statusCode, reason);
-		this.handler.afterConnectionClosed(this.wsSession, closeStatus);
+		this.webSocketHandler.afterConnectionClosed(this.wsSession, closeStatus);
 	}
 
 	@Override
 	public void onWebSocketText(String payload) {
 		TextMessage message = new TextMessage(payload);
-		this.handler.handleMessage(this.wsSession, message);
+		this.webSocketHandler.handleMessage(this.wsSession, message);
 	}
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
 		BinaryMessage message = new BinaryMessage(payload, offset, len);
-		this.handler.handleMessage(this.wsSession, message);
+		this.webSocketHandler.handleMessage(this.wsSession, message);
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
-		this.handler.handleTransportError(this.wsSession, cause);
+		this.webSocketHandler.handleTransportError(this.wsSession, cause);
 	}
 }

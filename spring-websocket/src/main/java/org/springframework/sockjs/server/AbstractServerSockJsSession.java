@@ -25,7 +25,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.springframework.sockjs.AbstractSockJsSession;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketMessage;
@@ -44,9 +43,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 	private ScheduledFuture<?> heartbeatTask;
 
 
-	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config,
-			HandlerProvider<WebSocketHandler<?>> handler) {
-
+	public AbstractServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
 		super(sessionId, handler);
 		this.sockJsConfig = config;
 	}

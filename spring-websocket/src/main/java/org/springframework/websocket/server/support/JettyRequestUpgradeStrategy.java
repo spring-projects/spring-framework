@@ -32,7 +32,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.adapter.JettyWebSocketListenerAdapter;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
@@ -63,14 +62,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		this.factory = new WebSocketServerFactory();
 		this.factory.setCreator(new WebSocketCreator() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
 				Assert.isInstanceOf(ServletWebSocketRequest.class, request);
 				ServletWebSocketRequest servletRequest = (ServletWebSocketRequest) request;
-				HandlerProvider<WebSocketHandler<?>> handlerProvider =
-						(HandlerProvider<WebSocketHandler<?>>) servletRequest.getServletAttributes().get(
-								HANDLER_PROVIDER_ATTR_NAME);
-				return new JettyWebSocketListenerAdapter(handlerProvider);
+				WebSocketHandler<?> webSocketHandler =
+						(WebSocketHandler<?>) servletRequest.getServletAttributes().get(HANDLER_PROVIDER_ATTR_NAME);
+				return new JettyWebSocketListenerAdapter(webSocketHandler);
 			}
 		});
 		try {
@@ -89,7 +86,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, HandlerProvider<WebSocketHandler<?>> handlerProvider) throws IOException {
+			String selectedProtocol, WebSocketHandler<?> webSocketHandler) throws IOException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -97,16 +94,16 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		upgrade(servletRequest, servletResponse, selectedProtocol, handlerProvider);
+		upgrade(servletRequest, servletResponse, selectedProtocol, webSocketHandler);
 	}
 
 	private void upgrade(HttpServletRequest request, HttpServletResponse response,
-			String selectedProtocol, final HandlerProvider<WebSocketHandler<?>> handlerProvider) throws IOException {
+			String selectedProtocol, final WebSocketHandler<?> webSocketHandler) throws IOException {
 
 		Assert.state(this.factory.isUpgradeRequest(request, response), "Not a suitable WebSocket upgrade request");
 		Assert.state(this.factory.acceptWebSocket(request, response), "Unable to accept WebSocket");
 
-		request.setAttribute(HANDLER_PROVIDER_ATTR_NAME, handlerProvider);
+		request.setAttribute(HANDLER_PROVIDER_ATTR_NAME, webSocketHandler);
 	}
 
 }

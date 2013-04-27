@@ -21,9 +21,7 @@ import javax.websocket.Session;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
  * @author Rossen Stoyanchev
@@ -32,30 +30,34 @@ import org.springframework.websocket.support.SimpleHandlerProvider;
 public class AnnotatedEndpointConnectionManager extends EndpointConnectionManagerSupport
 		implements BeanFactoryAware {
 
-	private final HandlerProvider<Object> handlerProvider;
+	private final BeanCreatingHandlerProvider<Object> endpointProvider;
+
+	private final Object endpoint;
 
 
-	public AnnotatedEndpointConnectionManager(Object endpointBean, String uriTemplate, Object... uriVariables) {
+	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.handlerProvider = new SimpleHandlerProvider<Object>(endpointBean);
+		this.endpointProvider = null;
+		this.endpoint = endpoint;
 	}
 
 	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.handlerProvider = new BeanCreatingHandlerProvider<Object>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<Object>(endpointClass);
+		this.endpoint = null;
 	}
 
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (this.handlerProvider instanceof BeanFactoryAware) {
-			((BeanFactoryAware) this.handlerProvider).setBeanFactory(beanFactory);
+		if (this.endpointProvider != null) {
+			this.endpointProvider.setBeanFactory(beanFactory);
 		}
 	}
 
 	@Override
 	protected void openConnection() throws Exception {
-		Object endpoint = this.handlerProvider.getHandler();
+		Object endpoint = (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
 		Session session = getWebSocketContainer().connectToServer(endpoint, getUri());
 		updateSession(session);
 	}

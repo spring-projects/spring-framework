@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -53,15 +52,14 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 
 	/**
-	 *
 	 * @param sessionId
-	 * @param handlerProvider the recipient of SockJS messages
+	 * @param webSocketHandler the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handlerProvider) {
+	public AbstractSockJsSession(String sessionId, WebSocketHandler<?> webSocketHandler) {
 		Assert.notNull(sessionId, "sessionId is required");
-		Assert.notNull(handlerProvider, "handlerProvider is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.sessionId = sessionId;
-		this.handler = new WebSocketHandlerInvoker(handlerProvider).setLogger(logger);
+		this.handler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
 	}
 
 	public String getId() {

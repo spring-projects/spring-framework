@@ -33,9 +33,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 
 /**
@@ -53,7 +51,9 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final String path;
 
-	private final HandlerProvider<Endpoint> handlerProvider;
+	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
+
+	private final Endpoint endpoint;
 
     private List<Class<? extends Encoder>> encoders = new ArrayList<Class<? extends Encoder>>();
 
@@ -70,7 +70,6 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	/**
 	 * Class constructor with the {@code javax.webscoket.Endpoint} class.
-	 * TODO
 	 *
 	 * @param path
 	 * @param endpointClass
@@ -79,14 +78,16 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpointClass, "endpointClass is required");
 		this.path = path;
-		this.handlerProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpoint = null;
 	}
 
-	public EndpointRegistration(String path, Endpoint endpointBean) {
+	public EndpointRegistration(String path, Endpoint endpoint) {
 		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(endpointBean, "endpointBean is required");
+		Assert.notNull(endpoint, "endpoint is required");
 		this.path = path;
-		this.handlerProvider = new SimpleHandlerProvider<Endpoint>(endpointBean);
+		this.endpointProvider = null;
+		this.endpoint = endpoint;
 	}
 
 
@@ -96,13 +97,13 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Class<? extends Endpoint> getEndpointClass() {
-		return (Class<? extends Endpoint>) this.handlerProvider.getHandlerType();
+		return (this.endpoint != null) ?
+				this.endpoint.getClass() : ((Class<? extends Endpoint>) this.endpointProvider.getHandlerType());
 	}
 
 	public Endpoint getEndpoint() {
-		return this.handlerProvider.getHandler();
+		return (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
 	}
 
 	public void setSubprotocols(List<String> subprotocols) {
@@ -115,7 +116,6 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	}
 
 	public void setExtensions(List<Extension> extensions) {
-		// TODO: verify against ServerContainer.getInstalledExtensions()
 		this.extensions = extensions;
 	}
 
@@ -188,8 +188,8 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (this.handlerProvider instanceof BeanFactoryAware) {
-			((BeanFactoryAware) this.handlerProvider).setBeanFactory(beanFactory);
+		if (this.endpointProvider != null) {
+			this.endpointProvider.setBeanFactory(beanFactory);
 		}
 	}
 

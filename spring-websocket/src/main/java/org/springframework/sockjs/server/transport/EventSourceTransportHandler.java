@@ -25,7 +25,6 @@ import org.springframework.sockjs.server.SockJsFrame.DefaultFrameFormat;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
 import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -47,7 +46,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 	}
 
 	@Override
-	public StreamingServerSockJsSession createSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handler) {
+	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler<?> handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
 		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {
 			@Override

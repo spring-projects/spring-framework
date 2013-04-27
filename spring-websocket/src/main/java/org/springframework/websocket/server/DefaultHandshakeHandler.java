@@ -35,7 +35,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -88,7 +87,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	@Override
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler<?>> handler) throws IOException {
+			WebSocketHandler<?> webSocketHandler) throws IOException {
 
 		logger.debug("Starting handshake for " + request.getURI());
 
@@ -136,10 +135,10 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		response.flush();
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Upgrading with " + handler);
+			logger.trace("Upgrading with " + webSocketHandler);
 		}
 
-		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, handler);
+		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, webSocketHandler);
 
 		return true;
 	}

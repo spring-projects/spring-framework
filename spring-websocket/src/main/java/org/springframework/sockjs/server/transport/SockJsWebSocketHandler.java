@@ -25,7 +25,6 @@ import org.springframework.sockjs.server.SockJsFrame;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -45,7 +44,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
+	private final WebSocketHandler<?> webSocketHandler;
 
 	private WebSocketServerSockJsSession sockJsSession;
 
@@ -55,11 +54,11 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public SockJsWebSocketHandler(SockJsConfiguration config, HandlerProvider<WebSocketHandler<?>> handlerProvider) {
+	public SockJsWebSocketHandler(SockJsConfiguration config, WebSocketHandler<?> webSocketHandler) {
 		Assert.notNull(config, "sockJsConfig is required");
-		Assert.notNull(handlerProvider, "handlerProvider is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.sockJsConfig = config;
-		this.handlerProvider = handlerProvider;
+		this.webSocketHandler = webSocketHandler;
 	}
 
 	protected SockJsConfiguration getSockJsConfig() {
@@ -103,7 +102,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 
 		public WebSocketServerSockJsSession(String sessionId, SockJsConfiguration config) {
-			super(sessionId, config, SockJsWebSocketHandler.this.handlerProvider);
+			super(sessionId, config, SockJsWebSocketHandler.this.webSocketHandler);
 		}
 
 		public void initWebSocketSession(WebSocketSession wsSession) {

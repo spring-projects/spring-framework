@@ -30,7 +30,6 @@ import org.springframework.sockjs.server.TransportType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.JavaScriptUtils;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -81,7 +80,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	public StreamingServerSockJsSession createSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handler) {
+	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler<?> handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
 
 		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {

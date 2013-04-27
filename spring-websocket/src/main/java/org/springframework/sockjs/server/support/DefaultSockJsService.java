@@ -51,7 +51,6 @@ import org.springframework.sockjs.server.transport.XhrPollingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrStreamingTransportHandler;
 import org.springframework.sockjs.server.transport.XhrTransportHandler;
 import org.springframework.util.CollectionUtils;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
@@ -143,13 +142,13 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler<?>> handler) throws IOException {
+			WebSocketHandler<?> webSocketHandler) throws IOException {
 
 		if (isWebSocketEnabled()) {
 			TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
 			if (transportHandler != null) {
 				if (transportHandler instanceof HandshakeHandler) {
-					((HandshakeHandler) transportHandler).doHandshake(request, response, handler);
+					((HandshakeHandler) transportHandler).doHandshake(request, response, webSocketHandler);
 					return;
 				}
 			}
@@ -160,7 +159,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler<?>> handler)
+			String sessionId, TransportType transportType, WebSocketHandler<?> webSocketHandler)
 					throws IOException, TransportErrorException {
 
 		TransportHandler transportHandler = this.transportHandlers.get(transportType);
@@ -188,7 +187,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			return;
 		}
 
-		AbstractSockJsSession session = getSockJsSession(sessionId, handler, transportHandler);
+		AbstractSockJsSession session = getSockJsSession(sessionId, webSocketHandler, transportHandler);
 
 		if (session != null) {
 			if (transportType.setsNoCacheHeader()) {
@@ -207,11 +206,11 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			}
 		}
 
-		transportHandler.handleRequest(request, response, handler, session);
+		transportHandler.handleRequest(request, response, webSocketHandler, session);
 	}
 
-	public AbstractSockJsSession getSockJsSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handler,
-			TransportHandler transportHandler) {
+	public AbstractSockJsSession getSockJsSession(String sessionId,
+			WebSocketHandler<?> webSocketHandler, TransportHandler transportHandler) {
 
 		AbstractSockJsSession session = this.sessions.get(sessionId);
 		if (session != null) {
@@ -230,7 +229,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 					scheduleSessionTask();
 				}
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
-				session = (AbstractSockJsSession) sessionFactory.createSession(sessionId, handler);
+				session = (AbstractSockJsSession) sessionFactory.createSession(sessionId, webSocketHandler);
 				this.sessions.put(sessionId, session);
 				return session;
 			}

@@ -26,11 +26,10 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.server.AbstractServerSockJsSession;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
-import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -50,10 +49,8 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	private ServerHttpResponse response;
 
 
-	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration sockJsConfig,
-			HandlerProvider<WebSocketHandler<?>> handler) {
-
-		super(sessionId, sockJsConfig, handler);
+	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler<?> handler) {
+		super(sessionId, config, handler);
 	}
 
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,

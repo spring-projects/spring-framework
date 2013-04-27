@@ -17,7 +17,6 @@
 package org.springframework.sockjs.server;
 
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * @author Rossen Stoyanchev

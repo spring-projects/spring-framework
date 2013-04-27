@@ -19,7 +19,6 @@ package org.springframework.sockjs.server;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -31,6 +30,6 @@ public interface TransportHandler {
 	TransportType getTransportType();
 
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler<?>> handler, AbstractSockJsSession session) throws TransportErrorException;
+			WebSocketHandler<?> handler, AbstractSockJsSession session) throws TransportErrorException;
 
 }

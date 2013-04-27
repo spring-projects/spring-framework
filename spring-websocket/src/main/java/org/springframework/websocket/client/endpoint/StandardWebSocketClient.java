@@ -32,14 +32,12 @@ import javax.websocket.WebSocketContainer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
-import org.springframework.websocket.adapter.StandardWebSocketSessionAdapter;
 import org.springframework.websocket.adapter.StandardEndpointAdapter;
+import org.springframework.websocket.adapter.StandardWebSocketSessionAdapter;
 import org.springframework.websocket.client.WebSocketClient;
 import org.springframework.websocket.client.WebSocketConnectFailureException;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
  * A standard Java {@link WebSocketClient}.
@@ -61,24 +59,18 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler handler, String uriTemplate, Object... uriVariables)
+	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
 			throws WebSocketConnectFailureException {
 
-		return doHandshake(new SimpleHandlerProvider<WebSocketHandler<?>>(handler), uriTemplate, uriVariables);
-	}
-
-	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler<?>> handler,
-			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException {
-
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
-		return doHandshake(handler, null, uri);
+		return doHandshake(webSocketHandler, null, uri);
 	}
 
 	@Override
-	public WebSocketSession doHandshake(HandlerProvider<WebSocketHandler<?>> handler,
+	public WebSocketSession doHandshake(WebSocketHandler<?> webSocketHandler,
 			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
-		Endpoint endpoint = new StandardEndpointAdapter(handler);
+		Endpoint endpoint = new StandardEndpointAdapter(webSocketHandler);
 
 		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		if (httpHeaders != null) {

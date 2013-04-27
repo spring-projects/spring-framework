@@ -28,11 +28,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.PartialMessageHandler;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.WebSocketMessage;
 import org.springframework.websocket.WebSocketSession;
 
 
@@ -46,7 +44,7 @@ public class StandardEndpointAdapter extends Endpoint {
 
 	private static Log logger = LogFactory.getLog(StandardEndpointAdapter.class);
 
-	private final WebSocketHandler<WebSocketMessage<?>> handler;
+	private final WebSocketHandlerInvoker handler;
 
 	private final Class<?> handlerClass;
 
@@ -54,10 +52,10 @@ public class StandardEndpointAdapter extends Endpoint {
 
 
 
-	public StandardEndpointAdapter(HandlerProvider<WebSocketHandler<?>> provider) {
-		Assert.notNull(provider, "provider is required");
-		this.handler = new WebSocketHandlerInvoker(provider).setLogger(logger);
-		this.handlerClass= provider.getHandlerType();
+	public StandardEndpointAdapter(WebSocketHandler<?> webSocketHandler) {
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		this.handler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
+		this.handlerClass= webSocketHandler.getClass();
 	}
 
 
@@ -70,6 +68,8 @@ public class StandardEndpointAdapter extends Endpoint {
 				handleTextMessage(session, message);
 			}
 		});
+
+		// TODO: per-connection proxy
 
 		if (!PartialMessageHandler.class.isAssignableFrom(this.handlerClass)) {
 			session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {

@@ -28,9 +28,8 @@ import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.SockJsFrame;
-import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.SockJsFrame.FrameFormat;
-import org.springframework.websocket.HandlerProvider;
+import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -58,7 +57,7 @@ public abstract class AbstractHttpSendingTransportHandler
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler<?>> webSocketHandler, AbstractSockJsSession session)
+			WebSocketHandler<?> webSocketHandler, AbstractSockJsSession session)
 					throws TransportErrorException {
 
 		// Set content type before writing

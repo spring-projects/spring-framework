@@ -31,9 +31,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
  * @author Rossen Stoyanchev
@@ -43,19 +41,23 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 
 	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
 
-	private final HandlerProvider<Endpoint> handlerProvider;
+	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
+
+	private final Endpoint endpoint;
 
 
-	public EndpointConnectionManager(Endpoint endpointBean, String uriTemplate, Object... uriVariables) {
+	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		Assert.notNull(endpointBean, "endpointBean is required");
-		this.handlerProvider = new SimpleHandlerProvider<Endpoint>(endpointBean);
+		Assert.notNull(endpoint, "endpoint is required");
+		this.endpointProvider = null;
+		this.endpoint = endpoint;
 	}
 
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass is required");
-		this.handlerProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpoint = null;
 	}
 
 
@@ -81,14 +83,14 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (this.handlerProvider instanceof BeanFactoryAware) {
-			((BeanFactoryAware) this.handlerProvider).setBeanFactory(beanFactory);
+		if (this.endpointProvider != null) {
+			this.endpointProvider.setBeanFactory(beanFactory);
 		}
 	}
 
 	@Override
 	protected void openConnection() throws Exception {
-		Endpoint endpoint = this.handlerProvider.getHandler();
+		Endpoint endpoint = (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
 		ClientEndpointConfig endpointConfig = this.configBuilder.build();
 		Session session = getWebSocketContainer().connectToServer(endpoint, endpointConfig, getUri());
 		updateSession(session);

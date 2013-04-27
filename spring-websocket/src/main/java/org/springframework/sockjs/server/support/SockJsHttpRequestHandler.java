@@ -31,9 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
  * @author Rossen Stoyanchev
@@ -45,7 +43,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 	private final SockJsService sockJsService;
 
-	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
+	private final WebSocketHandler<?> webSocketHandler;
 
 	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
@@ -57,36 +55,16 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	 * that begins with the specified prefix will be handled by this service. In a
 	 * Servlet container this is the path within the current servlet mapping.
 	 */
-	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService, WebSocketHandler handler) {
+	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService, WebSocketHandler webSocketHandler) {
 
 		Assert.hasText(prefix, "prefix is required");
 		Assert.notNull(sockJsService, "sockJsService is required");
-		Assert.notNull(handler, "webSocketHandler is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 
 		this.prefix = prefix;
 		this.sockJsService = sockJsService;
-		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler<?>>(handler);
+		this.webSocketHandler = webSocketHandler;
 	}
-
-	/**
-	 * Class constructor with {@link SockJsHandler} type (per request) ...
-	 *
-	 * @param prefix the path prefix for the SockJS service. All requests with a path
-	 * that begins with the specified prefix will be handled by this service. In a
-	 * Servlet container this is the path within the current servlet mapping.
-	 */
-	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService,
-			HandlerProvider<WebSocketHandler<?>> handlerProvider) {
-
-		Assert.hasText(prefix, "prefix is required");
-		Assert.notNull(sockJsService, "sockJsService is required");
-		Assert.notNull(handlerProvider, "handlerProvider is required");
-
-		this.prefix = prefix;
-		this.sockJsService = sockJsService;
-		this.handlerProvider = handlerProvider;
-	}
-
 
 	public String getPrefix() {
 		return this.prefix;
@@ -111,7 +89,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
 		try {
-			this.sockJsService.handleRequest(httpRequest, httpResponse, sockJsPath, this.handlerProvider);
+			this.sockJsService.handleRequest(httpRequest, httpResponse, sockJsPath, this.webSocketHandler);
 		}
 		catch (Exception ex) {
 			// TODO

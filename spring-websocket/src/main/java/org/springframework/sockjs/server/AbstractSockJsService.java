@@ -36,7 +36,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -200,8 +199,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 * @throws Exception
 	 */
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, HandlerProvider<WebSocketHandler<?>> handler)
-					throws IOException, TransportErrorException {
+			String sockJsPath, WebSocketHandler<?> webSocketHandler) throws IOException, TransportErrorException {
 
 		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
 
@@ -227,7 +225,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 				return;
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocketRequest(request, response, handler);
+				handleRawWebSocketRequest(request, response, webSocketHandler);
 				return;
 			}
 
@@ -247,18 +245,18 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 				return;
 			}
 
-			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), handler);
+			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), webSocketHandler);
 		}
 		finally {
 			response.flush();
 		}
 	}
 
-	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerProvider<WebSocketHandler<?>> handler) throws IOException;
+	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
+			ServerHttpResponse response, WebSocketHandler<?> webSocketHandler) throws IOException;
 
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sessionId, TransportType transportType, HandlerProvider<WebSocketHandler<?>> handler)
+			String sessionId, TransportType transportType, WebSocketHandler<?> webSocketHandler)
 					throws IOException, TransportErrorException;
 
 

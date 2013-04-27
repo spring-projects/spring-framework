@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 
 /**
@@ -29,7 +28,8 @@ import org.springframework.websocket.WebSocketHandler;
  */
 public interface SockJsService {
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, String sockJsPath,
-			HandlerProvider<WebSocketHandler<?>> handler) throws IOException, TransportErrorException;
+
+	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+			String sockJsPath, WebSocketHandler<?> webSocketHandler) throws IOException, TransportErrorException;
 
 }

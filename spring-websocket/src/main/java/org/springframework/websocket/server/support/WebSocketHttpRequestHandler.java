@@ -29,11 +29,9 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
  * An {@link HttpRequestHandler} that wraps the invocation of a {@link HandshakeHandler}.
@@ -45,22 +43,17 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 	private final HandshakeHandler handshakeHandler;
 
-	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
+	private final WebSocketHandler<?> webSocketHandler;
 
 
 	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
-		this(new SimpleHandlerProvider<WebSocketHandler<?>>(webSocketHandler));
+		this(webSocketHandler, new DefaultHandshakeHandler());
 	}
 
-	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler<?>> handlerProvider) {
-		this(handlerProvider, new DefaultHandshakeHandler());
-	}
-
-	public WebSocketHttpRequestHandler(	HandlerProvider<WebSocketHandler<?>> handlerProvider,
-			HandshakeHandler handshakeHandler) {
-		Assert.notNull(handlerProvider, "handlerProvider is required");
+	public WebSocketHttpRequestHandler(	WebSocketHandler<?> webSocketHandler, HandshakeHandler handshakeHandler) {
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
-		this.handlerProvider = handlerProvider;
+		this.webSocketHandler = webSocketHandler;
 		this.handshakeHandler = new DefaultHandshakeHandler();
 	}
 
@@ -72,7 +65,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
 		try {
-			this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.handlerProvider);
+			this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.webSocketHandler);
 		}
 		catch (Exception e) {
 			// TODO

@@ -21,10 +21,8 @@ import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
-import org.springframework.websocket.support.SimpleHandlerProvider;
 
 /**
  * @author Rossen Stoyanchev
@@ -34,7 +32,7 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 	private final WebSocketClient client;
 
-	private final HandlerProvider<WebSocketHandler<?>> handlerProvider;
+	private final WebSocketHandler<?> webSocketHandler;
 
 	private WebSocketSession webSocketSession;
 
@@ -46,17 +44,8 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 		super(uriTemplate, uriVariables);
 		this.client = webSocketClient;
-		this.handlerProvider = new SimpleHandlerProvider<WebSocketHandler<?>>(webSocketHandler);
+		this.webSocketHandler = webSocketHandler;
 	}
-
-	public WebSocketConnectionManager(WebSocketClient webSocketClient,
-			HandlerProvider<WebSocketHandler<?>> handlerProvider, String uriTemplate, Object... uriVariables) {
-
-		super(uriTemplate, uriVariables);
-		this.client = webSocketClient;
-		this.handlerProvider = handlerProvider;
-	}
-
 
 	public void setSubProtocols(List<String> subProtocols) {
 		this.subProtocols.clear();
@@ -73,7 +62,7 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 	protected void openConnection() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setSecWebSocketProtocol(this.subProtocols);
-		this.webSocketSession = this.client.doHandshake(this.handlerProvider, headers, getUri());
+		this.webSocketSession = this.client.doHandshake(this.webSocketHandler, headers, getUri());
 	}
 
 	@Override

@@ -16,7 +16,6 @@
 
 package org.springframework.sockjs;
 
-import org.springframework.websocket.HandlerProvider;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
@@ -32,9 +31,9 @@ public interface SockJsSessionFactory<S extends WebSocketSession>{
 	/**
 	 * Create a new SockJS session.
 	 * @param sessionId the ID of the session
-	 * @param handler the underlying {@link WebSocketHandler}
+	 * @param webSocketHandler the underlying {@link WebSocketHandler}
 	 * @return a new non-null session
 	 */
-	S createSession(String sessionId, HandlerProvider<WebSocketHandler<?>> handler);
+	S createSession(String sessionId, WebSocketHandler<?> webSocketHandler);
 
 }
