@@ -48,14 +48,14 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * The default location of the XmlWebApplicationContext configuration file
  * is therefore "/WEB-INF/action-servlet.xml".
  *
- * <pre>
+ * <pre class="code">
  * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/&gt;</pre>
  *
  * The location of the context configuration files can be customized
  * through the "contextConfigLocation" setting, analogous to the root
  * WebApplicationContext and FrameworkServlet contexts.
  *
- * <pre>
+ * <pre class="code">
  * &lt;plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"&gt;
  *   &lt;set-property property="contextConfigLocation" value="/WEB-INF/action-servlet.xml /WEB-INF/myContext.xml"/&gt;
  * &lt;/plug-in&gt;</pre>

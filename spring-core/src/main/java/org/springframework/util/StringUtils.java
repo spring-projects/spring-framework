@@ -87,7 +87,7 @@ public abstract class StringUtils {
 	/**
 	 * Check that the given CharSequence is neither {@code null} nor of length 0.
 	 * Note: Will return {@code true} for a CharSequence that purely consists of whitespace.
-	 * <p><pre>
+	 * <p><pre class="code">
 	 * StringUtils.hasLength(null) = false
 	 * StringUtils.hasLength("") = false
 	 * StringUtils.hasLength(" ") = true
@@ -116,7 +116,7 @@ public abstract class StringUtils {
 	 * Check whether the given CharSequence has actual text.
 	 * More specifically, returns {@code true} if the string not {@code null},
 	 * its length is greater than 0, and it contains at least one non-whitespace character.
-	 * <p><pre>
+	 * <p><pre class="code">
 	 * StringUtils.hasText(null) = false
 	 * StringUtils.hasText("") = false
 	 * StringUtils.hasText(" ") = false

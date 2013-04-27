@@ -72,7 +72,7 @@ import org.springframework.util.StringUtils;
  * <p><b>Ant-style Patterns:</b>
  *
  * <p>When the path location contains an Ant-style pattern, e.g.:
- * <pre>
+ * <pre class="code">
  * /WEB-INF/*-context.xml
  * com/mycompany/**&#47;applicationContext.xml
  * file:C:/some/path/*-context.xml
@@ -143,9 +143,9 @@ import org.springframework.util.StringUtils;
  *
  * <p><b>WARNING:</b> Ant-style patterns with "classpath:" resources are not
  * guaranteed to find matching resources if the root package to search is available
- * in multiple class path locations. This is because a resource such as<pre>
+ * in multiple class path locations. This is because a resource such as<pre class="code">
  *     com/mycompany/package1/service-context.xml
- * </pre>may be in only one location, but when a path such as<pre>
+ * </pre>may be in only one location, but when a path such as<pre class="code">
  *     classpath:com/mycompany/**&#47;service-context.xml
  * </pre>is used to try to resolve it, the resolver will work off the (first) URL
  * returned by {@code getResource("com/mycompany");}. If this base package

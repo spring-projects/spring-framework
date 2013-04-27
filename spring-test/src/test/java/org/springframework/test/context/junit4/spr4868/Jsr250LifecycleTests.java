@@ -45,7 +45,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  * logger category for this class is enabled at {@code INFO} level.
  *
  * <h4>Expected Log Output</h4>
- * <pre>
+ * <pre class="code">
  * INFO : org.springframework.test.context.junit4.spr4868.LifecycleBean - initializing
  * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - beforeAllTests()
  * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - setUp()

@@ -36,7 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;application>
  *   ...
  *   &lt;variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver&lt;/variable-resolver>
@@ -46,7 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Spring-managed service layer beans, for example in property values of
  * JSF-managed beans:
  *
- * <pre>
+ * <pre class="code">
  * &lt;managed-bean>
  *   &lt;managed-bean-name>myJsfManagedBean&lt;/managed-bean-name>
  *   &lt;managed-bean-class>example.MyJsfManagedBean&lt;/managed-bean-class>
@@ -60,7 +60,7 @@ import org.springframework.web.context.WebApplicationContext;
  * with "mySpringManagedBusinessObject" defined as Spring bean in
  * applicationContext.xml:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="mySpringManagedBusinessObject" class="example.MySpringManagedBusinessObject">
  *   ...
  * &lt;/bean></pre>

@@ -36,7 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;application>
  *   ...
  *   &lt;variable-resolver>org.springframework.web.jsf.WebApplicationContextVariableResolver&lt;/variable-resolver>

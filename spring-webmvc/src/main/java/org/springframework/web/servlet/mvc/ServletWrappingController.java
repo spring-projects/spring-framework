@@ -48,7 +48,7 @@ import org.springframework.web.servlet.ModelAndView;
  * through the configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
  * From the Struts point of view, everything will work as usual.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
  *   &lt;property name="interceptors"&gt;
  *     &lt;list&gt;

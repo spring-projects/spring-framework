@@ -658,7 +658,7 @@ public class BeanFactoryGenericsTests {
 	 * Tests support for parameterized {@code factory-method} declarations such
 	 * as Mockito {@code mock()} method which has the following signature.
 	 *
-	 * <pre>{@code
+	 * <pre class="code">{@code
 	 * public static <T> T mock(Class<T> classToMock)
 	 * }</pre>
 	 *

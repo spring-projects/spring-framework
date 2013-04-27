@@ -37,7 +37,7 @@ public class Matchers {
 	 *
 	 * <p>Often useful when working with JUnit {@link ExpectedException}
 	 * {@link Rule @Rule}s, for example:
-	 * <pre>
+	 * <pre class="code">
 	 * thrown.expect(DataAccessException.class);
 	 * thrown.except(exceptionCause(isA(SQLException.class)));
 	 * </pre>

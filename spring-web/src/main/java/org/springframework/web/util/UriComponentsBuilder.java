@@ -154,7 +154,7 @@ public class UriComponentsBuilder {
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
 	 *
-	 * <pre>
+	 * <pre class="code">
 	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
@@ -226,7 +226,7 @@ public class UriComponentsBuilder {
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
 	 *
-	 * <pre>
+	 * <pre class="code">
 	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
@@ -483,7 +483,7 @@ public class UriComponentsBuilder {
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
 	 *
-	 * <pre>
+	 * <pre class="code">
 	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
 	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>

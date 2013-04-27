@@ -60,7 +60,7 @@ import org.junit.internal.AssumptionViolatedException;
  * In addition to assumptions based on the JDK version, tests can be categorized into
  * {@link TestGroup}s. Active groups are enabled using the 'testGroups' system property,
  * usually activated from the gradle command line:
- * <pre>
+ * <pre class="code">
  * gradle test -PtestGroups="performance"
  * </pre>
  *

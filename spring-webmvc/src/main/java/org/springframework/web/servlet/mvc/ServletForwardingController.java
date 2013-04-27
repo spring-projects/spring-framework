@@ -38,7 +38,7 @@ import org.springframework.web.util.WebUtils;
  * <p><b>Example:</b> web.xml, mapping all "/myservlet" requests to a Spring dispatcher.
  * Also defines a custom "myServlet", but <i>without</i> servlet mapping.
  *
- * <pre>
+ * <pre class="code">
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;myServlet&lt;/servlet-name&gt;
  *   &lt;servlet-class&gt;mypackage.TestServlet&lt;/servlet-class&gt;
@@ -59,7 +59,7 @@ import org.springframework.web.util.WebUtils;
  * configured HandlerInterceptor chain (e.g. an OpenSessionInViewInterceptor).
  * From the servlet point of view, everything will work as usual.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
  *   &lt;property name="interceptors"&gt;
  *     &lt;list&gt;

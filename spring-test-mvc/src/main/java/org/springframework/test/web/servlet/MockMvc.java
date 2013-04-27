@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  *
  * <p>Below is an example:
  *
- * <pre>
+ * <pre class="code">
  * static imports:
  * MockMvcBuilders.*, MockMvcRequestBuilders.*, MockMvcResultMatchers.*
  *
