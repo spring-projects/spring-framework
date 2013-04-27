@@ -34,7 +34,7 @@ import org.springframework.core.io.Resource;
  * <p>The mapping file should be in the following format, as specified by the
  * Java Activation Framework:
  *
- * <pre>
+ * <pre class="code">
  * # map text/html to .htm and .html files
  * text/html  html htm HTML HTM</pre>
  *

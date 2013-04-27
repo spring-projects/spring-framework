@@ -58,14 +58,14 @@ import org.springframework.validation.ObjectError;
  *
  * <p>Example definition in {@code struts-config.xml}:
  *
- * <pre>
+ * <pre class="code">
  * &lt;form-beans&gt;
  *   &lt;form-bean name="actionForm" type="org.springframework.web.struts.SpringBindingActionForm"/&gt;
  * &lt;/form-beans&gt;</pre>
  *
  * Example code in a custom Struts {@code Action}:
  *
- * <pre>
+ * <pre class="code">
  * public ActionForward execute(ActionMapping actionMapping, ActionForm actionForm, HttpServletRequest request, HttpServletResponse response) throws Exception {
  *   SpringBindingActionForm form = (SpringBindingActionForm) actionForm;
  *   MyPojoBean bean = ...;

@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * via a shared {@code EntityManager} reference, to be able to detect a
  * thread-bound EntityManager. Typically, the code will look like as follows:
  *
- * <pre>
+ * <pre class="code">
  * public void doSomeDataAccessAction() {
  *   this.entityManager...
  * }</pre>

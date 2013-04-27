@@ -111,7 +111,7 @@ public abstract class GenericTypeResolver {
 	 * method for {@code creatProxy()} and an {@code Object[]} array containing
 	 * {@code MyService.class}, {@code resolveReturnTypeForGenericMethod()} will
 	 * infer that the target return type is {@code MyService}.
-	 * <pre>{@code public static <T> T createProxy(Class<T> clazz)}</pre>
+	 * <pre class="code">{@code public static <T> T createProxy(Class<T> clazz)}</pre>
 	 * <h4>Possible Return Values</h4>
 	 * <ul>
 	 * <li>the target return type, if it can be inferred</li>

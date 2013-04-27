@@ -31,7 +31,7 @@ import org.springframework.aop.TargetSource;
  *
  * <p>Example:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="queueConnectionFactoryTarget" class="org.springframework.jndi.JndiObjectTargetSource"&gt;
  *   &lt;property name="jndiName" value="JmsQueueConnectionFactory"/&gt;
  *   &lt;property name="lookupOnStartup" value="false"/&gt;

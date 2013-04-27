@@ -29,7 +29,7 @@ public interface ParserContext {
 	 * Whether or not the expression being parsed is a template. A template expression consists of literal text that can
 	 * be mixed with evaluatable blocks. Some examples:
 	 *
-	 * <pre>
+	 * <pre class="code">
 	 * 	   Some literal text
 	 *     Hello #{name.firstName}!
 	 *     #{3 + 4}

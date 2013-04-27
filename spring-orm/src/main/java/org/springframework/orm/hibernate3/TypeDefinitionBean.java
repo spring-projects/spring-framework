@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
  * definition, as list element for the "typeDefinitions" bean property.
  * For example:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
  *   ...
  *   &lt;property name="typeDefinitions"&gt;

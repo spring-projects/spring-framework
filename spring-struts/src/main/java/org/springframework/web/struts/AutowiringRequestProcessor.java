@@ -42,7 +42,7 @@ import org.springframework.web.context.WebApplicationContext;
  * wired with matching service layer beans, that is, bean property setters
  * will automatically be called if a service layer bean matches the property.
  *
- * <pre>
+ * <pre class="code">
  * &lt;action path="/login" type="myapp.MyAction"/&gt;</pre>
  *
  * There are two autowire modes available: "byType" and "byName". The default

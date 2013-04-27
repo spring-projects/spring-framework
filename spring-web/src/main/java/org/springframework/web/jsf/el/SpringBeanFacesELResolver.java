@@ -31,7 +31,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  *
  * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;application>
  *   ...
  *   &lt;el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver&lt;/el-resolver>
@@ -41,7 +41,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * Spring-managed service layer beans, for example in property values of
  * JSF-managed beans:
  *
- * <pre>
+ * <pre class="code">
  * &lt;managed-bean>
  *   &lt;managed-bean-name>myJsfManagedBean&lt;/managed-bean-name>
  *   &lt;managed-bean-class>example.MyJsfManagedBean&lt;/managed-bean-class>
@@ -55,7 +55,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * with "mySpringManagedBusinessObject" defined as Spring bean in
  * applicationContext.xml:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="mySpringManagedBusinessObject" class="example.MySpringManagedBusinessObject">
  *   ...
  * &lt;/bean></pre>

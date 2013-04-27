@@ -65,7 +65,7 @@ import org.springframework.util.StringUtils;
  * 2.0.2 is used by default.
  *
  * <p>A workaround is to explicitly specify the Xerces version inside the Maven POM:
- * <pre>
+ * <pre class="code">
  * &lt;dependency&gt;
  *   &lt;groupId&gt;xerces&lt;/groupId&gt;
  *     &lt;artifactId&gt;xercesImpl&lt;/artifactId&gt;

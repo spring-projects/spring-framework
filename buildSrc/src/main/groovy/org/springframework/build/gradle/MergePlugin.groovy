@@ -34,7 +34,7 @@ import org.gradle.api.invocation.*
  * dependencies (for example Hibernate v3 and v4).
  * <p>
  * The 'merge' extension should be used to define how projects are merged, for example:
- * <pre>
+ * <pre class="code">
  * configure(subprojects) {
  *     apply plugin: MergePlugin
  * }

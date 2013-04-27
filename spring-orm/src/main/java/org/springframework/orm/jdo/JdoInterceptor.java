@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * the interceptor to provide proper PersistenceManager handling. Typically, the code
  * will look like as follows:
  *
- * <pre>
+ * <pre class="code">
  * public void doSomeDataAccessAction() {
  *   PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(this.pmf, false);
  *   ...

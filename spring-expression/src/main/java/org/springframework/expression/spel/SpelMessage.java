@@ -25,7 +25,7 @@ import java.text.MessageFormat;
  * <p>
  * When a message is formatted, it will have this kind of form
  *
- * <pre>
+ * <pre class="code">
  * EL1004E: (pos 34): Type cannot be found 'String'
  * </pre>
  *

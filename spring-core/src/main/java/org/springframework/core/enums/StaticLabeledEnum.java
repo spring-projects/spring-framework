@@ -21,7 +21,7 @@ package org.springframework.core.enums;
  *
  * Usage example:
  *
- * <pre>
+ * <pre class="code">
  * public class FlowSessionStatus extends StaticLabeledEnum {
  *
  *     // public static final instances!

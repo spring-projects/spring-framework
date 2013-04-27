@@ -83,7 +83,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>A typical TilesConfigurer bean definition looks as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
  *   &lt;property name="definitions">
  *     &lt;list>

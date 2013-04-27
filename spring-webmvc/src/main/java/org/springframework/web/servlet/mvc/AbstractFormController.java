@@ -646,7 +646,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Either show some "invalid submit" message, or call {@link #showNewForm} for
 	 * resetting the form (prepopulating it with the current values if "bindOnNewForm"
 	 * is true). In this case, the form object in the session serves as transaction token.
-	 * <pre>
+	 * <pre class="code">
 	 * protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response) throws Exception {
 	 *   return showNewForm(request, response);
 	 * }</pre>
