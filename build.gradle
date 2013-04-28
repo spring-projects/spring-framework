@@ -12,6 +12,11 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
+	// The following is a work-around until the Gradle build uses
+	// Ant 1.9.x by default. This is necessary to avoid the
+	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
+	ant.properties["build.compiler"] = "javac1.7"
+
 	ext.aspectjVersion  = "1.7.2"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
