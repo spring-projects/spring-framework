@@ -3,6 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 4.0 M1 (2013-05-13)
+--------------------------------------
+
+* deleted deprecated, legacy JUnit 3.8 based test class hierarchy
+* deleted deprecated JUnit 3.8 support in the TestContext framework (SPR-10499)
+* deleted deprecated @ExpectedException annotation in the TestContext framework (SPR-10499)
+* deleted deprecated @NotTransactional annotation in the TestContext framework (SPR-10499)
+* deleted deprecated SimpleJdbcTestUtils class (SPR-10499)
+* deleted deprecated SimpleJdbcTemplate field from base test classes in the TestContext framework (SPR-10499)
+
+
 Changes in version 3.2.3 (2013-05-02)
 -------------------------------------
 
