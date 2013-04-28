@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
@@ -64,7 +63,6 @@ import org.springframework.util.ReflectionUtils;
  * </p>
  * <ul>
  * <li>{@link Test#expected() &#064;Test(expected=...)}</li>
- * <li>{@link ExpectedException &#064;ExpectedException}</li>
  * <li>{@link Test#timeout() &#064;Test(timeout=...)}</li>
  * <li>{@link Timed &#064;Timed}</li>
  * <li>{@link Repeat &#064;Repeat}</li>
@@ -349,9 +347,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	/**
 	 * Get the {@code exception} that the supplied {@link FrameworkMethod
 	 * test method} is expected to throw.
-	 * <p>Supports both Spring's {@link ExpectedException @ExpectedException(...)}
-	 * and JUnit's {@link Test#expected() @Test(expected=...)} annotations, but
-	 * not both simultaneously.
+	 * <p>Supports JUnit's {@link Test#expected() @Test(expected=...)} annotation.
 	 * @return the expected exception, or {@code null} if none was specified
 	 */
 	protected Class<? extends Throwable> getExpectedException(FrameworkMethod frameworkMethod) {
@@ -359,20 +355,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		Class<? extends Throwable> junitExpectedException = (testAnnotation != null
 				&& testAnnotation.expected() != Test.None.class ? testAnnotation.expected() : null);
 
-		ExpectedException expectedExAnn = frameworkMethod.getAnnotation(ExpectedException.class);
-		Class<? extends Throwable> springExpectedException = (expectedExAnn != null ? expectedExAnn.value() : null);
-
-		if (springExpectedException != null && junitExpectedException != null) {
-			String msg = "Test method [" + frameworkMethod.getMethod()
-					+ "] has been configured with Spring's @ExpectedException(" + springExpectedException.getName()
-					+ ".class) and JUnit's @Test(expected=" + junitExpectedException.getName()
-					+ ".class) annotations. "
-					+ "Only one declaration of an 'expected exception' is permitted per test method.";
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-
-		return springExpectedException != null ? springExpectedException : junitExpectedException;
+		return junitExpectedException;
 	}
 
 	/**

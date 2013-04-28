@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,20 +27,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
  * JUnit 4 based integration test which verifies support of Spring's
- * {@link Transactional &#64;Transactional}, {@link NotTransactional
- * &#64;NotTransactional}, {@link TestExecutionListeners
+ * {@link Transactional &#64;Transactional}, {@link TestExecutionListeners
  * &#64;TestExecutionListeners}, and {@link ContextConfiguration
  * &#64;ContextConfiguration} annotations in conjunction with the
  * {@link SpringJUnit4ClassRunner} and the following
@@ -94,7 +93,7 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void modifyTestDataWithoutTransaction() {
 		assertInTransaction(false);
 		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));

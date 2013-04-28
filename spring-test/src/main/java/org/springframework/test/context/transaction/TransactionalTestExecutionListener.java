@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -56,15 +55,12 @@ import org.springframework.util.StringUtils;
  * {@code TestExecutionListener} that provides support for executing tests
  * within transactions by honoring the
  * {@link org.springframework.transaction.annotation.Transactional &#064;Transactional}
- * and {@link NotTransactional &#064;NotTransactional} annotations. Expects a
- * {@link PlatformTransactionManager} bean to be defined in the Spring
- * {@link ApplicationContext} for the test.
+ * annotation. Expects a {@link PlatformTransactionManager} bean to be defined in the
+ * Spring {@link ApplicationContext} for the test.
  *
  * <p>Changes to the database during a test that is run with {@code @Transactional}
  * will be run within a transaction that will, by default, be automatically
- * <em>rolled back</em> after completion of the test; whereas, changes to the
- * database during a test that is run with {@code @NotTransactional} will
- * <strong>not</strong> be run within a transaction. Test methods that are not
+ * <em>rolled back</em> after completion of the test. Test methods that are not
  * annotated with {@code @Transactional} (at the class or method level) will not
  * be run within a transaction.
  *
@@ -93,7 +89,6 @@ import org.springframework.util.StringUtils;
  * @see TransactionConfiguration
  * @see TransactionManagementConfigurer
  * @see org.springframework.transaction.annotation.Transactional
- * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
  * @see BeforeTransaction
  * @see AfterTransaction
@@ -128,7 +123,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * {@code @BeforeTransaction} methods will not be invoked, and a transaction
 	 * will not be started.
 	 * @see org.springframework.transaction.annotation.Transactional
-	 * @see org.springframework.test.annotation.NotTransactional
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	@SuppressWarnings("serial")
@@ -140,10 +134,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (this.transactionContextCache.remove(testMethod) != null) {
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction: "
 					+ "Invoke endTransaction() before startNewTransaction().");
-		}
-
-		if (testMethod.isAnnotationPresent(NotTransactional.class)) {
-			return;
 		}
 
 		PlatformTransactionManager tm = null;
@@ -162,10 +152,15 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context "
 						+ testContext);
 			}
-			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
-		}
 
-		if (tm != null) {
+            if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+                return;
+            }
+
+            tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
+        }
+
+        if (tm != null) {
 			TransactionContext txContext = new TransactionContext(tm, transactionAttribute);
 			runBeforeTransactionMethods(testContext);
 			startNewTransaction(testContext, txContext);

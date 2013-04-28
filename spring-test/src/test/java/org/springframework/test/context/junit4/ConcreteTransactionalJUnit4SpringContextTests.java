@@ -36,11 +36,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
@@ -131,7 +132,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyApplicationContext() {
 		assertInTransaction(false);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
@@ -139,7 +140,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
@@ -147,7 +148,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyBeanNameSet() {
 		assertInTransaction(false);
 		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
@@ -155,7 +156,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyAnnotationAutowiredFields() {
 		assertInTransaction(false);
 		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
@@ -164,7 +165,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyAnnotationAutowiredMethods() {
 		assertInTransaction(false);
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
@@ -172,14 +173,14 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyResourceAnnotationWiredFields() {
 		assertInTransaction(false);
 		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public final void verifyResourceAnnotationWiredMethods() {
 		assertInTransaction(false);
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);

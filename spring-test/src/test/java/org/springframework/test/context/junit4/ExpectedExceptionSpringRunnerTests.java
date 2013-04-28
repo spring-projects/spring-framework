@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
-import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
@@ -33,7 +32,6 @@ import org.springframework.test.context.TestExecutionListeners;
  * {@link SpringJUnit4ClassRunner}:
  * <ul>
  * <li>JUnit's {@link Test#expected() &#064;Test(expected=...)}</li>
- * <li>Spring's {@link ExpectedException &#064;ExpectedException}</li>
  * </ul>
  *
  * @author Sam Brannen
@@ -51,11 +49,11 @@ public class ExpectedExceptionSpringRunnerTests {
 		notifier.addListener(listener);
 
 		new SpringJUnit4ClassRunner(testClass).run(notifier);
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", 1,
+		assertEquals("Verifying number of failures for test class [" + testClass + "].", 0,
 			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 3,
+		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 1,
 			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 3,
+		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 1,
 			listener.getTestFinishedCount());
 	}
 
@@ -68,20 +66,6 @@ public class ExpectedExceptionSpringRunnerTests {
 		// Should Pass.
 		@Test(expected = IndexOutOfBoundsException.class)
 		public void verifyJUnitExpectedException() {
-			new ArrayList<Object>().get(1);
-		}
-
-		// Should Pass.
-		@Test
-		@ExpectedException(IndexOutOfBoundsException.class)
-		public void verifySpringExpectedException() {
-			new ArrayList<Object>().get(1);
-		}
-
-		// Should Fail due to duplicate configuration.
-		@Test(expected = IllegalStateException.class)
-		@ExpectedException(IllegalStateException.class)
-		public void verifyJUnitAndSpringExpectedException() {
 			new ArrayList<Object>().get(1);
 		}
 
