@@ -79,11 +79,11 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 
 
 	private int createPerson(String name) {
-		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
 	private int deletePerson(String name) {
-		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {

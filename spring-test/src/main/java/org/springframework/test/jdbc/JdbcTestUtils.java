@@ -37,8 +37,6 @@ import org.springframework.util.StringUtils;
  * {@code JdbcTestUtils} is a collection of JDBC related utility functions
  * intended to simplify standard database testing scenarios.
  *
- * <p>As of Spring 3.1.3, {@code JdbcTestUtils} supersedes {@link SimpleJdbcTestUtils}.
- *
  * @author Thomas Risberg
  * @author Sam Brannen
  * @author Juergen Hoeller

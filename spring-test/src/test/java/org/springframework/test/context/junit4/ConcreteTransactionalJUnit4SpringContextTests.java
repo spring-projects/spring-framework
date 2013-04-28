@@ -35,11 +35,11 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.test.jdbc.SimpleJdbcTestUtils;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,29 +80,29 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	protected String bar;
 
 
-	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-		return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
+	protected static int clearPersonTable(final JdbcTemplate jdbcTemplate) {
+		return JdbcTestUtils.deleteFromTables(jdbcTemplate, "person");
 	}
 
-	protected static void createPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
+	protected static void createPersonTable(final JdbcTemplate jdbcTemplate) {
 		try {
-			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
+			jdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
 		catch (final BadSqlGrammarException bsge) {
 			/* ignore */
 		}
 	}
 
-	protected static int countRowsInPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-		return SimpleJdbcTestUtils.countRowsInTable(simpleJdbcTemplate, "person");
+	protected static int countRowsInPersonTable(final JdbcTemplate jdbcTemplate) {
+		return JdbcTestUtils.countRowsInTable(jdbcTemplate, "person");
 	}
 
-	protected static int addPerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
-		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+	protected static int addPerson(final JdbcTemplate jdbcTemplate, final String name) {
+		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
-	protected static int deletePerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
-		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+	protected static int deletePerson(final JdbcTemplate jdbcTemplate, final String name) {
+		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
 	@Override
@@ -189,36 +189,36 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@BeforeTransaction
 	public void beforeTransaction() {
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-			countRowsInPersonTable(super.simpleJdbcTemplate));
-		assertEquals("Adding yoda", 1, addPerson(super.simpleJdbcTemplate, YODA));
+			countRowsInPersonTable(super.jdbcTemplate));
+		assertEquals("Adding yoda", 1, addPerson(super.jdbcTemplate, YODA));
 	}
 
 	@Before
 	public void setUp() throws Exception {
 		assertEquals("Verifying the number of rows in the person table before a test method.",
-			(inTransaction() ? 2 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
+			(inTransaction() ? 2 : 1), countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(super.simpleJdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(super.simpleJdbcTemplate, SUE));
+		assertEquals("Adding jane", 1, addPerson(super.jdbcTemplate, JANE));
+		assertEquals("Adding sue", 1, addPerson(super.jdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().", 4,
-			countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		assertEquals("Verifying the number of rows in the person table after a test method.",
-			(inTransaction() ? 4 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
+			(inTransaction() ? 4 : 1), countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
-		assertEquals("Deleting yoda", 1, deletePerson(super.simpleJdbcTemplate, YODA));
+		assertEquals("Deleting yoda", 1, deletePerson(super.jdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-			countRowsInPersonTable(super.simpleJdbcTemplate));
+			countRowsInPersonTable(super.jdbcTemplate));
 	}
 
 
@@ -226,10 +226,10 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 		@Resource
 		public void setDataSource(DataSource dataSource) {
-			SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-			createPersonTable(simpleJdbcTemplate);
-			clearPersonTable(simpleJdbcTemplate);
-			addPerson(simpleJdbcTemplate, BOB);
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+			createPersonTable(jdbcTemplate);
+			clearPersonTable(jdbcTemplate);
+			addPerson(jdbcTemplate, BOB);
 		}
 	}
 
