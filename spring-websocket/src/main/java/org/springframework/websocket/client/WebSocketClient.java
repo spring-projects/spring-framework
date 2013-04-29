@@ -22,10 +22,10 @@ import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
 
 /**
- * Contract for starting a WebSocket handshake request.
- *
- * <p>To automatically start a WebSocket connection when the application starts, see
- * {@link WebSocketConnectionManager}.
+ * Contract for programmatically starting a WebSocket handshake request. For most cases it
+ * would be more convenient to use the declarative style
+ * {@link WebSocketConnectionManager} that starts a WebSocket connection to a
+ * pre-configured URI when the application starts.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

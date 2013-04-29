@@ -19,6 +19,7 @@ package org.springframework.websocket.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.websocket.WebSocketHandler;
@@ -40,13 +41,16 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 	private final List<String> subProtocols = new ArrayList<String>();
 
+	private final boolean syncClientLifecycle;
 
-	public WebSocketConnectionManager(WebSocketClient webSocketClient,
+
+	public WebSocketConnectionManager(WebSocketClient client,
 			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
 
 		super(uriTemplate, uriVariables);
-		this.client = webSocketClient;
+		this.client = client;
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+		this.syncClientLifecycle = ((client instanceof SmartLifecycle) && !((SmartLifecycle) client).isRunning());
 	}
 
 	/**
@@ -69,6 +73,22 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 	public List<String> getSubProtocols() {
 		return this.subProtocols;
+	}
+
+	@Override
+	public void startInternal() {
+		if (this.syncClientLifecycle) {
+			((SmartLifecycle) this.client).start();
+		}
+		super.startInternal();
+	}
+
+	@Override
+	public void stopInternal() {
+		if (this.syncClientLifecycle) {
+			((SmartLifecycle) client).stop();
+		}
+		super.stopInternal();
 	}
 
 	@Override

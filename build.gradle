@@ -532,6 +532,7 @@ project("spring-websocket") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.1.v20130408")
+		optional("org.eclipse.jetty.websocket:websocket-client:9.0.1.v20130408")
 
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1") // required for SockJS support currently
 

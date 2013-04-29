@@ -40,6 +40,8 @@ public abstract class AbstractWebSocketConnectionManager implements SmartLifecyc
 
 	private boolean autoStartup = false;
 
+	private boolean isRunning = false;
+
 	private int phase = Integer.MAX_VALUE;
 
 	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
@@ -93,67 +95,84 @@ public abstract class AbstractWebSocketConnectionManager implements SmartLifecyc
 	}
 
 	/**
+	 * Return whether this ConnectionManager has been started.
+	 */
+	public boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.isRunning;
+		}
+	}
+
+	/**
 	 * Connect to the configured {@link #setDefaultUri(URI) default URI}. If already
 	 * connected, the method has no impact.
 	 */
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
-				this.taskExecutor.execute(new Runnable() {
-					@Override
-					public void run() {
-						synchronized (lifecycleMonitor) {
-							try {
-								logger.info("Connecting to WebSocket at " + uri);
-								openConnection();
-								logger.info("Successfully connected");
-							}
-							catch (Throwable ex) {
-								logger.error("Failed to connect", ex);
-							}
-						}
-					}
-				});
+				startInternal();
 			}
 		}
+	}
+
+	protected void startInternal() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting " + this.getClass().getSimpleName());
+		}
+		this.isRunning = true;
+		this.taskExecutor.execute(new Runnable() {
+			@Override
+			public void run() {
+				synchronized (lifecycleMonitor) {
+					try {
+						logger.info("Connecting to WebSocket at " + uri);
+						openConnection();
+						logger.info("Successfully connected");
+					}
+					catch (Throwable ex) {
+						logger.error("Failed to connect", ex);
+					}
+				}
+			}
+		});
 	}
 
 	protected abstract void openConnection() throws Exception;
 
-	/**
-	 * Closes the configured message WebSocket connection.
-	 */
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
-				try {
-					closeConnection();
-				}
-				catch (Throwable e) {
-					logger.error("Failed to stop WebSocket connection", e);
-				}
+				stopInternal();
 			}
 		}
 	}
 
+	protected void stopInternal() {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Stopping " + this.getClass().getSimpleName());
+		}
+		try {
+			if (isConnected()) {
+				closeConnection();
+			}
+		}
+		catch (Throwable e) {
+			logger.error("Failed to stop WebSocket connection", e);
+		}
+		finally {
+			this.isRunning = false;
+		}
+	}
+
+	protected abstract boolean isConnected();
+
 	protected abstract void closeConnection() throws Exception;
 
-	public void stop(Runnable callback) {
+	public final void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
 			this.stop();
 			callback.run();
 		}
 	}
-
-	/**
-	 * Return whether the configured message endpoint is currently active.
-	 */
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return isConnected();
-		}
-	}
-
-	protected abstract boolean isConnected();
 
 }

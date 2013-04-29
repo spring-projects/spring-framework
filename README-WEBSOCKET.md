@@ -54,6 +54,17 @@ Run the ant build:
 
 A usable Tomcat installation can be found in `output/build`
 
+### Jetty 9
+
+Download and use the latest Jetty (currently 9.0.2.v20130417). It does not support JSR-356 yet but that's not an issue, since we're using the Jetty 9 native WebSocket API.
+
+If using Java-based Servlet configuration instead of web.xml, add the following options to Jetty's start.ini:
+
+    OPTIONS=plus
+    etc/jetty-plus.xml
+    OPTIONS=annotations
+    etc/jetty-annotations.xml
+
 ### Glassfish
 
 Glassfish also provides JSR-356 support based on Tyrus (the reference implementation).

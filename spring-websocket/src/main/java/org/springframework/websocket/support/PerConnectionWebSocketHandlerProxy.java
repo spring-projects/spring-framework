@@ -125,4 +125,9 @@ public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler, Bea
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "PerConnectionWebSocketHandlerProxy [handlerType=" + this.provider.getHandlerType() + "]";
+	}
+
 }

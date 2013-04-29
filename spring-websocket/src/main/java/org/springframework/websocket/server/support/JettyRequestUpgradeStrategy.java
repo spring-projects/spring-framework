@@ -100,10 +100,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	private void upgrade(HttpServletRequest request, HttpServletResponse response,
 			String selectedProtocol, final WebSocketHandler webSocketHandler) throws IOException {
 
-		Assert.state(this.factory.isUpgradeRequest(request, response), "Not a suitable WebSocket upgrade request");
-		Assert.state(this.factory.acceptWebSocket(request, response), "Unable to accept WebSocket");
+		Assert.state(this.factory.isUpgradeRequest(request, response), "Expected websocket upgrade request");
 
 		request.setAttribute(HANDLER_PROVIDER_ATTR_NAME, webSocketHandler);
+
+		if (!this.factory.acceptWebSocket(request, response)) {
+			// should never happen
+			throw new IllegalStateException("WebSocket request not accepted by Jetty");
+		}
 	}
 
 }
