@@ -34,14 +34,14 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 	private static final Log logger = LogFactory.getLog(BeanCreatingHandlerProvider.class);
 
-	private final Class<? extends T> handlerClass;
+	private final Class<? extends T> handlerType;
 
 	private AutowireCapableBeanFactory beanFactory;
 
 
-	public BeanCreatingHandlerProvider(Class<? extends T> handlerClass) {
-		Assert.notNull(handlerClass, "handlerClass is required");
-		this.handlerClass = handlerClass;
+	public BeanCreatingHandlerProvider(Class<? extends T> handlerType) {
+		Assert.notNull(handlerType, "handlerType is required");
+		this.handlerType = handlerType;
 	}
 
 
@@ -52,24 +52,20 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 		}
 	}
 
-	public boolean isSingleton() {
-		return false;
-	}
-
 	public Class<? extends T> getHandlerType() {
-		return this.handlerClass;
+		return this.handlerType;
 	}
 
 	public T getHandler() {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Creating instance for handler type " + this.handlerClass);
+			logger.trace("Creating instance for handler type " + this.handlerType);
 		}
 		if (this.beanFactory == null) {
 			logger.warn("No BeanFactory available, attempting to use default constructor");
-			return BeanUtils.instantiate(this.handlerClass);
+			return BeanUtils.instantiate(this.handlerType);
 		}
 		else {
-			return this.beanFactory.createBean(this.handlerClass);
+			return this.beanFactory.createBean(this.handlerType);
 		}
 	}
 
@@ -84,7 +80,7 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 	@Override
 	public String toString() {
-		return "BeanCreatingHandlerProvider [handlerClass=" + handlerClass + "]";
+		return "BeanCreatingHandlerProvider [handlerClass=" + handlerType + "]";
 	}
 
 }

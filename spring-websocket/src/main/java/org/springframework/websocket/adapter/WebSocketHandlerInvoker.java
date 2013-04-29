@@ -61,7 +61,6 @@ public class WebSocketHandlerInvoker implements WebSocketHandler {
 		}
 		try {
 			Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected new session");
-
 			this.handler.afterConnectionEstablished(session);
 		}
 		catch (Throwable ex) {
