@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.jdo.Constants;
@@ -35,8 +34,6 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Default implementation of the {@link JdoDialect} interface.
@@ -68,10 +65,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
 public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTranslator {
-
-	// JDO 3.0 setTimeoutMillis method available?
-	private static final Method setTimeoutMillisMethod =
-			ClassUtils.getMethodIfAvailable(Query.class, "setTimeoutMillis", Integer.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -213,19 +206,9 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	}
 
 	/**
-	 * This implementation applies a JDO 3.0 query timeout, if available. Otherwise,
-	 * it sets the JPA 2.0 query hints "javax.persistence.lock.timeout" and
-	 * "javax.persistence.query.timeout", assuming that JDO providers are often
-	 * JPA providers as well.
+	 * This implementation does nothing.
 	 */
 	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
-		if (setTimeoutMillisMethod != null) {
-			ReflectionUtils.invokeMethod(setTimeoutMillisMethod, query, remainingTimeInSeconds);
-		}
-		else {
-			query.addExtension("javax.persistence.lock.timeout", remainingTimeInSeconds);
-			query.addExtension("javax.persistence.query.timeout", remainingTimeInSeconds);
-		}
 	}
 
 
