@@ -380,7 +380,7 @@ public class TaskExecutorExample {
 
       <programlisting language="java">@Configuration
 @EnableAsync
-@EnableSCheduling
+@EnableScheduling
 public class AppConfig {
 }</programlisting>
 
