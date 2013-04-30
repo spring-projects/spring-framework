@@ -23,12 +23,9 @@ import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
-import org.springframework.websocket.PartialMessageHandler;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -42,25 +39,22 @@ import org.springframework.websocket.WebSocketSession;
  */
 public class StandardEndpointAdapter extends Endpoint {
 
-	private static Log logger = LogFactory.getLog(StandardEndpointAdapter.class);
-
-	private final WebSocketHandlerInvoker handler;
-
-	private final Class<?> handlerClass;
+	private final WebSocketHandler handler;
 
 	private WebSocketSession wsSession;
 
 
-
 	public StandardEndpointAdapter(WebSocketHandler webSocketHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.handler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
-		this.handlerClass= webSocketHandler.getClass();
+		this.handler = webSocketHandler;
 	}
 
 
 	@Override
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
+
+		this.wsSession = new StandardWebSocketSessionAdapter(session);
+		this.handler.afterConnectionEstablished(this.wsSession);
 
 		session.addMessageHandler(new MessageHandler.Whole<String>() {
 			@Override
@@ -69,9 +63,7 @@ public class StandardEndpointAdapter extends Endpoint {
 			}
 		});
 
-		// TODO: per-connection proxy
-
-		if (!PartialMessageHandler.class.isAssignableFrom(this.handlerClass)) {
+		if (!this.handler.isStreaming()) {
 			session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
 				@Override
 				public void onMessage(ByteBuffer message) {
@@ -88,8 +80,6 @@ public class StandardEndpointAdapter extends Endpoint {
 			});
 		}
 
-		this.wsSession = new StandardWebSocketSessionAdapter(session);
-		this.handler.afterConnectionEstablished(this.wsSession);
 	}
 
 	private void handleTextMessage(javax.websocket.Session session, String payload) {

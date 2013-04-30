@@ -57,11 +57,23 @@ public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler, Bea
 	private Map<WebSocketSession, WebSocketHandler> handlers =
 			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
 
+	private boolean streaming;
+
 
 	public PerConnectionWebSocketHandlerProxy(Class<? extends WebSocketHandler> handlerType) {
-		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
+		this(handlerType, false);
 	}
 
+	public PerConnectionWebSocketHandlerProxy(Class<? extends WebSocketHandler> handlerType, boolean isStreaming) {
+		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
+		this.streaming = isStreaming;
+	}
+
+
+	@Override
+	public boolean isStreaming() {
+		return this.streaming;
+	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

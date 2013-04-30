@@ -32,6 +32,8 @@ import org.springframework.web.util.NestedServletException;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
+import org.springframework.websocket.support.LoggingWebSocketHandlerDecorator;
 
 /**
  * An {@link HttpRequestHandler} that wraps the invocation of a {@link HandshakeHandler}.
@@ -53,8 +55,19 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	public WebSocketHttpRequestHandler(	WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		Assert.notNull(handshakeHandler, "handshakeHandler is required");
-		this.webSocketHandler = webSocketHandler;
+		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
 		this.handshakeHandler = new DefaultHandshakeHandler();
+	}
+
+	/**
+	 * Decorate the WebSocketHandler provided to the class constructor.
+	 * <p>
+	 * By default {@link ExceptionWebSocketHandlerDecorator} and
+	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
+	 */
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+		handler = new ExceptionWebSocketHandlerDecorator(handler);
+		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
 	@Override

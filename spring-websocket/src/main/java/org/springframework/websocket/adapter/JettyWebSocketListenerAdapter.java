@@ -16,8 +16,6 @@
 
 package org.springframework.websocket.adapter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.springframework.util.Assert;
@@ -35,8 +33,6 @@ import org.springframework.websocket.WebSocketSession;
  */
 public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
-	private static Log logger = LogFactory.getLog(JettyWebSocketListenerAdapter.class);
-
 	private final WebSocketHandler webSocketHandler;
 
 	private WebSocketSession wsSession;
@@ -44,7 +40,7 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	public JettyWebSocketListenerAdapter(WebSocketHandler webSocketHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.webSocketHandler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
+		this.webSocketHandler = webSocketHandler;
 	}
 
 
@@ -76,4 +72,5 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 	public void onWebSocketError(Throwable cause) {
 		this.webSocketHandler.handleTransportError(this.wsSession, cause);
 	}
+
 }

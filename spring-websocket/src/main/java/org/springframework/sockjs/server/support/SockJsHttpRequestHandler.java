@@ -32,6 +32,8 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
+import org.springframework.websocket.support.LoggingWebSocketHandlerDecorator;
 
 /**
  * @author Rossen Stoyanchev
@@ -63,7 +65,18 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 		this.prefix = prefix;
 		this.sockJsService = sockJsService;
-		this.webSocketHandler = webSocketHandler;
+		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+	}
+
+	/**
+	 * Decorate the WebSocketHandler provided to the class constructor.
+	 * <p>
+	 * By default {@link ExceptionWebSocketHandlerDecorator} and
+	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
+	 */
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+		handler = new ExceptionWebSocketHandlerDecorator(handler);
+		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
 	public String getPrefix() {

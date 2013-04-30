@@ -23,6 +23,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
+import org.springframework.websocket.support.LoggingWebSocketHandlerDecorator;
 
 /**
  * @author Rossen Stoyanchev
@@ -44,7 +46,18 @@ public class WebSocketConnectionManager extends AbstractWebSocketConnectionManag
 
 		super(uriTemplate, uriVariables);
 		this.client = webSocketClient;
-		this.webSocketHandler = webSocketHandler;
+		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+	}
+
+	/**
+	 * Decorate the WebSocketHandler provided to the class constructor.
+	 * <p>
+	 * By default {@link ExceptionWebSocketHandlerDecorator} and
+	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
+	 */
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+		handler = new ExceptionWebSocketHandlerDecorator(handler);
+		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
 	public void setSubProtocols(List<String> subProtocols) {

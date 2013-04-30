@@ -26,7 +26,6 @@ import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
-import org.springframework.websocket.adapter.WebSocketHandlerInvoker;
 
 
 /**
@@ -42,7 +41,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	private final String sessionId;
 
-	private WebSocketHandlerInvoker handler;
+	private WebSocketHandler handler;
 
 	private State state = State.NEW;
 
@@ -59,7 +58,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		Assert.notNull(sessionId, "sessionId is required");
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.sessionId = sessionId;
-		this.handler = new WebSocketHandlerInvoker(webSocketHandler).setLogger(logger);
+		this.handler = webSocketHandler;
 	}
 
 	public String getId() {
@@ -129,7 +128,13 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 */
 	protected void tryCloseWithSockJsTransportError(Throwable ex, CloseStatus closeStatus) {
 		delegateError(ex);
-		this.handler.tryCloseWithError(this, ex, closeStatus);
+		try {
+			logger.error("Closing due to transport error for " + this, ex);
+			close(closeStatus);
+		}
+		catch (Throwable t) {
+			// ignore
+		}
 	}
 
 	public void delegateMessages(String[] messages) {

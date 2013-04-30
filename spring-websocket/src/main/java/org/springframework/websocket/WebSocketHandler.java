@@ -48,4 +48,9 @@ public interface WebSocketHandler {
 	 */
 	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus);
 
+	/**
+	 * Whether this WebSocketHandler wishes to receive messages broken up in parts.
+	 */
+	boolean isStreaming();
+
 }
