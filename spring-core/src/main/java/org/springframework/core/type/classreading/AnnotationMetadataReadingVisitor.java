@@ -43,9 +43,9 @@ import org.springframework.util.MultiValueMap;
  * @author Costin Leau
  * @since 2.5
  */
-final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
+public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
-	private final ClassLoader classLoader;
+	protected final ClassLoader classLoader;
 
 	private final Set<String> annotationSet = new LinkedHashSet<String>();
 
@@ -53,7 +53,7 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	private final Map<String, AnnotationAttributes> attributeMap = new LinkedHashMap<String, AnnotationAttributes>(4);
 
-	private final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
+	protected final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
 
 
 	public AnnotationMetadataReadingVisitor(ClassLoader classLoader) {

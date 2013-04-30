@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,11 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 	}
 
 	public void visitEnum(String attributeName, String asmTypeDescriptor, String attributeValue) {
+		Object newValue  = getEnumValue(asmTypeDescriptor, attributeValue);
+		this.visit(attributeName, newValue);
+	}
+
+	protected Object getEnumValue(String asmTypeDescriptor, String attributeValue) {
 		Object valueToUse = attributeValue;
 		try {
 			Class<?> enumType = this.classLoader.loadClass(Type.getType(asmTypeDescriptor).getClassName());
@@ -88,7 +93,7 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 		catch (IllegalAccessException ex) {
 			this.logger.warn("Could not access enum value while reading annotation metadata", ex);
 		}
-		this.attributes.put(attributeName, valueToUse);
+		return valueToUse;
 	}
 }
 
