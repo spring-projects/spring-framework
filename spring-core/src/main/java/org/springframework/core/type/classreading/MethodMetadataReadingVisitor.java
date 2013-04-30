@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 
 	private final int access;
 
-	private String declaringClassName;
+	private final String declaringClassName;
 
 	private final ClassLoader classLoader;
 
@@ -53,8 +53,10 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 
 	private final Map<String, AnnotationAttributes> attributeMap = new LinkedHashMap<String, AnnotationAttributes>(2);
 
+
 	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
 			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
+
 		super(SpringAsmInfo.ASM_VERSION);
 		this.name = name;
 		this.access = access;
@@ -63,10 +65,11 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 		this.methodMetadataMap = methodMetadataMap;
 	}
 
+
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
-		methodMetadataMap.add(className, this);
+		this.methodMetadataMap.add(className, this);
 		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
 
@@ -97,4 +100,5 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
 	}
+
 }
