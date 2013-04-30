@@ -124,6 +124,7 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		options.author = true
 		options.header = project.name
 		options.links(project.ext.javadocLinks)
+		options.addStringOption('Xdoclint:none', '-quiet')
 
 		// suppress warnings due to cross-module @see and @link references;
 		// note that global 'api' task does display all warnings.
@@ -778,6 +779,7 @@ configure(rootProject) {
 		options.stylesheetFile = file("src/api/stylesheet.css")
 		options.splitIndex = true
 		options.links(project.ext.javadocLinks)
+		options.addStringOption('Xdoclint:none', '-quiet')
 
 		source subprojects.collect { project ->
 			project.sourceSets.main.allJava
