@@ -438,7 +438,7 @@ project("spring-web") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.servlet.jsp:jsp-api:2.1")
 		provided("javax.activation:activation:1.1")
-		optional("com.caucho:hessian:3.2.1")
+		optional("com.caucho:hessian:4.0.7")
 		optional("rome:rome:1.0")
 		optional("commons-fileupload:commons-fileupload:1.3")
 		optional("org.apache.httpcomponents:httpclient:4.2")

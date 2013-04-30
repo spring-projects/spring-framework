@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,10 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.caucho.HessianServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
+ * @deprecated as of Spring 4.0, since Burlap hasn't evolved in years
+ * and is effectively retired (in contrast to its sibling Hessian)
  */
+@Deprecated
 public class BurlapServiceExporter extends BurlapExporter implements HttpRequestHandler {
 
 	/**

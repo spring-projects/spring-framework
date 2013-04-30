@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.FactoryBean;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>
+ * <b>Note: As of Spring 4.0, this proxy factory requires Hessian 4.0 or above.</b>
  *
  * <p>The service URL must be an HTTP URL exposing a Hessian service.
  * For details, see the {@link HessianClientInterceptor} javadoc.
@@ -36,7 +37,6 @@ import org.springframework.beans.factory.FactoryBean;
  * @see #setServiceUrl
  * @see HessianClientInterceptor
  * @see HessianServiceExporter
- * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hessian.io.HessianDebugOutputStream;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
 import org.apache.commons.logging.Log;
@@ -45,7 +46,7 @@ import org.springframework.util.CommonsLogWriter;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.
- * <b>Note: As of Spring 3.0, this exporter requires Hessian 3.2 or above.</b>
+ * <b>Note: As of Spring 4.0, this exporter requires Hessian 4.0 or above.</b>
  *
  * @author Juergen Hoeller
  * @since 2.5.1
@@ -59,6 +60,8 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 
 
 	private SerializerFactory serializerFactory = new SerializerFactory();
+
+	private HessianRemoteResolver remoteResolver;
 
 	private Log debugLogger;
 
@@ -81,6 +84,22 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	 */
 	public void setSendCollectionType(boolean sendCollectionType) {
 		this.serializerFactory.setSendCollectionType(sendCollectionType);
+	}
+
+	/**
+	 * Set whether to allow non-serializable types as Hessian arguments
+	 * and return values. Default is "true".
+	 */
+	public void setAllowNonSerializable(boolean allowNonSerializable) {
+		this.serializerFactory.setAllowNonSerializable(allowNonSerializable);
+	}
+
+	/**
+	 * Specify a custom HessianRemoteResolver to use for resolving remote
+	 * object references.
+	 */
+	public void setRemoteResolver(HessianRemoteResolver remoteResolver) {
+		this.remoteResolver = remoteResolver;
 	}
 
 	/**
@@ -192,6 +211,9 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 			if (this.serializerFactory != null) {
 				in.setSerializerFactory(this.serializerFactory);
 				out.setSerializerFactory(this.serializerFactory);
+			}
+			if (this.remoteResolver != null) {
+				in.setRemoteResolver(this.remoteResolver);
 			}
 
 			try {
