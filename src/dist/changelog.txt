@@ -3,13 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2.3 (2013-05-02)
+Changes in version 3.2.3 (2013-05-14)
 -------------------------------------
 
+* support for Hibernate 4.2 as JPA provider (SPR-10395)
+* minimized ASM usage during configuration class processing (SPR-10292)
+* added public "getName()" accessor to MethodReference (SPR-10422)
 * fixed ReflectiveMethodResolver to avoid potential UnsupportedOperationException on sort (SPR-10392)
-* fixed Jaxb2Marshaller's partial unmarshalling feature to consistently apply to all sources (SPR-10282)
 * JdbcTemplate defensively uses JDBC 3.0 getParameterType call for Oracle driver compatibility (SPR-10385)
 * introduced public ArgumentPreparedStatementSetter and ArgumentTypePreparedStatementSetter classes (SPR-10375)
+* fixed Jaxb2Marshaller's partial unmarshalling feature to consistently apply to all sources (SPR-10282)
+* SimpleMappingExceptionResolver prefers longer mapping expression in case of same exception depth (SPR-9639)
 
 
 Changes in version 3.2.2 (2013-03-14)
