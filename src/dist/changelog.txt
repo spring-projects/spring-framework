@@ -6,7 +6,8 @@ http://www.springsource.org
 Changes in version 3.2.3 (2013-05-14)
 -------------------------------------
 
-* support for Hibernate 4.2 as JPA provider (SPR-10395)
+* compatibility with OpenJDK 8 for target 1.5/1.6/1.7 compiled Spring 3.2.x applications (SPR-9639)
+* HibernateJpaDialect support for Hibernate 4.2 as JPA provider (SPR-10395)
 * minimized ASM usage during configuration class processing (SPR-10292)
 * added public "getName()" accessor to MethodReference (SPR-10422)
 * fixed ReflectiveMethodResolver to avoid potential UnsupportedOperationException on sort (SPR-10392)
