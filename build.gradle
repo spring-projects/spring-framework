@@ -12,8 +12,8 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	// The following is a work-around until the Gradle build uses
-	// Ant 1.9.x by default. This is necessary to avoid the
+	// The following is a work-around for allowing to build on JDK 8 until the
+	// Gradle build uses Ant 1.9.x by default. This is necessary to avoid the
 	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
 	ant.properties["build.compiler"] = "javac1.7"
 
@@ -251,6 +251,7 @@ project("spring-core") {
 
 project("spring-beans") {
 	description = "Spring Beans"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
@@ -262,6 +263,7 @@ project("spring-beans") {
 
 project("spring-aop") {
 	description = "Spring AOP"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
@@ -275,6 +277,7 @@ project("spring-aop") {
 
 project("spring-expression") {
 	description = "Spring Expression Language (SpEL)"
+
 	dependencies {
 		compile(project(":spring-core"))
 	}
@@ -282,9 +285,11 @@ project("spring-expression") {
 
 project("spring-instrument") {
 	description = "Spring Instrument"
+
 	dependencies {
 		compile(project(":spring-core"))
 	}
+
 	jar {
 		manifest.attributes["Premain-Class"] =
 			"org.springframework.instrument.InstrumentationSavingAgent"
@@ -293,6 +298,7 @@ project("spring-instrument") {
 
 project("spring-instrument-tomcat") {
 	description = "Spring Instrument Tomcat"
+
 	dependencies {
 		provided("org.apache.tomcat:catalina:6.0.16")
 	}
@@ -300,6 +306,7 @@ project("spring-instrument-tomcat") {
 
 project("spring-context") {
 	description = "Spring Context"
+
 	dependencies {
 		optional(project(":spring-instrument"))
 		compile(project(":spring-aop"))
@@ -312,12 +319,12 @@ project("spring-context") {
 		optional("javax.inject:javax.inject:1")
 		optional("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
 		optional("javax.persistence:persistence-api:1.0")
-		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.beanshell:bsh:2.0b4")
 		optional("org.codehaus.groovy:groovy-all:1.8.8")
 		optional("org.jruby:jruby:1.6.5.1")
 		optional("joda-time:joda-time:2.1")
 		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.hibernate:hibernate-validator:4.3.0.Final")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
@@ -332,6 +339,7 @@ project("spring-context") {
 
 project("spring-tx") {
 	description = "Spring Transaction"
+
 	dependencies {
 		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
 		optional(project(":spring-aop"))
@@ -364,7 +372,6 @@ project("spring-oxm") {
 		optional(project(":spring-context")) // for Jaxb2Marshaller
 		compile("commons-lang:commons-lang:2.5")
 		optional("com.thoughtworks.xstream:xstream:1.3.1")
-		optional("com.sun.xml.bind:jaxb-impl:2.1.7")
 		optional("org.jibx:jibx-run:1.2.3")
 		optional("org.apache.xmlbeans:xmlbeans:2.4.0")
 		optional("org.codehaus.castor:castor-xml:1.3.2")
@@ -379,6 +386,7 @@ project("spring-oxm") {
 
 project("spring-jms") {
 	description = "Spring JMS"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -397,6 +405,7 @@ project("spring-jms") {
 
 project("spring-jdbc") {
 	description = "Spring JDBC"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -413,6 +422,7 @@ project("spring-jdbc") {
 
 project("spring-context-support") {
 	description = "Spring Context Support"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
@@ -449,8 +459,6 @@ project("spring-web") {
 		compile(project(":spring-context"))
 		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
 		compile("aopalliance:aopalliance:1.0")
-		optional("com.caucho:hessian:3.2.1")
-		optional("rome:rome:1.0")
 		optional("javax.el:el-api:1.0")
 		optional("javax.faces:jsf-api:1.2_08")
 		provided("javax.portlet:portlet-api:2.0")
@@ -459,6 +467,8 @@ project("spring-web") {
 		optional("javax.xml:jaxrpc-api:1.1")
 		provided("javax.xml.soap:saaj-api:1.3")
 		provided("javax.activation:activation:1.1")
+		optional("com.caucho:hessian:3.2.1")
+		optional("rome:rome:1.0")
 		optional("commons-fileupload:commons-fileupload:1.2")
 		optional("commons-io:commons-io:1.3")
 		optional("commons-httpclient:commons-httpclient:3.1")
@@ -493,16 +503,16 @@ project("spring-orm") {
 
 	dependencies {
 		compile("aopalliance:aopalliance:1.0")
+		optional("javax.persistence:persistence-api:1.0")
+		optional("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1")
+		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1")
 		optional("org.hibernate:hibernate-core:3.3.2.GA")
 		optional("org.hibernate:hibernate-annotations:3.4.0.GA")
 		optional("org.hibernate:hibernate-entitymanager:3.4.0.GA")
 		optional("org.apache.openjpa:openjpa:1.1.0")
-		optional("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1")
-		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1")
 		optional("toplink.essentials:toplink-essentials:2.0-41b")
 		optional("javax.jdo:jdo-api:3.0")
 		optional("org.apache.ibatis:ibatis-sqlmap:2.3.4.726")
-		optional("javax.persistence:persistence-api:1.0")
 		provided("javax.servlet:servlet-api:2.5")
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -523,11 +533,12 @@ project("spring-orm") {
 project("spring-orm-hibernate4") {
 	description = "Spring Object/Relational Mapping - Hibernate 4 support"
 	merge.into = project(":spring-orm")
+
 	dependencies {
 		provided(project(":spring-tx"))
 		provided(project(":spring-jdbc"))
-		optional("org.hibernate:hibernate-core:4.1.0.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.1.0.Final")
+		optional("org.hibernate:hibernate-core:4.1.9.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.1.9.Final")
 		optional(project(":spring-web"))
 		optional("javax.servlet:servlet-api:2.5")
 	}
@@ -535,6 +546,7 @@ project("spring-orm-hibernate4") {
 
 project("spring-webmvc") {
 	description = "Spring Web MVC"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-expression"))
@@ -547,7 +559,6 @@ project("spring-webmvc") {
 		optional("org.apache.tiles:tiles-core:2.1.2")
 		optional("org.apache.tiles:tiles-jsp:2.1.2")
 		optional("org.apache.tiles:tiles-servlet:2.1.2")
-		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
 		optional("org.apache.poi:poi:3.0.2-FINAL")
 		optional("com.lowagie:itext:2.1.7")
@@ -556,6 +567,7 @@ project("spring-webmvc") {
 		}
 		optional("rome:rome:1.0")
 		optional("velocity:velocity:1.5")
+		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:2.3.15")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
@@ -594,6 +606,7 @@ project("spring-webmvc") {
 project("spring-webmvc-tiles3") {
 	description = "Spring Framework Tiles3 Integration"
 	merge.into = project(":spring-webmvc")
+
 	dependencies {
 		provided(project(":spring-context"))
 		provided(project(":spring-web"))
@@ -624,6 +637,7 @@ project("spring-webmvc-tiles3") {
 
 project("spring-webmvc-portlet") {
 	description = "Spring Web Portlet"
+
 	dependencies {
 		provided("javax.servlet:servlet-api:2.5")
 		provided("javax.portlet:portlet-api:2.0")
@@ -704,7 +718,6 @@ project("spring-test-mvc") {
 		testCompile("rome:rome:1.0")
 		testCompile("javax.activation:activation:1.1")
 		testCompile("javax.mail:mail:1.4")
-		testCompile("javax.xml.bind:jaxb-api:2.2.6")
 		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
 		testCompile("org.apache.tiles:tiles-api:3.0.1")
 		testCompile("org.apache.tiles:tiles-core:3.0.1") {
@@ -735,6 +748,7 @@ project("spring-struts") {
 project("spring-aspects") {
 	description = "Spring Aspects"
 	apply from: "aspects.gradle"
+
 	dependencies {
 		optional(project(":spring-beans")) // for @Configurable support
 		optional(project(":spring-aop")) // for @Async support
@@ -752,6 +766,7 @@ project("spring-aspects") {
 		compile(project(":spring-beans")) // for "p" namespace visibility
 		testCompile(project(":spring-test"))
 	}
+
 	eclipse.project {
 		natures += "org.eclipse.ajdt.ui.ajnature"
 		buildCommands = [new org.gradle.plugins.ide.eclipse.model.
@@ -764,7 +779,7 @@ configure(rootProject) {
 
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
-	apply plugin: "detect-split-packages"
+	// apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
 	reference {
@@ -772,9 +787,11 @@ configure(rootProject) {
 		pdfFilename = "spring-framework-reference.pdf"
 	}
 
-	detectSplitPackages {
-		projectsToScan -= project(":spring-instrument-tomcat")
-	}
+	// TODO: DetectSplitPackagesPlugin fails in line 154 due to method not found on java.io.File.
+	// TODO: Possibly related to user rights or OS differences on OpenJDK 8; works fine on JDK 7.
+	// detectSplitPackages {
+	//	projectsToScan -= project(":spring-instrument-tomcat")
+	// }
 
 	// don't publish the default jar for the root project
 	configurations.archives.artifacts.clear()
@@ -791,7 +808,7 @@ configure(rootProject) {
 		testCompile(project(":spring-web"))
 		testCompile(project(":spring-webmvc-portlet"))
 		testCompile(project(":spring-orm"))
-		testCompile("org.hibernate:hibernate-core:4.1.0.Final")
+		testCompile("org.hibernate:hibernate-core:4.1.9.Final")
 		testCompile("javax.servlet:servlet-api:2.5")
 		testCompile("javax.portlet:portlet-api:2.0")
 		testCompile("javax.inject:javax.inject:1")
@@ -828,7 +845,7 @@ configure(rootProject) {
 
 		doFirst {
 			classpath = files(
-				// ensure servlet 3.x and Hibernate 4.x have precedence on the Javadoc
+				// ensure Servlet 3.x and Hibernate 4.x have precedence on the Javadoc
 				// classpath over their respective 2.5 and 3.x variants
 				project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
 				rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },
