@@ -134,6 +134,8 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException {
 
+		// TODO: populate headers
+
 		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler);
 
 		try {

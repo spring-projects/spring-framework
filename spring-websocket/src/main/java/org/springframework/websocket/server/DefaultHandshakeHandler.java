@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.websocket.WebSocketHandler;
 
@@ -53,7 +55,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private List<String> supportedProtocols;
+	private List<String> supportedProtocols = new ArrayList<String>();
 
 	private RequestUpgradeStrategy requestUpgradeStrategy;
 
@@ -101,7 +103,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			handleInvalidUpgradeHeader(request, response);
 			return false;
 		}
-		if (!request.getHeaders().getConnection().contains("Upgrade")) {
+		if (!request.getHeaders().getConnection().contains("Upgrade") &&
+				!request.getHeaders().getConnection().contains("upgrade")) {
 			handleInvalidConnectHeader(request, response);
 			return false;
 		}
@@ -188,7 +191,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	protected String selectProtocol(List<String> requestedProtocols) {
-		if (requestedProtocols != null) {
+		if (CollectionUtils.isEmpty(requestedProtocols)) {
 			for (String protocol : requestedProtocols) {
 				if (this.supportedProtocols.contains(protocol)) {
 					return protocol;

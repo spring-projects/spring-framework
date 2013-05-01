@@ -198,6 +198,10 @@ public final class CloseStatus {
 		return (this.code == otherStatus.code && ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
 	}
 
+	public boolean equalsCode(CloseStatus other) {
+		return this.code == other.code;
+	}
+
 	@Override
 	public String toString() {
 		return "CloseStatus [code=" + this.code + ", reason=" + this.reason + "]";

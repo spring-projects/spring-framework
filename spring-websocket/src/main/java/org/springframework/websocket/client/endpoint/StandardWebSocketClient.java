@@ -27,9 +27,12 @@ import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
+import javax.websocket.HandshakeResponse;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.websocket.WebSocketHandler;
@@ -46,6 +49,8 @@ import org.springframework.websocket.client.WebSocketConnectFailureException;
  * @since 4.0
  */
 public class StandardWebSocketClient implements WebSocketClient {
+
+	private static final Log logger = LogFactory.getLog(StandardWebSocketClient.class);
 
 	private static final Set<String> EXCLUDED_HEADERS = new HashSet<String>(
 			Arrays.asList("Sec-WebSocket-Accept", "Sec-WebSocket-Extensions", "Sec-WebSocket-Key",
@@ -83,8 +88,21 @@ public class StandardWebSocketClient implements WebSocketClient {
 				public void beforeRequest(Map<String, List<String>> headers) {
 					for (String headerName : httpHeaders.keySet()) {
 						if (!EXCLUDED_HEADERS.contains(headerName)) {
-							headers.put(headerName, httpHeaders.get(headerName));
+							List<String> value = httpHeaders.get(headerName);
+							if (logger.isTraceEnabled()) {
+								logger.trace("Adding header [" + headerName + "=" + value + "]");
+							}
+							headers.put(headerName, value);
 						}
+					}
+					if (logger.isTraceEnabled()) {
+						logger.trace("Handshake request headers: " + headers);
+					}
+				}
+				@Override
+				public void afterResponse(HandshakeResponse handshakeResponse) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Handshake response headers: " + handshakeResponse.getHeaders());
 					}
 				}
 			});
