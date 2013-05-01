@@ -17,7 +17,15 @@
 package org.springframework.websocket;
 
 /**
- * A handler for WebSocket sessions.
+ * A handler for WebSocket messages and lifecycle events.
+ *
+ * <p> Implementations of this interface are encouraged to handle exceptions locally where
+ * it makes sense or alternatively let the exception bubble up in which case the exception
+ * is logged and the session closed with {@link CloseStatus#SERVER_ERROR SERVER_ERROR(101)} by default.
+ * The exception handling strategy is provided by
+ * {@link org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator ExceptionWebSocketHandlerDecorator},
+ * which can be customized or replaced by decorating the {@link WebSocketHandler} with a
+ * different decorator.
  *
  * @param <T> The type of message being handled {@link TextMessage}, {@link BinaryMessage}
  *        (or {@link WebSocketMessage} for both).
@@ -29,24 +37,40 @@ package org.springframework.websocket;
 public interface WebSocketHandler {
 
 	/**
-	 * A new WebSocket connection has been opened and is ready to be used.
+	 * Invoked after WebSocket negotiation has succeeded and the WebSocket connection is
+	 * opened and ready for use.
+	 *
+	 * @throws Exception this method can handle or propagate exceptions; see class-level
+	 *         Javadoc for details.
 	 */
-	void afterConnectionEstablished(WebSocketSession session);
+	void afterConnectionEstablished(WebSocketSession session) throws Exception;
 
 	/**
-	 * Handle an incoming WebSocket message.
+	 * Invoked when a new WebSocket message arrives.
+	 *
+	 * @throws Exception this method can handle or propagate exceptions; see class-level
+	 *         Javadoc for details.
 	 */
-	void handleMessage(WebSocketSession session, WebSocketMessage<?> message);
+	void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception;
 
 	/**
 	 * Handle an error from the underlying WebSocket message transport.
+	 *
+	 * @throws Exception this method can handle or propagate exceptions; see class-level
+	 *         Javadoc for details.
 	 */
-	void handleTransportError(WebSocketSession session, Throwable exception);
+	void handleTransportError(WebSocketSession session, Throwable exception) throws Exception;
 
 	/**
-	 * A WebSocket connection has been closed.
+	 * Invoked after the WebSocket connection has been closed by either side, or after a
+	 * transport error has occurred. Although the session may technically still be open,
+	 * depending on the underlying implementation, sending messages at this point is
+	 * discouraged and most likely will not succeed.
+	 *
+	 * @throws Exception this method can handle or propagate exceptions; see class-level
+	 *         Javadoc for details.
 	 */
-	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus);
+	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception;
 
 	/**
 	 * Whether this WebSocketHandler wishes to receive messages broken up in parts.

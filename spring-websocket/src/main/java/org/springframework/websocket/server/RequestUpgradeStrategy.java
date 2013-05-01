@@ -37,12 +37,17 @@ public interface RequestUpgradeStrategy {
 	String[] getSupportedVersions();
 
 	/**
-	 * Perform runtime specific steps to complete the upgrade.
-	 * Invoked only if the handshake is successful.
+	 * Perform runtime specific steps to complete the upgrade. Invoked after successful
+	 * negotiation of the handshake request.
 	 *
 	 * @param webSocketHandler the handler for WebSocket messages
+	 *
+	 * @throws HandshakeFailureException thrown when handshake processing failed to
+	 *         complete due to an internal, unrecoverable error, i.e. a server error as
+	 *         opposed to a failure to successfully negotiate the requirements of the
+	 *         handshake request.
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			WebSocketHandler webSocketHandler) throws IOException;
+			WebSocketHandler webSocketHandler) throws IOException, HandshakeFailureException;
 
 }

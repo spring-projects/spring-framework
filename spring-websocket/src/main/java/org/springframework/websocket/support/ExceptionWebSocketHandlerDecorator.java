@@ -43,11 +43,11 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 			getDelegate().afterConnectionEstablished(session);
 		}
 		catch (Throwable ex) {
-			tryCloseWithError(session, ex);
+			tryCloseWithError(session, ex, logger);
 		}
 	}
 
-	private void tryCloseWithError(WebSocketSession session, Throwable exception) {
+	public static void tryCloseWithError(WebSocketSession session, Throwable exception, Log logger) {
 		logger.error("Closing due to exception for " + session, exception);
 		if (session.isOpen()) {
 			try {
@@ -65,7 +65,7 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 			getDelegate().handleMessage(session, message);
 		}
 		catch (Throwable ex) {
-			tryCloseWithError(session,ex);
+			tryCloseWithError(session, ex, logger);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 			getDelegate().handleTransportError(session, exception);
 		}
 		catch (Throwable ex) {
-			tryCloseWithError(session, ex);
+			tryCloseWithError(session, ex, logger);
 		}
 	}
 
@@ -84,8 +84,8 @@ public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorato
 		try {
 			getDelegate().afterConnectionClosed(session, closeStatus);
 		}
-		catch (Throwable ex) {
-			logger.error("Unhandled error for " + this, ex);
+		catch (Throwable t) {
+			logger.error("Unhandled error for " + this, t);
 		}
 	}
 

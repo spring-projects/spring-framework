@@ -31,6 +31,7 @@ import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
  * An abstract base class for use with HTTP-based transports.
@@ -65,7 +66,12 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 			tryCloseWithSockJsTransportError(t, null);
 			throw new TransportErrorException("Failed open SockJS session", t, getId());
 		}
-		delegateConnectionEstablished();
+		try {
+			delegateConnectionEstablished();
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this, t, logger);
+		}
 	}
 
 	protected void writePrelude() throws IOException {

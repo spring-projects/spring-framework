@@ -81,14 +81,14 @@ public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler, Bea
 	}
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) {
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		WebSocketHandler handler = this.provider.getHandler();
 		this.handlers.put(session, handler);
 		handler.afterConnectionEstablished(session);
 	}
 
 	@Override
-	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
+	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		getHandler(session).handleMessage(session, message);
 	}
 
@@ -99,12 +99,12 @@ public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler, Bea
 	}
 
 	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) {
+	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 		getHandler(session).handleTransportError(session, exception);
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		try {
 			getHandler(session).afterConnectionClosed(session, closeStatus);
 		}

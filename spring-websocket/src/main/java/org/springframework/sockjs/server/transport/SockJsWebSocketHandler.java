@@ -34,8 +34,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
- * A wrapper around a {@link WebSocketHandler} instance that parses as well as adds SockJS
- * messages frames as well as sends SockJS heartbeat messages.
+ * A wrapper around a {@link WebSocketHandler} instance that parses and adds SockJS
+ * messages frames and also sends SockJS heartbeat messages.
+ *
+ * <p>
+ * Implementations of the {@link WebSocketHandler} interface in this class allow
+ * exceptions from the wrapped {@link WebSocketHandler} to propagate. However, any
+ * exceptions resulting from SockJS message handling (e.g. while sending SockJS frames or
+ * heartbeat messages) are caught and treated as transport errors, i.e. routed to the
+ * {@link WebSocketHandler#handleTransportError(WebSocketSession, Throwable)
+ * handleTransportError} method of the wrapped handler and the session closed.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -66,24 +74,24 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	}
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession wsSession) {
+	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
 		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
 		this.sockJsSession = new WebSocketServerSockJsSession(getSockJsSessionId(wsSession), getSockJsConfig());
 		this.sockJsSession.initWebSocketSession(wsSession);
 	}
 
 	@Override
-	public void handleTextMessage(WebSocketSession wsSession, TextMessage message) {
+	public void handleTextMessage(WebSocketSession wsSession, TextMessage message) throws Exception {
 		this.sockJsSession.handleMessage(message, wsSession);
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession wsSession, CloseStatus status) {
+	public void afterConnectionClosed(WebSocketSession wsSession, CloseStatus status) throws Exception {
 		this.sockJsSession.delegateConnectionClosed(status);
 	}
 
 	@Override
-	public void handleTransportError(WebSocketSession webSocketSession, Throwable exception) {
+	public void handleTransportError(WebSocketSession webSocketSession, Throwable exception) throws Exception {
 		this.sockJsSession.delegateError(exception);
 	}
 
@@ -105,7 +113,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 			super(sessionId, config, SockJsWebSocketHandler.this.webSocketHandler);
 		}
 
-		public void initWebSocketSession(WebSocketSession wsSession) {
+		public void initWebSocketSession(WebSocketSession wsSession) throws Exception {
 			this.wsSession = wsSession;
 			try {
 				TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
@@ -124,7 +132,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 			return this.wsSession.isOpen();
 		}
 
-		public void handleMessage(TextMessage message, WebSocketSession wsSession) {
+		public void handleMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
 			String payload = message.getPayload();
 			if (StringUtils.isEmpty(payload)) {
 				logger.trace("Ignoring empty message");

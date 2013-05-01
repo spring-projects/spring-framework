@@ -89,7 +89,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	@Override
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler) throws IOException {
+			WebSocketHandler webSocketHandler) throws IOException, HandshakeFailureException {
 
 		logger.debug("Starting handshake for " + request.getURI());
 
@@ -201,14 +201,14 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		return null;
 	}
 
-    private String getWebSocketKeyHash(String key) {
+    private String getWebSocketKeyHash(String key) throws HandshakeFailureException {
     	try {
-	        MessageDigest digest = MessageDigest.getInstance("SHA1");
-	        byte[] bytes = digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
-			return DatatypeConverter.printBase64Binary(bytes);
+    		MessageDigest digest = MessageDigest.getInstance("SHA1");
+    		byte[] bytes = digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
+    		return DatatypeConverter.printBase64Binary(bytes);
     	}
     	catch (NoSuchAlgorithmException ex) {
-    		throw new IllegalStateException("Failed to generate value for Sec-WebSocket-Key header", ex);
+    		throw new HandshakeFailureException("Failed to generate value for Sec-WebSocket-Key header", ex);
     	}
     }
 

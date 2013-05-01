@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.websocket;
+package org.springframework.sockjs.server;
+
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * A "marker" interface for {@link BinaryMessageHandler} types that wish to handle partial
- * messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface PartialMessageHandler {
+@SuppressWarnings("serial")
+public class SockJsRuntimeException extends NestedRuntimeException {
+
+	public SockJsRuntimeException(String msg) {
+		super(msg);
+	}
+
+	public SockJsRuntimeException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 
 }

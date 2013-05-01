@@ -28,7 +28,6 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.util.NestedServletException;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
@@ -79,13 +78,10 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 		try {
 			this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.webSocketHandler);
-		}
-		catch (Exception e) {
-			// TODO
-			throw new NestedServletException("HandshakeHandler failure", e);
-		}
-		finally {
 			httpResponse.flush();
+		}
+		catch (IOException ex) {
+			throw ex;
 		}
 	}
 

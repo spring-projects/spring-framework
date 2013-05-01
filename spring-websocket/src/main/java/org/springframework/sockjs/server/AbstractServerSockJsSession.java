@@ -111,7 +111,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 		catch (Throwable ex) {
 			logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
 			close();
-			throw new NestedSockJsRuntimeException("Failed to write " + frame, ex);
+			throw new SockJsRuntimeException("Failed to write " + frame, ex);
 		}
 	}
 

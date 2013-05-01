@@ -37,11 +37,11 @@ import org.springframework.websocket.WebSocketSession;
 public class WebSocketHandlerAdapter implements WebSocketHandler {
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) {
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 	}
 
 	@Override
-	public final void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
+	public final void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		if (message instanceof TextMessage) {
 			handleTextMessage(session, (TextMessage) message);
 		}
@@ -54,18 +54,18 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 		}
 	}
 
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 	}
 
-	protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-	}
-
-	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) {
+	protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+	}
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 	}
 
 	@Override

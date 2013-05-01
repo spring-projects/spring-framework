@@ -27,9 +27,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
+import org.springframework.sockjs.server.SockJsRuntimeException;
 import org.springframework.sockjs.server.TransportErrorException;
 import org.springframework.sockjs.server.TransportHandler;
 import org.springframework.websocket.WebSocketHandler;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,7 +91,13 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 			logger.trace("Received messages: " + Arrays.asList(messages));
 		}
 
-		session.delegateMessages(messages);
+		try {
+			session.delegateMessages(messages);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(session, t, logger);
+			throw new SockJsRuntimeException("Unhandled WebSocketHandler error in " + this, t);
+		}
 
 		response.setStatusCode(getResponseStatus());
 		response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));

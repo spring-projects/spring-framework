@@ -43,22 +43,22 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 	}
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) {
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.delegate.afterConnectionEstablished(session);
 	}
 
 	@Override
-	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
+	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		this.delegate.handleMessage(session, message);
 	}
 
 	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) {
+	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 		this.delegate.handleTransportError(session, exception);
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		this.delegate.afterConnectionClosed(session, closeStatus);
 	}
 

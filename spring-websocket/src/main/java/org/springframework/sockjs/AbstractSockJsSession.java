@@ -118,7 +118,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		this.timeLastActive = System.currentTimeMillis();
 	}
 
-	public void delegateConnectionEstablished() {
+	public void delegateConnectionEstablished() throws Exception {
 		this.state = State.OPEN;
 		this.handler.afterConnectionEstablished(this);
 	}
@@ -127,23 +127,28 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * Close due to error arising from SockJS transport handling.
 	 */
 	protected void tryCloseWithSockJsTransportError(Throwable ex, CloseStatus closeStatus) {
-		delegateError(ex);
+		logger.error("Closing due to transport error for " + this, ex);
 		try {
-			logger.error("Closing due to transport error for " + this, ex);
-			close(closeStatus);
+			delegateError(ex);
 		}
-		catch (Throwable t) {
-			// ignore
+		catch (Throwable delegateEx) {
+			logger.error("Unhandled error for " + this, delegateEx);
+			try {
+				close(closeStatus);
+			}
+			catch (Throwable closeEx) {
+				logger.error("Unhandled error for " + this, closeEx);
+			}
 		}
 	}
 
-	public void delegateMessages(String[] messages) {
+	public void delegateMessages(String[] messages) throws Exception {
 		for (String message : messages) {
 			this.handler.handleMessage(this, new TextMessage(message));
 		}
 	}
 
-	public void delegateError(Throwable ex) {
+	public void delegateError(Throwable ex) throws Exception {
 		this.handler.handleTransportError(this, ex);
 	}
 
@@ -153,7 +158,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	 * {@link TextMessageHandler}. This is in contrast to {@link #close()} that pro-actively
 	 * closes the connection.
 	 */
-	public final void delegateConnectionClosed(CloseStatus status) {
+	public final void delegateConnectionClosed(CloseStatus status) throws Exception {
 		if (!isClosed()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(this + " was closed, " + status);
@@ -193,7 +198,12 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			finally {
 				this.state = State.CLOSED;
-				this.handler.afterConnectionClosed(this, status);
+				try {
+					this.handler.afterConnectionClosed(this, status);
+				}
+				catch (Throwable t) {
+					logger.error("Unhandled error for " + this, t);
+				}
 			}
 		}
 	}

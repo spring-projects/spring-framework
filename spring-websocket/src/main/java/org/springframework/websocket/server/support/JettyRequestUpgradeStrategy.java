@@ -34,6 +34,7 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.adapter.JettyWebSocketListenerAdapter;
+import org.springframework.websocket.server.HandshakeFailureException;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
 
 /**
@@ -106,7 +107,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		if (!this.factory.acceptWebSocket(request, response)) {
 			// should never happen
-			throw new IllegalStateException("WebSocket request not accepted by Jetty");
+			throw new HandshakeFailureException("WebSocket request not accepted by Jetty");
 		}
 	}
 

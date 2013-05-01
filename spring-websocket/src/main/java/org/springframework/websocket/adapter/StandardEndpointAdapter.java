@@ -23,12 +23,15 @@ import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
 
 
 /**
@@ -38,6 +41,8 @@ import org.springframework.websocket.WebSocketSession;
  * @since 4.0
  */
 public class StandardEndpointAdapter extends Endpoint {
+
+	private static final Log logger = LogFactory.getLog(StandardEndpointAdapter.class);
 
 	private final WebSocketHandler handler;
 
@@ -54,7 +59,13 @@ public class StandardEndpointAdapter extends Endpoint {
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
 
 		this.wsSession = new StandardWebSocketSessionAdapter(session);
-		this.handler.afterConnectionEstablished(this.wsSession);
+		try {
+			this.handler.afterConnectionEstablished(this.wsSession);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+			return;
+		}
 
 		session.addMessageHandler(new MessageHandler.Whole<String>() {
 			@Override
@@ -84,23 +95,43 @@ public class StandardEndpointAdapter extends Endpoint {
 
 	private void handleTextMessage(javax.websocket.Session session, String payload) {
 		TextMessage textMessage = new TextMessage(payload);
-		this.handler.handleMessage(this.wsSession, textMessage);
+		try {
+			this.handler.handleMessage(this.wsSession, textMessage);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
 	}
 
 	private void handleBinaryMessage(javax.websocket.Session session, ByteBuffer payload, boolean isLast) {
 		BinaryMessage binaryMessage = new BinaryMessage(payload, isLast);
-		this.handler.handleMessage(this.wsSession, binaryMessage);
+		try {
+			this.handler.handleMessage(this.wsSession, binaryMessage);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
 	}
 
 	@Override
 	public void onClose(javax.websocket.Session session, CloseReason reason) {
 		CloseStatus closeStatus = new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase());
-		this.handler.afterConnectionClosed(this.wsSession, closeStatus);
+		try {
+			this.handler.afterConnectionClosed(this.wsSession, closeStatus);
+		}
+		catch (Throwable t) {
+			logger.error("Unhandled error for " + this.wsSession, t);
+		}
 	}
 
 	@Override
 	public void onError(javax.websocket.Session session, Throwable exception) {
-		this.handler.handleTransportError(this.wsSession, exception);
+		try {
+			this.handler.handleTransportError(this.wsSession, exception);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
 	}
 
 }

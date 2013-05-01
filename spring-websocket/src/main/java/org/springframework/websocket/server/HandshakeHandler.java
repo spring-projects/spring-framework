@@ -31,7 +31,21 @@ import org.springframework.websocket.WebSocketHandler;
 public interface HandshakeHandler {
 
 
+	/**
+	 *
+	 * @param request
+	 * @param response
+	 * @param webSocketHandler
+	 * @return
+	 *
+	 * @throws IOException thrown when accessing or setting the response
+	 *
+	 * @throws HandshakeFailureException thrown when handshake processing failed to
+	 *         complete due to an internal, unrecoverable error, i.e. a server error as
+	 *         opposed to a failure to successfully negotiate the requirements of the
+	 *         handshake request.
+	 */
 	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler webSocketHandler)
-			throws IOException;
+			throws IOException, HandshakeFailureException;
 
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.websocket.adapter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.springframework.util.Assert;
@@ -24,6 +26,7 @@ import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
  * Adapts Spring's {@link WebSocketHandler} to Jetty's {@link WebSocketListener}.
@@ -32,6 +35,8 @@ import org.springframework.websocket.WebSocketSession;
  * @since 4.0
  */
 public class JettyWebSocketListenerAdapter implements WebSocketListener {
+
+	private static final Log logger = LogFactory.getLog(JettyWebSocketListenerAdapter.class);
 
 	private final WebSocketHandler webSocketHandler;
 
@@ -47,30 +52,55 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 	@Override
 	public void onWebSocketConnect(Session session) {
 		this.wsSession = new JettyWebSocketSessionAdapter(session);
-		this.webSocketHandler.afterConnectionEstablished(this.wsSession);
-	}
-
-	@Override
-	public void onWebSocketClose(int statusCode, String reason) {
-		CloseStatus closeStatus = new CloseStatus(statusCode, reason);
-		this.webSocketHandler.afterConnectionClosed(this.wsSession, closeStatus);
+		try {
+			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
 	}
 
 	@Override
 	public void onWebSocketText(String payload) {
 		TextMessage message = new TextMessage(payload);
-		this.webSocketHandler.handleMessage(this.wsSession, message);
+		try {
+			this.webSocketHandler.handleMessage(this.wsSession, message);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
 	}
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
 		BinaryMessage message = new BinaryMessage(payload, offset, len);
-		this.webSocketHandler.handleMessage(this.wsSession, message);
+		try {
+			this.webSocketHandler.handleMessage(this.wsSession, message);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
+	}
+
+	@Override
+	public void onWebSocketClose(int statusCode, String reason) {
+		CloseStatus closeStatus = new CloseStatus(statusCode, reason);
+		try {
+			this.webSocketHandler.afterConnectionClosed(this.wsSession, closeStatus);
+		}
+		catch (Throwable t) {
+			logger.error("Unhandled error for " + this.wsSession, t);
+		}
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
-		this.webSocketHandler.handleTransportError(this.wsSession, cause);
+		try {
+			this.webSocketHandler.handleTransportError(this.wsSession, cause);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
 	}
 
 }

@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.websocket.server.HandshakeFailureException;
 import org.springframework.websocket.server.endpoint.EndpointRegistration;
 
 /**
@@ -69,7 +70,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws IOException {
+			String selectedProtocol, Endpoint endpoint) throws IOException, HandshakeFailureException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -85,12 +86,12 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 			engine.register(tyrusEndpoint);
 		}
 		catch (DeploymentException ex) {
-			throw new IllegalStateException("Failed to deploy endpoint in Glassfish", ex);
+			throw new HandshakeFailureException("Failed to deploy endpoint in Glassfish", ex);
 		}
 
 		try {
 			if (!performUpgrade(servletRequest, servletResponse, request.getHeaders(), tyrusEndpoint)) {
-				throw new IllegalStateException("Failed to upgrade HttpServletRequest");
+				throw new HandshakeFailureException("Failed to upgrade HttpServletRequest");
 			}
 		}
 		finally {
