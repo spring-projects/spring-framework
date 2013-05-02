@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * A FactoryBean for creating a Jackson {@link ObjectMapper} with setters to
- * enable or disable Jackson features from within XML configuration.
+ * A {@link FactoryBean} for creating a Jackson {@link ObjectMapper} with setters
+ * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with MappingJacksonHttpMessageConverter:
  * <pre>
@@ -104,6 +104,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Define the format for date/time with the given {@link DateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setSimpleDateFormat(String)
 	 */
 	public void setDateFormat(DateFormat dateFormat) {
@@ -112,6 +114,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Define the date/time format with a {@link SimpleDateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setDateFormat(DateFormat)
 	 */
 	public void setSimpleDateFormat(String format) {
@@ -132,8 +136,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	 * {@link org.codehaus.jackson.map.DeserializationConfig.Feature#AUTO_DETECT_FIELDS}.
 	 */
 	public void setAutoDetectFields(boolean autoDetectFields) {
-		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
 		this.features.put(SerializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
+		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
 	}
 
 	/**
@@ -161,11 +165,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Specify features to enable.
-	 *
+	 * @see org.codehaus.jackson.JsonParser.Feature
+	 * @see org.codehaus.jackson.JsonGenerator.Feature
 	 * @see org.codehaus.jackson.map.SerializationConfig.Feature
 	 * @see org.codehaus.jackson.map.DeserializationConfig.Feature
-	 * @see org.codehaus.jackson.map.JsonParser.Feature
-	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToEnable(Object[] featuresToEnable) {
 		if (featuresToEnable != null) {
@@ -177,11 +180,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Specify features to disable.
-	 *
+	 * @see org.codehaus.jackson.JsonParser.Feature
+	 * @see org.codehaus.jackson.JsonGenerator.Feature
 	 * @see org.codehaus.jackson.map.SerializationConfig.Feature
 	 * @see org.codehaus.jackson.map.DeserializationConfig.Feature
-	 * @see org.codehaus.jackson.map.JsonParser.Feature
-	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToDisable(Object[] featuresToDisable) {
 		if (featuresToDisable != null) {
@@ -190,6 +192,7 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 			}
 		}
 	}
+
 
 	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
@@ -204,27 +207,28 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 			this.objectMapper.getSerializationConfig().setDateFormat(this.dateFormat);
 		}
 		for (Map.Entry<Object, Boolean> entry : this.features.entrySet()) {
-			configureFeature(entry.getKey(), entry.getValue().booleanValue());
+			configureFeature(entry.getKey(), entry.getValue());
 		}
 	}
 
 	private void configureFeature(Object feature, boolean enabled) {
-		if (feature instanceof DeserializationConfig.Feature) {
-			this.objectMapper.configure((DeserializationConfig.Feature) feature, enabled);
-		}
-		else if (feature instanceof SerializationConfig.Feature) {
-			this.objectMapper.configure((SerializationConfig.Feature) feature, enabled);
-		}
-		else if (feature instanceof JsonParser.Feature) {
+		if (feature instanceof JsonParser.Feature) {
 			this.objectMapper.configure((JsonParser.Feature) feature, enabled);
 		}
 		else if (feature instanceof JsonGenerator.Feature) {
 			this.objectMapper.configure((JsonGenerator.Feature) feature, enabled);
 		}
+		else if (feature instanceof SerializationConfig.Feature) {
+			this.objectMapper.configure((SerializationConfig.Feature) feature, enabled);
+		}
+		else if (feature instanceof DeserializationConfig.Feature) {
+			this.objectMapper.configure((DeserializationConfig.Feature) feature, enabled);
+		}
 		else {
 			throw new IllegalArgumentException("Unknown feature class: " + feature.getClass().getName());
 		}
 	}
+
 
 	/**
 	 * Return the singleton ObjectMapper.
