@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -42,17 +41,11 @@ import org.springframework.web.util.HtmlUtils;
  * populating the data for their view. The name of this form object can be
  * configured using the {@link #setModelAttribute "modelAttribute"} property.
  *
- * <p>The default value for the {@link #setModelAttribute "modelAttribute"}
- * property is '{@code command}' which corresponds to the default name
- * when using the
- * {@link org.springframework.web.servlet.mvc.SimpleFormController SimpleFormController}.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Rossen Stoyanchev
  * @since 2.0
- * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
 @SuppressWarnings("serial")
 public class FormTag extends AbstractHtmlElementTag {
@@ -360,7 +353,6 @@ public class FormTag extends AbstractHtmlElementTag {
 		// Expose the form object name for nested tags...
 		String modelAttribute = resolveModelAttribute();
 		this.pageContext.setAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
-		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
 
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
@@ -487,7 +479,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	public void doFinally() {
 		super.doFinally();
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-		this.pageContext.removeAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.
 			this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);

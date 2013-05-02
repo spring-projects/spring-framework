@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,28 +78,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * Constructor for bean-style configuration.
 	 */
 	public SingleConnectionDataSource() {
-	}
-
-	/**
-	 * Create a new SingleConnectionDataSource with the given standard
-	 * DriverManager parameters.
-	 * @param driverClassName the JDBC driver class name
-	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param username the JDBC username to use for accessing the DriverManager
-	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @param suppressClose if the returned Connection should be a
-	 * close-suppressing proxy or the physical Connection
-	 * @deprecated since Spring 2.5. Driver parameter usage is generally not recommended
-	 * for a SingleConnectionDataSource. If you insist on using driver parameters
-	 * directly, set up the Driver class manually before invoking this DataSource.
-	 * @see java.sql.DriverManager#getConnection(String, String, String)
-	 */
-	@Deprecated
-	public SingleConnectionDataSource(
-			String driverClassName, String url, String username, String password, boolean suppressClose) {
-
-		super(driverClassName, url, username, password);
-		this.suppressClose = suppressClose;
 	}
 
 	/**

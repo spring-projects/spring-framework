@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,21 +95,6 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	 * @see #mergeProperties()
 	 */
 	protected Properties createProperties() throws IOException {
-		return (Properties) createInstance();
-	}
-
-	/**
-	 * Template method that subclasses may override to construct the object
-	 * returned by this factory. The default implementation returns the
-	 * plain merged Properties instance.
-	 * <p>Invoked on initialization of this FactoryBean in case of a
-	 * shared singleton; else, on each {@link #getObject()} call.
-	 * @return the object returned by this factory
-	 * @throws IOException if an exception occured during properties loading
-	 * @deprecated as of Spring 3.0, in favor of {@link #createProperties()}
-	 */
-	@Deprecated
-	protected Object createInstance() throws IOException {
 		return mergeProperties();
 	}
 

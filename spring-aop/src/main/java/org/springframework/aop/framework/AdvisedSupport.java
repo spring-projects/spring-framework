@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,16 +307,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		removeAdvisor(index);
 		addAdvisor(index, b);
 		return true;
-	}
-
-	/**
-	 * Add all of the given advisors to this proxy configuration.
-	 * @param advisors the advisors to register
-	 * @deprecated as of Spring 3.0, in favor of {@link #addAdvisors}
-	 */
-	@Deprecated
-	public void addAllAdvisors(Advisor[] advisors) {
-		addAdvisors(Arrays.asList(advisors));
 	}
 
 	/**

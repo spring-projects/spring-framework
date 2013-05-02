@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,17 +208,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Create a new AbstractBeanDefinition as a deep copy of the given
 	 * bean definition.
 	 * @param original the original bean definition to copy from
-	 * @deprecated since Spring 2.5, in favor of {@link #AbstractBeanDefinition(BeanDefinition)}
-	 */
-	@Deprecated
-	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
-		this((BeanDefinition) original);
-	}
-
-	/**
-	 * Create a new AbstractBeanDefinition as a deep copy of the given
-	 * bean definition.
-	 * @param original the original bean definition to copy from
 	 */
 	protected AbstractBeanDefinition(BeanDefinition original) {
 		setParentName(original.getParentName());
@@ -260,17 +249,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		}
 	}
 
-
-	/**
-	 * Override settings in this bean definition (presumably a copied parent
-	 * from a parent-child inheritance relationship) from the given bean
-	 * definition (presumably the child).
-	 * @deprecated since Spring 2.5, in favor of {@link #overrideFrom(BeanDefinition)}
-	 */
-	@Deprecated
-	public void overrideFrom(AbstractBeanDefinition other) {
-		overrideFrom((BeanDefinition) other);
-	}
 
 	/**
 	 * Override settings in this bean definition (presumably a copied parent

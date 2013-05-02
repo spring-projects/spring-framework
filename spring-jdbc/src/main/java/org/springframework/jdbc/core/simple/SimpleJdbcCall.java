@@ -125,15 +125,6 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
-	/**
-	 * @deprecated in favor of {@link #returningResultSet(String, org.springframework.jdbc.core.RowMapper)}
-	 */
-	@Deprecated
-	public SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper) {
-		addDeclaredRowMapper(parameterName, rowMapper);
-		return this;
-	}
-
 	public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
 		setAccessCallParameterMetaData(false);
 		return this;
