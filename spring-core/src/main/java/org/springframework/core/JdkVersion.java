@@ -59,6 +59,11 @@ public abstract class JdkVersion {
 	 */
 	public static final int JAVA_18 = 5;
 
+	/**
+	 * Constant identifying the 1.9 JVM (Java 9).
+	 */
+	public static final int JAVA_19 = 5;
+
 
 	private static final String javaVersion;
 
@@ -67,7 +72,10 @@ public abstract class JdkVersion {
 	static {
 		javaVersion = System.getProperty("java.version");
 		// version String should look like "1.4.2_10"
-		if (javaVersion.contains("1.8.")) {
+		if (javaVersion.contains("1.9.")) {
+			majorJavaVersion = JAVA_19;
+		}
+		else if (javaVersion.contains("1.8.")) {
 			majorJavaVersion = JAVA_18;
 		}
 		else if (javaVersion.contains("1.7.")) {
