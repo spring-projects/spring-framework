@@ -25,7 +25,6 @@ import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.WebSocketSession;
 import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
@@ -40,18 +39,20 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	private final WebSocketHandler webSocketHandler;
 
-	private WebSocketSession wsSession;
+	private JettyWebSocketSessionAdapter wsSession;
 
 
-	public JettyWebSocketListenerAdapter(WebSocketHandler webSocketHandler) {
+	public JettyWebSocketListenerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSessionAdapter wsSession) {
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		Assert.notNull(wsSession, "wsSession is required");
 		this.webSocketHandler = webSocketHandler;
+		this.wsSession = wsSession;
 	}
 
 
 	@Override
 	public void onWebSocketConnect(Session session) {
-		this.wsSession = new JettyWebSocketSessionAdapter(session);
+		this.wsSession.initSession(session);
 		try {
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 		}

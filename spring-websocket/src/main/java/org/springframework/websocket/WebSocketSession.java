@@ -17,7 +17,9 @@
 package org.springframework.websocket;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
+import java.security.Principal;
 
 /**
  * Allows sending messages over a WebSocket connection as well as closing it.
@@ -33,9 +35,9 @@ public interface WebSocketSession {
 	String getId();
 
 	/**
-	 * Return whether the connection is still open.
+	 * Return the URI used to open the WebSocket connection.
 	 */
-	boolean isOpen();
+	URI getUri();
 
 	/**
      * Return whether the underlying socket is using a secure transport.
@@ -43,9 +45,26 @@ public interface WebSocketSession {
 	boolean isSecure();
 
 	/**
-	 * Return the URI used to open the WebSocket connection.
+	 * Return a {@link java.security.Principal} instance containing the name of the
+	 * authenticated user. If the user has not been authenticated, the method returns
+	 * <code>null</code>.
 	 */
-	URI getURI();
+	Principal getPrincipal();
+
+	/**
+	 * Return the host name of the endpoint on the other end.
+	 */
+	String getRemoteHostName();
+
+	/**
+	 * Return the IP address of the endpoint on the other end.
+	 */
+	String getRemoteAddress();
+
+	/**
+	 * Return whether the connection is still open.
+	 */
+	boolean isOpen();
 
 	/**
 	 * Send a WebSocket message either {@link TextMessage} or

@@ -30,12 +30,11 @@ import org.springframework.websocket.BinaryMessage;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.WebSocketSession;
 import org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator;
 
 
 /**
- * An {@link Endpoint} that delegates to a {@link WebSocketHandler}.
+ * A wrapper around a {@link WebSocketHandler} that adapts it to {@link Endpoint}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -46,19 +45,22 @@ public class StandardEndpointAdapter extends Endpoint {
 
 	private final WebSocketHandler handler;
 
-	private WebSocketSession wsSession;
+	private final StandardWebSocketSessionAdapter wsSession;
 
 
-	public StandardEndpointAdapter(WebSocketHandler webSocketHandler) {
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.handler = webSocketHandler;
+	public StandardEndpointAdapter(WebSocketHandler handler, StandardWebSocketSessionAdapter wsSession) {
+		Assert.notNull(handler, "handler is required");
+		Assert.notNull(wsSession, "wsSession is required");
+		this.handler = handler;
+		this.wsSession = wsSession;
 	}
 
 
 	@Override
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
 
-		this.wsSession = new StandardWebSocketSessionAdapter(session);
+		this.wsSession.initSession(session);
+
 		try {
 			this.handler.afterConnectionEstablished(this.wsSession);
 		}

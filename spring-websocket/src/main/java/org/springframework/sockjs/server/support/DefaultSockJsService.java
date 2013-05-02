@@ -54,6 +54,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.server.DefaultHandshakeHandler;
 import org.springframework.websocket.server.HandshakeHandler;
+import org.springframework.websocket.server.support.ServerWebSocketSessionInitializer;
 
 
 /**
@@ -68,6 +69,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
 
 	private final Map<String, AbstractSockJsSession> sessions = new ConcurrentHashMap<String, AbstractSockJsSession>();
+
+	private final ServerWebSocketSessionInitializer sessionInitializer = new ServerWebSocketSessionInitializer();
 
 	private ScheduledFuture sessionCleanupTask;
 
@@ -187,14 +190,15 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			return;
 		}
 
-		AbstractSockJsSession session = getSockJsSession(sessionId, webSocketHandler, transportHandler);
+		AbstractSockJsSession session = getSockJsSession(sessionId, webSocketHandler,
+				transportHandler, request, response);
 
 		if (session != null) {
-			if (transportType.setsNoCacheHeader()) {
+			if (transportType.setsNoCache()) {
 				addNoCacheHeaders(response);
 			}
 
-			if (transportType.setsJsessionIdCookie() && isJsessionIdCookieRequired()) {
+			if (transportType.setsJsessionId() && isJsessionIdCookieRequired()) {
 				Cookie cookie = request.getCookies().getCookie("JSESSIONID");
 				String jsid = (cookie != null) ? cookie.getValue() : "dummy";
 				// TODO: bypass use of Cookie object (causes Jetty to set Expires header)
@@ -209,8 +213,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		transportHandler.handleRequest(request, response, webSocketHandler, session);
 	}
 
-	public AbstractSockJsSession getSockJsSession(String sessionId,
-			WebSocketHandler webSocketHandler, TransportHandler transportHandler) {
+	protected AbstractSockJsSession getSockJsSession(String sessionId, WebSocketHandler handler,
+			TransportHandler transportHandler, ServerHttpRequest request, ServerHttpResponse response) {
 
 		AbstractSockJsSession session = this.sessions.get(sessionId);
 		if (session != null) {
@@ -218,7 +222,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		}
 
 		if (transportHandler instanceof SockJsSessionFactory) {
-			SockJsSessionFactory<?> sessionFactory = (SockJsSessionFactory<?>) transportHandler;
+			SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 
 			synchronized (this.sessions) {
 				session = this.sessions.get(sessionId);
@@ -229,7 +233,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 					scheduleSessionTask();
 				}
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
-				session = (AbstractSockJsSession) sessionFactory.createSession(sessionId, webSocketHandler);
+				session = sessionFactory.createSession(sessionId, handler);
+				this.sessionInitializer.initialize(request, response, session);
 				this.sessions.put(sessionId, session);
 				return session;
 			}

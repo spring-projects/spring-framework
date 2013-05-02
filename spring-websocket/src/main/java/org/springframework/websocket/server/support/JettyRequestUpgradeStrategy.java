@@ -34,6 +34,7 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.adapter.JettyWebSocketListenerAdapter;
+import org.springframework.websocket.adapter.JettyWebSocketSessionAdapter;
 import org.springframework.websocket.server.HandshakeFailureException;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
 
@@ -53,10 +54,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	// FIXME when to call factory.cleanup();
 
-	private static final String HANDLER_PROVIDER_ATTR_NAME = JettyRequestUpgradeStrategy.class.getName()
+	private static final String WEBSOCKET_LISTENER_ATTR_NAME = JettyRequestUpgradeStrategy.class.getName()
 			+ ".HANDLER_PROVIDER";
 
 	private WebSocketServerFactory factory;
+
+	private final ServerWebSocketSessionInitializer wsSessionInitializer = new ServerWebSocketSessionInitializer();
 
 
 	public JettyRequestUpgradeStrategy() {
@@ -65,17 +68,14 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			@Override
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
 				Assert.isInstanceOf(ServletWebSocketRequest.class, request);
-				ServletWebSocketRequest servletRequest = (ServletWebSocketRequest) request;
-				WebSocketHandler webSocketHandler =
-						(WebSocketHandler) servletRequest.getServletAttributes().get(HANDLER_PROVIDER_ATTR_NAME);
-				return new JettyWebSocketListenerAdapter(webSocketHandler);
+				return ((ServletWebSocketRequest) request).getServletAttributes().get(WEBSOCKET_LISTENER_ATTR_NAME);
 			}
 		});
 		try {
 			this.factory.init();
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(ex);
+			throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory", ex);
 		}
 	}
 
@@ -95,17 +95,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		upgrade(servletRequest, servletResponse, selectedProtocol, webSocketHandler);
-	}
+		if (!this.factory.isUpgradeRequest(servletRequest, servletResponse)) {
+			// should never happen
+			throw new HandshakeFailureException("Not a WebSocket request");
+		}
 
-	private void upgrade(HttpServletRequest request, HttpServletResponse response,
-			String selectedProtocol, final WebSocketHandler webSocketHandler) throws IOException {
+		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
+		this.wsSessionInitializer.initialize(request, response, session);
+		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler, session);
 
-		Assert.state(this.factory.isUpgradeRequest(request, response), "Expected websocket upgrade request");
+		servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME, listener);
 
-		request.setAttribute(HANDLER_PROVIDER_ATTR_NAME, webSocketHandler);
-
-		if (!this.factory.acceptWebSocket(request, response)) {
+		if (!this.factory.acceptWebSocket(servletRequest, servletResponse)) {
 			// should never happen
 			throw new HandshakeFailureException("WebSocket request not accepted by Jetty");
 		}

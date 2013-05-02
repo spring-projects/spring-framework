@@ -18,6 +18,7 @@ package org.springframework.websocket.adapter;
 
 import java.io.IOException;
 import java.net.URI;
+import java.security.Principal;
 
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
@@ -35,16 +36,21 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAdapter {
+public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAdapter<javax.websocket.Session> {
 
-	private final javax.websocket.Session session;
+	private javax.websocket.Session session;
+
+	private URI uri;
+
+	private String remoteHostName;
+
+	private String remoteAddress;
 
 
-	public StandardWebSocketSessionAdapter(javax.websocket.Session session) {
+	public void initSession(javax.websocket.Session session) {
 		Assert.notNull(session, "session is required");
 		this.session = session;
 	}
-
 
 	@Override
 	public String getId() {
@@ -52,9 +58,15 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 	}
 
 	@Override
-	public boolean isOpen() {
-		return this.session.isOpen();
+	public URI getUri() {
+		return this.uri;
 	}
+
+	@Override
+	public void setUri(URI uri) {
+		this.uri = uri;
+	}
+
 
 	@Override
 	public boolean isSecure() {
@@ -62,8 +74,38 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 	}
 
 	@Override
-	public URI getURI() {
-		return this.session.getRequestURI();
+	public Principal getPrincipal() {
+		return this.session.getUserPrincipal();
+	}
+
+	@Override
+	public void setPrincipal(Principal principal) {
+		// ignore
+	}
+
+	@Override
+	public String getRemoteHostName() {
+		return this.remoteHostName;
+	}
+
+	@Override
+	public void setRemoteHostName(String name) {
+		this.remoteHostName = name;
+	}
+
+	@Override
+	public String getRemoteAddress() {
+		return this.remoteAddress;
+	}
+
+	@Override
+	public void setRemoteAddress(String address) {
+		this.remoteAddress = address;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return this.session.isOpen();
 	}
 
 	@Override

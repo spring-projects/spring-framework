@@ -26,6 +26,8 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.adapter.StandardEndpointAdapter;
+import org.springframework.websocket.adapter.StandardWebSocketSessionAdapter;
+import org.springframework.websocket.server.HandshakeFailureException;
 import org.springframework.websocket.server.RequestUpgradeStrategy;
 
 /**
@@ -39,15 +41,20 @@ public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeS
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private final ServerWebSocketSessionInitializer wsSessionInitializer = new ServerWebSocketSessionInitializer();
+
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler webSocketHandler) throws IOException {
+			String protocol, WebSocketHandler handler) throws IOException, HandshakeFailureException {
 
-		upgradeInternal(request, response, protocol, new StandardEndpointAdapter(webSocketHandler));
+		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
+		this.wsSessionInitializer.initialize(request, response, session);
+		StandardEndpointAdapter endpoint = new StandardEndpointAdapter(handler, session);
+		upgradeInternal(request, response, protocol, endpoint);
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws IOException;
+			String selectedProtocol, Endpoint endpoint) throws IOException, HandshakeFailureException;
 
 }

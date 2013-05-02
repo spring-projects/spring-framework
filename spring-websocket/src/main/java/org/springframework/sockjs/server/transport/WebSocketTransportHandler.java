@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.sockjs.AbstractSockJsSession;
+import org.springframework.sockjs.SockJsSessionFactory;
 import org.springframework.sockjs.server.ConfigurableTransportHandler;
 import org.springframework.sockjs.server.SockJsConfiguration;
 import org.springframework.sockjs.server.TransportErrorException;
@@ -39,7 +40,8 @@ import org.springframework.websocket.server.HandshakeHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketTransportHandler implements ConfigurableTransportHandler, HandshakeHandler {
+public class WebSocketTransportHandler implements ConfigurableTransportHandler,
+		HandshakeHandler, SockJsSessionFactory {
 
 	private final HandshakeHandler handshakeHandler;
 
@@ -62,11 +64,17 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler, 
 	}
 
 	@Override
+	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
+		return new WebSocketServerSockJsSession(sessionId, this.sockJsConfig, webSocketHandler);
+	}
+
+	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws TransportErrorException {
 
 		try {
-			WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, webSocketHandler);
+			WebSocketServerSockJsSession wsSession = (WebSocketServerSockJsSession) session;
+			WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, webSocketHandler, wsSession);
 			this.handshakeHandler.doHandshake(request, response, sockJsWrapper);
 		}
 		catch (Throwable t) {

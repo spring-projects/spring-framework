@@ -28,12 +28,12 @@ import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Endpoint;
 import javax.websocket.HandshakeResponse;
-import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -67,15 +67,26 @@ public class StandardWebSocketClient implements WebSocketClient {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
 			throws WebSocketConnectFailureException {
 
-		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
-		return doHandshake(webSocketHandler, null, uri);
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
+		return doHandshake(webSocketHandler, null, uriComponents);
 	}
 
 	@Override
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
 			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
-		Endpoint endpoint = new StandardEndpointAdapter(webSocketHandler);
+		return doHandshake(webSocketHandler, httpHeaders, UriComponentsBuilder.fromUri(uri).build());
+	}
+
+	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
+			final HttpHeaders httpHeaders, UriComponents uriComponents) throws WebSocketConnectFailureException {
+
+		URI uri = uriComponents.toUri();
+
+		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
+		session.setUri(uri);
+		session.setRemoteHostName(uriComponents.getHost());
+		Endpoint endpoint = new StandardEndpointAdapter(webSocketHandler, session);
 
 		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		if (httpHeaders != null) {
@@ -109,8 +120,9 @@ public class StandardWebSocketClient implements WebSocketClient {
 		}
 
 		try {
-			Session session = this.webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
-			return new StandardWebSocketSessionAdapter(session);
+			// TODO: do not block
+			this.webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
+			return session;
 		}
 		catch (Exception e) {
 			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);

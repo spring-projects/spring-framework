@@ -39,7 +39,7 @@ import org.springframework.websocket.WebSocketHandler;
  * @since 4.0
  */
 public abstract class AbstractHttpSendingTransportHandler
-		implements ConfigurableTransportHandler, SockJsSessionFactory<AbstractSockJsSession> {
+		implements ConfigurableTransportHandler, SockJsSessionFactory {
 
 	protected final Log logger = LogFactory.getLog(this.getClass());
 

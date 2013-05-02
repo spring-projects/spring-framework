@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.sockjs;
+package org.springframework.websocket.adapter;
 
-import org.springframework.websocket.WebSocketHandler;
+import java.net.URI;
+import java.security.Principal;
+
+import org.springframework.websocket.WebSocketSession;
+
 
 /**
- * A factory for creating a SockJS session.
- *
- * @param <S> The type of session being created
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SockJsSessionFactory {
+public interface ConfigurableWebSocketSession extends WebSocketSession {
 
-	/**
-	 * Create a new SockJS session.
-	 * @param sessionId the ID of the session
-	 * @param webSocketHandler the underlying {@link WebSocketHandler}
-	 * @return a new non-null session
-	 */
-	AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler);
+	void setUri(URI uri);
+
+	void setRemoteHostName(String name);
+
+	void setRemoteAddress(String address);
+
+	void setPrincipal(Principal principal);
 
 }

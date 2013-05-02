@@ -18,6 +18,7 @@ package org.springframework.sockjs;
 
 import java.io.IOException;
 import java.net.URI;
+import java.security.Principal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.websocket.CloseStatus;
 import org.springframework.websocket.TextMessage;
 import org.springframework.websocket.WebSocketHandler;
-import org.springframework.websocket.WebSocketSession;
+import org.springframework.websocket.adapter.ConfigurableWebSocketSession;
 
 
 /**
@@ -34,12 +35,20 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractSockJsSession implements WebSocketSession {
+public abstract class AbstractSockJsSession implements ConfigurableWebSocketSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
-	private final String sessionId;
+	private final String id;
+
+	private URI uri;
+
+	private String remoteHostName;
+
+	private String remoteAddress;
+
+	private Principal principal;
 
 	private WebSocketHandler handler;
 
@@ -57,24 +66,51 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	public AbstractSockJsSession(String sessionId, WebSocketHandler webSocketHandler) {
 		Assert.notNull(sessionId, "sessionId is required");
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		this.sessionId = sessionId;
+		this.id = sessionId;
 		this.handler = webSocketHandler;
 	}
 
 	public String getId() {
-		return this.sessionId;
+		return this.id;
+	}
+
+	@Override
+	public URI getUri() {
+		return this.uri;
+	}
+
+	@Override
+	public void setUri(URI uri) {
+		this.uri = uri;
 	}
 
 	@Override
 	public boolean isSecure() {
-		// TODO
-		return false;
+		return "wss".equals(this.uri.getSchemeSpecificPart());
 	}
 
-	@Override
-	public URI getURI() {
-		// TODO
-		return null;
+	public String getRemoteHostName() {
+		return this.remoteHostName;
+	}
+
+	public void setRemoteHostName(String remoteHostName) {
+		this.remoteHostName = remoteHostName;
+	}
+
+	public String getRemoteAddress() {
+		return this.remoteAddress;
+	}
+
+	public void setRemoteAddress(String remoteAddress) {
+		this.remoteAddress = remoteAddress;
+	}
+
+	public Principal getPrincipal() {
+		return this.principal;
+	}
+
+	public void setPrincipal(Principal principal) {
+		this.principal = principal;
 	}
 
 	public boolean isNew() {
@@ -213,7 +249,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	@Override
 	public String toString() {
-		return "SockJS session id=" + this.sessionId;
+		return "SockJS session id=" + this.id;
 	}
 
 

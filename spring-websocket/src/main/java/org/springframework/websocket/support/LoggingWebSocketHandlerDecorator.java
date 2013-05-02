@@ -41,7 +41,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Connection established, "	+ session + ", uri=" + session.getURI());
+			logger.debug("Connection established, "	+ session + ", uri=" + session.getUri());
 		}
 		super.afterConnectionEstablished(session);
 	}

@@ -68,7 +68,7 @@ public enum TransportType {
 		return this.httpMethod;
 	}
 
-	public boolean setsNoCacheHeader() {
+	public boolean setsNoCache() {
 		return this.headerHints.contains("no_cache");
 	}
 
@@ -76,7 +76,7 @@ public enum TransportType {
 		return this.headerHints.contains("cors");
 	}
 
-	public boolean setsJsessionIdCookie() {
+	public boolean setsJsessionId() {
 		return this.headerHints.contains("jsessionid");
 	}
 

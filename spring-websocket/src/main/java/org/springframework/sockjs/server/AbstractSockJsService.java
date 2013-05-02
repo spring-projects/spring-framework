@@ -51,7 +51,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	private static final int ONE_YEAR = 365 * 24 * 60 * 60;
 
 
-	private String name = getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this);
+	private String name = "SockJS Service " + ObjectUtils.getIdentityHexString(this);
 
 	private String clientLibraryUrl = "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js";
 

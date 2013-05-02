@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -129,6 +130,21 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			}
 		}
 		return this.headers;
+	}
+
+	@Override
+	public Principal getPrincipal() {
+		return this.servletRequest.getUserPrincipal();
+	}
+
+	@Override
+	public String getRemoteHostName() {
+		return this.servletRequest.getRemoteHost();
+	}
+
+	@Override
+	public String getRemoteAddress() {
+		return this.servletRequest.getRemoteAddr();
 	}
 
 	public Cookies getCookies() {

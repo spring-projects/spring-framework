@@ -17,13 +17,12 @@
 package org.springframework.websocket.client.jetty;
 
 import java.net.URI;
-import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.jetty.websocket.api.Session;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.websocket.WebSocketHandler;
 import org.springframework.websocket.WebSocketSession;
@@ -126,23 +125,34 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
 			throws WebSocketConnectFailureException {
 
-		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
-		return doHandshake(webSocketHandler, null, uri);
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
+		return doHandshake(webSocketHandler, null, uriComponents);
 	}
 
 	@Override
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException {
 
+		return doHandshake(webSocketHandler, headers, UriComponentsBuilder.fromUri(uri).build());
+	}
+
+	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, UriComponents uriComponents)
+			throws WebSocketConnectFailureException {
+
 		// TODO: populate headers
 
-		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler);
+		URI uri = uriComponents.toUri();
+
+		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
+		session.setUri(uri);
+		session.setRemoteHostName(uriComponents.getHost());
+
+		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler, session);
 
 		try {
-			// block for now
-			Future<org.eclipse.jetty.websocket.api.Session> future = this.client.connect(listener, uri);
-			Session session = future.get();
-			return new JettyWebSocketSessionAdapter(session);
+			// TODO: do not block
+			this.client.connect(listener, uri).get();
+			return session;
 		}
 		catch (Exception e) {
 			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);
