@@ -106,6 +106,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Define the format for date/time with the given {@link DateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setSimpleDateFormat(String)
 	 */
 	public void setDateFormat(DateFormat dateFormat) {
@@ -114,6 +116,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Define the date/time format with a {@link SimpleDateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setDateFormat(DateFormat)
 	 */
 	public void setSimpleDateFormat(String format) {
@@ -134,8 +138,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	 * {@link org.codehaus.jackson.map.DeserializationConfig.Feature#AUTO_DETECT_FIELDS}.
 	 */
 	public void setAutoDetectFields(boolean autoDetectFields) {
-		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
 		this.features.put(SerializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
+		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
 	}
 
 	/**

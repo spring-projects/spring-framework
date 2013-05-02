@@ -123,6 +123,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Define the format for date/time with the given {@link DateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setSimpleDateFormat(String)
 	 */
 	public void setDateFormat(DateFormat dateFormat) {
@@ -131,6 +133,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Define the date/time format with a {@link SimpleDateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setDateFormat(DateFormat)
 	 */
 	public void setSimpleDateFormat(String format) {
@@ -213,9 +217,11 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Specify features to enable.
-	 * @see MapperFeature
-	 * @see SerializationFeature
-	 * @see DeserializationFeature
+	 * @see com.fasterxml.jackson.core.JsonParser.Feature
+	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
+	 * @see com.fasterxml.jackson.databind.SerializationFeature
+	 * @see com.fasterxml.jackson.databind.DeserializationFeature
+	 * @see com.fasterxml.jackson.databind.MapperFeature
 	 */
 	public void setFeaturesToEnable(Object... featuresToEnable) {
 		if (featuresToEnable != null) {
