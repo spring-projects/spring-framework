@@ -39,7 +39,7 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
+ * using <a href="http://jackson.codehaus.org/">Jackson 2.x's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
@@ -278,6 +278,8 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeContent(OutputStream stream, Object value, boolean prefixJson) throws IOException {
+		// The following has been deprecated as late as Jackson 2.2 (April 2013);
+		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
 		JsonGenerator generator = this.objectMapper.getJsonFactory().createJsonGenerator(stream, this.encoding);
 
 		// A workaround for JsonGenerators not applying serialization features

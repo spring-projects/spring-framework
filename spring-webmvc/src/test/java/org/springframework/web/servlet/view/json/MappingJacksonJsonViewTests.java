@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.BeanProperty;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -31,11 +33,13 @@ import org.codehaus.jackson.map.SerializerFactory;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.ser.BeanSerializerFactory;
+import org.codehaus.jackson.type.JavaType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -60,6 +64,7 @@ public class MappingJacksonJsonViewTests {
 
 	private ScriptableObject jsScope;
 
+
 	@Before
 	public void setUp() {
 		request = new MockHttpServletRequest();
@@ -71,6 +76,7 @@ public class MappingJacksonJsonViewTests {
 		view = new MappingJacksonJsonView();
 	}
 
+
 	@Test
 	public void isExposePathVars() {
 		assertEquals("Must not expose path variables", false, view.isExposePathVariables());
@@ -78,7 +84,6 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderSimpleMap() throws Exception {
-
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
 		model.put("foo", "bar");
@@ -122,7 +127,6 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderSimpleBean() throws Exception {
-
 		Object bean = new TestBeanSimple();
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
@@ -139,7 +143,6 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderWithPrettyPrint() throws Exception {
-
 		ModelMap model = new ModelMap("foo", new TestBeanSimple());
 
 		view.setPrettyPrint(true);
@@ -153,14 +156,12 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderSimpleBeanPrefixed() throws Exception {
-
 		view.setPrefixJson(true);
 		renderSimpleBean();
 	}
 
 	@Test
 	public void renderWithCustomSerializerLocatedByAnnotation() throws Exception {
-
 		Object bean = new TestBeanSimpleAnnotated();
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", bean);
@@ -175,8 +176,7 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderWithCustomSerializerLocatedByFactory() throws Exception {
-
-		SerializerFactory factory = new DelegatingSerializerFactory();
+		SerializerFactory factory = new DelegatingSerializerFactory(null);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializerFactory(factory);
 		view.setObjectMapper(mapper);
@@ -197,7 +197,6 @@ public class MappingJacksonJsonViewTests {
 
 	@Test
 	public void renderOnlyIncludedAttributes() throws Exception {
-
 		Set<String> attrs = new HashSet<String>();
 		attrs.add("foo");
 		attrs.add("baz");
@@ -288,10 +287,11 @@ public class MappingJacksonJsonViewTests {
 		}
 	}
 
+
 	@JsonSerialize(using=TestBeanSimpleSerializer.class)
 	public static class TestBeanSimpleAnnotated extends TestBeanSimple {
-
 	}
+
 
 	public static class TestChildBean {
 
@@ -318,10 +318,11 @@ public class MappingJacksonJsonViewTests {
 		}
 	}
 
-	public static class TestBeanSimpleSerializer extends JsonSerializer<TestBeanSimple> {
+
+	public static class TestBeanSimpleSerializer extends JsonSerializer<Object> {
 
 		@Override
-		public void serialize(TestBeanSimple value, JsonGenerator jgen, SerializerProvider provider)
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider)
 				throws IOException {
 
 			jgen.writeStartObject();
@@ -332,19 +333,22 @@ public class MappingJacksonJsonViewTests {
 		}
 	}
 
-	public static class DelegatingSerializerFactory extends SerializerFactory {
 
-		private SerializerFactory delegate = BeanSerializerFactory.instance;
+	public static class DelegatingSerializerFactory extends BeanSerializerFactory {
+
+		public DelegatingSerializerFactory(Config config) {
+			super(config);
+		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public <T> JsonSerializer<T> createSerializer(Class<T> type, SerializationConfig config) {
-			if (type == TestBeanSimple.class) {
-				return (JsonSerializer<T>) new TestBeanSimpleSerializer();
+		public JsonSerializer<Object> createSerializer(SerializationConfig config, JavaType baseType, BeanProperty property) throws JsonMappingException {
+			if (baseType.getRawClass() == TestBeanSimple.class) {
+				return new TestBeanSimpleSerializer();
 			}
 			else {
-				return delegate.createSerializer(type, config);
+				return super.createSerializer(config, baseType, property);
 			}
 		}
 	}
+
 }

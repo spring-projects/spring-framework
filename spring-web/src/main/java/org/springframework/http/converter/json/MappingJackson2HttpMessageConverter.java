@@ -39,8 +39,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
+ * can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 2.x's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
@@ -178,6 +178,8 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			throws IOException, HttpMessageNotWritableException {
 
 		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
+		// The following has been deprecated as late as Jackson 2.2 (April 2013);
+		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
 		JsonGenerator jsonGenerator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
 
@@ -200,8 +202,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.
-	 * <p>The default implementation returns {@link ObjectMapper#constructType(java.lang.reflect.Type)}
-	 * or {@code ObjectMapper.getTypeFactory().constructType(type, contextClass)},
+	 * <p>The default implementation returns {@code typeFactory.constructType(type, contextClass)},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
@@ -220,9 +221,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 * @return the java type
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return (contextClass != null) ?
-			this.objectMapper.getTypeFactory().constructType(type, contextClass) :
-			this.objectMapper.constructType(type);
+		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
 	}
 
 	/**

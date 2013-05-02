@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 
 import org.springframework.http.HttpInputMessage;
@@ -39,8 +38,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson's</a> {@link ObjectMapper}.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
+ * can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 1.x's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
@@ -111,7 +110,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	/**
-	 * Whether to use the {@link org.codehaus.jackson.impl.DefaultPrettyPrinter} when writing JSON.
+	 * Whether to use the {@link org.codehaus.jackson.util.DefaultPrettyPrinter} when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
 	 * <pre>
 	 * ObjectMapper mapper = new ObjectMapper();
@@ -124,6 +123,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		this.prettyPrint = prettyPrint;
 		configurePrettyPrint();
 	}
+
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
@@ -197,8 +197,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.
-	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)}
-	 * or {@code TypeFactory.type(type, TypeFactory.type(contextClass))},
+	 * <p>The default implementation returns {@code typeFactory.constructType(type, contextClass)},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
@@ -216,9 +215,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * @return the java type
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return (contextClass != null) ?
-			TypeFactory.type(type, TypeFactory.type(contextClass)) :
-			TypeFactory.type(type);
+		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
 	}
 
 	/**

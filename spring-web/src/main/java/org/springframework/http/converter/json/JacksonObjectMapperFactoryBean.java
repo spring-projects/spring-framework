@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * A FactoryBean for creating a Jackson {@link ObjectMapper} with setters to
- * enable or disable Jackson features from within XML configuration.
+ * A {@link FactoryBean} for creating a Jackson 1.x {@link ObjectMapper} with setters
+ * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with MappingJacksonHttpMessageConverter:
  * <pre>
@@ -78,6 +78,8 @@ import org.springframework.beans.factory.InitializingBean;
  * 	&lt;/property>
  * &lt;/bean>
  * </pre>
+ *
+ * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
@@ -161,11 +163,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Specify features to enable.
-	 *
+	 * @see org.codehaus.jackson.JsonParser.Feature
+	 * @see org.codehaus.jackson.JsonGenerator.Feature
 	 * @see org.codehaus.jackson.map.SerializationConfig.Feature
 	 * @see org.codehaus.jackson.map.DeserializationConfig.Feature
-	 * @see org.codehaus.jackson.map.JsonParser.Feature
-	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToEnable(Object[] featuresToEnable) {
 		if (featuresToEnable != null) {
@@ -177,11 +178,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Specify features to disable.
-	 *
+	 * @see org.codehaus.jackson.JsonParser.Feature
+	 * @see org.codehaus.jackson.JsonGenerator.Feature
 	 * @see org.codehaus.jackson.map.SerializationConfig.Feature
 	 * @see org.codehaus.jackson.map.DeserializationConfig.Feature
-	 * @see org.codehaus.jackson.map.JsonParser.Feature
-	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToDisable(Object[] featuresToDisable) {
 		if (featuresToDisable != null) {
@@ -191,40 +191,43 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 		}
 	}
 
+
 	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
 			this.objectMapper = new ObjectMapper();
 		}
 		if (this.annotationIntrospector != null) {
-			this.objectMapper.getSerializationConfig().setAnnotationIntrospector(annotationIntrospector);
-			this.objectMapper.getDeserializationConfig().setAnnotationIntrospector(annotationIntrospector);
+			this.objectMapper.setSerializationConfig(
+					this.objectMapper.getSerializationConfig().withAnnotationIntrospector(this.annotationIntrospector));
+			this.objectMapper.setDeserializationConfig(
+					this.objectMapper.getDeserializationConfig().withAnnotationIntrospector(this.annotationIntrospector));
 		}
 		if (this.dateFormat != null) {
-			// Deprecated for 1.8+, use objectMapper.setDateFormat(dateFormat);
-			this.objectMapper.getSerializationConfig().setDateFormat(this.dateFormat);
+			this.objectMapper.setDateFormat(this.dateFormat);
 		}
 		for (Map.Entry<Object, Boolean> entry : this.features.entrySet()) {
-			configureFeature(entry.getKey(), entry.getValue().booleanValue());
+			configureFeature(entry.getKey(), entry.getValue());
 		}
 	}
 
 	private void configureFeature(Object feature, boolean enabled) {
-		if (feature instanceof DeserializationConfig.Feature) {
-			this.objectMapper.configure((DeserializationConfig.Feature) feature, enabled);
-		}
-		else if (feature instanceof SerializationConfig.Feature) {
-			this.objectMapper.configure((SerializationConfig.Feature) feature, enabled);
-		}
-		else if (feature instanceof JsonParser.Feature) {
+		if (feature instanceof JsonParser.Feature) {
 			this.objectMapper.configure((JsonParser.Feature) feature, enabled);
 		}
 		else if (feature instanceof JsonGenerator.Feature) {
 			this.objectMapper.configure((JsonGenerator.Feature) feature, enabled);
 		}
+		else if (feature instanceof SerializationConfig.Feature) {
+			this.objectMapper.configure((SerializationConfig.Feature) feature, enabled);
+		}
+		else if (feature instanceof DeserializationConfig.Feature) {
+			this.objectMapper.configure((DeserializationConfig.Feature) feature, enabled);
+		}
 		else {
 			throw new IllegalArgumentException("Unknown feature class: " + feature.getClass().getName());
 		}
 	}
+
 
 	/**
 	 * Return the singleton ObjectMapper.
