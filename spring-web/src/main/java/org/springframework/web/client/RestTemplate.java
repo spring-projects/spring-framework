@@ -74,17 +74,17 @@ import org.springframework.web.util.UriTemplate;
  * above them. They support additional, less frequently used combinations including support for requests using the
  * HTTP PATCH method. However, note that the underlying HTTP library must also support the desired combination.
  *
- * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}. Two
- * variant take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])}, {@link
- * #getForObject(String, Class, Map)}), and are capable of substituting any {@linkplain UriTemplate URI templates} in
- * that URL using either a {@code String} variable arguments array, or a {@code Map<String, String>}. The string varargs
- * variant expands the given template variables in order, so that
+ * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}.
+ * Two variants take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])},
+ * {@link #getForObject(String, Class, Map)}), and are capable of substituting any {@linkplain UriTemplate URI templates}
+ * in that URL using either a {@code String} variable arguments array, or a {@code Map<String, String>}.
+ * The string varargs variant expands the given template variables in order, so that
  * <pre>
- * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class,"42",
+ * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42",
  * "21");
  * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template based on
- * variable name, and is therefore more useful when using many variables, or when a single variable is used multiple
+ * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template based
+ * on variable name, and is therefore more useful when using many variables, or when a single variable is used multiple
  * times. For example:
  * <pre>
  * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
@@ -103,12 +103,13 @@ import org.springframework.web.util.UriTemplate;
  * http://example.com/hotel%2520list}). If this behavior is undesirable, use the {@code URI}-argument methods, which
  * will not perform any URL encoding.
  *
- * <p>Objects passed to and returned from these methods are converted to and from HTTP messages by {@link
- * HttpMessageConverter} instances. Converters for the main mime types are registered by default, but you can also write
- * your own converter and register it via the {@link #setMessageConverters messageConverters} bean property.
+ * <p>Objects passed to and returned from these methods are converted to and from HTTP messages by
+ * {@link HttpMessageConverter} instances. Converters for the main mime types are registered by default,
+ * but you can also write your own converter and register it via the {@link #setMessageConverters messageConverters}
+ * bean property.
  *
- * <p>This template uses a {@link org.springframework.http.client.SimpleClientHttpRequestFactory} and a {@link
- * DefaultResponseErrorHandler} as default strategies for creating HTTP connections or handling HTTP errors,
+ * <p>This template uses a {@link org.springframework.http.client.SimpleClientHttpRequestFactory} and a
+ * {@link DefaultResponseErrorHandler} as default strategies for creating HTTP connections or handling HTTP errors,
  * respectively. These defaults can be overridden through the {@link #setRequestFactory(ClientHttpRequestFactory)
  * requestFactory} and {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
@@ -121,6 +122,9 @@ import org.springframework.web.util.UriTemplate;
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
+	private static boolean romePresent =
+			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", RestTemplate.class.getClassLoader());
+
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", RestTemplate.class.getClassLoader());
 
@@ -131,9 +135,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private static final boolean jacksonPresent =
 			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", RestTemplate.class.getClassLoader()) &&
 					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", RestTemplate.class.getClassLoader());
-
-	private static boolean romePresent =
-			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", RestTemplate.class.getClassLoader());
 
 
 	private final ResponseExtractor<HttpHeaders> headersExtractor = new HeadersExtractor();
@@ -181,25 +182,32 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	/**
 	 * Set the message body converters to use.
-	 * <p><These converters are used to convert from and to HTTP requests and responses.
+	 * <p>These converters are used to convert from and to HTTP requests and responses.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.messageConverters = messageConverters;
 	}
 
-	/** Returns the message body converters. These converters are used to convert from and to HTTP requests and responses. */
+	/**
+	 * Return the message body converters.
+	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
 		return this.messageConverters;
 	}
 
-	/** Set the error handler. */
+	/**
+	 * Set the error handler.
+	 * <p>By default, RestTemplate uses a {@link DefaultResponseErrorHandler}.
+	 */
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "'errorHandler' must not be null");
 		this.errorHandler = errorHandler;
 	}
 
-	/** Return the error handler. By default, this is the {@link DefaultResponseErrorHandler}. */
+	/**
+	 * Return the error handler.
+	 */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.errorHandler;
 	}
