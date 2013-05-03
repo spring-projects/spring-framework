@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,12 +49,12 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriUtils;
 
 /**
- * <strong>The central class for client-side HTTP access.</strong> It simplifies communication with HTTP servers, and
- * enforces RESTful principles. It handles HTTP connections, leaving application code to provide URLs (with possible
- * template variables) and extract results.
+ * <strong>Spring's central class for client-side HTTP access.</strong>
+ * It simplifies communication with HTTP servers, and enforces RESTful principles.
+ * It handles HTTP connections, leaving application code to provide URLs
+ * (with possible template variables) and extract results.
  *
  * <p>The main entry points of this template are the methods named after the six main HTTP methods:
  * <table>
@@ -74,7 +72,7 @@ import org.springframework.web.util.UriUtils;
  *
  * <p>The {@code exchange} and {@code execute} methods are generalized versions of the more specific methods listed
  * above them. They support additional, less frequently used combinations including support for requests using the
- * HTTP PATCH method. However, note that the underlying HTTP library must also support the desired combination.</p>
+ * HTTP PATCH method. However, note that the underlying HTTP library must also support the desired combination.
  *
  * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}. Two
  * variant take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])}, {@link
@@ -115,11 +113,11 @@ import org.springframework.web.util.UriUtils;
  * requestFactory} and {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
  * @see ResponseExtractor
  * @see ResponseErrorHandler
- * @since 3.0
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
@@ -145,7 +143,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
 
-	/** Create a new instance of the {@link RestTemplate} using default settings. */
+	/**
+	 * Create a new instance of the {@link RestTemplate} using default settings.
+	 */
 	public RestTemplate() {
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
@@ -171,7 +171,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Create a new instance of the {@link RestTemplate} based on the given {@link ClientHttpRequestFactory}.
 	 * @param requestFactory HTTP request factory to use
 	 * @see org.springframework.http.client.SimpleClientHttpRequestFactory
-	 * @see org.springframework.http.client.CommonsClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 */
 	public RestTemplate(ClientHttpRequestFactory requestFactory) {
 		this();
@@ -180,8 +180,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 
 	/**
-	 * Set the message body converters to use. These converters are used to convert from and to HTTP requests and
-	 * responses.
+	 * Set the message body converters to use.
+	 * <p><These converters are used to convert from and to HTTP requests and responses.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
@@ -311,17 +311,16 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	public <T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType, Object... uriVariables)
 			throws RestClientException {
+
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
 		ResponseEntityResponseExtractor<T> responseExtractor =
 				new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <T> ResponseEntity<T> postForEntity(String url,
-										   Object request,
-										   Class<T> responseType,
-										   Map<String, ?> uriVariables)
+	public <T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType, Map<String, ?> uriVariables)
 			throws RestClientException {
+
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(request, responseType);
 		ResponseEntityResponseExtractor<T> responseExtractor =
 				new ResponseEntityResponseExtractor<T>(responseType);
@@ -441,16 +440,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
-		UriTemplate uriTemplate = new HttpUrlTemplate(url);
-		URI expanded = uriTemplate.expand(urlVariables);
+		URI expanded = new UriTemplate(url).expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
-		UriTemplate uriTemplate = new HttpUrlTemplate(url);
-		URI expanded = uriTemplate.expand(urlVariables);
+		URI expanded = new UriTemplate(url).expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
@@ -667,6 +664,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 	}
 
+
 	/**
 	 * Response extractor for {@link HttpEntity}.
 	 */
@@ -683,8 +681,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
-			if (delegate != null) {
-				T body = delegate.extractData(response);
+			if (this.delegate != null) {
+				T body = this.delegate.extractData(response);
 				return new ResponseEntity<T>(body, response.getHeaders(), response.getStatusCode());
 			}
 			else {
@@ -701,32 +699,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
 			return response.getHeaders();
-		}
-	}
-
-	/**
-	 * HTTP-specific subclass of UriTemplate, overriding the encode method.
-	 */
-	@SuppressWarnings("serial")
-	private static class HttpUrlTemplate extends UriTemplate {
-
-		public HttpUrlTemplate(String uriTemplate) {
-			super(uriTemplate);
-		}
-
-		@Override
-		protected URI encodeUri(String uri) {
-			try {
-				String encoded = UriUtils.encodeHttpUrl(uri, "UTF-8");
-				return new URI(encoded);
-			}
-			catch (UnsupportedEncodingException ex) {
-				// should not happen, UTF-8 is always supported
-				throw new IllegalStateException(ex);
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Could not create HTTP URL from [" + uri + "]: " + ex, ex);
-			}
 		}
 	}
 
