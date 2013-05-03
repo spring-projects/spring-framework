@@ -88,7 +88,7 @@ configure(allprojects) { project ->
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://glassfish.java.net/nonav/docs/v3/api/",
 		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/", // commonj
-		"http://quartz-scheduler.org/api/2.1.5/",
+		"http://quartz-scheduler.org/api/2.1.7/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.2.0/",
 		"http://jackson.codehaus.org/1.9.12/javadoc/",
@@ -340,7 +340,7 @@ project("spring-oxm") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		optional(project(":spring-context")) // for Jaxb2Marshaller
+		testCompile(project(":spring-context"))
 		optional("com.thoughtworks.xstream:xstream:1.4.4")
 		optional("org.jibx:jibx-run:1.2.5")
 		optional("org.apache.xmlbeans:xmlbeans:2.6.0")

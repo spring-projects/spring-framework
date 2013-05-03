@@ -75,7 +75,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
@@ -119,9 +118,8 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener)
  * @see #setAdapters(XmlAdapter[])
  */
-public class Jaxb2Marshaller
-		implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller, BeanClassLoaderAware,
-		ResourceLoaderAware, InitializingBean {
+public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller,
+		BeanClassLoaderAware, InitializingBean {
 
 	private static final String CID = "cid:";
 
@@ -177,8 +175,8 @@ public class Jaxb2Marshaller
 
 
 	/**
-	 * Set multiple JAXB context paths. The given array of context paths is converted to a
-	 * colon-delimited string, as supported by JAXB.
+	 * Set multiple JAXB context paths. The given array of context paths gets
+	 * converted to a colon-delimited string, as supported by JAXB.
 	 */
 	public void setContextPaths(String... contextPaths) {
 		Assert.notEmpty(contextPaths, "'contextPaths' must not be empty");
@@ -187,8 +185,8 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set a JAXB context path.
-	 * <p>Setting this property, {@link #setClassesToBeBound "classesToBeBound"}, or
-	 * {@link #setPackagesToScan "packagesToScan"} is required.
+	 * <p>Setting either this property, {@link #setClassesToBeBound "classesToBeBound"}
+	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
 	public void setContextPath(String contextPath) {
 		Assert.hasText(contextPath, "'contextPath' must not be null");
@@ -204,8 +202,8 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set the list of Java classes to be recognized by a newly created JAXBContext.
-	 * <p>Setting this property, {@link #setContextPath "contextPath"}, or
-	 * {@link #setPackagesToScan "packagesToScan"} is required.
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
+	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
 	public void setClassesToBeBound(Class<?>... classesToBeBound) {
 		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
@@ -220,10 +218,11 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the packages to search using Spring-based scanning for classes with JAXB2 annotations in the classpath.
-	 * <p>Setting this property, {@link #setContextPath "contextPath"}, or
-	 * {@link #setClassesToBeBound "classesToBeBound"} is required. This is analogous to Spring's component-scan feature
-	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * Set the packages to search for classes with JAXB2 annotations in the classpath.
+	 * This is using a Spring-bases search and therefore analogous to Spring's component-scan
+	 * feature ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
+	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
@@ -390,12 +389,8 @@ public class Jaxb2Marshaller
 		this.beanClassLoader = classLoader;
 	}
 
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
 
-
-	public final void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
 		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(this.classesToBeBound);
 		boolean hasPackagesToScan = !ObjectUtils.isEmpty(this.packagesToScan);
@@ -487,10 +482,8 @@ public class Jaxb2Marshaller
 			logger.info("Creating JAXBContext by scanning packages [" +
 					StringUtils.arrayToCommaDelimitedString(this.packagesToScan) + "]");
 		}
-		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.packagesToScan);
-		scanner.setResourceLoader(this.resourceLoader);
-		scanner.scanPackages();
-		Class<?>[] jaxb2Classes = scanner.getJaxb2Classes();
+		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.beanClassLoader, this.packagesToScan);
+		Class<?>[] jaxb2Classes = scanner.scanPackages();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found JAXB2 classes: [" + StringUtils.arrayToCommaDelimitedString(jaxb2Classes) + "]");
 		}
