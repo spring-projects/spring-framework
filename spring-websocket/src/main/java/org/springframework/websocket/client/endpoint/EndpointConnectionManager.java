@@ -21,29 +21,36 @@ import java.util.List;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
+import javax.websocket.ContainerProvider;
 import javax.websocket.Decoder;
 import javax.websocket.Encoder;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
 import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
+import org.springframework.websocket.client.ConnectionManagerSupport;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointConnectionManager extends EndpointConnectionManagerSupport implements BeanFactoryAware {
+public class EndpointConnectionManager extends ConnectionManagerSupport implements BeanFactoryAware {
 
-	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
+	private final Endpoint endpoint;
 
 	private final BeanCreatingHandlerProvider<Endpoint> endpointProvider;
 
-	private final Endpoint endpoint;
+	private final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
+
+	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
+
+	private Session session;
 
 
 	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
@@ -81,6 +88,14 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 		this.configBuilder.configurator(configurator);
 	}
 
+	public void setWebSocketContainer(WebSocketContainer webSocketContainer) {
+		this.webSocketContainer = webSocketContainer;
+	}
+
+	public WebSocketContainer getWebSocketContainer() {
+		return this.webSocketContainer;
+	}
+
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.endpointProvider != null) {
@@ -92,8 +107,24 @@ public class EndpointConnectionManager extends EndpointConnectionManagerSupport 
 	protected void openConnection() throws Exception {
 		Endpoint endpoint = (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
 		ClientEndpointConfig endpointConfig = this.configBuilder.build();
-		Session session = getWebSocketContainer().connectToServer(endpoint, endpointConfig, getUri());
-		updateSession(session);
+		this.session = getWebSocketContainer().connectToServer(endpoint, endpointConfig, getUri());
+	}
+
+	@Override
+	protected void closeConnection() throws Exception {
+		try {
+			if (isConnected()) {
+				this.session.close();
+			}
+		}
+		finally {
+			this.session = null;
+		}
+	}
+
+	@Override
+	protected boolean isConnected() {
+		return ((this.session != null) && this.session.isOpen());
 	}
 
 }

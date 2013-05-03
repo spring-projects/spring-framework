@@ -21,7 +21,7 @@ package org.springframework.websocket;
  *
  * <p> Implementations of this interface are encouraged to handle exceptions locally where
  * it makes sense or alternatively let the exception bubble up in which case the exception
- * is logged and the session closed with {@link CloseStatus#SERVER_ERROR SERVER_ERROR(101)} by default.
+ * is logged and the session closed with {@link CloseStatus#SERVER_ERROR SERVER_ERROR(1011)} by default.
  * The exception handling strategy is provided by
  * {@link org.springframework.websocket.support.ExceptionWebSocketHandlerDecorator ExceptionWebSocketHandlerDecorator},
  * which can be customized or replaced by decorating the {@link WebSocketHandler} with a

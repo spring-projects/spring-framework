@@ -48,23 +48,23 @@ import org.springframework.websocket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class PerConnectionWebSocketHandlerProxy implements WebSocketHandler, BeanFactoryAware {
+public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFactoryAware {
 
-	private Log logger = LogFactory.getLog(PerConnectionWebSocketHandlerProxy.class);
+	private static final Log logger = LogFactory.getLog(PerConnectionWebSocketHandler.class);
 
 	private final BeanCreatingHandlerProvider<WebSocketHandler> provider;
 
-	private Map<WebSocketSession, WebSocketHandler> handlers =
+	private final Map<WebSocketSession, WebSocketHandler> handlers =
 			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
 
-	private boolean streaming;
+	private final boolean streaming;
 
 
-	public PerConnectionWebSocketHandlerProxy(Class<? extends WebSocketHandler> handlerType) {
+	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType) {
 		this(handlerType, false);
 	}
 
-	public PerConnectionWebSocketHandlerProxy(Class<? extends WebSocketHandler> handlerType, boolean isStreaming) {
+	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType, boolean isStreaming) {
 		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
 		this.streaming = isStreaming;
 	}

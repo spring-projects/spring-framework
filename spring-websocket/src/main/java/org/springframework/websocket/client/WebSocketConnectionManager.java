@@ -31,7 +31,7 @@ import org.springframework.websocket.support.LoggingWebSocketHandlerDecorator;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketConnectionManager extends AbstractWebSocketConnectionManager {
+public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private final WebSocketClient client;
 

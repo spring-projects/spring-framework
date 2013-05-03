@@ -44,7 +44,7 @@ import org.springframework.websocket.WebSocketHandler;
  * <p>
  * A container-specific {@link RequestUpgradeStrategy} is required since standard Java
  * WebSocket currently does not provide a way to initiate a WebSocket handshake.
- * Currently available are implementations for Tomcat and Glassfish.
+ * Currently available are implementations for Tomcat and GlassFish.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -218,7 +218,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		private static final boolean tomcatWebSocketPresent = ClassUtils.isPresent(
 				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
 
-		private static final boolean glassfishWebSocketPresent = ClassUtils.isPresent(
+		private static final boolean glassFishWebSocketPresent = ClassUtils.isPresent(
 				"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
 
 		private static final boolean jettyWebSocketPresent = ClassUtils.isPresent(
@@ -229,8 +229,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			if (tomcatWebSocketPresent) {
 				className = "org.springframework.websocket.server.support.TomcatRequestUpgradeStrategy";
 			}
-			else if (glassfishWebSocketPresent) {
-				className = "org.springframework.websocket.server.support.GlassfishRequestUpgradeStrategy";
+			else if (glassFishWebSocketPresent) {
+				className = "org.springframework.websocket.server.support.GlassFishRequestUpgradeStrategy";
 			}
 			else if (jettyWebSocketPresent) {
 				className = "org.springframework.websocket.server.support.JettyRequestUpgradeStrategy";

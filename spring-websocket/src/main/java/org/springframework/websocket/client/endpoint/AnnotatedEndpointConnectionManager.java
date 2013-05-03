@@ -16,23 +16,29 @@
 
 package org.springframework.websocket.client.endpoint;
 
+import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
+import javax.websocket.WebSocketContainer;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.websocket.client.ConnectionManagerSupport;
 import org.springframework.websocket.support.BeanCreatingHandlerProvider;
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotatedEndpointConnectionManager extends EndpointConnectionManagerSupport
-		implements BeanFactoryAware {
+public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport implements BeanFactoryAware {
+
+	private final Object endpoint;
 
 	private final BeanCreatingHandlerProvider<Object> endpointProvider;
 
-	private final Object endpoint;
+	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
+
+	private Session session;
 
 
 	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {
@@ -48,6 +54,14 @@ public class AnnotatedEndpointConnectionManager extends EndpointConnectionManage
 	}
 
 
+	public void setWebSocketContainer(WebSocketContainer webSocketContainer) {
+		this.webSocketContainer = webSocketContainer;
+	}
+
+	public WebSocketContainer getWebSocketContainer() {
+		return this.webSocketContainer;
+	}
+
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.endpointProvider != null) {
@@ -58,8 +72,24 @@ public class AnnotatedEndpointConnectionManager extends EndpointConnectionManage
 	@Override
 	protected void openConnection() throws Exception {
 		Object endpoint = (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
-		Session session = getWebSocketContainer().connectToServer(endpoint, getUri());
-		updateSession(session);
+		this.session = this.webSocketContainer.connectToServer(endpoint, getUri());
+	}
+
+	@Override
+	protected void closeConnection() throws Exception {
+		try {
+			if (isConnected()) {
+				this.session.close();
+			}
+		}
+		finally {
+			this.session = null;
+		}
+	}
+
+	@Override
+	protected boolean isConnected() {
+		return ((this.session != null) && this.session.isOpen());
 	}
 
 }

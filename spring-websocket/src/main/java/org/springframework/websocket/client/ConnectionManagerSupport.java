@@ -31,7 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractWebSocketConnectionManager implements SmartLifecycle {
+public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -49,7 +49,7 @@ public abstract class AbstractWebSocketConnectionManager implements SmartLifecyc
 	private final Object lifecycleMonitor = new Object();
 
 
-	public AbstractWebSocketConnectionManager(String uriTemplate, Object... uriVariables) {
+	public ConnectionManagerSupport(String uriTemplate, Object... uriVariables) {
 		this.uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
 	}
 

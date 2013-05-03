@@ -52,13 +52,13 @@ import org.springframework.websocket.server.HandshakeFailureException;
 import org.springframework.websocket.server.endpoint.EndpointRegistration;
 
 /**
- * Glassfish support for upgrading an {@link HttpServletRequest} during a WebSocket
+ * GlassFish support for upgrading an {@link HttpServletRequest} during a WebSocket
  * handshake.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
+public class GlassFishRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
 
 	private final static Random random = new Random();
 
@@ -86,7 +86,7 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 			engine.register(tyrusEndpoint);
 		}
 		catch (DeploymentException ex) {
-			throw new HandshakeFailureException("Failed to deploy endpoint in Glassfish", ex);
+			throw new HandshakeFailureException("Failed to deploy endpoint in GlassFish", ex);
 		}
 
 		try {
@@ -140,13 +140,13 @@ public class GlassfishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 	private Connection createConnection(TyrusHttpUpgradeHandler handler, HttpServletResponse response) {
 		try {
 			String name = "org.glassfish.tyrus.servlet.ConnectionImpl";
-			Class<?> clazz = ClassUtils.forName(name, GlassfishRequestUpgradeStrategy.class.getClassLoader());
+			Class<?> clazz = ClassUtils.forName(name, GlassFishRequestUpgradeStrategy.class.getClassLoader());
 			Constructor<?> constructor = clazz.getDeclaredConstructor(TyrusHttpUpgradeHandler.class, HttpServletResponse.class);
 			ReflectionUtils.makeAccessible(constructor);
 			return (Connection) constructor.newInstance(handler, response);
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException("Failed to instantiate Glassfish connection", ex);
+			throw new IllegalStateException("Failed to instantiate GlassFish connection", ex);
 		}
 	}
 
