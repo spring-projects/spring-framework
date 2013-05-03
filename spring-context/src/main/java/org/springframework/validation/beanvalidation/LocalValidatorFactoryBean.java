@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import javax.validation.Configuration;
@@ -43,7 +42,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
@@ -65,7 +63,7 @@ import org.springframework.util.ReflectionUtils;
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
  * <p><b>As of Spring 4.0, this class supports Bean Validation 1.0 and 1.1, with special support
- * for Hibernate Validator 4.x and 5.0</b> (see {@link #setValidationMessageSource}).
+ * for Hibernate Validator 4.3 and 5.0</b> (see {@link #setValidationMessageSource}).
  *
  * <p>Note that Bean Validation 1.1's {@code #forExecutables} method isn't supported: We do not
  * expect that method to be called by application code; consider {@link MethodValidationInterceptor}
@@ -130,7 +128,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * instead of relying on JSR-303's default "ValidationMessages.properties" bundle
 	 * in the classpath. This may refer to a Spring context's shared "messageSource" bean,
 	 * or to some special MessageSource setup for validation purposes only.
-	 * <p><b>NOTE:</b> This feature requires Hibernate Validator 4.1 or higher on the classpath.
+	 * <p><b>NOTE:</b> This feature requires Hibernate Validator 4.3 or higher on the classpath.
 	 * You may nevertheless use a different validation provider but Hibernate Validator's
 	 * {@link ResourceBundleMessageInterpolator} class must be accessible during configuration.
 	 * <p>Specify either this property or {@link #setMessageInterpolator "messageInterpolator"},
@@ -360,47 +358,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 */
 	private static class HibernateValidatorDelegate {
 
-		public static MessageInterpolator buildMessageInterpolator(final MessageSource messageSource) {
-			Class<?> locatorClass;
-			try {
-				// Hibernate Validator 5.x
-				locatorClass = ClassUtils.forName(
-						"org.hibernate.validator.spi.resourceloading.ResourceBundleLocator",
-						HibernateValidatorDelegate.class.getClassLoader());
-			}
-			catch (ClassNotFoundException ex) {
-				try {
-					// Hibernate Validator 4.x
-					locatorClass = ClassUtils.forName(
-							"org.hibernate.validator.resourceloading.ResourceBundleLocator",
-							HibernateValidatorDelegate.class.getClassLoader());
-				}
-				catch (ClassNotFoundException ex2) {
-					throw new IllegalStateException("Neither Hibernate Validator 5.x nor 4.x API found");
-				}
-			}
-			Object locator = Proxy.newProxyInstance(HibernateValidatorDelegate.class.getClassLoader(),
-					new Class[] {locatorClass}, new InvocationHandler() {
-				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-					if (method.getName().equals("getResourceBundle")) {
-						return new MessageSourceResourceBundle(messageSource, (Locale) args[0]);
-					}
-					else {
-						try {
-							return method.invoke(this, args);
-						}
-						catch (InvocationTargetException ex) {
-							throw ex.getTargetException();
-						}
-					}
-				}
-			});
-			try {
-				return ResourceBundleMessageInterpolator.class.getConstructor(locatorClass).newInstance(locator);
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Unexpected Hibernate Validator API mismatch", ex);
-			}
+		public static MessageInterpolator buildMessageInterpolator(MessageSource messageSource) {
+			return new ResourceBundleMessageInterpolator(new MessageSourceResourceBundleLocator(messageSource));
 		}
 	}
 
