@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -98,8 +97,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	private Map<Class<?>, PropertyEditor> customEditors;
 
 	private Map<String, CustomEditorHolder> customEditorsForPath;
-
-	private Set<PropertyEditor> sharedEditors;
 
 	private Map<Class<?>, PropertyEditor> customEditorCache;
 
@@ -290,33 +287,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			this.customEditors.put(requiredType, propertyEditor);
 			this.customEditorCache = null;
 		}
-	}
-
-	/**
-	 * Register the given custom property editor for all properties
-	 * of the given type, indicating that the given instance is a
-	 * shared editor that might be used concurrently.
-	 * @param requiredType the type of the property
-	 * @param propertyEditor the shared editor to register
-	 * @deprecated as of Spring 3.0, in favor of PropertyEditorRegistrars or ConversionService usage
-	 */
-	@Deprecated
-	public void registerSharedEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
-		registerCustomEditor(requiredType, null, propertyEditor);
-		if (this.sharedEditors == null) {
-			this.sharedEditors = new HashSet<PropertyEditor>();
-		}
-		this.sharedEditors.add(propertyEditor);
-	}
-
-	/**
-	 * Check whether the given editor instance is a shared editor, that is,
-	 * whether the given editor instance might be used concurrently.
-	 * @param propertyEditor the editor instance to check
-	 * @return whether the editor is a shared instance
-	 */
-	public boolean isSharedEditor(PropertyEditor propertyEditor) {
-		return (this.sharedEditors != null && this.sharedEditors.contains(propertyEditor));
 	}
 
 	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
