@@ -64,8 +64,8 @@ import org.springframework.util.ReflectionUtils;
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
- * <p>As of Spring 4.0, this class supports Bean Validation 1.0 and 1.1, with special support
- * for Hibernate Validator 4.x and 5.0 (see {@link #setValidationMessageSource}).
+ * <p><b>As of Spring 4.0, this class supports Bean Validation 1.0 and 1.1, with special support
+ * for Hibernate Validator 4.x and 5.0</b> (see {@link #setValidationMessageSource}).
  *
  * <p>Note that Bean Validation 1.1's {@code #forExecutables} method isn't supported: We do not
  * expect that method to be called by application code; consider {@link MethodValidationInterceptor}
@@ -254,6 +254,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			configuration.addProperty(entry.getKey(), entry.getValue());
 		}
 
+		// Allow for custom post-processing before we actually build the ValidatorFactory.
+		postProcessConfiguration(configuration);
+
 		this.validatorFactory = configuration.buildValidatorFactory();
 		setTargetValidator(this.validatorFactory.getValidator());
 	}
@@ -310,6 +313,16 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 	}
 
+	/**
+	 * Post-process the given Bean Validation configuration,
+	 * adding to or overriding any of its settings.
+	 * <p>Invoked right before building the {@link ValidatorFactory}.
+	 * @param configuration the Configuration object, pre-populated with
+	 * settings driven by LocalValidatorFactoryBean's properties
+	 */
+	protected void postProcessConfiguration(Configuration configuration) {
+	}
+
 
 	public Validator getValidator() {
 		return this.validatorFactory.getValidator();
@@ -332,7 +345,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 	public void close() {
-		ReflectionUtils.invokeMethod(closeMethod, this.validatorFactory);
+		if (closeMethod != null) {
+			ReflectionUtils.invokeMethod(closeMethod, this.validatorFactory);
+		}
 	}
 
 	public void destroy() {
