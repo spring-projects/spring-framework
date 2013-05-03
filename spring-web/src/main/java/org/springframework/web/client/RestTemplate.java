@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +49,6 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriUtils;
 
 /**
  * <strong>The central class for client-side HTTP access.</strong> It simplifies communication with HTTP servers, and
@@ -115,11 +112,11 @@ import org.springframework.web.util.UriUtils;
  * requestFactory} and {@link #setErrorHandler(ResponseErrorHandler) errorHandler} bean properties.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
  * @see ResponseExtractor
  * @see ResponseErrorHandler
- * @since 3.0
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
 
@@ -145,7 +142,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
 
-	/** Create a new instance of the {@link RestTemplate} using default settings. */
+	/**
+	 * Create a new instance of the {@link RestTemplate} using default settings.
+	 */
 	public RestTemplate() {
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
@@ -171,7 +170,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Create a new instance of the {@link RestTemplate} based on the given {@link ClientHttpRequestFactory}.
 	 * @param requestFactory HTTP request factory to use
 	 * @see org.springframework.http.client.SimpleClientHttpRequestFactory
-	 * @see org.springframework.http.client.CommonsClientHttpRequestFactory
 	 */
 	public RestTemplate(ClientHttpRequestFactory requestFactory) {
 		this();
@@ -441,16 +439,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
-		UriTemplate uriTemplate = new HttpUrlTemplate(url);
-		URI expanded = uriTemplate.expand(urlVariables);
+		URI expanded = new UriTemplate(url).expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
 	public <T> T execute(String url, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
-		UriTemplate uriTemplate = new HttpUrlTemplate(url);
-		URI expanded = uriTemplate.expand(urlVariables);
+		URI expanded = new UriTemplate(url).expand(urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
@@ -667,6 +663,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 	}
 
+
 	/**
 	 * Response extractor for {@link HttpEntity}.
 	 */
@@ -683,8 +680,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
-			if (delegate != null) {
-				T body = delegate.extractData(response);
+			if (this.delegate != null) {
+				T body = this.delegate.extractData(response);
 				return new ResponseEntity<T>(body, response.getHeaders(), response.getStatusCode());
 			}
 			else {
@@ -701,32 +698,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		public HttpHeaders extractData(ClientHttpResponse response) throws IOException {
 			return response.getHeaders();
-		}
-	}
-
-	/**
-	 * HTTP-specific subclass of UriTemplate, overriding the encode method.
-	 */
-	@SuppressWarnings("serial")
-	private static class HttpUrlTemplate extends UriTemplate {
-
-		public HttpUrlTemplate(String uriTemplate) {
-			super(uriTemplate);
-		}
-
-		@Override
-		protected URI encodeUri(String uri) {
-			try {
-				String encoded = UriUtils.encodeHttpUrl(uri, "UTF-8");
-				return new URI(encoded);
-			}
-			catch (UnsupportedEncodingException ex) {
-				// should not happen, UTF-8 is always supported
-				throw new IllegalStateException(ex);
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Could not create HTTP URL from [" + uri + "]: " + ex, ex);
-			}
 		}
 	}
 

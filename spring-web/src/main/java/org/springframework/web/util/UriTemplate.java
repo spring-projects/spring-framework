@@ -165,28 +165,6 @@ public class UriTemplate implements Serializable {
 		return result;
 	}
 
-	/**
-	 * Encodes the given String as URL.
-	 * <p>Defaults to {@link UriUtils#encodeUri(String, String)}.
-	 * @param uri the URI to encode
-	 * @return the encoded URI
-	 * @deprecated No longer in use, with no direct replacement
-	 */
-	@Deprecated
-	protected URI encodeUri(String uri) {
-		try {
-			String encoded = UriUtils.encodeUri(uri, "UTF-8");
-			return new URI(encoded);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not happen, UTF-8 is always supported
-			throw new IllegalStateException(ex);
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
-		}
-	}
-
 	@Override
 	public String toString() {
 		return this.uriTemplate;
@@ -249,6 +227,5 @@ public class UriTemplate implements Serializable {
 			return Pattern.compile(this.patternBuilder.toString());
 		}
 	}
-
 
 }
