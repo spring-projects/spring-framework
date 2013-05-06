@@ -53,7 +53,6 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 	private ApplicationContext dirtiedApplicationContext;
 
 
-	@SuppressWarnings("deprecation")
 	private void performCommonAssertions() {
 		assertInTransaction(true);
 		assertNotNull(super.applicationContext,

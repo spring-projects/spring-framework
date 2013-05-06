@@ -73,7 +73,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
-@SuppressWarnings("deprecation")
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 
 	/**

@@ -48,7 +48,6 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 2.5
  */
-@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests
 		implements BeanNameAware, InitializingBean {

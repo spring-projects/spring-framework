@@ -37,7 +37,6 @@ import org.springframework.test.context.TestExecutionListeners;
  * @author Sam Brannen
  * @since 3.0
  */
-@SuppressWarnings("deprecation")
 @RunWith(JUnit4.class)
 public class ExpectedExceptionSpringRunnerTests {
 

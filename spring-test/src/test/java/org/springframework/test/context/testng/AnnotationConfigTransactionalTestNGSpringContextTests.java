@@ -54,7 +54,6 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 3.1
  */
-@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 		AbstractTransactionalTestNGSpringContextTests {
