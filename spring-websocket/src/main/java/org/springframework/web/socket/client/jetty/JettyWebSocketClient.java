@@ -133,19 +133,11 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException {
 
-		return doHandshake(webSocketHandler, headers, UriComponentsBuilder.fromUri(uri).build());
-	}
-
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, UriComponents uriComponents)
-			throws WebSocketConnectFailureException {
-
 		// TODO: populate headers
-
-		URI uri = uriComponents.toUri();
 
 		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
 		session.setUri(uri);
-		session.setRemoteHostName(uriComponents.getHost());
+		session.setRemoteHostName(uri.getHost());
 
 		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler, session);
 

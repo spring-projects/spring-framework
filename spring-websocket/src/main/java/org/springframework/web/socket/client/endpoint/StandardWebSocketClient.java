@@ -75,17 +75,9 @@ public class StandardWebSocketClient implements WebSocketClient {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
 			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
 
-		return doHandshake(webSocketHandler, httpHeaders, UriComponentsBuilder.fromUri(uri).build());
-	}
-
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
-			final HttpHeaders httpHeaders, UriComponents uriComponents) throws WebSocketConnectFailureException {
-
-		URI uri = uriComponents.toUri();
-
 		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
 		session.setUri(uri);
-		session.setRemoteHostName(uriComponents.getHost());
+		session.setRemoteHostName(uri.getHost());
 		Endpoint endpoint = new StandardEndpointAdapter(webSocketHandler, session);
 
 		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();

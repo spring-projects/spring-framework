@@ -149,7 +149,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 		logger.debug("Invalid Upgrade header " + request.getHeaders().getUpgrade());
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
-		response.getBody().write("Can \"Upgrade\" only to \"websocket\".".getBytes("UTF-8"));
+		response.getBody().write("Can \"Upgrade\" only to \"WebSocket\".".getBytes("UTF-8"));
 	}
 
 	protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
@@ -227,13 +227,13 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		private RequestUpgradeStrategy create() {
 			String className;
 			if (tomcatWebSocketPresent) {
-				className = "org.springframework.websocket.server.support.TomcatRequestUpgradeStrategy";
+				className = "org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy";
 			}
 			else if (glassFishWebSocketPresent) {
-				className = "org.springframework.websocket.server.support.GlassFishRequestUpgradeStrategy";
+				className = "org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
 			}
 			else if (jettyWebSocketPresent) {
-				className = "org.springframework.websocket.server.support.JettyRequestUpgradeStrategy";
+				className = "org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
 			}
 			else {
 				throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());

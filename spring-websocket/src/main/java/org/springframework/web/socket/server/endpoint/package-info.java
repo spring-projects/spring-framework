@@ -20,9 +20,7 @@
  * {@link org.springframework.web.socket.server.endpoint.EndpointExporter} for
  * registering type-based endpoints,
  * {@link org.springframework.web.socket.server.endpoint.SpringConfigurator} for
- * instantiating annotated endpoints through Spring, and
- * {@link org.springframework.websocket.server.support.EndpointHandshakeHandler}
- * for integrating endpoints into HTTP request processing.
+ * instantiating annotated endpoints through Spring.
  */
 package org.springframework.web.socket.server.endpoint;
 

@@ -17,11 +17,16 @@ package org.springframework.web.socket.sockjs;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +44,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * Provides support for SockJS configuration options and serves the static SockJS URLs.
+ * An abstract class for {@link SockJsService} implementations. Provides configuration
+ * support, SockJS path resolution, and processing for static SockJS requests (e.g.
+ * "/info", "/iframe.html", etc). Sub-classes are responsible for handling transport
+ * requests.
+ *
+ * <p>
+ * It is expected that this service is mapped correctly to one or more prefixes such as
+ * "/echo" including all sub-URLs (e.g. "/echo/**"). A SockJS service itself is generally
+ * unaware of request mapping details but nevertheless must be able to extract the SockJS
+ * path, which is the portion of the request path following the prefix. In most cases,
+ * this class can auto-detect the SockJS path but you can also explicitly configure the
+ * list of valid prefixes with {@link #setValidSockJsPrefixes(String...)}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -51,7 +67,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	private static final int ONE_YEAR = 365 * 24 * 60 * 60;
 
 
-	private String name = "SockJS Service " + ObjectUtils.getIdentityHexString(this);
+	private String name = "SockJSService@" + ObjectUtils.getIdentityHexString(this);
 
 	private String clientLibraryUrl = "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js";
 
@@ -67,6 +83,9 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	private final TaskScheduler taskScheduler;
 
+	private final List<String> sockJsPrefixes = new ArrayList<String>();
+
+	private final Set<String> sockJsPathCache = new CopyOnWriteArraySet<String>();
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -83,6 +102,38 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	public String getName() {
 		return this.name;
+	}
+
+	/**
+	 * Use this property to configure one or more prefixes that this SockJS service is
+	 * allowed to serve. The prefix (e.g. "/echo") is needed to extract the SockJS
+	 * specific portion of the URL (e.g. "${prefix}/info", "${prefix}/iframe.html", etc).
+	 * <p>
+	 * This property is not strictly required. In most cases, the SockJS path can be
+	 * auto-detected since the initial request from the SockJS client is of the form
+	 * "{prefix}/info". Assuming the SockJS service is mapped correctly (e.g. using
+	 * Ant-style pattern "/echo/**") this should work fine. This property can be used
+	 * to configure explicitly the prefixes this service is allowed to service.
+	 *
+	 * @param prefixes the prefixes to use; prefixes do not need to include the portions
+	 *        of the path that represent Servlet container context or Servlet path.
+	 */
+	public void setValidSockJsPrefixes(String... prefixes) {
+
+		this.sockJsPrefixes.clear();
+		for (String prefix : prefixes) {
+			if (prefix.endsWith("/") && (prefix.length() > 1)) {
+				prefix = prefix.substring(0, prefix.length() - 1);
+			}
+			this.sockJsPrefixes.add(prefix);
+		}
+
+		// sort with longest prefix at the top
+		Collections.sort(this.sockJsPrefixes, Collections.reverseOrder(new Comparator<String>() {
+			public int compare(String o1, String o2) {
+				return new Integer(o1.length()).compareTo(new Integer(o2.length()));
+			}
+		}));
 	}
 
 	/**
@@ -198,10 +249,18 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 *
 	 * @throws Exception
 	 */
-	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			String sockJsPath, WebSocketHandler webSocketHandler) throws IOException, TransportErrorException {
+	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
+			throws IOException, TransportErrorException {
 
-		logger.debug(request.getMethod() + " [" + sockJsPath + "]");
+		String sockJsPath = getSockJsPath(request);
+		if (sockJsPath == null) {
+			logger.warn("Could not determine SockJS path for URL \"" + request.getURI().getPath() +
+					". Consider setting validSockJsPrefixes.");
+			response.setStatusCode(HttpStatus.NOT_FOUND);
+			return;
+		}
+
+		logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath + "]");
 
 		try {
 			request.getHeaders();
@@ -225,13 +284,13 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 				return;
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocketRequest(request, response, webSocketHandler);
+				handleRawWebSocketRequest(request, response, handler);
 				return;
 			}
 
 			String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 			if (pathSegments.length != 3) {
-				logger.debug("Expected /{server}/{session}/{transport} but got " + sockJsPath);
+				logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
 				response.setStatusCode(HttpStatus.NOT_FOUND);
 				return;
 			}
@@ -245,11 +304,60 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 				return;
 			}
 
-			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), webSocketHandler);
+			handleTransportRequest(request, response, sessionId, TransportType.fromValue(transport), handler);
 		}
 		finally {
 			response.flush();
 		}
+	}
+
+	/**
+	 * Return the SockJS path or null if the path could not be determined.
+	 */
+	private String getSockJsPath(ServerHttpRequest request) {
+
+		String path = request.getURI().getPath();
+
+		// SockJS prefix hints?
+		if (!this.sockJsPrefixes.isEmpty()) {
+			for (String prefix : this.sockJsPrefixes) {
+				int index = path.indexOf(prefix);
+				if (index != -1) {
+					this.sockJsPathCache.add(path.substring(0, index + prefix.length()));
+					return path.substring(index + prefix.length());
+				}
+			}
+		}
+
+		// SockJS info request?
+		if (path.endsWith("/info")) {
+			this.sockJsPathCache.add(path.substring(0, path.length() - 6));
+			return "/info";
+		}
+
+		// Have we seen this prefix before (following the initial /info request)?
+		String match = null;
+		for (String sockJsPath : this.sockJsPathCache) {
+			if (path.startsWith(sockJsPath)) {
+				if ((match == null) || (match.length() < sockJsPath.length())) {
+					match = sockJsPath;
+				}
+			}
+		}
+		if (match != null) {
+			return path.substring(match.length());
+		}
+
+		// SockJS greeting?
+		String pathNoSlash = path.endsWith("/")  ? path.substring(0, path.length() - 1) : path;
+		String lastSegment = pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
+
+		if ((TransportType.fromValue(lastSegment) == null) && !lastSegment.startsWith("iframe")) {
+			this.sockJsPathCache.add(path);
+			return "";
+		}
+
+		return null;
 	}
 
 	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
@@ -263,18 +371,18 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
-			logger.debug("Empty server, session, or transport value");
+			logger.warn("Empty server, session, or transport value");
 			return false;
 		}
 
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
-			logger.debug("Server or session contain a \".\"");
+			logger.warn("Server or session contain a \".\"");
 			return false;
 		}
 
 		if (!isWebSocketEnabled() && transport.equals(TransportType.WEBSOCKET.value())) {
-			logger.debug("Websocket transport is disabled");
+			logger.warn("Websocket transport is disabled");
 			return false;
 		}
 
@@ -346,7 +454,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 				response.setStatusCode(HttpStatus.NO_CONTENT);
 
-				addCorsHeaders(request, response, HttpMethod.GET, HttpMethod.OPTIONS);
+				addCorsHeaders(request, response, HttpMethod.OPTIONS, HttpMethod.GET);
 				addCacheHeaders(response);
 			}
 			else {
@@ -403,5 +511,6 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 			response.getBody().write(contentBytes);
 		}
 	};
+
 
 }

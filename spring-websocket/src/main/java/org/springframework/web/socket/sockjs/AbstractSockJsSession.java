@@ -217,7 +217,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
 	public final void close() throws IOException {
-		close(CloseStatus.NORMAL);
+		close(new CloseStatus(3000, "Go away!"));
 	}
 
 	/**
@@ -225,7 +225,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
 	public final void close(CloseStatus status) throws IOException {
-		if (!isClosed()) {
+		if (isOpen()) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing " + this + ", " + status);
 			}

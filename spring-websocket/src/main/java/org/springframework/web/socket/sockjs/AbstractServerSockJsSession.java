@@ -83,7 +83,6 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 		disconnect(status);
 	}
 
-	// TODO: close status/reason
 	protected abstract void disconnect(CloseStatus status) throws IOException;
 
 	/**
@@ -104,12 +103,14 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 			else {
 				logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
 			}
-			close();
+			disconnect(CloseStatus.SERVER_ERROR);
+			close(CloseStatus.SERVER_ERROR);
 			throw ex;
 		}
 		catch (Throwable ex) {
 			logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
-			close();
+			disconnect(CloseStatus.SERVER_ERROR);
+			close(CloseStatus.SERVER_ERROR);
 			throw new SockJsRuntimeException("Failed to write " + frame, ex);
 		}
 	}

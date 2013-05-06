@@ -17,7 +17,9 @@
 package org.springframework.web.socket.sockjs;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpMethod;
 
@@ -50,12 +52,21 @@ public enum TransportType {
 
 	private final List<String> headerHints;
 
+	private static final Map<String, TransportType> transportTypes = new HashMap<String, TransportType>();
+
+	static {
+		for (TransportType type : values()) {
+			transportTypes.put(type.value, type);
+		}
+	}
+
 
 	private TransportType(String value, HttpMethod httpMethod, String... headerHints) {
 		this.value = value;
 		this.httpMethod = httpMethod;
 		this.headerHints = Arrays.asList(headerHints);
 	}
+
 
 	public String value() {
 		return this.value;
@@ -80,13 +91,8 @@ public enum TransportType {
 		return this.headerHints.contains("jsessionid");
 	}
 
-	public static TransportType fromValue(String transportValue) {
-		for (TransportType type : values()) {
-			if (type.value().equals(transportValue)) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("No matching constant for [" + transportValue + "]");
+	public static TransportType fromValue(String value) {
+		return transportTypes.get(value);
 	}
 
 	@Override

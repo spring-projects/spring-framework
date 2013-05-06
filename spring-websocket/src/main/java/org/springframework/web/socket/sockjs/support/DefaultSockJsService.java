@@ -177,7 +177,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		if (!supportedMethod.equals(request.getMethod())) {
 			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
 				response.setStatusCode(HttpStatus.NO_CONTENT);
-				addCorsHeaders(request, response, supportedMethod, HttpMethod.OPTIONS);
+				addCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod);
 				addCacheHeaders(response);
 			}
 			else {

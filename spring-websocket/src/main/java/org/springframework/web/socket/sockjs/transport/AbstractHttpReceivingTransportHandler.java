@@ -28,6 +28,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
+import org.springframework.web.socket.sockjs.SockJsFrame;
 import org.springframework.web.socket.sockjs.SockJsRuntimeException;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportHandler;
@@ -61,6 +62,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 		if (session == null) {
 			response.setStatusCode(HttpStatus.NOT_FOUND);
+			logger.warn("Session not found");
 			return;
 		}
 
@@ -75,21 +77,27 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 			messages = readMessages(request);
 		}
 		catch (JsonMappingException ex) {
+			logger.error("Failed to read message: ", ex);
 			sendInternalServerError(response, "Payload expected.", session.getId());
 			return;
 		}
 		catch (IOException ex) {
+			logger.error("Failed to read message: ", ex);
 			sendInternalServerError(response, "Broken JSON encoding.", session.getId());
 			return;
 		}
 		catch (Throwable t) {
+			logger.error("Failed to read message: ", t);
 			sendInternalServerError(response, "Failed to process messages", session.getId());
 			return;
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Received messages: " + Arrays.asList(messages));
+			logger.trace("Received message(s): " + Arrays.asList(messages));
 		}
+
+		response.setStatusCode(getResponseStatus());
+		response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 
 		try {
 			session.delegateMessages(messages);
@@ -98,9 +106,6 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(session, t, logger);
 			throw new SockJsRuntimeException("Unhandled WebSocketHandler error in " + this, t);
 		}
-
-		response.setStatusCode(getResponseStatus());
-		response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 	}
 
 	protected void sendInternalServerError(ServerHttpResponse response, String error,

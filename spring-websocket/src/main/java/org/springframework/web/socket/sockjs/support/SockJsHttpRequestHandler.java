@@ -32,8 +32,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
-import org.springframework.web.util.NestedServletException;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * @author Rossen Stoyanchev
@@ -41,29 +39,17 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
-	private final String prefix;
-
 	private final SockJsService sockJsService;
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 
 	/**
 	 * Class constructor with {@link SockJsHandler} instance ...
-	 *
-	 * @param prefix the path prefix for the SockJS service. All requests with a path
-	 * that begins with the specified prefix will be handled by this service. In a
-	 * Servlet container this is the path within the current servlet mapping.
 	 */
-	public SockJsHttpRequestHandler(String prefix, SockJsService sockJsService, WebSocketHandler webSocketHandler) {
-
-		Assert.hasText(prefix, "prefix is required");
+	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
 		Assert.notNull(sockJsService, "sockJsService is required");
 		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-
-		this.prefix = prefix;
 		this.sockJsService = sockJsService;
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
 	}
@@ -79,35 +65,14 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-	public String getPattern() {
-		return this.prefix + "/**";
-	}
-
 	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-
-		Assert.isTrue(lookupPath.startsWith(this.prefix),
-				"Request path does not match the prefix of the SockJsService " + this.prefix);
-
-		String sockJsPath = lookupPath.substring(prefix.length());
-
 		ServerHttpRequest httpRequest = new AsyncServletServerHttpRequest(request, response);
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
-		try {
-			this.sockJsService.handleRequest(httpRequest, httpResponse, sockJsPath, this.webSocketHandler);
-		}
-		catch (Exception ex) {
-			// TODO
-			throw new NestedServletException("SockJS service failure", ex);
-		}
+		this.sockJsService.handleRequest(httpRequest, httpResponse, this.webSocketHandler);
 	}
 
 }

@@ -100,17 +100,13 @@ public class AsyncServletServerHttpRequest extends ServletServerHttpRequest
 		}
 	}
 
-	public void dispatch() {
-		Assert.notNull(this.asyncContext, "Cannot dispatch without an AsyncContext");
-		this.asyncContext.dispatch();
-	}
-
 	public void completeAsync() {
 		Assert.notNull(this.asyncContext, "Cannot dispatch without an AsyncContext");
 		if (isAsyncStarted() && !isAsyncCompleted()) {
 			this.asyncContext.complete();
 		}
 	}
+
 
 	// ---------------------------------------------------------------------
 	// Implementation of AsyncListener methods

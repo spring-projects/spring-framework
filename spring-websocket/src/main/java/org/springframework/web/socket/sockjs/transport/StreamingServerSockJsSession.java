@@ -41,7 +41,11 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 			FrameFormat frameFormat) throws TransportErrorException {
 
 		super.setInitialRequest(request, response, frameFormat);
-		super.setLongPollingRequest(request, response, frameFormat);
+
+		// the WebSocketHandler delegate may have closed the session
+		if (!isClosed()) {
+			super.setLongPollingRequest(request, response, frameFormat);
+		}
 	}
 
 	protected void flushCache() throws IOException {

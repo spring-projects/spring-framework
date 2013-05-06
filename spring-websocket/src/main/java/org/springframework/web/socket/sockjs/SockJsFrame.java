@@ -78,6 +78,30 @@ public class SockJsFrame {
 		return this.content.getBytes(Charset.forName("UTF-8"));
 	}
 
+	public static String escapeCharacters(char[] chars) {
+		StringBuilder result = new StringBuilder();
+		for (char ch : chars) {
+			if (isSockJsEscapeCharacter(ch)) {
+				result.append('\\').append('u');
+				String hex = Integer.toHexString(ch).toLowerCase();
+				for (int i = 0; i < (4 - hex.length()); i++) {
+					result.append('0');
+				}
+				result.append(hex);
+			}
+			else {
+				result.append(ch);
+			}
+		}
+		return result.toString();
+	}
+
+	private static boolean isSockJsEscapeCharacter(char ch) {
+		return (ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u200C' && ch <= '\u200F')
+				|| (ch >= '\u2028' && ch <= '\u202F') || (ch >= '\u2060' && ch <= '\u206F')
+				|| (ch >= '\uFFF0' && ch <= '\uFFFF') || (ch >= '\uD800' && ch <= '\uDFFF');
+	}
+
 	public String toString() {
 		String result = this.content;
 		if (result.length() > 80) {
@@ -101,7 +125,7 @@ public class SockJsFrame {
 				sb.append('"');
 				// TODO: dependency on Jackson
 				char[] quotedChars = JsonStringEncoder.getInstance().quoteAsString(messages[i]);
-				sb.append(escapeSockJsCharacters(quotedChars));
+				sb.append(escapeCharacters(quotedChars));
 				sb.append('"');
 	            if (i < messages.length - 1) {
 	                sb.append(',');
@@ -109,30 +133,6 @@ public class SockJsFrame {
 			}
 			sb.append(']');
 			return sb.toString();
-		}
-
-		private static String escapeSockJsCharacters(char[] chars) {
-			StringBuilder result = new StringBuilder();
-			for (char ch : chars) {
-				if (isSockJsEscapeCharacter(ch)) {
-					result.append('\\').append('u');
-					String hex = Integer.toHexString(ch).toLowerCase();
-					for (int i = 0; i < (4 - hex.length()); i++) {
-						result.append('0');
-					}
-					result.append(hex);
-				}
-				else {
-					result.append(ch);
-				}
-			}
-			return result.toString();
-		}
-
-		private static boolean isSockJsEscapeCharacter(char ch) {
-			return (ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u200C' && ch <= '\u200F')
-					|| (ch >= '\u2028' && ch <= '\u202F') || (ch >= '\u2060' && ch <= '\u206F')
-					|| (ch >= '\uFFF0' && ch <= '\uFFFF') || (ch >= '\uD800' && ch <= '\uDFFF');
 		}
 	}
 

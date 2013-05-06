@@ -157,12 +157,13 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 
 	protected synchronized void resetRequest() {
 		updateLastActiveTime();
-		if (isActive()) {
+		if (isActive() && this.asyncRequest.isAsyncStarted()) {
 			try {
+				logger.debug("Completing async request");
 				this.asyncRequest.completeAsync();
 			}
 			catch (Throwable ex) {
-				logger.warn("Failed to complete async request: " + ex.getMessage());
+				logger.error("Failed to complete async request: " + ex.getMessage());
 			}
 		}
 		this.asyncRequest = null;

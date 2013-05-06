@@ -62,7 +62,7 @@ public class WebSocketServerSockJsSession extends AbstractServerSockJsSession {
 
 	@Override
 	public boolean isActive() {
-		return this.webSocketSession.isOpen();
+		return ((this.webSocketSession != null) && this.webSocketSession.isOpen());
 	}
 
 	public void handleMessage(TextMessage message, WebSocketSession wsSession) throws Exception {
