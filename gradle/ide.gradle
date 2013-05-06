@@ -5,6 +5,12 @@ import org.gradle.plugins.ide.eclipse.model.SourceFolder
 apply plugin: "propdeps-eclipse"
 apply plugin: "propdeps-idea"
 
+// Until eclipse fully supports Java 8 use 1.7 source level
+eclipse.jdt {
+	sourceCompatibility = 1.7
+	targetCompatibility = 1.7
+}
+
 // Replace classpath entries with project dependencies (GRADLE-1116)
 eclipse.classpath.file.whenMerged { classpath ->
 	def regexp = /.*?\/([^\/]+)\/build\/[^\/]+\/(?:main|test)/ // only match those that end in main or test (avoids removing necessary entries like build/classes/jaxb)
