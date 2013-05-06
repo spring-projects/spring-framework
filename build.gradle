@@ -506,8 +506,8 @@ project("spring-websocket") {
 		compile(project(":spring-context"))
 		compile(project(":spring-web"))
 
-		optional("org.apache.tomcat:tomcat-servlet-api:8.0-SNAPSHOT") // TODO: replace with "javax.servlet:javax.servlet-api"
-		optional("org.apache.tomcat:tomcat-websocket-api:8.0-SNAPSHOT") // TODO: replace with "javax.websocket:javax.websocket-api"
+		optional("javax.servlet:javax.servlet-api:3.1-b09")
+		optional("javax.websocket:javax.websocket-api:1.0-rc5")
 
 		optional("org.apache.tomcat:tomcat-websocket:8.0-SNAPSHOT") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
@@ -528,10 +528,9 @@ project("spring-websocket") {
 	}
 
 	repositories {
-		maven { url "http://repo.springsource.org/libs-release" }
 		maven { url "https://maven.java.net/content/groups/public/" } // javax.websocket-*
-		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket snapshots
-		maven { url "https://maven.java.net/content/repositories/snapshots" } // tyrus/glassfish snapshots
+		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
+		maven { url "https://maven.java.net/content/repositories/snapshots" } // tyrus snapshots
 	}
 }
 

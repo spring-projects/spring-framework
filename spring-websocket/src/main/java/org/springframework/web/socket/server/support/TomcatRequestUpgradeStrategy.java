@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Endpoint;
 import javax.websocket.server.ServerEndpointConfig;
@@ -55,7 +56,13 @@ public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrateg
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
-		WsHttpUpgradeHandler upgradeHandler = servletRequest.upgrade(WsHttpUpgradeHandler.class);
+		WsHttpUpgradeHandler upgradeHandler;
+		try {
+			upgradeHandler = servletRequest.upgrade(WsHttpUpgradeHandler.class);
+		}
+		catch (ServletException e) {
+			throw new HandshakeFailureException("Unable to create UpgardeHandler", e);
+		}
 
 		WsHandshakeRequest webSocketRequest = new WsHandshakeRequest(servletRequest);
 		try {

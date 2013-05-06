@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Random;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -102,7 +103,13 @@ public class GlassFishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 	private boolean performUpgrade(HttpServletRequest request, HttpServletResponse response,
 			HttpHeaders headers, TyrusEndpoint tyrusEndpoint) throws IOException {
 
-		final TyrusHttpUpgradeHandler upgradeHandler = request.upgrade(TyrusHttpUpgradeHandler.class);
+		final TyrusHttpUpgradeHandler upgradeHandler;
+		try {
+			upgradeHandler = request.upgrade(TyrusHttpUpgradeHandler.class);
+		}
+		catch (ServletException e) {
+			throw new HandshakeFailureException("Unable to create UpgardeHandler", e);
+		}
 
 		Connection connection = createConnection(upgradeHandler, response);
 

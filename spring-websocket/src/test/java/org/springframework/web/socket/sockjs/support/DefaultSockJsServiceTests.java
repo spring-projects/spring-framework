@@ -20,9 +20,8 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.sockjs.StubTaskScheduler;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
 
@@ -42,7 +41,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	@Before
 	public void setUp() {
 		super.setUp();
-		this.service = new DefaultSockJsService(new StubTaskScheduler());
+		this.service = new DefaultSockJsService(new ThreadPoolTaskScheduler());
 		this.service.setValidSockJsPrefixes("/echo");
 	}
 
@@ -61,22 +60,5 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertNotNull(handlers.get(TransportType.HTML_FILE));
 		assertNotNull(handlers.get(TransportType.EVENT_SOURCE));
 	}
-
-	@Test
-	public void xhrSend() throws Exception {
-
-		setRequest("POST", "/echo/000/c5839f69/xhr");
-		this.service.handleRequest(this.request, this.response, new TextWebSocketHandlerAdapter());
-
-		resetResponse();
-		setRequest("POST", "/echo/000/c5839f69/xhr_send");
-		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
-
-		this.service.handleRequest(this.request, this.response, new TextWebSocketHandlerAdapter());
-
-		assertEquals(204, this.servletResponse.getStatus());
-		assertEquals("text/plain;charset=UTF-8", this.servletResponse.getContentType());
-	}
-
 
 }
