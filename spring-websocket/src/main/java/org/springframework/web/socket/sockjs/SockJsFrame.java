@@ -78,23 +78,28 @@ public class SockJsFrame {
 		return this.content.getBytes(Charset.forName("UTF-8"));
 	}
 
-	public static String escapeCharacters(char[] chars) {
+	/**
+	 * See "JSON Unicode Encoding" section of SockJS protocol.
+	 */
+	public static String escapeCharacters(char[] characters) {
 		StringBuilder result = new StringBuilder();
-		for (char ch : chars) {
-			if (isSockJsEscapeCharacter(ch)) {
+		for (char c : characters) {
+			if (isSockJsEscapeCharacter(c)) {
 				result.append('\\').append('u');
-				String hex = Integer.toHexString(ch).toLowerCase();
+				String hex = Integer.toHexString(c).toLowerCase();
 				for (int i = 0; i < (4 - hex.length()); i++) {
 					result.append('0');
 				}
 				result.append(hex);
 			}
 			else {
-				result.append(ch);
+				result.append(c);
 			}
 		}
 		return result.toString();
 	}
+
+	// See `escapable_by_server` var in SockJS protocol (under "JSON Unicode Encoding")
 
 	private static boolean isSockJsEscapeCharacter(char ch) {
 		return (ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u200C' && ch <= '\u200F')
