@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
@@ -42,6 +43,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	public final OutputStream getBody() throws IOException {
 		checkExecuted();
 		return getBodyInternal(this.headers);
+	}
+
+	public Cookies getCookies() {
+		// TODO
+		throw new UnsupportedOperationException();
 	}
 
 	public final ClientHttpResponse execute() throws IOException {
