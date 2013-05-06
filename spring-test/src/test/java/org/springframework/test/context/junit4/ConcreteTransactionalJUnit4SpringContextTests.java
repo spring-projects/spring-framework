@@ -50,7 +50,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @since 2.5
  */
-@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTransactionalJUnit4SpringContextTests
 		implements BeanNameAware, InitializingBean {

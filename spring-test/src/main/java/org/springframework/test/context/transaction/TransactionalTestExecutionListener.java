@@ -93,7 +93,6 @@ import org.springframework.util.StringUtils;
  * @see BeforeTransaction
  * @see AfterTransaction
  */
-@SuppressWarnings("deprecation")
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);

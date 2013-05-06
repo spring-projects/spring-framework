@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("transactionalTests-context.xml")
 @Transactional
-@SuppressWarnings("deprecation")
 public class TimedTransactionalSpringRunnerTests {
 
 	@Test
