@@ -243,11 +243,10 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * This method uses the Java Activation framework, which returns
-	 * "application/octet-stream" when the mime type is unknown (i.e. it never returns
-	 * {@code null}). In order to maintain the {@link ServletContext#getMimeType(String)
-	 * contract, as of version 3.2.2, this method returns null if the mimeType is
-	 * "application/octet-stream".
+	 * This method uses the Java Activation framework, which returns "application/octet-stream"
+	 * when the mime type is unknown (i.e. it never returns {@code null}). In order to maintain
+	 * the {@link ServletContext#getMimeType(String)} contract, this method returns {@code null}
+	 * if the mimeType is "application/octet-stream", as of Spring 3.2.2.
 	 */
 	public String getMimeType(String filePath) {
 		String mimeType = MimeTypeResolver.getMimeType(filePath);
