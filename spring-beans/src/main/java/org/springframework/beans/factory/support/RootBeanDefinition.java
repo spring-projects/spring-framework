@@ -114,33 +114,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Create a new RootBeanDefinition with the given singleton status.
-	 * @param beanClass the class of the bean to instantiate
-	 * @param singleton the singleton status of the bean
-	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
-	 */
-	@Deprecated
-	public RootBeanDefinition(Class beanClass, boolean singleton) {
-		super();
-		setBeanClass(beanClass);
-		setSingleton(singleton);
-	}
-
-	/**
-	 * Create a new RootBeanDefinition for a singleton,
-	 * using the given autowire mode.
-	 * @param beanClass the class of the bean to instantiate
-	 * @param autowireMode by name or type, using the constants in this interface
-	 * @deprecated as of Spring 3.0, in favor of {@link #setAutowireMode} usage
-	 */
-	@Deprecated
-	public RootBeanDefinition(Class beanClass, int autowireMode) {
-		super();
-		setBeanClass(beanClass);
-		setAutowireMode(autowireMode);
-	}
-
-	/**
 	 * Create a new RootBeanDefinition for a singleton,
 	 * using the given autowire mode.
 	 * @param beanClass the class of the bean to instantiate
@@ -155,34 +128,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {
 			setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
 		}
-	}
-
-	/**
-	 * Create a new RootBeanDefinition for a singleton,
-	 * providing property values.
-	 * @param beanClass the class of the bean to instantiate
-	 * @param pvs the property values to apply
-	 * @deprecated as of Spring 3.0, in favor of {@link #getPropertyValues} usage
-	 */
-	@Deprecated
-	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs) {
-		super(null, pvs);
-		setBeanClass(beanClass);
-	}
-
-	/**
-	 * Create a new RootBeanDefinition with the given singleton status,
-	 * providing property values.
-	 * @param beanClass the class of the bean to instantiate
-	 * @param pvs the property values to apply
-	 * @param singleton the singleton status of the bean
-	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
-	 */
-	@Deprecated
-	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs, boolean singleton) {
-		super(null, pvs);
-		setBeanClass(beanClass);
-		setSingleton(singleton);
 	}
 
 	/**

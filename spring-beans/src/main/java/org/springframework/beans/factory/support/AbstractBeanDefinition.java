@@ -136,10 +136,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private String scope = SCOPE_DEFAULT;
 
-	private boolean singleton = true;
-
-	private boolean prototype = false;
-
 	private boolean abstractFlag = false;
 
 	private boolean lazyInit = false;
@@ -409,8 +405,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public void setScope(String scope) {
 		this.scope = scope;
-		this.singleton = SCOPE_SINGLETON.equals(scope) || SCOPE_DEFAULT.equals(scope);
-		this.prototype = SCOPE_PROTOTYPE.equals(scope);
 	}
 
 	/**
@@ -421,32 +415,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
-	 * on all calls. In case of "false", the BeanFactory will apply the <b>Prototype</b>
-	 * design pattern, with each caller requesting an instance getting an independent
-	 * instance. How this is exactly defined will depend on the BeanFactory.
-	 * <p>"Singletons" are the commoner type, so the default is "true".
-	 * Note that as of Spring 2.0, this flag is just an alternative way to
-	 * specify scope="singleton" or scope="prototype".
-	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
-	 * @see #setScope
-	 * @see #SCOPE_SINGLETON
-	 * @see #SCOPE_PROTOTYPE
-	 */
-	@Deprecated
-	public void setSingleton(boolean singleton) {
-		this.scope = (singleton ? SCOPE_SINGLETON : SCOPE_PROTOTYPE);
-		this.singleton = singleton;
-		this.prototype = !singleton;
-	}
-
-	/**
 	 * Return whether this a <b>Singleton</b>, with a single shared instance
 	 * returned from all calls.
 	 * @see #SCOPE_SINGLETON
 	 */
 	public boolean isSingleton() {
-		return this.singleton;
+		return SCOPE_SINGLETON.equals(scope) || SCOPE_DEFAULT.equals(scope);
 	}
 
 	/**
@@ -455,7 +429,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	public boolean isPrototype() {
-		return this.prototype;
+		return SCOPE_PROTOTYPE.equals(scope);
 	}
 
 	/**
