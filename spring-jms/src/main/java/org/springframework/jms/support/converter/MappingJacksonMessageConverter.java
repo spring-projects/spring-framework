@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,28 +28,28 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.xml.transform.Result;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 
-import org.springframework.oxm.Marshaller;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Message converter that uses the Jackson library to convert messages to and from JSON.
+ * Message converter that uses Jackson 1.x to convert messages to and from JSON.
  * Maps an object to a {@link BytesMessage}, or to a {@link TextMessage} if the
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
+ *
+ * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
  *
  * @author Mark Pollack
  * @author Dave Syer
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class MappingJacksonMessageConverter implements MessageConverter {
+public class MappingJacksonMessageConverter implements MessageConverter, BeanClassLoaderAware {
 
 	/**
 	 * The default encoding used for writing to text messages: UTF-8.
@@ -70,6 +70,8 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 	private Map<String, Class<?>> idClassMappings = new HashMap<String, Class<?>>();
 
 	private Map<Class<?>, String> classIdMappings = new HashMap<Class<?>, String>();
+
+	private ClassLoader beanClassLoader;
 
 
 	/**
@@ -145,6 +147,10 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 		}
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		Message message;
@@ -187,7 +193,6 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 	 * @throws JMSException if thrown by JMS methods
 	 * @throws IOException in case of I/O errors
 	 * @see Session#createBytesMessage
-	 * @see Marshaller#marshal(Object, Result)
 	 */
 	protected TextMessage mapToTextMessage(Object object, Session session, ObjectMapper objectMapper)
 			throws JMSException, IOException {
@@ -206,7 +211,6 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 	 * @throws JMSException if thrown by JMS methods
 	 * @throws IOException in case of I/O errors
 	 * @see Session#createBytesMessage
-	 * @see Marshaller#marshal(Object, Result)
 	 */
 	protected BytesMessage mapToBytesMessage(Object object, Session session, ObjectMapper objectMapper)
 			throws JMSException, IOException {
@@ -357,12 +361,13 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 		if (typeId == null) {
 			throw new MessageConversionException("Could not find type id property [" + this.typeIdPropertyName + "]");
 		}
-		Class mappedClass = this.idClassMappings.get(typeId);
+		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
-			return TypeFactory.type(mappedClass);
+			return this.objectMapper.getTypeFactory().constructType(mappedClass);
 		}
 		try {
-			return TypeFactory.type(ClassUtils.forName(typeId, getClass().getClassLoader()));
+			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
+			return this.objectMapper.getTypeFactory().constructType(typeClass);
 		}
 		catch (Throwable ex) {
 			throw new MessageConversionException("Failed to resolve type id [" + typeId + "]", ex);

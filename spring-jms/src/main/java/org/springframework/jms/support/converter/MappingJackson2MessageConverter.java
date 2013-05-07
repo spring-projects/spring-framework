@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,21 +32,24 @@ import javax.jms.TextMessage;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Message converter that uses the Jackson 2 library to convert messages to and from JSON.
- * Maps an object to a {@link javax.jms.BytesMessage}, or to a {@link javax.jms.TextMessage} if the
- * {@link #setTargetType targetType} is set to {@link org.springframework.jms.support.converter.MessageType#TEXT}.
- * Converts from a {@link javax.jms.TextMessage} or {@link javax.jms.BytesMessage} to an object.
+ * Message converter that uses Jackson 2.x to convert messages to and from JSON.
+ * Maps an object to a {@link BytesMessage}, or to a {@link TextMessage} if the
+ * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
+ * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
+ *
+ * <p>Tested against Jackson 2.2; compatible with Jackson 2.0 and higher.
  *
  * @author Mark Pollack
  * @author Dave Syer
  * @author Juergen Hoeller
  * @since 3.1.4
  */
-public class MappingJackson2MessageConverter implements MessageConverter {
+public class MappingJackson2MessageConverter implements MessageConverter, BeanClassLoaderAware {
 
 	/**
 	 * The default encoding used for writing to text messages: UTF-8.
@@ -68,9 +71,11 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 
 	private Map<Class<?>, String> classIdMappings = new HashMap<Class<?>, String>();
 
+	private ClassLoader beanClassLoader;
+
 
 	/**
-	 * Specify the {@link org.codehaus.jackson.map.ObjectMapper} to use instead of using the default.
+	 * Specify the {@link ObjectMapper} to use instead of using the default.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
@@ -78,13 +83,13 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 	}
 
 	/**
-	 * Specify whether {@link #toMessage(Object, javax.jms.Session)} should marshal to a
-	 * {@link javax.jms.BytesMessage} or a {@link javax.jms.TextMessage}.
-	 * <p>The default is {@link org.springframework.jms.support.converter.MessageType#BYTES}, i.e. this converter marshals to
-	 * a {@link javax.jms.BytesMessage}. Note that the default version of this converter
-	 * supports {@link org.springframework.jms.support.converter.MessageType#BYTES} and {@link org.springframework.jms.support.converter.MessageType#TEXT} only.
-	 * @see org.springframework.jms.support.converter.MessageType#BYTES
-	 * @see org.springframework.jms.support.converter.MessageType#TEXT
+	 * Specify whether {@link #toMessage(Object, Session)} should marshal to a
+	 * {@link BytesMessage} or a {@link TextMessage}.
+	 * <p>The default is {@link MessageType#BYTES}, i.e. this converter marshals to
+	 * a {@link BytesMessage}. Note that the default version of this converter
+	 * supports {@link MessageType#BYTES} and {@link MessageType#TEXT} only.
+	 * @see MessageType#BYTES
+	 * @see MessageType#TEXT
 	 */
 	public void setTargetType(MessageType targetType) {
 		Assert.notNull(targetType, "MessageType must not be null");
@@ -142,6 +147,10 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 		}
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		Message message;
@@ -176,15 +185,14 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 
 
 	/**
-	 * Map the given object to a {@link javax.jms.TextMessage}.
+	 * Map the given object to a {@link TextMessage}.
 	 * @param object the object to be mapped
 	 * @param session current JMS session
 	 * @param objectMapper the mapper to use
 	 * @return the resulting message
-	 * @throws javax.jms.JMSException if thrown by JMS methods
-	 * @throws java.io.IOException in case of I/O errors
-	 * @see javax.jms.Session#createBytesMessage
-	 * @see org.springframework.oxm.Marshaller#marshal(Object, javax.xml.transform.Result)
+	 * @throws JMSException if thrown by JMS methods
+	 * @throws IOException in case of I/O errors
+	 * @see Session#createBytesMessage
 	 */
 	protected TextMessage mapToTextMessage(Object object, Session session, ObjectMapper objectMapper)
 			throws JMSException, IOException {
@@ -195,15 +203,14 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 	}
 
 	/**
-	 * Map the given object to a {@link javax.jms.BytesMessage}.
+	 * Map the given object to a {@link BytesMessage}.
 	 * @param object the object to be mapped
 	 * @param session current JMS session
 	 * @param objectMapper the mapper to use
 	 * @return the resulting message
-	 * @throws javax.jms.JMSException if thrown by JMS methods
-	 * @throws java.io.IOException in case of I/O errors
-	 * @see javax.jms.Session#createBytesMessage
-	 * @see org.springframework.oxm.Marshaller#marshal(Object, javax.xml.transform.Result)
+	 * @throws JMSException if thrown by JMS methods
+	 * @throws IOException in case of I/O errors
+	 * @see Session#createBytesMessage
 	 */
 	protected BytesMessage mapToBytesMessage(Object object, Session session, ObjectMapper objectMapper)
 			throws JMSException, IOException {
@@ -222,22 +229,22 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 
 	/**
 	 * Template method that allows for custom message mapping.
-	 * Invoked when {@link #setTargetType} is not {@link org.springframework.jms.support.converter.MessageType#TEXT} or
-	 * {@link org.springframework.jms.support.converter.MessageType#BYTES}.
+	 * Invoked when {@link #setTargetType} is not {@link MessageType#TEXT} or
+	 * {@link MessageType#BYTES}.
 	 * <p>The default implementation throws an {@link IllegalArgumentException}.
 	 * @param object the object to marshal
 	 * @param session the JMS Session
 	 * @param objectMapper the mapper to use
 	 * @param targetType the target message type (other than TEXT or BYTES)
 	 * @return the resulting message
-	 * @throws javax.jms.JMSException if thrown by JMS methods
-	 * @throws java.io.IOException in case of I/O errors
+	 * @throws JMSException if thrown by JMS methods
+	 * @throws IOException in case of I/O errors
 	 */
 	protected Message mapToMessage(Object object, Session session, ObjectMapper objectMapper, MessageType targetType)
 			throws JMSException, IOException {
 
 		throw new IllegalArgumentException("Unsupported message type [" + targetType +
-				"]. MappingJacksonMessageConverter by default only supports TextMessages and BytesMessages.");
+				"]. MappingJackson2MessageConverter by default only supports TextMessages and BytesMessages.");
 	}
 
 	/**
@@ -247,7 +254,7 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 	 * into the configured type id message property.
 	 * @param object the payload object to set a type id for
 	 * @param message the JMS Message to set the type id on
-	 * @throws javax.jms.JMSException if thrown by JMS methods
+	 * @throws JMSException if thrown by JMS methods
 	 * @see #getJavaTypeForMessage(javax.jms.Message)
 	 * @see #setTypeIdPropertyName(String)
 	 * @see #setTypeIdMappings(java.util.Map)
@@ -283,8 +290,8 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 	 * @param message the input message
 	 * @param targetJavaType the target type
 	 * @return the message converted to an object
-	 * @throws javax.jms.JMSException if thrown by JMS
-	 * @throws java.io.IOException in case of I/O errors
+	 * @throws JMSException if thrown by JMS
+	 * @throws IOException in case of I/O errors
 	 */
 	protected Object convertFromTextMessage(TextMessage message, JavaType targetJavaType)
 			throws JMSException, IOException {
@@ -298,8 +305,8 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 	 * @param message the input message
 	 * @param targetJavaType the target type
 	 * @return the message converted to an object
-	 * @throws javax.jms.JMSException if thrown by JMS
-	 * @throws java.io.IOException in case of I/O errors
+	 * @throws JMSException if thrown by JMS
+	 * @throws IOException in case of I/O errors
 	 */
 	protected Object convertFromBytesMessage(BytesMessage message, JavaType targetJavaType)
 			throws JMSException, IOException {
@@ -321,14 +328,14 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 
 	/**
 	 * Template method that allows for custom message mapping.
-	 * Invoked when {@link #setTargetType} is not {@link org.springframework.jms.support.converter.MessageType#TEXT} or
-	 * {@link org.springframework.jms.support.converter.MessageType#BYTES}.
+	 * Invoked when {@link #setTargetType} is not {@link MessageType#TEXT} or
+	 * {@link MessageType#BYTES}.
 	 * <p>The default implementation throws an {@link IllegalArgumentException}.
 	 * @param message the input message
 	 * @param targetJavaType the target type
 	 * @return the message converted to an object
-	 * @throws javax.jms.JMSException if thrown by JMS
-	 * @throws java.io.IOException in case of I/O errors
+	 * @throws JMSException if thrown by JMS
+	 * @throws IOException in case of I/O errors
 	 */
 	protected Object convertFromMessage(Message message, JavaType targetJavaType)
 			throws JMSException, IOException {
@@ -344,7 +351,7 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 	 * and consults the configured type id mapping. This can be overridden with
 	 * a different strategy, e.g. doing some heuristics based on message origin.
 	 * @param message the JMS Message to set the type id on
-	 * @throws javax.jms.JMSException if thrown by JMS methods
+	 * @throws JMSException if thrown by JMS methods
 	 * @see #setTypeIdOnMessage(Object, javax.jms.Message)
 	 * @see #setTypeIdPropertyName(String)
 	 * @see #setTypeIdMappings(java.util.Map)
@@ -354,13 +361,13 @@ public class MappingJackson2MessageConverter implements MessageConverter {
 		if (typeId == null) {
 			throw new MessageConversionException("Could not find type id property [" + this.typeIdPropertyName + "]");
 		}
-		Class mappedClass = this.idClassMappings.get(typeId);
+		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
 			return this.objectMapper.getTypeFactory().constructType(mappedClass);
 		}
 		try {
-			return this.objectMapper.getTypeFactory().constructType(
-					ClassUtils.forName(typeId, getClass().getClassLoader()));
+			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
+			return this.objectMapper.getTypeFactory().constructType(typeClass);
 		}
 		catch (Throwable ex) {
 			throw new MessageConversionException("Failed to resolve type id [" + typeId + "]", ex);
