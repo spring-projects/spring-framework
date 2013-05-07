@@ -79,14 +79,14 @@ import org.springframework.web.util.UriTemplate;
  * {@link #getForObject(String, Class, Map)}), and are capable of substituting any {@linkplain UriTemplate URI templates}
  * in that URL using either a {@code String} variable arguments array, or a {@code Map<String, String>}.
  * The string varargs variant expands the given template variables in order, so that
- * <pre>
+ * <pre class="code">
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42",
  * "21");
  * </pre>
  * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template based
  * on variable name, and is therefore more useful when using many variables, or when a single variable is used multiple
  * times. For example:
- * <pre>
+ * <pre class="code">
  * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
  * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
  * </pre>
@@ -95,7 +95,7 @@ import org.springframework.web.util.UriTemplate;
  * expanded URI multiple times.
  *
  * <p>Furthermore, the {@code String}-argument methods assume that the URL String is unencoded. This means that
- * <pre>
+ * <pre class="code">
  * restTemplate.getForObject("http://example.com/hotel list");
  * </pre>
  * will perform a GET on {@code http://example.com/hotel%20list}. As a result, any URL passed that is already encoded

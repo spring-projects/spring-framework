@@ -109,7 +109,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	/**
 	 * Whether to use the {@link org.codehaus.jackson.util.DefaultPrettyPrinter} when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre>
+	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 	 * converter.setObjectMapper(mapper);

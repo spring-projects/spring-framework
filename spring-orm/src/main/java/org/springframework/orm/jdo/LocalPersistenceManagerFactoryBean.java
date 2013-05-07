@@ -81,7 +81,7 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>For example, in case of <a href="http://www.jpox.org">JPOX</a>:
  *
- * <p><pre>
+ * <p><pre class="code">
  * &lt;bean id="persistenceManagerFactory" class="org.jpox.PersistenceManagerFactoryImpl" destroy-method="close"&gt;
  *   &lt;property name="connectionFactory" ref="dataSource"/&gt;
  *   &lt;property name="nontransactionalRead" value="true"/&gt;

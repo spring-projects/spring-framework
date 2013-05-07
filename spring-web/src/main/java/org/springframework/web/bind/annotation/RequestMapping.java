@@ -321,7 +321,7 @@ public @interface RequestMapping {
 	 * specified header is <i>not</i> supposed to be present in the request.
 	 * <p>Also supports media type wildcards (*), for headers such as Accept
 	 * and Content-Type. For instance,
-	 * <pre>
+	 * <pre class="code">
 	 * &#064;RequestMapping(value = "/something", headers = "content-type=text/*")
 	 * </pre>
 	 * will match requests with a Content-Type of "text/html", "text/plain", etc.
@@ -340,7 +340,7 @@ public @interface RequestMapping {
 	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
 	 * Examples:
-	 * <pre>
+	 * <pre class="code">
 	 * consumes = "text/plain"
 	 * consumes = {"text/plain", "application/*"}
 	 * </pre>
@@ -359,7 +359,7 @@ public @interface RequestMapping {
 	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Accept} matches one of these media types.
 	 * Examples:
-	 * <pre>
+	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
 	 * </pre>

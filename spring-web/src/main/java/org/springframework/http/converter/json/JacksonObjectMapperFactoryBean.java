@@ -36,7 +36,7 @@ import org.springframework.beans.factory.InitializingBean;
  * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with MappingJacksonHttpMessageConverter:
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
  * 	&lt;property name="objectMapper">
  * 		&lt;bean class="org.springframework.web.context.support.JacksonObjectMapperFactoryBean"
@@ -48,7 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
  * </pre>
  *
  * <p>Example usage with MappingJacksonJsonView:
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
  * 	&lt;property name="objectMapper">
  * 		&lt;bean class="org.springframework.web.context.support.JacksonObjectMapperFactoryBean"
@@ -63,7 +63,7 @@ import org.springframework.beans.factory.InitializingBean;
  * options), you can still use the more general methods
  * {@link #setFeaturesToEnable(Object[])} and {@link #setFeaturesToDisable(Object[])}.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.web.context.support.JacksonObjectMapperFactoryBean">
  * 	&lt;property name="featuresToEnable">
  * 		&lt;array>

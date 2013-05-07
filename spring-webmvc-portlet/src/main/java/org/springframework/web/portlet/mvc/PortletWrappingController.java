@@ -61,7 +61,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  *
  * <p><b>Example:</b>
  *
- * <pre>&lt;bean id="wrappingController" class="org.springframework.web.portlet.mvc.PortletWrappingController"&gt;
+ * <pre class="code">&lt;bean id="wrappingController" class="org.springframework.web.portlet.mvc.PortletWrappingController"&gt;
  *   &lt;property name="portletClass"&gt;
  *     &lt;value&gt;org.springframework.web.portlet.sample.HelloWorldPortlet&lt;/value&gt;
  *   &lt;/property&gt;

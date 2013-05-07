@@ -449,7 +449,7 @@ public abstract class MethodVisitor {
      * constant types, implementations of this method should check for
      * unexpected constant types, like this:
      * 
-     * <pre>
+     * <pre class="code">
      * if (cst instanceof Integer) {
      *     // ...
      * } else if (cst instanceof Float) {

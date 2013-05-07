@@ -29,7 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
  * <p>Configure this handler proxy in your {@code faces-config.xml} file
  * as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;application&gt;
  *   ...
  *   &lt;navigation-handler&gt;
@@ -43,7 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Spring bean definition like the following. However, all of Spring's bean configuration
  * power can be applied to such a bean, in particular all flavors of dependency injection.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean name="jsfNavigationHandler" class="mypackage.MyNavigationHandler"&gt;
  *   &lt;property name="myProperty" ref="myOtherBean"/&gt;
  * &lt;/bean&gt;</pre>

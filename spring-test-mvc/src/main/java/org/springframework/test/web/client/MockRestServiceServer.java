@@ -39,7 +39,7 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * actual running server.
  *
  * <p>Below is an example:
- * <pre>
+ * <pre class="code">
  * RestTemplate restTemplate = new RestTemplate()
  * MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
  *

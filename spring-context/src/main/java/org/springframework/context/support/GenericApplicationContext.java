@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  *
  * <p>Usage example:
  *
- * <pre>
+ * <pre class="code">
  * GenericApplicationContext ctx = new GenericApplicationContext();
  * XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
  * xmlReader.loadBeanDefinitions(new ClassPathResource("applicationContext.xml"));

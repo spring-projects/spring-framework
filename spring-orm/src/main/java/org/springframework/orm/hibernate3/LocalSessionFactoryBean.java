@@ -445,7 +445,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * This configuration setting corresponds to the &lt;class-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
-	 * <pre>
+	 * <pre class="code">
 	 * &lt;property name="entityCacheStrategies"&gt;
 	 *   &lt;props&gt;
 	 *     &lt;prop key="com.mycompany.Customer"&gt;read-write&lt;/prop&gt;
@@ -465,7 +465,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * This configuration setting corresponds to the &lt;collection-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
-	 * <pre>
+	 * <pre class="code">
 	 * &lt;property name="collectionCacheStrategies"&gt;
 	 *   &lt;props&gt;
 	 *     &lt;prop key="com.mycompany.Order.items">read-write&lt;/prop&gt;

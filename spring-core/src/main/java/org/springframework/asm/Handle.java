@@ -154,7 +154,7 @@ public final class Handle {
      * Returns the textual representation of this handle. The textual
      * representation is:
      * 
-     * <pre>
+     * <pre class="code">
      * owner '.' name desc ' ' '(' tag ')'
      * </pre>
      * 

@@ -36,7 +36,7 @@ import org.springframework.web.servlet.FlashMap;
  * automatically propagated to the "output" FlashMap of the current request.
  *
  * <p>Example usage in an {@code @Controller}:
- * <pre>
+ * <pre class="code">
  * &#064;RequestMapping(value = "/accounts", method = RequestMethod.POST)
  * public String handle(Account account, BindingResult result, RedirectAttributes redirectAttrs) {
  *   if (result.hasErrors()) {

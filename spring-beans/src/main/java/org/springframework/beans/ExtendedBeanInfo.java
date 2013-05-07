@@ -44,7 +44,7 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  * Decorator for a standard {@link BeanInfo} object, e.g. as created by
  * {@link Introspector#getBeanInfo(Class)}, designed to discover and register static
  * and/or non-void returning setter methods. For example:
- * <pre>{@code
+ * <pre class="code">
  * public class Bean {
  *     private Foo foo;
  *
@@ -56,7 +56,7 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  *         this.foo = foo;
  *         return this;
  *     }
- * }}</pre>
+ * }</pre>
  * The standard JavaBeans {@code Introspector} will discover the {@code getFoo} read
  * method, but will bypass the {@code #setFoo(Foo)} write method, because its non-void
  * returning signature does not comply with the JavaBeans specification.

@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * <p>Example usage with
  * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
  *   &lt;property name="objectMapper">
  *     &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean"
@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  *
  * <p>Example usage with MappingJackson2JsonView:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
  *   &lt;property name="objectMapper">
  *     &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean"
@@ -78,7 +78,7 @@ import org.springframework.util.Assert;
  * options), you can still use the more general methods
  * {@link #setFeaturesToEnable(Object[])} and {@link #setFeaturesToDisable(Object[])}.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.web.context.support.Jackson2ObjectMapperFactoryBean">
  *   &lt;property name="featuresToEnable">
  *     &lt;array>

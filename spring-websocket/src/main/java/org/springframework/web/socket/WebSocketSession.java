@@ -74,7 +74,7 @@ public interface WebSocketSession {
 
 	/**
 	 * Close the WebSocket connection with status 1000, i.e. equivalent to:
-	 * <pre>
+	 * <pre class="code">
 	 * session.close(CloseStatus.NORMAL);
 	 * </pre>
 	 */

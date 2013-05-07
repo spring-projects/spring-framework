@@ -37,7 +37,7 @@ import org.springframework.util.CollectionUtils;
  * view class. For example you might add the following code to your
  * {@code Controller}:
  *
- * <pre>
+ * <pre class="code">
  * Map<String, Object> model = new HashMap<String, Object>();
  * model.put("format", "pdf");</pre>
  *

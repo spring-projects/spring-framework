@@ -63,7 +63,7 @@ import org.springframework.web.util.UriUtils;
  * is 'false'.  When setting the URL value into a variable, escaping is not recommended.
  *
  * <p>Example usage:
- * <pre>&lt;spring:url value="/url/path/{variableName}"&gt;
+ * <pre class="code">&lt;spring:url value="/url/path/{variableName}"&gt;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
  * Results in:

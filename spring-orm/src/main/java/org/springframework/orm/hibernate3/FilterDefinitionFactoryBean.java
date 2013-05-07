@@ -35,7 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
  * definition, as the list element for the "filterDefinitions" bean property.
  * For example:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
  *   ...
  *   &lt;property name="filterDefinitions"&gt;
