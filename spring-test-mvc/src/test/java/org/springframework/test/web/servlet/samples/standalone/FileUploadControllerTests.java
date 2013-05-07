@@ -40,15 +40,9 @@ public class FileUploadControllerTests {
 	@Test
 	public void readString() throws Exception {
 		MockMultipartFile file = new MockMultipartFile("file", "orig", null, "bar".getBytes());
-		try {
-			standaloneSetup(new FileUploadController()).build()
-					.perform(fileUpload("/fileupload").file(file))
-					.andExpect(model().attribute("message", "File 'orig' uploaded successfully"));
-		}
-		catch (NoSuchMethodError err) {
-			// TODO: on JDK 8 - no idea why
-			err.printStackTrace();
-		}
+		standaloneSetup(new FileUploadController()).build()
+				.perform(fileUpload("/fileupload").file(file))
+				.andExpect(model().attribute("message", "File 'orig' uploaded successfully"));
 	}
 
 

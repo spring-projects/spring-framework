@@ -39,14 +39,8 @@ public class MockMultipartHttpServletRequestBuilderTests {
 		assertEquals(MockMultipartHttpServletRequestBuilder.class, result.getClass());
 
 		MockMultipartHttpServletRequestBuilder builder = (MockMultipartHttpServletRequestBuilder) result;
-		try {
-			MockHttpServletRequest request = builder.buildRequest(new MockServletContext());
-			assertEquals("UTF-8", request.getCharacterEncoding());
-		}
-		catch (NoSuchMethodError err) {
-			// TODO: on JDK 8 - no idea why
-			err.printStackTrace();
-		}
+		MockHttpServletRequest request = builder.buildRequest(new MockServletContext());
+		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 
 }
