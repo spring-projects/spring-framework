@@ -79,7 +79,7 @@ configure(allprojects) { project ->
 	}
 
 	ext.javadocLinks = [
-		"http://docs.oracle.com/javase/6/docs/api",
+		"http://docs.oracle.com/javase/6/docs/api/",
 		"http://docs.oracle.com/javaee/6/api/",
 		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/", // CommonJ
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
@@ -427,6 +427,7 @@ project("spring-context-support") {
 
 project("spring-web") {
 	description = "Spring Web"
+
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans")) // for MultiPartFilter
@@ -460,6 +461,36 @@ project("spring-web") {
 
 	// pick up ContextLoader.properties in src/main
 	sourceSets.main.resources.srcDirs += "src/main/java"
+}
+
+project("spring-websocket") {
+	description = "Spring WebSocket support"
+
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-context"))
+		compile(project(":spring-web"))
+		optional("javax.servlet:javax.servlet-api:3.1-b09")
+		optional("javax.websocket:javax.websocket-api:1.0-rc5")
+		optional("org.apache.tomcat:tomcat-websocket:8.0-SNAPSHOT") {
+			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+		}
+		optional("org.glassfish.tyrus:tyrus-websocket-core:1.0-SNAPSHOT")
+		optional("org.glassfish.tyrus:tyrus-container-servlet:1.0-SNAPSHOT")
+		optional("org.eclipse.jetty:jetty-webapp:9.0.1.v20130408") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		optional("org.eclipse.jetty.websocket:websocket-server:9.0.1.v20130408")
+		optional("org.eclipse.jetty.websocket:websocket-client:9.0.1.v20130408")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // required for SockJS support currently
+	}
+
+	repositories {
+		maven { url "https://maven.java.net/content/groups/public/" } // javax.websocket-*
+		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
+		maven { url "https://maven.java.net/content/repositories/snapshots" } // tyrus snapshots
+	}
 }
 
 project("spring-orm") {
@@ -499,41 +530,6 @@ project("spring-orm-hibernate4") {
 		optional("org.hibernate:hibernate-entitymanager:4.2.1.Final")
 		optional(project(":spring-web"))
 		optional("javax.servlet:javax.servlet-api:3.0.1")
-	}
-}
-
-project("spring-websocket") {
-	description = "Spring WebSocket support"
-	dependencies {
-		compile(project(":spring-core"))
-		compile(project(":spring-context"))
-		compile(project(":spring-web"))
-
-		optional("javax.servlet:javax.servlet-api:3.1-b09")
-		optional("javax.websocket:javax.websocket-api:1.0-rc5")
-
-		optional("org.apache.tomcat:tomcat-websocket:8.0-SNAPSHOT") {
-			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
-			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
-		}
-
-		optional("org.glassfish.tyrus:tyrus-websocket-core:1.0-SNAPSHOT")
-		optional("org.glassfish.tyrus:tyrus-container-servlet:1.0-SNAPSHOT")
-
-		optional("org.eclipse.jetty:jetty-webapp:9.0.1.v20130408") {
-			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
-		}
-		optional("org.eclipse.jetty.websocket:websocket-server:9.0.1.v20130408")
-		optional("org.eclipse.jetty.websocket:websocket-client:9.0.1.v20130408")
-
-		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1") // required for SockJS support currently
-
-	}
-
-	repositories {
-		maven { url "https://maven.java.net/content/groups/public/" } // javax.websocket-*
-		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
-		maven { url "https://maven.java.net/content/repositories/snapshots" } // tyrus snapshots
 	}
 }
 
