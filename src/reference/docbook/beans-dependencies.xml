@@ -627,7 +627,7 @@ public class ExampleBean {
 
         <programlisting language="xml">&lt;property name="targetName"&gt;
  <lineannotation>&lt;!-- a bean with id 'theTargetBean' must exist; otherwise an exception will be thrown --&gt;</lineannotation>
- &lt;idref local="theTargetBean"/&gt;
+ &lt;idref bean="theTargetBean"/&gt;
 &lt;/property&gt;</programlisting>
 
         <para>A common place (at least in versions earlier than Spring 2.0)
@@ -677,7 +677,7 @@ public class ExampleBean {
         errors as early as possible) if the target bean is in the same XML
         file.</para>
 
-      <programlisting language="xml">&lt;ref local="someBean"/&gt;</programlisting>
+      <programlisting language="xml">&lt;ref bean="someBean"/&gt;</programlisting>
 
       <para>Specifying the target bean through the <literal>parent</literal>
         attribute creates a reference to a bean that is in a parent container of
