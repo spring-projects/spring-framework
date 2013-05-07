@@ -16,13 +16,17 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
+import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  */
 public abstract class AbstractConfigurableJasperReportsViewTests extends AbstractJasperReportsViewTests {
 
+	@Test
 	public void testNoConfiguredExporter() throws Exception {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
 		view.setUrl(COMPILED_REPORT);

@@ -22,11 +22,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import junit.framework.TestCase;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.tests.Assume;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.ui.jasperreports.ProductBean;
 import org.springframework.util.ClassUtils;
@@ -37,7 +39,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public abstract class AbstractJasperReportsTests extends TestCase {
+public abstract class AbstractJasperReportsTests {
 
 	protected static final String COMPILED_REPORT = "/org/springframework/ui/jasperreports/DataSourceReport.jasper";
 
@@ -54,7 +56,12 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	protected MockHttpServletResponse response;
 
 
-	@Override
+	@BeforeClass
+	public static void assumptions() {
+		Assume.canLoadNativeDirFonts();
+	}
+
+	@Before
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();

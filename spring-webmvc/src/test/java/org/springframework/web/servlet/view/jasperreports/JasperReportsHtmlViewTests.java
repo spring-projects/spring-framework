@@ -18,12 +18,15 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
+import org.junit.Test;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -40,6 +43,7 @@ public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 		return "text/html";
 	}
 
+	@Test
 	public void testConfigureExporterParametersWithEncodingFromPropertiesFile() throws Exception {
 		GenericWebApplicationContext ac = new GenericWebApplicationContext();
 		ac.setServletContext(new MockServletContext());
