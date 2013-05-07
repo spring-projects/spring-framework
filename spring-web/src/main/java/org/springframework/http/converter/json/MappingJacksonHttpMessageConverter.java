@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
@@ -44,11 +43,13 @@ import org.springframework.util.Assert;
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
- * {@link #setSupportedMediaTypes(List) supportedMediaTypes} property.
+ * {@link #setSupportedMediaTypes supportedMediaTypes} property.
+ *
+ * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.web.servlet.view.json.MappingJacksonJsonView
  */
 public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
@@ -67,12 +68,14 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * Construct a new {@code MappingJacksonHttpMessageConverter}.
 	 */
 	public MappingJacksonHttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET),
+				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
+
 	/**
-	 * Set the {@code ObjectMapper} for this view. If not set, a default
-	 * {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * Set the {@code ObjectMapper} for this view.
+	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON
 	 * serialization process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory}
 	 * can be configured that provides custom serializers for specific types. The other option for refining
@@ -83,12 +86,6 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 		configurePrettyPrint();
-	}
-
-	private void configurePrettyPrint() {
-		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, this.prettyPrint);
-		}
 	}
 
 	/**
@@ -122,6 +119,12 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	public void setPrettyPrint(boolean prettyPrint) {
 		this.prettyPrint = prettyPrint;
 		configurePrettyPrint();
+	}
+
+	private void configurePrettyPrint() {
+		if (this.prettyPrint != null) {
+			this.objectMapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, this.prettyPrint);
+		}
 	}
 
 

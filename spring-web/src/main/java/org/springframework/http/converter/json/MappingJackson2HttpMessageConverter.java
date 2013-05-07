@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -45,13 +44,14 @@ import org.springframework.util.Assert;
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
- * {@link #setSupportedMediaTypes(List) supportedMediaTypes} property.
+ * {@link #setSupportedMediaTypes supportedMediaTypes} property.
+ *
+ * <p>Tested against Jackson 2.2; compatible with Jackson 2.0 and higher.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
  * @author Rossen Stoyanchev
  * @since 3.1.2
- * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
@@ -70,12 +70,14 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 * Construct a new {@code MappingJackson2HttpMessageConverter}.
 	 */
 	public MappingJackson2HttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET),
+				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
+
 	/**
-	 * Set the {@code ObjectMapper} for this view. If not set, a default
-	 * {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * Set the {@code ObjectMapper} for this view.
+	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON
 	 * serialization process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory}
 	 * can be configured that provides custom serializers for specific types. The other option for refining
@@ -86,12 +88,6 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 		configurePrettyPrint();
-	}
-
-	private void configurePrettyPrint() {
-		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
-		}
 	}
 
 	/**
@@ -124,6 +120,12 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	public void setPrettyPrint(boolean prettyPrint) {
 		this.prettyPrint = prettyPrint;
 		configurePrettyPrint();
+	}
+
+	private void configurePrettyPrint() {
+		if (this.prettyPrint != null) {
+			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
+		}
 	}
 
 
@@ -172,7 +174,6 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 	}
 
-
 	@Override
 	protected void writeInternal(Object object, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -180,6 +181,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
 		// The following has been deprecated as late as Jackson 2.2 (April 2013);
 		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
+		@SuppressWarnings("deprecation")
 		JsonGenerator jsonGenerator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
 
