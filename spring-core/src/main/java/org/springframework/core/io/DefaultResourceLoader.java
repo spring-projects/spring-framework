@@ -122,7 +122,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * ClassPathResource that explicitly expresses a context-relative path
 	 * through implementing the ContextResource interface.
 	 */
-	private static class ClassPathContextResource extends ClassPathResource implements ContextResource {
+	protected static class ClassPathContextResource extends ClassPathResource implements ContextResource {
 
 		public ClassPathContextResource(String path, ClassLoader classLoader) {
 			super(path, classLoader);
