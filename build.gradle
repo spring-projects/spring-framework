@@ -79,7 +79,6 @@ configure(allprojects) { project ->
 	}
 
 	ext.javadocLinks = [
-		"http://docs.oracle.com/javase/6/docs/api/",
 		"http://docs.oracle.com/javaee/6/api/",
 		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/", // CommonJ
 		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
