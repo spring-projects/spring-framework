@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,13 @@ public class StaticApplicationContext extends GenericApplicationContext {
 
 
 	/**
+	 * Overridden to turn it into a no-op, to be more lenient towards test cases.
+	 */
+	@Override
+	protected void assertBeanFactoryActive() {
+	}
+
+	/**
 	 * Return the internal StaticMessageSource used by this context.
 	 * Can be used to register messages on it.
 	 * @see #addMessage
@@ -76,7 +83,6 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	public final StaticMessageSource getStaticMessageSource() {
 		return this.staticMessageSource;
 	}
-
 
 	/**
 	 * Register a singleton bean with the underlying bean factory.

@@ -1094,24 +1094,50 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 	}
 
+	/**
+	 * Assert that this context's BeanFactory is currently active,
+	 * throwing an {@link IllegalStateException} if it isn't.
+	 * <p>Invoked by all {@link BeanFactory} delegation methods that depend
+	 * on an active context, i.e. in particular all bean accessor methods.
+	 * <p>The default implementation checks the {@link #isActive() 'active'} status
+	 * of this context overall. May be overridden for more specific checks, or for a
+	 * no-op if {@link #getBeanFactory()} itself throws an exception in such a case.
+	 */
+	protected void assertBeanFactoryActive() {
+		synchronized (this.activeMonitor) {
+			if (!this.active) {
+				if (this.closed) {
+					throw new IllegalStateException(getDisplayName() + " has been closed already");
+				}
+				else {
+					throw new IllegalStateException(getDisplayName() + " has not been refreshed yet");
+				}
+			}
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
 	public Object getBean(String name) throws BeansException {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name);
 	}
 
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name, requiredType);
 	}
 
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBean(requiredType);
 	}
 
 	public Object getBean(String name, Object... args) throws BeansException {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBean(name, args);
 	}
 
@@ -1120,18 +1146,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
 		return getBeanFactory().isSingleton(name);
 	}
 
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
 		return getBeanFactory().isPrototype(name);
 	}
 
 	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
 		return getBeanFactory().isTypeMatch(name, targetType);
 	}
 
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
 		return getBeanFactory().getType(name);
 	}
 
@@ -1157,30 +1187,36 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	public String[] getBeanNamesForType(Class<?> type) {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBeanNamesForType(type);
 	}
 
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+		assertBeanFactoryActive();
 		return getBeanFactory().getBeansOfType(type);
 	}
 
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
+		assertBeanFactoryActive();
 		return getBeanFactory().getBeansOfType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
+		assertBeanFactoryActive();
 		return getBeanFactory().getBeansWithAnnotation(annotationType);
 	}
 
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
+		assertBeanFactoryActive();
 		return getBeanFactory().findAnnotationOnBean(beanName, annotationType);
 	}
 
