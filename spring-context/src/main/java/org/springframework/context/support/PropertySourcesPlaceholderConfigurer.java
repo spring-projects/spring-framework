@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
+import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -78,6 +79,8 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 
 
 	private MutablePropertySources propertySources;
+
+	private PropertySources appliedPropertySources;
 
 	private Environment environment;
 
@@ -149,6 +152,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		}
 
 		this.processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
+		this.appliedPropertySources = this.propertySources;
 	}
 
 	/**
@@ -184,6 +188,18 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) {
 		throw new UnsupportedOperationException(
 				"Call processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver) instead");
+	}
+
+	/**
+	 * Returns the property sources that were actually applied during
+	 * {@link #postProcessBeanFactory(ConfigurableListableBeanFactory) post-processing}.
+	 * @return the property sources that were applied
+	 * @throws IllegalStateException if the property sources have not yet been applied
+	 * @since 4.0
+	 */
+	public PropertySources getAppliedPropertySources() throws IllegalStateException {
+		Assert.state(this.appliedPropertySources != null, "PropertySources have not get been applied");
+		return this.appliedPropertySources;
 	}
 
 }
