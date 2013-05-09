@@ -32,8 +32,14 @@ import org.springframework.core.type.AnnotationMetadata;
  * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}</li>
  * </ul>
  *
+ * <p>ImportSelectors are usually processed in the same way as regular {@code @Import}
+ * annotations, however, it is also possible to defer selection of imports until all
+ * {@code @Configuration} classes have been processed (see {@link DeferredImportSelector}
+ * for details).
+ *
  * @author Chris Beams
  * @since 3.1
+ * @see DeferredImportSelector
  * @see Import
  * @see ImportBeanDefinitionRegistrar
  * @see Configuration

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
@@ -275,20 +276,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
-		for (BeanDefinitionHolder holder : configCandidates) {
-			BeanDefinition bd = holder.getBeanDefinition();
-			try {
-				if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
-					parser.parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
-				}
-				else {
-					parser.parse(bd.getBeanClassName(), holder.getBeanName());
-				}
-			}
-			catch (IOException ex) {
-				throw new BeanDefinitionStoreException("Failed to load bean class: " + bd.getBeanClassName(), ex);
-			}
-		}
+		parser.parse(configCandidates);
 		parser.validate();
 
 		// Handle any @PropertySource annotations
@@ -312,7 +300,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory,
 					this.resourceLoader, this.environment, this.importBeanNameGenerator);
 		}
-		this.reader.loadBeanDefinitions(parser.getConfigurationClasses());
+		for (ConfigurationClass configurationClass : parser.getConfigurationClasses()) {
+			if (!ConditionalAnnotationHelper.shouldSkip(configurationClass, registry,
+					this.environment, this.importBeanNameGenerator)) {
+				reader.loadBeanDefinitionsForConfigurationClass(configurationClass);
+			}
+		}
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {
