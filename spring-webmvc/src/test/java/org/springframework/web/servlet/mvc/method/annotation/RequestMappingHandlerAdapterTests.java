@@ -181,7 +181,8 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
-		assertEquals("globalAttrValue", mav.getModel().get("globalAttr"));
+		assertEquals("lAttr1", mav.getModel().get("attr1"));
+		assertEquals("gAttr2", mav.getModel().get("attr2"));
 	}
 
 
@@ -199,6 +200,11 @@ public class RequestMappingHandlerAdapterTests {
 
 	@SuppressWarnings("unused")
 	private static class SimpleController {
+
+		@ModelAttribute
+		public void addAttributes(Model model) {
+			model.addAttribute("attr1", "lAttr1");
+		}
 
 		public String handle() {
 			return null;
@@ -227,7 +233,8 @@ public class RequestMappingHandlerAdapterTests {
 
 		@ModelAttribute
 		public void addAttributes(Model model) {
-			model.addAttribute("globalAttr", "globalAttrValue");
+			model.addAttribute("attr1", "gAttr1");
+			model.addAttribute("attr2", "gAttr2");
 		}
 	}
 
