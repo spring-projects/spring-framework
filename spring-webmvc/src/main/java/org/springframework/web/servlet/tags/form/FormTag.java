@@ -111,6 +111,8 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private String action;
 
+	private String servletRelativeAction;
+
 	private String method = DEFAULT_METHOD;
 
 	private String target;
@@ -194,6 +196,21 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	protected String getAction() {
 		return this.action;
+	}
+
+	/**
+	 * Set the value of the '{@code action}' attribute.
+	 * <p>May be a runtime expression.
+	 */
+	public void setServletRelativeAction(String servletRelativeaction) {
+		this.servletRelativeAction = (servletRelativeaction != null ? servletRelativeaction : "");
+	}
+
+	/**
+	 * Get the value of the '{@code action}' attribute.
+	 */
+	protected String getServletRelativeAction() {
+		return this.servletRelativeAction;
 	}
 
 	/**
@@ -403,21 +420,29 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Resolve the value of the '{@code action}' attribute.
-	 * <p>If the user configured an '{@code action}' value then
-	 * the result of evaluating this value is used. Otherwise, the
-	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI}
-	 * is used.
+	 * <p>If the user configured an '{@code action}' value then the result of
+	 * evaluating this value is used. If the user configured an
+	 * '{@code servletRelativeAction}' value then the value is prepended
+	 * with the context and servlet paths, and the result is used. Otherwise, the
+	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri()
+	 * originating URI} is used.
+	 *
 	 * @return the value that is to be used for the '{@code action}' attribute
 	 */
 	protected String resolveAction() throws JspException {
 		String action = getAction();
+		String servletRelativeAction = getServletRelativeAction();
 		if (StringUtils.hasText(action)) {
-			String pathToServlet = getRequestContext().getPathToServlet();
-			if (action.startsWith("/") && !action.startsWith(getRequestContext().getContextPath())) {
-				action = pathToServlet + action;
-			}
 			action = getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
 			return processAction(action);
+		}
+		else if (StringUtils.hasText(servletRelativeAction)) {
+			String pathToServlet = getRequestContext().getPathToServlet();
+			if (servletRelativeAction.startsWith("/") && !servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
+				servletRelativeAction = pathToServlet + servletRelativeAction;
+			}
+			servletRelativeAction = getDisplayString(evaluate(ACTION_ATTRIBUTE, servletRelativeAction));
+			return processAction(servletRelativeAction);
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();

@@ -179,7 +179,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onreset = "onreset";
 
 		this.tag.setCommandName(commandName);
-		this.tag.setAction(action);
+		this.tag.setServletRelativeAction(action);
 		this.tag.setMethod(method);
 		this.tag.setEnctype(enctype);
 		this.tag.setOnsubmit(onsubmit);
