@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * agnostic of the actual testing framework in use.
  *
  * @author Sam Brannen
- * @author Juergen Hoellereasymock
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class TestContext extends AttributeAccessorSupport {
