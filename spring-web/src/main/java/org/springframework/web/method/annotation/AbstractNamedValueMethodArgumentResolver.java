@@ -74,6 +74,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		this.expressionContext = (beanFactory != null) ? new BeanExpressionContext(beanFactory, new RequestScope()) : null;
 	}
 
+	@Override
 	public final Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
@@ -96,9 +97,15 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			arg = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
+		boolean emptyArgValue = "".equals(arg);
+
 		if (binderFactory != null) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 			arg = binder.convertIfNecessary(arg, paramType, parameter);
+		}
+
+		if (emptyArgValue && (arg == null)) {
+			handleMissingValue(namedValueInfo.name, parameter);
 		}
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);
