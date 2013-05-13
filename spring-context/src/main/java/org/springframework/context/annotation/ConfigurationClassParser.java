@@ -23,9 +23,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -76,6 +79,7 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Rob Winch
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -89,8 +93,8 @@ class ConfigurationClassParser {
 
 	private final Set<String> knownSuperclasses = new LinkedHashSet<String>();
 
-	private final Set<ConfigurationClass> configurationClasses =
-		new LinkedHashSet<ConfigurationClass>();
+	private final Map<ConfigurationClass,ConfigurationClass> configurationClasses =
+		new LinkedHashMap<ConfigurationClass,ConfigurationClass>();
 
 	private final Stack<PropertySource<?>> propertySources =
 		new Stack<PropertySource<?>>();
@@ -157,13 +161,60 @@ class ConfigurationClassParser {
 		}
 		while (metadata != null);
 
-		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
+		if (getConfigurationClasses().contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
 			// Let's remove the old one and go with the new one.
-			this.configurationClasses.remove(configClass);
+			ConfigurationClass originalConfigClass = removeConfigurationClass(configClass);
+
+			mergeFromOriginalConfig(originalConfigClass,configClass);
 		}
 
-		this.configurationClasses.add(configClass);
+		addConfigurationClass(configClass);
+	}
+
+
+	/**
+	 * Merges from the original {@link ConfigurationClass} to the new
+	 * {@link ConfigurationClass}. This is necessary if parent classes have already been
+	 * processed.
+	 *
+	 * @param originalConfigClass the original {@link ConfigurationClass} that may have
+	 *        additional metadata
+	 * @param configClass the new {@link ConfigurationClass} that will have metadata added
+	 *        to it if necessary
+	 */
+	private void mergeFromOriginalConfig(ConfigurationClass originalConfigClass,
+			ConfigurationClass configClass) {
+
+		Set<String> beanMethodNames = new HashSet<String>();
+		for(BeanMethod beanMethod : configClass.getBeanMethods()) {
+			beanMethodNames.add(createBeanMethodName(beanMethod));
+		}
+
+		for(BeanMethod originalBeanMethod : originalConfigClass.getBeanMethods()) {
+			String originalBeanMethodName = createBeanMethodName(originalBeanMethod);
+			if(!beanMethodNames.contains(originalBeanMethodName)) {
+				configClass.addBeanMethod(new BeanMethod(originalBeanMethod.getMetadata(), configClass));
+			}
+		}
+		for(Entry<String, Class<? extends BeanDefinitionReader>> originalImportedEntry : originalConfigClass.getImportedResources().entrySet()) {
+			if(!configClass.getImportedResources().containsKey(originalImportedEntry.getKey())) {
+				configClass.addImportedResource(originalImportedEntry.getKey(), originalImportedEntry.getValue());
+			}
+		}
+	}
+
+	/**
+	 * Converts a {@link BeanMethod} into the fully qualified name of the Method
+	 *
+	 * @param beanMethod
+	 * @return fully qualified name of the {@link BeanMethod}
+	 */
+	private String createBeanMethodName(BeanMethod beanMethod) {
+		String hashDelim = "#";
+		String dClassName = beanMethod.getMetadata().getDeclaringClassName();
+		String methodName = beanMethod.getMetadata().getMethodName();
+		return dClassName + hashDelim + methodName;
 	}
 
 	/**
@@ -249,6 +300,14 @@ class ConfigurationClassParser {
 
 		// no superclass, processing is complete
 		return null;
+	}
+
+	private void addConfigurationClass(ConfigurationClass configClass) {
+		this.configurationClasses.put(configClass,configClass);
+	}
+
+	private ConfigurationClass removeConfigurationClass(ConfigurationClass configClass) {
+		return this.configurationClasses.remove(configClass);
 	}
 
 	/**
@@ -441,13 +500,13 @@ class ConfigurationClassParser {
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate() {
-		for (ConfigurationClass configClass : this.configurationClasses) {
+		for (ConfigurationClass configClass : getConfigurationClasses()) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
-		return this.configurationClasses;
+		return this.configurationClasses.keySet();
 	}
 
 	public Stack<PropertySource<?>> getPropertySources() {
