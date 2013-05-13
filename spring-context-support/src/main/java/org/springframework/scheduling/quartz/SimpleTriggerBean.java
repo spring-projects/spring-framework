@@ -144,15 +144,18 @@ public class SimpleTriggerBean extends SimpleTrigger
 		this.jobDetail = jobDetail;
 	}
 
+	@Override
 	public JobDetail getJobDetail() {
 		return this.jobDetail;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws ParseException {
 		if (getName() == null) {
 			setName(this.beanName);

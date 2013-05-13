@@ -75,6 +75,7 @@ class AspectJPrecedenceComparator implements Comparator {
 	}
 
 
+	@Override
 	public int compare(Object o1, Object o2) {
 		if (!(o1 instanceof Advisor && o2 instanceof Advisor)) {
 			throw new IllegalArgumentException(

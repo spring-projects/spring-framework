@@ -128,6 +128,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws ResourceException {
 		if (this.messageListenerSet) {
 			setMessageEndpointFactory(this.endpointFactory);

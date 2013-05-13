@@ -29,10 +29,12 @@ public class DefaultCookie implements Cookie {
 		this.value = value;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String getValue() {
 		return value;
   	}

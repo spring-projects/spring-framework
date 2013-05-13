@@ -86,6 +86,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		Session session = getSession();
 		SessionHolder sessionHolder =

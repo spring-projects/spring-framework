@@ -67,6 +67,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	 * connection manager will connect to the remote endpoint upon a
 	 * ContextRefreshedEvent.
 	 */
+	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
@@ -86,6 +87,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	 * Return the phase in which this endpoint connection factory will be auto-connected
 	 * and stopped.
 	 */
+	@Override
 	public int getPhase() {
 		return this.phase;
 	}
@@ -97,6 +99,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	/**
 	 * Return whether this ConnectionManager has been started.
 	 */
+	@Override
 	public boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
 			return this.isRunning;
@@ -107,6 +110,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	 * Connect to the configured {@link #setDefaultUri(URI) default URI}. If already
 	 * connected, the method has no impact.
 	 */
+	@Override
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
@@ -139,6 +143,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	protected abstract void openConnection() throws Exception;
 
+	@Override
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
@@ -168,6 +173,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	protected abstract void closeConnection() throws Exception;
 
+	@Override
 	public final void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
 			this.stop();

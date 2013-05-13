@@ -137,16 +137,19 @@ public final class MockMvc {
 
 		return new ResultActions() {
 
+			@Override
 			public ResultActions andExpect(ResultMatcher matcher) throws Exception {
 				matcher.match(mvcResult);
 				return this;
 			}
 
+			@Override
 			public ResultActions andDo(ResultHandler printer) throws Exception {
 				printer.handle(mvcResult);
 				return this;
 			}
 
+			@Override
 			public MvcResult andReturn() {
 				return mvcResult;
 			}

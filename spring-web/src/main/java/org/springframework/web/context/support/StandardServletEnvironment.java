@@ -90,6 +90,7 @@ public class StandardServletEnvironment extends StandardEnvironment
 		super.customizePropertySources(propertySources);
 	}
 
+	@Override
 	public void initPropertySources(ServletContext servletContext, ServletConfig servletConfig) {
 		WebApplicationContextUtils.initServletPropertySources(
 				this.getPropertySources(), servletContext, servletConfig);

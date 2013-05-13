@@ -281,6 +281,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Falls back to a default EntityManagerFactory bean if no persistence unit specified.
 	 * @see #setPersistenceUnitName
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getEntityManagerFactory() == null) {
 			if (!(beanFactory instanceof ListableBeanFactory)) {
@@ -297,6 +298,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * for the specified EntityManagerFactory if none set.
 	 * Auto-detect the EntityManagerFactory's DataSource, if any.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
@@ -315,6 +317,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getEntityManagerFactory();
 	}
@@ -654,11 +657,13 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.entityManagerHolder.getEntityManager().flush();

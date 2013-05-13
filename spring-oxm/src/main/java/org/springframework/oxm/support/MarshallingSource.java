@@ -124,34 +124,42 @@ public class MarshallingSource extends SAXSource {
 			this.content = content;
 		}
 
+		@Override
 		public void setContentHandler(ContentHandler contentHandler) {
 			this.contentHandler = contentHandler;
 		}
 
+		@Override
 		public ContentHandler getContentHandler() {
 			return this.contentHandler;
 		}
 
+		@Override
 		public void setDTDHandler(DTDHandler dtdHandler) {
 			this.dtdHandler = dtdHandler;
 		}
 
+		@Override
 		public DTDHandler getDTDHandler() {
 			return this.dtdHandler;
 		}
 
+		@Override
 		public void setEntityResolver(EntityResolver entityResolver) {
 			this.entityResolver = entityResolver;
 		}
 
+		@Override
 		public EntityResolver getEntityResolver() {
 			return this.entityResolver;
 		}
 
+		@Override
 		public void setErrorHandler(ErrorHandler errorHandler) {
 			this.errorHandler = errorHandler;
 		}
 
+		@Override
 		public ErrorHandler getErrorHandler() {
 			return this.errorHandler;
 		}
@@ -160,14 +168,17 @@ public class MarshallingSource extends SAXSource {
 			return this.lexicalHandler;
 		}
 
+		@Override
 		public boolean getFeature(String name) throws SAXNotRecognizedException {
 			throw new SAXNotRecognizedException(name);
 		}
 
+		@Override
 		public void setFeature(String name, boolean value) throws SAXNotRecognizedException {
 			throw new SAXNotRecognizedException(name);
 		}
 
+		@Override
 		public Object getProperty(String name) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 				return lexicalHandler;
@@ -177,6 +188,7 @@ public class MarshallingSource extends SAXSource {
 			}
 		}
 
+		@Override
 		public void setProperty(String name, Object value) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 				this.lexicalHandler = (LexicalHandler) value;
@@ -186,10 +198,12 @@ public class MarshallingSource extends SAXSource {
 			}
 		}
 
+		@Override
 		public void parse(InputSource input) throws SAXException {
 			parse();
 		}
 
+		@Override
 		public void parse(String systemId) throws SAXException {
 			parse();
 		}

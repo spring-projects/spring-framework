@@ -102,10 +102,12 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		this.interfaces.add(intf);
 	}
 
+	@Override
 	public Class[] getInterfaces() {
 		return this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
+	@Override
 	public void validateInterfaces() throws IllegalArgumentException {
 		for (Class ifc : this.interfaces) {
 			if (this.advice instanceof DynamicIntroductionAdvice &&
@@ -121,23 +123,28 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
 
+	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}
 
+	@Override
 	public ClassFilter getClassFilter() {
 		return this;
 	}
 
+	@Override
 	public boolean matches(Class clazz) {
 		return true;
 	}

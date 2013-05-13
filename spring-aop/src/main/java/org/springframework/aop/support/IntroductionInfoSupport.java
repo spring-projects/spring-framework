@@ -59,6 +59,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		this.publishedInterfaces.remove(intf);
 	}
 
+	@Override
 	public Class[] getInterfaces() {
 		return this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
 	}

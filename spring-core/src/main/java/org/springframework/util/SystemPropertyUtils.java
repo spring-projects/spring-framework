@@ -89,6 +89,7 @@ public abstract class SystemPropertyUtils {
 			this.text = text;
 		}
 
+		@Override
 		public String resolvePlaceholder(String placeholderName) {
 			try {
 				String propVal = System.getProperty(placeholderName);

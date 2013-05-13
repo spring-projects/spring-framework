@@ -56,6 +56,7 @@ public class HttpRequestWrapper implements HttpRequest {
 	/**
 	 * Returns the method of the wrapped request.
 	 */
+	@Override
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
 	}
@@ -63,6 +64,7 @@ public class HttpRequestWrapper implements HttpRequest {
 	/**
 	 * Returns the URI of the wrapped request.
 	 */
+	@Override
 	public URI getURI() {
 		return this.request.getURI();
 	}
@@ -70,6 +72,7 @@ public class HttpRequestWrapper implements HttpRequest {
 	/**
 	 * Returns the headers of the wrapped request.
 	 */
+	@Override
 	public HttpHeaders getHeaders() {
 		return this.request.getHeaders();
 	}
@@ -77,6 +80,7 @@ public class HttpRequestWrapper implements HttpRequest {
 	/**
 	 * Returns the cookies of the wrapped request.
 	 */
+	@Override
 	public Cookies getCookies() {
 		return this.request.getCookies();
 	}

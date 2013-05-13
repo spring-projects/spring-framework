@@ -245,6 +245,7 @@ public abstract class UriComponents implements Serializable {
 			this.uriVariables = uriVariables;
 		}
 
+		@Override
 		public Object getValue(String name) {
 			if (!this.uriVariables.containsKey(name)) {
 				throw new IllegalArgumentException("Map has no value for '" + name + "'");
@@ -265,6 +266,7 @@ public abstract class UriComponents implements Serializable {
 			this.valueIterator = Arrays.asList(uriVariableValues).iterator();
 		}
 
+		@Override
 		public Object getValue(String name) {
 			if (!this.valueIterator.hasNext()) {
 				throw new IllegalArgumentException(

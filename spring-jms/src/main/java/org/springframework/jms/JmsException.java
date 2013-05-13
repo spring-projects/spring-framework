@@ -80,6 +80,7 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * if there is one.
 	 * @see javax.jms.JMSException#getLinkedException()
 	 */
+	@Override
 	public String getMessage() {
 		String message = super.getMessage();
 		Throwable cause = getCause();

@@ -113,6 +113,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		return this.transactionManager;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.transactionManager == null) {
 			throw new IllegalArgumentException("Property 'transactionManager' is required");
@@ -120,6 +121,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	}
 
 
+	@Override
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);

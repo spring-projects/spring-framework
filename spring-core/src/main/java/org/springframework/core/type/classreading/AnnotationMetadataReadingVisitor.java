@@ -75,18 +75,22 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 
+	@Override
 	public Set<String> getAnnotationTypes() {
 		return this.annotationSet;
 	}
 
+	@Override
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		return this.metaAnnotationMap.get(annotationType);
 	}
 
+	@Override
 	public boolean hasAnnotation(String annotationType) {
 		return this.annotationSet.contains(annotationType);
 	}
 
+	@Override
 	public boolean hasMetaAnnotation(String metaAnnotationType) {
 		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
 		for (Set<String> metaTypes : allMetaTypes) {
@@ -97,14 +101,17 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		return false;
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
 		return this.attributeMap.containsKey(annotationType);
 	}
 
+	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
 		return getAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
 		AnnotationAttributes raw = (attributes == null ? null : attributes.get(0));
@@ -112,10 +119,12 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 				classValuesAsString);
 	}
 
+	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
 		return getAllAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(
 			String annotationType, boolean classValuesAsString) {
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
@@ -132,10 +141,12 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		return allAttributes;
 	}
 
+	@Override
 	public boolean hasAnnotatedMethods(String annotationType) {
 		return this.methodMetadataMap.containsKey(annotationType);
 	}
 
+	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		List<MethodMetadata> list = this.methodMetadataMap.get(annotationType);
 		if (CollectionUtils.isEmpty(list)) {

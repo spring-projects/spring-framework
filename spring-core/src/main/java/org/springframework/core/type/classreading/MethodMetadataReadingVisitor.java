@@ -75,30 +75,37 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
 
+	@Override
 	public String getMethodName() {
 		return this.name;
 	}
 
+	@Override
 	public boolean isStatic() {
 		return ((this.access & Opcodes.ACC_STATIC) != 0);
 	}
 
+	@Override
 	public boolean isFinal() {
 		return ((this.access & Opcodes.ACC_FINAL) != 0);
 	}
 
+	@Override
 	public boolean isOverridable() {
 		return (!isStatic() && !isFinal() && ((this.access & Opcodes.ACC_PRIVATE) == 0));
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
 		return this.attributeMap.containsKey(annotationType);
 	}
 
+	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return getAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType,
 			boolean classValuesAsString) {
 		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
@@ -106,10 +113,12 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 				this.classLoader, attributes.get(0), classValuesAsString));
 	}
 
+	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
 		return getAllAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(
 			String annotationType, boolean classValuesAsString) {
 		if(!this.attributeMap.containsKey(annotationType)) {
@@ -125,6 +134,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		return allAttributes;
 	}
 
+	@Override
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
 	}

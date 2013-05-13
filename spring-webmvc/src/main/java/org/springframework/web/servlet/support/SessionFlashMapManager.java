@@ -40,6 +40,7 @@ public class SessionFlashMapManager extends AbstractFlashMapManager{
 	 * FlashMap matching the current request is found or there are expired
 	 * FlashMap to be removed.
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	protected List<FlashMap> retrieveFlashMaps(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
@@ -49,6 +50,7 @@ public class SessionFlashMapManager extends AbstractFlashMapManager{
 	/**
 	 * Save the given FlashMap instance, if not empty, in the HTTP session.
 	 */
+	@Override
 	protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response) {
 		request.getSession().setAttribute(FLASH_MAPS_SESSION_ATTRIBUTE, flashMaps);
 	}

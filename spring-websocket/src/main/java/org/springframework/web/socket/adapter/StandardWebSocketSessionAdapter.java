@@ -47,6 +47,7 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 	private String remoteAddress;
 
 
+	@Override
 	public void initSession(javax.websocket.Session session) {
 		Assert.notNull(session, "session is required");
 		this.session = session;

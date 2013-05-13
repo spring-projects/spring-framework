@@ -245,6 +245,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	private void scheduleSessionTask() {
 		this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					int count = sessions.size();

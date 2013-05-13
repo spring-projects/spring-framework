@@ -30,6 +30,7 @@ import java.lang.reflect.Parameter;
  */
 public class StandardReflectionParameterNameDiscoverer implements ParameterNameDiscoverer {
 
+	@Override
 	public String[] getParameterNames(Method method) {
 		Parameter[] parameters = method.getParameters();
 		String[] parameterNames = new String[parameters.length];
@@ -39,6 +40,7 @@ public class StandardReflectionParameterNameDiscoverer implements ParameterNameD
 		return parameterNames;
 	}
 
+	@Override
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Parameter[] parameters = ctor.getParameters();
 		String[] parameterNames = new String[parameters.length];

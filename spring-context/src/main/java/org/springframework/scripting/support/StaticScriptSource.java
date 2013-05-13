@@ -68,15 +68,18 @@ public class StaticScriptSource implements ScriptSource {
 	}
 
 
+	@Override
 	public synchronized String getScriptAsString() {
 		this.modified = false;
 		return this.script;
 	}
 
+	@Override
 	public synchronized boolean isModified() {
 		return this.modified;
 	}
 
+	@Override
 	public String suggestedClassName() {
 		return this.className;
 	}

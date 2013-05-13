@@ -206,11 +206,13 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 		this.disabled = disabled;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws CacheException, IOException {
 		// If no cache name given, use bean name as cache name.
 		String cacheName = getName();
@@ -295,6 +297,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	}
 
 
+	@Override
 	public Ehcache getObject() {
 		return this.cache;
 	}
@@ -304,6 +307,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	 * {@link #getObject()} based on logic in {@link #createCache()} and
 	 * {@link #decorateCache(Ehcache)} as orchestrated by {@link #afterPropertiesSet()}.
 	 */
+	@Override
 	public Class<? extends Ehcache> getObjectType() {
 		if (this.cache != null) {
 			return this.cache.getClass();
@@ -322,6 +326,7 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 		return Cache.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

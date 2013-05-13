@@ -138,6 +138,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		this.awaitTerminationSeconds = awaitTerminationSeconds;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -147,6 +148,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		initialize();
 	}
@@ -181,6 +183,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */
+	@Override
 	public void destroy() {
 		shutdown();
 	}

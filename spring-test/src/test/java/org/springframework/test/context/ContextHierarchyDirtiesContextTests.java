@@ -124,6 +124,7 @@ public class ContextHierarchyDirtiesContextTests {
 			}
 		}
 
+		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 			ContextHierarchyDirtiesContextTests.context = applicationContext;
 			ContextHierarchyDirtiesContextTests.baz = applicationContext.getBean("bean", String.class);

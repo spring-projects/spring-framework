@@ -45,6 +45,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		RequestParam requestParamAnnot = parameter.getParameterAnnotation(RequestParam.class);
 		if (requestParamAnnot != null) {
@@ -55,6 +56,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 		return false;
 	}
 
+	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

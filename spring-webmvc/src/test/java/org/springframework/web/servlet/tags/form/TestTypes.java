@@ -33,6 +33,7 @@ enum TestEnum {
 		return "Value: " + name();
 	}
 
+	@Override
 	public String toString() {
 		return "TestEnum: " + name();
 	}

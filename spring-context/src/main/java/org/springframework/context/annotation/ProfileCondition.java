@@ -29,6 +29,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  */
 class ProfileCondition implements Condition {
 
+	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		if (context.getEnvironment() != null && metadata.isAnnotated(Profile.class.getName())) {
 			AnnotationAttributes profile = AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(Profile.class.getName()));

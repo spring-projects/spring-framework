@@ -183,19 +183,23 @@ abstract class ConditionalAnnotationHelper {
 			return null;
 		}
 
+		@Override
 		public BeanDefinitionRegistry getRegistry() {
 			return this.registry;
 		}
 
+		@Override
 		public Environment getEnvironment() {
 			return this.environment;
 		}
 
+		@Override
 		public ConfigurableListableBeanFactory getBeanFactory() {
 			Assert.state(this.beanFactory != null, "Unable to locate the BeanFactory");
 			return this.beanFactory;
 		}
 
+		@Override
 		public ResourceLoader getResourceLoader() {
 			if (registry instanceof ResourceLoader) {
 				return (ResourceLoader) registry;
@@ -203,6 +207,7 @@ abstract class ConditionalAnnotationHelper {
 			return null;
 		}
 
+		@Override
 		public ClassLoader getClassLoader() {
 			ResourceLoader resourceLoader = getResourceLoader();
 			return (resourceLoader == null ? null : resourceLoader.getClassLoader());

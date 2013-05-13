@@ -130,6 +130,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 		// sort with longest prefix at the top
 		Collections.sort(this.sockJsPrefixes, Collections.reverseOrder(new Comparator<String>() {
+			@Override
 			public int compare(String o1, String o2) {
 				return new Integer(o1.length()).compareTo(new Integer(o2.length()));
 			}
@@ -166,6 +167,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		return this;
 	}
 
+	@Override
 	public int getStreamBytesLimit() {
 		return streamBytesLimit;
 	}
@@ -196,10 +198,12 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		return this;
 	}
 
+	@Override
 	public long getHeartbeatTime() {
 		return this.heartbeatTime;
 	}
 
+	@Override
 	public TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
 	}
@@ -249,6 +253,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 *
 	 * @throws Exception
 	 */
+	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
 			throws IOException, TransportErrorException {
 
@@ -438,6 +443,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		private static final String INFO_CONTENT =
 				"{\"entropy\":%s,\"origins\":[\"*:*\"],\"cookie_needed\":%s,\"websocket\":%s}";
 
+		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 
 			if (HttpMethod.GET.equals(request.getMethod())) {
@@ -483,6 +489,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		        "</body>\n" +
 		        "</html>";
 
+		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
 
 			if (!HttpMethod.GET.equals(request.getMethod())) {

@@ -85,10 +85,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.servletRequest;
 	}
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.servletRequest.getMethod());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
@@ -100,6 +102,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -147,6 +150,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.servletRequest.getRemoteAddr();
 	}
 
+	@Override
 	public Cookies getCookies() {
 		if (this.cookies == null) {
 			this.cookies = new Cookies();
@@ -159,6 +163,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.cookies;
 	}
 
+	@Override
 	public MultiValueMap<String, String> getQueryParams() {
 		if (this.queryParams == null) {
 			this.queryParams = new LinkedMultiValueMap<String, String>(this.servletRequest.getParameterMap().size());
@@ -171,6 +176,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.queryParams;
 	}
 
+	@Override
 	public InputStream getBody() throws IOException {
 		if (isFormPost(this.servletRequest)) {
 			return getBodyFromServletRequestParameters(this.servletRequest);

@@ -101,6 +101,7 @@ public class ServletForwardingController extends AbstractController implements B
 		this.servletName = servletName;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 		if (this.servletName == null) {

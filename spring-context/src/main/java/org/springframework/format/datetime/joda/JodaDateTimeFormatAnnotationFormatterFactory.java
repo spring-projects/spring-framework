@@ -71,6 +71,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	private StringValueResolver embeddedValueResolver;
 
 
+	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
@@ -80,10 +81,12 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	}
 
 
+	@Override
 	public final Set<Class<?>> getFieldTypes() {
 		return FIELD_TYPES;
 	}
 
+	@Override
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
 		if (ReadablePartial.class.isAssignableFrom(fieldType)) {
@@ -99,6 +102,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		}
 	}
 
+	@Override
 	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
 		return new DateTimeParser(getFormatter(annotation, fieldType));
 	}

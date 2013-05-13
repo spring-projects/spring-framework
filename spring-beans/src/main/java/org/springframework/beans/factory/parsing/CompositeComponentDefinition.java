@@ -51,10 +51,12 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 	}
 
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
+	@Override
 	public Object getSource() {
 		return this.source;
 	}

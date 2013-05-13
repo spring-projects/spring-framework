@@ -68,6 +68,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		this.timeoutPerShutdownPhase = timeoutPerShutdownPhase;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory);
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
@@ -85,6 +86,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * declared as a dependency of another bean will be started before
 	 * the dependent bean regardless of the declared phase.
 	 */
+	@Override
 	public void start() {
 		startBeans(false);
 		this.running = true;
@@ -99,21 +101,25 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * declared as dependent on another bean will be stopped before
 	 * the dependency bean regardless of the declared phase.
 	 */
+	@Override
 	public void stop() {
 		stopBeans();
 		this.running = false;
 	}
 
+	@Override
 	public void onRefresh() {
 		startBeans(true);
 		this.running = true;
 	}
 
+	@Override
 	public void onClose() {
 		stopBeans();
 		this.running = false;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
@@ -221,6 +227,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 						}
 						countDownBeanNames.add(beanName);
 						((SmartLifecycle) bean).stop(new Runnable() {
+							@Override
 							public void run() {
 								latch.countDown();
 								countDownBeanNames.remove(beanName);
@@ -389,6 +396,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			this.bean = bean;
 		}
 
+		@Override
 		public int compareTo(LifecycleGroupMember other) {
 			int thisOrder = getPhase(this.bean);
 			int otherOrder = getPhase(other.bean);

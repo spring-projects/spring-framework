@@ -36,31 +36,38 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	private boolean extractOldValueForEditor = false;
 
 
+	@Override
 	public void setExtractOldValueForEditor(boolean extractOldValueForEditor) {
 		this.extractOldValueForEditor = extractOldValueForEditor;
 	}
 
+	@Override
 	public boolean isExtractOldValueForEditor() {
 		return this.extractOldValueForEditor;
 	}
 
 
+	@Override
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
 		setPropertyValue(pv.getName(), pv.getValue());
 	}
 
+	@Override
 	public void setPropertyValues(Map<?, ?> map) throws BeansException {
 		setPropertyValues(new MutablePropertyValues(map));
 	}
 
+	@Override
 	public void setPropertyValues(PropertyValues pvs) throws BeansException {
 		setPropertyValues(pvs, false, false);
 	}
 
+	@Override
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown) throws BeansException {
 		setPropertyValues(pvs, ignoreUnknown, false);
 	}
 
+	@Override
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
 			throws BeansException {
 
@@ -118,6 +125,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
+	@Override
 	public abstract Object getPropertyValue(String propertyName) throws BeansException;
 
 	/**
@@ -129,6 +137,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed or a type mismatch occured
 	 */
+	@Override
 	public abstract void setPropertyValue(String propertyName, Object value) throws BeansException;
 
 }

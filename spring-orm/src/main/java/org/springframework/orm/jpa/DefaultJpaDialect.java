@@ -55,6 +55,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
 	 * @see #cleanupTransaction
 	 */
+	@Override
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
@@ -67,6 +68,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 		return null;
 	}
 
+	@Override
 	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
 			throws PersistenceException {
 
@@ -78,6 +80,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * implementation does not require any cleanup.
 	 * @see #beginTransaction
 	 */
+	@Override
 	public void cleanupTransaction(Object transactionData) {
 	}
 
@@ -85,6 +88,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * This implementation always returns {@code null},
 	 * indicating that no JDBC Connection can be provided.
 	 */
+	@Override
 	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
@@ -99,6 +103,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * {@code Connection.close()} (or some other method with similar effect) here.
 	 * @see java.sql.Connection#close()
 	 */
+	@Override
 	public void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager em)
 			throws PersistenceException, SQLException {
 	}
@@ -112,6 +117,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * This implementation delegates to EntityManagerFactoryUtils.
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 	}

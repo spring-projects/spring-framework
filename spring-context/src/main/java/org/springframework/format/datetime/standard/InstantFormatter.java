@@ -33,10 +33,12 @@ import org.springframework.format.Formatter;
  */
 public class InstantFormatter implements Formatter<Instant> {
 
+	@Override
 	public Instant parse(String text, Locale locale) throws ParseException {
 		return Instant.parse(text);
 	}
 
+	@Override
 	public String print(Instant object, Locale locale) {
 		return object.toString();
 	}

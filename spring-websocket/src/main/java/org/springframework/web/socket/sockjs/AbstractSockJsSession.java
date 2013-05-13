@@ -70,6 +70,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 		this.handler = webSocketHandler;
 	}
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
@@ -89,26 +90,32 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 		return "wss".equals(this.uri.getSchemeSpecificPart());
 	}
 
+	@Override
 	public String getRemoteHostName() {
 		return this.remoteHostName;
 	}
 
+	@Override
 	public void setRemoteHostName(String remoteHostName) {
 		this.remoteHostName = remoteHostName;
 	}
 
+	@Override
 	public String getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
+	@Override
 	public void setRemoteAddress(String remoteAddress) {
 		this.remoteAddress = remoteAddress;
 	}
 
+	@Override
 	public Principal getPrincipal() {
 		return this.principal;
 	}
 
+	@Override
 	public void setPrincipal(Principal principal) {
 		this.principal = principal;
 	}
@@ -117,6 +124,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 		return State.NEW.equals(this.state);
 	}
 
+	@Override
 	public boolean isOpen() {
 		return State.OPEN.equals(this.state);
 	}
@@ -216,6 +224,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	 * {@inheritDoc}
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
+	@Override
 	public final void close() throws IOException {
 		close(new CloseStatus(3000, "Go away!"));
 	}
@@ -224,6 +233,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	 * {@inheritDoc}
 	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
 	 */
+	@Override
 	public final void close(CloseStatus status) throws IOException {
 		if (isOpen()) {
 			if (logger.isDebugEnabled()) {

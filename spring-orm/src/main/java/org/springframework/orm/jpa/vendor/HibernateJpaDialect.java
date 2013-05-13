@@ -143,6 +143,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			this.session = session;
 		}
 
+		@Override
 		public Connection getConnection() {
 			try {
 				if (connectionMethodToUse == null) {
@@ -156,6 +157,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			}
 		}
 
+		@Override
 		public void releaseConnection(Connection con) {
 			if (sessionConnectionMethod != null) {
 				// Need to explicitly call close() with Hibernate 3.x in order to allow

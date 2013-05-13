@@ -86,19 +86,23 @@ public class SimpleServletPostProcessor implements
 		this.useSharedServletConfig = useSharedServletConfig;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 	}
 
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Servlet) {
 			ServletConfig config = this.servletConfig;
@@ -115,6 +119,7 @@ public class SimpleServletPostProcessor implements
 		return bean;
 	}
 
+	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Servlet) {
 			((Servlet) bean).destroy();
@@ -137,18 +142,22 @@ public class SimpleServletPostProcessor implements
 			this.servletContext = servletContext;
 		}
 
+		@Override
 		public String getServletName() {
 			return this.servletName;
 		}
 
+		@Override
 		public ServletContext getServletContext() {
 			return this.servletContext;
 		}
 
+		@Override
 		public String getInitParameter(String paramName) {
 			return null;
 		}
 
+		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}

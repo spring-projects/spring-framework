@@ -300,6 +300,7 @@ public abstract class PersistenceManagerFactoryUtils {
 			this.newPersistenceManager = newPersistenceManager;
 		}
 
+		@Override
 		public int getOrder() {
 			return PERSISTENCE_MANAGER_SYNCHRONIZATION_ORDER;
 		}

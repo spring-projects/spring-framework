@@ -117,6 +117,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	}
 
 
+	@Override
 	public synchronized boolean isActive() {
 		return ((this.asyncRequest != null) && (!this.asyncRequest.isAsyncCompleted()));
 	}
@@ -133,6 +134,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 		return this.response;
 	}
 
+	@Override
 	protected final synchronized void sendMessageInternal(String message) throws IOException {
 		this.messageCache.add(message);
 		tryFlushCache();
@@ -170,6 +172,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 		this.response = null;
 	}
 
+	@Override
 	protected synchronized void writeFrameInternal(SockJsFrame frame) throws IOException {
 		if (isActive()) {
 			frame = this.frameFormat.format(frame);

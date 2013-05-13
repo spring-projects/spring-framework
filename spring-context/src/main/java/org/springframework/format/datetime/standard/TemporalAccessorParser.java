@@ -62,6 +62,7 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 	}
 
 
+	@Override
 	public TemporalAccessor parse(String text, Locale locale) throws ParseException {
 		DateTimeFormatter formatterToUse = DateTimeContextHolder.getFormatter(this.formatter, locale);
 		if (LocalDate.class.equals(this.temporalAccessorType)) {

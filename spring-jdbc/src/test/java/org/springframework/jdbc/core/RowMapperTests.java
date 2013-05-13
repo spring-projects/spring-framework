@@ -50,6 +50,7 @@ public class RowMapperTests extends TestCase {
 
 	private List<TestBean> result;
 
+	@Override
 	@Before
 	public void setUp() throws SQLException {
 		connection = mock(Connection.class);

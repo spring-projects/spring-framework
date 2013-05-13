@@ -101,6 +101,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	/**
 	 * Creates the final merged mapping set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		getFileTypeMap();
 	}

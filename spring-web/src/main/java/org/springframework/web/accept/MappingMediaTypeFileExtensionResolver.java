@@ -63,11 +63,13 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	 * Find the file extensions mapped to the given MediaType.
 	 * @return 0 or more extensions, never {@code null}
 	 */
+	@Override
 	public List<String> resolveFileExtensions(MediaType mediaType) {
 		List<String> fileExtensions = this.fileExtensions.get(mediaType);
 		return (fileExtensions != null) ? fileExtensions : Collections.<String>emptyList();
 	}
 
+	@Override
 	public List<String> getAllFileExtensions() {
 		return Collections.unmodifiableList(this.allFileExtensions);
 	}

@@ -78,6 +78,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Set the view's name. Helpful for traceability.
 	 * <p>Framework code must call this when constructing views.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -103,6 +104,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return the content type for this view.
 	 */
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -251,6 +253,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Delegates to renderMergedOutputModel for the actual rendering.
 	 * @see #renderMergedOutputModel
 	 */
+	@Override
 	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +

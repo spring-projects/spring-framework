@@ -89,6 +89,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	protected static final String PREFETCH_ATTRIBUTE = "prefetch";
 
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 			new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));

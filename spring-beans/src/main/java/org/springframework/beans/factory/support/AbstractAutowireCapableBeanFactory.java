@@ -280,6 +280,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	// Typical methods for creating and populating external bean instances
 	//-------------------------------------------------------------------------
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T createBean(Class<T> beanClass) throws BeansException {
 		// Use prototype bean definition, to avoid registering bean as dependent bean.
@@ -289,6 +290,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return (T) createBean(beanClass.getName(), bd, null);
 	}
 
+	@Override
 	public void autowireBean(Object existingBean) {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(ClassUtils.getUserClass(existingBean));
@@ -299,6 +301,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		populateBean(bd.getBeanClass().getName(), bd, bw);
 	}
 
+	@Override
 	public Object configureBean(Object existingBean, String beanName) throws BeansException {
 		markBeanAsCreated(beanName);
 		BeanDefinition mbd = getMergedBeanDefinition(beanName);
@@ -320,6 +323,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return initializeBean(beanName, existingBean, bd);
 	}
 
+	@Override
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
 		return resolveDependency(descriptor, beanName, null, null);
 	}
@@ -329,6 +333,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	// Specialized methods for fine-grained control over the bean lifecycle
 	//-------------------------------------------------------------------------
 
+	@Override
 	public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
@@ -336,6 +341,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return createBean(beanClass.getName(), bd, null);
 	}
 
+	@Override
 	public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		final RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
@@ -350,6 +356,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (System.getSecurityManager() != null) {
 				bean = AccessController.doPrivileged(new PrivilegedAction<Object>() {
 
+					@Override
 					public Object run() {
 						return getInstantiationStrategy().instantiate(bd, null, parent);
 					}
@@ -364,6 +371,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+	@Override
 	public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException {
 
@@ -379,6 +387,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		populateBean(bd.getBeanClass().getName(), bd, bw);
 	}
 
+	@Override
 	public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
 		markBeanAsCreated(beanName);
 		BeanDefinition bd = getMergedBeanDefinition(beanName);
@@ -387,10 +396,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		applyPropertyValues(beanName, bd, bw, bd.getPropertyValues());
 	}
 
+	@Override
 	public Object initializeBean(Object existingBean, String beanName) {
 		return initializeBean(beanName, existingBean, null);
 	}
 
+	@Override
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException {
 
@@ -404,6 +415,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	@Override
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
 
@@ -417,6 +429,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	@Override
 	public void destroyBean(Object existingBean) {
 		new DisposableBeanAdapter(existingBean, getBeanPostProcessors(), getAccessControlContext()).destroy();
 	}
@@ -514,6 +527,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						"' to allow for resolving potential circular references");
 			}
 			addSingletonFactory(beanName, new ObjectFactory() {
+				@Override
 				public Object getObject() throws BeansException {
 					return getEarlyBeanReference(beanName, mbd, bean);
 				}
@@ -701,6 +715,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// @Bean methods, there may be parameters present.
 				ReflectionUtils.doWithMethods(fbClass,
 					new ReflectionUtils.MethodCallback() {
+						@Override
 						public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 							if (method.getName().equals(factoryMethodName) &&
 									FactoryBean.class.isAssignableFrom(method.getReturnType())) {
@@ -1001,6 +1016,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			final BeanFactory parent = this;
 			if (System.getSecurityManager() != null) {
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
 					public Object run() {
 						return getInstantiationStrategy().instantiate(mbd, beanName, parent);
 					}
@@ -1470,6 +1486,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object initializeBean(final String beanName, final Object bean, RootBeanDefinition mbd) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				@Override
 				public Object run() {
 					invokeAwareMethods(beanName, bean);
 					return null;
@@ -1537,6 +1554,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (System.getSecurityManager() != null) {
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 							((InitializingBean) bean).afterPropertiesSet();
 							return null;
@@ -1594,6 +1612,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+				@Override
 				public Object run() throws Exception {
 					ReflectionUtils.makeAccessible(initMethod);
 					return null;
@@ -1601,6 +1620,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			});
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+					@Override
 					public Object run() throws Exception {
 						initMethod.invoke(bean);
 						return null;

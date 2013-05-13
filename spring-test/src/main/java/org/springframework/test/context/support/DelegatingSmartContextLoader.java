@@ -36,10 +36,12 @@ public class DelegatingSmartContextLoader extends AbstractDelegatingSmartContext
 	private final SmartContextLoader annotationConfigLoader = new AnnotationConfigContextLoader();
 
 
+	@Override
 	protected SmartContextLoader getXmlLoader() {
 		return this.xmlLoader;
 	}
 
+	@Override
 	protected SmartContextLoader getAnnotationConfigLoader() {
 		return this.annotationConfigLoader;
 	}

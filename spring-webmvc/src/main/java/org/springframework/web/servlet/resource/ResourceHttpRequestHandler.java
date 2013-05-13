@@ -88,6 +88,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		this.locations = locations;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notEmpty(locations, "Locations list must not be empty");
 	}
@@ -104,6 +105,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * of the resource will be written to the response with caching headers
 	 * set to expire one year in the future.
 	 */
+	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

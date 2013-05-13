@@ -32,6 +32,7 @@ public class StubSockJsConfig implements SockJsConfiguration {
 	private TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
 
+	@Override
 	public int getStreamBytesLimit() {
 		return streamBytesLimit;
 	}
@@ -40,6 +41,7 @@ public class StubSockJsConfig implements SockJsConfiguration {
 		this.streamBytesLimit = streamBytesLimit;
 	}
 
+	@Override
 	public long getHeartbeatTime() {
 		return heartbeatTime;
 	}
@@ -48,6 +50,7 @@ public class StubSockJsConfig implements SockJsConfiguration {
 		this.heartbeatTime = heartbeatTime;
 	}
 
+	@Override
 	public TaskScheduler getTaskScheduler() {
 		return taskScheduler;
 	}

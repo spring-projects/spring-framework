@@ -140,6 +140,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.burlapProxy == null) {
 			throw new IllegalStateException("BurlapClientInterceptor is not properly initialized - " +

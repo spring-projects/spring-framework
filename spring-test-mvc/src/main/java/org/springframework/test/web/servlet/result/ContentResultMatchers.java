@@ -70,6 +70,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher contentType(final MediaType contentType) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String actual = result.getResponse().getContentType();
 				assertTrue("Content type not set", actual != null);
@@ -92,6 +93,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher contentTypeCompatibleWith(final MediaType contentType) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String actual = result.getResponse().getContentType();
 				assertTrue("Content type not set", actual != null);
@@ -108,6 +110,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher encoding(final String characterEncoding) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				String actual = result.getResponse().getCharacterEncoding();
 				assertEquals("Character encoding", characterEncoding, actual);
@@ -124,6 +127,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher string(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertThat("Response content", result.getResponse().getContentAsString(), matcher);
 			}
@@ -135,6 +139,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher string(final String expectedContent) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Response content", expectedContent, result.getResponse().getContentAsString());
 			}
@@ -146,6 +151,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher bytes(final byte[] expectedContent) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Response content", expectedContent, result.getResponse().getContentAsByteArray());
 			}
@@ -166,6 +172,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher xml(final String xmlContent) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xmlHelper.assertXmlEqual(xmlContent, content);
@@ -179,6 +186,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher node(final Matcher<? super Node> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xmlHelper.assertNode(content, matcher);
@@ -194,6 +202,7 @@ public class ContentResultMatchers {
 	 */
 	public ResultMatcher source(final Matcher<? super Source> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xmlHelper.assertSource(content, matcher);

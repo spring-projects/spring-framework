@@ -29,6 +29,7 @@ import org.springframework.transaction.TransactionStatus;
  */
 public abstract class TransactionCallbackWithoutResult implements TransactionCallback<Object> {
 
+	@Override
 	public final Object doInTransaction(TransactionStatus status) {
 		doInTransactionWithoutResult(status);
 		return null;

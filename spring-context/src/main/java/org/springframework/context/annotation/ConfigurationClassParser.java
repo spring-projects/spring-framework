@@ -90,6 +90,7 @@ class ConfigurationClassParser {
 
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
 			new Comparator<ConfigurationClassParser.DeferredImportSelectorHolder>() {
+		@Override
 		public int compare(DeferredImportSelectorHolder o1,
 				DeferredImportSelectorHolder o2) {
 			return AnnotationAwareOrderComparator.INSTANCE.compare(
@@ -535,6 +536,7 @@ class ConfigurationClassParser {
 			this.imports.put(importedClass, importingClass);
 		}
 
+		@Override
 		public String getImportingClassFor(String importedClass) {
 			return this.imports.get(importedClass);
 		}
@@ -548,6 +550,7 @@ class ConfigurationClassParser {
 		public boolean contains(Object elem) {
 			ConfigurationClass configClass = (ConfigurationClass) elem;
 			Comparator<ConfigurationClass> comparator = new Comparator<ConfigurationClass>() {
+				@Override
 				public int compare(ConfigurationClass first, ConfigurationClass second) {
 					return first.getMetadata().getClassName().equals(second.getMetadata().getClassName()) ? 0 : 1;
 				}

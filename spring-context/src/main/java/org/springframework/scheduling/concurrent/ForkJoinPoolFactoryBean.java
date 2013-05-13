@@ -125,25 +125,30 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 		this.awaitTerminationSeconds = awaitTerminationSeconds;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		this.forkJoinPool = (this.commonPool ? ForkJoinPool.commonPool() :
 				new ForkJoinPool(this.parallelism, this.threadFactory, this.uncaughtExceptionHandler, this.asyncMode));
 	}
 
 
+	@Override
 	public ForkJoinPool getObject() {
 		return this.forkJoinPool;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return ForkJoinPool.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() {
 		// Ignored for the common pool.
 		this.forkJoinPool.shutdown();

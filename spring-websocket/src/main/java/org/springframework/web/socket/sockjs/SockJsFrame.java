@@ -107,6 +107,7 @@ public class SockJsFrame {
 				|| (ch >= '\uFFF0' && ch <= '\uFFFF') || (ch >= '\uD800' && ch <= '\uDFFF');
 	}
 
+	@Override
 	public String toString() {
 		String result = this.content;
 		if (result.length() > 80) {
@@ -161,6 +162,7 @@ public class SockJsFrame {
 		 * frame content is to be inserted; e.g. "data: %s\r\n\r\n"
 		 * @return new SockJsFrame instance with the formatted content
 		 */
+		@Override
 		public SockJsFrame format(SockJsFrame frame) {
 			String content = String.format(this.format, preProcessContent(frame.getContent()));
 			return new SockJsFrame(content);

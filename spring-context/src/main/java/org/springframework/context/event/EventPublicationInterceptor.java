@@ -77,10 +77,12 @@ public class EventPublicationInterceptor
 		}
 	}
 
+	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.applicationEventClassConstructor == null) {
 			throw new IllegalArgumentException("applicationEventClass is required");
@@ -88,6 +90,7 @@ public class EventPublicationInterceptor
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Object retVal = invocation.proceed();
 

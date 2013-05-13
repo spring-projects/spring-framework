@@ -143,6 +143,7 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	public final static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
 
+		@Override
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null;
 		}

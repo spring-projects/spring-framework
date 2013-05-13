@@ -360,10 +360,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return (Class) beanClassObject;
 	}
 
+	@Override
 	public void setBeanClassName(String beanClassName) {
 		this.beanClass = beanClassName;
 	}
 
+	@Override
 	public String getBeanClassName() {
 		Object beanClassObject = this.beanClass;
 		if (beanClassObject instanceof Class) {
@@ -403,6 +405,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
+	@Override
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
@@ -410,6 +413,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the target scope for the bean.
 	 */
+	@Override
 	public String getScope() {
 		return this.scope;
 	}
@@ -419,6 +423,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * returned from all calls.
 	 * @see #SCOPE_SINGLETON
 	 */
+	@Override
 	public boolean isSingleton() {
 		return SCOPE_SINGLETON.equals(scope) || SCOPE_DEFAULT.equals(scope);
 	}
@@ -428,6 +433,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * returned for each call.
 	 * @see #SCOPE_PROTOTYPE
 	 */
+	@Override
 	public boolean isPrototype() {
 		return SCOPE_PROTOTYPE.equals(scope);
 	}
@@ -446,6 +452,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return whether this bean is "abstract", i.e. not meant to be instantiated
 	 * itself but rather just serving as parent for concrete child bean definitions.
 	 */
+	@Override
 	public boolean isAbstract() {
 		return this.abstractFlag;
 	}
@@ -455,6 +462,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * <p>If {@code false}, the bean will get instantiated on startup by bean
 	 * factories that perform eager initialization of singletons.
 	 */
+	@Override
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
 	}
@@ -463,6 +471,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return whether this bean should be lazily initialized, i.e. not
 	 * eagerly instantiated on startup. Only applicable to a singleton bean.
 	 */
+	@Override
 	public boolean isLazyInit() {
 		return this.lazyInit;
 	}
@@ -543,6 +552,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * constructor arguments. This property should just be necessary for other kinds
 	 * of dependencies like statics (*ugh*) or database preparation on startup.
 	 */
+	@Override
 	public void setDependsOn(String[] dependsOn) {
 		this.dependsOn = dependsOn;
 	}
@@ -550,6 +560,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the bean names that this bean depends on.
 	 */
+	@Override
 	public String[] getDependsOn() {
 		return this.dependsOn;
 	}
@@ -557,6 +568,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set whether this bean is a candidate for getting autowired into some other bean.
 	 */
+	@Override
 	public void setAutowireCandidate(boolean autowireCandidate) {
 		this.autowireCandidate = autowireCandidate;
 	}
@@ -564,6 +576,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
 	 */
+	@Override
 	public boolean isAutowireCandidate() {
 		return this.autowireCandidate;
 	}
@@ -573,6 +586,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * If this value is true for exactly one bean among multiple
 	 * matching candidates, it will serve as a tie-breaker.
 	 */
+	@Override
 	public void setPrimary(boolean primary) {
 		this.primary = primary;
 	}
@@ -582,6 +596,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * If this value is true for exactly one bean among multiple
 	 * matching candidates, it will serve as a tie-breaker.
 	 */
+	@Override
 	public boolean isPrimary() {
 		return this.primary;
 	}
@@ -676,6 +691,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return constructor argument values for this bean (never {@code null}).
 	 */
+	@Override
 	public ConstructorArgumentValues getConstructorArgumentValues() {
 		return this.constructorArgumentValues;
 	}
@@ -697,6 +713,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return property values for this bean (never {@code null}).
 	 */
+	@Override
 	public MutablePropertyValues getPropertyValues() {
 		return this.propertyValues;
 	}
@@ -718,18 +735,22 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 
+	@Override
 	public void setFactoryBeanName(String factoryBeanName) {
 		this.factoryBeanName = factoryBeanName;
 	}
 
+	@Override
 	public String getFactoryBeanName() {
 		return this.factoryBeanName;
 	}
 
+	@Override
 	public void setFactoryMethodName(String factoryMethodName) {
 		this.factoryMethodName = factoryMethodName;
 	}
 
+	@Override
 	public String getFactoryMethodName() {
 		return this.factoryMethodName;
 	}
@@ -826,6 +847,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the role hint for this {@code BeanDefinition}.
 	 */
+	@Override
 	public int getRole() {
 		return this.role;
 	}
@@ -838,6 +860,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		this.description = description;
 	}
 
+	@Override
 	public String getDescription() {
 		return this.description;
 	}
@@ -865,6 +888,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		this.resource = new DescriptiveResource(resourceDescription);
 	}
 
+	@Override
 	public String getResourceDescription() {
 		return (this.resource != null ? this.resource.getDescription() : null);
 	}
@@ -876,6 +900,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		this.resource = new BeanDefinitionResource(originatingBd);
 	}
 
+	@Override
 	public BeanDefinition getOriginatingBeanDefinition() {
 		return (this.resource instanceof BeanDefinitionResource ?
 				((BeanDefinitionResource) this.resource).getBeanDefinition() : null);

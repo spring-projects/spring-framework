@@ -51,6 +51,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 		return this.sockJsConfig;
 	}
 
+	@Override
 	public final synchronized void sendMessage(WebSocketMessage message) throws IOException {
 		Assert.isTrue(!isClosed(), "Cannot send a message when session is closed");
 		Assert.isInstanceOf(TextMessage.class, message, "Expected text message: " + message);
@@ -132,6 +133,7 @@ public abstract class AbstractServerSockJsSession extends AbstractSockJsSession 
 		}
 		Date time = new Date(System.currentTimeMillis() + getSockJsConfig().getHeartbeatTime());
 		this.heartbeatTask = getSockJsConfig().getTaskScheduler().schedule(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					sendHeartbeat();

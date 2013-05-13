@@ -35,6 +35,7 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Delegates to {@link #getName}.
 	 */
+	@Override
 	public String getDescription() {
 		return getName();
 	}
@@ -42,6 +43,7 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Returns an empty array.
 	 */
+	@Override
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[0];
 	}
@@ -49,6 +51,7 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Returns an empty array.
 	 */
+	@Override
 	public BeanDefinition[] getInnerBeanDefinitions() {
 		return new BeanDefinition[0];
 	}
@@ -56,6 +59,7 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Returns an empty array.
 	 */
+	@Override
 	public BeanReference[] getBeanReferences() {
 		return new BeanReference[0];
 	}

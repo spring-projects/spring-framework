@@ -34,6 +34,7 @@ class TrueClassFilter implements ClassFilter, Serializable {
 	private TrueClassFilter() {
 	}
 
+	@Override
 	public boolean matches(Class clazz) {
 		return true;
 	}

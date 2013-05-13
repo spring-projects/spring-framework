@@ -46,11 +46,13 @@ public class GenericApplicationListenerAdapter implements SmartApplicationListen
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void onApplicationEvent(ApplicationEvent event) {
 		this.delegate.onApplicationEvent(event);
 	}
 
+	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
 		Class typeArg = GenericTypeResolver.resolveTypeArgument(this.delegate.getClass(), ApplicationListener.class);
 		if (typeArg == null || typeArg.equals(ApplicationEvent.class)) {
@@ -62,10 +64,12 @@ public class GenericApplicationListenerAdapter implements SmartApplicationListen
 		return (typeArg == null || typeArg.isAssignableFrom(eventType));
 	}
 
+	@Override
 	public boolean supportsSourceType(Class<?> sourceType) {
 		return true;
 	}
 
+	@Override
 	public int getOrder() {
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}

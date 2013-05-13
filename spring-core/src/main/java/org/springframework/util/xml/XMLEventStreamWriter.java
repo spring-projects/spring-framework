@@ -56,65 +56,80 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 		this.eventFactory = eventFactory;
 	}
 
+	@Override
 	public NamespaceContext getNamespaceContext() {
 		return eventWriter.getNamespaceContext();
 	}
 
+	@Override
 	public String getPrefix(String uri) throws XMLStreamException {
 		return eventWriter.getPrefix(uri);
 	}
 
+	@Override
 	public void setPrefix(String prefix, String uri) throws XMLStreamException {
 		eventWriter.setPrefix(prefix, uri);
 	}
 
+	@Override
 	public void setDefaultNamespace(String uri) throws XMLStreamException {
 		eventWriter.setDefaultNamespace(uri);
 	}
 
+	@Override
 	public void setNamespaceContext(NamespaceContext context) throws XMLStreamException {
 		eventWriter.setNamespaceContext(context);
 	}
 
+	@Override
 	public void writeStartDocument() throws XMLStreamException {
 		eventWriter.add(eventFactory.createStartDocument());
 	}
 
+	@Override
 	public void writeStartDocument(String version) throws XMLStreamException {
 		eventWriter.add(eventFactory.createStartDocument(DEFAULT_ENCODING, version));
 	}
 
+	@Override
 	public void writeStartDocument(String encoding, String version) throws XMLStreamException {
 		eventWriter.add(eventFactory.createStartDocument(encoding, version));
 	}
 
+	@Override
 	public void writeStartElement(String localName) throws XMLStreamException {
 		writeStartElement(eventFactory.createStartElement(new QName(localName), null, null));
 	}
 
+	@Override
 	public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
 		writeStartElement(eventFactory.createStartElement(new QName(namespaceURI, localName), null, null));
 	}
 
+	@Override
 	public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
 		writeStartElement(eventFactory.createStartElement(new QName(namespaceURI, localName, prefix), null, null));
 	}
 
+	@Override
 	public void writeEmptyElement(String localName) throws XMLStreamException {
 		writeStartElement(localName);
 		writeEndElement();
 	}
 
+	@Override
 	public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
 		writeStartElement(namespaceURI, localName);
 		writeEndElement();
 	}
 
+	@Override
 	public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
 		writeStartElement(prefix, localName, namespaceURI);
 		writeEndElement();
 	}
 
+	@Override
 	public void writeEndElement() throws XMLStreamException {
 		int last = endElements.size() - 1;
 		EndElement lastEndElement = endElements.get(last);
@@ -122,71 +137,88 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 		endElements.remove(last);
 	}
 
+	@Override
 	public void writeAttribute(String localName, String value) throws XMLStreamException {
 		eventWriter.add(eventFactory.createAttribute(localName, value));
 	}
 
+	@Override
 	public void writeAttribute(String namespaceURI, String localName, String value) throws XMLStreamException {
 		eventWriter.add(eventFactory.createAttribute(new QName(namespaceURI, localName), value));
 	}
 
+	@Override
 	public void writeAttribute(String prefix, String namespaceURI, String localName, String value)
 			throws XMLStreamException {
 		eventWriter.add(eventFactory.createAttribute(prefix, namespaceURI, localName, value));
 	}
 
+	@Override
 	public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
 		writeNamespace(eventFactory.createNamespace(prefix, namespaceURI));
 	}
 
+	@Override
 	public void writeDefaultNamespace(String namespaceURI) throws XMLStreamException {
 		writeNamespace(eventFactory.createNamespace(namespaceURI));
 	}
 
+	@Override
 	public void writeCharacters(String text) throws XMLStreamException {
 		eventWriter.add(eventFactory.createCharacters(text));
 	}
 
+	@Override
 	public void writeCharacters(char[] text, int start, int len) throws XMLStreamException {
 		eventWriter.add(eventFactory.createCharacters(new String(text, start, len)));
 	}
 
+	@Override
 	public void writeCData(String data) throws XMLStreamException {
 		eventWriter.add(eventFactory.createCData(data));
 	}
 
+	@Override
 	public void writeComment(String data) throws XMLStreamException {
 		eventWriter.add(eventFactory.createComment(data));
 	}
 
+	@Override
 	public void writeProcessingInstruction(String target) throws XMLStreamException {
 		eventWriter.add(eventFactory.createProcessingInstruction(target, ""));
 	}
 
+	@Override
 	public void writeProcessingInstruction(String target, String data) throws XMLStreamException {
 		eventWriter.add(eventFactory.createProcessingInstruction(target, data));
 	}
 
+	@Override
 	public void writeDTD(String dtd) throws XMLStreamException {
 		eventWriter.add(eventFactory.createDTD(dtd));
 	}
 
+	@Override
 	public void writeEntityRef(String name) throws XMLStreamException {
 		eventWriter.add(eventFactory.createEntityReference(name, null));
 	}
 
+	@Override
 	public void writeEndDocument() throws XMLStreamException {
 		eventWriter.add(eventFactory.createEndDocument());
 	}
 
+	@Override
 	public Object getProperty(String name) throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	}
 
+	@Override
 	public void flush() throws XMLStreamException {
 		eventWriter.flush();
 	}
 
+	@Override
 	public void close() throws XMLStreamException {
 		eventWriter.close();
 	}

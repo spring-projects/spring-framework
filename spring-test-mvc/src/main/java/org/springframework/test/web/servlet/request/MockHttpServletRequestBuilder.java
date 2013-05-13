@@ -426,6 +426,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * {@inheritDoc}
 	 * @return always returns {@code true}.
 	 */
+	@Override
 	public boolean isMergeEnabled() {
 		return true;
 	}
@@ -437,6 +438,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * @param parent the parent {@code RequestBuilder} to inherit properties from
 	 * @return the result of the merge
 	 */
+	@Override
 	public Object merge(Object parent) {
 		if (parent == null) {
 			return this;
@@ -540,6 +542,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	/**
 	 * Build a {@link MockHttpServletRequest}.
 	 */
+	@Override
 	public final MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		MockHttpServletRequest request = createServletRequest(servletContext);
 

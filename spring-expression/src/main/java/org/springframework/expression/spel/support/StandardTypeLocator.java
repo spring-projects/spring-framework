@@ -59,6 +59,7 @@ public class StandardTypeLocator implements TypeLocator {
 	 * @return the class object for the type
 	 * @throws EvaluationException if the type cannot be found
 	 */
+	@Override
 	public Class<?> findType(String typename) throws EvaluationException {
 		String nameToLookup = typename;
 		try {

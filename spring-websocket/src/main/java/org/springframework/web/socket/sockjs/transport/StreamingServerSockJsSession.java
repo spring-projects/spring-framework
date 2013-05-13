@@ -48,6 +48,7 @@ public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSessio
 		}
 	}
 
+	@Override
 	protected void flushCache() throws IOException {
 
 		cancelHeartbeat();

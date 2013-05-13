@@ -101,6 +101,7 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 	// RenderResponse methods
 	//---------------------------------------------------------------------
 
+	@Override
 	public void setContentType(String contentType) {
 		if (this.request != null) {
 			Enumeration<String> supportedTypes = this.request.getResponseContentTypes();
@@ -112,6 +113,7 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		this.contentType = contentType;
 	}
 
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -120,10 +122,12 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		this.characterEncoding = characterEncoding;
 	}
 
+	@Override
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
 
+	@Override
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		if (this.writer == null) {
 			Writer targetWriter = (this.characterEncoding != null
@@ -150,18 +154,22 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		this.locale = locale;
 	}
 
+	@Override
 	public Locale getLocale() {
 		return this.locale;
 	}
 
+	@Override
 	public void setBufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 	}
 
+	@Override
 	public int getBufferSize() {
 		return this.bufferSize;
 	}
 
+	@Override
 	public void flushBuffer() {
 		if (this.writer != null) {
 			this.writer.flush();
@@ -177,6 +185,7 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		this.committed = true;
 	}
 
+	@Override
 	public void resetBuffer() {
 		if (this.committed) {
 			throw new IllegalStateException("Cannot reset buffer - response is already committed");
@@ -188,10 +197,12 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		this.committed = committed;
 	}
 
+	@Override
 	public boolean isCommitted() {
 		return this.committed;
 	}
 
+	@Override
 	public void reset() {
 		resetBuffer();
 		this.characterEncoding = null;
@@ -199,22 +210,27 @@ public class MockMimeResponse extends MockPortletResponse implements MimeRespons
 		this.locale = null;
 	}
 
+	@Override
 	public OutputStream getPortletOutputStream() throws IOException {
 		return this.outputStream;
 	}
 
+	@Override
 	public PortletURL createRenderURL() {
 		return new MockPortletURL(getPortalContext(), MockPortletURL.URL_TYPE_RENDER);
 	}
 
+	@Override
 	public PortletURL createActionURL() {
 		return new MockPortletURL(getPortalContext(), MockPortletURL.URL_TYPE_ACTION);
 	}
 
+	@Override
 	public ResourceURL createResourceURL() {
 		return new MockResourceURL();
 	}
 
+	@Override
 	public CacheControl getCacheControl() {
 		return this.cacheControl;
 	}

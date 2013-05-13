@@ -121,6 +121,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
 		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
 		Collections.sort(matches, new Comparator<Method>() {
+			@Override
 			public int compare(Method m1, Method m2) {
 				return m2.toString().compareTo(m1.toString());
 			}
@@ -220,35 +221,43 @@ class ExtendedBeanInfo implements BeanInfo {
 	 * method found during construction.
 	 * @see #ExtendedBeanInfo(BeanInfo)
 	 */
+	@Override
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return this.propertyDescriptors.toArray(
 				new PropertyDescriptor[this.propertyDescriptors.size()]);
 	}
 
+	@Override
 	public BeanInfo[] getAdditionalBeanInfo() {
 		return delegate.getAdditionalBeanInfo();
 	}
 
+	@Override
 	public BeanDescriptor getBeanDescriptor() {
 		return delegate.getBeanDescriptor();
 	}
 
+	@Override
 	public int getDefaultEventIndex() {
 		return delegate.getDefaultEventIndex();
 	}
 
+	@Override
 	public int getDefaultPropertyIndex() {
 		return delegate.getDefaultPropertyIndex();
 	}
 
+	@Override
 	public EventSetDescriptor[] getEventSetDescriptors() {
 		return delegate.getEventSetDescriptors();
 	}
 
+	@Override
 	public Image getIcon(int iconKind) {
 		return delegate.getIcon(iconKind);
 	}
 
+	@Override
 	public MethodDescriptor[] getMethodDescriptors() {
 		return delegate.getMethodDescriptors();
 	}
@@ -658,6 +667,7 @@ class PropertyDescriptorUtils {
  */
 class PropertyDescriptorComparator implements Comparator<PropertyDescriptor> {
 
+	@Override
 	public int compare(PropertyDescriptor desc1, PropertyDescriptor desc2) {
 		String left = desc1.getName();
 		String right = desc2.getName();

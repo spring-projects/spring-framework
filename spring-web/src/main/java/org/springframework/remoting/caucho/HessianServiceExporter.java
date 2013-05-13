@@ -52,6 +52,7 @@ public class HessianServiceExporter extends HessianExporter implements HttpReque
 	/**
 	 * Processes the incoming Hessian request and creates a Hessian response.
 	 */
+	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

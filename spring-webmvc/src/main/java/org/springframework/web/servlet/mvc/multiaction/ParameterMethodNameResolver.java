@@ -157,6 +157,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	}
 
 
+	@Override
 	public String getHandlerMethodName(HttpServletRequest request) throws NoSuchRequestHandlingMethodException {
 		String methodName = null;
 

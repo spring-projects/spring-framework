@@ -38,6 +38,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	private DefaultSockJsService service;
 
 
+	@Override
 	@Before
 	public void setUp() {
 		super.setUp();

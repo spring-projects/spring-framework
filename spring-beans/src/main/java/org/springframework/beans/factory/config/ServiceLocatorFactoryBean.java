@@ -245,6 +245,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		this.serviceMappings = serviceMappings;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new FatalBeanException(
@@ -253,6 +254,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		this.beanFactory = (ListableBeanFactory) beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.serviceLocatorInterface == null) {
 			throw new IllegalArgumentException("Property 'serviceLocatorInterface' is required");
@@ -322,14 +324,17 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.serviceLocatorInterface;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -340,6 +345,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	 */
 	private class ServiceLocatorInvocationHandler implements InvocationHandler {
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				// Only consider equal when proxies are identical.

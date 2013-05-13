@@ -317,6 +317,7 @@ public class DefaultPersistenceUnitManager
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
 	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
 	 */
+	@Override
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
@@ -329,11 +330,13 @@ public class DefaultPersistenceUnitManager
 		return this.loadTimeWeaver;
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.loadTimeWeaver == null && InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
 			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver(this.resourcePatternResolver.getClassLoader());
@@ -524,6 +527,7 @@ public class DefaultPersistenceUnitManager
 	}
 
 
+	@Override
 	public PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() {
 		if (this.persistenceUnitInfoNames.isEmpty()) {
 			throw new IllegalStateException("No persistence units parsed from " +
@@ -541,6 +545,7 @@ public class DefaultPersistenceUnitManager
 		return pui;
 	}
 
+	@Override
 	public PersistenceUnitInfo obtainPersistenceUnitInfo(String persistenceUnitName) {
 		PersistenceUnitInfo pui = this.persistenceUnitInfos.remove(persistenceUnitName);
 		if (pui == null) {

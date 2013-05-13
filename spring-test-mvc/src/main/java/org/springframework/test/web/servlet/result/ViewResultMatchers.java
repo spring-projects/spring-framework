@@ -44,6 +44,7 @@ public class ViewResultMatchers {
 	 */
 	public ResultMatcher name(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = result.getModelAndView();
 				assertTrue("No ModelAndView found", mav != null);
@@ -57,6 +58,7 @@ public class ViewResultMatchers {
 	 */
 	public ResultMatcher name(final String expectedViewName) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = result.getModelAndView();
 				assertTrue("No ModelAndView found", mav != null);

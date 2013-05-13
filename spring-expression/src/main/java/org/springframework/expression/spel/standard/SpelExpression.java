@@ -62,56 +62,67 @@ public class SpelExpression implements Expression {
 
 	// implementing Expression
 
+	@Override
 	public Object getValue() throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), configuration);
 		return ast.getValue(expressionState);
 	}
 
+	@Override
 	public Object getValue(Object rootObject) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), configuration);
 		return ast.getValue(expressionState);
 	}
 
+	@Override
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), configuration);
 		TypedValue typedResultValue = ast.getTypedValue(expressionState);
 		return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 	}
 
+	@Override
 	public <T> T getValue(Object rootObject, Class<T> expectedResultType) throws EvaluationException {
 		ExpressionState expressionState = new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), configuration);
 		TypedValue typedResultValue = ast.getTypedValue(expressionState);
 		return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 	}
 
+	@Override
 	public Object getValue(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		return ast.getValue(new ExpressionState(context, configuration));
 	}
 
+	@Override
 	public Object getValue(EvaluationContext context, Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		return ast.getValue(new ExpressionState(context, toTypedValue(rootObject), configuration));
 	}
 
+	@Override
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		TypedValue typedResultValue = ast.getTypedValue(new ExpressionState(context, configuration));
 		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
+	@Override
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> expectedResultType) throws EvaluationException {
 		TypedValue typedResultValue = ast.getTypedValue(new ExpressionState(context, toTypedValue(rootObject), configuration));
 		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
+	@Override
 	public Class<?> getValueType() throws EvaluationException {
 		return getValueType(getEvaluationContext());
 	}
 
+	@Override
 	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return getValueType(getEvaluationContext(), rootObject);
 	}
 
+	@Override
 	public Class<?> getValueType(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ExpressionState eState = new ExpressionState(context, configuration);
@@ -119,60 +130,72 @@ public class SpelExpression implements Expression {
 		return typeDescriptor != null ? typeDescriptor.getType() : null;
 	}
 
+	@Override
 	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		ExpressionState eState = new ExpressionState(context, toTypedValue(rootObject), configuration);
 		TypeDescriptor typeDescriptor = ast.getValueInternal(eState).getTypeDescriptor();
 		return typeDescriptor != null ? typeDescriptor.getType() : null;
 	}
 
+	@Override
 	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
 		return getValueTypeDescriptor(getEvaluationContext());
 	}
 
+	@Override
 	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
 		ExpressionState eState = new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), configuration);
 		return ast.getValueInternal(eState).getTypeDescriptor();
 	}
 
+	@Override
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ExpressionState eState = new ExpressionState(context, configuration);
 		return ast.getValueInternal(eState).getTypeDescriptor();
 	}
 
+	@Override
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ExpressionState eState = new ExpressionState(context, toTypedValue(rootObject), configuration);
 		return ast.getValueInternal(eState).getTypeDescriptor();
 	}
 
+	@Override
 	public String getExpressionString() {
 		return expression;
 	}
 
+	@Override
 	public boolean isWritable(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		return ast.isWritable(new ExpressionState(context, configuration));
 	}
 
+	@Override
 	public boolean isWritable(Object rootObject) throws EvaluationException {
 		return ast.isWritable(new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), configuration));
 	}
 
+	@Override
 	public boolean isWritable(EvaluationContext context, Object rootObject) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		return ast.isWritable(new ExpressionState(context, toTypedValue(rootObject), configuration));
 	}
 
+	@Override
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ast.setValue(new ExpressionState(context, configuration), value);
 	}
 
+	@Override
 	public void setValue(Object rootObject, Object value) throws EvaluationException {
 		ast.setValue(new ExpressionState(getEvaluationContext(), toTypedValue(rootObject), configuration), value);
 	}
 
+	@Override
 	public void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ast.setValue(new ExpressionState(context, toTypedValue(rootObject), configuration), value);

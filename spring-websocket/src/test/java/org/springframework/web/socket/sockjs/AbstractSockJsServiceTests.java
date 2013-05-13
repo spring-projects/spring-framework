@@ -40,6 +40,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	private WebSocketHandler handler;
 
 
+	@Override
 	@Before
 	public void setUp() {
 		super.setUp();

@@ -40,6 +40,7 @@ class AnnotatedElementUtils {
 			String annotationType) {
 		final Set<String> types = new LinkedHashSet<String>();
 		process(element, annotationType, new Processor<Object>() {
+			@Override
 			public Object process(Annotation annotation, int depth) {
 				if (depth > 0) {
 					types.add(annotation.annotationType().getName());
@@ -54,6 +55,7 @@ class AnnotatedElementUtils {
 			String annotationType) {
 		return Boolean.TRUE.equals(
 				process(element, annotationType, new Processor<Boolean>() {
+					@Override
 					public Boolean process(Annotation annotation, int depth) {
 						if (depth > 0) {
 							return true;
@@ -66,6 +68,7 @@ class AnnotatedElementUtils {
 	public static boolean isAnnotated(AnnotatedElement element, String annotationType) {
 		return Boolean.TRUE.equals(
 				process(element, annotationType, new Processor<Boolean>() {
+					@Override
 					public Boolean process(Annotation annotation, int depth) {
 						return true;
 					}
@@ -76,6 +79,7 @@ class AnnotatedElementUtils {
 			String annotationType, final boolean classValuesAsString,
 			final boolean nestedAnnotationsAsMap) {
 		return process(element, annotationType, new Processor<Map<String, Object>>() {
+			@Override
 			public Map<String, Object> process(Annotation annotation, int depth) {
 				return AnnotationUtils.getAnnotationAttributes(annotation,
 						classValuesAsString, nestedAnnotationsAsMap);
@@ -88,6 +92,7 @@ class AnnotatedElementUtils {
 			final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 		final MultiValueMap<String, Object> attributes = new LinkedMultiValueMap<String, Object>();
 		process(element, annotationType, new Processor<Object>() {
+			@Override
 			public Object process(Annotation annotation, int depth) {
 				if (annotation.annotationType().getName().equals(annotationType)) {
 					for (Map.Entry<String, Object> entry : AnnotationUtils.getAnnotationAttributes(

@@ -56,6 +56,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 	/**
 	 * Retrieve the Spring-managed Session for the current thread, if any.
 	 */
+	@Override
 	public Session currentSession() throws HibernateException {
 		try {
 			return (org.hibernate.classic.Session) SessionFactoryUtils.doGetSession(this.sessionFactory, false);

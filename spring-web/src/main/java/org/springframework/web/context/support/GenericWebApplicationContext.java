@@ -116,10 +116,12 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	/**
 	 * Set the ServletContext that this WebApplicationContext runs in.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
@@ -200,6 +202,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		}
 	}
 
+	@Override
 	public Theme getTheme(String themeName) {
 		return this.themeSource.getTheme(themeName);
 	}
@@ -209,24 +212,29 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	// Pseudo-implementation of ConfigurableWebApplicationContext
 	// ---------------------------------------------------------------------
 
+	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		// no-op
 	}
 
+	@Override
 	public ServletConfig getServletConfig() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getServletConfig()");
 	}
 
+	@Override
 	public void setNamespace(String namespace) {
 		// no-op
 	}
 
+	@Override
 	public String getNamespace() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getNamespace()");
 	}
 
+	@Override
 	public void setConfigLocation(String configLocation) {
 		if (StringUtils.hasText(configLocation)) {
 			throw new UnsupportedOperationException(
@@ -235,6 +243,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		}
 	}
 
+	@Override
 	public void setConfigLocations(String[] configLocations) {
 		if (!ObjectUtils.isEmpty(configLocations)) {
 			throw new UnsupportedOperationException(
@@ -243,6 +252,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		}
 	}
 
+	@Override
 	public String[] getConfigLocations() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getConfigLocations()");

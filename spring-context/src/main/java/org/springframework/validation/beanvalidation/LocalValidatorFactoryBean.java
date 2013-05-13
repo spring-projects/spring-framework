@@ -204,11 +204,13 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validationPropertyMap;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		@SuppressWarnings("rawtypes")
@@ -271,6 +273,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 					this.parameterNameDiscoverer : new LocalVariableTableParameterNameDiscoverer());
 			Object parameterNameProvider = Proxy.newProxyInstance(getClass().getClassLoader(),
 					new Class[] {parameterNameProviderClass}, new InvocationHandler() {
+				@Override
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					if (method.getName().equals("getParameterNames")) {
 						String[] result = null;
@@ -322,22 +325,27 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 
+	@Override
 	public Validator getValidator() {
 		return this.validatorFactory.getValidator();
 	}
 
+	@Override
 	public ValidatorContext usingContext() {
 		return this.validatorFactory.usingContext();
 	}
 
+	@Override
 	public MessageInterpolator getMessageInterpolator() {
 		return this.validatorFactory.getMessageInterpolator();
 	}
 
+	@Override
 	public TraversableResolver getTraversableResolver() {
 		return this.validatorFactory.getTraversableResolver();
 	}
 
+	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}
@@ -348,6 +356,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 	}
 
+	@Override
 	public void destroy() {
 		close();
 	}

@@ -72,14 +72,17 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.adapter.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.adapter.getInstrumentableClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}

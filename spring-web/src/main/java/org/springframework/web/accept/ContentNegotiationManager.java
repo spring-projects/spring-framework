@@ -118,6 +118,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * @return the requested media types or an empty list, never {@code null}
 	 * @throws HttpMediaTypeNotAcceptableException if the requested media types cannot be parsed
 	 */
+	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) throws HttpMediaTypeNotAcceptableException {
 		for (ContentNegotiationStrategy strategy : this.contentNegotiationStrategies) {
 			List<MediaType> mediaTypes = strategy.resolveMediaTypes(webRequest);
@@ -133,6 +134,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * Delegate to all configured MediaTypeFileExtensionResolver instances and aggregate
 	 * the list of all file extensions found.
 	 */
+	@Override
 	public List<String> resolveFileExtensions(MediaType mediaType) {
 		Set<String> result = new LinkedHashSet<String>();
 		for (MediaTypeFileExtensionResolver resolver : this.fileExtensionResolvers) {
@@ -145,6 +147,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * Delegate to all configured MediaTypeFileExtensionResolver instances and aggregate
 	 * the list of all known file extensions.
 	 */
+	@Override
 	public List<String> getAllFileExtensions() {
 		Set<String> result = new LinkedHashSet<String>();
 		for (MediaTypeFileExtensionResolver resolver : this.fileExtensionResolvers) {

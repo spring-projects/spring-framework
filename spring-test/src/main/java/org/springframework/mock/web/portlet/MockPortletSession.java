@@ -77,10 +77,12 @@ public class MockPortletSession implements PortletSession {
 	}
 
 
+	@Override
 	public Object getAttribute(String name) {
 		return this.portletAttributes.get(name);
 	}
 
+	@Override
 	public Object getAttribute(String name, int scope) {
 		if (scope == PortletSession.PORTLET_SCOPE) {
 			return this.portletAttributes.get(name);
@@ -91,10 +93,12 @@ public class MockPortletSession implements PortletSession {
 		return null;
 	}
 
+	@Override
 	public Enumeration<String> getAttributeNames() {
 		return Collections.enumeration(new LinkedHashSet<String>(this.portletAttributes.keySet()));
 	}
 
+	@Override
 	public Enumeration<String> getAttributeNames(int scope) {
 		if (scope == PortletSession.PORTLET_SCOPE) {
 			return Collections.enumeration(new LinkedHashSet<String>(this.portletAttributes.keySet()));
@@ -105,10 +109,12 @@ public class MockPortletSession implements PortletSession {
 		return null;
 	}
 
+	@Override
 	public long getCreationTime() {
 		return this.creationTime;
 	}
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
@@ -118,10 +124,12 @@ public class MockPortletSession implements PortletSession {
 		setNew(false);
 	}
 
+	@Override
 	public long getLastAccessedTime() {
 		return this.lastAccessedTime;
 	}
 
+	@Override
 	public int getMaxInactiveInterval() {
 		return this.maxInactiveInterval;
 	}
@@ -147,6 +155,7 @@ public class MockPortletSession implements PortletSession {
 		}
 	}
 
+	@Override
 	public void invalidate() {
 		this.invalid = true;
 		clearAttributes();
@@ -160,14 +169,17 @@ public class MockPortletSession implements PortletSession {
 		this.isNew = value;
 	}
 
+	@Override
 	public boolean isNew() {
 		return this.isNew;
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		this.portletAttributes.remove(name);
 	}
 
+	@Override
 	public void removeAttribute(String name, int scope) {
 		if (scope == PortletSession.PORTLET_SCOPE) {
 			this.portletAttributes.remove(name);
@@ -177,6 +189,7 @@ public class MockPortletSession implements PortletSession {
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		if (value != null) {
 			this.portletAttributes.put(name, value);
@@ -186,6 +199,7 @@ public class MockPortletSession implements PortletSession {
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == PortletSession.PORTLET_SCOPE) {
 			if (value != null) {
@@ -205,18 +219,22 @@ public class MockPortletSession implements PortletSession {
 		}
 	}
 
+	@Override
 	public void setMaxInactiveInterval(int interval) {
 		this.maxInactiveInterval = interval;
 	}
 
+	@Override
 	public PortletContext getPortletContext() {
 		return this.portletContext;
 	}
 
+	@Override
 	public Map<String, Object> getAttributeMap() {
 		return Collections.unmodifiableMap(this.portletAttributes);
 	}
 
+	@Override
 	public Map<String, Object> getAttributeMap(int scope) {
 		if (scope == PortletSession.PORTLET_SCOPE) {
 			return Collections.unmodifiableMap(this.portletAttributes);

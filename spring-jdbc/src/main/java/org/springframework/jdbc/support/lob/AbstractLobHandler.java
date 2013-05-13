@@ -33,22 +33,27 @@ import java.sql.SQLException;
  */
 public abstract class AbstractLobHandler implements LobHandler {
 
+	@Override
 	public byte[] getBlobAsBytes(ResultSet rs, String columnName) throws SQLException {
 		return getBlobAsBytes(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public InputStream getBlobAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
 		return getBlobAsBinaryStream(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public String getClobAsString(ResultSet rs, String columnName) throws SQLException {
 		return getClobAsString(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public InputStream getClobAsAsciiStream(ResultSet rs, String columnName) throws SQLException {
 		return getClobAsAsciiStream(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public Reader getClobAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
 		return getClobAsCharacterStream(rs, rs.findColumn(columnName));
 	}

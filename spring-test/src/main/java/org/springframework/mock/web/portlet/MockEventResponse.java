@@ -27,6 +27,7 @@ import javax.portlet.EventResponse;
  */
 public class MockEventResponse extends MockStateAwareResponse implements EventResponse {
 
+	@Override
 	public void setRenderParameters(EventRequest request) {
 		setRenderParameters(request.getParameterMap());
 	}

@@ -62,18 +62,22 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		return this.servletResponse;
 	}
 
+	@Override
 	public void setStatusCode(HttpStatus status) {
 		this.servletResponse.setStatus(status.value());
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
+	@Override
 	public Cookies getCookies() {
 		return (this.headersWritten ? Cookies.readOnlyCookies(this.cookies) : this.cookies);
 	}
 
+	@Override
 	public OutputStream getBody() throws IOException {
 		writeCookies();
 		writeHeaders();
@@ -87,6 +91,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		this.servletResponse.flushBuffer();
 	}
 
+	@Override
 	public void close() {
 		writeCookies();
 		writeHeaders();

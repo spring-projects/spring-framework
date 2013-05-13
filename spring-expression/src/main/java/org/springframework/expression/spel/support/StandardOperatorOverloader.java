@@ -26,11 +26,13 @@ import org.springframework.expression.OperatorOverloader;
  */
 public class StandardOperatorOverloader implements OperatorOverloader {
 
+	@Override
 	public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand)
 			throws EvaluationException {
 		return false;
 	}
 
+	@Override
 	public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
 		throw new EvaluationException("No operation overloaded by default");
 	}

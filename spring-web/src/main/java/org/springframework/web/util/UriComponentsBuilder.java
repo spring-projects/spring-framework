@@ -604,6 +604,7 @@ public class UriComponentsBuilder {
 			return null;
 		}
 
+		@Override
 		public PathComponent build() {
 			int size = this.componentBuilders.size();
 			List<PathComponent> components = new ArrayList<PathComponent>(size);
@@ -632,6 +633,7 @@ public class UriComponentsBuilder {
 			this.path.append(path);
 		}
 
+		@Override
 		public PathComponent build() {
 			if (this.path.length() == 0) {
 				return null;
@@ -661,6 +663,7 @@ public class UriComponentsBuilder {
 			}
 		}
 
+		@Override
 		public PathComponent build() {
 			return (this.pathSegments.isEmpty() ? null :
 					new HierarchicalUriComponents.PathSegmentComponent(this.pathSegments));

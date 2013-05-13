@@ -532,6 +532,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 			return new RulesVariant(rules, variant);
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof RulesVariant) {
 				RulesVariant other = (RulesVariant) obj;
@@ -540,6 +541,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 			return false;
 		}
 
+		@Override
 		public int hashCode() {
 			return this.toId().hashCode();
 		}

@@ -235,6 +235,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		this.useMutableTilesContainer = useMutableTilesContainer;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -244,6 +245,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * delegating to the TilesInitializer.
 	 * @throws TilesException in case of setup failure
 	 */
+	@Override
 	public void afterPropertiesSet() throws TilesException {
 		ApplicationContext preliminaryContext = new SpringWildcardServletTilesApplicationContext(this.servletContext);
 		if (this.tilesInitializer == null) {
@@ -256,6 +258,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Removes the TilesContainer from this web application.
 	 * @throws TilesException in case of cleanup failure
 	 */
+	@Override
 	public void destroy() throws TilesException {
 		this.tilesInitializer.destroy();
 	}

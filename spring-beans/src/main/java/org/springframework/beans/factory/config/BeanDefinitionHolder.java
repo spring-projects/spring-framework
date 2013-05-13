@@ -108,6 +108,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * Expose the bean definition's source object.
 	 * @see BeanDefinition#getSource()
 	 */
+	@Override
 	public Object getSource() {
 		return this.beanDefinition.getSource();
 	}

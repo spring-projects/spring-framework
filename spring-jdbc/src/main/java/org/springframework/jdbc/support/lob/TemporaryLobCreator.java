@@ -55,6 +55,7 @@ public class TemporaryLobCreator implements LobCreator {
 	private final Set<Clob> temporaryClobs = new LinkedHashSet<Clob>(1);
 
 
+	@Override
 	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
 			throws SQLException {
 
@@ -70,6 +71,7 @@ public class TemporaryLobCreator implements LobCreator {
 		}
 	}
 
+	@Override
 	public void setBlobAsBinaryStream(
 			PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
 			throws SQLException {
@@ -92,6 +94,7 @@ public class TemporaryLobCreator implements LobCreator {
 		}
 	}
 
+	@Override
 	public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
 			throws SQLException {
 
@@ -107,6 +110,7 @@ public class TemporaryLobCreator implements LobCreator {
 		}
 	}
 
+	@Override
 	public void setClobAsAsciiStream(
 			PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 			throws SQLException {
@@ -129,6 +133,7 @@ public class TemporaryLobCreator implements LobCreator {
 		}
 	}
 
+	@Override
 	public void setClobAsCharacterStream(
 			PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
 			throws SQLException {
@@ -151,6 +156,7 @@ public class TemporaryLobCreator implements LobCreator {
 		}
 	}
 
+	@Override
 	public void close() {
 		try {
 			for (Blob blob : this.temporaryBlobs) {

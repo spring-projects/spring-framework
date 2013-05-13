@@ -82,6 +82,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	  this.order = order;
 	}
 
+	@Override
 	public final int getOrder() {
 	  return this.order;
 	}
@@ -294,6 +295,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
 	 */
+	@Override
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {

@@ -385,11 +385,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		this.mappedClass = mappedClass;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
 		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(this.classesToBeBound);
@@ -520,11 +522,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 
+	@Override
 	public boolean supports(Class<?> clazz) {
 		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
 				supportsInternal(clazz, this.checkForXmlRootElement));
 	}
 
+	@Override
 	public boolean supports(Type genericType) {
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -614,10 +618,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	// Marshalling
 
+	@Override
 	public void marshal(Object graph, Result result) throws XmlMappingException {
 		marshal(graph, result, null);
 	}
 
+	@Override
 	public void marshal(Object graph, Result result, MimeContainer mimeContainer) throws XmlMappingException {
 		try {
 			Marshaller marshaller = createMarshaller();
@@ -699,10 +705,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	// Unmarshalling
 
+	@Override
 	public Object unmarshal(Source source) throws XmlMappingException {
 		return unmarshal(source, null);
 	}
 
+	@Override
 	public Object unmarshal(Source source, MimeContainer mimeContainer) throws XmlMappingException {
 		try {
 			Unmarshaller unmarshaller = createUnmarshaller();
@@ -927,18 +935,22 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			this.length = length;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(this.data, this.offset, this.length);
 		}
 
+		@Override
 		public OutputStream getOutputStream() throws IOException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String getContentType() {
 			return this.contentType;
 		}
 
+		@Override
 		public String getName() {
 			return "ByteArrayDataSource";
 		}

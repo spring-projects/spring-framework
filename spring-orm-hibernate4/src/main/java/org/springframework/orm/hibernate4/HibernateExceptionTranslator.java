@@ -38,6 +38,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  */
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);

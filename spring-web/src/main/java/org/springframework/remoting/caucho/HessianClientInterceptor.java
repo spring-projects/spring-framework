@@ -236,6 +236,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.hessianProxy == null) {
 			throw new IllegalStateException("HessianClientInterceptor is not properly initialized - " +

@@ -290,6 +290,7 @@ public final class ModelMapTests {
 
 	public static class SomeInnerClass {
 
+		@Override
 		public boolean equals(Object obj) {
 			return (obj instanceof SomeInnerClass);
 		}

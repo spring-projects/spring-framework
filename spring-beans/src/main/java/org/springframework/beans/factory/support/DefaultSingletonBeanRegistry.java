@@ -120,6 +120,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
 
 
+	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
 		Assert.notNull(beanName, "'beanName' must not be null");
 		synchronized (this.singletonObjects) {
@@ -166,6 +167,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 	}
 
+	@Override
 	public Object getSingleton(String beanName) {
 		return getSingleton(beanName, true);
 	}
@@ -273,16 +275,19 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 	}
 
+	@Override
 	public boolean containsSingleton(String beanName) {
 		return (this.singletonObjects.containsKey(beanName));
 	}
 
+	@Override
 	public String[] getSingletonNames() {
 		synchronized (this.singletonObjects) {
 			return StringUtils.toStringArray(this.registeredSingletons);
 		}
 	}
 
+	@Override
 	public int getSingletonCount() {
 		synchronized (this.singletonObjects) {
 			return this.registeredSingletons.size();

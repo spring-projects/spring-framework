@@ -278,6 +278,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	/**
 	 * Calls {@link #scheduleTasks()} at bean construction time.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		scheduleTasks();
 	}
@@ -333,6 +334,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		}
 	}
 
+	@Override
 	public void destroy() {
 		for (ScheduledFuture<?> future : this.scheduledFutures) {
 			future.cancel(true);

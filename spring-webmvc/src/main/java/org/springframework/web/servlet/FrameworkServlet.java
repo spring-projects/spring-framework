@@ -1077,6 +1077,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 *
 	 * @since 4.0
 	 */
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		if (this.webApplicationContext == null
@@ -1113,6 +1114,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
 
+		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			FrameworkServlet.this.onApplicationEvent(event);
 		}

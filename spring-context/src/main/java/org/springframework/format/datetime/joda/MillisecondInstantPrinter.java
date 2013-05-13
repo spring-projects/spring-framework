@@ -42,6 +42,7 @@ public final class MillisecondInstantPrinter implements Printer<Long> {
 	}
 
 
+	@Override
 	public String print(Long instant, Locale locale) {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).print(instant);
 	}

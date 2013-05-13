@@ -68,43 +68,53 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 
+	@Override
 	public String getMethodName() {
 		return this.introspectedMethod.getName();
 	}
 
+	@Override
 	public String getDeclaringClassName() {
 		return this.introspectedMethod.getDeclaringClass().getName();
 	}
 
+	@Override
 	public boolean isStatic() {
 		return Modifier.isStatic(this.introspectedMethod.getModifiers());
 	}
 
+	@Override
 	public boolean isFinal() {
 		return Modifier.isFinal(this.introspectedMethod.getModifiers());
 	}
 
+	@Override
 	public boolean isOverridable() {
 		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
 		return AnnotatedElementUtils.isAnnotated(this.introspectedMethod, annotationType);
 	}
 
+	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return getAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAnnotationAttributes(this.introspectedMethod,
 				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
+	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
 		return getAllAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(
 			String annotationType, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,

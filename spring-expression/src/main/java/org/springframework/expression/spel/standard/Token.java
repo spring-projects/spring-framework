@@ -50,6 +50,7 @@ class Token {
 		return kind;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		s.append("[").append(kind.toString());

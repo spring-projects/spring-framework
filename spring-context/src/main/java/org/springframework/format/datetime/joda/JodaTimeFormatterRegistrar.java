@@ -155,6 +155,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	}
 
 
+	@Override
 	public void registerFormatters(FormatterRegistry registry) {
 		JodaTimeConverters.registerConverters(registry);
 

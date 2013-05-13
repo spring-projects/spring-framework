@@ -53,6 +53,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 	}
 
 
+	@Override
 	public void registerFormatters(FormatterRegistry registry) {
 		addDateConverters(registry);
 		registry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
@@ -81,6 +82,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class DateToLongConverter implements Converter<Date, Long> {
 
+		@Override
 		public Long convert(Date source) {
 			return source.getTime();
 		}
@@ -89,6 +91,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class DateToCalendarConverter implements Converter<Date, Calendar> {
 
+		@Override
 		public Calendar convert(Date source) {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(source);
@@ -99,6 +102,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class CalendarToDateConverter implements Converter<Calendar, Date> {
 
+		@Override
 		public Date convert(Calendar source) {
 			return source.getTime();
 		}
@@ -107,6 +111,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class CalendarToLongConverter implements Converter<Calendar, Long> {
 
+		@Override
 		public Long convert(Calendar source) {
 			return source.getTime().getTime();
 		}
@@ -115,6 +120,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 	private static class LongToDateConverter implements Converter<Long, Date> {
 
+		@Override
 		public Date convert(Long source) {
 			return new Date(source);
 		}
@@ -125,6 +131,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 
 		private final DateToCalendarConverter dateToCalendarConverter = new DateToCalendarConverter();
 
+		@Override
 		public Calendar convert(Long source) {
 			return this.dateToCalendarConverter.convert(new Date(source));
 		}

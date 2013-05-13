@@ -43,6 +43,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	private MessageSource messageSource;
 
 
+	@Override
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
 	}

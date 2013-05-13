@@ -57,6 +57,7 @@ public class AsyncServletServerHttpRequest extends ServletServerHttpRequest
 	/**
 	 * Timeout period begins after the container thread has exited.
 	 */
+	@Override
 	public void setTimeout(long timeout) {
 		Assert.state(!isAsyncStarted(), "Cannot change the timeout with concurrent handling in progress");
 		this.timeout = timeout;
@@ -70,6 +71,7 @@ public class AsyncServletServerHttpRequest extends ServletServerHttpRequest
 		this.completionHandlers.add(runnable);
 	}
 
+	@Override
 	public boolean isAsyncStarted() {
 		return ((this.asyncContext != null) && getServletRequest().isAsyncStarted());
 	}
@@ -79,10 +81,12 @@ public class AsyncServletServerHttpRequest extends ServletServerHttpRequest
 	 * <p>It is important to avoid use of request and response objects after async
 	 * processing has completed. Servlet containers often re-use them.
 	 */
+	@Override
 	public boolean isAsyncCompleted() {
 		return this.asyncCompleted.get();
 	}
 
+	@Override
 	public void startAsync() {
 		Assert.state(getServletRequest().isAsyncSupported(),
 				"Async support must be enabled on a servlet and for all filters involved " +
@@ -100,6 +104,7 @@ public class AsyncServletServerHttpRequest extends ServletServerHttpRequest
 		}
 	}
 
+	@Override
 	public void completeAsync() {
 		Assert.notNull(this.asyncContext, "Cannot dispatch without an AsyncContext");
 		if (isAsyncStarted() && !isAsyncCompleted()) {

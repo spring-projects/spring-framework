@@ -88,10 +88,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	/**
 	 * Returns an instance that can initialize {@link ApplicationContextAware} beans.
 	 */
+	@Override
 	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException {
 		return this.beanFactory;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
@@ -100,26 +102,32 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Implementation of ApplicationContext interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
 
+	@Override
 	public String getApplicationName() {
 		return "";
 	}
 
+	@Override
 	public String getDisplayName() {
 		return this.displayName;
 	}
 
+	@Override
 	public long getStartupDate() {
 		return this.startupDate;
 	}
 
+	@Override
 	public ApplicationContext getParent() {
 		return null;
 	}
 
+	@Override
 	public Environment getEnvironment() {
 		return this.environment ;
 	}
@@ -139,42 +147,52 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public Object getBean(String name) throws BeansException {
 		return this.beanFactory.getBean(name);
 	}
 
+	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return this.beanFactory.getBean(name, requiredType);
 	}
 
+	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		return this.beanFactory.getBean(requiredType);
 	}
 
+	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
 		return this.beanFactory.getBean(name, args);
 	}
 
+	@Override
 	public boolean containsBean(String name) {
 		return this.beanFactory.containsBean(name);
 	}
 
+	@Override
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.isSingleton(name);
 	}
 
+	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.isPrototype(name);
 	}
 
+	@Override
 	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.isTypeMatch(name, targetType);
 	}
 
+	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.getType(name);
 	}
 
+	@Override
 	public String[] getAliases(String name) {
 		return this.beanFactory.getAliases(name);
 	}
@@ -183,42 +201,51 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public boolean containsBeanDefinition(String beanName) {
 		return this.beanFactory.containsBeanDefinition(beanName);
 	}
 
+	@Override
 	public int getBeanDefinitionCount() {
 		return this.beanFactory.getBeanDefinitionCount();
 	}
 
+	@Override
 	public String[] getBeanDefinitionNames() {
 		return this.beanFactory.getBeanDefinitionNames();
 	}
 
+	@Override
 	public String[] getBeanNamesForType(Class<?> type) {
 		return this.beanFactory.getBeanNamesForType(type);
 	}
 
+	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		return this.beanFactory.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
+	@Override
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		return this.beanFactory.getBeansOfType(type);
 	}
 
+	@Override
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
 		return this.beanFactory.getBeansOfType(type, includeNonSingletons, allowEagerInit);
 	}
 
+	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
 		return this.beanFactory.getBeansWithAnnotation(annotationType);
 	}
 
+	@Override
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
 		return this.beanFactory.findAnnotationOnBean(beanName, annotationType);
 	}
@@ -227,10 +254,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public BeanFactory getParentBeanFactory() {
 		return null;
 	}
 
+	@Override
 	public boolean containsLocalBean(String name) {
 		return this.beanFactory.containsBean(name);
 	}
@@ -239,14 +268,17 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Implementation of MessageSource interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public String getMessage(String code, Object args[], String defaultMessage, Locale locale) {
 		return this.messageSource.getMessage(code, args, defaultMessage, locale);
 	}
 
+	@Override
 	public String getMessage(String code, Object args[], Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(code, args, locale);
 	}
 
+	@Override
 	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
 		return this.messageSource.getMessage(resolvable, locale);
 	}
@@ -255,10 +287,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Implementation of ResourceLoader interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public ClassLoader getClassLoader() {
 		return null;
 	}
 
+	@Override
 	public Resource getResource(String location) {
 		return this.resourcePatternResolver.getResource(location);
 	}
@@ -267,9 +301,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	// Other
 	//---------------------------------------------------------------------
 
+	@Override
 	public void publishEvent(ApplicationEvent event) {
 	}
 
+	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
 		return this.resourcePatternResolver.getResources(locationPattern);
 	}
@@ -282,6 +318,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	 */
 	private class StubBeanFactory extends StaticListableBeanFactory implements AutowireCapableBeanFactory {
 
+		@Override
 		public Object initializeBean(Object existingBean, String beanName) throws BeansException {
 			if (existingBean instanceof ApplicationContextAware) {
 				((ApplicationContextAware) existingBean).setApplicationContext(StubWebApplicationContext.this);
@@ -289,53 +326,65 @@ class StubWebApplicationContext implements WebApplicationContext {
 			return existingBean;
 		}
 
+		@Override
 		public <T> T createBean(Class<T> beanClass) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@SuppressWarnings("rawtypes")
 		public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@SuppressWarnings("rawtypes")
 		public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void autowireBean(Object existingBean) throws BeansException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Object configureBean(Object existingBean, String beanName) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void destroyBean(Object existingBean) {
 			throw new UnsupportedOperationException();
 		}

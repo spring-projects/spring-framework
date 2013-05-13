@@ -147,6 +147,7 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 	}
 
 
+	@Override
 	public void registerFormatters(FormatterRegistry registry) {
 		DateTimeFormatter dateFormatter = getFormatter(Type.DATE);
 		DateTimeFormatter timeFormatter = getFormatter(Type.TIME);

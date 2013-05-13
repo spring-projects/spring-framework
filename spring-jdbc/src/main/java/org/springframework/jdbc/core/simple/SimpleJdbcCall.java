@@ -79,33 +79,39 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 
+	@Override
 	public SimpleJdbcCall withProcedureName(String procedureName) {
 		setProcedureName(procedureName);
 		setFunction(false);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withFunctionName(String functionName) {
 		setProcedureName(functionName);
 		setFunction(true);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withSchemaName(String schemaName) {
 		setSchemaName(schemaName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withCatalogName(String catalogName) {
 		setCatalogName(catalogName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withReturnValue() {
 		setReturnValueRequired(true);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
 		for (SqlParameter sqlParameter : sqlParameters) {
 			if (sqlParameter != null) {
@@ -115,59 +121,71 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
 		setInParameterNames(new HashSet<String>(Arrays.asList(inParameterNames)));
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall returningResultSet(String parameterName, RowMapper rowMapper) {
 		addDeclaredRowMapper(parameterName, rowMapper);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
 		setAccessCallParameterMetaData(false);
 		return this;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, Object... args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, Map<String, ?> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, Object... args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, Map<String, ?> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	public Map<String, Object> execute(Object... args) {
 		return doExecute(args);
 	}
 
+	@Override
 	public Map<String, Object> execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
+	@Override
 	public Map<String, Object> execute(SqlParameterSource parameterSource) {
 		return doExecute(parameterSource);
 	}

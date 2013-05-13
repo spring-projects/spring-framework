@@ -62,6 +62,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	}
 
 
+	@Override
 	public WorkManager getWorkManager() {
 		if (this.workManager == null) {
 			throw new IllegalStateException("No WorkManager available");
@@ -69,10 +70,12 @@ public class SimpleBootstrapContext implements BootstrapContext {
 		return this.workManager;
 	}
 
+	@Override
 	public XATerminator getXATerminator() {
 		return this.xaTerminator;
 	}
 
+	@Override
 	public Timer createTimer() throws UnavailableException {
 		return new Timer();
 	}

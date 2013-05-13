@@ -48,6 +48,7 @@ public class NoOpCacheManager implements CacheManager {
 	 * This implementation always returns a {@link Cache} implementation that will not store items.
 	 * Additionally, the request cache will be remembered by the manager for consistency.
 	 */
+	@Override
 	public Cache getCache(String name) {
 		Cache cache = this.caches.get(name);
 		if (cache == null) {
@@ -63,6 +64,7 @@ public class NoOpCacheManager implements CacheManager {
 	/**
 	 * This implementation returns the name of the caches previously requested.
 	 */
+	@Override
 	public Collection<String> getCacheNames() {
 		synchronized (this.cacheNames) {
 			return Collections.unmodifiableSet(this.cacheNames);
@@ -78,24 +80,30 @@ public class NoOpCacheManager implements CacheManager {
 			this.name = name;
 		}
 
+		@Override
 		public void clear() {
 		}
 
+		@Override
 		public void evict(Object key) {
 		}
 
+		@Override
 		public ValueWrapper get(Object key) {
 			return null;
 		}
 
+		@Override
 		public String getName() {
 			return this.name;
 		}
 
+		@Override
 		public Object getNativeCache() {
 			return null;
 		}
 
+		@Override
 		public void put(Object key, Object value) {
 		}
 	}

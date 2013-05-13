@@ -370,14 +370,17 @@ public abstract class CollectionUtils {
 			this.enumeration = enumeration;
 		}
 
+		@Override
 		public boolean hasNext() {
 			return this.enumeration.hasMoreElements();
 		}
 
+		@Override
 		public E next() {
 			return this.enumeration.nextElement();
 		}
 
+		@Override
 		public void remove() throws UnsupportedOperationException {
 			throw new UnsupportedOperationException("Not supported");
 		}
@@ -396,6 +399,7 @@ public abstract class CollectionUtils {
 			this.map = map;
 		}
 
+		@Override
 		public void add(K key, V value) {
 			List<V> values = this.map.get(key);
 			if (values == null) {
@@ -405,23 +409,27 @@ public abstract class CollectionUtils {
 			values.add(value);
 		}
 
+		@Override
 		public V getFirst(K key) {
 			List<V> values = this.map.get(key);
 			return (values != null ? values.get(0) : null);
 		}
 
+		@Override
 		public void set(K key, V value) {
 			List<V> values = new LinkedList<V>();
 			values.add(value);
 			this.map.put(key, values);
 		}
 
+		@Override
 		public void setAll(Map<K, V> values) {
 			for (Entry<K, V> entry : values.entrySet()) {
 				set(entry.getKey(), entry.getValue());
 			}
 		}
 
+		@Override
 		public Map<K, V> toSingleValueMap() {
 			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K,V>(this.map.size());
 			for (Entry<K, List<V>> entry : map.entrySet()) {
@@ -430,50 +438,62 @@ public abstract class CollectionUtils {
 			return singleValueMap;
 		}
 
+		@Override
 		public int size() {
 			return this.map.size();
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return this.map.isEmpty();
 		}
 
+		@Override
 		public boolean containsKey(Object key) {
 			return this.map.containsKey(key);
 		}
 
+		@Override
 		public boolean containsValue(Object value) {
 			return this.map.containsValue(value);
 		}
 
+		@Override
 		public List<V> get(Object key) {
 			return this.map.get(key);
 		}
 
+		@Override
 		public List<V> put(K key, List<V> value) {
 			return this.map.put(key, value);
 		}
 
+		@Override
 		public List<V> remove(Object key) {
 			return this.map.remove(key);
 		}
 
+		@Override
 		public void putAll(Map<? extends K, ? extends List<V>> m) {
 			this.map.putAll(m);
 		}
 
+		@Override
 		public void clear() {
 			this.map.clear();
 		}
 
+		@Override
 		public Set<K> keySet() {
 			return this.map.keySet();
 		}
 
+		@Override
 		public Collection<List<V>> values() {
 			return this.map.values();
 		}
 
+		@Override
 		public Set<Entry<K, List<V>>> entrySet() {
 			return this.map.entrySet();
 		}

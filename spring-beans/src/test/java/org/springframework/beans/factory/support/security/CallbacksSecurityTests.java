@@ -262,6 +262,7 @@ public class CallbacksSecurityTests {
 			return this.name;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (obj == this) {
 				return true;
@@ -273,6 +274,7 @@ public class CallbacksSecurityTests {
 			return this.name.equals(p.name);
 		}
 
+		@Override
 		public int hashCode() {
 			return this.name.hashCode();
 		}

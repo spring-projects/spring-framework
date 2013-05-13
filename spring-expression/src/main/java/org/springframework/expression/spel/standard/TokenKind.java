@@ -45,6 +45,7 @@ enum TokenKind {
 		this("");
 	}
 
+	@Override
 	public String toString() {
 		return this.name()+(tokenChars.length!=0?"("+new String(tokenChars)+")":"");
 	}

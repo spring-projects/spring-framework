@@ -147,11 +147,13 @@ public class MappingJackson2MessageConverter implements MessageConverter, BeanCl
 		}
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
+	@Override
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		Message message;
 		try {
@@ -173,6 +175,7 @@ public class MappingJackson2MessageConverter implements MessageConverter, BeanCl
 		return message;
 	}
 
+	@Override
 	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
 		try {
 			JavaType targetJavaType = getJavaTypeForMessage(message);

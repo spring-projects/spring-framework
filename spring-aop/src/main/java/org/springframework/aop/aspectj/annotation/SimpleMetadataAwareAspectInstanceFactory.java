@@ -45,6 +45,7 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 	}
 
 
+	@Override
 	public final AspectMetadata getAspectMetadata() {
 		return this.metadata;
 	}

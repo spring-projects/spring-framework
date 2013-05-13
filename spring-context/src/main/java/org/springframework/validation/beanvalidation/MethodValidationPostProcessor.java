@@ -96,6 +96,7 @@ public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProce
 		this.validator = validatorFactory.getValidator();
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		Pointcut pointcut = new AnnotationMatchingPointcut(this.validatedAnnotationType, true);
 		Advice advice = (this.validator != null ? new MethodValidationInterceptor(this.validator) :

@@ -109,6 +109,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -138,6 +139,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {

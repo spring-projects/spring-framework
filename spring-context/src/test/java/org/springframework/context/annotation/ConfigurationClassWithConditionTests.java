@@ -129,6 +129,7 @@ public class ConfigurationClassWithConditionTests {
 
 	static class NoBeanOneCondition implements Condition {
 
+		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return !context.getBeanFactory().containsBeanDefinition("bean1");
 		}
@@ -136,6 +137,7 @@ public class ConfigurationClassWithConditionTests {
 
 	static class MetaConditionalFilter implements Condition {
 
+		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(MetaConditional.class.getName()));
 			assertThat(attributes.getString("value"), equalTo("test"));
@@ -144,6 +146,7 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	static class NeverCondition implements Condition {
+		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return false;
 		}

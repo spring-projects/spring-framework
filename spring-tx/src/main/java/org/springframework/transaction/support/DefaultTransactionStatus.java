@@ -103,6 +103,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 		return (this.transaction != null);
 	}
 
+	@Override
 	public boolean isNewTransaction() {
 		return (hasTransaction() && this.newTransaction);
 	}

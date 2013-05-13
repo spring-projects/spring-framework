@@ -206,12 +206,14 @@ class ConfigurationClassEnhancer {
 	private static class DisposableBeanMethodInterceptor implements MethodInterceptor,
 			ConditionalCallback {
 
+		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return candidateMethod.getName().equals("destroy")
 					&& candidateMethod.getParameterTypes().length == 0
 					&& DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
 		}
 
+		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			Enhancer.registerStaticCallbacks(obj.getClass(), null);
 			// does the actual (non-CGLIB) superclass actually implement DisposableBean?
@@ -235,6 +237,7 @@ class ConfigurationClassEnhancer {
 	private static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor,
 			ConditionalCallback {
 
+		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return candidateMethod.getName().equals("setBeanFactory")
 					&& candidateMethod.getParameterTypes().length == 1
@@ -242,6 +245,7 @@ class ConfigurationClassEnhancer {
 					&& BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass());
 		}
 
+		@Override
 		public Object intercept(Object obj, Method method, Object[] args,
 				MethodProxy proxy) throws Throwable {
 			Field field = obj.getClass().getDeclaredField(BEAN_FACTORY_FIELD);
@@ -266,6 +270,7 @@ class ConfigurationClassEnhancer {
 	 */
 	private static class BeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
+		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);
 		}
@@ -277,6 +282,7 @@ class ConfigurationClassEnhancer {
 		 * invoking the super implementation of the proxied method i.e., the actual
 		 * {@code @Bean} method.
 		 */
+		@Override
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
 					MethodProxy cglibMethodProxy) throws Throwable {
 
@@ -389,6 +395,7 @@ class ConfigurationClassEnhancer {
 			enhancer.setSuperclass(fbClass);
 			enhancer.setUseFactory(false);
 			enhancer.setCallback(new MethodInterceptor() {
+				@Override
 				public Object intercept(Object obj, Method method, Object[] args,
 						MethodProxy proxy) throws Throwable {
 					if (method.getName().equals("getObject") && args.length == 0) {

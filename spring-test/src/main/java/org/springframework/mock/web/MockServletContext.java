@@ -215,6 +215,7 @@ public class MockServletContext implements ServletContext {
 		this.contextPath = (contextPath != null ? contextPath : "");
 	}
 
+	@Override
 	public String getContextPath() {
 		return this.contextPath;
 	}
@@ -223,6 +224,7 @@ public class MockServletContext implements ServletContext {
 		this.contexts.put(contextPath, context);
 	}
 
+	@Override
 	public ServletContext getContext(String contextPath) {
 		if (this.contextPath.equals(contextPath)) {
 			return this;
@@ -234,6 +236,7 @@ public class MockServletContext implements ServletContext {
 		this.majorVersion = majorVersion;
 	}
 
+	@Override
 	public int getMajorVersion() {
 		return this.majorVersion;
 	}
@@ -242,6 +245,7 @@ public class MockServletContext implements ServletContext {
 		this.minorVersion = minorVersion;
 	}
 
+	@Override
 	public int getMinorVersion() {
 		return this.minorVersion;
 	}
@@ -250,6 +254,7 @@ public class MockServletContext implements ServletContext {
 		this.effectiveMajorVersion = effectiveMajorVersion;
 	}
 
+	@Override
 	public int getEffectiveMajorVersion() {
 		return this.effectiveMajorVersion;
 	}
@@ -258,6 +263,7 @@ public class MockServletContext implements ServletContext {
 		this.effectiveMinorVersion = effectiveMinorVersion;
 	}
 
+	@Override
 	public int getEffectiveMinorVersion() {
 		return this.effectiveMinorVersion;
 	}
@@ -268,11 +274,13 @@ public class MockServletContext implements ServletContext {
 	 * the {@link ServletContext#getMimeType(String)} contract, this method returns {@code null}
 	 * if the mimeType is "application/octet-stream", as of Spring 3.2.2.
 	 */
+	@Override
 	public String getMimeType(String filePath) {
 		String mimeType = MimeTypeResolver.getMimeType(filePath);
 		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
 	}
 
+	@Override
 	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
@@ -298,6 +306,7 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	@Override
 	public URL getResource(String path) throws MalformedURLException {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		if (!resource.exists()) {
@@ -315,6 +324,7 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	@Override
 	public InputStream getResourceAsStream(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		if (!resource.exists()) {
@@ -329,6 +339,7 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
 		if (!path.startsWith("/")) {
 			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
@@ -336,6 +347,7 @@ public class MockServletContext implements ServletContext {
 		return new MockRequestDispatcher(path);
 	}
 
+	@Override
 	public RequestDispatcher getNamedDispatcher(String path) {
 		return this.namedRequestDispatchers.get(path);
 	}
@@ -393,30 +405,37 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
+	@Override
 	public Servlet getServlet(String name) {
 		return null;
 	}
 
+	@Override
 	public Enumeration<Servlet> getServlets() {
 		return Collections.enumeration(new HashSet<Servlet>());
 	}
 
+	@Override
 	public Enumeration<String> getServletNames() {
 		return Collections.enumeration(new HashSet<String>());
 	}
 
+	@Override
 	public void log(String message) {
 		logger.info(message);
 	}
 
+	@Override
 	public void log(Exception ex, String message) {
 		logger.info(message, ex);
 	}
 
+	@Override
 	public void log(String message, Throwable ex) {
 		logger.info(message, ex);
 	}
 
+	@Override
 	public String getRealPath(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
@@ -428,19 +447,23 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	@Override
 	public String getServerInfo() {
 		return "MockServletContext";
 	}
 
+	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}
 
+	@Override
 	public boolean setInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
 		if (this.initParameters.containsKey(name)) {
@@ -455,15 +478,18 @@ public class MockServletContext implements ServletContext {
 		this.initParameters.put(name, value);
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getAttributeNames() {
 		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
@@ -474,6 +500,7 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
@@ -483,14 +510,17 @@ public class MockServletContext implements ServletContext {
 		this.servletContextName = servletContextName;
 	}
 
+	@Override
 	public String getServletContextName() {
 		return this.servletContextName;
 	}
 
+	@Override
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
 
+	@Override
 	public void declareRoles(String... roleNames) {
 		Assert.notNull(roleNames, "Role names array must not be null");
 		for (String roleName : roleNames) {
@@ -503,20 +533,24 @@ public class MockServletContext implements ServletContext {
 		return Collections.unmodifiableSet(this.declaredRoles);
 	}
 
+	@Override
 	public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes)
 			throws IllegalStateException, IllegalArgumentException {
 		this.sessionTrackingModes = sessionTrackingModes;
 	}
 
+	@Override
 	public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
 		return DEFAULT_SESSION_TRACKING_MODES;
 	}
 
+	@Override
 	public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
 		return (this.sessionTrackingModes != null ?
 				Collections.unmodifiableSet(this.sessionTrackingModes) : DEFAULT_SESSION_TRACKING_MODES);
 	}
 
+	@Override
 	public SessionCookieConfig getSessionCookieConfig() {
 		return this.sessionCookieConfig;
 	}
@@ -526,70 +560,87 @@ public class MockServletContext implements ServletContext {
 	// Unsupported Servlet 3.0 registration methods
 	//---------------------------------------------------------------------
 
+	@Override
 	public JspConfigDescriptor getJspConfigDescriptor() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public ServletRegistration.Dynamic addServlet(String servletName, String className) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public ServletRegistration.Dynamic addServlet(String servletName, Class<? extends Servlet> servletClass) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public <T extends Servlet> T createServlet(Class<T> c) throws ServletException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public ServletRegistration getServletRegistration(String servletName) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public FilterRegistration.Dynamic addFilter(String filterName, String className) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public <T extends Filter> T createFilter(Class<T> c) throws ServletException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public FilterRegistration getFilterRegistration(String filterName) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void addListener(Class<? extends EventListener> listenerClass) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void addListener(String className) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public <T extends EventListener> void addListener(T t) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
 		throw new UnsupportedOperationException();
 	}

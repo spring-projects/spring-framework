@@ -161,6 +161,7 @@ public abstract class JRubyScriptUtils {
 			this.ruby = ruby;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				return (isProxyForSameRubyObject(args[0]));

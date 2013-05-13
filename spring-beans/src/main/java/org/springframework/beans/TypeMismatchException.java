@@ -107,6 +107,7 @@ public class TypeMismatchException extends PropertyAccessException {
 		return this.requiredType;
 	}
 
+	@Override
 	public String getErrorCode() {
 		return ERROR_CODE;
 	}

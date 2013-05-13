@@ -74,6 +74,7 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 * This implementation eagerly fetches the Preferences instances
 	 * for the required system and user tree nodes.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		this.systemPrefs = (this.systemTreePath != null) ?
 				Preferences.systemRoot().node(this.systemTreePath) : Preferences.systemRoot();

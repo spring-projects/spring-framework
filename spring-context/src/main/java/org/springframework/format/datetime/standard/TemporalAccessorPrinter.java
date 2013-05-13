@@ -45,6 +45,7 @@ public final class TemporalAccessorPrinter implements Printer<TemporalAccessor> 
 	}
 
 
+	@Override
 	public String print(TemporalAccessor partial, Locale locale) {
 		return DateTimeContextHolder.getFormatter(this.formatter, locale).format(partial);
 	}

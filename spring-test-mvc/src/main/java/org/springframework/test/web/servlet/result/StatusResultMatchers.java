@@ -46,6 +46,7 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher is(final Matcher<Integer> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertThat("Response status", result.getResponse().getStatus(), matcher);
 			}
@@ -57,6 +58,7 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher is(final int status) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Response status", status, result.getResponse().getStatus());
 			}
@@ -69,6 +71,7 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher reason(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertThat("Response status reason", result.getResponse().getErrorMessage(), matcher);
 			}
@@ -80,6 +83,7 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher reason(final String reason) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Response status reason", reason, result.getResponse().getErrorMessage());
 			}
@@ -545,6 +549,7 @@ public class StatusResultMatchers {
 	 */
 	private ResultMatcher matcher(final HttpStatus status) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				assertEquals("Status", status.value(), result.getResponse().getStatus());
 			}

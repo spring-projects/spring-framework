@@ -94,6 +94,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	 */
 	private class GenericMessageEndpoint extends AbstractMessageEndpoint implements MethodInterceptor {
 
+		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			boolean applyDeliveryCalls = !hasBeforeDeliveryBeenCalled();
 			if (applyDeliveryCalls) {

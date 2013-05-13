@@ -149,10 +149,12 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	// BodyTag implementation
 	//---------------------------------------------------------------------
 
+	@Override
 	public void doInitBody() throws JspException {
 		// no op
 	}
 
+	@Override
 	public void setBodyContent(BodyContent bodyContent) {
 		this.bodyContent = bodyContent;
 	}
