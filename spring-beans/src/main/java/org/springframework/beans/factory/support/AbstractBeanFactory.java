@@ -521,26 +521,32 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
-			Class<?> beanClass = predictBeanType(beanName, mbd, typesToMatch);
-			if (beanClass == null) {
+			Class<?> beanType = predictBeanType(beanName, mbd, typesToMatch);
+			if (beanType == null) {
 				return false;
 			}
 
 			// Check bean class whether we're dealing with a FactoryBean.
-			if (FactoryBean.class.isAssignableFrom(beanClass)) {
+			if (FactoryBean.class.isAssignableFrom(beanType)) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					// If it's a FactoryBean, we want to look at what it creates, not the factory class.
-					Class<?> type = getTypeForFactoryBean(beanName, mbd);
-					return (type != null && typeToMatch.isAssignableFrom(type));
-				}
-				else {
-					return typeToMatch.isAssignableFrom(beanClass);
+					beanType = getTypeForFactoryBean(beanName, mbd);
+					if (beanType == null) {
+						return false;
+					}
 				}
 			}
-			else {
-				return !BeanFactoryUtils.isFactoryDereference(name) &&
-						typeToMatch.isAssignableFrom(beanClass);
+			else if (BeanFactoryUtils.isFactoryDereference(name)) {
+				// Special case: A SmartInstantiationAwareBeanPostProcessor returned a non-FactoryBean
+				// type but we nevertheless are being asked to dereference a FactoryBean...
+				// Let's check the original bean class and proceed with it if it is a FactoryBean.
+				beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+				if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
+					return false;
+				}
 			}
+
+			return typeToMatch.isAssignableFrom(beanType);
 		}
 	}
 
@@ -1377,8 +1383,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the corresponding bean definition
 	 */
 	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
-		Class<?> beanClass = predictBeanType(beanName, mbd, FactoryBean.class);
-		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+		Class<?> beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+		return (beanType != null && FactoryBean.class.isAssignableFrom(beanType));
 	}
 
 	/**
