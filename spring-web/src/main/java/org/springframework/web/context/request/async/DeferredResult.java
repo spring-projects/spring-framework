@@ -173,9 +173,9 @@ public class DeferredResult<T> {
 				return false;
 			}
 			this.result = result;
-			if (this.resultHandler != null) {
-				this.resultHandler.handleResult(this.result);
-			}
+		}
+		if (this.resultHandler != null) {
+			this.resultHandler.handleResult(this.result);
 		}
 		return true;
 	}
