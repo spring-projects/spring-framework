@@ -22,9 +22,9 @@ import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
 
 
-public class PollingServerSockJsSession extends AbstractHttpServerSockJsSession {
+public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
-	public PollingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
+	public PollingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 

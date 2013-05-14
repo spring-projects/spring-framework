@@ -50,7 +50,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
-import org.springframework.web.socket.server.endpoint.EndpointRegistration;
+import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
 
 /**
  * GlassFish support for upgrading an {@link HttpServletRequest} during a WebSocket
@@ -136,7 +136,7 @@ public class GlassFishRequestUpgradeStrategy extends AbstractEndpointUpgradeStra
 		String randomValue = String.valueOf(random.nextLong());
 		String endpointPath = requestUri.endsWith("/") ? requestUri + randomValue : requestUri + "/" + randomValue;
 
-		EndpointRegistration endpointConfig = new EndpointRegistration(endpointPath, endpoint);
+		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(endpointPath, endpoint);
 		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
 
 		return new TyrusEndpoint(new EndpointWrapper(endpoint, endpointConfig,

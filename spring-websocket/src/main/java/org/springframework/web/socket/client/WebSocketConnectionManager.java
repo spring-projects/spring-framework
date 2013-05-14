@@ -84,7 +84,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	}
 
 	@Override
-	public void stopInternal() {
+	public void stopInternal() throws Exception {
 		if (this.syncClientLifecycle) {
 			((SmartLifecycle) client).stop();
 		}

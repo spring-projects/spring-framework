@@ -79,7 +79,7 @@ public enum TransportType {
 		return this.httpMethod;
 	}
 
-	public boolean setsNoCache() {
+	public boolean sendsNoCacheInstruction() {
 		return this.headerHints.contains("no_cache");
 	}
 

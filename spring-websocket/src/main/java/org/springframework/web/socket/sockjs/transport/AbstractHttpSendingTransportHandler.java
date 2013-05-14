@@ -28,9 +28,9 @@ import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.ConfigurableTransportHandler;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
+import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.TransportErrorException;
-import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 
 /**
  * TODO
@@ -57,18 +57,17 @@ public abstract class AbstractHttpSendingTransportHandler
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, AbstractSockJsSession session)
-					throws TransportErrorException {
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws TransportErrorException {
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
 
-		AbstractHttpServerSockJsSession httpServerSession = (AbstractHttpServerSockJsSession) session;
+		AbstractHttpSockJsSession httpServerSession = (AbstractHttpSockJsSession) session;
 		handleRequestInternal(request, response, httpServerSession);
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSockJsSession httpServerSession) throws TransportErrorException {
+			AbstractHttpSockJsSession httpServerSession) throws TransportErrorException {
 
 		if (httpServerSession.isNew()) {
 			logger.debug("Opening " + getTransportType() + " connection");

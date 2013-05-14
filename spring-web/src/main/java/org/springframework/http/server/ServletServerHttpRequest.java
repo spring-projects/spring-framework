@@ -166,6 +166,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
 		if (this.queryParams == null) {
+			// TODO: extract from query string
 			this.queryParams = new LinkedMultiValueMap<String, String>(this.servletRequest.getParameterMap().size());
 			for (String name : this.servletRequest.getParameterMap().keySet()) {
 				for (String value : this.servletRequest.getParameterValues(name)) {

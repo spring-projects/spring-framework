@@ -52,12 +52,15 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(StandardWebSocketClient.class);
 
-	private static final Set<String> EXCLUDED_HEADERS = new HashSet<String>(
-			Arrays.asList("Sec-WebSocket-Accept", "Sec-WebSocket-Extensions", "Sec-WebSocket-Key",
-					"Sec-WebSocket-Protocol", "Sec-WebSocket-Version"));
+	private WebSocketContainer webSocketContainer;
 
-	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
+	public WebSocketContainer getWebSocketContainer() {
+		if (this.webSocketContainer == null) {
+			this.webSocketContainer = ContainerProvider.getWebSocketContainer();
+		}
+		return this.webSocketContainer;
+	}
 
 	public void setWebSocketContainer(WebSocketContainer container) {
 		this.webSocketContainer = container;
@@ -72,8 +75,8 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
-			final HttpHeaders httpHeaders, URI uri) throws WebSocketConnectFailureException {
+	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders httpHeaders, URI uri)
+			throws WebSocketConnectFailureException {
 
 		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
 		session.setUri(uri);
@@ -86,29 +89,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 			if (!protocols.isEmpty()) {
 				configBuidler.preferredSubprotocols(protocols);
 			}
-			configBuidler.configurator(new Configurator() {
-				@Override
-				public void beforeRequest(Map<String, List<String>> headers) {
-					for (String headerName : httpHeaders.keySet()) {
-						if (!EXCLUDED_HEADERS.contains(headerName)) {
-							List<String> value = httpHeaders.get(headerName);
-							if (logger.isTraceEnabled()) {
-								logger.trace("Adding header [" + headerName + "=" + value + "]");
-							}
-							headers.put(headerName, value);
-						}
-					}
-					if (logger.isTraceEnabled()) {
-						logger.trace("Handshake request headers: " + headers);
-					}
-				}
-				@Override
-				public void afterResponse(HandshakeResponse handshakeResponse) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Handshake response headers: " + handshakeResponse.getHeaders());
-					}
-				}
-			});
+			configBuidler.configurator(new StandardWebSocketClientConfigurator(httpHeaders));
 		}
 
 		try {
@@ -118,6 +99,43 @@ public class StandardWebSocketClient implements WebSocketClient {
 		}
 		catch (Exception e) {
 			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);
+		}
+	}
+
+
+	private static class StandardWebSocketClientConfigurator extends Configurator {
+
+		private static final Set<String> EXCLUDED_HEADERS = new HashSet<String>(
+				Arrays.asList("Sec-WebSocket-Accept", "Sec-WebSocket-Extensions", "Sec-WebSocket-Key",
+						"Sec-WebSocket-Protocol", "Sec-WebSocket-Version"));
+
+		private final HttpHeaders httpHeaders;
+
+
+		public StandardWebSocketClientConfigurator(HttpHeaders httpHeaders) {
+			this.httpHeaders = httpHeaders;
+		}
+
+		@Override
+		public void beforeRequest(Map<String, List<String>> headers) {
+			for (String headerName : this.httpHeaders.keySet()) {
+				if (!EXCLUDED_HEADERS.contains(headerName)) {
+					List<String> value = this.httpHeaders.get(headerName);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Adding header [" + headerName + "=" + value + "]");
+					}
+					headers.put(headerName, value);
+				}
+			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("Handshake request headers: " + headers);
+			}
+		}
+		@Override
+		public void afterResponse(HandshakeResponse handshakeResponse) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Handshake response headers: " + handshakeResponse.getHeaders());
+			}
 		}
 	}
 

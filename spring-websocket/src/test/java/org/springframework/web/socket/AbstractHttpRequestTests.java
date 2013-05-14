@@ -41,16 +41,19 @@ public class AbstractHttpRequestTests {
 
 	@Before
 	public void setUp() {
-		this.servletRequest = new MockHttpServletRequest();
-		this.servletResponse = new MockHttpServletResponse();
-		this.request = new AsyncServletServerHttpRequest(this.servletRequest, this.servletResponse);
-		this.response = new ServletServerHttpResponse(this.servletResponse);
+		resetRequestAndResponse();
 	}
-
 
 	protected void setRequest(String method, String requestUri) {
 		this.servletRequest.setMethod(method);
 		this.servletRequest.setRequestURI(requestUri);
+	}
+
+	protected void resetRequestAndResponse() {
+		resetResponse();
+		this.servletRequest = new MockHttpServletRequest();
+		this.servletRequest.setAsyncSupported(true);
+		this.request = new AsyncServletServerHttpRequest(this.servletRequest, this.servletResponse);
 	}
 
 	protected void resetResponse() {

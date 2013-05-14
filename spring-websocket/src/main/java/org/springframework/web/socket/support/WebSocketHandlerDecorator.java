@@ -38,7 +38,7 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 	}
 
 
-	protected WebSocketHandler getDelegate() {
+	public WebSocketHandler getDelegate() {
 		return this.delegate;
 	}
 

@@ -332,6 +332,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 					return path.substring(index + prefix.length());
 				}
 			}
+			return null;
 		}
 
 		// SockJS info request?
@@ -518,6 +519,5 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 			response.getBody().write(contentBytes);
 		}
 	};
-
 
 }

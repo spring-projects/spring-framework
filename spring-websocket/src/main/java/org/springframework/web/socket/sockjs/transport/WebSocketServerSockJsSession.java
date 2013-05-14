@@ -23,7 +23,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.AbstractServerSockJsSession;
+import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
 
@@ -31,10 +31,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
+ * A WebSocket implementation of {@link AbstractSockJsSession}. Delegates to a
+ * {@link WebSocketSession}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketServerSockJsSession extends AbstractServerSockJsSession {
+public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 
 	private WebSocketSession webSocketSession;
 
@@ -103,5 +106,5 @@ public class WebSocketServerSockJsSession extends AbstractServerSockJsSession {
 	protected void disconnect(CloseStatus status) throws IOException {
 		this.webSocketSession.close(status);
 	}
-}
 
+}

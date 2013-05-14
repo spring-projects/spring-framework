@@ -38,16 +38,14 @@ import org.springframework.web.socket.support.BeanCreatingHandlerProvider;
 
 /**
  * An implementation of {@link javax.websocket.server.ServerEndpointConfig} that also
- * holds the target {@link javax.websocket.Endpoint} as a reference or a bean name.
- *
- * <p>
- * Beans of this type are detected by {@link EndpointExporter} and
- * registered with a Java WebSocket runtime at startup.
+ * holds the target {@link javax.websocket.Endpoint} provided as a reference or as a bean
+ * name. Beans of this type are detected by {@link ServerEndpointExporter} and registered
+ * with a Java WebSocket runtime at startup.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
+public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
 
 	private final String path;
 
@@ -65,7 +63,7 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 
 	private final Map<String, Object> userProperties = new HashMap<String, Object>();
 
-	private Configurator configurator = new Configurator() {};
+	private Configurator configurator = new EndpointRegistrationConfigurator();
 
 
 	/**
@@ -74,7 +72,7 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 	 * @param path
 	 * @param endpointClass
 	 */
-	public EndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
+	public ServerEndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpointClass, "endpointClass is required");
 		this.path = path;
@@ -82,7 +80,7 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		this.endpoint = null;
 	}
 
-	public EndpointRegistration(String path, Endpoint endpoint) {
+	public ServerEndpointRegistration(String path, Endpoint endpoint) {
 		Assert.hasText(path, "path must not be empty");
 		Assert.notNull(endpoint, "endpoint is required");
 		this.path = path;
@@ -152,44 +150,61 @@ public class EndpointRegistration implements ServerEndpointConfig, BeanFactoryAw
 		return this.decoders;
 	}
 
-	/**
-	 * The {@link Configurator#getEndpointInstance(Class)} method is always ignored.
-	 */
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-	}
-
 	@Override
 	public Configurator getConfigurator() {
-		return new Configurator() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
-				return (T) EndpointRegistration.this.getEndpoint();
-			}
-			@Override
-			public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
-				EndpointRegistration.this.configurator.modifyHandshake(sec, request, response);
-			}
-			@Override
-			public boolean checkOrigin(String originHeaderValue) {
-				return EndpointRegistration.this.configurator.checkOrigin(originHeaderValue);
-			}
-			@Override
-			public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-				return EndpointRegistration.this.configurator.getNegotiatedSubprotocol(supported, requested);
-			}
-			@Override
-			public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-				return EndpointRegistration.this.configurator.getNegotiatedExtensions(installed, requested);
-			}
-		};
+		return this.configurator;
 	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.endpointProvider != null) {
 			this.endpointProvider.setBeanFactory(beanFactory);
+		}
+	}
+
+	protected void modifyHandshake(HandshakeRequest request, HandshakeResponse response) {
+		this.configurator.modifyHandshake(this, request, response);
+	}
+
+	protected boolean checkOrigin(String originHeaderValue) {
+		return this.configurator.checkOrigin(originHeaderValue);
+	}
+
+	protected String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
+		return this.configurator.getNegotiatedSubprotocol(supported, requested);
+	}
+
+	protected List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
+		return this.configurator.getNegotiatedExtensions(installed, requested);
+	}
+
+
+	private class EndpointRegistrationConfigurator extends Configurator {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
+			return (T) ServerEndpointRegistration.this.getEndpoint();
+		}
+
+		@Override
+		public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+			super.modifyHandshake(sec, request, response);
+		}
+
+		@Override
+		public boolean checkOrigin(String originHeaderValue) {
+			return super.checkOrigin(originHeaderValue);
+		}
+
+		@Override
+		public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
+			return super.getNegotiatedSubprotocol(supported, requested);
+		}
+
+		@Override
+		public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
+			return super.getNegotiatedExtensions(installed, requested);
 		}
 	}
 

@@ -47,10 +47,10 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler handler) {
+	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
 
-		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {
+		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
 
 			@Override
 			protected void writePrelude() throws IOException {

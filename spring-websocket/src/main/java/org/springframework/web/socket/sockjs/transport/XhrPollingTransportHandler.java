@@ -51,9 +51,9 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 	}
 
 	@Override
-	public PollingServerSockJsSession createSession(String sessionId, WebSocketHandler handler) {
+	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
-		return new PollingServerSockJsSession(sessionId, getSockJsConfig(), handler);
+		return new PollingSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 
 }

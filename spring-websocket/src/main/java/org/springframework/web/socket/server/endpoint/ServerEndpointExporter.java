@@ -48,12 +48,13 @@ import org.springframework.util.ReflectionUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class EndpointExporter implements InitializingBean, BeanPostProcessor, ApplicationContextAware {
+public class ServerEndpointExporter implements InitializingBean, BeanPostProcessor, ApplicationContextAware {
 
 	private static final boolean isServletApiPresent =
-			ClassUtils.isPresent("javax.servlet.ServletContext", EndpointExporter.class.getClassLoader());
+			ClassUtils.isPresent("javax.servlet.ServletContext", ServerEndpointExporter.class.getClassLoader());
 
-	private static Log logger = LogFactory.getLog(EndpointExporter.class);
+	private static Log logger = LogFactory.getLog(ServerEndpointExporter.class);
+
 
 	private final List<Class<?>> annotatedEndpointClasses = new ArrayList<Class<?>>();
 
@@ -62,6 +63,7 @@ public class EndpointExporter implements InitializingBean, BeanPostProcessor, Ap
 	private ApplicationContext applicationContext;
 
 	private ServerContainer serverContainer;
+
 
 	/**
 	 * TODO

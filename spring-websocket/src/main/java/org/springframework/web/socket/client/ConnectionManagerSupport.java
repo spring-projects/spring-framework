@@ -26,7 +26,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Abstract base class for WebSocketConnection managers.
+ * Abstract base class for WebSocket connection managers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -147,25 +147,25 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	public final void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
-				stopInternal();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Stopping " + this.getClass().getSimpleName());
+				}
+				try {
+					stopInternal();
+				}
+				catch (Throwable e) {
+					logger.error("Failed to stop WebSocket connection", e);
+				}
+				finally {
+					this.isRunning = false;
+				}
 			}
 		}
 	}
 
-	protected void stopInternal() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Stopping " + this.getClass().getSimpleName());
-		}
-		try {
-			if (isConnected()) {
-				closeConnection();
-			}
-		}
-		catch (Throwable e) {
-			logger.error("Failed to stop WebSocket connection", e);
-		}
-		finally {
-			this.isRunning = false;
+	protected void stopInternal() throws Exception {
+		if (isConnected()) {
+			closeConnection();
 		}
 	}
 

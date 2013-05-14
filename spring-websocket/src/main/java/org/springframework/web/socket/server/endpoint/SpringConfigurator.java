@@ -27,9 +27,9 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * This should be used in conjuction with {@link ServerEndpoint @ServerEndpoint} classes.
+ * This should be used in conjunction with {@link ServerEndpoint @ServerEndpoint} classes.
  *
- * <p>For {@link javax.websocket.Endpoint}, see {@link EndpointExporter}.
+ * <p>For {@link javax.websocket.Endpoint}, see {@link ServerEndpointExporter}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -56,7 +56,7 @@ public class SpringConfigurator extends Configurator {
 			}
 			return wac.getAutowireCapableBeanFactory().createBean(endpointClass);
 		}
-		if (beans.size() == 1) {
+		else if (beans.size() == 1) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using @ServerEndpoint singleton " + beans.keySet().iterator().next());
 			}

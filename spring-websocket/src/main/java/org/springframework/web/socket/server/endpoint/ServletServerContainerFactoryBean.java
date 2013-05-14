@@ -34,7 +34,7 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * using its setters allows configuring the {@code ServerContainer} through Spring
  * configuration. This is useful even if the ServerContainer is not injected into any
  * other bean. For example, an application can configure a {@link DefaultHandshakeHandler}
- * , a {@link SockJsService}, or {@link EndpointExporter}, and separately declare this
+ * , a {@link SockJsService}, or {@link ServerEndpointExporter}, and separately declare this
  * FactoryBean in order to customize the properties of the (one and only)
  * {@code ServerContainer} instance.
  *
@@ -43,9 +43,6 @@ import org.springframework.web.socket.sockjs.SockJsService;
  */
 public class ServletServerContainerFactoryBean
 		implements FactoryBean<WebSocketContainer>, InitializingBean, ServletContextAware {
-
-	private static final String SERVER_CONTAINER_ATTR_NAME = "javax.websocket.server.ServerContainer";
-
 
 	private Long asyncSendTimeout;
 
@@ -92,7 +89,7 @@ public class ServletServerContainerFactoryBean
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		this.serverContainer = (ServerContainer) servletContext.getAttribute(SERVER_CONTAINER_ATTR_NAME);
+		this.serverContainer = (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
 	}
 
 	@Override

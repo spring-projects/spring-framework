@@ -41,6 +41,7 @@ public class SockJsFrame {
 
 
 	private SockJsFrame(String content) {
+		Assert.notNull("content is required");
 		this.content = content;
 	}
 
@@ -114,6 +115,22 @@ public class SockJsFrame {
 			result = result.substring(0, 80) + "...(truncated)";
 		}
 		return "SockJsFrame content='" + result.replace("\n", "\\n").replace("\r", "\\r") + "'";
+	}
+
+	@Override
+	public int hashCode() {
+		return this.content.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof SockJsFrame)) {
+			return false;
+		}
+		return this.content.equals(((SockJsFrame) other).content);
 	}
 
 

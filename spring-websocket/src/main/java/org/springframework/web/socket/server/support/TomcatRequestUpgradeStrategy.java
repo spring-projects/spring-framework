@@ -34,7 +34,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
-import org.springframework.web.socket.server.endpoint.EndpointRegistration;
+import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
 
 /**
  * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket handshake.
@@ -77,7 +77,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrateg
 		// TODO: use ServletContext attribute when Tomcat is updated
 		WsServerContainer serverContainer = WsServerContainer.getServerContainer();
 
-		ServerEndpointConfig endpointConfig = new EndpointRegistration("/shouldntmatter", endpoint);
+		ServerEndpointConfig endpointConfig = new ServerEndpointRegistration("/shouldntmatter", endpoint);
 
 		upgradeHandler.preInit(endpoint, endpointConfig, serverContainer, webSocketRequest,
 				selectedProtocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());

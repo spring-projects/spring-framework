@@ -20,13 +20,19 @@ import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportType;
 
 public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler {
+
+	private final FormHttpMessageConverter formConverter = new FormHttpMessageConverter();
+
 
 	@Override
 	public TransportType getTransportType() {
@@ -36,13 +42,6 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
 			AbstractSockJsSession sockJsSession) throws TransportErrorException {
-
-		if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {
-			if (request.getQueryParams().getFirst("d") == null) {
-				sendInternalServerError(response, "Payload expected.", sockJsSession.getId());
-				return;
-			}
-		}
 
 		super.handleRequestInternal(request, response, sockJsSession);
 
@@ -57,8 +56,9 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 	@Override
 	protected String[] readMessages(ServerHttpRequest request) throws IOException {
 		if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {
-			String d = request.getQueryParams().getFirst("d");
-			return getObjectMapper().readValue(d, String[].class);
+			MultiValueMap<String, String> map = this.formConverter.read(null, request);
+			String d = map.getFirst("d");
+			return (StringUtils.hasText(d)) ? getObjectMapper().readValue(d, String[].class) : null;
 		}
 		else {
 			return getObjectMapper().readValue(request.getBody(), String[].class);

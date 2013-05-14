@@ -26,12 +26,12 @@ import org.springframework.web.socket.sockjs.SockJsFrame;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 
-public class StreamingServerSockJsSession extends AbstractHttpServerSockJsSession {
+public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 	private int byteCount;
 
 
-	public StreamingServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
+	public StreamingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 

@@ -26,11 +26,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.AbstractServerSockJsSession;
+import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
-import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
@@ -39,7 +39,7 @@ import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpServerSockJsSession extends AbstractServerSockJsSession {
+public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private FrameFormat frameFormat;
 
@@ -50,7 +50,7 @@ public abstract class AbstractHttpServerSockJsSession extends AbstractServerSock
 	private ServerHttpResponse response;
 
 
-	public AbstractHttpServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
+	public AbstractHttpSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 

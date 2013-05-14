@@ -80,10 +80,10 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	public StreamingServerSockJsSession createSession(String sessionId, WebSocketHandler handler) {
+	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
 		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
 
-		return new StreamingServerSockJsSession(sessionId, getSockJsConfig(), handler) {
+		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
 
 			@Override
 			protected void writePrelude() throws IOException {
@@ -99,7 +99,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpServerSockJsSession session) throws TransportErrorException {
+			AbstractHttpSockJsSession session) throws TransportErrorException {
 
 		try {
 			String callback = request.getQueryParams().getFirst("c");

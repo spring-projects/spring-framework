@@ -35,6 +35,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -84,7 +85,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	 *        application stops.
 	 */
 	public DefaultSockJsService(TaskScheduler taskScheduler) {
-		this(taskScheduler, null);
+		super(taskScheduler);
+		addTransportHandlers(getDefaultTransportHandlers());
 	}
 
 	/**
@@ -105,9 +107,16 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 		super(taskScheduler);
 
-		transportHandlers = CollectionUtils.isEmpty(transportHandlers) ? getDefaultTransportHandlers() : transportHandlers;
-		addTransportHandlers(transportHandlers);
-		addTransportHandlers(Arrays.asList(transportHandlerOverrides));
+		if (!CollectionUtils.isEmpty(transportHandlers)) {
+			addTransportHandlers(transportHandlers);
+		}
+		if (!ObjectUtils.isEmpty(transportHandlerOverrides)) {
+			addTransportHandlers(Arrays.asList(transportHandlerOverrides));
+		}
+
+		if (this.transportHandlers.isEmpty()) {
+			logger.warn("No transport handlers");
+		}
 	}
 
 	protected final Set<TransportHandler> getDefaultTransportHandlers() {
@@ -194,7 +203,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 				transportHandler, request, response);
 
 		if (session != null) {
-			if (transportType.setsNoCache()) {
+			if (transportType.sendsNoCacheInstruction()) {
 				addNoCacheHeaders(response);
 			}
 

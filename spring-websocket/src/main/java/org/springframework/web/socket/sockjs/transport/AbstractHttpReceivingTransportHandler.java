@@ -28,8 +28,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
-import org.springframework.web.socket.sockjs.SockJsFrame;
-import org.springframework.web.socket.sockjs.SockJsRuntimeException;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
@@ -38,7 +36,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * TODO
+ * Base class for HTTP-based transports that read input messages.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -57,8 +55,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, AbstractSockJsSession session)
-					throws TransportErrorException {
+			WebSocketHandler webSocketHandler, AbstractSockJsSession session) throws TransportErrorException {
 
 		if (session == null) {
 			response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -77,18 +74,23 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 			messages = readMessages(request);
 		}
 		catch (JsonMappingException ex) {
-			logger.error("Failed to read message: ", ex);
+			logger.error("Failed to read message: " + ex.getMessage());
 			sendInternalServerError(response, "Payload expected.", session.getId());
 			return;
 		}
 		catch (IOException ex) {
-			logger.error("Failed to read message: ", ex);
+			logger.error("Failed to read message: " + ex.getMessage());
 			sendInternalServerError(response, "Broken JSON encoding.", session.getId());
 			return;
 		}
 		catch (Throwable t) {
-			logger.error("Failed to read message: ", t);
+			logger.error("Failed to read message: " + t.getMessage());
 			sendInternalServerError(response, "Failed to process messages", session.getId());
+			return;
+		}
+
+		if (messages == null) {
+			sendInternalServerError(response, "Payload expected.", session.getId());
 			return;
 		}
 
@@ -104,7 +106,7 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 		}
 		catch (Throwable t) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(session, t, logger);
-			throw new SockJsRuntimeException("Unhandled WebSocketHandler error in " + this, t);
+			throw new TransportErrorException("Unhandled WebSocketHandler error in " + this, t, session.getId());
 		}
 	}
 
