@@ -45,44 +45,42 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 
 	private static final String AJ_ID = "[AspectJ] ";
 
-	private static final Log LOGGER = LogFactory.getLog("AspectJ Weaver");
+	private static final Log logger = LogFactory.getLog("AspectJ Weaver");
 
 
 	@Override
 	public boolean handleMessage(IMessage message) throws AbortException {
 		Kind messageKind = message.getKind();
-
 		if (messageKind == IMessage.DEBUG) {
-			if (LOGGER.isDebugEnabled() || LOGGER.isTraceEnabled()) {
-				LOGGER.debug(makeMessageFor(message));
+			if (logger.isDebugEnabled()) {
+				logger.debug(makeMessageFor(message));
 				return true;
 			}
 		}
-		else if ((messageKind == IMessage.INFO) || (messageKind == IMessage.WEAVEINFO)) {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info(makeMessageFor(message));
+		else if (messageKind == IMessage.INFO || messageKind == IMessage.WEAVEINFO) {
+			if (logger.isInfoEnabled()) {
+				logger.info(makeMessageFor(message));
 				return true;
 			}
 		}
 		else if (messageKind == IMessage.WARNING) {
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(makeMessageFor(message));
+			if (logger.isWarnEnabled()) {
+				logger.warn(makeMessageFor(message));
 				return true;
 			}
 		}
 		else if (messageKind == IMessage.ERROR) {
-			if (LOGGER.isErrorEnabled()) {
-				LOGGER.error(makeMessageFor(message));
+			if (logger.isErrorEnabled()) {
+				logger.error(makeMessageFor(message));
 				return true;
 			}
 		}
 		else if (messageKind == IMessage.ABORT) {
-			if (LOGGER.isFatalEnabled()) {
-				LOGGER.fatal(makeMessageFor(message));
+			if (logger.isFatalEnabled()) {
+				logger.fatal(makeMessageFor(message));
 				return true;
 			}
 		}
-
 		return false;
 	}
 
