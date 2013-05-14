@@ -75,24 +75,12 @@ public class StandardEndpointAdapter extends Endpoint {
 				handleTextMessage(session, message);
 			}
 		});
-
-		if (!this.handler.isStreaming()) {
-			session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
-				@Override
-				public void onMessage(ByteBuffer message) {
-					handleBinaryMessage(session, message, true);
-				}
-			});
-		}
-		else {
-			session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>() {
-				@Override
-				public void onMessage(ByteBuffer messagePart, boolean isLast) {
-					handleBinaryMessage(session, messagePart, isLast);
-				}
-			});
-		}
-
+		session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>() {
+			@Override
+			public void onMessage(ByteBuffer message) {
+				handleBinaryMessage(session, message);
+			}
+		});
 	}
 
 	private void handleTextMessage(javax.websocket.Session session, String payload) {
@@ -105,8 +93,8 @@ public class StandardEndpointAdapter extends Endpoint {
 		}
 	}
 
-	private void handleBinaryMessage(javax.websocket.Session session, ByteBuffer payload, boolean isLast) {
-		BinaryMessage binaryMessage = new BinaryMessage(payload, isLast);
+	private void handleBinaryMessage(javax.websocket.Session session, ByteBuffer payload) {
+		BinaryMessage binaryMessage = new BinaryMessage(payload);
 		try {
 			this.handler.handleMessage(this.wsSession, binaryMessage);
 		}

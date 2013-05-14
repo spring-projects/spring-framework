@@ -57,22 +57,9 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	private final Map<WebSocketSession, WebSocketHandler> handlers =
 			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
 
-	private final boolean streaming;
-
 
 	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType) {
-		this(handlerType, false);
-	}
-
-	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType, boolean isStreaming) {
 		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
-		this.streaming = isStreaming;
-	}
-
-
-	@Override
-	public boolean isStreaming() {
-		return this.streaming;
 	}
 
 	@Override

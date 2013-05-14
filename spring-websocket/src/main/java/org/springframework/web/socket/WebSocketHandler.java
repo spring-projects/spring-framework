@@ -72,9 +72,4 @@ public interface WebSocketHandler {
 	 */
 	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception;
 
-	/**
-	 * Whether this WebSocketHandler wishes to receive messages broken up in parts.
-	 */
-	boolean isStreaming();
-
 }

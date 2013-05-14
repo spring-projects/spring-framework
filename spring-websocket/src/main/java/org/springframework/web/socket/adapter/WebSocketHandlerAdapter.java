@@ -68,9 +68,4 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 	}
 
-	@Override
-	public boolean isStreaming() {
-		return false;
-	}
-
 }

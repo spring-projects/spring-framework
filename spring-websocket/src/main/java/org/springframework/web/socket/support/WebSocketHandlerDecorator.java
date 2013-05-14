@@ -63,11 +63,6 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 	}
 
 	@Override
-	public boolean isStreaming() {
-		return this.delegate.isStreaming();
-	}
-
-	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [delegate=" + this.delegate + "]";
 	}

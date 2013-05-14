@@ -31,53 +31,24 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
 	private byte[] bytes;
 
-	private final boolean last;
-
 
 	/**
 	 * Create a new {@link BinaryMessage} instance.
 	 * @param payload a non-null payload
+	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(ByteBuffer payload) {
-		this(payload, true);
-	}
-
-	/**
-	 * Create a new {@link BinaryMessage} instance.
-	 * @param payload a non-null payload
-	 * @param isLast if the message is the last of a series of partial messages
-	 */
-	public BinaryMessage(ByteBuffer payload, boolean isLast) {
 		super(payload);
 		this.bytes = null;
-		this.last = isLast;
 	}
 
 	/**
 	 * Create a new {@link BinaryMessage} instance.
 	 * @param payload a non-null payload
+	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(byte[] payload) {
-		this(payload, true);
-	}
-
-	/**
-	 * Create a new {@link BinaryMessage} instance.
-	 * @param payload a non-null payload
-	 * @param isLast if the message is the last of a series of partial messages
-	 */
-	public BinaryMessage(byte[] payload, boolean isLast) {
-		this(payload, 0, (payload == null ? 0 : payload.length), isLast);
-	}
-
-	/**
-	 * Create a new {@link BinaryMessage} instance by wrapping an existing byte array.
-	 * @param payload a non-null payload, NOTE: this value is not copied so care must be
-	 *        taken not to modify the array.
-	 * @param isLast if the message is the last of a series of partial messages
-	 */
-	public BinaryMessage(byte[] payload, int offset, int len) {
-		this(payload, offset, len, true);
+		this(payload, 0, (payload == null ? 0 : payload.length));
 	}
 
 	/**
@@ -88,20 +59,11 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	 * @param len the length of the array considered for the payload
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
-	public BinaryMessage(byte[] payload, int offset, int len, boolean isLast) {
+	public BinaryMessage(byte[] payload, int offset, int len) {
 		super(payload != null ? ByteBuffer.wrap(payload, offset, len) : null);
 		if(offset == 0 && len == payload.length) {
 			this.bytes = payload;
 		}
-		this.last = isLast;
-	}
-
-	/**
-	 * Returns if this is the last part in a series of partial messages. If this is
-	 * not a partial message this method will return {@code true}.
-	 */
-	public boolean isLast() {
-		return this.last;
 	}
 
 	/**
