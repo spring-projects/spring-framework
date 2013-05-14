@@ -346,7 +346,7 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		else {
 			int dotPos1 = pattern1.indexOf('.');
-			if (dotPos1 == -1 || pattern1ContainsUriVar) {
+			if (dotPos1 == -1 || pattern1ContainsUriVar||!isPattern(pattern1)) {
 				// simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;
