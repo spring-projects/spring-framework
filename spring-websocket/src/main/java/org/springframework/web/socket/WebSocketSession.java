@@ -17,12 +17,12 @@
 package org.springframework.web.socket;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 
 /**
- * Allows sending messages over a WebSocket connection as well as closing it.
+ * A WebSocket session abstraction. Allows sending messages over a WebSocket connection
+ * and closing it.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

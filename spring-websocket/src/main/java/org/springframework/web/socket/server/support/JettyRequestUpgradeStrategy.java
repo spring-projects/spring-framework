@@ -39,7 +39,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * {@link RequestUpgradeStrategy} for use with Jetty. Based on Jetty's internal
+ * {@link RequestUpgradeStrategy} for use with Jetty 9. Based on Jetty's internal
  * {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
  *
  * @author Phillip Webb

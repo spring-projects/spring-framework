@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs;
-
-import org.springframework.core.NestedRuntimeException;
-
 /**
- *
- * @author Rossen Stoyanchev
- * @since 4.0
+ * WebSocket-related classes used by client and server code such as
+ * a {@link org.springframework.web.socket.support.WebSocketHandlerDecorator}
+ * and sub-class implementations, as well as a
+ * {@link org.springframework.web.socket.support.PerConnectionWebSocketHandler}.
  */
-@SuppressWarnings("serial")
-public class SockJsRuntimeException extends NestedRuntimeException {
+package org.springframework.web.socket.support;
 
-	public SockJsRuntimeException(String msg) {
-		super(msg);
-	}
-
-	public SockJsRuntimeException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
-
-}

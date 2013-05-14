@@ -34,7 +34,7 @@ import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
- * An abstract base class for use with HTTP-based transports.
+ * An abstract base class for use with HTTP transport based SockJS sessions.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

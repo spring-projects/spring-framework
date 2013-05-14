@@ -211,7 +211,7 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 			this.session.writeFrame(SockJsFrame.openFrame());
 			fail("expected exception");
 		}
-		catch (SockJsRuntimeException ex) {
+		catch (TransportErrorException ex) {
 			assertEquals(CloseStatus.SERVER_ERROR, this.session.getStatus());
 			verify(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.SERVER_ERROR);
 		}

@@ -21,7 +21,11 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
 
-
+/**
+ * A SockJS session for use with polling HTTP transports.
+ *
+ * @author Rossen Stoyanchev
+ */
 public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 	public PollingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {

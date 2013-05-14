@@ -60,7 +60,8 @@ import org.springframework.web.socket.sockjs.transport.XhrTransportHandler;
 
 /**
  * A default implementation of {@link SockJsService} adding support for transport handling
- * and session management.
+ * and session management. See {@link AbstractSockJsService} base class for important
+ * details on request mapping.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

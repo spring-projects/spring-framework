@@ -18,10 +18,14 @@ package org.springframework.web.socket.server.support;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
 
 
 /**
+ * Copies information from the handshake HTTP request and response to a given
+ * {@link WebSocketSession}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

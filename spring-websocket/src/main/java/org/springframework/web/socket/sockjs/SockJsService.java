@@ -23,9 +23,12 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
+ * A service for processing SockJS requests.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler
  */
 public interface SockJsService {
 

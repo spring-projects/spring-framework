@@ -25,7 +25,9 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * A {@link WebSocketHandler} for binary messages with empty methods.
+ * A convenient base class for {@link WebSocketHandler} implementation that process binary
+ * messages only. Text messages are rejected with {@link CloseStatus#NOT_ACCEPTABLE}. All
+ * other methods have empty implementations.
  *
  * @author Rossen Stoyanchev
  * @author Phillip Webb

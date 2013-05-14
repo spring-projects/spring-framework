@@ -15,7 +15,7 @@
  */
 
 /**
- * Server-side SockJS classes including a
+ * Key server-side SockJS implementation classes including a
  * {@link org.springframework.web.socket.sockjs.support.DefaultSockJsService} implementation
  * as well as a Spring MVC HandlerMapping mapping SockJS services to incoming requests.
  *

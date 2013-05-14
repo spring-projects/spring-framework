@@ -17,6 +17,8 @@
 package org.springframework.web.socket.sockjs;
 
 /**
+ * A {@link TransportHandler} that requires access to SockJS configuration options.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

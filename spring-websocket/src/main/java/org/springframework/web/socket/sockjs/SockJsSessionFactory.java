@@ -19,7 +19,8 @@ package org.springframework.web.socket.sockjs;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * A factory for creating a SockJS session.
+ * A factory for creating a SockJS session. {@link TransportHandler}s typically also serve
+ * as SockJS session factories.
  *
  * @param <S> The type of session being created
  * @author Rossen Stoyanchev

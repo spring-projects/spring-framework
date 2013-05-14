@@ -39,14 +39,22 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * BeanPostProcessor that detects beans of type
- * {@link javax.websocket.server.ServerEndpointConfig} and registers the provided
- * {@link javax.websocket.Endpoint} with a standard Java WebSocket runtime.
- *
- * <p>If the runtime is a Servlet container, use {@link ServletEndpointExporter}.
+ * Detects beans of type {@link javax.websocket.server.ServerEndpointConfig} and registers
+ * with the standard Java WebSocket runtime. Also detects beans annotated with
+ * {@link ServerEndpoint} and registers them as well. Although not required, it is likely
+ * annotated endpoints should have their {@code configurator} property set to
+ * {@link SpringConfigurator}.
+ * <p>
+ * When this class is used, by declaring it in Spring configuration, it should be possible
+ * to turn off a Servlet container's scan for WebSocket endpoints. This can be done with
+ * the help of the {@code <absolute-ordering>} element in web.xml.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see ServerEndpointRegistration
+ * @see SpringConfigurator
+ * @see ServletServerContainerFactoryBean
  */
 public class ServerEndpointExporter implements InitializingBean, BeanPostProcessor, ApplicationContextAware {
 
@@ -66,9 +74,12 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 
 
 	/**
-	 * TODO
-	 * @param annotatedEndpointClasses
-	 */
+	 * Explicitly list annotated endpoint types that should be registered on startup. This
+	 * can be done if you wish to turn off a Servlet container's scan for endpoints, which
+	 * goes through all 3rd party jars in the, and rely on Spring configuration instead.
+	 *
+	 * @param annotatedEndpointClasses {@link ServerEndpoint}-annotated types
+ 	 */
 	public void setAnnotatedEndpointClasses(Class<?>... annotatedEndpointClasses) {
 		this.annotatedEndpointClasses.clear();
 		this.annotatedEndpointClasses.addAll(Arrays.asList(annotatedEndpointClasses));

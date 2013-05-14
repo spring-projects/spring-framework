@@ -38,12 +38,16 @@ import org.springframework.web.socket.support.BeanCreatingHandlerProvider;
 
 /**
  * An implementation of {@link javax.websocket.server.ServerEndpointConfig} that also
- * holds the target {@link javax.websocket.Endpoint} provided as a reference or as a bean
- * name. Beans of this type are detected by {@link ServerEndpointExporter} and registered
- * with a Java WebSocket runtime at startup.
+ * contains the target {@link javax.websocket.Endpoint}, provided either as a reference or
+ * as a bean name.
+ * <p>
+ * {@link ServerEndpointRegistration} beans are detected by {@link ServerEndpointExporter}
+ * and registered with a Java WebSocket runtime at startup.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see ServerEndpointExporter
  */
 public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
 

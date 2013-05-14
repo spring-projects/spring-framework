@@ -15,12 +15,8 @@
  */
 
 /**
- * Server classes for use with standard Java WebSocket endpoints including
- * {@link org.springframework.web.socket.server.endpoint.ServerEndpointRegistration} and
- * {@link org.springframework.web.socket.server.endpoint.ServerEndpointExporter} for
- * registering type-based endpoints,
- * {@link org.springframework.web.socket.server.endpoint.SpringConfigurator} for
- * instantiating annotated endpoints through Spring.
+ * Server classes for use with standard Java WebSocket endpoints providing configuration
+ * and initialization support.
  */
 package org.springframework.web.socket.server.endpoint;
 

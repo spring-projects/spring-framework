@@ -28,7 +28,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
- * Adapts Spring's {@link WebSocketHandler} to Jetty's {@link WebSocketListener}.
+ * Adapts {@link WebSocketHandler} to the Jetty 9 {@link WebSocketListener}.
  *
  * @author Phillip Webb
  * @since 4.0

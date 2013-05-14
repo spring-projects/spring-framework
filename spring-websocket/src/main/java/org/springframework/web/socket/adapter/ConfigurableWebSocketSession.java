@@ -23,6 +23,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
+ * A WebSocketSession with configurable properties.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

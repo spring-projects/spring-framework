@@ -27,12 +27,20 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * This should be used in conjunction with {@link ServerEndpoint @ServerEndpoint} classes.
- *
- * <p>For {@link javax.websocket.Endpoint}, see {@link ServerEndpointExporter}.
+ * A {@link javax.websocket.server.ServerEndpointConfig.Configurator} for initializing
+ * {@link ServerEndpoint}-annotated classes through Spring.
+ * <p>
+ * <pre class="code">
+ * &#064;ServerEndpoint(value = "/echo", configurator = SpringConfigurator.class)
+ * public class EchoEndpoint {
+ *     // ...
+ * }
+ * </pre>
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see ServerEndpointExporter
  */
 public class SpringConfigurator extends Configurator {
 

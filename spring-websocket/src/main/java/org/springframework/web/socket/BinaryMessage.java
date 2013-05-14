@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @see WebSocketMessage
  */
 public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 

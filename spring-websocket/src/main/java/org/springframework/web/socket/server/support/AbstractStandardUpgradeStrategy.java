@@ -31,13 +31,12 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A {@link RequestUpgradeStrategy} that supports WebSocket handlers of type
- * {@link WebSocketHandler} as well as {@link javax.websocket.Endpoint}.
+ * A {@link RequestUpgradeStrategy} for containers that support standard Java WebSocket.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractEndpointUpgradeStrategy implements RequestUpgradeStrategy {
+public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeStrategy {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

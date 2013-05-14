@@ -31,11 +31,12 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
 
 
 /**
- * TODO
+ * An abstract base class SockJS sessions implementing {@link WebSocketSession}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -314,7 +315,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 			logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
 			disconnect(CloseStatus.SERVER_ERROR);
 			close(CloseStatus.SERVER_ERROR);
-			throw new SockJsRuntimeException("Failed to write " + frame, ex);
+			throw new TransportErrorException("Failed to write " + frame, ex, this.getId());
 		}
 	}
 

@@ -21,8 +21,16 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
+ * A contract for SockJS transport implementations. A {@link TransportHandler} is closely
+ * related to and often delegates to an {@link AbstractSockJsSession}. In fact most
+ * transports are also implementations of {@link SockJsSessionFactory} with the only exception
+ * to that being HTTP transports that receive messages as they depend on finding an existing
+ * session. See {@link TransportType} for a list of all available transport types.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see SockJsService
  */
 public interface TransportHandler {
 

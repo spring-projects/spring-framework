@@ -23,6 +23,9 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 
 /**
+ * Represents a SockJS frames. Provides methods for access to commonly used message
+ * frames.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

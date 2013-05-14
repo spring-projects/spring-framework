@@ -43,7 +43,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * A standard Java {@link WebSocketClient}.
+ * Initiates WebSocket requests to a WebSocket server programatically through the standard
+ * Java WebSocket API .
  *
  * @author Rossen Stoyanchev
  * @since 4.0

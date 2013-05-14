@@ -15,10 +15,7 @@
  */
 
 /**
- * Client-side classes for use with standard Java WebSocket endpoints including
- * {@link org.springframework.web.socket.client.endpoint.EndpointConnectionManager} and
- * {@link org.springframework.web.socket.client.endpoint.AnnotatedEndpointConnectionManager}
- * for connecting to server endpoints using type-based or annotated endpoints respectively.
+ * Client-side classes for use with standard Java WebSocket endpoints.
  */
 package org.springframework.web.socket.client.endpoint;
 

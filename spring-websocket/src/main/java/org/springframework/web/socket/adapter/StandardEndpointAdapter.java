@@ -34,7 +34,7 @@ import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
 
 
 /**
- * A wrapper around a {@link WebSocketHandler} that adapts it to {@link Endpoint}.
+ * Adapts a {@link WebSocketHandler} to a standard {@link Endpoint}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

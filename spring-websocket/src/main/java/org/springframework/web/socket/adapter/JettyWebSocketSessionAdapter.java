@@ -31,7 +31,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * Adapts Jetty's {@link Session} to Spring's {@link WebSocketSession}.
+ * Adapts a Jetty {@link org.eclipse.jetty.websocket.api.Session} to
+ * {@link WebSocketSession}.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev

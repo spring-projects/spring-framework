@@ -22,13 +22,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.TransportType;
 import org.springframework.web.socket.sockjs.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.TransportHandler;
+import org.springframework.web.socket.sockjs.TransportType;
 
 
 /**
- * TODO
+ * A {@link TransportHandler} that sends messages over an HTTP streaming request.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

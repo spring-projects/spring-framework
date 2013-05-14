@@ -19,8 +19,15 @@ import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
 
+
+/**
+ * A {@link TransportHandler} that receives messages over HTTP.
+ *
+ * @author Rossen Stoyanchev
+ */
 public class XhrTransportHandler extends AbstractHttpReceivingTransportHandler {
 
 

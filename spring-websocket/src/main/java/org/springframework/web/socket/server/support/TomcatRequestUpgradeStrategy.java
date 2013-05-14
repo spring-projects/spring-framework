@@ -42,7 +42,7 @@ import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class TomcatRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
+public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
 	@Override
 	public String[] getSupportedVersions() {

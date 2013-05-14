@@ -24,6 +24,8 @@ import java.util.Map;
 import org.springframework.http.HttpMethod;
 
 /**
+ * SockJS server transport types.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

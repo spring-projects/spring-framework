@@ -28,13 +28,15 @@ import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
 
 /**
- * A FactoryBean for {@link javax.websocket.server.ServerContainer}. Since
+ * A FactoryBean for configuring {@link javax.websocket.server.ServerContainer}. Since
  * there is only one {@code ServerContainer} instance accessible under a well-known
  * {@code javax.servlet.ServletContext} attribute, simply declaring this FactoryBean and
  * using its setters allows configuring the {@code ServerContainer} through Spring
- * configuration. This is useful even if the ServerContainer is not injected into any
- * other bean. For example, an application can configure a {@link DefaultHandshakeHandler}
- * , a {@link SockJsService}, or {@link ServerEndpointExporter}, and separately declare this
+ * configuration.
+ * <p>
+ * This is useful even if the {@code ServerContainer} is not injected into any other bean.
+ * For example, an application can configure a {@link DefaultHandshakeHandler}, a
+ * {@link SockJsService}, or {@link ServerEndpointExporter}, and separately declare this
  * FactoryBean in order to customize the properties of the (one and only)
  * {@code ServerContainer} instance.
  *

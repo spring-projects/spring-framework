@@ -19,6 +19,7 @@ package org.springframework.web.socket.client.endpoint;
 import javax.websocket.ContainerProvider;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import javax.websocket.server.ServerEndpoint;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,6 +28,11 @@ import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.support.BeanCreatingHandlerProvider;
 
 /**
+ * A WebSocket connection manager that is given a URI, a {@link ServerEndpoint}-annotated
+ * endpoint, connects to a WebSocket server through the {@link #start()} and
+ * {@link #stop()} methods. If {@link #setAutoStartup(boolean)} is set to {@code true}
+ * this will be done automatically when the Spring ApplicationContext is refreshed.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

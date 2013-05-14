@@ -26,14 +26,17 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.TransportErrorException;
-import org.springframework.web.socket.sockjs.TransportType;
 import org.springframework.web.socket.sockjs.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.TransportErrorException;
+import org.springframework.web.socket.sockjs.TransportHandler;
+import org.springframework.web.socket.sockjs.TransportType;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * TODO
+ * An HTTP {@link TransportHandler} that uses a famous browsder document.domain technique:
+ * <a href="http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
+ * 		http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
  *
  * @author Rossen Stoyanchev
  * @since 4.0

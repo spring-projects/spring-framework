@@ -48,7 +48,6 @@ import org.springframework.web.socket.WebSocketHandler;
  * support, SockJS path resolution, and processing for static SockJS requests (e.g.
  * "/info", "/iframe.html", etc). Sub-classes are responsible for handling transport
  * requests.
- *
  * <p>
  * It is expected that this service is mapped correctly to one or more prefixes such as
  * "/echo" including all sub-URLs (e.g. "/echo/**"). A SockJS service itself is generally

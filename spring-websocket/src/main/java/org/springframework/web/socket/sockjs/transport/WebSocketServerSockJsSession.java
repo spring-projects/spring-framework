@@ -31,8 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
- * A WebSocket implementation of {@link AbstractSockJsSession}. Delegates to a
- * {@link WebSocketSession}.
+ * A SockJS session for use with the WebSocket transport.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

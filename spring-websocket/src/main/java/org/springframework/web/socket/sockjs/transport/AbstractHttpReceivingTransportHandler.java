@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Base class for HTTP-based transports that read input messages.
+ * Base class for HTTP-based transports that read input messages from HTTP requests.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

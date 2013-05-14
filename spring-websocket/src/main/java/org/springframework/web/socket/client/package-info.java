@@ -15,7 +15,7 @@
  */
 
 /**
- * Server-side abstractions for WebSocket applications.
+ * Client-side abstractions for WebSocket applications.
  */
 package org.springframework.web.socket.client;
 

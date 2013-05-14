@@ -23,12 +23,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.TransportType;
 import org.springframework.web.socket.sockjs.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.TransportType;
 
 /**
- * TODO
+ * A TransportHandler for sending messages via Server-Sent events:
+ * <a href="http://dev.w3.org/html5/eventsource/">http://dev.w3.org/html5/eventsource/</a>.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

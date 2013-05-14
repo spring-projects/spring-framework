@@ -19,13 +19,14 @@ package org.springframework.web.socket;
 /**
  * A handler for WebSocket messages and lifecycle events.
  *
- * <p> Implementations of this interface are encouraged to handle exceptions locally where
- * it makes sense or alternatively let the exception bubble up in which case the exception
- * is logged and the session closed with {@link CloseStatus#SERVER_ERROR SERVER_ERROR(1011)} by default.
- * The exception handling strategy is provided by
- * {@link org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator ExceptionWebSocketHandlerDecorator},
- * which can be customized or replaced by decorating the {@link WebSocketHandler} with a
- * different decorator.
+ * <p>
+ * Implementations of this interface are encouraged to handle exceptions locally where it
+ * makes sense or alternatively let the exception bubble up in which case the exception is
+ * logged and the session closed with {@link CloseStatus#SERVER_ERROR SERVER_ERROR(1011)}
+ * by default. The exception handling strategy is provided by
+ * {@link org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
+ * ExceptionWebSocketHandlerDecorator}, which can be customized or replaced by decorating
+ * the {@link WebSocketHandler} with a different decorator.
  *
  * @param <T> The type of message being handled {@link TextMessage}, {@link BinaryMessage}
  *        (or {@link WebSocketMessage} for both).

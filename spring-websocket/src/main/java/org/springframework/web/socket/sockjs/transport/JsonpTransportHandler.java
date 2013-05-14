@@ -27,8 +27,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.TransportErrorException;
+import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
 
+/**
+ * A {@link TransportHandler} that receives messages over HTTP.
+ *
+ * @author Rossen Stoyanchev
+ */
 public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler {
 
 	private final FormHttpMessageConverter formConverter = new FormHttpMessageConverter();

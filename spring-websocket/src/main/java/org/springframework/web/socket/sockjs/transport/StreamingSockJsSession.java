@@ -23,9 +23,14 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
-import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.TransportErrorException;
 
+/**
+ * A SockJS session for use with streaming HTTP transports.
+ *
+ * @author Rossen Stoyanchev
+ */
 public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 	private int byteCount;

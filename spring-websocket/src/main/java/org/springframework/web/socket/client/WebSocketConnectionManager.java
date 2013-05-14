@@ -28,6 +28,11 @@ import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 
 /**
+ * A WebSocket connection manager that is given a URI, a {@link WebSocketClient}, and a
+ * {@link WebSocketHandler}, connects to a WebSocket server through {@link #start()} and
+ * {@link #stop()} methods. If {@link #setAutoStartup(boolean)} is set to {@code true}
+ * this will be done automatically when the Spring ApplicationContext is refreshed.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

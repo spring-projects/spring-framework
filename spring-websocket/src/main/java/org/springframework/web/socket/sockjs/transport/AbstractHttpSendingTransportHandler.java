@@ -33,7 +33,7 @@ import org.springframework.web.socket.sockjs.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 
 /**
- * TODO
+ * Base class for HTTP-based transports that send messages over HTTP.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

@@ -26,7 +26,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Abstract base class for WebSocket connection managers.
+ * A base class for WebSocket connection managers. Provides a declarative style of
+ * connecting to a WebSocket server given a URI to connect to. The connection occurs when
+ * the Spring ApplicationContext is refreshed, if the {@link #autoStartup} property is set
+ * to {@code true}, or if set to {@code false}, the {@link #start()} and #stop methods can
+ * be invoked manually.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

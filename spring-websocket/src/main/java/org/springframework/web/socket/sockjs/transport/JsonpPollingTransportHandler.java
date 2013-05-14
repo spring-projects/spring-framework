@@ -26,13 +26,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsFrame;
+import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportType;
-import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * TODO
+ * A TransportHandler that sends messages via JSONP polling.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

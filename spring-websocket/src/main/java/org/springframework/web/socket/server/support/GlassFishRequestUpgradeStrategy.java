@@ -59,7 +59,7 @@ import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class GlassFishRequestUpgradeStrategy extends AbstractEndpointUpgradeStrategy {
+public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
 	private final static Random random = new Random();
 

@@ -28,7 +28,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * An base class for implementations adapting {@link WebSocketSession}.
+ * An abstract base class for implementations of {@link WebSocketSession}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

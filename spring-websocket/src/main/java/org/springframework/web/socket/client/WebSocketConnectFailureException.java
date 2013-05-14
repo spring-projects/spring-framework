@@ -19,6 +19,8 @@ package org.springframework.web.socket.client;
 import org.springframework.core.NestedRuntimeException;
 
 /**
+ * Thrown when a WebSocket connection to a server could not be established.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

@@ -30,8 +30,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * A standard Java implementation of {@link WebSocketSession} that delegates to
- * {@link javax.websocket.Session}.
+ * Adapts a standard {@link javax.websocket.Session} to {@link WebSocketSession}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

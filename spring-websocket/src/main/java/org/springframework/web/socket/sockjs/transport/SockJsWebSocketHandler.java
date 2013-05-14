@@ -28,14 +28,14 @@ import org.springframework.web.socket.sockjs.SockJsConfiguration;
 
 
 /**
- * A wrapper around a {@link WebSocketHandler} instance that parses and adds SockJS
- * messages frames and also sends SockJS heartbeat messages.
- *
+ * An implementation of {@link WebSocketHandler} that adds SockJS messages frames, sends
+ * SockJS heartbeat messages, and delegates lifecycle events and messages to a target
+ * {@link WebSocketHandler}.
  * <p>
- * Implementations of the {@link WebSocketHandler} interface in this class allow
- * exceptions from the wrapped {@link WebSocketHandler} to propagate. However, any
- * exceptions resulting from SockJS message handling (e.g. while sending SockJS frames or
- * heartbeat messages) are caught and treated as transport errors, i.e. routed to the
+ * Methods in this class allow exceptions from the wrapped {@link WebSocketHandler} to
+ * propagate. However, any exceptions resulting from SockJS message handling (e.g. while
+ * sending SockJS frames or heartbeat messages) are caught and treated as transport
+ * errors, i.e. routed to the
  * {@link WebSocketHandler#handleTransportError(WebSocketSession, Throwable)
  * handleTransportError} method of the wrapped handler and the session closed.
  *

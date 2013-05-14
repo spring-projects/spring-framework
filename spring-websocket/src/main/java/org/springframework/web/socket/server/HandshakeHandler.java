@@ -21,22 +21,31 @@ import java.io.IOException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.support.PerConnectionWebSocketHandler;
 
 /**
  * Contract for processing a WebSocket handshake request.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
  */
 public interface HandshakeHandler {
 
 
 	/**
+	 * Initiate the handshake.
 	 *
-	 * @param request
-	 * @param response
-	 * @param webSocketHandler
-	 * @return
+	 * @param request the current request
+	 * @param response the current response
+	 * @param webSocketHandler the handler to process WebSocket messages; see
+	 *        {@link PerConnectionWebSocketHandler} for providing a handler with
+	 *        per-connection lifecycle.
+	 *
+	 * @return whether the handshake negotiation was successful or not. In either case the
+	 *         response status, headers, and body will have been updated to reflect the
+	 *         result of the negotiation
 	 *
 	 * @throws IOException thrown when accessing or setting the response
 	 *

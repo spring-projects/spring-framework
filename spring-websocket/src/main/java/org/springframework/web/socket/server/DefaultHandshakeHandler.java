@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * TODO
+ * A default implemnetation of {@link HandshakeHandler}.
  * <p>
  * A container-specific {@link RequestUpgradeStrategy} is required since standard Java
  * WebSocket currently does not provide a way to initiate a WebSocket handshake.

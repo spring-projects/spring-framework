@@ -20,9 +20,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A message that can be handled or sent during a WebSocket interaction. There are only
- * two sub-classes {@link BinaryMessage} or a {@link TextMessage} with no further
- * sub-classing expected.
+ * A message that can be handled or sent on a WebSocket connection.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -42,7 +40,6 @@ public abstract class WebSocketMessage<T> {
 		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
 	}
-
 
 	/**
 	 * Returns the message payload. This will never be {@code null}.

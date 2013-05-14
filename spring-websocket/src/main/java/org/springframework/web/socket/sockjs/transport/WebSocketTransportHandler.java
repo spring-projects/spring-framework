@@ -33,9 +33,11 @@ import org.springframework.web.socket.sockjs.TransportType;
 
 
 /**
- * A WebSocket {@link TransportHandler} that delegates to a {@link HandshakeHandler}
- * passing a SockJS {@link WebSocketHandler}. Also implements {@link HandshakeHandler}
- * directly in support for raw WebSocket communication at SockJS URL "/websocket".
+ * A WebSocket {@link TransportHandler}. Uses {@link SockJsWebSocketHandler} and
+ * {@link WebSocketServerSockJsSession} to add SockJS processing.
+ * <p>
+ * Also implements {@link HandshakeHandler} to support raw WebSocket communication at
+ * SockJS URL "/websocket".
  *
  * @author Rossen Stoyanchev
  * @since 4.0

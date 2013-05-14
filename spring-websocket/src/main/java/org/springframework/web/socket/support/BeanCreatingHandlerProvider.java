@@ -26,7 +26,10 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
 
 /**
- *
+ * Instantiates a target handler through a Spring {@link BeanFactory} and also provides
+ * an equivalent destroy method. Mainly for internal use to assist with initializing and
+ * destroying handlers with per-connection lifecycle.
+ * 
  * @author Rossen Stoyanchev
  * @since 4.0
  */

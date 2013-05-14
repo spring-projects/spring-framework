@@ -25,14 +25,11 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * A {@link WebSocketHandler} for both text and binary messages with empty methods.
+ * A convenient base class for {@link WebSocketHandler} implementation with empty methods.
  *
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @since 4.0
- *
- * @see TextWebSocketHandlerAdapter
- * @see BinaryWebSocketHandlerAdapter
  */
 public class WebSocketHandlerAdapter implements WebSocketHandler {
 

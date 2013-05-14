@@ -25,6 +25,10 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
+ * An exception handling {@link WebSocketHandlerDecorator}. Traps all {@link Throwable}
+ * instances that escape from the decorated handler and closes the session with
+ * {@link CloseStatus#SERVER_ERROR}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

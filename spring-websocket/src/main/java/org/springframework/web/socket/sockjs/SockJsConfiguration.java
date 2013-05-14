@@ -19,6 +19,9 @@ package org.springframework.web.socket.sockjs;
 import org.springframework.scheduling.TaskScheduler;
 
 /**
+ * SockJS configuration options that need to be made available to {@link TransportHandler}
+ * s and SockJS sessions.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
