@@ -3,10 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2.3 (2013-05-14)
+Changes in version 3.2.3 (2013-05-17)
 -------------------------------------
 
-* compatibility with OpenJDK 8 for target 1.5/1.6/1.7 compiled Spring 3.2.x applications (SPR-9639)
+* compatibility with OpenJDK 8 for target 1.5/1.6/1.7 compiled Spring Framework 3.2.x applications (SPR-9639)
+* compatibility with OSGI-style use of generics in source code that got compiled to 1.4 byte code (SPR-10559)
 * HibernateJpaDialect support for Hibernate 4.2 as JPA provider (SPR-10395)
 * minimized ASM usage during configuration class processing (SPR-10292)
 * added public "getName()" accessor to MethodReference (SPR-10422)
@@ -14,7 +15,11 @@ Changes in version 3.2.3 (2013-05-14)
 * JdbcTemplate defensively uses JDBC 3.0 getParameterType call for Oracle driver compatibility (SPR-10385)
 * introduced public ArgumentPreparedStatementSetter and ArgumentTypePreparedStatementSetter classes (SPR-10375)
 * fixed Jaxb2Marshaller's partial unmarshalling feature to consistently apply to all sources (SPR-10282)
+* ContentNegotiationManager properly handles HttpMessageConverter checking for Accept header "*/*" (SPR-10513)
+* ServletContextResourcePatternResolver supports Tomcat-style "foo#bar.war" deployment unit names (SPR-10471)
 * SimpleMappingExceptionResolver prefers longer mapping expression in case of same exception depth (SPR-9639)
+* fixed regression with JSP form tag prepending the context/servlet path (broke use for Portlets; SPR-10382)
+* fixed regression with ResourceHttpMessageConverter accidentally not closing underlying files (SPR-10460)
 
 
 Changes in version 3.2.2 (2013-03-14)
