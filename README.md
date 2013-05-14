@@ -37,7 +37,7 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 ### prerequisites
 
-[Git][] and the latest [Early Access build of OpenJDK 1.8][JDK18].
+[Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88].
 
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
@@ -85,7 +85,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Gradle]: http://gradle.org
 [`./gradlew`]: http://vimeo.com/34436402
 [Git]: http://help.github.com/set-up-git-redirect
-[JDK18]: http://jdk8.java.net/download.html
+[JDK18 build 88]: https://jdk8.java.net/archive/8-b88.html
 [Gradle build and release FAQ]: https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ
 [Pull requests]: http://help.github.com/send-pull-requests
 [contributor guidelines]: https://github.com/SpringSource/spring-framework/blob/master/CONTRIBUTING.md
