@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 /**
  * The purpose of this class is to enable capturing and passing a generic
  * {@link Type}. In order to capture the generic type and retain it at runtime,
- * you need to create a sub-class as follows:
+ * you need to create a subclass as follows:
  *
  * <pre class="code">
  * ParameterizedTypeReference&lt;List&lt;String&gt;&gt; typeRef = new ParameterizedTypeReference&lt;List&lt;String&gt;&gt;() {};
@@ -37,54 +37,31 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.2
- *
  * @see <a href="http://gafter.blogspot.nl/2006/12/super-type-tokens.html">Neal Gafter on Super Type Tokens</a>
  */
 public abstract class ParameterizedTypeReference<T> {
 
 	private final Type type;
 
+
 	protected ParameterizedTypeReference() {
-		Class<?> parameterizedTypeReferenceSubClass = findParameterizedTypeReferenceSubClass(getClass());
-
-		Type type = parameterizedTypeReferenceSubClass.getGenericSuperclass();
+		Class<?> parameterizedTypeReferenceSubclass = findParameterizedTypeReferenceSubclass(getClass());
+		Type type = parameterizedTypeReferenceSubclass.getGenericSuperclass();
 		Assert.isInstanceOf(ParameterizedType.class, type);
-
 		ParameterizedType parameterizedType = (ParameterizedType) type;
 		Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1);
-
 		this.type = parameterizedType.getActualTypeArguments()[0];
 	}
 
-	private static Class<?> findParameterizedTypeReferenceSubClass(Class<?> child) {
-
-		Class<?> parent = child.getSuperclass();
-
-		if (Object.class.equals(parent)) {
-			throw new IllegalStateException("Expected ParameterizedTypeReference superclass");
-		}
-		else if (ParameterizedTypeReference.class.equals(parent)) {
-			return child;
-		}
-		else {
-			return findParameterizedTypeReferenceSubClass(parent);
-		}
-	}
 
 	public Type getType() {
 		return this.type;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o instanceof ParameterizedTypeReference) {
-			ParameterizedTypeReference<?> other = (ParameterizedTypeReference<?>) o;
-			return this.type.equals(other.type);
-		}
-		return false;
+	public boolean equals(Object obj) {
+		return (this == obj || (obj instanceof ParameterizedTypeReference &&
+				this.type.equals(((ParameterizedTypeReference) obj).type)));
 	}
 
 	@Override
@@ -96,4 +73,19 @@ public abstract class ParameterizedTypeReference<T> {
 	public String toString() {
 		return "ParameterizedTypeReference<" + this.type + ">";
 	}
+
+
+	private static Class<?> findParameterizedTypeReferenceSubclass(Class<?> child) {
+		Class<?> parent = child.getSuperclass();
+		if (Object.class.equals(parent)) {
+			throw new IllegalStateException("Expected ParameterizedTypeReference superclass");
+		}
+		else if (ParameterizedTypeReference.class.equals(parent)) {
+			return child;
+		}
+		else {
+			return findParameterizedTypeReferenceSubclass(parent);
+		}
+	}
+
 }
