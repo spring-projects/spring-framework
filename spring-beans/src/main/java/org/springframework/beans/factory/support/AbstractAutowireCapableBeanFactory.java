@@ -171,6 +171,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		setParentBeanFactory(parentBeanFactory);
 	}
 
+
 	/**
 	 * Set the instantiation strategy to use for creating bean instances.
 	 * Default is CglibSubclassingInstantiationStrategy.
@@ -261,7 +262,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this.ignoredDependencyInterfaces.add(ifc);
 	}
 
-
 	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
@@ -346,7 +346,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else {
 			Object bean;
 			final BeanFactory parent = this;
-
 			if (System.getSecurityManager() != null) {
 				bean = AccessController.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
@@ -357,7 +356,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				bean = getInstantiationStrategy().instantiate(bd, null, parent);
 			}
-
 			populateBean(beanClass.getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -687,22 +685,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
 			if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) fbDef).hasBeanClass()) {
-				Class<?> fbClass = ((AbstractBeanDefinition) fbDef).getBeanClass();
-				if (ClassUtils.isCglibProxyClass(fbClass)) {
-					// CGLIB subclass methods hide generic parameters. look at the superclass.
-					fbClass = fbClass.getSuperclass();
-				}
+				// CGLIB subclass methods hide generic parameters; look at the original user class.
+				Class<?> fbClass = ClassUtils.getUserClass(((AbstractBeanDefinition) fbDef).getBeanClass());
 				// Find the given factory method, taking into account that in the case of
 				// @Bean methods, there may be parameters present.
 				ReflectionUtils.doWithMethods(fbClass,
-					new ReflectionUtils.MethodCallback() {
-						public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-							if (method.getName().equals(factoryMethodName) &&
-									FactoryBean.class.isAssignableFrom(method.getReturnType())) {
-								objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+						new ReflectionUtils.MethodCallback() {
+							public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+								if (method.getName().equals(factoryMethodName) &&
+										FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+									objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+								}
 							}
-						}
-					});
+						});
 				if (objectType.value != null) {
 					return objectType.value;
 				}
