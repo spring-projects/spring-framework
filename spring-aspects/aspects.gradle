@@ -12,8 +12,8 @@ configurations {
 tasks.getByName("idea").onlyIf { false }
 tasks.getByName("ideaModule").onlyIf { false }
 
-task compileJava(overwrite: true)  {
-	dependsOn JavaPlugin.PROCESS_RESOURCES_TASK_NAME
+compileJava  {
+	actions = []
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
 
 	def outputDir = project.sourceSets.main.output.classesDir
@@ -44,8 +44,8 @@ task compileJava(overwrite: true)  {
 	}
 }
 
-task compileTestJava(overwrite: true)  {
-	dependsOn JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME
+compileTestJava  {
+	actions = []
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
 	dependsOn jar
 

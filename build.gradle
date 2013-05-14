@@ -11,7 +11,7 @@ buildscript {
 configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
-
+	
 	// The following is a work-around until the Gradle build uses
 	// Ant 1.9.x by default. This is necessary to avoid the
 	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
@@ -155,7 +155,7 @@ project("spring-build-src") {
 
 	dependencies {
 		compile gradleApi()
-		groovy localGroovy()
+		compile localGroovy()
 	}
 
 	configurations.archives.artifacts.clear()
@@ -959,7 +959,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "1.3"
+		gradleVersion = "1.6"
 
 		doLast() {
 			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
