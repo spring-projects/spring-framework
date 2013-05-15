@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 
 	/**
-	 * Create a ClassPathScanningCandidateComponentProvider.
+	 * Create a ClassPathScanningCandidateComponentProvider with a {@link StandardEnvironment}.
 	 * @param useDefaultFilters whether to register the default filters for the
 	 * {@link Component @Component}, {@link Repository @Repository},
 	 * {@link Service @Service}, and {@link Controller @Controller}
@@ -101,6 +101,15 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		this(useDefaultFilters, new StandardEnvironment());
 	}
 
+	/**
+	 * Create a ClassPathScanningCandidateComponentProvider with the given {@link Environment}.
+	 * @param useDefaultFilters whether to register the default filters for the
+	 * {@link Component @Component}, {@link Repository @Repository},
+	 * {@link Service @Service}, and {@link Controller @Controller}
+	 * stereotype annotations
+	 * @param environment the Environment to use
+	 * @see #registerDefaultFilters()
+	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment) {
 		if (useDefaultFilters) {
 			registerDefaultFilters();
