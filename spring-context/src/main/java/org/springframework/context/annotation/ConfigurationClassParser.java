@@ -296,8 +296,7 @@ class ConfigurationClassParser {
 	 * @param metadata the metadata representation of the containing class
 	 * @throws IOException if there is any problem reading metadata from a member class
 	 */
-	private void processMemberClasses(ConfigurationClass configClass,
-			AnnotationMetadata metadata) throws IOException {
+	private void processMemberClasses(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
 		if (metadata instanceof StandardAnnotationMetadata) {
 			for (Class<?> memberClass : ((StandardAnnotationMetadata) metadata).getIntrospectedClass().getDeclaredClasses()) {
 				if (ConfigurationClassUtils.isConfigurationCandidate(new StandardAnnotationMetadata(memberClass))) {
@@ -430,10 +429,12 @@ class ConfigurationClassParser {
 			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			try {
 				for (Object candidate : classesToImport) {
-					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate : this.metadataReaderFactory.getMetadataReader((String) candidate));
+					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate :
+							this.metadataReaderFactory.getMetadataReader((String) candidate));
 					if (checkAssignability(ImportSelector.class, candidateToCheck)) {
 						// the candidate class is an ImportSelector -> delegate to it to determine imports
-						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate : this.resourceLoader.getClassLoader().loadClass((String) candidate));
+						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
+								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						invokeAwareMethods(selector);
 						if(selector instanceof DeferredImportSelector) {
@@ -445,7 +446,8 @@ class ConfigurationClassParser {
 					}
 					else if (checkAssignability(ImportBeanDefinitionRegistrar.class, candidateToCheck)) {
 						// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
-						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate : this.resourceLoader.getClassLoader().loadClass((String) candidate));
+						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
+								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
 						invokeAwareMethods(registrar);
 						registrar.registerBeanDefinitions(importingClassMetadata, this.registry);
