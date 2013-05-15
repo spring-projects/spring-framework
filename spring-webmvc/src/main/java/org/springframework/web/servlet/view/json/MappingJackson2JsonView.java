@@ -64,7 +64,7 @@ public class MappingJackson2JsonView extends AbstractView {
 
 	private JsonEncoding encoding = JsonEncoding.UTF8;
 
-	private boolean prefixJson = false;
+	private String jsonPrefix;
 
 	private Boolean prettyPrint;
 
@@ -123,15 +123,25 @@ public class MappingJackson2JsonView extends AbstractView {
 	}
 
 	/**
+	 * Specify a custom prefix to use for this view's JSON output.
+	 * Default is none.
+	 * @see #setPrefixJson
+	 */
+	public void setJsonPrefix(String jsonPrefix) {
+		this.jsonPrefix = jsonPrefix;
+	}
+
+	/**
 	 * Indicates whether the JSON output by this view should be prefixed with <tt>"{} && "</tt>.
 	 * Default is {@code false}.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed
 	 * on the string, the prefix would need to be ignored.
+	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.prefixJson = prefixJson;
+		this.jsonPrefix = "{} && ";
 	}
 
 	/**
@@ -243,7 +253,7 @@ public class MappingJackson2JsonView extends AbstractView {
 
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
 		Object value = filterModel(model);
-		writeContent(stream, value, this.prefixJson);
+		writeContent(stream, value, this.jsonPrefix);
 		if (this.updateContentLength) {
 			writeToResponse(response, (ByteArrayOutputStream) stream);
 		}
@@ -272,11 +282,11 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * Write the actual JSON content to the stream.
 	 * @param stream the output stream to use
 	 * @param value the value to be rendered, as returned from {@link #filterModel}
-	 * @param prefixJson whether the JSON output by this view should be prefixed
-	 * with <tt>"{} && "</tt> (as indicated through {@link #setPrefixJson})
+	 * @param jsonPrefix the prefix for this view's JSON output
+	 * (as indicated through {@link #setJsonPrefix}/{@link #setPrefixJson})
 	 * @throws IOException if writing failed
 	 */
-	protected void writeContent(OutputStream stream, Object value, boolean prefixJson) throws IOException {
+	protected void writeContent(OutputStream stream, Object value, String jsonPrefix) throws IOException {
 		// The following has been deprecated as late as Jackson 2.2 (April 2013);
 		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
 		@SuppressWarnings("deprecation")
@@ -288,8 +298,8 @@ public class MappingJackson2JsonView extends AbstractView {
 			generator.useDefaultPrettyPrinter();
 		}
 
-		if (prefixJson) {
-			generator.writeRaw("{} && ");
+		if (jsonPrefix != null) {
+			generator.writeRaw(jsonPrefix);
 		}
 		this.objectMapper.writeValue(generator, value);
 	}
