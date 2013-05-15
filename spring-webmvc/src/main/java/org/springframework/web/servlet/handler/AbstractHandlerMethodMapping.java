@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,7 +38,6 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define a
@@ -61,12 +61,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
 
-
-	public AbstractHandlerMethodMapping() {
-		UrlPathHelper pathHelper = new UrlPathHelper();
-		pathHelper.setRemoveSemicolonContent(false);
-		setUrlPathHelper(pathHelper);
-	}
 
 	/**
 	 * Whether to detect handler methods in beans in ancestor ApplicationContexts.

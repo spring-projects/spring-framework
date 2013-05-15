@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,7 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.web.util.UrlPathHelper;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -184,16 +181,6 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo.html"));
 
 		assertNull(match);
-	}
-
-	@Test
-	public void matchIgnorePathParams() {
-		UrlPathHelper pathHelper = new UrlPathHelper();
-		pathHelper.setRemoveSemicolonContent(false);
-		PatternsRequestCondition condition = new PatternsRequestCondition(new String[] {"/foo/bar"}, pathHelper, null, true, true);
-		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo;q=1/bar;s=1"));
-
-		assertNotNull(match);
 	}
 
 	@Test

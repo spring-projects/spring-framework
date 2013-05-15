@@ -128,7 +128,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Set if ";" (semicolon) content should be stripped from the request URI.
-	 * <p>The default value is {@code false}.
+	 * <p>The default value is {@code true}.
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {

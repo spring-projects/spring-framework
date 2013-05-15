@@ -42,13 +42,6 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
-	private static UrlPathHelper pathHelperNoSemicolonContent;
-
-	static {
-		pathHelperNoSemicolonContent = new UrlPathHelper();
-		pathHelperNoSemicolonContent.setRemoveSemicolonContent(true);
-	}
-
 	private final Set<String> patterns;
 
 	private final UrlPathHelper pathHelper;
@@ -217,15 +210,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
-		String lookupPathNoSemicolonContent = (lookupPath.indexOf(';') != -1) ?
-				pathHelperNoSemicolonContent.getLookupPathForRequest(request) : null;
 
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
-			if (match == null && lookupPathNoSemicolonContent != null) {
-				match = getMatchingPattern(pattern, lookupPathNoSemicolonContent);
-			}
 			if (match != null) {
 				matches.add(match);
 			}
