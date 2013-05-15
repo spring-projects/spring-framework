@@ -23,12 +23,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -79,7 +76,6 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @author Rob Winch
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -91,14 +87,6 @@ class ConfigurationClassParser {
 
 	private final ImportStack importStack = new ImportStack();
 
-	private final Set<String> knownSuperclasses = new LinkedHashSet<String>();
-
-	private final Map<ConfigurationClass,ConfigurationClass> configurationClasses =
-		new LinkedHashMap<ConfigurationClass,ConfigurationClass>();
-
-	private final Stack<PropertySource<?>> propertySources =
-		new Stack<PropertySource<?>>();
-
 	private final Environment environment;
 
 	private final ResourceLoader resourceLoader;
@@ -106,6 +94,12 @@ class ConfigurationClassParser {
 	private final BeanDefinitionRegistry registry;
 
 	private final ComponentScanAnnotationParser componentScanParser;
+
+	private final Set<ConfigurationClass> configurationClasses = new LinkedHashSet<ConfigurationClass>();
+
+	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
+
+	private final Stack<PropertySource<?>> propertySources = new Stack<PropertySource<?>>();
 
 
 	/**
@@ -155,70 +149,28 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// recursively process the configuration class and its superclass hierarchy
+		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
+			// Explicit bean definition found, probably replacing an import.
+			// Let's remove the old one and go with the new one.
+			this.configurationClasses.remove(configClass);
+			for (Iterator<ConfigurationClass> it = this.knownSuperclasses.values().iterator(); it.hasNext();) {
+				if (configClass.equals(it.next())) {
+					it.remove();
+				}
+			}
+		}
+
+		// Recursively process the configuration class and its superclass hierarchy.
 		do {
 			metadata = doProcessConfigurationClass(configClass, metadata);
 		}
 		while (metadata != null);
 
-		if (getConfigurationClasses().contains(configClass) && configClass.getBeanName() != null) {
-			// Explicit bean definition found, probably replacing an import.
-			// Let's remove the old one and go with the new one.
-			ConfigurationClass originalConfigClass = removeConfigurationClass(configClass);
-
-			mergeFromOriginalConfig(originalConfigClass,configClass);
-		}
-
-		addConfigurationClass(configClass);
-	}
-
-
-	/**
-	 * Merges from the original {@link ConfigurationClass} to the new
-	 * {@link ConfigurationClass}. This is necessary if parent classes have already been
-	 * processed.
-	 *
-	 * @param originalConfigClass the original {@link ConfigurationClass} that may have
-	 *        additional metadata
-	 * @param configClass the new {@link ConfigurationClass} that will have metadata added
-	 *        to it if necessary
-	 */
-	private void mergeFromOriginalConfig(ConfigurationClass originalConfigClass,
-			ConfigurationClass configClass) {
-
-		Set<String> beanMethodNames = new HashSet<String>();
-		for(BeanMethod beanMethod : configClass.getBeanMethods()) {
-			beanMethodNames.add(createBeanMethodName(beanMethod));
-		}
-
-		for(BeanMethod originalBeanMethod : originalConfigClass.getBeanMethods()) {
-			String originalBeanMethodName = createBeanMethodName(originalBeanMethod);
-			if(!beanMethodNames.contains(originalBeanMethodName)) {
-				configClass.addBeanMethod(new BeanMethod(originalBeanMethod.getMetadata(), configClass));
-			}
-		}
-		for(Entry<String, Class<? extends BeanDefinitionReader>> originalImportedEntry : originalConfigClass.getImportedResources().entrySet()) {
-			if(!configClass.getImportedResources().containsKey(originalImportedEntry.getKey())) {
-				configClass.addImportedResource(originalImportedEntry.getKey(), originalImportedEntry.getValue());
-			}
-		}
+		this.configurationClasses.add(configClass);
 	}
 
 	/**
-	 * Converts a {@link BeanMethod} into the fully qualified name of the Method
-	 *
-	 * @param beanMethod
-	 * @return fully qualified name of the {@link BeanMethod}
-	 */
-	private String createBeanMethodName(BeanMethod beanMethod) {
-		String hashDelim = "#";
-		String dClassName = beanMethod.getMetadata().getDeclaringClassName();
-		String methodName = beanMethod.getMetadata().getMethodName();
-		return dClassName + hashDelim + methodName;
-	}
-
-	/**
-	 * @return annotation metadata of superclass, null if none found or previously processed
+	 * @return annotation metadata of superclass, {@code null} if none found or previously processed
 	 */
 	protected AnnotationMetadata doProcessConfigurationClass(
 			ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
@@ -232,7 +184,7 @@ class ConfigurationClassParser {
 			processPropertySource(propertySource);
 		}
 
-		// process any @ComponentScan annotions
+		// process any @ComponentScan annotations
 		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
@@ -248,7 +200,6 @@ class ConfigurationClassParser {
 		}
 
 		// process any @Import annotations
-
 		Set<Object> imports = new LinkedHashSet<Object>();
 		Set<Object> visited = new LinkedHashSet<Object>();
 		collectImports(metadata, imports, visited);
@@ -275,7 +226,8 @@ class ConfigurationClassParser {
 		// process superclass, if any
 		if (metadata.hasSuperClass()) {
 			String superclass = metadata.getSuperClassName();
-			if (this.knownSuperclasses.add(superclass)) {
+			if (!this.knownSuperclasses.containsKey(superclass)) {
+				this.knownSuperclasses.put(superclass, configClass);
 				// superclass found, return its annotation metadata and recurse
 				if (metadata instanceof StandardAnnotationMetadata) {
 					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
@@ -300,14 +252,6 @@ class ConfigurationClassParser {
 
 		// no superclass, processing is complete
 		return null;
-	}
-
-	private void addConfigurationClass(ConfigurationClass configClass) {
-		this.configurationClasses.put(configClass,configClass);
-	}
-
-	private ConfigurationClass removeConfigurationClass(ConfigurationClass configClass) {
-		return this.configurationClasses.remove(configClass);
 	}
 
 	/**
@@ -500,13 +444,13 @@ class ConfigurationClassParser {
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate() {
-		for (ConfigurationClass configClass : getConfigurationClasses()) {
+		for (ConfigurationClass configClass : this.configurationClasses) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
-		return this.configurationClasses.keySet();
+		return this.configurationClasses;
 	}
 
 	public Stack<PropertySource<?>> getPropertySources() {
