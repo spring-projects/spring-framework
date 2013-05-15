@@ -16,13 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,6 +54,8 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
 
+import static org.junit.Assert.*;
+
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
  *
@@ -90,6 +85,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(testController);
+		this.handlerMapping.setRemoveSemicolonContent(false);
 	}
 
 	@Test

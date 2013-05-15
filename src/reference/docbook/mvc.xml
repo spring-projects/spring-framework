@@ -1173,9 +1173,7 @@ public void findPet(
         <para>Note that to enable the use of matrix variables, you must set the
         <classname>removeSemicolonContent</classname> property of
         <classname>RequestMappingHandlerMapping</classname> to <code>false</code>.
-        By default it is set to <code>true</code> with the exception of the
-        MVC namespace and the MVC Java config both of which automatically enable
-        the use of matrix variables.</para>
+        By default it is set to <code>false</code>.</para>
 
       </section>
 
