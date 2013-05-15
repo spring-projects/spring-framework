@@ -31,7 +31,7 @@ import org.springframework.util.ClassUtils;
  * <p><b>NOTE:</b> On JBoss 6.0, to avoid the container loading the classes before the
  * application actually starts, one needs to add a <tt>WEB-INF/jboss-scanning.xml</tt>
  * file to the application archive - with the following content:
- * <pre>&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
+ * <pre class="code">&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
  *
  * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
@@ -72,14 +72,17 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.adapter.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.adapter.getInstrumentableClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}

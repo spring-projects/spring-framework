@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@
 package org.springframework.core;
 
 /**
- * Internal helper class used to find the Java/JVM version
- * that Spring is operating on, to allow for automatically
- * adapting to the present platform's capabilities.
+ * Internal helper class used to find the Java/JVM version that Spring is
+ * operating on, to allow for automatically adapting to the present platform's
+ * capabilities.
  *
- * <p>Note that Spring requires JVM 1.5 or higher, as of Spring 3.0.
+ * <p>Note that Spring requires JVM 1.6 or higher, as of Spring 4.0.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 public abstract class JdkVersion {
 
@@ -54,6 +55,16 @@ public abstract class JdkVersion {
 	 */
 	public static final int JAVA_17 = 4;
 
+	/**
+	 * Constant identifying the 1.8 JVM (Java 8).
+	 */
+	public static final int JAVA_18 = 5;
+
+	/**
+	 * Constant identifying the 1.9 JVM (Java 9).
+	 */
+	public static final int JAVA_19 = 6;
+
 
 	private static final String javaVersion;
 
@@ -62,15 +73,18 @@ public abstract class JdkVersion {
 	static {
 		javaVersion = System.getProperty("java.version");
 		// version String should look like "1.4.2_10"
-		if (javaVersion.contains("1.7.")) {
+		if (javaVersion.contains("1.9.")) {
+			majorJavaVersion = JAVA_19;
+		}
+		else if (javaVersion.contains("1.8.")) {
+			majorJavaVersion = JAVA_18;
+		}
+		else if (javaVersion.contains("1.7.")) {
 			majorJavaVersion = JAVA_17;
 		}
-		else if (javaVersion.contains("1.6.")) {
-			majorJavaVersion = JAVA_16;
-		}
 		else {
-			// else leave 1.5 as default (it's either 1.5 or unknown)
-			majorJavaVersion = JAVA_15;
+			// else leave 1.6 as default (it's either 1.6 or unknown)
+			majorJavaVersion = JAVA_16;
 		}
 	}
 
@@ -87,62 +101,15 @@ public abstract class JdkVersion {
 
 	/**
 	 * Get the major version code. This means we can do things like
-	 * {@code if (getMajorJavaVersion() < JAVA_14)}.
-	 * @return a code comparable to the JAVA_XX codes in this class
-	 * @see #JAVA_13
-	 * @see #JAVA_14
-	 * @see #JAVA_15
+	 * {@code if (getMajorJavaVersion() >= JAVA_17)}.
+	 * @return a code comparable to the {@code JAVA_XX} codes in this class
 	 * @see #JAVA_16
-	 * @see #JAVA_17
+     * @see #JAVA_17
+     * @see #JAVA_18
+     * @see #JAVA_19
 	 */
 	public static int getMajorJavaVersion() {
 		return majorJavaVersion;
-	}
-
-
-	/**
-	 * Convenience method to determine if the current JVM is at least Java 1.4.
-	 * @return {@code true} if the current JVM is at least Java 1.4
-	 * @deprecated as of Spring 3.0 which requires Java 1.5+
-	 * @see #getMajorJavaVersion()
-	 * @see #JAVA_14
-	 * @see #JAVA_15
-	 * @see #JAVA_16
-	 * @see #JAVA_17
-	 */
-	@Deprecated
-	public static boolean isAtLeastJava14() {
-		return true;
-	}
-
-	/**
-	 * Convenience method to determine if the current JVM is at least
-	 * Java 1.5 (Java 5).
-	 * @return {@code true} if the current JVM is at least Java 1.5
-	 * @deprecated as of Spring 3.0 which requires Java 1.5+
-	 * @see #getMajorJavaVersion()
-	 * @see #JAVA_15
-	 * @see #JAVA_16
-	 * @see #JAVA_17
-	 */
-	@Deprecated
-	public static boolean isAtLeastJava15() {
-		return true;
-	}
-
-	/**
-	 * Convenience method to determine if the current JVM is at least
-	 * Java 1.6 (Java 6).
-	 * @return {@code true} if the current JVM is at least Java 1.6
-	 * @deprecated as of Spring 3.0, in favor of reflective checks for
-	 * the specific Java 1.6 classes of interest
-	 * @see #getMajorJavaVersion()
-	 * @see #JAVA_16
-	 * @see #JAVA_17
-	 */
-	@Deprecated
-	public static boolean isAtLeastJava16() {
-		return (majorJavaVersion >= JAVA_16);
 	}
 
 }

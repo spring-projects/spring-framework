@@ -18,7 +18,6 @@ package org.springframework.cache.ehcache;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
@@ -31,8 +30,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link FactoryBean} that exposes an EhCache {@link net.sf.ehcache.CacheManager}
@@ -47,8 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * and cares for proper shutdown of the CacheManager. EhCacheManagerFactoryBean is
  * also necessary for loading EhCache configuration from a non-default config location.
  *
- * <p>Note: As of Spring 3.0, Spring's EhCache support requires EhCache 1.3 or higher.
- * As of Spring 3.2, we recommend using EhCache 2.1 or higher.
+ * <p>Note: As of Spring 4.0, Spring's EhCache support requires EhCache 2.1 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -59,10 +55,6 @@ import org.springframework.util.ReflectionUtils;
  * @see net.sf.ehcache.CacheManager
  */
 public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, InitializingBean, DisposableBean {
-
-	// Check whether EhCache 2.1+ CacheManager.create(Configuration) method is available...
-	private static final Method createWithConfiguration =
-			ClassUtils.getMethodIfAvailable(CacheManager.class, "create", Configuration.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -106,38 +98,17 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws IOException, CacheException {
 		logger.info("Initializing EhCache CacheManager");
 		InputStream is = (this.configLocation != null ? this.configLocation.getInputStream() : null);
 		try {
-			// A bit convoluted for EhCache 1.x/2.0 compatibility.
-			// To be much simpler once we require EhCache 2.1+
+			Configuration configuration = (is != null ?
+					ConfigurationFactory.parseConfiguration(is) : ConfigurationFactory.parseConfiguration());
 			if (this.cacheManagerName != null) {
-				if (this.shared && createWithConfiguration == null) {
-					// No CacheManager.create(Configuration) method available before EhCache 2.1;
-					// can only set CacheManager name after creation.
-					this.cacheManager = (is != null ? CacheManager.create(is) : CacheManager.create());
-					this.cacheManager.setName(this.cacheManagerName);
-				}
-				else {
-					Configuration configuration = (is != null ? ConfigurationFactory.parseConfiguration(is) :
-							ConfigurationFactory.parseConfiguration());
-					configuration.setName(this.cacheManagerName);
-					if (this.shared) {
-						this.cacheManager = (CacheManager) ReflectionUtils.invokeMethod(createWithConfiguration, null, configuration);
-					}
-					else {
-						this.cacheManager = new CacheManager(configuration);
-					}
-				}
+				configuration.setName(this.cacheManagerName);
 			}
-			// For strict backwards compatibility: use simplest possible constructors...
-			else if (this.shared) {
-				this.cacheManager = (is != null ? CacheManager.create(is) : CacheManager.create());
-			}
-			else {
-				this.cacheManager = (is != null ? new CacheManager(is) : new CacheManager());
-			}
+			this.cacheManager = (this.shared ? CacheManager.create(configuration) : new CacheManager(configuration));
 		}
 		finally {
 			if (is != null) {
@@ -147,19 +118,23 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	}
 
 
+	@Override
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}
 
+	@Override
 	public Class<? extends CacheManager> getObjectType() {
 		return (this.cacheManager != null ? this.cacheManager.getClass() : CacheManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() {
 		logger.info("Shutting down EhCache CacheManager");
 		this.cacheManager.shutdown();

@@ -110,7 +110,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.2 or later, as of Spring 3.0.
+ * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -395,10 +395,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * bean names. It does not need to be set for any other mode of operation.
 	 * @see #setEntityInterceptorBeanName
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");
@@ -422,6 +424,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getSessionFactory();
 	}
@@ -882,6 +885,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			return this.sessionHolder.isRollbackOnly() ||
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());

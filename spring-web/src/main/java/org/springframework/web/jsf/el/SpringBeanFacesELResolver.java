@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
 /**
- * JSF 1.2 {@code ELResolver} that delegates to the Spring root
- * {@code WebApplicationContext}, resolving name references to
- * Spring-defined beans.
+ * JSF {@code ELResolver} that delegates to the Spring root {@code WebApplicationContext},
+ * resolving name references to Spring-defined beans.
  *
  * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;application>
  *   ...
  *   &lt;el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver&lt;/el-resolver>
@@ -41,7 +40,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * Spring-managed service layer beans, for example in property values of
  * JSF-managed beans:
  *
- * <pre>
+ * <pre class="code">
  * &lt;managed-bean>
  *   &lt;managed-bean-name>myJsfManagedBean&lt;/managed-bean-name>
  *   &lt;managed-bean-class>example.MyJsfManagedBean&lt;/managed-bean-class>
@@ -55,7 +54,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * with "mySpringManagedBusinessObject" defined as Spring bean in
  * applicationContext.xml:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="mySpringManagedBusinessObject" class="example.MySpringManagedBusinessObject">
  *   ...
  * &lt;/bean></pre>

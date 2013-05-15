@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 
@@ -38,10 +39,12 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 
 	private final ByteArrayOutputStream body = new ByteArrayOutputStream();
 
+	private final Cookies cookies = new Cookies();
 
 	/**
 	 * Return the headers.
 	 */
+	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
@@ -49,6 +52,7 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	/**
 	 * Return the body content.
 	 */
+	@Override
 	public OutputStream getBody() throws IOException {
 		return this.body;
 	}
@@ -81,6 +85,11 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 			// should not occur
 			throw new InternalError(ex.getMessage());
 		}
+	}
+
+	@Override
+	public Cookies getCookies() {
+		return this.cookies;
 	}
 
 }

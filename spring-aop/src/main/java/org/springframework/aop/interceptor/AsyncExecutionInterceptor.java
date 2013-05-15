@@ -77,6 +77,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
 	 * otherwise.
 	 */
+	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 		Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
@@ -84,6 +85,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 
 		Future<?> result = determineAsyncExecutor(specificMethod).submit(
 				new Callable<Object>() {
+					@Override
 					public Object call() throws Exception {
 						try {
 							Object result = invocation.proceed();
@@ -119,6 +121,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		return null;
 	}
 
+	@Override
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE;
 	}

@@ -64,7 +64,7 @@ public abstract class UriComponents implements Serializable {
 	 * Returns the scheme. Can be {@code null}.
 	 */
 	public final String getScheme() {
-		return scheme;
+		return this.scheme;
 	}
 
 	/**
@@ -115,11 +115,9 @@ public abstract class UriComponents implements Serializable {
 	}
 
 
-	// encoding
-
 	/**
-	 * Encode all URI components using their specific encoding rules, and returns the result
-	 * as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
+	 * Encode all URI components using their specific encoding rules, and returns the
+	 * result as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
 	 * @return the encoded uri components
 	 */
 	public final UriComponents encode() {
@@ -139,9 +137,6 @@ public abstract class UriComponents implements Serializable {
 	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
 	public abstract UriComponents encode(String encoding) throws UnsupportedEncodingException;
-
-
-	// expanding
 
 	/**
 	 * Replaces all URI template variables with the values from a given map. The map keys
@@ -174,6 +169,30 @@ public abstract class UriComponents implements Serializable {
 	 */
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 
+	/**
+	 * Normalize the path removing sequences like "path/..".
+	 * @see org.springframework.util.StringUtils#cleanPath(String)
+	 */
+	public abstract UriComponents normalize();
+
+	/**
+	 * Returns a URI string from this {@code UriComponents} instance.
+	 */
+	public abstract String toUriString();
+
+	/**
+	 * Returns a {@code URI} from this {@code UriComponents} instance.
+	 */
+	public abstract URI toUri();
+
+	@Override
+	public final String toString() {
+		return toUriString();
+	}
+
+
+	// static expansion helpers
+
 	static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
 		if (source == null) {
 			return null;
@@ -197,33 +216,12 @@ public abstract class UriComponents implements Serializable {
 
 	private static String getVariableName(String match) {
 		int colonIdx = match.indexOf(':');
-		return colonIdx == -1 ? match : match.substring(0, colonIdx);
+		return (colonIdx != -1 ? match.substring(0, colonIdx) : match);
 	}
 
 	private static String getVariableValueAsString(Object variableValue) {
-		return variableValue != null ? variableValue.toString() : "";
+		return (variableValue != null ? variableValue.toString() : "");
 	}
-
-	/**
-	 * Returns a URI string from this {@code UriComponents} instance.
-	 */
-	public abstract String toUriString();
-
-	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
-	 */
-	public abstract URI toUri();
-
-	@Override
-	public final String toString() {
-		return toUriString();
-	}
-
-	/**
-	 * Normalize the path removing sequences like "path/..".
-	 * @see org.springframework.util.StringUtils#cleanPath(String)
-	 */
-	public abstract UriComponents normalize();
 
 
 	/**
@@ -233,8 +231,8 @@ public abstract class UriComponents implements Serializable {
 	interface UriTemplateVariables {
 
 		Object getValue(String name);
-
 	}
+
 
 	/**
 	 * URI template variables backed by a map.
@@ -247,6 +245,7 @@ public abstract class UriComponents implements Serializable {
 			this.uriVariables = uriVariables;
 		}
 
+		@Override
 		public Object getValue(String name) {
 			if (!this.uriVariables.containsKey(name)) {
 				throw new IllegalArgumentException("Map has no value for '" + name + "'");
@@ -267,12 +266,13 @@ public abstract class UriComponents implements Serializable {
 			this.valueIterator = Arrays.asList(uriVariableValues).iterator();
 		}
 
+		@Override
 		public Object getValue(String name) {
-			if (!valueIterator.hasNext()) {
+			if (!this.valueIterator.hasNext()) {
 				throw new IllegalArgumentException(
 						"Not enough variable values available to expand '" + name + "'");
 			}
-			return valueIterator.next();
+			return this.valueIterator.next();
 		}
 	}
 

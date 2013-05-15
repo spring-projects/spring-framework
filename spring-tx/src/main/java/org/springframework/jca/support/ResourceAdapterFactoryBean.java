@@ -113,6 +113,7 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 * Builds the BootstrapContext and starts the ResourceAdapter with it.
 	 * @see javax.resource.spi.ResourceAdapter#start(javax.resource.spi.BootstrapContext)
 	 */
+	@Override
 	public void afterPropertiesSet() throws ResourceException {
 		if (this.resourceAdapter == null) {
 			throw new IllegalArgumentException("'resourceAdapter' or 'resourceAdapterClass' is required");
@@ -124,14 +125,17 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	}
 
 
+	@Override
 	public ResourceAdapter getObject() {
 		return this.resourceAdapter;
 	}
 
+	@Override
 	public Class<? extends ResourceAdapter> getObjectType() {
 		return (this.resourceAdapter != null ? this.resourceAdapter.getClass() : ResourceAdapter.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -141,6 +145,7 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 * Stops the ResourceAdapter.
 	 * @see javax.resource.spi.ResourceAdapter#stop()
 	 */
+	@Override
 	public void destroy() {
 		this.resourceAdapter.stop();
 	}

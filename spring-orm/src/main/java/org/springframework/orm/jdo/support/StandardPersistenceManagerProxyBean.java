@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,13 @@ import org.springframework.util.Assert;
 /**
  * Proxy that implements the {@link javax.jdo.PersistenceManager} interface,
  * delegating to a thread-bound PersistenceManager on each invocation -
- * as defined by the JDO 2.1 specification. This class makes such a standard
+ * as defined by the JDO 3.0 specification. This class makes such a standard
  * JDO PersistenceManager proxy available for bean references.
  *
  * <p>The main advantage of this proxy is that it allows DAOs to work with a
- * plain JDO PersistenceManager reference in JDO 2.1 style
+ * plain JDO PersistenceManager reference in JDO 3.0 style
  * (see {@link javax.jdo.PersistenceManagerFactory#getPersistenceManagerProxy()}),
  * exposing the exact behavior that the target JDO provider implements.
- *
- * <p>Note: This proxy requires JDO 2.1 or higher.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -57,14 +55,17 @@ public class StandardPersistenceManagerProxyBean implements FactoryBean<Persiste
 	}
 
 
+	@Override
 	public PersistenceManager getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<? extends PersistenceManager> getObjectType() {
 		return (this.proxy != null ? this.proxy.getClass() : PersistenceManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

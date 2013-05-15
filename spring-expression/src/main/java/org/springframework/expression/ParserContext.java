@@ -29,7 +29,7 @@ public interface ParserContext {
 	 * Whether or not the expression being parsed is a template. A template expression consists of literal text that can
 	 * be mixed with evaluatable blocks. Some examples:
 	 *
-	 * <pre>
+	 * <pre class="code">
 	 * 	   Some literal text
 	 *     Hello #{name.firstName}!
 	 *     #{3 + 4}
@@ -62,14 +62,17 @@ public interface ParserContext {
 	 */
 	public static final ParserContext TEMPLATE_EXPRESSION = new ParserContext() {
 
+		@Override
 		public String getExpressionPrefix() {
 			return "#{";
 		}
 
+		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
 
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}

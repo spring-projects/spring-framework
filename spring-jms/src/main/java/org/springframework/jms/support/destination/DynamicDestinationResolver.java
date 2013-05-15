@@ -54,6 +54,7 @@ public class DynamicDestinationResolver implements DestinationResolver {
 	 * @see #resolveTopic(javax.jms.Session, String)
 	 * @see #resolveQueue(javax.jms.Session, String)
 	 */
+	@Override
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 

@@ -56,10 +56,12 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 		isNegated = negated;
 	}
 
+	@Override
 	public MediaType getMediaType() {
 		return mediaType;
 	}
 
+	@Override
 	public boolean isNegated() {
 		return isNegated;
 	}
@@ -76,6 +78,7 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 
 	protected abstract boolean matchMediaType(HttpServletRequest request) throws HttpMediaTypeException;
 
+	@Override
 	public int compareTo(AbstractMediaTypeExpression other) {
 		return MediaType.SPECIFICITY_COMPARATOR.compare(this.getMediaType(), other.getMediaType());
 	}

@@ -76,6 +76,7 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 	}
 
 
+	@Override
 	public String resolveThemeName(HttpServletRequest request) {
 		// Check request for preparsed or preset theme.
 		String theme = (String) request.getAttribute(THEME_REQUEST_ATTRIBUTE_NAME);
@@ -93,6 +94,7 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 		return getDefaultThemeName();
 	}
 
+	@Override
 	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
 		if (themeName != null) {
 			// Set request attribute and add cookie.

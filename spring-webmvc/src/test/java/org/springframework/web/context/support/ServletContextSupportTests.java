@@ -54,21 +54,6 @@ import org.springframework.mock.web.test.MockServletContext;
 public class ServletContextSupportTests {
 
 	@Test
-	@Deprecated
-	public void testServletContextFactoryBean() {
-		MockServletContext sc = new MockServletContext();
-
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.setServletContext(sc);
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		wac.registerSingleton("servletContext", ServletContextFactoryBean.class, pvs);
-		wac.refresh();
-
-		Object value = wac.getBean("servletContext");
-		assertEquals(sc, value);
-	}
-
-	@Test
 	public void testServletContextAttributeFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute("myAttr", "myValue");
@@ -101,7 +86,7 @@ public class ServletContextSupportTests {
 		catch (BeanCreationException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof IllegalStateException);
-			assertTrue(ex.getCause().getMessage().indexOf("myAttr") != -1);
+			assertTrue(ex.getCause().getMessage().contains("myAttr"));
 		}
 	}
 
@@ -138,7 +123,7 @@ public class ServletContextSupportTests {
 		catch (BeanCreationException ex) {
 			// expected
 			assertTrue(ex.getCause() instanceof IllegalStateException);
-			assertTrue(ex.getCause().getMessage().indexOf("myParam") != -1);
+			assertTrue(ex.getCause().getMessage().contains("myParam"));
 		}
 	}
 

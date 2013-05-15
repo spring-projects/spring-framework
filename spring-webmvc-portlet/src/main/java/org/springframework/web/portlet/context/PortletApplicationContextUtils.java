@@ -244,6 +244,7 @@ public abstract class PortletApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<PortletRequest>, Serializable {
 
+		@Override
 		public PortletRequest getObject() {
 			return currentRequestAttributes().getRequest();
 		}
@@ -261,6 +262,7 @@ public abstract class PortletApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<PortletSession>, Serializable {
 
+		@Override
 		public PortletSession getObject() {
 			return currentRequestAttributes().getRequest().getPortletSession();
 		}
@@ -278,6 +280,7 @@ public abstract class PortletApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
+		@Override
 		public WebRequest getObject() {
 			return new PortletWebRequest(currentRequestAttributes().getRequest());
 		}

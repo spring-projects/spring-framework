@@ -177,6 +177,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
 		for (Class<?> currentHandlerType : handlerTypes) {
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
+				@Override
 				public void doWith(Method method) {
 					RequestMapping mapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 					if (mapping != null) {

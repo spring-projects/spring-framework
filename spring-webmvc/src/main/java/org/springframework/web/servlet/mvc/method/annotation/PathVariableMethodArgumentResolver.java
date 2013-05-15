@@ -65,6 +65,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		super(null);
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (!parameter.hasParameterAnnotation(PathVariable.class)) {
 			return false;

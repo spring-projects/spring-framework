@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ import org.springframework.util.CollectionUtils;
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
  * for a single JPA {@link javax.persistence.EntityManagerFactory}. Binds a JPA
  * EntityManager from the specified factory to the thread, potentially allowing for
- * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator}
- * and {@link JpaTemplate} are aware of thread-bound entity managers and participate
+ * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator} and
+ * {@code @PersistenceContext} are aware of thread-bound entity managers and participate
  * in such transactions automatically. Using either is required for JPA access code
  * supporting this transaction management mechanism.
  *
@@ -100,7 +100,6 @@ import org.springframework.util.CollectionUtils;
  * @see #setEntityManagerFactory
  * @see #setDataSource
  * @see LocalEntityManagerFactoryBean
- * @see JpaTemplate#execute
  * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
@@ -282,6 +281,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Falls back to a default EntityManagerFactory bean if no persistence unit specified.
 	 * @see #setPersistenceUnitName
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getEntityManagerFactory() == null) {
 			if (!(beanFactory instanceof ListableBeanFactory)) {
@@ -298,6 +298,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * for the specified EntityManagerFactory if none set.
 	 * Auto-detect the EntityManagerFactory's DataSource, if any.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
@@ -316,6 +317,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getEntityManagerFactory();
 	}
@@ -566,9 +568,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 
-		// Remove the entity manager holder from the thread.
+		// Remove the entity manager holder from the thread, if still there.
+		// (Could have been removed by EntityManagerFactoryUtils in order
+		// to replace it with an unsynchronized EntityManager).
 		if (txObject.isNewEntityManagerHolder()) {
-			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+			TransactionSynchronizationManager.unbindResourceIfPossible(getEntityManagerFactory());
 		}
 		txObject.getEntityManagerHolder().clear();
 
@@ -653,11 +657,13 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.entityManagerHolder.getEntityManager().flush();

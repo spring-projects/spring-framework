@@ -82,6 +82,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 		this.executor = executor;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		AsyncAnnotationAdvisor advisor = (this.executor != null ?
 				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor());

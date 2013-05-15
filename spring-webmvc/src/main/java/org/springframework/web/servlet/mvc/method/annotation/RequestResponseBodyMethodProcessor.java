@@ -74,10 +74,12 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		super(messageConverters, contentNegotiationManager);
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestBody.class);
 	}
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return returnType.getMethodAnnotation(ResponseBody.class) != null;
 	}
@@ -89,6 +91,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	 * 	is {@code true} and there is no body content or if there is no suitable
 	 * 	converter to read the content with.
 	 */
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
@@ -180,6 +183,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		return super.readWithMessageConverters(inputMessage, methodParam, paramType);
 	}
 
+	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
 			throws IOException, HttpMediaTypeNotAcceptableException {

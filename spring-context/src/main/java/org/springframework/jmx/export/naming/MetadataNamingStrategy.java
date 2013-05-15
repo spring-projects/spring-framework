@@ -94,6 +94,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 		this.defaultDomain = defaultDomain;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.attributeSource == null) {
 			throw new IllegalArgumentException("Property 'attributeSource' is required");
@@ -105,6 +106,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	 * Reads the {@code ObjectName} from the source-level metadata associated
 	 * with the managed resource's {@code Class}.
 	 */
+	@Override
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		Class managedClass = AopUtils.getTargetClass(managedBean);
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);

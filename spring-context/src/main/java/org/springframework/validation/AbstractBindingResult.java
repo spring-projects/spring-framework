@@ -84,15 +84,18 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	// Implementation of the Errors interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public String getObjectName() {
 		return this.objectName;
 	}
 
 
+	@Override
 	public void reject(String errorCode, Object[] errorArgs, String defaultMessage) {
 		addError(new ObjectError(getObjectName(), resolveMessageCodes(errorCode), errorArgs, defaultMessage));
 	}
 
+	@Override
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
 		if ("".equals(getNestedPath()) && !StringUtils.hasLength(field)) {
 			// We're at the top of the nested object hierarchy,
@@ -109,10 +112,12 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		addError(fe);
 	}
 
+	@Override
 	public void addError(ObjectError error) {
 		this.errors.add(error);
 	}
 
+	@Override
 	public void addAllErrors(Errors errors) {
 		if (!errors.getObjectName().equals(getObjectName())) {
 			throw new IllegalArgumentException("Errors object needs to have same object name");
@@ -120,10 +125,12 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		this.errors.addAll(errors.getAllErrors());
 	}
 
+	@Override
 	public String[] resolveMessageCodes(String errorCode) {
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName());
 	}
 
+	@Override
 	public String[] resolveMessageCodes(String errorCode, String field) {
 		Class<?> fieldType = getFieldType(field);
 		return getMessageCodesResolver().resolveMessageCodes(
@@ -146,6 +153,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return Collections.unmodifiableList(this.errors);
 	}
 
+	@Override
 	public List<ObjectError> getGlobalErrors() {
 		List<ObjectError> result = new LinkedList<ObjectError>();
 		for (ObjectError objectError : this.errors) {
@@ -166,6 +174,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return null;
 	}
 
+	@Override
 	public List<FieldError> getFieldErrors() {
 		List<FieldError> result = new LinkedList<FieldError>();
 		for (ObjectError objectError : this.errors) {
@@ -212,6 +221,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return null;
 	}
 
+	@Override
 	public Object getFieldValue(String field) {
 		FieldError fieldError = getFieldError(field);
 		// Use rejected value in case of error, current bean property value else.
@@ -262,6 +272,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see org.springframework.web.servlet.tags.BindTag
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
+	@Override
 	public Map<String, Object> getModel() {
 		Map<String, Object> model = new LinkedHashMap<String, Object>(2);
 		// Mapping from name to target object.
@@ -271,6 +282,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		return model;
 	}
 
+	@Override
 	public Object getRawFieldValue(String field) {
 		return getActualFieldValue(fixedField(field));
 	}
@@ -280,6 +292,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * {@link #getPropertyEditorRegistry() PropertyEditorRegistry}'s
 	 * editor lookup facility, if available.
 	 */
+	@Override
 	public PropertyEditor findEditor(String field, Class<?> valueType) {
 		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
 		if (editorRegistry != null) {
@@ -297,6 +310,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	/**
 	 * This implementation returns {@code null}.
 	 */
+	@Override
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return null;
 	}
@@ -307,6 +321,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * detected to target a disallowed field.
 	 * @see DataBinder#setAllowedFields
 	 */
+	@Override
 	public void recordSuppressedField(String field) {
 		this.suppressedFields.add(field);
 	}
@@ -317,6 +332,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * disallowed fields.
 	 * @see DataBinder#setAllowedFields
 	 */
+	@Override
 	public String[] getSuppressedFields() {
 		return StringUtils.toStringArray(this.suppressedFields);
 	}
@@ -349,6 +365,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	/**
 	 * Return the wrapped target object.
 	 */
+	@Override
 	public abstract Object getTarget();
 
 	/**

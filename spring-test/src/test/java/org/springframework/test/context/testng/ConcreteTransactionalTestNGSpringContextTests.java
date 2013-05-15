@@ -30,10 +30,11 @@ import org.springframework.tests.sample.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -47,7 +48,6 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 2.5
  */
-@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests
 		implements BeanNameAware, InitializingBean {
@@ -83,11 +83,11 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 
 	private int createPerson(String name) {
-		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
 	private int deletePerson(String name) {
-		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyApplicationContextSet() {
 		assertInTransaction(false);
 		assertNotNull(super.applicationContext,
@@ -146,7 +146,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue(beanInitialized,
@@ -154,7 +154,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyBeanNameSet() {
 		assertInTransaction(false);
 		assertEquals(beanName, getClass().getName(),
@@ -162,7 +162,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyAnnotationAutowiredFields() {
 		assertInTransaction(false);
 		assertNull(nonrequiredLong, "The nonrequiredLong field should NOT have been autowired.");
@@ -171,7 +171,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyAnnotationAutowiredMethods() {
 		assertInTransaction(false);
 		assertNotNull(employee, "The setEmployee() method should have been autowired.");
@@ -179,14 +179,14 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyResourceAnnotationInjectedFields() {
 		assertInTransaction(false);
 		assertEquals(foo, "Foo", "The foo field should have been injected via @Resource.");
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyResourceAnnotationInjectedMethods() {
 		assertInTransaction(false);
 		assertEquals(bar, "Bar", "The setBar() method should have been injected via @Resource.");

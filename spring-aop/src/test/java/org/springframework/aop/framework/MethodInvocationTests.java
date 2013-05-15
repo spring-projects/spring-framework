@@ -60,6 +60,7 @@ public final class MethodInvocationTests {
 	@Test
 	public void testToStringDoesntHitTarget() throws Throwable {
 		Object target = new TestBean() {
+			@Override
 			public String toString() {
 				throw new UnsupportedOperationException("toString");
 			}

@@ -101,6 +101,7 @@ public class MockPortletURL extends MockBaseURL implements PortletURL {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodeParameter("urlType", this.urlType));

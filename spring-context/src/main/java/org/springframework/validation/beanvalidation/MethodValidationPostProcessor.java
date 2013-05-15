@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ import org.springframework.validation.annotation.Validated;
  * inline constraint annotations. Validation groups can be specified through {@code @Validated}
  * as well. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 3.1, this functionality requires Hibernate Validator 4.2 or higher.
- * In a future version of Spring, this class will autodetect a Bean Validation 1.1 compliant
- * provider and automatically use the standard method validation support when available.
+ * <p>As of Spring 4.0, this functionality requires either a Bean Validation 1.1 provider
+ * (such as Hibernate Validator 5.0) or the Bean Validation 1.0 API with Hibernate Validator
+ * 4.2 or 4.3. The actual provider will be autodetected and automatically adapted.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -96,6 +96,7 @@ public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProce
 		this.validator = validatorFactory.getValidator();
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		Pointcut pointcut = new AnnotationMatchingPointcut(this.validatedAnnotationType, true);
 		Advice advice = (this.validator != null ? new MethodValidationInterceptor(this.validator) :

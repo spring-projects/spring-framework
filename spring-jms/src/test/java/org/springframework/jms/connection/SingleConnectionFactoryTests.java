@@ -310,50 +310,6 @@ public class SingleConnectionFactoryTests {
 	}
 
 	@Test
-	public void testConnectionFactory102WithQueue() throws JMSException {
-		QueueConnectionFactory cf = mock(QueueConnectionFactory.class);
-		QueueConnection con = mock(QueueConnection.class);
-
-		given(cf.createQueueConnection()).willReturn(con);
-
-		SingleConnectionFactory scf = new SingleConnectionFactory102(cf, false);
-		QueueConnection con1 = scf.createQueueConnection();
-		con1.start();
-		con1.close();  // should be ignored
-		QueueConnection con2 = scf.createQueueConnection();
-		con2.start();
-		con2.close();  // should be ignored
-		scf.destroy();  // should trigger actual close
-
-		verify(con).start();
-		verify(con).stop();
-		verify(con).close();
-		verifyNoMoreInteractions(con);
-	}
-
-	@Test
-	public void testConnectionFactory102WithTopic() throws JMSException {
-		TopicConnectionFactory cf = mock(TopicConnectionFactory.class);
-		TopicConnection con = mock(TopicConnection.class);
-
-		given(cf.createTopicConnection()).willReturn(con);
-
-		SingleConnectionFactory scf = new SingleConnectionFactory102(cf, true);
-		TopicConnection con1 = scf.createTopicConnection();
-		con1.start();
-		con1.close();  // should be ignored
-		TopicConnection con2 = scf.createTopicConnection();
-		con2.start();
-		con2.close();  // should be ignored
-		scf.destroy();  // should trigger actual close
-
-		verify(con).start();
-		verify(con).stop();
-		verify(con).close();
-		verifyNoMoreInteractions(con);
-	}
-
-	@Test
 	public void testCachingConnectionFactory() throws JMSException {
 		ConnectionFactory cf = mock(ConnectionFactory.class);
 		Connection con = mock(Connection.class);

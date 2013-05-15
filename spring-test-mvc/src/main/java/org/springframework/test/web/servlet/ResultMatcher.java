@@ -24,7 +24,7 @@ package org.springframework.test.web.servlet;
  *
  * <p>Example:
  *
- * <pre>
+ * <pre class="code">
  * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
  *
  * mockMvc.perform(get("/form"))

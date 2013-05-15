@@ -109,6 +109,7 @@ public abstract class ExposeBeanNameAdvisors {
 			this.beanName = beanName;
 		}
 
+		@Override
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			if (!(mi instanceof ProxyMethodInvocation)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
@@ -142,6 +143,7 @@ public abstract class ExposeBeanNameAdvisors {
 			return super.invoke(mi);
 		}
 
+		@Override
 		public String getBeanName() {
 			return this.beanName;
 		}

@@ -101,6 +101,7 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws NamingException, RemoteException {
 		prepare();
 	}
@@ -137,6 +138,7 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	/**
 	 * Unbind the RMI service from JNDI on bean factory shutdown.
 	 */
+	@Override
 	public void destroy() throws NamingException, NoSuchObjectException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Unbinding RMI service from JNDI location [" + this.jndiName + "]");

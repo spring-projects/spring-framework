@@ -83,6 +83,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	 * behaviour in around advice. However, subclasses should invoke this
 	 * method, which handles introduced interfaces and forwarding to the target.
 	 */
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		if (isMethodOnIntroducedInterface(mi)) {
 			Object delegate = getIntroductionDelegateFor(mi.getThis());

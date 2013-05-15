@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
@@ -183,16 +184,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		this.importBeanNameGenerator = beanNameGenerator;
 	}
 
+	@Override
 	public void setEnvironment(Environment environment) {
 		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 		if (!this.setMetadataReaderFactoryCalled) {
@@ -204,6 +208,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/**
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
+	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
 		RootBeanDefinition iabpp = new RootBeanDefinition(ImportAwareBeanPostProcessor.class);
 		iabpp.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -227,6 +232,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Prepare the Configuration classes for servicing bean requests at runtime
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
+	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		int factoryId = System.identityHashCode(beanFactory);
 		if (this.factoriesPostProcessed.contains(factoryId)) {
@@ -275,20 +281,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
-		for (BeanDefinitionHolder holder : configCandidates) {
-			BeanDefinition bd = holder.getBeanDefinition();
-			try {
-				if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
-					parser.parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
-				}
-				else {
-					parser.parse(bd.getBeanClassName(), holder.getBeanName());
-				}
-			}
-			catch (IOException ex) {
-				throw new BeanDefinitionStoreException("Failed to load bean class: " + bd.getBeanClassName(), ex);
-			}
-		}
+		parser.parse(configCandidates);
 		parser.validate();
 
 		// Handle any @PropertySource annotations
@@ -312,7 +305,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory,
 					this.resourceLoader, this.environment, this.importBeanNameGenerator);
 		}
-		this.reader.loadBeanDefinitions(parser.getConfigurationClasses());
+		for (ConfigurationClass configurationClass : parser.getConfigurationClasses()) {
+			if (!ConditionalAnnotationHelper.shouldSkip(configurationClass, registry,
+					this.environment, this.importBeanNameGenerator)) {
+				reader.loadBeanDefinitionsForConfigurationClass(configurationClass);
+			}
+		}
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {
@@ -348,7 +346,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// nothing to enhance -> return immediately
 			return;
 		}
-		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer(beanFactory);
+		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
 			try {
@@ -373,10 +371,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private BeanFactory beanFactory;
 
+		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 			this.beanFactory = beanFactory;
 		}
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof ImportAware) {
 				ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
@@ -399,10 +399,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public int getOrder() {
 			return Ordered.HIGHEST_PRECEDENCE;
 		}

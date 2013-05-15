@@ -34,8 +34,6 @@ import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Unit tests for UrlTag
- *
  * @author Scott Andrews
  */
 public class UrlTagTests extends AbstractTagTests {
@@ -118,7 +116,7 @@ public class UrlTagTests extends AbstractTagTests {
 	public void testSetHtmlEscapeFalse() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-		tag.setHtmlEscape("false");
+		tag.setHtmlEscape(false);
 
 		tag.doStartTag();
 
@@ -141,7 +139,7 @@ public class UrlTagTests extends AbstractTagTests {
 	public void testSetHtmlEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-		tag.setHtmlEscape("true");
+		tag.setHtmlEscape(true);
 
 		tag.doStartTag();
 
@@ -164,7 +162,7 @@ public class UrlTagTests extends AbstractTagTests {
 	public void testSetJavaScriptEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-		tag.setJavaScriptEscape("true");
+		tag.setJavaScriptEscape(true);
 
 		tag.doStartTag();
 
@@ -187,8 +185,8 @@ public class UrlTagTests extends AbstractTagTests {
 	public void testSetHtmlAndJavaScriptEscapeTrue() throws JspException {
 		tag.setValue("url/path");
 		tag.setVar("var");
-		tag.setHtmlEscape("true");
-		tag.setJavaScriptEscape("true");
+		tag.setHtmlEscape(true);
+		tag.setJavaScriptEscape(true);
 
 		tag.doStartTag();
 

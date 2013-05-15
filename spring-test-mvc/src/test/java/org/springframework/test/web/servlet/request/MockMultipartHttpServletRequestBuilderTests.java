@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2013 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,18 @@
 
 package org.springframework.test.web.servlet.request;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 
+import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link MockMultipartHttpServletRequestBuilder}.
- *
  * @author Rossen Stoyanchev
  */
 public class MockMultipartHttpServletRequestBuilderTests {
-
 
 	@Test
 	public void test() {
@@ -44,7 +40,6 @@ public class MockMultipartHttpServletRequestBuilderTests {
 
 		MockMultipartHttpServletRequestBuilder builder = (MockMultipartHttpServletRequestBuilder) result;
 		MockHttpServletRequest request = builder.buildRequest(new MockServletContext());
-
 		assertEquals("UTF-8", request.getCharacterEncoding());
 	}
 

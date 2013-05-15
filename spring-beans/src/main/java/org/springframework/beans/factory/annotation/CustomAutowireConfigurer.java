@@ -59,10 +59,12 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -82,6 +84,7 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.customQualifierTypes != null) {

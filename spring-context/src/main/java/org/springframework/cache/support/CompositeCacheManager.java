@@ -59,6 +59,7 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 		this.fallbackToNoOpCache = fallbackToNoOpCache;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.fallbackToNoOpCache) {
 			this.cacheManagers.add(new NoOpCacheManager());
@@ -66,6 +67,7 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 	}
 
 
+	@Override
 	public Cache getCache(String name) {
 		for (CacheManager cacheManager : this.cacheManagers) {
 			Cache cache = cacheManager.getCache(name);
@@ -76,6 +78,7 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 		return null;
 	}
 
+	@Override
 	public Collection<String> getCacheNames() {
 		List<String> names = new ArrayList<String>();
 		for (CacheManager manager : this.cacheManagers) {

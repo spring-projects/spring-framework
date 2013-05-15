@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.support.PersistenceExceptionTranslator;
@@ -28,7 +26,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * SPI strategy that encapsulates certain functionality that standard JPA 1.0
+ * SPI strategy that encapsulates certain functionality that standard JPA 2.0
  * does not offer, such as access to the underlying JDBC Connection. This
  * strategy is mainly intended for standalone usage of a JPA provider; most
  * of its functionality is not relevant when running with JTA transactions.
@@ -46,58 +44,12 @@ import org.springframework.transaction.TransactionException;
  * @author Rod Johnson
  * @since 2.0
  * @see DefaultJpaDialect
- * @see JpaAccessor#setJpaDialect
  * @see JpaTransactionManager#setJpaDialect
  * @see JpaVendorAdapter#getJpaDialect()
  * @see AbstractEntityManagerFactoryBean#setJpaDialect
  * @see AbstractEntityManagerFactoryBean#setJpaVendorAdapter
  */
 public interface JpaDialect extends PersistenceExceptionTranslator {
-
-	//-----------------------------------------------------------------------------------
-	// Hooks for non-standard persistence operations (used by EntityManagerFactory beans)
-	//-----------------------------------------------------------------------------------
-
-	/**
-	 * Return whether the EntityManagerFactoryPlus(Operations) interface is
-	 * supported by this provider.
-	 * @see EntityManagerFactoryPlusOperations
-	 * @see EntityManagerFactoryPlus
-	 */
-	boolean supportsEntityManagerFactoryPlusOperations();
-
-	/**
-	 * Return whether the EntityManagerPlus(Operations) interface is
-	 * supported by this provider.
-	 * @see EntityManagerPlusOperations
-	 * @see EntityManagerPlus
-	 */
-	boolean supportsEntityManagerPlusOperations();
-
-	/**
-	 * Return an EntityManagerFactoryPlusOperations implementation for
-	 * the given raw EntityManagerFactory. This operations object can be
-	 * used to serve the additional operations behind a proxy that
-	 * implements the EntityManagerFactoryPlus interface.
-	 * @param rawEntityManager the raw provider-specific EntityManagerFactory
-	 * @return the EntityManagerFactoryPlusOperations implementation
-	 */
-	EntityManagerFactoryPlusOperations getEntityManagerFactoryPlusOperations(EntityManagerFactory rawEntityManager);
-
-	/**
-	 * Return an EntityManagerPlusOperations implementation for
-	 * the given raw EntityManager. This operations object can be
-	 * used to serve the additional operations behind a proxy that
-	 * implements the EntityManagerPlus interface.
-	 * @param rawEntityManager the raw provider-specific EntityManagerFactory
-	 * @return the EntityManagerFactoryPlusOperations implementation
-	 */
-	EntityManagerPlusOperations getEntityManagerPlusOperations(EntityManager rawEntityManager);
-
-
-	//-------------------------------------------------------------------------
-	// Hooks for transaction management (used by JpaTransactionManager)
-	//-------------------------------------------------------------------------
 
 	/**
 	 * Begin the given JPA transaction, applying the semantics specified by the
@@ -135,13 +87,15 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 
 	/**
 	 * Prepare a JPA transaction, applying the specified semantics. Called by
-	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction.
+	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction
+	 * or a locally joined transaction (e.g. after upgrading an unsynchronized
+	 * EntityManager to a synchronized one).
 	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
 	 * a transaction data object can be returned that holds the previous flush mode
 	 * (and possibly other data), to be reset in {@code cleanupTransaction}.
-	 * <p>Implementations can also use the Spring transaction name, as exposed by the
-	 * passed-in TransactionDefinition, to optimize for specific data access use cases
-	 * (effectively using the current transaction name as use case identifier).
+	 * <p>Implementations can also use the Spring transaction name to optimize for
+	 * specific data access use cases (effectively using the current transaction
+	 * name as use case identifier).
 	 * @param entityManager the EntityManager to begin a JPA transaction on
 	 * @param readOnly whether the transaction is supposed to be read-only
 	 * @param name the name of the transaction (if any)
@@ -172,7 +126,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * needing access to the underlying JDBC Connection, usually within an active JPA
 	 * transaction (for example, by JpaTransactionManager). The returned handle will
 	 * be passed into the {@code releaseJdbcConnection} method when not needed anymore.
-	 * <p>This strategy is necessary as JPA 1.0 does not provide a standard way to retrieve
+	 * <p>This strategy is necessary as JPA does not provide a standard way to retrieve
 	 * the underlying JDBC Connection (due to the fact that a JPA implementation might not
 	 * work with a relational database at all).
 	 * <p>Implementations are encouraged to return an unwrapped Connection object, i.e.

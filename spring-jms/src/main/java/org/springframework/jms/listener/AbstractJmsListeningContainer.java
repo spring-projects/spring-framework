@@ -113,6 +113,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		this.autoStartup = autoStartup;
 	}
 
+	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
@@ -131,10 +132,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Return the phase in which this container will be started and stopped.
 	 */
+	@Override
 	public int getPhase() {
 		return this.phase;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -169,6 +172,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Calls {@link #shutdown()} when the BeanFactory destroys the container instance.
 	 * @see #shutdown()
 	 */
+	@Override
 	public void destroy() {
 		shutdown();
 	}
@@ -260,6 +264,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @throws JmsException if starting failed
 	 * @see #doStart
 	 */
+	@Override
 	public void start() throws JmsException {
 		try {
 			doStart();
@@ -298,6 +303,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @throws JmsException if stopping failed
 	 * @see #doStop
 	 */
+	@Override
 	public void stop() throws JmsException {
 		try {
 			doStop();
@@ -307,6 +313,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 	}
 
+	@Override
 	public void stop(Runnable callback) {
 		this.stop();
 		callback.run();
@@ -335,6 +342,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see #stop()
 	 * @see #runningAllowed()
 	 */
+	@Override
 	public final boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
 			return (this.running && runningAllowed());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.net.SocketException;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
 import java.rmi.NoSuchObjectException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.StubNotFoundException;
 import java.rmi.UnknownHostException;
@@ -51,47 +50,8 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class RmiClientInterceptorUtils {
 
-	private static final String ORACLE_CONNECTION_EXCEPTION = "com.evermind.server.rmi.RMIConnectionException";
-
 	private static final Log logger = LogFactory.getLog(RmiClientInterceptorUtils.class);
 
-
-	/**
-	 * Apply the given method invocation to the given RMI stub.
-	 * <p>Delegates to the corresponding method if the RMI stub does not directly
-	 * implement the invoked method. This typically happens when a non-RMI service
-	 * interface is used for an RMI service. The methods of such a service interface
-	 * have to match the RMI stub methods, but they typically don't declare
-	 * {@code java.rmi.RemoteException}: A RemoteException thrown by the RMI stub
-	 * will be automatically converted to Spring's RemoteAccessException.
-	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
-	 */
-	@Deprecated
-	public static Object invoke(MethodInvocation invocation, Remote stub, String serviceName) throws Throwable {
-		try {
-			return invokeRemoteMethod(invocation, stub);
-		}
-		catch (InvocationTargetException ex) {
-			Throwable targetEx = ex.getTargetException();
-			if (targetEx instanceof RemoteException) {
-				RemoteException rex = (RemoteException) targetEx;
-				throw convertRmiAccessException(invocation.getMethod(), rex, serviceName);
-			}
-			else {
-				throw targetEx;
-			}
-		}
-	}
-
-	/**
-	 * Perform a raw method invocation on the given RMI stub,
-	 * letting reflection exceptions through as-is.
-	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
-	 */
-	@Deprecated
-	public static Object doInvoke(MethodInvocation invocation, Remote stub) throws InvocationTargetException {
-		return invokeRemoteMethod(invocation, stub);
-	}
 
 	/**
 	 * Perform a raw method invocation on the given RMI stub,
@@ -198,9 +158,7 @@ public abstract class RmiClientInterceptorUtils {
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
 	 * <p>Treats RMI's ConnectException, ConnectIOException, UnknownHostException,
-	 * NoSuchObjectException and StubNotFoundException as connect failure,
-	 * as well as Oracle's OC4J {@code com.evermind.server.rmi.RMIConnectionException}
-	 * (which doesn't derive from from any well-known RMI connect exception).
+	 * NoSuchObjectException and StubNotFoundException as connect failure.
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
 	 * @see java.rmi.ConnectException
@@ -213,7 +171,7 @@ public abstract class RmiClientInterceptorUtils {
 		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
 				ex instanceof UnknownHostException || ex instanceof NoSuchObjectException ||
 				ex instanceof StubNotFoundException || ex.getCause() instanceof SocketException ||
-				isCorbaConnectFailure(ex.getCause()) || ORACLE_CONNECTION_EXCEPTION.equals(ex.getClass().getName()));
+				isCorbaConnectFailure(ex.getCause()));
 	}
 
 	/**

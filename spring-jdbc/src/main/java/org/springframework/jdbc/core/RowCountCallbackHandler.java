@@ -69,6 +69,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * by overriding the {@code processRow(ResultSet, int)} method.
 	 * @see #processRow(java.sql.ResultSet, int)
 	 */
+	@Override
 	public final void processRow(ResultSet rs) throws SQLException {
 		if (this.rowCount == 0) {
 			ResultSetMetaData rsmd = rs.getMetaData();

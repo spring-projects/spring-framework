@@ -153,6 +153,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		final Map<Class<? extends Throwable>, Method> matchedHandlers = new HashMap<Class<? extends Throwable>, Method>();
 
 		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) {
 				method = ClassUtils.getMostSpecificMethod(method, handlerType);
 				List<Class<? extends Throwable>> handledExceptions = getHandledExceptions(method);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/** Raw EntityManagerFactory as returned by the PersistenceProvider */
 	public EntityManagerFactory nativeEntityManagerFactory;
 
-	private EntityManagerFactoryPlusOperations plusOperations;
-
 	private EntityManagerFactory entityManagerFactory;
 
 
@@ -142,6 +140,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.persistenceProvider = persistenceProvider;
 	}
 
+	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}
@@ -157,6 +156,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
+	@Override
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -223,6 +223,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.entityManagerInterface = emInterface;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return this.entityManagerInterface;
 	}
@@ -238,6 +239,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.jpaDialect = jpaDialect;
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
@@ -260,23 +262,28 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		return this.jpaVendorAdapter;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
+	@Override
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
 			if (this.persistenceProvider == null) {
@@ -339,10 +346,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(), this.beanClassLoader));
 		}
 		ifcs.add(EntityManagerFactoryInfo.class);
-		if (getJpaDialect() != null && getJpaDialect().supportsEntityManagerFactoryPlusOperations()) {
-			this.plusOperations = getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
-			ifcs.add(EntityManagerFactoryPlusOperations.class);
-		}
 		try {
 			return (EntityManagerFactory) Proxy.newProxyInstance(
 					this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
@@ -363,20 +366,29 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo /
-	 * EntityManagerFactoryPlusOperations / the native EntityManagerFactory accordingly.
+	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo
+	 * or the native EntityManagerFactory accordingly.
 	 */
 	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
 		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 			return method.invoke(this, args);
 		}
-		else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
-			return method.invoke(this.plusOperations, args);
+		else if (method.getName().equals("createEntityManager") && args != null && args.length > 0 &&
+				args[0] != null && args[0].getClass().isEnum() && "SYNCHRONIZED".equals(args[0].toString())) {
+			// JPA 2.1's createEntityManager(SynchronizationType, Map)
+			// Redirect to plain createEntityManager and add synchronization semantics through Spring proxy
+			EntityManager rawEntityManager = (args.length > 1 ?
+					this.nativeEntityManagerFactory.createEntityManager((Map) args[1]) :
+					this.nativeEntityManagerFactory.createEntityManager());
+			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
 		}
+
+		// Standard delegation to the native factory, just post-processing EntityManager return values
 		Object retVal = method.invoke(this.nativeEntityManagerFactory, args);
 		if (retVal instanceof EntityManager) {
+			// Any other createEntityManager variant - expecting non-synchronized semantics
 			EntityManager rawEntityManager = (EntityManager) retVal;
-			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this);
+			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, false);
 		}
 		return retVal;
 	}
@@ -399,19 +411,23 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaDialect#translateExceptionIfPossible
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return (this.jpaDialect != null ? this.jpaDialect.translateExceptionIfPossible(ex) :
 				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
 	}
 
+	@Override
 	public EntityManagerFactory getNativeEntityManagerFactory() {
 		return this.nativeEntityManagerFactory;
 	}
 
+	@Override
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return null;
 	}
 
+	@Override
 	public DataSource getDataSource() {
 		return null;
 	}
@@ -420,14 +436,17 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/**
 	 * Return the singleton EntityManagerFactory.
 	 */
+	@Override
 	public EntityManagerFactory getObject() {
 		return this.entityManagerFactory;
 	}
 
+	@Override
 	public Class<? extends EntityManagerFactory> getObjectType() {
 		return (this.entityManagerFactory != null ? this.entityManagerFactory.getClass() : EntityManagerFactory.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -436,6 +455,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/**
 	 * Close the EntityManagerFactory on bean factory shutdown.
 	 */
+	@Override
 	public void destroy() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Closing JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
@@ -499,6 +519,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			this.entityManagerFactoryBean = emfb;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
 				if (method.getName().equals("equals")) {

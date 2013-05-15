@@ -124,11 +124,13 @@ public class FormattingConversionServiceFactoryBean
 		this.registerDefaultFormatters = registerDefaultFormatters;
 	}
 
+	@Override
 	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
 		this.embeddedValueResolver = embeddedValueResolver;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		this.conversionService = new DefaultFormattingConversionService(this.embeddedValueResolver, this.registerDefaultFormatters);
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
@@ -171,14 +173,17 @@ public class FormattingConversionServiceFactoryBean
 	}
 
 
+	@Override
 	public FormattingConversionService getObject() {
 		return this.conversionService;
 	}
 
+	@Override
 	public Class<? extends FormattingConversionService> getObjectType() {
 		return FormattingConversionService.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

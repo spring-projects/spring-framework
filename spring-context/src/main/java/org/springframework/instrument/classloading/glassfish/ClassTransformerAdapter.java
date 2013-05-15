@@ -42,6 +42,7 @@ class ClassTransformerAdapter implements ClassTransformer {
 		this.classFileTransformer = classFileTransformer;
 	}
 
+	@Override
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 

@@ -173,10 +173,12 @@ public class MockPortletRequest implements PortletRequest {
 	// PortletRequest methods
 	// ---------------------------------------------------------------------
 
+	@Override
 	public boolean isWindowStateAllowed(WindowState windowState) {
 		return CollectionUtils.contains(this.portalContext.getSupportedWindowStates(), windowState);
 	}
 
+	@Override
 	public boolean isPortletModeAllowed(PortletMode portletMode) {
 		return CollectionUtils.contains(this.portalContext.getSupportedPortletModes(), portletMode);
 	}
@@ -186,6 +188,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.portletMode = portletMode;
 	}
 
+	@Override
 	public PortletMode getPortletMode() {
 		return this.portletMode;
 	}
@@ -195,6 +198,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.windowState = windowState;
 	}
 
+	@Override
 	public WindowState getWindowState() {
 		return this.windowState;
 	}
@@ -204,6 +208,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.portletPreferences = preferences;
 	}
 
+	@Override
 	public PortletPreferences getPreferences() {
 		return this.portletPreferences;
 	}
@@ -216,10 +221,12 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
+	@Override
 	public PortletSession getPortletSession() {
 		return getPortletSession(true);
 	}
 
+	@Override
 	public PortletSession getPortletSession(boolean create) {
 		checkActive();
 		// Reset session if invalidated.
@@ -265,21 +272,25 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
+	@Override
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
 		List<String> list = this.properties.get(key);
 		return (list != null && list.size() > 0 ? list.get(0) : null);
 	}
 
+	@Override
 	public Enumeration<String> getProperties(String key) {
 		Assert.notNull(key, "property key must not be null");
 		return Collections.enumeration(this.properties.get(key));
 	}
 
+	@Override
 	public Enumeration<String> getPropertyNames() {
 		return Collections.enumeration(this.properties.keySet());
 	}
 
+	@Override
 	public PortalContext getPortalContext() {
 		return this.portalContext;
 	}
@@ -288,6 +299,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.authType = authType;
 	}
 
+	@Override
 	public String getAuthType() {
 		return this.authType;
 	}
@@ -296,6 +308,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.contextPath = contextPath;
 	}
 
+	@Override
 	public String getContextPath() {
 		return this.contextPath;
 	}
@@ -304,6 +317,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.remoteUser = remoteUser;
 	}
 
+	@Override
 	public String getRemoteUser() {
 		return this.remoteUser;
 	}
@@ -312,6 +326,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.userPrincipal = userPrincipal;
 	}
 
+	@Override
 	public Principal getUserPrincipal() {
 		return this.userPrincipal;
 	}
@@ -320,15 +335,18 @@ public class MockPortletRequest implements PortletRequest {
 		this.userRoles.add(role);
 	}
 
+	@Override
 	public boolean isUserInRole(String role) {
 		return this.userRoles.contains(role);
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		checkActive();
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
 		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
@@ -369,19 +387,23 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
+	@Override
 	public String getParameter(String name) {
 		String[] arr = this.parameters.get(name);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
+	@Override
 	public Enumeration<String> getParameterNames() {
 		return Collections.enumeration(this.parameters.keySet());
 	}
 
+	@Override
 	public String[] getParameterValues(String name) {
 		return this.parameters.get(name);
 	}
 
+	@Override
 	public Map<String, String[]> getParameterMap() {
 		return Collections.unmodifiableMap(this.parameters);
 	}
@@ -390,10 +412,12 @@ public class MockPortletRequest implements PortletRequest {
 		this.secure = secure;
 	}
 
+	@Override
 	public boolean isSecure() {
 		return this.secure;
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		checkActive();
 		if (value != null) {
@@ -404,11 +428,13 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		checkActive();
 		this.attributes.remove(name);
 	}
 
+	@Override
 	public String getRequestedSessionId() {
 		PortletSession session = this.getPortletSession();
 		return (session != null ? session.getId() : null);
@@ -418,6 +444,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.requestedSessionIdValid = requestedSessionIdValid;
 	}
 
+	@Override
 	public boolean isRequestedSessionIdValid() {
 		return this.requestedSessionIdValid;
 	}
@@ -430,10 +457,12 @@ public class MockPortletRequest implements PortletRequest {
 		this.responseContentTypes.add(0, responseContentType);
 	}
 
+	@Override
 	public String getResponseContentType() {
 		return this.responseContentTypes.get(0);
 	}
 
+	@Override
 	public Enumeration<String> getResponseContentTypes() {
 		return Collections.enumeration(this.responseContentTypes);
 	}
@@ -446,10 +475,12 @@ public class MockPortletRequest implements PortletRequest {
 		this.locales.add(0, locale);
 	}
 
+	@Override
 	public Locale getLocale() {
 		return this.locales.get(0);
 	}
 
+	@Override
 	public Enumeration<Locale> getLocales() {
 		return Collections.enumeration(this.locales);
 	}
@@ -458,6 +489,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.scheme = scheme;
 	}
 
+	@Override
 	public String getScheme() {
 		return this.scheme;
 	}
@@ -466,6 +498,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.serverName = serverName;
 	}
 
+	@Override
 	public String getServerName() {
 		return this.serverName;
 	}
@@ -474,6 +507,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.serverPort = serverPort;
 	}
 
+	@Override
 	public int getServerPort() {
 		return this.serverPort;
 	}
@@ -482,6 +516,7 @@ public class MockPortletRequest implements PortletRequest {
 		this.windowID = windowID;
 	}
 
+	@Override
 	public String getWindowID() {
 		return this.windowID;
 	}
@@ -490,10 +525,12 @@ public class MockPortletRequest implements PortletRequest {
 		this.cookies = cookies;
 	}
 
+	@Override
 	public Cookie[] getCookies() {
 		return this.cookies;
 	}
 
+	@Override
 	public Map<String, String[]> getPrivateParameterMap() {
 		if (!this.publicParameterNames.isEmpty()) {
 			Map<String, String[]> filtered = new LinkedHashMap<String, String[]>();
@@ -509,6 +546,7 @@ public class MockPortletRequest implements PortletRequest {
 		}
 	}
 
+	@Override
 	public Map<String, String[]> getPublicParameterMap() {
 		if (!this.publicParameterNames.isEmpty()) {
 			Map<String, String[]> filtered = new LinkedHashMap<String, String[]>();

@@ -63,20 +63,24 @@ public class SourceFilteringListener implements SmartApplicationListener {
 	}
 
 
+	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event.getSource() == this.source) {
 			onApplicationEventInternal(event);
 		}
 	}
 
+	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
 		return (this.delegate == null || this.delegate.supportsEventType(eventType));
 	}
 
+	@Override
 	public boolean supportsSourceType(Class<?> sourceType) {
 		return sourceType.isInstance(this.source);
 	}
 
+	@Override
 	public int getOrder() {
 		return (this.delegate != null ? this.delegate.getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}

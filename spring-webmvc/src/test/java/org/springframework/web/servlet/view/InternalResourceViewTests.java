@@ -17,9 +17,7 @@
 package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import junit.framework.TestCase;
@@ -55,7 +53,7 @@ public class InternalResourceViewTests extends TestCase {
 
 	public void testForward() throws Exception {
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		Object obj = new Integer(1);
+		Object obj = 1;
 		model.put("foo", "bar");
 		model.put("I", obj);
 
@@ -81,67 +79,14 @@ public class InternalResourceViewTests extends TestCase {
 		assertEquals(url, response.getForwardedUrl());
 
 		Set<String> keys = model.keySet();
-		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = it.next();
+		for (String key : keys) {
 			assertEquals(model.get(key), request.getAttribute(key));
 		}
-
-		assertEquals("/myservlet/handler.do", request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE));
-		assertEquals("/mycontext", request.getAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE));
-		assertEquals("/myservlet", request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
-		assertEquals(";mypathinfo", request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
-		assertEquals("?param1=value1", request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
-	}
-
-	public void testForwardWithForwardAttributesPresent() throws Exception {
-		HashMap<String, Object> model = new HashMap<String, Object>();
-		Object obj = new Integer(1);
-		model.put("foo", "bar");
-		model.put("I", obj);
-
-		String url = "forward-to";
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
-		request.setContextPath("/mycontext");
-		request.setServletPath("/myservlet");
-		request.setPathInfo(";mypathinfo");
-		request.setQueryString("?param1=value1");
-
-		request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/MYservlet/handler.do");
-		request.setAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE, "/MYcontext");
-		request.setAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE, "/MYservlet");
-		request.setAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE, ";MYpathinfo");
-		request.setAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE, "?Param1=value1");
-
-		InternalResourceView view = new InternalResourceView();
-		view.setUrl(url);
-		view.setServletContext(new MockServletContext() {
-			@Override
-			public int getMinorVersion() {
-				return 4;
-			}
-		});
-
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		view.render(model, request, response);
-		assertEquals(url, response.getForwardedUrl());
-
-		Set<String> keys = model.keySet();
-		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = it.next();
-			assertEquals(model.get(key), request.getAttribute(key));
-		}
-
-		assertEquals("/MYservlet/handler.do", request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE));
-		assertEquals("/MYcontext", request.getAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE));
-		assertEquals("/MYservlet", request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
-		assertEquals(";MYpathinfo", request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
-		assertEquals("?Param1=value1", request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
 	}
 
 	public void testAlwaysInclude() throws Exception {
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		Object obj = new Integer(1);
+		Object obj = 1;
 		model.put("foo", "bar");
 		model.put("I", obj);
 
@@ -161,15 +106,14 @@ public class InternalResourceViewTests extends TestCase {
 		assertEquals(url, response.getIncludedUrl());
 
 		Set<String> keys = model.keySet();
-		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = iter.next();
+		for (String key : keys) {
 			verify(request).setAttribute(key, model.get(key));
 		}
 	}
 
 	public void testIncludeOnAttribute() throws Exception {
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		Object obj = new Integer(1);
+		Object obj = 1;
 		model.put("foo", "bar");
 		model.put("I", obj);
 
@@ -190,15 +134,14 @@ public class InternalResourceViewTests extends TestCase {
 		assertEquals(url, response.getIncludedUrl());
 
 		Set<String> keys = model.keySet();
-		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = iter.next();
+		for (String key : keys) {
 			verify(request).setAttribute(key, model.get(key));
 		}
 	}
 
 	public void testIncludeOnCommitted() throws Exception {
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		Object obj = new Integer(1);
+		Object obj = 1;
 		model.put("foo", "bar");
 		model.put("I", obj);
 
@@ -220,8 +163,7 @@ public class InternalResourceViewTests extends TestCase {
 		assertEquals(url, response.getIncludedUrl());
 
 		Set<String> keys = model.keySet();
-		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = iter.next();
+		for (String key : keys) {
 			verify(request).setAttribute(key, model.get(key));
 		}
 	}

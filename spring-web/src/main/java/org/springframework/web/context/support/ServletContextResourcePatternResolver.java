@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 			ServletContext servletContext, String fullPattern, String dir, Set<Resource> result)
 			throws IOException {
 
-		Set candidates = servletContext.getResourcePaths(dir);
+		Set<String> candidates = servletContext.getResourcePaths(dir);
 		if (candidates != null) {
 			boolean dirDepthNotFixed = fullPattern.contains("**");
 			int jarFileSep = fullPattern.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
@@ -119,8 +119,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 				jarFilePath = fullPattern.substring(0, jarFileSep);
 				pathInJarFile = fullPattern.substring(jarFileSep + ResourceUtils.JAR_URL_SEPARATOR.length());
 			}
-			for (Object candidate : candidates) {
-				String currPath = (String) candidate;
+			for (String currPath : candidates) {
 				if (!currPath.startsWith(dir)) {
 					// Returned resource path does not start with relative directory:
 					// assuming absolute path returned -> strip absolute path.
@@ -150,11 +149,10 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	}
 
 	/**
-	 * Method extracts entries from the given jar by pattern.
+	 * Extract entries from the given jar by pattern.
 	 * @param jarFilePath the path to the jar file
 	 * @param entryPattern the pattern for jar entries to match
 	 * @param result the Set of matching Resources to add to
-	 * @throws IOException if jar contents could not be retrieved
 	 */
 	private void doRetrieveMatchingJarEntries(String jarFilePath, String entryPattern, Set<Resource> result) {
 		if (logger.isDebugEnabled()) {
@@ -166,9 +164,9 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 				JarEntry entry = entries.nextElement();
 				String entryPath = entry.getName();
 				if (getPathMatcher().match(entryPattern, entryPath)) {
-					result.add(new UrlResource(ResourceUtils.URL_PROTOCOL_JAR + ":" +
-							ResourceUtils.URL_PROTOCOL_FILE + ":" + jarFilePath +
-							ResourceUtils.JAR_URL_SEPARATOR + entryPath));
+					result.add(new UrlResource(
+							ResourceUtils.URL_PROTOCOL_JAR,
+							ResourceUtils.FILE_URL_PREFIX + jarFilePath + ResourceUtils.JAR_URL_SEPARATOR + entryPath));
 				}
 			}
 		}

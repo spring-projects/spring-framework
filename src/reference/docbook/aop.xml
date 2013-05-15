@@ -3590,13 +3590,6 @@ http://www.springframework.org/schema/context
               </row>
 
               <row>
-                <entry><para>Running in <link
-                xl:href="http://www.oracle.com/technology/products/oc4j/index.html">Oracle's
-                OC4J</link></para></entry>
-                <entry><para><classname>OC4JLoadTimeWeaver</classname></para></entry>
-              </row>
-
-              <row>
                 <entry><para>Running in <link xl:href="http://glassfish.dev.java.net/">GlassFish</link></para></entry>
                 <entry><para><classname>GlassFishLoadTimeWeaver</classname></para></entry>
               </row>
@@ -3854,10 +3847,11 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
         </section>
 
         <section xml:id="aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss">
-          <title>WebLogic, WebSphere, OC4J, Resin, GlassFish, JBoss</title>
+          <title>WebLogic, WebSphere, Resin, GlassFish, JBoss</title>
 
-          <para>Recent versions of BEA WebLogic (version 10 and above), IBM WebSphere Application Server (version 7 and above),
-          Oracle Containers for Java EE (OC4J 10.1.3.1 and above), Resin (3.1 and above) and JBoss (5.x or above)
+          <para>Recent versions of WebLogic Server (version 10 and above),
+          IBM WebSphere Application Server (version 7 and above),
+          Resin (3.1 and above) and JBoss (5.x or above)
           provide a ClassLoader that is capable of local instrumentation.
           Spring's native LTW leverages such ClassLoaders to enable AspectJ weaving.
           You can enable LTW by simply activating load-time weaving

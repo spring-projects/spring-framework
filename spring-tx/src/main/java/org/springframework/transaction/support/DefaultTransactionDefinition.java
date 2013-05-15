@@ -134,6 +134,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.propagationBehavior = propagationBehavior;
 	}
 
+	@Override
 	public final int getPropagationBehavior() {
 		return this.propagationBehavior;
 	}
@@ -168,6 +169,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.isolationLevel = isolationLevel;
 	}
 
+	@Override
 	public final int getIsolationLevel() {
 		return this.isolationLevel;
 	}
@@ -184,6 +186,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.timeout = timeout;
 	}
 
+	@Override
 	public final int getTimeout() {
 		return this.timeout;
 	}
@@ -196,6 +199,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.readOnly = readOnly;
 	}
 
+	@Override
 	public final boolean isReadOnly() {
 		return this.readOnly;
 	}
@@ -209,6 +213,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 		this.name = name;
 	}
 
+	@Override
 	public final String getName() {
 		return this.name;
 	}

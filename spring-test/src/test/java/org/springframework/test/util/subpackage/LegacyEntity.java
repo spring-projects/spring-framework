@@ -29,6 +29,7 @@ public class LegacyEntity {
 
 	private Object collaborator = new Object() {
 
+		@Override
 		public String toString() {
 			throw new RuntimeException(
 				"Invoking toString() on the default collaborator causes an undesirable side effect");
@@ -36,6 +37,7 @@ public class LegacyEntity {
 	};
 
 
+	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
 		.append("collaborator", this.collaborator)//

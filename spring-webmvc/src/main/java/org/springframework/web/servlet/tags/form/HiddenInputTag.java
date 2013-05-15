@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,22 +40,24 @@ public class HiddenInputTag extends AbstractHtmlElementTag {
 	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
-	private String disabled;
+	private boolean disabled;
 
-	/**
-	 * Get the value of the '{@code disabled}' attribute.
-	 */
-	public String getDisabled() {
-		return this.disabled;
-	}
 
 	/**
 	 * Set the value of the '{@code disabled}' attribute.
 	 * May be a runtime expression.
 	 */
-	public void setDisabled(String disabled) {
+	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
+
+	/**
+	 * Get the value of the '{@code disabled}' attribute.
+	 */
+	public boolean isDisabled() {
+		return this.disabled;
+	}
+
 
 	/**
 	 * Flags "type" as an illegal dynamic attribute.
@@ -83,13 +85,6 @@ public class HiddenInputTag extends AbstractHtmlElementTag {
 		tagWriter.writeAttribute("value", processFieldValue(getName(), value, "hidden"));
 		tagWriter.endTag();
 		return SKIP_BODY;
-	}
-
-	/**
-	 * Is the current HTML tag disabled?
-	 */
-	protected boolean isDisabled() throws JspException {
-		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
 	}
 
 }

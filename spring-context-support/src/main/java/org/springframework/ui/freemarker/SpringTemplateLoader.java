@@ -63,6 +63,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		}
 	}
 
+	@Override
 	public Object findTemplateSource(String name) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for FreeMarker template with name [" + name + "]");
@@ -71,6 +72,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		return (resource.exists() ? resource : null);
 	}
 
+	@Override
 	public Reader getReader(Object templateSource, String encoding) throws IOException {
 		Resource resource = (Resource) templateSource;
 		try {
@@ -85,6 +87,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 	}
 
 
+	@Override
 	public long getLastModified(Object templateSource) {
 		Resource resource = (Resource) templateSource;
 		try {
@@ -99,6 +102,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		}
 	}
 
+	@Override
 	public void closeTemplateSource(Object templateSource) throws IOException {
 	}
 

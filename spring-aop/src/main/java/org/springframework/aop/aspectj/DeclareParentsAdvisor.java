@@ -77,6 +77,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 		// Excludes methods implemented.
 		ClassFilter exclusion = new ClassFilter() {
+			@Override
 			public boolean matches(Class clazz) {
 				return !(introducedInterface.isAssignableFrom(clazz));
 			}
@@ -87,22 +88,27 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	}
 
 
+	@Override
 	public ClassFilter getClassFilter() {
 		return this.typePatternClassFilter;
 	}
 
+	@Override
 	public void validateInterfaces() throws IllegalArgumentException {
 		// Do nothing
 	}
 
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}
 
+	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
+	@Override
 	public Class[] getInterfaces() {
 		return new Class[] {this.introducedInterface};
 	}

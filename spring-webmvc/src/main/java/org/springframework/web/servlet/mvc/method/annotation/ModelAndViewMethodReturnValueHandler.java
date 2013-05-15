@@ -42,10 +42,12 @@ import org.springframework.web.servlet.View;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return ModelAndView.class.isAssignableFrom(returnType.getParameterType());
 	}
 
+	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,18 +34,6 @@ public class CannotGetJdbcConnectionException extends DataAccessResourceFailureE
 	 * @param ex SQLException root cause
 	 */
 	public CannotGetJdbcConnectionException(String msg, SQLException ex) {
-		super(msg, ex);
-	}
-
-	/**
-	 * Constructor for CannotGetJdbcConnectionException.
-	 * @param msg the detail message
-	 * @param ex ClassNotFoundException root cause
-	 * @deprecated since Spring 2.5, in favor of throwing an
-	 * IllegalStateException in case of the driver not being found
-	 */
-	@Deprecated
-	public CannotGetJdbcConnectionException(String msg, ClassNotFoundException ex) {
 		super(msg, ex);
 	}
 

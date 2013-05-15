@@ -158,19 +158,4 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		deleteFromTables(new String[] { "person" });
 	}
 
-	/*
-	 * TODO: This displays incorrect behavior in TopLink because of its EJBQLException -
-	 * which is not a subclass of PersistenceException but rather of TopLinkException!
-	public void testEntityManagerProxyException() {
-		EntityManager em = entityManagerFactory.createEntityManager();
-		try {
-			em.createQuery("select p from Person p where p.o=0").getResultList();
-			fail("Semantic nonsense should be rejected");
-		}
-		catch (PersistenceException ex) {
-			// expected
-		}
-	}
-	*/
-
 }

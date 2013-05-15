@@ -39,18 +39,17 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
+ * using <a href="http://jackson.codehaus.org/">Jackson 2.x's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
- * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
- * alone via  {@link #setExtractValueFromSingleKeyModel}.
+ * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as
+ * JSON alone via {@link #setExtractValueFromSingleKeyModel}.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1.2
- * @see org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
  */
 public class MappingJackson2JsonView extends AbstractView {
 
@@ -138,7 +137,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	/**
 	 * Whether to use the default pretty printer when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre>
+	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	 * </pre>
@@ -278,6 +277,9 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeContent(OutputStream stream, Object value, boolean prefixJson) throws IOException {
+		// The following has been deprecated as late as Jackson 2.2 (April 2013);
+		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
+		@SuppressWarnings("deprecation")
 		JsonGenerator generator = this.objectMapper.getJsonFactory().createJsonGenerator(stream, this.encoding);
 
 		// A workaround for JsonGenerators not applying serialization features

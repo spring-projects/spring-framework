@@ -31,7 +31,7 @@ import org.springframework.util.CollectionUtils;
  * interface to map from the current PortletMode to request handler beans.
  *
  * <p>The bean configuration for this mapping will look something like this:
- * <pre>
+ * <pre class="code">
  * 	&lt;bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping"&gt;
  * 		&lt;property name="portletModeMap"&gt;
  * 			&lt;map&gt;

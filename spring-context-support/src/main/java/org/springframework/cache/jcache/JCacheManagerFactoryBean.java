@@ -53,10 +53,12 @@ public class JCacheManagerFactoryBean
 		this.cacheManagerName = cacheManagerName;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		this.cacheManager = (this.beanClassLoader != null ?
 				Caching.getCacheManager(this.beanClassLoader, this.cacheManagerName) :
@@ -64,19 +66,23 @@ public class JCacheManagerFactoryBean
 	}
 
 
+	@Override
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.cacheManager != null ? this.cacheManager.getClass() : CacheManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() {
 		this.cacheManager.shutdown();
 	}

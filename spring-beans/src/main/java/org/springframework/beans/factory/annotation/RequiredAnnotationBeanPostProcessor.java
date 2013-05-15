@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
@@ -90,9 +91,9 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 	/**
 	 * Cache for validated bean names, skipping re-validation for the same bean
-	 * (using a ConcurrentHashMap as a Set)
 	 */
-	private final Map<String, Boolean> validatedBeanNames = new ConcurrentHashMap<String, Boolean>(64);
+	private final Set<String> validatedBeanNames =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(64));
 
 
 	/**
@@ -116,6 +117,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		return this.requiredAnnotationType;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
 			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
@@ -126,11 +128,13 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
 
+	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 	}
 
@@ -139,7 +143,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
 			throws BeansException {
 
-		if (!this.validatedBeanNames.containsKey(beanName)) {
+		if (!this.validatedBeanNames.contains(beanName)) {
 			if (!shouldSkip(this.beanFactory, beanName)) {
 				List<String> invalidProperties = new ArrayList<String>();
 				for (PropertyDescriptor pd : pds) {
@@ -151,7 +155,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 					throw new BeanInitializationException(buildExceptionMessage(invalidProperties, beanName));
 				}
 			}
-			this.validatedBeanNames.put(beanName, Boolean.TRUE);
+			this.validatedBeanNames.add(beanName);
 		}
 		return pvs;
 	}

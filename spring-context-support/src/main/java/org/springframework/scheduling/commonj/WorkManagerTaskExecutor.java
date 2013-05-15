@@ -109,6 +109,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		this.workListener = workListener;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		if (this.workManager == null) {
 			if (this.workManagerName == null) {
@@ -123,6 +124,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	// Implementation of the Spring SchedulingTaskExecutor interface
 	//-------------------------------------------------------------------------
 
+	@Override
 	public void execute(Runnable task) {
 		Assert.state(this.workManager != null, "No WorkManager specified");
 		Work work = new DelegatingWork(task);
@@ -142,16 +144,19 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -161,6 +166,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -170,24 +176,28 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	// Implementation of the CommonJ WorkManager interface
 	//-------------------------------------------------------------------------
 
+	@Override
 	public WorkItem schedule(Work work)
 			throws WorkException, IllegalArgumentException {
 
 		return this.workManager.schedule(work);
 	}
 
+	@Override
 	public WorkItem schedule(Work work, WorkListener workListener)
 			throws WorkException, IllegalArgumentException {
 
 		return this.workManager.schedule(work, workListener);
 	}
 
+	@Override
 	public boolean waitForAll(Collection workItems, long timeout)
 			throws InterruptedException, IllegalArgumentException {
 
 		return this.workManager.waitForAll(workItems, timeout);
 	}
 
+	@Override
 	public Collection waitForAny(Collection workItems, long timeout)
 			throws InterruptedException, IllegalArgumentException {
 

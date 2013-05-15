@@ -18,6 +18,7 @@ package org.springframework.jms.support.converter;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class MappingJacksonMessageConverterTests {
 
 	private Session sessionMock;
 
+
 	@Before
 	public void setUp() throws Exception {
 		sessionMock = mock(Session.class);
@@ -51,22 +53,22 @@ public class MappingJacksonMessageConverterTests {
 		converter.setTypeIdPropertyName("__typeid__");
 	}
 
+
 	@Test
 	public void toBytesMessage() throws Exception {
 		BytesMessage bytesMessageMock = mock(BytesMessage.class);
-		Object toBeMarshalled = new Object();
+		Date toBeMarshalled = new Date();
 
 		given(sessionMock.createBytesMessage()).willReturn(bytesMessageMock);
 
 		converter.toMessage(toBeMarshalled, sessionMock);
 
 		verify(bytesMessageMock).setStringProperty("__encoding__", "UTF-8");
-		verify(bytesMessageMock).setStringProperty("__typeid__", Object.class.getName());
+		verify(bytesMessageMock).setStringProperty("__typeid__", Date.class.getName());
 		verify(bytesMessageMock).writeBytes(isA(byte[].class));
 	}
 
 	@Test
-	@SuppressWarnings("serial")
 	public void fromBytesMessage() throws Exception {
 		BytesMessage bytesMessageMock = mock(BytesMessage.class);
 		Map<String, String> unmarshalled = Collections.singletonMap("foo", "bar");
@@ -74,13 +76,11 @@ public class MappingJacksonMessageConverterTests {
 		byte[] bytes = "{\"foo\":\"bar\"}".getBytes();
 		final ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
 
-		given(bytesMessageMock.getStringProperty("__typeid__")).willReturn(
-				Object.class.getName());
+		given(bytesMessageMock.getStringProperty("__typeid__")).willReturn(Object.class.getName());
 		given(bytesMessageMock.propertyExists("__encoding__")).willReturn(false);
 		given(bytesMessageMock.getBodyLength()).willReturn(new Long(bytes.length));
 		given(bytesMessageMock.readBytes(any(byte[].class))).willAnswer(
 				new Answer<Integer>() {
-
 					@Override
 					public Integer answer(InvocationOnMock invocation) throws Throwable {
 						return byteStream.read((byte[]) invocation.getArguments()[0]);
@@ -95,13 +95,12 @@ public class MappingJacksonMessageConverterTests {
 	public void toTextMessageWithObject() throws Exception {
 		converter.setTargetType(MessageType.TEXT);
 		TextMessage textMessageMock = mock(TextMessage.class);
-		Object toBeMarshalled = new Object();
+		Date toBeMarshalled = new Date();
 
-		given(sessionMock.createTextMessage(isA(String.class))).willReturn(
-				textMessageMock);
+		given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
 
 		converter.toMessage(toBeMarshalled, sessionMock);
-		verify(textMessageMock).setStringProperty("__typeid__", Object.class.getName());
+		verify(textMessageMock).setStringProperty("__typeid__", Date.class.getName());
 	}
 
 	@Test
@@ -110,11 +109,10 @@ public class MappingJacksonMessageConverterTests {
 		TextMessage textMessageMock = mock(TextMessage.class);
 		Map<String, String> toBeMarshalled = new HashMap<String, String>();
 		toBeMarshalled.put("foo", "bar");
-		given(sessionMock.createTextMessage(isA(String.class))).willReturn(
-				textMessageMock);
+
+		given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
 
 		converter.toMessage(toBeMarshalled, sessionMock);
-
 		verify(textMessageMock).setStringProperty("__typeid__", HashMap.class.getName());
 	}
 
@@ -124,8 +122,7 @@ public class MappingJacksonMessageConverterTests {
 		Map<String, String> unmarshalled = Collections.singletonMap("foo", "bar");
 
 		String text = "{\"foo\":\"bar\"}";
-		given(textMessageMock.getStringProperty("__typeid__")).willReturn(
-				Object.class.getName());
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(Object.class.getName());
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
@@ -138,11 +135,11 @@ public class MappingJacksonMessageConverterTests {
 		Map<String, String> unmarshalled = Collections.singletonMap("foo", "bar");
 
 		String text = "{\"foo\":\"bar\"}";
-		given(textMessageMock.getStringProperty("__typeid__")).willReturn(
-				HashMap.class.getName());
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(HashMap.class.getName());
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
 		assertEquals("Invalid result", result, unmarshalled);
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,18 +325,19 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		while (matcher.find()) {
 			String match = matcher.group();
 			if (PLACEHOLDER_METHOD_NAME.equals(match)) {
-				matcher.appendReplacement(output, escape(methodInvocation.getMethod().getName()));
+				matcher.appendReplacement(output, Matcher.quoteReplacement(methodInvocation.getMethod().getName()));
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_NAME.equals(match)) {
 				String className = getClassForLogging(methodInvocation.getThis()).getName();
-				matcher.appendReplacement(output, escape(className));
+				matcher.appendReplacement(output, Matcher.quoteReplacement(className));
 			}
 			else if (PLACEHOLDER_TARGET_CLASS_SHORT_NAME.equals(match)) {
 				String shortName = ClassUtils.getShortName(getClassForLogging(methodInvocation.getThis()));
-				matcher.appendReplacement(output, escape(shortName));
+				matcher.appendReplacement(output, Matcher.quoteReplacement(shortName));
 			}
 			else if (PLACEHOLDER_ARGUMENTS.equals(match)) {
-				matcher.appendReplacement(output, escape(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));
+				matcher.appendReplacement(output,
+						Matcher.quoteReplacement(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));
 			}
 			else if (PLACEHOLDER_ARGUMENT_TYPES.equals(match)) {
 				appendArgumentTypes(methodInvocation, matcher, output);
@@ -345,7 +346,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				appendReturnValue(methodInvocation, matcher, output, returnValue);
 			}
 			else if (throwable != null && PLACEHOLDER_EXCEPTION.equals(match)) {
-				matcher.appendReplacement(output, escape(throwable.toString()));
+				matcher.appendReplacement(output, Matcher.quoteReplacement(throwable.toString()));
 			}
 			else if (PLACEHOLDER_INVOCATION_TIME.equals(match)) {
 				matcher.appendReplacement(output, Long.toString(invocationTime));
@@ -379,7 +380,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 			matcher.appendReplacement(output, "null");
 		}
 		else {
-			matcher.appendReplacement(output, escape(returnValue.toString()));
+			matcher.appendReplacement(output, Matcher.quoteReplacement(returnValue.toString()));
 		}
 	}
 
@@ -399,7 +400,8 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		for (int i = 0; i < argumentTypeShortNames.length; i++) {
 			argumentTypeShortNames[i] = ClassUtils.getShortName(argumentTypes[i]);
 		}
-		matcher.appendReplacement(output, escape(StringUtils.arrayToCommaDelimitedString(argumentTypeShortNames)));
+		matcher.appendReplacement(output,
+				Matcher.quoteReplacement(StringUtils.arrayToCommaDelimitedString(argumentTypeShortNames)));
 	}
 
 	/**
@@ -415,29 +417,6 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 				throw new IllegalArgumentException("Placeholder [" + match + "] is not valid");
 			}
 		}
-	}
-
-	/**
-	 * Replaces {@code $} in inner class names with {@code \$}.
-	 * <p>This code is equivalent to JDK 1.5's {@code quoteReplacement}
-	 * method in the Matcher class itself. We're keeping our own version
-	 * here for JDK 1.4 compliance reasons only.
-	 */
-	private String escape(String input) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			char c = input.charAt(i);
-			if (c == '\\') {
-				sb.append("\\\\");
-			}
-			else if (c == '$') {
-				sb.append("\\$");
-			}
-			else {
-				sb.append(c);
-			}
-		}
-		return sb.toString();
 	}
 
 }

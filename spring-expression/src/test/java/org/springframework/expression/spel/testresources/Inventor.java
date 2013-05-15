@@ -3,6 +3,7 @@ package org.springframework.expression.spel.testresources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,8 @@ public class Inventor {
 	private boolean accessedThroughGetSet;
 	public List<Integer> listOfInteger = new ArrayList<Integer>();
 	public List<Boolean> booleanList = new ArrayList<Boolean>();
-	public Map<String,Boolean> mapOfStringToBoolean = new HashMap<String,Boolean>();
-	public Map<Integer,String> mapOfNumbersUpToTen = new HashMap<Integer,String>();
+	public Map<String,Boolean> mapOfStringToBoolean = new LinkedHashMap<String,Boolean>();
+	public Map<Integer,String> mapOfNumbersUpToTen = new LinkedHashMap<Integer,String>();
 	public List<Integer> listOfNumbersUpToTen = new ArrayList<Integer>();
 	public List<Integer> listOneFive = new ArrayList<Integer>();
 	public String[] stringArrayOfThreeItems = new String[]{"1","2","3"};

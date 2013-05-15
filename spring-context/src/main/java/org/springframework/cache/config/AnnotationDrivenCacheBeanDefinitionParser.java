@@ -53,6 +53,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary
 	 * register an AutoProxyCreator} with the container as necessary.
 	 */
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {
@@ -74,15 +75,12 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 	/**
 	 * Registers a
-	 * <pre>
+	 * <pre class="code">
 	 * <bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
 	 *   <property name="cacheManager" ref="cacheManager"/>
 	 *   <property name="keyGenerator" ref="keyGenerator"/>
 	 * </bean>
-	 *
 	 * </pre>
-	 * @param element
-	 * @param parserContext
 	 */
 	private void registerCacheAspect(Element element, ParserContext parserContext) {
 		if (!parserContext.getRegistry().containsBeanDefinition(CACHE_ASPECT_BEAN_NAME)) {

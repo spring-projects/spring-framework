@@ -49,11 +49,13 @@ public abstract class MockMvcResultHandlers {
 		public ConsolePrintingResultHandler() {
 			super(new ResultValuePrinter() {
 
+				@Override
 				public void printHeading(String heading) {
 					System.out.println();
 					System.out.println(String.format("%20s:", heading));
 				}
 
+				@Override
 				public void printValue(String label, Object value) {
 					if (value != null && value.getClass().isArray()) {
 						value = CollectionUtils.arrayToList(value);

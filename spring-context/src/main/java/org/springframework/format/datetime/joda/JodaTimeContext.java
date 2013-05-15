@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 
 /**
- * A context that holds user-specific Joda Time settings such as the user's Chronology (calendar system) and time zone.
- * A {@code null} property value indicate the user has not specified a setting.
+ * A context that holds user-specific Joda-Time settings such as the user's
+ * Chronology (calendar system) and time zone.
+ *
+ * <p>A {@code null} property value indicate the user has not specified a setting.
  *
  * @author Keith Donald
  * @since 3.0
@@ -43,8 +45,7 @@ public class JodaTimeContext {
 	}
 
 	/**
-	 * The user's chronology (calendar system).
-	 * Null if not specified.
+	 * The user's chronology (calendar system), if any.
 	 */
 	public Chronology getChronology() {
 		return this.chronology;
@@ -58,8 +59,7 @@ public class JodaTimeContext {
 	}
 
 	/**
-	 * The user's timezone.
-	 * Null if not specified.
+	 * The user's timezone, if any.
 	 */
 	public DateTimeZone getTimeZone() {
 		return timeZone;
@@ -67,9 +67,11 @@ public class JodaTimeContext {
 
 
 	/**
-	 * Gets the Formatter with the this context's settings applied to the base {@code formatter}.
-	 * @param formatter the base formatter that establishes default formatting rules, generally context independent
-	 * @return the context DateTimeFormatter
+	 * Get the DateTimeFormatter with the this context's settings
+	 * applied to the base {@code formatter}.
+	 * @param formatter the base formatter that establishes default
+	 * formatting rules, generally context-independent
+	 * @return the contextual DateTimeFormatter
 	 */
 	public DateTimeFormatter getFormatter(DateTimeFormatter formatter) {
 		if (this.chronology != null) {

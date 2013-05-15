@@ -85,6 +85,7 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	 * @throws IllegalArgumentException if the supplied {@code notification} is {@code null}
 	 * @throws UnableToSendNotificationException if the supplied {@code notification} could not be sent
 	 */
+	@Override
 	public void sendNotification(Notification notification) {
 		Assert.notNull(notification, "Notification must not be null");
 		replaceNotificationSourceIfNecessary(notification);

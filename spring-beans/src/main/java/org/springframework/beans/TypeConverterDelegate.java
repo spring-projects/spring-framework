@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,11 +354,6 @@ class TypeConverterDelegate {
 	 */
 	private Object doConvertValue(Object oldValue, Object newValue, Class<?> requiredType, PropertyEditor editor) {
 		Object convertedValue = newValue;
-		boolean sharedEditor = false;
-
-		if (editor != null) {
-			sharedEditor = this.propertyEditorRegistry.isSharedEditor(editor);
-		}
 
 		if (editor != null && !(convertedValue instanceof String)) {
 			// Not a String -> use PropertyEditor's setValue.
@@ -366,19 +361,8 @@ class TypeConverterDelegate {
 			// we just want to allow special PropertyEditors to override setValue
 			// for type conversion from non-String values to the required type.
 			try {
-				Object newConvertedValue;
-				if (sharedEditor) {
-					// Synchronized access to shared editor instance.
-					synchronized (editor) {
-						editor.setValue(convertedValue);
-						newConvertedValue = editor.getValue();
-					}
-				}
-				else {
-					// Unsynchronized access to non-shared editor instance.
-					editor.setValue(convertedValue);
-					newConvertedValue = editor.getValue();
-				}
+				editor.setValue(convertedValue);
+				Object newConvertedValue = editor.getValue();
 				if (newConvertedValue != convertedValue) {
 					convertedValue = newConvertedValue;
 					// Reset PropertyEditor: It already did a proper conversion.
@@ -413,16 +397,7 @@ class TypeConverterDelegate {
 					logger.trace("Converting String to [" + requiredType + "] using property editor [" + editor + "]");
 				}
 				String newTextValue = (String) convertedValue;
-				if (sharedEditor) {
-					// Synchronized access to shared editor instance.
-					synchronized (editor) {
-						return doConvertTextValue(oldValue, newTextValue, editor);
-					}
-				}
-				else {
-					// Unsynchronized access to non-shared editor instance.
-					return doConvertTextValue(oldValue, newTextValue, editor);
-				}
+				return doConvertTextValue(oldValue, newTextValue, editor);
 			}
 			else if (String.class.equals(requiredType)) {
 				returnValue = convertedValue;

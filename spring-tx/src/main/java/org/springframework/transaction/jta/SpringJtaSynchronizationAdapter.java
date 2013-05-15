@@ -113,6 +113,7 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	 * <p>In case of an exception, the JTA transaction will be marked as rollback-only.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit
 	 */
+	@Override
 	public void beforeCompletion() {
 		try {
 			boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
@@ -168,6 +169,7 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCompletion
 	 * @see org.springframework.transaction.support.TransactionSynchronization#afterCompletion
 	 */
+	@Override
 	public void afterCompletion(int status) {
 		if (!this.beforeCompletionCalled) {
 			// beforeCompletion not called before (probably because of JTA rollback).

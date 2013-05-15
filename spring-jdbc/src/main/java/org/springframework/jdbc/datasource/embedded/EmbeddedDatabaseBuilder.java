@@ -24,7 +24,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * A builder that provides a convenient API for constructing an embedded database.
  *
  * <p>Usage example:
- * <pre>
+ * <pre class="code">
  * EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
  * EmbeddedDatabase db = builder.setType(H2).addScript("schema.sql").addScript("data.sql").build();
  * db.shutdown();

@@ -205,6 +205,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
@@ -213,6 +214,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return this.applicationContext;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();

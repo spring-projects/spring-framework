@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		this.timeoutPerShutdownPhase = timeoutPerShutdownPhase;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, beanFactory);
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
@@ -85,6 +86,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * declared as a dependency of another bean will be started before
 	 * the dependent bean regardless of the declared phase.
 	 */
+	@Override
 	public void start() {
 		startBeans(false);
 		this.running = true;
@@ -99,21 +101,25 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * declared as dependent on another bean will be stopped before
 	 * the dependency bean regardless of the declared phase.
 	 */
+	@Override
 	public void stop() {
 		stopBeans();
 		this.running = false;
 	}
 
+	@Override
 	public void onRefresh() {
 		startBeans(true);
 		this.running = true;
 	}
 
+	@Override
 	public void onClose() {
 		stopBeans();
 		this.running = false;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
@@ -221,6 +227,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 						}
 						countDownBeanNames.add(beanName);
 						((SmartLifecycle) bean).stop(new Runnable() {
+							@Override
 							public void run() {
 								latch.countDown();
 								countDownBeanNames.remove(beanName);
@@ -302,15 +309,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final List<LifecycleGroupMember> members = new ArrayList<LifecycleGroupMember>();
 
-		private Map<String, ? extends Lifecycle> lifecycleBeans = getLifecycleBeans();
-
-		private volatile int smartMemberCount;
-
 		private final int phase;
 
 		private final long timeout;
 
+		private final Map<String, ? extends Lifecycle> lifecycleBeans;
+
 		private final boolean autoStartupOnly;
+
+		private volatile int smartMemberCount;
 
 		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
 			this.phase = phase;
@@ -389,6 +396,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			this.bean = bean;
 		}
 
+		@Override
 		public int compareTo(LifecycleGroupMember other) {
 			int thisOrder = getPhase(this.bean);
 			int otherOrder = getPhase(other.bean);

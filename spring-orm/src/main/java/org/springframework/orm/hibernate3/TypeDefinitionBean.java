@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
  * definition, as list element for the "typeDefinitions" bean property.
  * For example:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
  *   ...
  *   &lt;property name="typeDefinitions"&gt;
@@ -111,12 +111,14 @@ public class TypeDefinitionBean implements BeanNameAware, InitializingBean {
 	 * the TypeDefinitionBean will be used.
 	 * @see #setTypeName
 	 */
+	@Override
 	public void setBeanName(String name) {
 		if (this.typeName == null) {
 			this.typeName = name;
 		}
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.typeName == null) {
 			throw new IllegalArgumentException("typeName is required");

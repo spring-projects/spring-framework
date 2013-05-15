@@ -46,6 +46,7 @@ public class NopInterceptor implements MethodInterceptor {
 		++count;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof NopInterceptor)) {
 			return false;

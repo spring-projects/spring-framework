@@ -37,7 +37,7 @@ import org.springframework.web.context.ServletContextAware;
  * The simplest way to use this class is to specify just a "templateLoaderPath";
  * you do not need any further configuration then.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
  *   &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value>&lt;/property&gt;
  * &lt;/bean&gt;</pre>
@@ -58,7 +58,7 @@ import org.springframework.web.context.ServletContextAware;
  * reference the "spring.ftl" macro library (contained in this package and thus
  * in spring.jar) like this:
  *
- * <pre>
+ * <pre class="code">
  * &lt;#import "/spring.ftl" as spring/&gt;
  * &lt;@spring.bind "person.age"/&gt;
  * age is ${spring.status.value}</pre>
@@ -97,6 +97,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Initialize the {@link TaglibFactory} for the given ServletContext.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.taglibFactory = new TaglibFactory(servletContext);
 	}
@@ -109,6 +110,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 * @see #createConfiguration
 	 * @see #setConfiguration
 	 */
+	@Override
 	public void afterPropertiesSet() throws IOException, TemplateException {
 		if (this.configuration == null) {
 			this.configuration = createConfiguration();
@@ -129,6 +131,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Return the Configuration object wrapped by this bean.
 	 */
+	@Override
 	public Configuration getConfiguration() {
 		return this.configuration;
 	}
@@ -136,6 +139,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Return the TaglibFactory object wrapped by this bean.
 	 */
+	@Override
 	public TaglibFactory getTaglibFactory() {
 		return this.taglibFactory;
 	}

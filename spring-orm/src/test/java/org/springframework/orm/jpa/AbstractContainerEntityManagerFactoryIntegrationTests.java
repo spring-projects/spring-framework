@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@ExpectedException(EntityNotFoundException.class)
 	public void testGetReferenceWhenNoRow() {
-		// Fails here with TopLink
 		Person notThere = sharedEntityManager.getReference(Person.class, 666);
 
 		// We may get here (as with Hibernate).
@@ -152,15 +151,6 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		try {
 			sharedEntityManager.getTransaction();
 			fail("Should not be able to create transactions on container managed EntityManager");
-		}
-		catch (IllegalStateException ex) {
-		}
-	}
-
-	public void testSharedEntityManagerProxyRejectsProgrammaticTxJoining() {
-		try {
-			sharedEntityManager.joinTransaction();
-			fail("Should not be able to join transactions with container managed EntityManager");
 		}
 		catch (IllegalStateException ex) {
 		}

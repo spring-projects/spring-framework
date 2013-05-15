@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.persistence.PersistenceException;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.ejb.HibernateEntityManager;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -35,13 +34,12 @@ import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed against Hibernate 3.3;
- * tested against 3.3, 3.5, 3.6 and 4.0 (with the latter including
- * Hibernate EntityManager in the Hibernate core distribution).
+ * Hibernate EntityManager. Developed against Hibernate 3.6 and 4.2.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -108,19 +106,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	protected Session getSession(EntityManager em) {
-		if (em instanceof HibernateEntityManager) {
-			return ((HibernateEntityManager) em).getSession();
-		}
-		else {
-			Object delegate = em.getDelegate();
-			if (delegate instanceof Session) {
-				return (Session) delegate;
-			}
-			else {
-				throw new IllegalStateException(
-						"Cannot obtain native Hibernate Session from given JPA EntityManager: " + em.getClass());
-			}
-		}
+		return em.unwrap(Session.class);
 	}
 
 
@@ -147,27 +133,40 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final Session session;
 
-		private static volatile Method connectionMethod;
+		// This will find a corresponding method on Hibernate 3.x but not on 4.x
+		private static final Method sessionConnectionMethod =
+				ClassUtils.getMethodIfAvailable(Session.class, "connection");
+
+		private static volatile Method connectionMethodToUse = sessionConnectionMethod;
 
 		public HibernateConnectionHandle(Session session) {
 			this.session = session;
 		}
 
+		@Override
 		public Connection getConnection() {
 			try {
-				if (connectionMethod == null) {
-					// reflective lookup to bridge between Hibernate 3.x and 4.x
-					connectionMethod = this.session.getClass().getMethod("connection");
+				if (connectionMethodToUse == null) {
+					// Reflective lookup trying to find SessionImpl's connection() on Hibernate 4.x
+					connectionMethodToUse = this.session.getClass().getMethod("connection");
 				}
-				return (Connection) ReflectionUtils.invokeMethod(connectionMethod, this.session);
+				return (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, this.session);
 			}
 			catch (NoSuchMethodException ex) {
-				throw new IllegalStateException("Cannot find connection() method on Hibernate session", ex);
+				throw new IllegalStateException("Cannot find connection() method on Hibernate Session", ex);
 			}
 		}
 
+		@Override
 		public void releaseConnection(Connection con) {
-			JdbcUtils.closeConnection(con);
+			if (sessionConnectionMethod != null) {
+				// Need to explicitly call close() with Hibernate 3.x in order to allow
+				// for eager release of the underlying physical Connection if necessary.
+				// However, do not do this on Hibernate 4.2+ since it would return the
+				// physical Connection to the pool right away, making it unusable for
+				// further operations within the current transaction!
+				JdbcUtils.closeConnection(con);
+			}
 		}
 	}
 

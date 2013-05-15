@@ -73,10 +73,12 @@ public class PersistenceExceptionTranslationAdvisor extends AbstractPointcutAdvi
 	}
 
 
+	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

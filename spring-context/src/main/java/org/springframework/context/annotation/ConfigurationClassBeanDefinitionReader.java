@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +28,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -51,8 +52,6 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * Reads a given fully-populated set of ConfigurationClass instances, registering bean
  * definitions with the given {@link BeanDefinitionRegistry} based on its contents.
@@ -63,6 +62,7 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  * @see ConfigurationClassParser
  */
@@ -118,7 +118,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions for the
 	 * class itself, all its {@link Bean} methods
 	 */
-	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
+	public void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
@@ -134,8 +134,6 @@ class ConfigurationClassBeanDefinitionReader {
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
-		String className = metadata.getClassName();
-		configBeanDef.setBeanClassName(className);
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
 			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
@@ -146,7 +144,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		else {
 			this.problemReporter.error(
-					new InvalidConfigurationImportProblem(className, configClass.getResource(), metadata));
+					new InvalidConfigurationImportProblem(metadata.getClassName(), configClass.getResource(), metadata));
 		}
 	}
 
@@ -155,6 +153,10 @@ class ConfigurationClassBeanDefinitionReader {
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
+		if (ConditionalAnnotationHelper.shouldSkip(beanMethod, this.registry,
+				this.environment, this.importBeanNameGenerator)) {
+			return;
+		}
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 
@@ -324,6 +326,7 @@ class ConfigurationClassBeanDefinitionReader {
 			this.annotationMetadata = original.annotationMetadata;
 		}
 
+		@Override
 		public AnnotationMetadata getMetadata() {
 			return this.annotationMetadata;
 		}

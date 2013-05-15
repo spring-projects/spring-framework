@@ -2427,15 +2427,14 @@ txManager.commit(status);</programlisting>
     <para>Spring's <classname>JtaTransactionManager</classname> is the
     standard choice to run on Java EE application servers, and is known to
     work on all common servers. Advanced functionality such as transaction
-    suspension works on many servers as well -- including GlassFish, JBoss,
-    Geronimo, and Oracle OC4J -- without any special configuration required.
+    suspension works on many servers as well -- including GlassFish, JBoss
+    and Geronimo -- without any special configuration required.
     However, for fully supported transaction suspension and further advanced
-    integration, Spring ships special adapters for IBM WebSphere, BEA WebLogic
-    Server, and Oracle OC4J. These adapters are discussed in the following
-    sections.</para>
+    integration, Spring ships special adapters for WebLogic Server and
+    WebSphere. These adapters are discussed in the following sections.</para>
 
-    <para><emphasis>For standard scenarios, including WebLogic Server,
-    WebSphere and OC4J, consider using the convenient
+    <para><emphasis>For standard scenarios, including WebLogic Server and
+    WebSphere, consider using the convenient
     <literal>&lt;tx:jta-transaction-manager/&gt;</literal> configuration
     element.</emphasis> When configured, this element automatically detects
     the underlying server and chooses the best transaction manager available
@@ -2459,7 +2458,7 @@ txManager.commit(status);</programlisting>
     </section>
 
     <section xml:id="transaction-application-server-integration-weblogic">
-      <title>BEA WebLogic Server</title>
+      <title>Oracle WebLogic Server</title>
 
       <para>On WebLogic Server 9.0 or above, you typically would use the
       <classname>WebLogicJtaTransactionManager</classname> instead of the
@@ -2470,22 +2469,6 @@ txManager.commit(status);</programlisting>
       environment, beyond standard JTA semantics: Features include transaction
       names, per-transaction isolation levels, and proper resuming of
       transactions in all cases.</para>
-    </section>
-
-    <section xml:id="transaction-application-server-integration-oc4j">
-      <title>Oracle OC4J</title>
-
-      <para>Spring ships a special adapter class for OC4J 10.1.3 or later
-      called <classname>OC4JJtaTransactionManager</classname>. This class is
-      analogous to the <classname>WebLogicJtaTransactionManager</classname>
-      class discussed in the previous section, providing similar value-adds on
-      OC4J: transaction names and per-transaction isolation levels.</para>
-
-      <para>The full JTA functionality, including transaction suspension,
-      works fine with Spring's <classname>JtaTransactionManager</classname> on
-      OC4J as well. The special
-      <classname>OC4JJtaTransactionManager</classname> adapter simply provides
-      value-adds beyond standard JTA.</para>
     </section>
   </section>
 

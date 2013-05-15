@@ -98,8 +98,12 @@ final class OpaqueUriComponents extends UriComponents {
 		String expandedScheme = expandUriComponent(this.getScheme(), uriVariables);
 		String expandedSSp = expandUriComponent(this.ssp, uriVariables);
 		String expandedFragment = expandUriComponent(this.getFragment(), uriVariables);
-
 		return new OpaqueUriComponents(expandedScheme, expandedSSp, expandedFragment);
+	}
+
+	@Override
+	public UriComponents normalize() {
+		return this;
 	}
 
 	@Override
@@ -131,10 +135,6 @@ final class OpaqueUriComponents extends UriComponents {
 		}
 	}
 
-	@Override
-	public UriComponents normalize() {
-		return this;
-	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -146,11 +146,10 @@ final class OpaqueUriComponents extends UriComponents {
 		}
 
 		OpaqueUriComponents other = (OpaqueUriComponents) obj;
-		boolean rtn = true;
-		rtn &= ObjectUtils.nullSafeEquals(getScheme(), other.getScheme());
-		rtn &= ObjectUtils.nullSafeEquals(this.ssp, other.ssp);
-		rtn &= ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
-		return rtn;
+		return ObjectUtils.nullSafeEquals(getScheme(), other.getScheme()) &&
+				ObjectUtils.nullSafeEquals(this.ssp, other.ssp) &&
+				ObjectUtils.nullSafeEquals(getFragment(), other.getFragment());
+
 	}
 
 	@Override

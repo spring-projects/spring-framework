@@ -22,19 +22,13 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSession;
 import javax.jms.Session;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
 
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.JmsTemplate102;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.jms.core.SessionCallback;
 import org.springframework.transaction.TransactionDefinition;
@@ -331,57 +325,4 @@ public class JmsTransactionManagerTests {
 		verify(con).close();
 	}
 
-	@Test
-	@Deprecated
-	public void testTransactionCommit102WithQueue() throws JMSException {
-		QueueConnectionFactory cf = mock(QueueConnectionFactory.class);
-		QueueConnection con = mock(QueueConnection.class);
-		final QueueSession session = mock(QueueSession.class);
-
-		given(cf.createQueueConnection()).willReturn(con);
-		given(con.createQueueSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
-
-		JmsTransactionManager tm = new JmsTransactionManager102(cf, false);
-		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
-		JmsTemplate jt = new JmsTemplate102(cf, false);
-		jt.execute(new SessionCallback() {
-			@Override
-			public Object doInJms(Session sess) {
-				assertTrue(sess == session);
-				return null;
-			}
-		});
-		tm.commit(ts);
-
-		verify(session).commit();
-		verify(session).close();
-		verify(con).close();
-	}
-
-	@Test
-	@Deprecated
-	public void testTransactionCommit102WithTopic() throws JMSException {
-		TopicConnectionFactory cf = mock(TopicConnectionFactory.class);
-		TopicConnection con = mock(TopicConnection.class);
-		final TopicSession session = mock(TopicSession.class);
-
-		given(cf.createTopicConnection()).willReturn(con);
-		given(con.createTopicSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
-
-		JmsTransactionManager tm = new JmsTransactionManager102(cf, true);
-		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
-		JmsTemplate jt = new JmsTemplate102(cf, true);
-		jt.execute(new SessionCallback() {
-			@Override
-			public Object doInJms(Session sess) {
-				assertTrue(sess == session);
-				return null;
-			}
-		});
-		tm.commit(ts);
-
-		verify(session).commit();
-		verify(session).close();
-		verify(con).close();
-	}
 }

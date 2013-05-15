@@ -416,14 +416,17 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 			assertNull(autowired.getRamnivas());
 		}
 
+		@Override
 		public Object getObject() throws Exception {
 			return new TestBean();
 		}
 
+		@Override
 		public Class getObjectType() {
 			return TestBean.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return false;
 		}
@@ -559,6 +562,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	public static class LineItem implements PricingStrategyClient {
 		private PricingStrategy pricingStrategy;
 
+		@Override
 		public void setPricingStrategy(PricingStrategy pricingStrategy) {
 			this.pricingStrategy = pricingStrategy;
 		}
@@ -568,6 +572,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	public static class Order implements MailSenderClient, Serializable {
 		private transient MailSender mailSender;
 
+		@Override
 		public void setMailSender(MailSender mailSender) {
 			this.mailSender = mailSender;
 		}
@@ -577,10 +582,12 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 		private transient MailSender mailSender;
 		private transient PaymentProcessor paymentProcessor;
 
+		@Override
 		public void setMailSender(MailSender mailSender) {
 			this.mailSender = mailSender;
 		}
 
+		@Override
 		public void setPaymentProcessor(PaymentProcessor paymentProcessor) {
 			this.paymentProcessor = paymentProcessor;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,11 @@
 package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditor;
-
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * Bind tag, supporting evaluation of binding errors for a certain
@@ -104,8 +102,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 	@Override
 	protected final int doStartTagInternal() throws Exception {
-		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", getPath(), pageContext);
-
+		String resolvedPath = getPath();
 		if (!isIgnoreNestedPath()) {
 			String nestedPath = (String) pageContext.getAttribute(
 					NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
@@ -171,6 +168,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 		return this.status.getErrors();
 	}
 
+	@Override
 	public final PropertyEditor getEditor() {
 		return this.status.getEditor();
 	}

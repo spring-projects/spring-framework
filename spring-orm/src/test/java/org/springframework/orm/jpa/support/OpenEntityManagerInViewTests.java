@@ -19,7 +19,6 @@ package org.springframework.orm.jpa.support;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.FilterChain;
@@ -30,13 +29,13 @@ import javax.servlet.ServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.test.MockFilterConfig;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.mock.web.test.PassThroughFilterChain;
-import org.springframework.orm.jpa.JpaTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -60,16 +59,11 @@ public class OpenEntityManagerInViewTests {
 
 	private EntityManagerFactory factory;
 
-	private JpaTemplate template;
-
 
 	@Before
 	public void setUp() throws Exception {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
-
-		template = new JpaTemplate(factory);
-		template.afterPropertiesSet();
 
 		given(factory.createEntityManager()).willReturn(manager);
 	}

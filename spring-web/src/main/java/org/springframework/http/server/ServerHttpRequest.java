@@ -16,8 +16,11 @@
 
 package org.springframework.http.server;
 
+import java.security.Principal;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a server-side HTTP request.
@@ -26,5 +29,27 @@ import org.springframework.http.HttpRequest;
  * @since 3.0
  */
 public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
+
+	/**
+	 * Returns the map of query parameters. Empty if no query has been set.
+	 */
+	MultiValueMap<String, String> getQueryParams();
+
+	/**
+	 * Return a {@link java.security.Principal} instance containing the name of the
+	 * authenticated user. If the user has not been authenticated, the method returns
+	 * <code>null</code>.
+	 */
+	Principal getPrincipal();
+
+	/**
+	 * Return the host name of the endpoint on the other end.
+	 */
+	String getRemoteHostName();
+
+	/**
+	 * Return the IP address of the endpoint on the other end.
+	 */
+	String getRemoteAddress();
 
 }

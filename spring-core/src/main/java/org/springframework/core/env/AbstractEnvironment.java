@@ -214,6 +214,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	// Implementation of ConfigurableEnvironment interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public String[] getActiveProfiles() {
 		return StringUtils.toStringArray(doGetActiveProfiles());
 	}
@@ -236,6 +237,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.activeProfiles;
 	}
 
+	@Override
 	public void setActiveProfiles(String... profiles) {
 		Assert.notNull(profiles, "Profile array must not be null");
 		this.activeProfiles.clear();
@@ -245,6 +247,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		}
 	}
 
+	@Override
 	public void addActiveProfile(String profile) {
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(format("Activating profile '%s'", profile));
@@ -255,6 +258,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 
+	@Override
 	public String[] getDefaultProfiles() {
 		return StringUtils.toStringArray(doGetDefaultProfiles());
 	}
@@ -288,6 +292,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #AbstractEnvironment()
 	 * @see #getReservedDefaultProfiles()
 	 */
+	@Override
 	public void setDefaultProfiles(String... profiles) {
 		Assert.notNull(profiles, "Profile array must not be null");
 		this.defaultProfiles.clear();
@@ -297,6 +302,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		}
 	}
 
+	@Override
 	public boolean acceptsProfiles(String... profiles) {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
@@ -337,10 +343,12 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 				"Invalid profile [" + profile + "]: must not begin with the ! operator");
 	}
 
+	@Override
 	public MutablePropertySources getPropertySources() {
 		return this.propertySources;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemEnvironment() {
 		Map<String, ?> systemEnvironment;
@@ -369,6 +377,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return (Map<String, Object>) systemEnvironment;
 	}
 
+	@Override
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Map<String, Object> getSystemProperties() {
 		Map systemProperties;
@@ -397,6 +406,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return systemProperties;
 	}
 
+	@Override
 	public void merge(ConfigurableEnvironment parent) {
 		for (PropertySource<?> ps : parent.getPropertySources()) {
 			if (!this.propertySources.contains(ps.getName())) {
@@ -419,74 +429,92 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	// Implementation of ConfigurablePropertyResolver interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public boolean containsProperty(String key) {
 		return this.propertyResolver.containsProperty(key);
 	}
 
+	@Override
 	public String getProperty(String key) {
 		return this.propertyResolver.getProperty(key);
 	}
 
+	@Override
 	public String getProperty(String key, String defaultValue) {
 		return this.propertyResolver.getProperty(key, defaultValue);
 	}
 
+	@Override
 	public <T> T getProperty(String key, Class<T> targetType) {
 		return this.propertyResolver.getProperty(key, targetType);
 	}
 
+	@Override
 	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
 		return this.propertyResolver.getProperty(key, targetType, defaultValue);
 	};
 
+	@Override
 	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
 		return this.propertyResolver.getPropertyAsClass(key, targetType);
 	}
 
+	@Override
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		return this.propertyResolver.getRequiredProperty(key);
 	}
 
+	@Override
 	public <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException {
 		return this.propertyResolver.getRequiredProperty(key, targetType);
 	}
 
+	@Override
 	public void setRequiredProperties(String... requiredProperties) {
 		this.propertyResolver.setRequiredProperties(requiredProperties);
 	}
 
+	@Override
 	public void validateRequiredProperties() throws MissingRequiredPropertiesException {
 		this.propertyResolver.validateRequiredProperties();
 	}
 
+	@Override
 	public String resolvePlaceholders(String text) {
 		return this.propertyResolver.resolvePlaceholders(text);
 	}
 
+	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		return this.propertyResolver.resolveRequiredPlaceholders(text);
 	}
 
+	@Override
 	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
 		this.propertyResolver.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
 	}
 
+	@Override
 	public void setConversionService(ConfigurableConversionService conversionService) {
 		this.propertyResolver.setConversionService(conversionService);
 	}
 
+	@Override
 	public ConfigurableConversionService getConversionService() {
 		return this.propertyResolver.getConversionService();
 	}
 
+	@Override
 	public void setPlaceholderPrefix(String placeholderPrefix) {
 		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
 	}
 
+	@Override
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
 	}
 
+	@Override
 	public void setValueSeparator(String valueSeparator) {
 		this.propertyResolver.setValueSeparator(valueSeparator);
 	}

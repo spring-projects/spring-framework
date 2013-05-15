@@ -26,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,12 +34,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -58,6 +63,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers;
 
+	private Cookies cookies;
+
+	private MultiValueMap<String, String> queryParams;
+
 
 	/**
 	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}.
@@ -76,10 +85,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.servletRequest;
 	}
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.servletRequest.getMethod());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
@@ -91,6 +102,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -123,6 +135,49 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.headers;
 	}
 
+	@Override
+	public Principal getPrincipal() {
+		return this.servletRequest.getUserPrincipal();
+	}
+
+	@Override
+	public String getRemoteHostName() {
+		return this.servletRequest.getRemoteHost();
+	}
+
+	@Override
+	public String getRemoteAddress() {
+		return this.servletRequest.getRemoteAddr();
+	}
+
+	@Override
+	public Cookies getCookies() {
+		if (this.cookies == null) {
+			this.cookies = new Cookies();
+			if (this.servletRequest.getCookies() != null) {
+				for (Cookie cookie : this.servletRequest.getCookies()) {
+					this.cookies.addCookie(cookie.getName(), cookie.getValue());
+				}
+			}
+		}
+		return this.cookies;
+	}
+
+	@Override
+	public MultiValueMap<String, String> getQueryParams() {
+		if (this.queryParams == null) {
+			// TODO: extract from query string
+			this.queryParams = new LinkedMultiValueMap<String, String>(this.servletRequest.getParameterMap().size());
+			for (String name : this.servletRequest.getParameterMap().keySet()) {
+				for (String value : this.servletRequest.getParameterValues(name)) {
+					this.queryParams.add(name, value);
+				}
+			}
+		}
+		return this.queryParams;
+	}
+
+	@Override
 	public InputStream getBody() throws IOException {
 		if (isFormPost(this.servletRequest)) {
 			return getBodyFromServletRequestParameters(this.servletRequest);

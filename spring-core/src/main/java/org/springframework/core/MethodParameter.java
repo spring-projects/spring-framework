@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,18 +162,34 @@ public class MethodParameter {
 
 	/**
 	 * Returns the wrapped member.
-	 * @return the member
+	 * @return the Method or Constructor as Member
 	 */
 	private Member getMember() {
-		return this.method != null ? this.method : this.constructor;
+		// NOTE: no ternary expression to retain JDK <8 compatibility even when using
+		// the JDK 8 compiler (potentially selecting java.lang.reflect.Executable
+		// as common type, with that new base class not available on older JDKs)
+		if (this.method != null) {
+			return this.method;
+		}
+		else {
+			return this.constructor;
+		}
 	}
 
 	/**
 	 * Returns the wrapped annotated element.
-	 * @return the annotated element
+	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	private AnnotatedElement getAnnotatedElement() {
-		return this.method != null ? this.method : this.constructor;
+		// NOTE: no ternary expression to retain JDK <8 compatibility even when using
+		// the JDK 8 compiler (potentially selecting java.lang.reflect.Executable
+		// as common type, with that new base class not available on older JDKs)
+		if (this.method != null) {
+			return this.method;
+		}
+		else {
+			return this.constructor;
+		}
 	}
 
 	/**

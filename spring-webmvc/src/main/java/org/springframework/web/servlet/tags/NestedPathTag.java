@@ -22,7 +22,6 @@ import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
 import org.springframework.beans.PropertyAccessor;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
  * <p>Nested-path tag, to support and assist with nested beans or bean properties
@@ -81,14 +80,12 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 
 	@Override
 	public int doStartTag() throws JspException {
-		String resolvedPath = ExpressionEvaluationUtils.evaluateString("path", getPath(), pageContext);
-
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
 		this.previousNestedPath =
 				(String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		String nestedPath =
-				(this.previousNestedPath != null ? this.previousNestedPath + resolvedPath : resolvedPath);
+				(this.previousNestedPath != null ? this.previousNestedPath + getPath() : getPath());
 		pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
@@ -111,10 +108,12 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 		return EVAL_PAGE;
 	}
 
+	@Override
 	public void doCatch(Throwable throwable) throws Throwable {
 		throw throwable;
 	}
 
+	@Override
 	public void doFinally() {
 		this.previousNestedPath = null;
 	}

@@ -98,6 +98,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	}
 
 
+	@Override
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
@@ -150,10 +151,12 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	}
 
 
+	@Override
 	public void removeFromCache(String destinationName) {
 		this.destinationCache.remove(destinationName);
 	}
 
+	@Override
 	public void clearCache() {
 		this.destinationCache.clear();
 	}

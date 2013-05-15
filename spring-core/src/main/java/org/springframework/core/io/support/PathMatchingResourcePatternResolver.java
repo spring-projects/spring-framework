@@ -72,7 +72,7 @@ import org.springframework.util.StringUtils;
  * <p><b>Ant-style Patterns:</b>
  *
  * <p>When the path location contains an Ant-style pattern, e.g.:
- * <pre>
+ * <pre class="code">
  * /WEB-INF/*-context.xml
  * com/mycompany/**&#47;applicationContext.xml
  * file:C:/some/path/*-context.xml
@@ -143,9 +143,9 @@ import org.springframework.util.StringUtils;
  *
  * <p><b>WARNING:</b> Ant-style patterns with "classpath:" resources are not
  * guaranteed to find matching resources if the root package to search is available
- * in multiple class path locations. This is because a resource such as<pre>
+ * in multiple class path locations. This is because a resource such as<pre class="code">
  *     com/mycompany/package1/service-context.xml
- * </pre>may be in only one location, but when a path such as<pre>
+ * </pre>may be in only one location, but when a path such as<pre class="code">
  *     classpath:com/mycompany/**&#47;service-context.xml
  * </pre>is used to try to resolve it, the resolver will work off the (first) URL
  * returned by {@code getResource("com/mycompany");}. If this base package
@@ -231,6 +231,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Return the ClassLoader that this pattern resolver works with
 	 * (never {@code null}).
 	 */
+	@Override
 	public ClassLoader getClassLoader() {
 		return getResourceLoader().getClassLoader();
 	}
@@ -253,10 +254,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 
+	@Override
 	public Resource getResource(String location) {
 		return getResourceLoader().getResource(location);
 	}
 
+	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
 		Assert.notNull(locationPattern, "Location pattern must not be null");
 		if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
@@ -675,6 +678,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			this.rootPath = (rootPath.length() == 0 || rootPath.endsWith("/") ? rootPath : rootPath + "/");
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class.equals(method.getDeclaringClass())) {
@@ -719,6 +723,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return this.resources.size();
 		}
 
+		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("sub-pattern: ").append(this.subPattern);

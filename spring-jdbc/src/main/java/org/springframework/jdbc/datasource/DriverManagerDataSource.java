@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,26 +105,6 @@ public class DriverManagerDataSource extends AbstractDriverBasedDataSource {
 	public DriverManagerDataSource(String url, Properties conProps) {
 		setUrl(url);
 		setConnectionProperties(conProps);
-	}
-
-	/**
-	 * Create a new DriverManagerDataSource with the given standard
-	 * DriverManager parameters.
-	 * @param driverClassName the JDBC driver class name
-	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param username the JDBC username to use for accessing the DriverManager
-	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @deprecated since Spring 2.5. DriverManagerDataSource is primarily
-	 * intended for accessing <i>pre-registered</i> JDBC drivers.
-	 * If you need to register a new driver, consider using
-	 * {@link SimpleDriverDataSource} instead.
-	 */
-	@Deprecated
-	public DriverManagerDataSource(String driverClassName, String url, String username, String password) {
-		setDriverClassName(driverClassName);
-		setUrl(url);
-		setUsername(username);
-		setPassword(password);
 	}
 
 

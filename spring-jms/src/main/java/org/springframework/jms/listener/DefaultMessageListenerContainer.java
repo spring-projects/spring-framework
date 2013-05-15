@@ -974,6 +974,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private volatile boolean idle = true;
 
+		@Override
 		public void run() {
 			synchronized (lifecycleMonitor) {
 				activeInvokerCount++;
@@ -1150,6 +1151,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			this.session = null;
 		}
 
+		@Override
 		public boolean isLongLived() {
 			return (maxMessagesPerTask < 0);
 		}

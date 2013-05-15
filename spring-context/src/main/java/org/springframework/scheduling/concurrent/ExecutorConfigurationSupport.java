@@ -65,6 +65,11 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Set the ThreadFactory to use for the ThreadPoolExecutor's thread pool.
 	 * Default is the ThreadPoolExecutor's default thread factory.
+	 * <p>In a Java EE 7 or other managed environment with JSR-236 support,
+	 * consider specifying a JNDI-located ManagedThreadFactory: by default,
+	 * to be found at "java:comp/env/concurrent/tf/DefaultThreadFactory".
+	 * Use the "jee:jndi-lookup" namespace element in XML or the programmatic
+	 * {@link org.springframework.jndi.JndiLocatorDelegate} for convenient lookup.
 	 * @see java.util.concurrent.Executors#defaultThreadFactory()
 	 */
 	public void setThreadFactory(ThreadFactory threadFactory) {
@@ -133,6 +138,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		this.awaitTerminationSeconds = awaitTerminationSeconds;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -142,6 +148,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		initialize();
 	}
@@ -176,6 +183,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */
+	@Override
 	public void destroy() {
 		shutdown();
 	}

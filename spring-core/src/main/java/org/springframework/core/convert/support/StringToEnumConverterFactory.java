@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
+	@Override
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
 		Class<?> enumType = targetType;
 		while(enumType != null && !enumType.isEnum()) {
@@ -47,6 +48,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 			this.enumType = enumType;
 		}
 
+		@Override
 		public T convert(String source) {
 			if (source.length() == 0) {
 				// It's an empty enum identifier: reset the enum value to null.

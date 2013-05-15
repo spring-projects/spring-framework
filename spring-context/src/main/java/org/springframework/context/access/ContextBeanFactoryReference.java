@@ -48,6 +48,7 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 	}
 
 
+	@Override
 	public BeanFactory getFactory() {
 		if (this.applicationContext == null) {
 			throw new IllegalStateException(
@@ -56,6 +57,7 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 		return this.applicationContext;
 	}
 
+	@Override
 	public void release() {
 		if (this.applicationContext != null) {
 			ApplicationContext savedCtx;

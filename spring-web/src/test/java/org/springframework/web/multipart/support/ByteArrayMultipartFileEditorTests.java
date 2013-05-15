@@ -47,6 +47,7 @@ public final class ByteArrayMultipartFileEditorTests extends TestCase {
 		ByteArrayMultipartFileEditor editor = new ByteArrayMultipartFileEditor();
 		final String expectedValue = "'Green Wing' - classic British comedy";
 		Object object = new Object() {
+			@Override
 			public String toString() {
 				return expectedValue;
 			}

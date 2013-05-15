@@ -72,6 +72,7 @@ class DomContentHandler implements ContentHandler {
 		}
 	}
 
+	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		Node parent = getParent();
 		Element element = document.createElementNS(uri, qName);
@@ -87,10 +88,12 @@ class DomContentHandler implements ContentHandler {
 		elements.add(element);
 	}
 
+	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		elements.remove(elements.size() - 1);
 	}
 
+	@Override
 	public void characters(char ch[], int start, int length) throws SAXException {
 		String data = new String(ch, start, length);
 		Node parent = getParent();
@@ -104,6 +107,7 @@ class DomContentHandler implements ContentHandler {
 		}
 	}
 
+	@Override
 	public void processingInstruction(String target, String data) throws SAXException {
 		Node parent = getParent();
 		ProcessingInstruction pi = document.createProcessingInstruction(target, data);
@@ -114,24 +118,31 @@ class DomContentHandler implements ContentHandler {
 	 * Unsupported
 	 */
 
+	@Override
 	public void setDocumentLocator(Locator locator) {
 	}
 
+	@Override
 	public void startDocument() throws SAXException {
 	}
 
+	@Override
 	public void endDocument() throws SAXException {
 	}
 
+	@Override
 	public void startPrefixMapping(String prefix, String uri) throws SAXException {
 	}
 
+	@Override
 	public void endPrefixMapping(String prefix) throws SAXException {
 	}
 
+	@Override
 	public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
 	}
 
+	@Override
 	public void skippedEntity(String name) throws SAXException {
 	}
 }

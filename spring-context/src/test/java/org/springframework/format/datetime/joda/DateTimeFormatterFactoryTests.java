@@ -30,8 +30,6 @@ import org.junit.Test;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 /**
- * Tests for {@link DateTimeFormatterFactory}.
- *
  * @author Phillip Webb
  * @author Sam Brannen
  */
@@ -100,4 +98,5 @@ public class DateTimeFormatterFactoryTests {
 	private DateTimeFormatter applyLocale(DateTimeFormatter dateTimeFormatter) {
 		return dateTimeFormatter.withLocale(Locale.US);
 	}
+
 }

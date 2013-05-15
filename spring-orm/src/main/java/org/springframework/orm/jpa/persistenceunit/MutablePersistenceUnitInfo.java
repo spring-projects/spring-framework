@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
@@ -61,9 +63,13 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private boolean excludeUnlistedClasses = false;
 
+	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
+
+	private ValidationMode validationMode = ValidationMode.AUTO;
+
 	private Properties properties = new Properties();
 
-	private String persistenceXMLSchemaVersion = "1.0";
+	private String persistenceXMLSchemaVersion = "2.0";
 
 	private String persistenceProviderPackageName;
 
@@ -72,6 +78,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
+	@Override
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -80,6 +87,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceProviderClassName = persistenceProviderClassName;
 	}
 
+	@Override
 	public String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
 	}
@@ -88,6 +96,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.transactionType = transactionType;
 	}
 
+	@Override
 	public PersistenceUnitTransactionType getTransactionType() {
 		if (this.transactionType != null) {
 			return this.transactionType;
@@ -102,6 +111,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.jtaDataSource = jtaDataSource;
 	}
 
+	@Override
 	public DataSource getJtaDataSource() {
 		return this.jtaDataSource;
 	}
@@ -110,6 +120,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.nonJtaDataSource = nonJtaDataSource;
 	}
 
+	@Override
 	public DataSource getNonJtaDataSource() {
 		return this.nonJtaDataSource;
 	}
@@ -118,6 +129,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.mappingFileNames.add(mappingFileName);
 	}
 
+	@Override
 	public List<String> getMappingFileNames() {
 		return this.mappingFileNames;
 	}
@@ -126,6 +138,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.jarFileUrls.add(jarFileUrl);
 	}
 
+	@Override
 	public List<URL> getJarFileUrls() {
 		return this.jarFileUrls;
 	}
@@ -134,6 +147,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
 	}
 
+	@Override
 	public URL getPersistenceUnitRootUrl() {
 		return this.persistenceUnitRootUrl;
 	}
@@ -142,6 +156,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.managedClassNames.add(managedClassName);
 	}
 
+	@Override
 	public List<String> getManagedClassNames() {
 		return this.managedClassNames;
 	}
@@ -150,8 +165,27 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.excludeUnlistedClasses = excludeUnlistedClasses;
 	}
 
+	@Override
 	public boolean excludeUnlistedClasses() {
 		return this.excludeUnlistedClasses;
+	}
+
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.sharedCacheMode = sharedCacheMode;
+	}
+
+	@Override
+	public SharedCacheMode getSharedCacheMode() {
+		return this.sharedCacheMode;
+	}
+
+	public void setValidationMode(ValidationMode validationMode) {
+		this.validationMode = validationMode;
+	}
+
+	@Override
+	public ValidationMode getValidationMode() {
+		return this.validationMode;
 	}
 
 	public void addProperty(String name, String value) {
@@ -165,6 +199,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.properties = properties;
 	}
 
+	@Override
 	public Properties getProperties() {
 		return this.properties;
 	}
@@ -173,10 +208,12 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceXMLSchemaVersion = persistenceXMLSchemaVersion;
 	}
 
+	@Override
 	public String getPersistenceXMLSchemaVersion() {
 		return this.persistenceXMLSchemaVersion;
 	}
 
+	@Override
 	public void setPersistenceProviderPackageName(String persistenceProviderPackageName) {
 		this.persistenceProviderPackageName = persistenceProviderPackageName;
 	}
@@ -190,6 +227,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	 * This implementation returns the default ClassLoader.
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
+	@Override
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -197,6 +235,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	/**
 	 * This implementation throws an UnsupportedOperationException.
 	 */
+	@Override
 	public void addTransformer(ClassTransformer classTransformer) {
 		throw new UnsupportedOperationException("addTransformer not supported");
 	}
@@ -204,6 +243,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	/**
 	 * This implementation throws an UnsupportedOperationException.
 	 */
+	@Override
 	public ClassLoader getNewTempClassLoader() {
 		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
 	}

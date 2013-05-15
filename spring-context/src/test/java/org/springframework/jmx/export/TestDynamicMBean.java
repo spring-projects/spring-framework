@@ -75,10 +75,12 @@ public class TestDynamicMBean implements DynamicMBean {
 				new MBeanNotificationInfo[0]);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		return (obj instanceof TestDynamicMBean);
 	}
 
+	@Override
 	public int hashCode() {
 		return TestDynamicMBean.class.hashCode();
 	}

@@ -93,6 +93,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 
 	private ConfigurableApplicationContext applicationContext;
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		Assert.isTrue(applicationContext instanceof ConfigurableApplicationContext,
 				"ApplicationContext does not implement ConfigurableApplicationContext");
@@ -105,6 +106,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 	 * finding all active ApplicationContexts through {@link #findApplicationContexts()},
 	 * then delegating to {@link #generateJson(java.util.Set)}.
 	 */
+	@Override
 	public String getSnapshotAsJson() {
 		Set<ConfigurableApplicationContext> contexts;
 		if (this.applicationContext != null) {

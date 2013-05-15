@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,10 @@ import org.springframework.orm.jpa.JpaDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink
- * 1.0 as well as 2.0-2.3.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
  *
  * <p>Exposes EclipseLink's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
- *
- * <p>This class is very analogous to {@link TopLinkJpaVendorAdapter}, since
- * EclipseLink is effectively the next generation of the TopLink product.
- * Thanks to Mike Keith for the original EclipseLink support prototype!
- *
- * <p>NOTE: No need to filter out classes from the JPA providers package for
- * EclipseLink (see SPR-6040)
  *
  * @author Juergen Hoeller
  * @author Thomas Risberg
@@ -56,6 +48,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final JpaDialect jpaDialect = new EclipseLinkJpaDialect();
 
 
+	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}

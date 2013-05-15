@@ -17,6 +17,7 @@
 package org.springframework.http.server;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -36,8 +37,14 @@ public interface ServerHttpResponse extends HttpOutputMessage, Closeable {
 	void setStatusCode(HttpStatus status);
 
 	/**
+	 * TODO
+	 */
+	void flush() throws IOException;
+
+	/**
 	 * Close this response, freeing any resources created.
 	 */
+	@Override
 	void close();
 
 }

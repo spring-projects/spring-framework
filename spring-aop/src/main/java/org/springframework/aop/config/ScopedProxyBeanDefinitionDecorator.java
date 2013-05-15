@@ -39,6 +39,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
 
+	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		boolean proxyTargetClass = true;
 		if (node instanceof Element) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,9 +98,6 @@ import org.springframework.util.StringUtils;
  * <p>The common annotations supported by this post-processor are available in
  * Java 6 (JDK 1.6) as well as in Java EE 5/6 (which provides a standalone jar for
  * its common annotations as well, allowing for use in any Java 5 based application).
- * Hence, this post-processor works out of the box on JDK 1.6, and requires the
- * JSR-250 API jar (and optionally the JAX-WS API jar and/or the EJB 3 API jar)
- * to be added to the classpath on JDK 1.5 (when running outside of Java EE 5/6).
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:
@@ -269,6 +266,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		this.resourceFactory = resourceFactory;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
@@ -287,14 +285,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
+	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
+	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;
 	}
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 

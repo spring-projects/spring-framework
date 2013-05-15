@@ -42,13 +42,6 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
-	private static UrlPathHelper pathHelperNoSemicolonContent;
-
-	static {
-		pathHelperNoSemicolonContent = new UrlPathHelper();
-		pathHelperNoSemicolonContent.setRemoveSemicolonContent(true);
-	}
-
 	private final Set<String> patterns;
 
 	private final UrlPathHelper pathHelper;
@@ -168,6 +161,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
+	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
 		Set<String> result = new LinkedHashSet<String>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
@@ -209,21 +203,17 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * 		or a new condition with sorted matching patterns;
 	 * 		or {@code null} if no patterns match.
 	 */
+	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
 
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
-		String lookupPathNoSemicolonContent = (lookupPath.indexOf(';') != -1) ?
-				pathHelperNoSemicolonContent.getLookupPathForRequest(request) : null;
 
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
-			if (match == null && lookupPathNoSemicolonContent != null) {
-				match = getMatchingPattern(pattern, lookupPathNoSemicolonContent);
-			}
 			if (match != null) {
 				matches.add(match);
 			}
@@ -256,9 +246,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (this.pathMatcher.match(pattern, lookupPath)) {
 			return pattern;
 		}
-		boolean endsWithSlash = pattern.endsWith("/");
 		if (this.useTrailingSlashMatch) {
-			if (!endsWithSlash && this.pathMatcher.match(pattern + "/", lookupPath)) {
+			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
 				return pattern +"/";
 			}
 		}
@@ -277,6 +266,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * contain only patterns that match the request and are sorted with
 	 * the best matches on top.
 	 */
+	@Override
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);

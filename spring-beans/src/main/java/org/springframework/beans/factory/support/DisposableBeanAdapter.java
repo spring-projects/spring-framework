@@ -85,13 +85,13 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private final boolean nonPublicAccessAllowed;
 
+	private final AccessControlContext acc;
+
 	private String destroyMethodName;
 
 	private transient Method destroyMethod;
 
 	private List<DestructionAwareBeanPostProcessor> beanPostProcessors;
-
-	private final AccessControlContext acc;
 
 
 	/**
@@ -140,6 +140,22 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	/**
 	 * Create a new DisposableBeanAdapter for the given bean.
+	 * @param bean the bean instance (never {@code null})
+	 * @param postProcessors the List of BeanPostProcessors
+	 * (potentially DestructionAwareBeanPostProcessor), if any
+	 */
+	public DisposableBeanAdapter(Object bean, List<BeanPostProcessor> postProcessors, AccessControlContext acc) {
+		Assert.notNull(bean, "Disposable bean must not be null");
+		this.bean = bean;
+		this.beanName = null;
+		this.invokeDisposableBean = (this.bean instanceof DisposableBean);
+		this.nonPublicAccessAllowed = true;
+		this.acc = acc;
+		this.beanPostProcessors = filterPostProcessors(postProcessors);
+	}
+
+	/**
+	 * Create a new DisposableBeanAdapter for the given bean.
 	 */
 	private DisposableBeanAdapter(Object bean, String beanName, boolean invokeDisposableBean,
 			boolean nonPublicAccessAllowed, String destroyMethodName,
@@ -149,9 +165,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.beanName = beanName;
 		this.invokeDisposableBean = invokeDisposableBean;
 		this.nonPublicAccessAllowed = nonPublicAccessAllowed;
+		this.acc = null;
 		this.destroyMethodName = destroyMethodName;
 		this.beanPostProcessors = postProcessors;
-		this.acc = null;
 	}
 
 
@@ -210,10 +226,12 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	}
 
 
+	@Override
 	public void run() {
 		destroy();
 	}
 
+	@Override
 	public void destroy() {
 		if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
@@ -228,6 +246,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			try {
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 							((DisposableBean) bean).destroy();
 							return null;
@@ -265,6 +284,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		try {
 			if (System.getSecurityManager() != null) {
 				return AccessController.doPrivileged(new PrivilegedAction<Method>() {
+					@Override
 					public Method run() {
 						return findDestroyMethod();
 					}
@@ -305,6 +325,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		try {
 			if (System.getSecurityManager() != null) {
 				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
 					public Object run() {
 						ReflectionUtils.makeAccessible(destroyMethod);
 						return null;
@@ -312,6 +333,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				});
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 							destroyMethod.invoke(bean, args);
 							return null;

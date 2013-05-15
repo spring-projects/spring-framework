@@ -465,6 +465,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * <p>A {@link ConfigurableBeanFactory} is expected for resolving
 	 * expressions in method argument default values.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -478,6 +479,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		return this.beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -772,15 +774,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			this.modelAttributeCache.put(handlerType, methods);
 		}
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<InvocableHandlerMethod>();
-		for (Method method : methods) {
-			Object bean = handlerMethod.getBean();
-			attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
-		}
+		// Global methods first
 		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
 			Object bean = entry.getKey().resolveBean();
 			for (Method method : entry.getValue()) {
 				attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
 			}
+		}
+		for (Method method : methods) {
+			Object bean = handlerMethod.getBean();
+			attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
 		}
 		return new ModelFactory(attrMethods, binderFactory, sessionAttrHandler);
 	}
@@ -801,15 +804,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			this.initBinderCache.put(handlerType, methods);
 		}
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<InvocableHandlerMethod>();
-		for (Method method : methods) {
-			Object bean = handlerMethod.getBean();
-			initBinderMethods.add(createInitBinderMethod(bean, method));
-		}
+		// Global methods first
 		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache .entrySet()) {
 			Object bean = entry.getKey().resolveBean();
 			for (Method method : entry.getValue()) {
 				initBinderMethods.add(createInitBinderMethod(bean, method));
 			}
+		}
+		for (Method method : methods) {
+			Object bean = handlerMethod.getBean();
+			initBinderMethods.add(createInitBinderMethod(bean, method));
 		}
 		return createDataBinderFactory(initBinderMethods);
 	}
@@ -863,6 +867,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public static final MethodFilter INIT_BINDER_METHODS = new MethodFilter() {
 
+		@Override
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
 		}
@@ -873,6 +878,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = new MethodFilter() {
 
+		@Override
 		public boolean matches(Method method) {
 			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
 					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));

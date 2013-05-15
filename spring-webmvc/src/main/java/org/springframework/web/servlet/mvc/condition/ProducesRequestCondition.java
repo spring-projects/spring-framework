@@ -159,6 +159,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * instance otherwise. Practically that means a method-level "produces"
 	 * overrides a type-level "produces" condition.
 	 */
+	@Override
 	public ProducesRequestCondition combine(ProducesRequestCondition other) {
 		return !other.expressions.isEmpty() ? other : this;
 	}
@@ -175,6 +176,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * 		or a new condition with matching expressions;
 	 * 		or {@code null} if no expressions match.
 	 */
+	@Override
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (isEmpty()) {
 			return this;
@@ -208,6 +210,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * contains the matching producible media type expression only or
 	 * is otherwise empty.
 	 */
+	@Override
 	public int compareTo(ProducesRequestCondition other, HttpServletRequest request) {
 		try {
 			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);

@@ -349,6 +349,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		this.resourceLocation = resourceLocation;
 	}
 
+	@Override
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		synchronized (this.bfgInstancesByKey) {
 			BeanFactoryGroup bfg = this.bfgInstancesByKey.get(this.resourceLocation);
@@ -500,11 +501,13 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			this.groupContextRef = groupContext;
 		}
 
+		@Override
 		public BeanFactory getFactory() {
 			return this.beanFactory;
 		}
 
 		// Note that it's legal to call release more than once!
+		@Override
 		public void release() throws FatalBeanException {
 			synchronized (bfgInstancesByKey) {
 				BeanFactory savedRef = this.groupContextRef;

@@ -50,6 +50,7 @@ public class ServletContextParameterFactoryBean implements FactoryBean<String>, 
 		this.initParamName = initParamName;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		if (this.initParamName == null) {
 			throw new IllegalArgumentException("initParamName is required");
@@ -61,14 +62,17 @@ public class ServletContextParameterFactoryBean implements FactoryBean<String>, 
 	}
 
 
+	@Override
 	public String getObject() {
 		return this.paramValue;
 	}
 
+	@Override
 	public Class<String> getObjectType() {
 		return String.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

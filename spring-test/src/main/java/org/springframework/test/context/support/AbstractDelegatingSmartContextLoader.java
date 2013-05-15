@@ -142,6 +142,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * context configuration; or if both candidate loaders detect defaults for the
 	 * supplied context configuration
 	 */
+	@Override
 	public void processContextConfiguration(final ContextConfigurationAttributes configAttributes) {
 
 		Assert.notNull(configAttributes, "configAttributes must not be null");
@@ -236,6 +237,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
 	 * {@code ApplicationContext} from the supplied merged context configuration
 	 */
+	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 
@@ -268,6 +270,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public final String[] processLocations(Class<?> clazz, String... locations) {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoaders do not support the ContextLoader SPI. "
 				+ "Call processContextConfiguration(ContextConfigurationAttributes) instead.");
@@ -279,6 +282,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * {@link #loadContext(MergedContextConfiguration)} instead.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public final ApplicationContext loadContext(String... locations) throws Exception {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoaders do not support the ContextLoader SPI. "
 				+ "Call loadContext(MergedContextConfiguration) instead.");

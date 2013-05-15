@@ -198,30 +198,6 @@
       thus allowing instrumentation of tests in various environments including
       JUnit, TestNG, and so on.</para>
 
-      <warning>
-        <title>JUnit 3.8 support is deprecated</title>
-
-        <para>As of Spring 3.0, the legacy JUnit 3.8 base class hierarchy (i.e.,
-        <classname>AbstractDependencyInjectionSpringContextTests</classname>,
-        <classname>AbstractTransactionalDataSourceSpringContextTests</classname>,
-        etc.) is officially deprecated and will be removed in a later release.
-        Any test classes based on this code should be migrated to the <link
-        linkend="testcontext-framework">Spring TestContext
-        Framework</link>.</para>
-
-        <para>As of Spring 3.1, the JUnit 3.8 base classes in the Spring
-        TestContext Framework (i.e.,
-        <classname>AbstractJUnit38SpringContextTests</classname> and
-        <classname>AbstractTransactionalJUnit38SpringContextTests</classname>)
-        and <interfacename>@ExpectedException</interfacename> have been
-        officially deprecated and will be removed in a later release. Any test
-        classes based on this code should be migrated to the JUnit 4 or TestNG
-        support provided by the <link linkend="testcontext-framework">Spring
-        TestContext Framework</link>. Similarly, any test methods annotated with
-        <interfacename>@ExpectedException</interfacename> should be modified to
-        use the built-in support for expected exceptions in JUnit and
-        TestNG.</para>
-      </warning>
     </section>
 
     <section xml:id="integration-testing-goals">
@@ -851,39 +827,6 @@ public void testProcessWithoutRollback() {
 </emphasis>public void afterTransaction() {
     <lineannotation>// logic to be executed after a transaction has ended</lineannotation>
 }</programlisting>
-          </listitem>
-
-          <listitem>
-            <para><emphasis role="bold">
-            <interfacename>@NotTransactional</interfacename> </emphasis></para>
-
-            <para>The presence of this annotation indicates that the annotated
-            test method must <emphasis>not</emphasis> execute in a transactional
-            context.</para>
-
-            <programlisting language="java"><emphasis role="bold">@NotTransactional</emphasis>
-@Test
-public void testProcessWithoutTransaction() {
-    <lineannotation>// ...</lineannotation>
-}</programlisting>
-
-            <warning>
-              <title>@NotTransactional is deprecated</title>
-
-              <para>As of Spring 3.0,
-              <interfacename>@NotTransactional</interfacename> is deprecated in
-              favor of moving the <emphasis>non-transactional</emphasis> test
-              method to a separate (non-transactional) test class or to a
-              <interfacename>@BeforeTransaction</interfacename> or
-              <interfacename>@AfterTransaction</interfacename> method. As an
-              alternative to annotating an entire class with
-              <interfacename>@Transactional</interfacename>, consider annotating
-              individual methods with
-              <interfacename>@Transactional</interfacename>; doing so allows a
-              mix of transactional and non-transactional methods in the same
-              test class without the need for using
-              <interfacename>@NotTransactional</interfacename>.</para>
-            </warning>
           </listitem>
         </itemizedlist>
       </section>
@@ -2788,10 +2731,8 @@ public class SessionScopedBeanTests {
           role="bold">within</emphasis> a transaction. In addition, methods
           annotated with <interfacename>@BeforeTransaction</interfacename> or
           <interfacename>@AfterTransaction</interfacename> are naturally not
-          executed for tests annotated with
-          <interfacename>@NotTransactional</interfacename>. However,
-          <interfacename>@NotTransactional</interfacename> is deprecated as of
-          Spring 3.0.</para>
+          executed for test methods that are not configured to run within a
+          transaction.</para>
         </tip>
 
         <para>The following JUnit-based example displays a fictitious
@@ -3177,10 +3118,10 @@ public class ExampleTests {
 
     @Test
     public void getAccount() throws Exception {
-        this.mockMvc.perform(get("/accounts/1").accept("application/json;charset=UTF-8"))
+        this.mockMvc.perform(get("/accounts/1").accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
           .andExpect(status().isOk())
           .andExpect(content().contentType("application/json"))
-          .andExpect(jsonPath("$.name").value("Lee");
+          .andExpect(jsonPath("$.name").value("Lee"));
     }
 
 }</programlisting>

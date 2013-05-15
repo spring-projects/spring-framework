@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.util.Assert;
@@ -35,6 +36,8 @@ public class MockHttpInputMessage implements HttpInputMessage {
 
 	private final InputStream body;
 
+	private final Cookies cookies = new Cookies();
+
 
 	public MockHttpInputMessage(byte[] contents) {
 		this.body = (contents != null) ? new ByteArrayInputStream(contents) : null;
@@ -45,12 +48,18 @@ public class MockHttpInputMessage implements HttpInputMessage {
 		this.body = body;
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
+	@Override
 	public InputStream getBody() throws IOException {
 		return this.body;
 	}
 
+	@Override
+	public Cookies getCookies() {
+		return this.cookies ;
+	}
 }

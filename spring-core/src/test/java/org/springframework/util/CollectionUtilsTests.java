@@ -222,6 +222,7 @@ public class CollectionUtilsTests {
 			this.name = name;
 		}
 
+		@Override
 		public boolean equals(Object rhs) {
 			if (this == rhs) {
 				return true;
@@ -233,6 +234,7 @@ public class CollectionUtilsTests {
 			return this.name.equals(instance.name);
 		}
 
+		@Override
 		public int hashCode() {
 			return this.name.hashCode();
 		}

@@ -30,11 +30,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -53,7 +54,6 @@ import org.testng.annotations.Test;
  * @author Sam Brannen
  * @since 3.1
  */
-@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 		AbstractTransactionalTestNGSpringContextTests {
@@ -78,11 +78,11 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 
 
 	private int createPerson(String name) {
-		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
 	private int deletePerson(String name) {
-		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
@@ -111,7 +111,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@Test
-	@NotTransactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void autowiringFromConfigClass() {
 		assertNotNull(employee, "The employee should have been autowired.");
 		assertEquals(employee.getName(), "John Smith");

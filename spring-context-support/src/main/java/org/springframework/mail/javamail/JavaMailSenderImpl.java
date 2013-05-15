@@ -292,10 +292,12 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	// Implementation of MailSender
 	//---------------------------------------------------------------------
 
+	@Override
 	public void send(SimpleMailMessage simpleMessage) throws MailException {
 		send(new SimpleMailMessage[] { simpleMessage });
 	}
 
+	@Override
 	public void send(SimpleMailMessage[] simpleMessages) throws MailException {
 		List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(simpleMessages.length);
 		for (SimpleMailMessage simpleMessage : simpleMessages) {
@@ -319,10 +321,12 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @see #setDefaultEncoding
 	 * @see #setDefaultFileTypeMap
 	 */
+	@Override
 	public MimeMessage createMimeMessage() {
 		return new SmartMimeMessage(getSession(), getDefaultEncoding(), getDefaultFileTypeMap());
 	}
 
+	@Override
 	public MimeMessage createMimeMessage(InputStream contentStream) throws MailException {
 		try {
 			return new MimeMessage(getSession(), contentStream);
@@ -332,18 +336,22 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		}
 	}
 
+	@Override
 	public void send(MimeMessage mimeMessage) throws MailException {
 		send(new MimeMessage[] {mimeMessage});
 	}
 
+	@Override
 	public void send(MimeMessage[] mimeMessages) throws MailException {
 		doSend(mimeMessages, null);
 	}
 
+	@Override
 	public void send(MimeMessagePreparator mimeMessagePreparator) throws MailException {
 		send(new MimeMessagePreparator[] { mimeMessagePreparator });
 	}
 
+	@Override
 	public void send(MimeMessagePreparator[] mimeMessagePreparators) throws MailException {
 		try {
 			List<MimeMessage> mimeMessages = new ArrayList<MimeMessage>(mimeMessagePreparators.length);

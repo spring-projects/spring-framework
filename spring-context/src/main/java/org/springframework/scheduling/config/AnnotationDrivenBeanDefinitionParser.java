@@ -69,6 +69,7 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 			AnnotationConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME;
 
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 

@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -78,6 +78,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
 		return new Comparator<RequestMappingInfo>() {
+			@Override
 			public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
 				return info1.compareTo(info2, request);
 			}
@@ -86,7 +87,6 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
-	 *
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
@@ -149,19 +149,16 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	/**
 	 * Iterate all RequestMappingInfos once again, look if any match by URL at
 	 * least and raise exceptions accordingly.
-	 *
-	 * @throws HttpRequestMethodNotSupportedException
-	 * 		if there are matches by URL but not by HTTP method
-	 * @throws HttpMediaTypeNotAcceptableException
-	 * 		if there are matches by URL but not by consumable media types
-	 * @throws HttpMediaTypeNotAcceptableException
-	 * 		if there are matches by URL but not by producible media types
+	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL
+	 * but not by HTTP method
+	 * @throws HttpMediaTypeNotAcceptableException if there are matches by URL
+	 * but not by consumable/producible media types
 	 */
 	@Override
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
 			String lookupPath, HttpServletRequest request) throws ServletException {
 
-		Set<String> allowedMethods = new HashSet<String>(6);
+		Set<String> allowedMethods = new LinkedHashSet<String>(4);
 
 		Set<RequestMappingInfo> patternMatches = new HashSet<RequestMappingInfo>();
 		Set<RequestMappingInfo> patternAndMethodMatches = new HashSet<RequestMappingInfo>();
@@ -193,12 +190,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		if (patternAndMethodMatches.isEmpty()) {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternMatches);
-			producibleMediaTypes = getProdicubleMediaTypes(request, patternMatches);
+			producibleMediaTypes = getProducibleMediaTypes(request, patternMatches);
 			paramConditions = getRequestParams(request, patternMatches);
 		}
 		else {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternAndMethodMatches);
-			producibleMediaTypes = getProdicubleMediaTypes(request, patternAndMethodMatches);
+			producibleMediaTypes = getProducibleMediaTypes(request, patternAndMethodMatches);
 			paramConditions = getRequestParams(request, patternAndMethodMatches);
 		}
 
@@ -236,7 +233,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return result;
 	}
 
-	private Set<MediaType> getProdicubleMediaTypes(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+	private Set<MediaType> getProducibleMediaTypes(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
 		Set<MediaType> result = new HashSet<MediaType>();
 		for (RequestMappingInfo partialMatch : partialMatches) {
 			if (partialMatch.getProducesCondition().getMatchingCondition(request) == null) {

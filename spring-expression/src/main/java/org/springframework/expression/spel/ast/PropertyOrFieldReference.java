@@ -83,14 +83,17 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			this.isAutoGrowNullReferences = isAutoGrowNullReferences;
 		}
 
+		@Override
 		public TypedValue getValue() {
 			return ref.getValueInternal(contextObject,eContext,isAutoGrowNullReferences);
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			ref.writeProperty(contextObject,eContext, ref.name, newValue);
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}

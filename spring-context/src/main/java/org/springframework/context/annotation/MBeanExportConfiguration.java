@@ -56,6 +56,7 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 	private BeanFactory beanFactory;
 
 
+	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		Map<String, Object> map = importMetadata.getAnnotationAttributes(EnableMBeanExport.class.getName());
 		this.attributes = AnnotationAttributes.fromMap(map);
@@ -63,6 +64,7 @@ public class MBeanExportConfiguration implements ImportAware, BeanFactoryAware {
 				"importing class " + importMetadata.getClassName());
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 	}

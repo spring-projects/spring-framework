@@ -43,11 +43,13 @@ public abstract class StaticMethodMatcherPointcut extends StaticMethodMatcher im
 		this.classFilter = classFilter;
 	}
 
+	@Override
 	public ClassFilter getClassFilter() {
 		return this.classFilter;
 	}
 
 
+	@Override
 	public final MethodMatcher getMethodMatcher() {
 		return this;
 	}

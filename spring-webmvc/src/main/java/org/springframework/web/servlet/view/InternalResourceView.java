@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,8 +68,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean alwaysInclude = false;
 
-	private volatile Boolean exposeForwardAttributes;
-
 	private boolean exposeContextBeansAsAttributes = false;
 
 	private Set<String> exposedContextBeanNames;
@@ -116,18 +113,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	public void setAlwaysInclude(boolean alwaysInclude) {
 		this.alwaysInclude = alwaysInclude;
-	}
-
-	/**
-	 * Set whether to explictly expose the Servlet 2.4 forward request attributes
-	 * when forwarding to the underlying view resource.
-	 * <p>Default is "true" on Servlet containers up until 2.4, and "false" for
-	 * Servlet 2.5 and above. Note that Servlet containers at 2.4 level and above
-	 * should expose those attributes automatically! This InternalResourceView
-	 * feature exists for Servlet 2.3 containers and misbehaving 2.4 containers.
-	 */
-	public void setExposeForwardAttributes(boolean exposeForwardAttributes) {
-		this.exposeForwardAttributes = exposeForwardAttributes;
 	}
 
 	/**
@@ -179,19 +164,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		return false;
 	}
 
-	/**
-	 * Checks whether we need to explicitly expose the Servlet 2.4 request attributes
-	 * by default.
-	 * @see #setExposeForwardAttributes
-	 * @see #exposeForwardRequestAttributes(javax.servlet.http.HttpServletRequest)
-	 */
-	@Override
-	protected void initServletContext(ServletContext sc) {
-		if (this.exposeForwardAttributes == null && sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-			this.exposeForwardAttributes = Boolean.TRUE;
-		}
-	}
-
 
 	/**
 	 * Render the internal resource given the specified model.
@@ -231,7 +203,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 		else {
 			// Note: The forwarded resource is supposed to determine the content type itself.
-			exposeForwardRequestAttributes(requestToExpose);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
@@ -326,30 +297,6 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 */
 	protected boolean useInclude(HttpServletRequest request, HttpServletResponse response) {
 		return (this.alwaysInclude || WebUtils.isIncludeRequest(request) || response.isCommitted());
-	}
-
-	/**
-	 * Expose the current request URI and paths as {@link HttpServletRequest}
-	 * attributes under the keys defined in the Servlet 2.4 specification,
-	 * for Servlet 2.3 containers as well as misbehaving Servlet 2.4 containers
-	 * (such as OC4J).
-	 * <p>Does not expose the attributes on Servlet 2.5 or above, mainly for
-	 * GlassFish compatibility (GlassFish gets confused by pre-exposed attributes).
-	 * In any case, Servlet 2.5 containers should finally properly support
-	 * Servlet 2.4 features, shouldn't they...
-	 * @param request current HTTP request
-	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes
-	 */
-	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
-		if (this.exposeForwardAttributes != null && this.exposeForwardAttributes) {
-			try {
-				WebUtils.exposeForwardRequestAttributes(request);
-			}
-			catch (Exception ex) {
-				// Servlet container rejected to set internal attributes, e.g. on TriFork.
-				this.exposeForwardAttributes = Boolean.FALSE;
-			}
-		}
 	}
 
 }

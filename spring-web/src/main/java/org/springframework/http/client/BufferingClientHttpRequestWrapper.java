@@ -17,9 +17,9 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -42,10 +42,12 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 	}
 
 
+	@Override
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
 	}
 
+	@Override
 	public URI getURI() {
 		return this.request.getURI();
 	}
@@ -56,6 +58,11 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 		StreamUtils.copy(bufferedOutput, this.request.getBody());
 		ClientHttpResponse response = this.request.execute();
 		return new BufferingClientHttpResponseWrapper(response);
+	}
+
+	@Override
+	public Cookies getCookies() {
+		return this.request.getCookies();
 	}
 
 }

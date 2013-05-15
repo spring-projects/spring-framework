@@ -32,6 +32,7 @@ public class InternalParseException extends RuntimeException {
 		super(cause);
 	}
 
+	@Override
 	public SpelParseException getCause() {
 		return (SpelParseException) super.getCause();
 	}

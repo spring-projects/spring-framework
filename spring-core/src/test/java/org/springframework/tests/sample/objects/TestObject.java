@@ -32,26 +32,32 @@ public class TestObject implements ITestObject, ITestInterface, Comparable<Objec
 		this.age = age;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Override
 	public int getAge() {
 		return this.age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
 
+	@Override
 	public TestObject getSpouse() {
 		return this.spouse;
 	}
 
+	@Override
 	public void setSpouse(TestObject spouse) {
 		this.spouse = spouse;
 	}

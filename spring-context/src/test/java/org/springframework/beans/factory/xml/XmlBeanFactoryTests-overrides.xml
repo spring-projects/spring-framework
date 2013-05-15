@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -19,7 +19,7 @@
 	<!--
 		We can use this to test the construction cost of beans with method overrides
 	-->
-	<bean id="overrideOnPrototype" singleton="false"
+	<bean id="overrideOnPrototype" scope="prototype"
 			class="org.springframework.beans.factory.xml.OverrideOneMethod">
 		<lookup-method name="getPrototypeDependency" bean="jenny"/>
 		<lookup-method name="protectedOverrideSingleton" bean="david"/>
@@ -35,7 +35,7 @@
 	</bean>
 	
 	
-	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" singleton="false">
+	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
@@ -54,7 +54,7 @@
 		</property>
 	</bean>
 
-	<bean id="jennyChild" class="org.springframework.tests.sample.beans.TestBean" parent="jennyParent" singleton="false">
+	<bean id="jennyChild" class="org.springframework.tests.sample.beans.TestBean" parent="jennyParent" scope="prototype">
 		<property name="spouse">
 			<ref local="david"/>
 		</property>

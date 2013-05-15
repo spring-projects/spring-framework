@@ -16,13 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +25,7 @@ import javax.servlet.http.Part;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -41,12 +35,19 @@ import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.test.MockPart;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestParamMethodArgumentResolver}.
@@ -239,6 +240,23 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test(expected = MissingServletRequestParameterException.class)
 	public void missingRequestParam() throws Exception {
 		resolver.resolveArgument(paramNamedStringArray, null, webRequest, null);
+		fail("Expected exception");
+	}
+
+	// SPR-10402
+
+	@Test(expected = MissingServletRequestParameterException.class)
+	public void missingRequestParamEmptyValueConvertedToNull() throws Exception {
+
+		WebDataBinder binder = new WebRequestDataBinder(null);
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, null, "stringNotAnnot")).willReturn(binder);
+
+		this.request.addParameter("stringNotAnnot", "");
+
+		resolver.resolveArgument(paramStringNotAnnot, null, webRequest, binderFactory);
 		fail("Expected exception");
 	}
 

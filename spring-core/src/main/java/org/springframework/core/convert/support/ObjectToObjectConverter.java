@@ -43,10 +43,12 @@ import org.springframework.util.ReflectionUtils;
  */
 final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
+	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
 	}
 
+	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.getType().equals(targetType.getType())) {
 			// no conversion required
@@ -55,6 +57,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		return hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
 	}
 
+	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;

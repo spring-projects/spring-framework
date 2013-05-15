@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,70 +47,14 @@ public class MethodReference extends SpelNodeImpl {
 
 
 	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
-		super(pos,arguments);
+		super(pos, arguments);
 		this.name = methodName;
 		this.nullSafe = nullSafe;
 	}
 
-	class MethodValueRef implements ValueRef {
 
-		private ExpressionState state;
-		private EvaluationContext evaluationContext;
-		private Object target;
-		private Object[] arguments;
-
-		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext, Object object, Object[] arguments) {
-			this.state = state;
-			this.evaluationContext = evaluationContext;
-			this.target = object;
-			this.arguments = arguments;
-		}
-
-		public TypedValue getValue() {
-			MethodExecutor executorToUse = cachedExecutor;
-			if (executorToUse != null) {
-				try {
-					return executorToUse.execute(evaluationContext, target, arguments);
-				}
-				catch (AccessException ae) {
-					// Two reasons this can occur:
-					// 1. the method invoked actually threw a real exception
-					// 2. the method invoked was not passed the arguments it expected and has become 'stale'
-
-					// In the first case we should not retry, in the second case we should see if there is a
-					// better suited method.
-
-					// To determine which situation it is, the AccessException will contain a cause.
-					// If the cause is an InvocationTargetException, a user exception was thrown inside the method.
-					// Otherwise the method could not be invoked.
-					throwSimpleExceptionIfPossible(state, ae);
-
-					// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
-					cachedExecutor = null;
-				}
-			}
-
-			// either there was no accessor or it no longer existed
-			executorToUse = findAccessorForMethod(name, getTypes(arguments), target, evaluationContext);
-			cachedExecutor = executorToUse;
-			try {
-				return executorToUse.execute(evaluationContext, target, arguments);
-			} catch (AccessException ae) {
-				// Same unwrapping exception handling as above in above catch block
-				throwSimpleExceptionIfPossible(state, ae);
-				throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
-						name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
-			}
-		}
-
-		public void setValue(Object newValue) {
-			throw new IllegalAccessError();
-		}
-
-		public boolean isWritable() {
-			return false;
-		}
-
+	public final String getName() {
+		return this.name;
 	}
 
 	@Override
@@ -122,22 +66,21 @@ public class MethodReference extends SpelNodeImpl {
 			// expressions
 			try {
 				state.pushActiveContextObject(state.getRootContextObject());
-				arguments[i] = children[i].getValueInternal(state).getValue();
+				arguments[i] = this.children[i].getValueInternal(state).getValue();
 			}
 			finally {
 				state.popActiveContextObject();
 			}
 		}
 		if (currentContext.getValue() == null) {
-			if (nullSafe) {
+			if (this.nullSafe) {
 				return ValueRef.NullValueRef.instance;
 			}
 			else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
+						FormatHelper.formatMethodForMessage(this.name, getTypes(arguments)));
 			}
 		}
-
 		return new MethodValueRef(state,state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
 	}
 
@@ -150,7 +93,7 @@ public class MethodReference extends SpelNodeImpl {
 			// expressions
 			try {
 				state.pushActiveContextObject(state.getRootContextObject());
-				arguments[i] = children[i].getValueInternal(state).getValue();
+				arguments[i] = this.children[i].getValueInternal(state).getValue();
 			}
 			finally {
 				state.popActiveContextObject();
@@ -162,7 +105,7 @@ public class MethodReference extends SpelNodeImpl {
 			}
 			else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
+						FormatHelper.formatMethodForMessage(this.name, getTypes(arguments)));
 			}
 		}
 
@@ -196,14 +139,14 @@ public class MethodReference extends SpelNodeImpl {
 		try {
 			return executorToUse.execute(
 					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
-		} catch (AccessException ae) {
+		}
+		catch (AccessException ae) {
 			// Same unwrapping exception handling as above in above catch block
 			throwSimpleExceptionIfPossible(state, ae);
 			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
 					this.name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
 		}
 	}
-
 
 	/**
 	 * Decode the AccessException, throwing a lightweight evaluation exception or, if the cause was a RuntimeException,
@@ -235,7 +178,7 @@ public class MethodReference extends SpelNodeImpl {
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(name).append("(");
+		sb.append(this.name).append("(");
 		for (int i = 0; i < getChildCount(); i++) {
 			if (i > 0)
 				sb.append(",");
@@ -245,9 +188,9 @@ public class MethodReference extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	private MethodExecutor findAccessorForMethod(String name,
-			List<TypeDescriptor> argumentTypes, ExpressionState state)
+	private MethodExecutor findAccessorForMethod(String name, List<TypeDescriptor> argumentTypes, ExpressionState state)
 			throws SpelEvaluationException {
+
 		return findAccessorForMethod(name,argumentTypes,state.getActiveContextObject().getValue(),state.getEvaluationContext());
 	}
 
@@ -259,19 +202,88 @@ public class MethodReference extends SpelNodeImpl {
 		if (mResolvers != null) {
 			for (MethodResolver methodResolver : mResolvers) {
 				try {
-					MethodExecutor cEx = methodResolver.resolve(
-							eContext, contextObject, name, argumentTypes);
+					MethodExecutor cEx = methodResolver.resolve(eContext, contextObject, name, argumentTypes);
 					if (cEx != null) {
 						return cEx;
 					}
 				}
 				catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessage.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
+					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessage.PROBLEM_LOCATING_METHOD,
+							name, contextObject.getClass());
 				}
 			}
 		}
-		throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_NOT_FOUND, FormatHelper.formatMethodForMessage(name, argumentTypes),
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_NOT_FOUND,
+				FormatHelper.formatMethodForMessage(name, argumentTypes),
 				FormatHelper.formatClassNameForMessage(contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
+	}
+
+
+	private class MethodValueRef implements ValueRef {
+
+		private final ExpressionState state;
+
+		private final EvaluationContext evaluationContext;
+
+		private final Object target;
+
+		private final Object[] arguments;
+
+		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext, Object object, Object[] arguments) {
+			this.state = state;
+			this.evaluationContext = evaluationContext;
+			this.target = object;
+			this.arguments = arguments;
+		}
+
+		@Override
+		public TypedValue getValue() {
+			MethodExecutor executorToUse = cachedExecutor;
+			if (executorToUse != null) {
+				try {
+					return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
+				}
+				catch (AccessException ae) {
+					// Two reasons this can occur:
+					// 1. the method invoked actually threw a real exception
+					// 2. the method invoked was not passed the arguments it expected and has become 'stale'
+
+					// In the first case we should not retry, in the second case we should see if there is a
+					// better suited method.
+
+					// To determine which situation it is, the AccessException will contain a cause.
+					// If the cause is an InvocationTargetException, a user exception was thrown inside the method.
+					// Otherwise the method could not be invoked.
+					throwSimpleExceptionIfPossible(this.state, ae);
+
+					// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
+					cachedExecutor = null;
+				}
+			}
+
+			// either there was no accessor or it no longer existed
+			executorToUse = findAccessorForMethod(name, getTypes(this.arguments), this.target, this.evaluationContext);
+			cachedExecutor = executorToUse;
+			try {
+				return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
+			}
+			catch (AccessException ae) {
+				// Same unwrapping exception handling as above in above catch block
+				throwSimpleExceptionIfPossible(this.state, ae);
+				throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
+						name, this.state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
+			}
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public boolean isWritable() {
+			return false;
+		}
 	}
 
 }

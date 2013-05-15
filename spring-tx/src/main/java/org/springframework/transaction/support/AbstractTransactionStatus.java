@@ -56,6 +56,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	// Handling of current transaction state
 	//---------------------------------------------------------------------
 
+	@Override
 	public void setRollbackOnly() {
 		this.rollbackOnly = true;
 	}
@@ -67,6 +68,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * @see #isLocalRollbackOnly()
 	 * @see #isGlobalRollbackOnly()
 	 */
+	@Override
 	public boolean isRollbackOnly() {
 		return (isLocalRollbackOnly() || isGlobalRollbackOnly());
 	}
@@ -92,6 +94,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	/**
 	 * This implementations is empty, considering flush as a no-op.
 	 */
+	@Override
 	public void flush() {
 	}
 
@@ -102,6 +105,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 		this.completed = true;
 	}
 
+	@Override
 	public boolean isCompleted() {
 		return this.completed;
 	}
@@ -126,6 +130,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 		return this.savepoint;
 	}
 
+	@Override
 	public boolean hasSavepoint() {
 		return (this.savepoint != null);
 	}
@@ -172,6 +177,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * @see #getSavepointManager()
 	 * @see org.springframework.transaction.SavepointManager
 	 */
+	@Override
 	public Object createSavepoint() throws TransactionException {
 		return getSavepointManager().createSavepoint();
 	}
@@ -183,6 +189,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * @see #getSavepointManager()
 	 * @see org.springframework.transaction.SavepointManager
 	 */
+	@Override
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 		getSavepointManager().rollbackToSavepoint(savepoint);
 	}
@@ -193,6 +200,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * @see #getSavepointManager()
 	 * @see org.springframework.transaction.SavepointManager
 	 */
+	@Override
 	public void releaseSavepoint(Object savepoint) throws TransactionException {
 		getSavepointManager().releaseSavepoint(savepoint);
 	}

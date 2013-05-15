@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
@@ -66,7 +65,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
- * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
  * @see org.springframework.test.context.transaction.BeforeTransaction
  * @see org.springframework.test.context.transaction.AfterTransaction
@@ -75,15 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
-@SuppressWarnings("deprecation")
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
-
-	/**
-	 * The {@code SimpleJdbcTemplate} that this base class manages, available to subclasses.
-	 * @deprecated As of Spring 3.2, use {@link #jdbcTemplate} instead.
-	 */
-	@Deprecated
-	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
 	/**
 	 * The {@code JdbcTemplate} that this base class manages, available to subclasses.
@@ -96,12 +86,11 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 
 	/**
 	 * Set the {@code DataSource}, typically provided via Dependency Injection.
-	 * <p>This method also instantiates the {@link #simpleJdbcTemplate} and
-	 * {@link #jdbcTemplate} instance variables.
+	 * <p>This method also instantiates the {@link #jdbcTemplate} instance
+     * variable.
 	 */
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
-		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 

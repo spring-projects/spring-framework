@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet.request;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,12 +25,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpHeaders;
@@ -44,7 +41,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -69,11 +65,9 @@ import org.springframework.web.util.UriUtils;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
-  * @since 3.2
-*/
+ * @since 3.2
+ */
 public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable {
-
-	static final boolean servlet3Present = ClassUtils.hasMethod(ServletRequest.class, "startAsync");
 
 	private final UriComponents uriComponents;
 
@@ -432,6 +426,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * {@inheritDoc}
 	 * @return always returns {@code true}.
 	 */
+	@Override
 	public boolean isMergeEnabled() {
 		return true;
 	}
@@ -443,6 +438,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * @param parent the parent {@code RequestBuilder} to inherit properties from
 	 * @return the result of the merge
 	 */
+	@Override
 	public Object merge(Object parent) {
 		if (parent == null) {
 			return this;
@@ -546,8 +542,8 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	/**
 	 * Build a {@link MockHttpServletRequest}.
 	 */
+	@Override
 	public final MockHttpServletRequest buildRequest(ServletContext servletContext) {
-
 		MockHttpServletRequest request = createServletRequest(servletContext);
 
 		String requestUri = this.uriComponents.getPath();
@@ -645,23 +641,11 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	}
 
 	/**
-	 * Creates a new {@link MockHttpServletRequest} based on the given
-	 * {@link ServletContext}. Can be overridden in sub-classes.
+	 * Create a new {@link MockHttpServletRequest} based on the given
+	 * {@link ServletContext}. Can be overridden in subclasses.
 	 */
 	protected MockHttpServletRequest createServletRequest(ServletContext servletContext) {
-		return servlet3Present ? createServlet3Request(servletContext) : new MockHttpServletRequest(servletContext);
-	}
-
-	private MockHttpServletRequest createServlet3Request(ServletContext servletContext) {
-		try {
-			String className = "org.springframework.test.web.servlet.request.Servlet3MockHttpServletRequest";
-			Class<?> clazz = ClassUtils.forName(className, MockHttpServletRequestBuilder.class.getClassLoader());
-			Constructor<?> constructor = clazz.getConstructor(ServletContext.class);
-			return (MockHttpServletRequest) BeanUtils.instantiateClass(constructor, servletContext);
-		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate MockHttpServletRequest", t);
-		}
+		return new MockHttpServletRequest(servletContext);
 	}
 
 	/**

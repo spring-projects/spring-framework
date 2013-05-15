@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.Before;
@@ -54,7 +55,7 @@ public class XMLEventStreamReaderTests {
 	@Test
 	public void readCorrect() throws Exception {
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		StaxSource source = new StaxSource(streamReader);
+		StAXSource source = new StAXSource(streamReader);
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
 		assertXMLEqual(XML, writer.toString());

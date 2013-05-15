@@ -95,6 +95,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		if (this.timerManager == null) {
 			if (this.timerManagerName == null) {
@@ -117,6 +118,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * Resumes the underlying TimerManager (if not shared).
 	 * @see commonj.timers.TimerManager#resume()
 	 */
+	@Override
 	public void start() {
 		if (!this.shared) {
 			this.timerManager.resume();
@@ -127,6 +129,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * Suspends the underlying TimerManager (if not shared).
 	 * @see commonj.timers.TimerManager#suspend()
 	 */
+	@Override
 	public void stop() {
 		if (!this.shared) {
 			this.timerManager.suspend();
@@ -139,6 +142,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * @see commonj.timers.TimerManager#isSuspending()
 	 * @see commonj.timers.TimerManager#isStopping()
 	 */
+	@Override
 	public boolean isRunning() {
 		return (!this.timerManager.isSuspending() && !this.timerManager.isStopping());
 	}
@@ -152,6 +156,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * Stops the underlying TimerManager (if not shared).
 	 * @see commonj.timers.TimerManager#stop()
 	 */
+	@Override
 	public void destroy() {
 		// Stop the entire TimerManager, if necessary.
 		if (!this.shared) {

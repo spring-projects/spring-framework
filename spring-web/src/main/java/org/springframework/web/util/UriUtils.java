@@ -73,7 +73,7 @@ public abstract class UriUtils {
 	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&"
 	 * characters in query parameter names and query parameter values because they cannot
 	 * be parsed in a reliable way. Instead use:
-	 * <pre>
+	 * <pre class="code">
 	 * UriComponents uriComponents = UriComponentsBuilder.fromUri("/path?name={value}").buildAndExpand("a=b");
 	 * String encodedUri = uriComponents.encode().toUriString();
 	 * </pre>
@@ -114,7 +114,7 @@ public abstract class UriUtils {
 	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&"
 	 * characters in query parameter names and query parameter values because they cannot
 	 * be parsed in a reliable way. Instead use:
-	 * <pre>
+	 * <pre class="code">
 	 * UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("/path?name={value}").buildAndExpand("a=b");
 	 * String encodedUri = uriComponents.encode().toUriString();
 	 * </pre>

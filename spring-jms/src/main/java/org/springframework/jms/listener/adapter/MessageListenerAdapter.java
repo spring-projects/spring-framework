@@ -301,6 +301,7 @@ public class MessageListenerAdapter
 	 * @see #handleListenerException
 	 * @see #onMessage(javax.jms.Message, javax.jms.Session)
 	 */
+	@Override
 	public void onMessage(Message message) {
 		try {
 			onMessage(message, null);
@@ -319,6 +320,7 @@ public class MessageListenerAdapter
 	 * @param session the JMS session to operate on
 	 * @throws JMSException if thrown by JMS API methods
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void onMessage(Message message, Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
@@ -361,6 +363,7 @@ public class MessageListenerAdapter
 		}
 	}
 
+	@Override
 	public String getSubscriptionName() {
 		Object delegate = getDelegate();
 		if (delegate != this && delegate instanceof SubscriptionNameProvider) {

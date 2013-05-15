@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,6 +212,7 @@ public class SingleConnectionFactory
 	/**
 	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("Connection or 'targetConnectionFactory' is required");
@@ -219,6 +220,7 @@ public class SingleConnectionFactory
 	}
 
 
+	@Override
 	public Connection createConnection() throws JMSException {
 		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
@@ -228,11 +230,13 @@ public class SingleConnectionFactory
 		}
 	}
 
+	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
+	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		Connection con;
 		synchronized (this.connectionMonitor) {
@@ -246,11 +250,13 @@ public class SingleConnectionFactory
 		return ((QueueConnection) con);
 	}
 
+	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
+	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		Connection con;
 		synchronized (this.connectionMonitor) {
@@ -264,6 +270,7 @@ public class SingleConnectionFactory
 		return ((TopicConnection) con);
 	}
 
+	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
@@ -297,6 +304,7 @@ public class SingleConnectionFactory
 	/**
 	 * Exception listener callback that renews the underlying single Connection.
 	 */
+	@Override
 	public void onException(JMSException ex) {
 		logger.warn("Encountered a JMSException - resetting the underlying JMS Connection", ex);
 		resetConnection();
@@ -308,6 +316,7 @@ public class SingleConnectionFactory
 	 * <p>As this bean implements DisposableBean, a bean factory will
 	 * automatically invoke this on destruction of its cached singletons.
 	 */
+	@Override
 	public void destroy() {
 		resetConnection();
 	}
@@ -469,6 +478,7 @@ public class SingleConnectionFactory
 			this.target = target;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
@@ -528,9 +538,20 @@ public class SingleConnectionFactory
 			}
 			else if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") ||
 					method.getName().equals("createTopicSession")) {
-				boolean transacted = (Boolean) args[0];
-				Integer ackMode = (Integer) args[1];
-				Integer mode = (transacted ? Session.SESSION_TRANSACTED : ackMode);
+				// Default: JMS 2.0 createSession() method
+				Integer mode = Session.AUTO_ACKNOWLEDGE;
+				if (args != null) {
+					if (args.length == 1) {
+						// JMS 2.0 createSession(int) method
+						mode = (Integer) args[0];
+					}
+					else if (args.length == 2) {
+						// JMS 1.1 createSession(boolean, int) method
+						boolean transacted = (Boolean) args[0];
+						Integer ackMode = (Integer) args[1];
+						mode = (transacted ? Session.SESSION_TRANSACTED : ackMode);
+					}
+				}
 				Session session = getSession(this.target, mode);
 				if (session != null) {
 					if (!method.getReturnType().isInstance(session)) {

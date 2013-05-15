@@ -1829,10 +1829,12 @@ public abstract class AbstractAopProxyTests {
 
 	public static class AllInstancesAreEqual implements IOther {
 
+		@Override
 		public boolean equals(Object other) {
 			return (other instanceof AllInstancesAreEqual);
 		}
 
+		@Override
 		public int hashCode() {
 			return getClass().hashCode();
 		}

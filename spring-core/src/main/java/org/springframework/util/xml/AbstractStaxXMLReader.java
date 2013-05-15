@@ -134,6 +134,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * @param ignored is ignored
 	 * @throws SAXException a SAX exception, possibly wrapping a {@code XMLStreamException}
 	 */
+	@Override
 	public final void parse(InputSource ignored) throws SAXException {
 		parse();
 	}
@@ -144,6 +145,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * @param ignored is ignored
 	 * @throws SAXException A SAX exception, possibly wrapping a {@code XMLStreamException}
 	 */
+	@Override
 	public final void parse(String ignored) throws SAXException {
 		parse();
 	}
@@ -217,18 +219,22 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 			this.location = location;
 		}
 
+		@Override
 		public String getPublicId() {
 			return location.getPublicId();
 		}
 
+		@Override
 		public String getSystemId() {
 			return location.getSystemId();
 		}
 
+		@Override
 		public int getLineNumber() {
 			return location.getLineNumber();
 		}
 
+		@Override
 		public int getColumnNumber() {
 			return location.getColumnNumber();
 		}

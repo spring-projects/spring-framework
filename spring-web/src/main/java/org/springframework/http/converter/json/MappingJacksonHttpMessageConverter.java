@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,12 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 
 import org.springframework.http.HttpInputMessage;
@@ -39,17 +37,19 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson's</a> {@link ObjectMapper}.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
+ * can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 1.x's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
- * {@link #setSupportedMediaTypes(List) supportedMediaTypes} property.
+ * {@link #setSupportedMediaTypes supportedMediaTypes} property.
+ *
+ * <p><b>NOTE:</b> Requires Jackson 1.8 or higher, as of Spring 4.0.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.web.servlet.view.json.MappingJacksonJsonView
  */
 public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
@@ -68,12 +68,14 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * Construct a new {@code MappingJacksonHttpMessageConverter}.
 	 */
 	public MappingJacksonHttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET),
+				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
+
 	/**
-	 * Set the {@code ObjectMapper} for this view. If not set, a default
-	 * {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * Set the {@code ObjectMapper} for this view.
+	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON
 	 * serialization process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory}
 	 * can be configured that provides custom serializers for specific types. The other option for refining
@@ -84,12 +86,6 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 		configurePrettyPrint();
-	}
-
-	private void configurePrettyPrint() {
-		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, this.prettyPrint);
-		}
 	}
 
 	/**
@@ -111,9 +107,9 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	/**
-	 * Whether to use the {@link org.codehaus.jackson.impl.DefaultPrettyPrinter} when writing JSON.
+	 * Whether to use the {@link org.codehaus.jackson.util.DefaultPrettyPrinter} when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre>
+	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 	 * converter.setObjectMapper(mapper);
@@ -125,11 +121,19 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		configurePrettyPrint();
 	}
 
+	private void configurePrettyPrint() {
+		if (this.prettyPrint != null) {
+			this.objectMapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, this.prettyPrint);
+		}
+	}
+
+
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return canRead(clazz, null, mediaType);
 	}
 
+	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		JavaType javaType = getJavaType(type, contextClass);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
@@ -154,6 +158,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@Override
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -197,8 +202,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.
-	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)}
-	 * or {@code TypeFactory.type(type, TypeFactory.type(contextClass))},
+	 * <p>The default implementation returns {@code typeFactory.constructType(type, contextClass)},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
@@ -216,9 +220,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * @return the java type
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return (contextClass != null) ?
-			TypeFactory.type(type, TypeFactory.type(contextClass)) :
-			TypeFactory.type(type);
+		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
 	}
 
 	/**

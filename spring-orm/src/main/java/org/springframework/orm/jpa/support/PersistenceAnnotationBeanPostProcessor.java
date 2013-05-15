@@ -61,6 +61,7 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
@@ -164,6 +165,11 @@ import org.springframework.util.ObjectUtils;
 public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
+
+	/* Check JPA 2.1 PersistenceContext.synchronizationType attribute */
+	private static final Method synchronizationTypeAttribute =
+			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronizationType");
+
 
 	private Object jndiEnvironment;
 
@@ -306,10 +312,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	  this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 	  return this.order;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ListableBeanFactory) {
 			this.beanFactory = (ListableBeanFactory) beanFactory;
@@ -317,6 +325,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
+	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			InjectionMetadata metadata = findPersistenceMetadata(beanType);
@@ -324,14 +333,17 @@ public class PersistenceAnnotationBeanPostProcessor
 		}
 	}
 
+	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
+	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;
 	}
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
@@ -345,14 +357,17 @@ public class PersistenceAnnotationBeanPostProcessor
 		return pvs;
 	}
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
 		EntityManagerFactoryUtils.closeEntityManager(emToClose);
@@ -589,6 +604,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		private PersistenceContextType type;
 
+		private boolean synchronizedWithTransaction = false;
+
 		private Properties properties;
 
 		public PersistenceElement(Member member, PropertyDescriptor pd) {
@@ -612,6 +629,8 @@ public class PersistenceAnnotationBeanPostProcessor
 				}
 				this.unitName = pc.unitName();
 				this.type = pc.type();
+				this.synchronizedWithTransaction = (synchronizationTypeAttribute == null ||
+						"SYNCHRONIZED".equals(ReflectionUtils.invokeMethod(synchronizationTypeAttribute, pc).toString()));
 				this.properties = properties;
 			}
 			else {
@@ -664,11 +683,13 @@ public class PersistenceAnnotationBeanPostProcessor
 						((EntityManagerFactoryInfo) emf).getEntityManagerInterface() != null) {
 					// Create EntityManager based on the info's vendor-specific type
 					// (which might be more specific than the field's type).
-					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties);
+					em = SharedEntityManagerCreator.createSharedEntityManager(
+							emf, this.properties, this.synchronizedWithTransaction);
 				}
 				else {
 					// Create EntityManager based on the field's type.
-					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getResourceType());
+					em = SharedEntityManagerCreator.createSharedEntityManager(
+							emf, this.properties, this.synchronizedWithTransaction, getResourceType());
 				}
 			}
 			return em;
@@ -686,7 +707,8 @@ public class PersistenceAnnotationBeanPostProcessor
 					emf = findEntityManagerFactory(this.unitName, requestingBeanName);
 				}
 				// Inject a container-managed extended EntityManager.
-				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
+				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(
+						emf, this.properties, this.synchronizedWithTransaction);
 			}
 			if (em instanceof EntityManagerProxy &&
 					beanFactory != null && !beanFactory.isPrototype(requestingBeanName)) {

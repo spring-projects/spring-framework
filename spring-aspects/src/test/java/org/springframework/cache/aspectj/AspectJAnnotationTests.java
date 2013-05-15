@@ -46,6 +46,7 @@ public class AspectJAnnotationTests extends AbstractAnnotationTests {
 		Assert.assertSame(ctx.getBean("keyGenerator"), aspect.getKeyGenerator());
 	}
 
+	@Override
 	public void testMultiEvict(CacheableService<?> service) {
 		Object o1 = new Object();
 

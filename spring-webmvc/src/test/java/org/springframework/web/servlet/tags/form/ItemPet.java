@@ -41,6 +41,7 @@ public class ItemPet {
 		return this.name.toUpperCase();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -52,6 +53,7 @@ public class ItemPet {
 		return (this.name != null && this.name.equals(otherPet.getName()));
 	}
 
+	@Override
 	public int hashCode() {
 		return this.name.hashCode();
 	}

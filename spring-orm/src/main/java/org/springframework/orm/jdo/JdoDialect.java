@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.jdo;
 import java.sql.SQLException;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 import javax.jdo.Transaction;
 
 import org.springframework.dao.DataAccessException;
@@ -32,8 +31,8 @@ import org.springframework.transaction.TransactionException;
  * in particular regarding transaction management and exception translation. To be
  * implemented for specific JDO providers such as JPOX, Kodo, Lido, Versant Open Access.
  *
- * <p>JDO 2.0 defines standard ways for most of the functionality covered here.
- * Hence, Spring's {@link DefaultJdoDialect} uses the corresponding JDO 2.0 methods
+ * <p>JDO 3.0 defines standard ways for most of the functionality covered here.
+ * Hence, Spring's {@link DefaultJdoDialect} uses the corresponding JDO 3.0 methods
  * by default, to be overridden in a vendor-specific fashion if necessary.
  * Vendor-specific subclasses of {@link DefaultJdoDialect} are still required for special
  * transaction semantics and more sophisticated exception translation (if needed).
@@ -46,7 +45,6 @@ import org.springframework.transaction.TransactionException;
  * @author Juergen Hoeller
  * @since 02.11.2003
  * @see JdoTransactionManager#setJdoDialect
- * @see JdoAccessor#setJdoDialect
  * @see DefaultJdoDialect
  */
 public interface JdoDialect {
@@ -144,19 +142,9 @@ public interface JdoDialect {
 	void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException;
 
-	/**
-	 * Apply the given timeout to the given JDO query object.
-	 * <p>Invoked with the remaining time of a specified transaction timeout, if any.
-	 * @param query the JDO query object to apply the timeout to
-	 * @param timeout the timeout value (seconds) to apply
-	 * @throws JDOException if thrown by JDO methods
-	 * @see JdoTemplate#prepareQuery
-	 */
-	void applyQueryTimeout(Query query, int timeout) throws JDOException;
-
 
 	//-----------------------------------------------------------------------------------
-	// Hook for exception translation (used by JdoTransactionManager and JdoTemplate)
+	// Hook for exception translation (used by JdoTransactionManager)
 	//-----------------------------------------------------------------------------------
 
 	/**
@@ -171,7 +159,6 @@ public interface JdoDialect {
 	 * in a database-specific fashion.
 	 * @param ex the JDOException thrown
 	 * @return the corresponding DataAccessException (must not be {@code null})
-	 * @see JdoAccessor#convertJdoAccessException
 	 * @see JdoTransactionManager#convertJdoAccessException
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 * @see org.springframework.dao.DataIntegrityViolationException

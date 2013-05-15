@@ -107,6 +107,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 		return this.paddingLength;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
@@ -117,14 +118,17 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	}
 
 
+	@Override
 	public int nextIntValue() throws DataAccessException {
 		return (int) getNextKey();
 	}
 
+	@Override
 	public long nextLongValue() throws DataAccessException {
 		return getNextKey();
 	}
 
+	@Override
 	public String nextStringValue() throws DataAccessException {
 		String s = Long.toString(getNextKey());
 		int len = s.length();

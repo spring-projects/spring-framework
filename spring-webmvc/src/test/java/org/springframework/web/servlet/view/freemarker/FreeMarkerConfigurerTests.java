@@ -45,18 +45,6 @@ import org.springframework.ui.freemarker.SpringTemplateLoader;
  */
 public class FreeMarkerConfigurerTests extends TestCase {
 
-	public void testTemplateLoaders() throws Exception {
-		FreeMarkerConfigurer fc = new FreeMarkerConfigurer();
-		fc.setTemplateLoaders(new TemplateLoader[] {});
-		fc.afterPropertiesSet();
-		assertTrue(fc.getConfiguration().getTemplateLoader() instanceof ClassTemplateLoader);
-
-		fc = new FreeMarkerConfigurer();
-		fc.setTemplateLoaders(new TemplateLoader[] {new ClassTemplateLoader()});
-		fc.afterPropertiesSet();
-		assertTrue(fc.getConfiguration().getTemplateLoader() instanceof MultiTemplateLoader);
-	}
-
 	public void testFreemarkerConfigurationFactoryBeanWithConfigLocation() throws TemplateException {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setConfigLocation(new FileSystemResource("myprops.properties"));

@@ -110,10 +110,12 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		this.singleton = singleton;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return this.singleton;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -123,6 +125,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -145,6 +148,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		prepare();
 		if (this.singleton) {
@@ -178,6 +182,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * to "true", otherwise returns the value returned from invoking the
 	 * specified method on the fly.
 	 */
+	@Override
 	public Object getObject() throws Exception {
 		if (this.singleton) {
 			if (!this.initialized) {
@@ -196,6 +201,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * Return the type of object that this FactoryBean creates,
 	 * or {@code null} if not known in advance.
 	 */
+	@Override
 	public Class<?> getObjectType() {
 		if (!isPrepared()) {
 			// Not fully initialized yet -> return null to indicate "not known yet".

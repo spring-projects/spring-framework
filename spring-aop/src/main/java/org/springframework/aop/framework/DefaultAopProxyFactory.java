@@ -49,6 +49,7 @@ import org.springframework.aop.SpringProxy;
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 
+	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
 			Class targetClass = config.getTargetClass();

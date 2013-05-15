@@ -623,6 +623,7 @@ public class TypeDescriptor {
 	}
 
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -654,10 +655,12 @@ public class TypeDescriptor {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		return getType().hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : this.annotations) {

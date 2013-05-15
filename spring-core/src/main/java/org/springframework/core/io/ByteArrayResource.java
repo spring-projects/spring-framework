@@ -93,6 +93,7 @@ public class ByteArrayResource extends AbstractResource {
 	 * underlying byte array.
 	 * @see java.io.ByteArrayInputStream
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return new ByteArrayInputStream(this.byteArray);
 	}
@@ -100,6 +101,7 @@ public class ByteArrayResource extends AbstractResource {
 	/**
 	 * This implementation returns the passed-in description, if any.
 	 */
+	@Override
 	public String getDescription() {
 		return this.description;
 	}

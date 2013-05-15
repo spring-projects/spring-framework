@@ -46,22 +46,27 @@ public abstract class DelegatingTransactionDefinition implements TransactionDefi
 	}
 
 
+	@Override
 	public int getPropagationBehavior() {
 		return this.targetDefinition.getPropagationBehavior();
 	}
 
+	@Override
 	public int getIsolationLevel() {
 		return this.targetDefinition.getIsolationLevel();
 	}
 
+	@Override
 	public int getTimeout() {
 		return this.targetDefinition.getTimeout();
 	}
 
+	@Override
 	public boolean isReadOnly() {
 		return this.targetDefinition.isReadOnly();
 	}
 
+	@Override
 	public String getName() {
 		return this.targetDefinition.getName();
 	}
