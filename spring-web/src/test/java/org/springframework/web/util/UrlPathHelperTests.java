@@ -16,15 +16,14 @@
 
 package org.springframework.web.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.io.UnsupportedEncodingException;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -111,6 +110,11 @@ public class UrlPathHelperTests {
 
 		request.setRequestURI("/foo;a=b;jsessionid=c0o7fszeb1;c=d");
 		assertEquals("jsessionid should always be removed", "/foo;a=b;c=d", helper.getRequestUri(request));
+
+		// SPR-10398
+
+		request.setRequestURI("/foo;a=b;JSESSIONID=c0o7fszeb1;c=d");
+		assertEquals("JSESSIONID should always be removed", "/foo;a=b;c=d", helper.getRequestUri(request));
 	}
 
 	@Test
