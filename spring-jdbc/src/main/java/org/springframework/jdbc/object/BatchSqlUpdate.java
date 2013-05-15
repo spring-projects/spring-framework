@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,10 +22,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 
 /**
  * SqlUpdate subclass that performs batch update operations. Encapsulates
@@ -54,6 +59,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 	private int batchSize = DEFAULT_BATCH_SIZE;
 
 	private boolean trackRowsAffected = true;
+	
+	private Map<String, ?> namedParamMap = null;
 
 	private final LinkedList<Object[]> parameterQueue = new LinkedList<Object[]>();
 
@@ -171,6 +178,36 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 		return -1;
 	}
+	
+	/**
+	 * Overridden version of {@code updateByNamedParam} that adds the given named statement
+	 * parameters to the queue rather than executing them immediately.
+	 * <p>You need to call {@code flush} to actually execute the batch.
+	 * If the specified batch size is reached, an implicit flush will happen;
+	 * you still need to finally call {@code flush} to flush all statements.
+	 * @param paramMap Map of parameter name to parameter object,
+	 * matching named parameters specified in the SQL statement
+	 * @return the number of rows affected by the update (always -1,
+	 * meaning "not applicable", as the statement is not actually
+	 * executed by this method)
+	 * @see #flush
+	 */
+	@Override
+	public int updateByNamedParam(Map<String, ?> paramMap) throws DataAccessException {
+		validateNamedParameters(paramMap);
+		this.parameterQueue.add(new Object[]{paramMap});
+		this.namedParamMap = paramMap;
+		
+		if (this.parameterQueue.size() == this.batchSize) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Triggering auto-flush because queue reached batch size of " + this.batchSize);
+			}
+			
+			flush();
+		}
+		
+		return -1;
+	}
 
 	/**
 	 * Trigger any queued update operations to be added as a final batch.
@@ -179,6 +216,10 @@ public class BatchSqlUpdate extends SqlUpdate {
 	public int[] flush() {
 		if (this.parameterQueue.isEmpty()) {
 			return new int[0];
+		}
+		
+		if (this.namedParamMap != null) {
+			return flushWithNamedParam();
 		}
 
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
@@ -201,6 +242,61 @@ public class BatchSqlUpdate extends SqlUpdate {
 		}
 
 		return rowsAffected;
+	}
+	
+	/**
+	 * Trigger any queued update operations to be added as a final batch
+	 * (In case of queue which contains named parameter map.)
+	 * @return an array of the number of rows affected by each statement
+	 */
+	protected int[] flushWithNamedParam() {
+		int[] rowsAffected = getJdbcTemplate().batchUpdate(
+				getNamedParameterParsedSql(),
+				new BatchPreparedStatementSetter() {
+					public int getBatchSize() {
+						return parameterQueue.size();
+					}
+					public void setValues(PreparedStatement ps, int index) throws SQLException {
+						Object[] params = convertNamedParamMap(parameterQueue.removeFirst());
+						newPreparedStatementSetter(params).setValues(ps);
+					}
+				});
+		
+		for (int rowCount : rowsAffected) {
+			checkRowsAffected(rowCount);
+			if (this.trackRowsAffected) {
+				this.rowsAffected.add(rowCount);
+			}
+		}
+		
+		return rowsAffected;
+	}
+
+	/**
+	 * Return the parsed sql that named parameter is replaced by '?' (prepared statement binding)
+	 * @see SqlUpdate#updateByNamedParam  
+	 */
+	protected String getNamedParameterParsedSql() {
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(namedParamMap);
+		return NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+	}
+	
+	/**
+	 * Return params array which is suitable for {@code newPreparedStatementSetter}
+	 * and converted from named parameter map.
+	 * @param Object array which contains named parameter map
+	 * @see SqlUpdate#updateByNamedParam  
+	 * @see SqlOperation#newPreparedStatementSetter
+	 */
+	protected Object[] convertNamedParamMap(Object[] map) {
+		if(map[0] instanceof Map) {
+			
+		}
+		Map<String, ?> paramMap = (Map<String, ?>) map[0];
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
+		return NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
 	}
 
 	/**
