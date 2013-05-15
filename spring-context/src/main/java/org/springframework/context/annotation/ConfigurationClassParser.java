@@ -85,8 +85,6 @@ class ConfigurationClassParser {
 
 	private final ProblemReporter problemReporter;
 
-	private final ImportStack importStack = new ImportStack();
-
 	private final Environment environment;
 
 	private final ResourceLoader resourceLoader;
@@ -100,6 +98,8 @@ class ConfigurationClassParser {
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
 
 	private final Stack<PropertySource<?>> propertySources = new Stack<PropertySource<?>>();
+
+	private final ImportStack importStack = new ImportStack();
 
 
 	/**
@@ -377,23 +377,27 @@ class ConfigurationClassParser {
 			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			try {
 				for (Object candidate : classesToImport) {
-					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate : this.metadataReaderFactory.getMetadataReader((String) candidate));
+					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate :
+							this.metadataReaderFactory.getMetadataReader((String) candidate));
 					if (checkAssignability(ImportSelector.class, candidateToCheck)) {
 						// the candidate class is an ImportSelector -> delegate to it to determine imports
-						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate : this.resourceLoader.getClassLoader().loadClass((String) candidate));
+						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
+								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						processImport(configClass, Arrays.asList(selector.selectImports(importingClassMetadata)), false);
 					}
 					else if (checkAssignability(ImportBeanDefinitionRegistrar.class, candidateToCheck)) {
 						// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
-						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate : this.resourceLoader.getClassLoader().loadClass((String) candidate));
+						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
+								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
 						invokeAwareMethods(registrar);
 						registrar.registerBeanDefinitions(importingClassMetadata, this.registry);
 					}
 					else {
 						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						this.importStack.registerImport(importingClassMetadata.getClassName(), (candidate instanceof Class ? ((Class) candidate).getName() : (String) candidate));
+						this.importStack.registerImport(importingClassMetadata.getClassName(),
+								(candidate instanceof Class ? ((Class) candidate).getName() : (String) candidate));
 						processConfigurationClass(candidateToCheck instanceof Class ? new ConfigurationClass((Class) candidateToCheck, true) :
 								new ConfigurationClass((MetadataReader) candidateToCheck, true));
 					}
@@ -457,7 +461,7 @@ class ConfigurationClassParser {
 		return this.propertySources;
 	}
 
-	public ImportRegistry getImportRegistry() {
+	ImportRegistry getImportRegistry() {
 		return this.importStack;
 	}
 
