@@ -82,9 +82,9 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	private final TaskScheduler taskScheduler;
 
-	private final List<String> sockJsPrefixes = new ArrayList<String>();
+	private final List<String> validSockJsPrefixes = new ArrayList<String>();
 
-	private final Set<String> sockJsPathCache = new CopyOnWriteArraySet<String>();
+	private final Set<String> knownSockJsPrefixes = new CopyOnWriteArraySet<String>();
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -119,16 +119,16 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 */
 	public void setValidSockJsPrefixes(String... prefixes) {
 
-		this.sockJsPrefixes.clear();
+		this.validSockJsPrefixes.clear();
 		for (String prefix : prefixes) {
 			if (prefix.endsWith("/") && (prefix.length() > 1)) {
 				prefix = prefix.substring(0, prefix.length() - 1);
 			}
-			this.sockJsPrefixes.add(prefix);
+			this.validSockJsPrefixes.add(prefix);
 		}
 
 		// sort with longest prefix at the top
-		Collections.sort(this.sockJsPrefixes, Collections.reverseOrder(new Comparator<String>() {
+		Collections.sort(this.validSockJsPrefixes, Collections.reverseOrder(new Comparator<String>() {
 			@Override
 			public int compare(String o1, String o2) {
 				return new Integer(o1.length()).compareTo(new Integer(o2.length()));
@@ -323,11 +323,11 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		String path = request.getURI().getPath();
 
 		// SockJS prefix hints?
-		if (!this.sockJsPrefixes.isEmpty()) {
-			for (String prefix : this.sockJsPrefixes) {
+		if (!this.validSockJsPrefixes.isEmpty()) {
+			for (String prefix : this.validSockJsPrefixes) {
 				int index = path.indexOf(prefix);
 				if (index != -1) {
-					this.sockJsPathCache.add(path.substring(0, index + prefix.length()));
+					this.knownSockJsPrefixes.add(path.substring(0, index + prefix.length()));
 					return path.substring(index + prefix.length());
 				}
 			}
@@ -336,13 +336,13 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 		// SockJS info request?
 		if (path.endsWith("/info")) {
-			this.sockJsPathCache.add(path.substring(0, path.length() - 6));
+			this.knownSockJsPrefixes.add(path.substring(0, path.length() - "/info".length()));
 			return "/info";
 		}
 
 		// Have we seen this prefix before (following the initial /info request)?
 		String match = null;
-		for (String sockJsPath : this.sockJsPathCache) {
+		for (String sockJsPath : this.knownSockJsPrefixes) {
 			if (path.startsWith(sockJsPath)) {
 				if ((match == null) || (match.length() < sockJsPath.length())) {
 					match = sockJsPath;
@@ -350,7 +350,12 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 			}
 		}
 		if (match != null) {
-			return path.substring(match.length());
+			String result = path.substring(match.length());
+			Assert.isTrue(result.charAt(0)  == '/', "Invalid SockJS path extracted from incoming path \"" +
+					path + "\". The extracted SockJS path is \"" + result +
+					"\". It was extracted from these known SockJS prefixes " + this.knownSockJsPrefixes +
+					". Consider setting 'validSockJsPrefixes' on DefaultSockJsService.");
+			return result;
 		}
 
 		// SockJS greeting?
@@ -358,7 +363,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 		String lastSegment = pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
 
 		if ((TransportType.fromValue(lastSegment) == null) && !lastSegment.startsWith("iframe")) {
-			this.sockJsPathCache.add(path);
+			this.knownSockJsPrefixes.add(path);
 			return "";
 		}
 

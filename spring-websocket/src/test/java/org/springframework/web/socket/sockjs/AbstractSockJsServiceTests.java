@@ -71,13 +71,20 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 	public void getSockJsPathForInfoRequest() throws Exception {
 
 		handleRequest("GET", "/a/info", HttpStatus.OK);
+
 		assertTrue(this.servletResponse.getContentAsString().startsWith("{\"entropy\":"));
+
+		handleRequest("GET", "/a/server/session/xhr", HttpStatus.OK);
+
+		assertEquals("session", this.service.sessionId);
+		assertEquals(TransportType.XHR, this.service.transportType);
+		assertSame(this.handler, this.service.handler);
 
 		this.service.setValidSockJsPrefixes("/b");
 
 		handleRequest("GET", "/a/info", HttpStatus.NOT_FOUND);
-
 		handleRequest("GET", "/b/info", HttpStatus.OK);
+
 		assertTrue(this.servletResponse.getContentAsString().startsWith("{\"entropy\":"));
 	}
 
