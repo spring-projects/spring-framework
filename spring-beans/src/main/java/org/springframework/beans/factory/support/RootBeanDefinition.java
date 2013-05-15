@@ -171,7 +171,11 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param original the original bean definition to copy from
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
-		this((BeanDefinition) original);
+		super(original);
+		this.decoratedDefinition = original.decoratedDefinition;
+		this.allowCaching = original.allowCaching;
+		this.targetType = original.targetType;
+		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
 	}
 
 	/**
@@ -181,13 +185,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	RootBeanDefinition(BeanDefinition original) {
 		super(original);
-		if (original instanceof RootBeanDefinition) {
-			RootBeanDefinition originalRbd = (RootBeanDefinition) original;
-			this.decoratedDefinition = originalRbd.decoratedDefinition;
-			this.allowCaching = originalRbd.allowCaching;
-			this.targetType = originalRbd.targetType;
-			this.isFactoryMethodUnique = originalRbd.isFactoryMethodUnique;
-		}
 	}
 
 

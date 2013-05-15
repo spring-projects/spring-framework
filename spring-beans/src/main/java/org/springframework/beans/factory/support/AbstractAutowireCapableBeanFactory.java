@@ -308,12 +308,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		RootBeanDefinition bd = null;
 		if (mbd instanceof RootBeanDefinition) {
 			RootBeanDefinition rbd = (RootBeanDefinition) mbd;
-			if (rbd.isPrototype()) {
-				bd = rbd;
-			}
+			bd = (rbd.isPrototype() ? rbd : rbd.cloneBeanDefinition());
 		}
-		if (bd == null) {
-			bd = new RootBeanDefinition(mbd);
+		if (!mbd.isPrototype()) {
+			if (bd == null) {
+				bd = new RootBeanDefinition(mbd);
+			}
 			bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 			bd.allowCaching = false;
 		}
