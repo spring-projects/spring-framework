@@ -90,27 +90,16 @@ class ConfigurationClassParser {
 
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
 			new Comparator<ConfigurationClassParser.DeferredImportSelectorHolder>() {
-		@Override
-		public int compare(DeferredImportSelectorHolder o1,
-				DeferredImportSelectorHolder o2) {
-			return AnnotationAwareOrderComparator.INSTANCE.compare(
-					o1.getImportSelector(), o2.getImportSelector());
-		}
-	};
+				@Override
+				public int compare(DeferredImportSelectorHolder o1, DeferredImportSelectorHolder o2) {
+					return AnnotationAwareOrderComparator.INSTANCE.compare(o1.getImportSelector(), o2.getImportSelector());
+				}
+			};
+
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
 	private final ProblemReporter problemReporter;
-
-	private final ImportStack importStack = new ImportStack();
-
-	private final Set<String> knownSuperclasses = new LinkedHashSet<String>();
-
-	private final Set<ConfigurationClass> configurationClasses =
-		new LinkedHashSet<ConfigurationClass>();
-
-	private final Stack<PropertySource<?>> propertySources =
-		new Stack<PropertySource<?>>();
 
 	private final Environment environment;
 
@@ -118,12 +107,20 @@ class ConfigurationClassParser {
 
 	private final BeanDefinitionRegistry registry;
 
-	private final ComponentScanAnnotationParser componentScanParser;
-
 	private final BeanNameGenerator beanNameGenerator;
 
-	private final List<DeferredImportSelectorHolder> deferredImportSelectors =
-			new LinkedList<DeferredImportSelectorHolder>();
+	private final ComponentScanAnnotationParser componentScanParser;
+
+	private final Set<ConfigurationClass> configurationClasses = new LinkedHashSet<ConfigurationClass>();
+
+	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
+
+	private final Stack<PropertySource<?>> propertySources = new Stack<PropertySource<?>>();
+
+	private final ImportStack importStack = new ImportStack();
+
+	private final List<DeferredImportSelectorHolder> deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
+
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
@@ -142,6 +139,7 @@ class ConfigurationClassParser {
 		this.componentScanParser = new ComponentScanAnnotationParser(
 				resourceLoader, environment, componentScanBeanNameGenerator, registry);
 	}
+
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
 		for (BeanDefinitionHolder holder : configCandidates) {
@@ -177,35 +175,39 @@ class ConfigurationClassParser {
 	 * @param clazz the Class to parse
 	 * @param beanName must not be null (as of Spring 3.1.1)
 	 */
-	protected void parse(Class<?> clazz, String beanName) throws IOException {
+	public void parse(Class<?> clazz, String beanName) throws IOException {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
 	}
 
-	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
-		AnnotationMetadata metadata = configClass.getMetadata();
 
-		if (ConditionalAnnotationHelper.shouldSkip(configClass, this.registry,
-				this.environment, this.beanNameGenerator)) {
+	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
+		if (ConditionalAnnotationHelper.shouldSkip(configClass, this.registry, this.environment, this.beanNameGenerator)) {
 			return;
 		}
-
-		// recursively process the configuration class and its superclass hierarchy
-		do {
-			metadata = doProcessConfigurationClass(configClass, metadata);
-		}
-		while (metadata != null);
 
 		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
 			// Let's remove the old one and go with the new one.
 			this.configurationClasses.remove(configClass);
+			for (Iterator<ConfigurationClass> it = this.knownSuperclasses.values().iterator(); it.hasNext();) {
+				if (configClass.equals(it.next())) {
+					it.remove();
+				}
+			}
 		}
+
+		// Recursively process the configuration class and its superclass hierarchy.
+		AnnotationMetadata metadata = configClass.getMetadata();
+		do {
+			metadata = doProcessConfigurationClass(configClass, metadata);
+		}
+		while (metadata != null);
 
 		this.configurationClasses.add(configClass);
 	}
 
 	/**
-	 * @return annotation metadata of superclass, null if none found or previously processed
+	 * @return annotation metadata of superclass, {@code null} if none found or previously processed
 	 */
 	protected AnnotationMetadata doProcessConfigurationClass(
 			ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
@@ -219,7 +221,7 @@ class ConfigurationClassParser {
 			processPropertySource(propertySource);
 		}
 
-		// process any @ComponentScan annotions
+		// process any @ComponentScan annotations
 		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
@@ -235,7 +237,6 @@ class ConfigurationClassParser {
 		}
 
 		// process any @Import annotations
-
 		Set<Object> imports = new LinkedHashSet<Object>();
 		Set<Object> visited = new LinkedHashSet<Object>();
 		collectImports(metadata, imports, visited);
@@ -262,7 +263,8 @@ class ConfigurationClassParser {
 		// process superclass, if any
 		if (metadata.hasSuperClass()) {
 			String superclass = metadata.getSuperClassName();
-			if (this.knownSuperclasses.add(superclass)) {
+			if (!this.knownSuperclasses.containsKey(superclass)) {
+				this.knownSuperclasses.put(superclass, configClass);
 				// superclass found, return its annotation metadata and recurse
 				if (metadata instanceof StandardAnnotationMetadata) {
 					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
@@ -416,7 +418,7 @@ class ConfigurationClassParser {
 				throw new BeanDefinitionStoreException("Failed to load bean class: ", ex);
 			}
 		}
-		deferredImportSelectors.clear();
+		this.deferredImportSelectors.clear();
 	}
 
 	private void processImport(ConfigurationClass configClass, Collection<?> classesToImport, boolean checkForCircularImports) throws IOException {
@@ -435,9 +437,9 @@ class ConfigurationClassParser {
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						invokeAwareMethods(selector);
 						if(selector instanceof DeferredImportSelector) {
-							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(
-									configClass, (DeferredImportSelector) selector));
-						} else {
+							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
+						}
+						else {
 							processImport(configClass, Arrays.asList(selector.selectImports(importingClassMetadata)), false);
 						}
 					}
@@ -516,7 +518,7 @@ class ConfigurationClassParser {
 		return this.propertySources;
 	}
 
-	public ImportRegistry getImportRegistry() {
+	ImportRegistry getImportRegistry() {
 		return this.importStack;
 	}
 
@@ -582,6 +584,27 @@ class ConfigurationClassParser {
 	}
 
 
+	private static class DeferredImportSelectorHolder {
+
+		private final ConfigurationClass configurationClass;
+
+		private final DeferredImportSelector importSelector;
+
+		public DeferredImportSelectorHolder(ConfigurationClass configurationClass, DeferredImportSelector importSelector) {
+			this.configurationClass = configurationClass;
+			this.importSelector = importSelector;
+		}
+
+		public ConfigurationClass getConfigurationClass() {
+			return this.configurationClass;
+		}
+
+		public DeferredImportSelector getImportSelector() {
+			return this.importSelector;
+		}
+	}
+
+
 	/**
 	 * {@link Problem} registered upon detection of a circular {@link Import}.
 	 */
@@ -596,24 +619,4 @@ class ConfigurationClassParser {
 		}
 	}
 
-
-	private static class DeferredImportSelectorHolder {
-
-		private ConfigurationClass configurationClass;
-
-		private DeferredImportSelector importSelector;
-
-		public DeferredImportSelectorHolder(ConfigurationClass configurationClass, DeferredImportSelector importSelector) {
-			this.configurationClass = configurationClass;
-			this.importSelector = importSelector;
-		}
-
-		public ConfigurationClass getConfigurationClass() {
-			return configurationClass;
-		}
-
-		public DeferredImportSelector getImportSelector() {
-			return importSelector;
-		}
-	}
 }

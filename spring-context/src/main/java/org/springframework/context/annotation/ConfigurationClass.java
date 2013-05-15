@@ -36,8 +36,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Represents a user-defined {@link Configuration @Configuration} class.
- * Includes a set of {@link Bean} methods, including all such methods defined in the
- * ancestry of the class, in a 'flattened-out' manner.
+ * Includes a set of {@link Bean} methods, including all such methods
+ * defined in the ancestry of the class, in a 'flattened-out' manner.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -52,14 +52,14 @@ final class ConfigurationClass {
 
 	private final Resource resource;
 
-	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
-			new LinkedHashMap<String, Class<? extends BeanDefinitionReader>>();
-
-	private final Set<BeanMethod> beanMethods = new LinkedHashSet<BeanMethod>();
-
 	private String beanName;
 
 	private final ConfigurationClass importedBy;
+
+	private final Set<BeanMethod> beanMethods = new LinkedHashSet<BeanMethod>();
+
+	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
+			new LinkedHashMap<String, Class<? extends BeanDefinitionReader>>();
 
 
 	/**
@@ -99,7 +99,7 @@ final class ConfigurationClass {
 	 * @see ConfigurationClass#ConfigurationClass(Class, ConfigurationClass)
 	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
-		Assert.hasText(beanName, "bean name must not be null");
+		Assert.hasText(beanName, "Bean name must not be null");
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.beanName = beanName;
@@ -133,6 +133,14 @@ final class ConfigurationClass {
 		return ClassUtils.getShortName(getMetadata().getClassName());
 	}
 
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
+	public String getBeanName() {
+		return this.beanName;
+	}
+
 	/**
 	 * Return whether this configuration class was registered via @{@link Import} or
 	 * automatically registered due to being nested within another configuration class.
@@ -153,14 +161,6 @@ final class ConfigurationClass {
 		return importedBy;
 	}
 
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	public String getBeanName() {
-		return this.beanName;
-	}
-
 	public void addBeanMethod(BeanMethod method) {
 		this.beanMethods.add(method);
 	}
@@ -169,8 +169,7 @@ final class ConfigurationClass {
 		return this.beanMethods;
 	}
 
-	public void addImportedResource(
-			String importedResource, Class<? extends BeanDefinitionReader> readerClass) {
+	public void addImportedResource(String importedResource, Class<? extends BeanDefinitionReader> readerClass) {
 		this.importedResources.put(importedResource, readerClass);
 	}
 
@@ -178,32 +177,29 @@ final class ConfigurationClass {
 		return this.importedResources;
 	}
 
+
 	public void validate(ProblemReporter problemReporter) {
-		// An @Bean method may only be overloaded through inheritance. No single
-		// @Configuration class may declare two @Bean methods with the same name.
-		final char hashDelim = '#';
-		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
-		for (BeanMethod beanMethod : beanMethods) {
-			String dClassName = beanMethod.getMetadata().getDeclaringClassName();
-			String methodName = beanMethod.getMetadata().getMethodName();
-			String fqMethodName = dClassName + hashDelim + methodName;
-			Integer currentCount = methodNameCounts.get(fqMethodName);
-			int newCount = currentCount != null ? currentCount + 1 : 1;
-			methodNameCounts.put(fqMethodName, newCount);
-		}
-
-		for (String methodName : methodNameCounts.keySet()) {
-			int count = methodNameCounts.get(methodName);
-			if (count > 1) {
-				String shortMethodName = methodName.substring(methodName.indexOf(hashDelim)+1);
-				problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName, count));
-			}
-		}
-
 		// A configuration class may not be final (CGLIB limitation)
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
 			if (getMetadata().isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
+			}
+		}
+
+		// An @Bean method may only be overloaded through inheritance. No single
+		// @Configuration class may declare two @Bean methods with the same name.
+		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
+		for (BeanMethod beanMethod : this.beanMethods) {
+			String fqMethodName = beanMethod.getFullyQualifiedMethodName();
+			Integer currentCount = methodNameCounts.get(fqMethodName);
+			int newCount = currentCount != null ? currentCount + 1 : 1;
+			methodNameCounts.put(fqMethodName, newCount);
+		}
+		for (String fqMethodName : methodNameCounts.keySet()) {
+			int count = methodNameCounts.get(fqMethodName);
+			if (count > 1) {
+				String shortMethodName = ConfigurationMethod.getShortMethodName(fqMethodName);
+				problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName, count));
 			}
 		}
 
