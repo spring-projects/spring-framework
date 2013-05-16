@@ -19,7 +19,6 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -121,24 +120,24 @@ public abstract class AnnotationUtils {
 	 */
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
 		A annotation = getAnnotation(method, annotationType);
-		Class<?> cl = method.getDeclaringClass();
+		Class<?> clazz = method.getDeclaringClass();
 		if (annotation == null) {
-			annotation = searchOnInterfaces(method, annotationType, cl.getInterfaces());
+			annotation = searchOnInterfaces(method, annotationType, clazz.getInterfaces());
 		}
 		while (annotation == null) {
-			cl = cl.getSuperclass();
-			if (cl == null || cl == Object.class) {
+			clazz = clazz.getSuperclass();
+			if (clazz == null || clazz.equals(Object.class)) {
 				break;
 			}
 			try {
-				Method equivalentMethod = cl.getDeclaredMethod(method.getName(), method.getParameterTypes());
+				Method equivalentMethod = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 				annotation = getAnnotation(equivalentMethod, annotationType);
 			}
 			catch (NoSuchMethodException ex) {
 				// No equivalent method found
 			}
 			if (annotation == null) {
-				annotation = searchOnInterfaces(method, annotationType, cl.getInterfaces());
+				annotation = searchOnInterfaces(method, annotationType, clazz.getInterfaces());
 			}
 		}
 		return annotation;
@@ -217,7 +216,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 		Class<?> superClass = clazz.getSuperclass();
-		if (superClass == null || superClass == Object.class) {
+		if (superClass == null || superClass.equals(Object.class)) {
 			return null;
 		}
 		return findAnnotation(superClass, annotationType);
@@ -273,25 +272,22 @@ public abstract class AnnotationUtils {
 	 * @return the first {@link Class} in the inheritance hierarchy of the specified
 	 * {@code clazz} which declares an annotation of at least one of the specified
 	 * {@code annotationTypes}, or {@code null} if not found
+	 * @since 3.2.2
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
 	 * @see #findAnnotationDeclaringClass(Class, Class)
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
-	 * @since 3.2.2
 	 */
-	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes,
-			Class<?> clazz) {
+	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes, Class<?> clazz) {
 		Assert.notEmpty(annotationTypes, "The list of annotation types must not be empty");
 		if (clazz == null || clazz.equals(Object.class)) {
 			return null;
 		}
-
 		for (Class<? extends Annotation> annotationType : annotationTypes) {
 			if (isAnnotationDeclaredLocally(annotationType, clazz)) {
 				return clazz;
 			}
 		}
-
 		return findAnnotationDeclaringClassForTypes(annotationTypes, clazz.getSuperclass());
 	}
 
