@@ -8,6 +8,7 @@ Changes in version 3.2.3 (2013-05-17)
 
 * compatibility with OpenJDK 8 for target 1.5/1.6/1.7 compiled Spring Framework 3.2.x applications (SPR-9639)
 * compatibility with OSGI-style use of generics in source code that got compiled to 1.4 byte code (SPR-10559)
+* consistent detection of Order annotation in superclasses and interfaces (SPR-10514)
 * fixed regression with type detection for child bean definitions (SPR-10374)
 * fixed configuration class overriding in terms of superclasses (SPR-10546)
 * minimized ASM usage during configuration class processing (SPR-10292)
