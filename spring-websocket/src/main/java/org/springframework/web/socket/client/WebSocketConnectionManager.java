@@ -24,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 
 /**
@@ -61,11 +60,9 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	/**
 	 * Decorate the WebSocketHandler provided to the class constructor.
 	 * <p>
-	 * By default {@link ExceptionWebSocketHandlerDecorator} and
-	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
+	 * By default {@link LoggingWebSocketHandlerDecorator} is added.
 	 */
 	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
-		handler = new ExceptionWebSocketHandlerDecorator(handler);
 		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 

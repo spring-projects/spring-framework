@@ -34,7 +34,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.StandardEndpointAdapter;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
-import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -60,17 +59,14 @@ public class StandardWebSocketClientTests {
 
 		WebSocketHandler handler = new WebSocketHandlerAdapter();
 		WebSocketContainer webSocketContainer = mock(WebSocketContainer.class);
-		StandardWebSocketClient client = new StandardWebSocketClient();
-		client.setWebSocketContainer(webSocketContainer);
+		StandardWebSocketClient client = new StandardWebSocketClient(webSocketContainer);
 		WebSocketSession session = client.doHandshake(handler, headers, uri);
 
 		ArgumentCaptor<Endpoint> endpointArg = ArgumentCaptor.forClass(Endpoint.class);
 		ArgumentCaptor<ClientEndpointConfig> configArg = ArgumentCaptor.forClass(ClientEndpointConfig.class);
 		ArgumentCaptor<URI> uriArg = ArgumentCaptor.forClass(URI.class);
 
-
 		verify(webSocketContainer).connectToServer(endpointArg.capture(), configArg.capture(), uriArg.capture());
-
 
 		assertNotNull(endpointArg.getValue());
 		assertEquals(StandardEndpointAdapter.class, endpointArg.getValue().getClass());
@@ -86,4 +82,5 @@ public class StandardWebSocketClientTests {
 		assertEquals(uri, session.getUri());
 		assertEquals("example.com", session.getRemoteHostName());
 	}
+
 }

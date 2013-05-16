@@ -16,8 +16,6 @@
 
 package org.springframework.web.socket;
 
-import java.io.Reader;
-import java.io.StringReader;
 
 /**
  * A {@link WebSocketMessage} that contains a textual {@link String} payload.
@@ -44,13 +42,6 @@ public final class TextMessage extends WebSocketMessage<String> {
 	 */
 	public TextMessage(CharSequence payload, boolean isLast) {
 		super(payload.toString(), isLast);
-	}
-
-	/**
-	 * Returns access to the message payload as a {@link Reader}.
-	 */
-	public Reader getReader() {
-		return new StringReader(getPayload());
 	}
 
 	@Override

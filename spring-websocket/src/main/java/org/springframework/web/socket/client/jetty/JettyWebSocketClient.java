@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.JettyWebSocketListenerAdapter;
@@ -126,12 +127,19 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 			throws WebSocketConnectFailureException {
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
-		return doHandshake(webSocketHandler, null, uriComponents);
+		return doHandshake(webSocketHandler, null, uriComponents.toUri());
 	}
 
 	@Override
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException {
+
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		Assert.notNull(uri, "uri is required");
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Connecting to " + uri);
+		}
 
 		// TODO: populate headers
 

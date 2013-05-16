@@ -27,7 +27,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
-import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 
@@ -69,11 +68,7 @@ public class WebSocketConnectionManagerTests {
 		WebSocketHandlerDecorator loggingHandler = captor.getValue();
 		assertEquals(LoggingWebSocketHandlerDecorator.class, loggingHandler.getClass());
 
-		WebSocketHandlerDecorator exceptionHandler = (WebSocketHandlerDecorator) loggingHandler.getDelegate();
-		assertNotNull(exceptionHandler);
-		assertEquals(ExceptionWebSocketHandlerDecorator.class, exceptionHandler.getClass());
-
-		assertSame(handler, exceptionHandler.getDelegate());
+		assertSame(handler, loggingHandler.getDelegate());
 	}
 
 	@Test
