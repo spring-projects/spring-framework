@@ -1,5 +1,5 @@
 Spring Framework version ${version}
-================================================================================
+==================================================================================
 
 To find out what has changed since any earlier releases, see 'docs/changelog.txt'.
 
