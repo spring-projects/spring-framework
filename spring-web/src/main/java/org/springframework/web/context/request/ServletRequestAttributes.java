@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.request;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -50,7 +50,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private volatile HttpSession session;
 
-	private final Map<String, Object> sessionAttributesToUpdate = new HashMap<String, Object>();
+	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
 
 
 	/**
@@ -104,9 +104,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 				try {
 					Object value = session.getAttribute(name);
 					if (value != null) {
-						synchronized (this.sessionAttributesToUpdate) {
-							this.sessionAttributesToUpdate.put(name, value);
-						}
+						this.sessionAttributesToUpdate.put(name, value);
 					}
 					return value;
 				}
@@ -129,9 +127,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		}
 		else {
 			HttpSession session = getSession(true);
-			synchronized (this.sessionAttributesToUpdate) {
-				this.sessionAttributesToUpdate.remove(name);
-			}
+			this.sessionAttributesToUpdate.remove(name);
 			session.setAttribute(name, value);
 		}
 	}
@@ -147,9 +143,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		else {
 			HttpSession session = getSession(false);
 			if (session != null) {
-				synchronized (this.sessionAttributesToUpdate) {
-					this.sessionAttributesToUpdate.remove(name);
-				}
+				this.sessionAttributesToUpdate.remove(name);
 				try {
 					session.removeAttribute(name);
 					// Remove any registered destruction callback as well.
@@ -228,24 +222,22 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		// Store session reference for access after request completion.
 		this.session = this.request.getSession(false);
 		// Update all affected session attributes.
-		synchronized (this.sessionAttributesToUpdate) {
-			if (this.session != null) {
-				try {
-					for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
-						String name = entry.getKey();
-						Object newValue = entry.getValue();
-						Object oldValue = this.session.getAttribute(name);
-						if (oldValue == newValue) {
-							this.session.setAttribute(name, newValue);
-						}
+		if (this.session != null) {
+			try {
+				for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+					String name = entry.getKey();
+					Object newValue = entry.getValue();
+					Object oldValue = this.session.getAttribute(name);
+					if (oldValue == newValue) {
+						this.session.setAttribute(name, newValue);
 					}
 				}
-				catch (IllegalStateException ex) {
-					// Session invalidated - shouldn't usually happen.
-				}
 			}
-			this.sessionAttributesToUpdate.clear();
+			catch (IllegalStateException ex) {
+				// Session invalidated - shouldn't usually happen.
+			}
 		}
+		this.sessionAttributesToUpdate.clear();
 	}
 
 	/**
