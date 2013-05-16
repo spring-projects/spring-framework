@@ -1,0 +1,23 @@
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:5.2 http://www.infinispan.org/schemas/infinispan-config-5.2.xsd"
+        xmlns="urn:infinispan:config:5.2">
+
+
+    <default>
+        <eviction strategy="LIRS"
+                  maxEntries="10000" />
+        <expiration
+                maxIdle="120000"
+                lifespan="120000" />
+    </default>
+
+    <namedCache name="myCache1">
+        <eviction strategy="LIRS"
+                  maxEntries="300" />
+        <expiration maxIdle="500000"
+                    lifespan="500000"/>
+    </namedCache>
+
+
+</infinispan>
