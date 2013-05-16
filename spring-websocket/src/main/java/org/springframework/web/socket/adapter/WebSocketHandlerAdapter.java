@@ -38,7 +38,7 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 	}
 
 	@Override
-	public final void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		if (message instanceof TextMessage) {
 			handleTextMessage(session, (TextMessage) message);
 		}
@@ -46,7 +46,6 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 			handleBinaryMessage(session, (BinaryMessage) message);
 		}
 		else {
-			// should not happen
 			throw new IllegalStateException("Unexpected WebSocket message type: " + message);
 		}
 	}
@@ -63,6 +62,11 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+	}
+
+	@Override
+	public boolean supportsPartialMessages() {
+		return false;
 	}
 
 }

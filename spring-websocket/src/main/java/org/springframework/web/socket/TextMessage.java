@@ -27,12 +27,23 @@ import java.io.StringReader;
  */
 public final class TextMessage extends WebSocketMessage<String> {
 
+
 	/**
 	 * Create a new {@link TextMessage} instance.
 	 * @param payload the payload
+	 * @param isLast whether this the last part of a message received or transmitted in parts
 	 */
 	public TextMessage(CharSequence payload) {
-		super(payload.toString());
+		super(payload.toString(), true);
+	}
+
+	/**
+	 * Create a new {@link TextMessage} instance.
+	 * @param payload the payload
+	 * @param isLast whether this the last part of a message received or transmitted in parts
+	 */
+	public TextMessage(CharSequence payload, boolean isLast) {
+		super(payload.toString(), isLast);
 	}
 
 	/**
@@ -40,6 +51,11 @@ public final class TextMessage extends WebSocketMessage<String> {
 	 */
 	public Reader getReader() {
 		return new StringReader(getPayload());
+	}
+
+	@Override
+	protected int getPayloadSize() {
+		return getPayload().length();
 	}
 
 }

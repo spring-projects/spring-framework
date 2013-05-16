@@ -15,8 +15,6 @@
  */
 package org.springframework.web.socket;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 
@@ -34,11 +32,9 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	/**
 	 * Create a new {@link BinaryMessage} instance.
 	 * @param payload a non-null payload
-	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(ByteBuffer payload) {
-		super(payload);
-		this.bytes = null;
+		this(payload, true);
 	}
 
 	/**
@@ -46,8 +42,26 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	 * @param payload a non-null payload
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
+	public BinaryMessage(ByteBuffer payload, boolean isLast) {
+		super(payload, isLast);
+		this.bytes = null;
+	}
+
+	/**
+	 * Create a new {@link BinaryMessage} instance.
+	 * @param payload a non-null payload
+	 */
 	public BinaryMessage(byte[] payload) {
-		this(payload, 0, (payload == null ? 0 : payload.length));
+		this(payload, 0, (payload == null ? 0 : payload.length), true);
+	}
+
+	/**
+	 * Create a new {@link BinaryMessage} instance.
+	 * @param payload a non-null payload
+	 * @param isLast if the message is the last of a series of partial messages
+	 */
+	public BinaryMessage(byte[] payload, boolean isLast) {
+		this(payload, 0, (payload == null ? 0 : payload.length), isLast);
 	}
 
 	/**
@@ -58,8 +72,8 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 	 * @param len the length of the array considered for the payload
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
-	public BinaryMessage(byte[] payload, int offset, int len) {
-		super(payload != null ? ByteBuffer.wrap(payload, offset, len) : null);
+	public BinaryMessage(byte[] payload, int offset, int len, boolean isLast) {
+		super(payload != null ? ByteBuffer.wrap(payload, offset, len) : null, isLast);
 		if(offset == 0 && len == payload.length) {
 			this.bytes = payload;
 		}
@@ -82,18 +96,9 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 		return result;
 	}
 
-	/**
-	 * Returns access to the message payload as an {@link InputStream}.
-	 */
-	public InputStream getInputStream() {
-		byte[] array = getByteArray();
-		return (array != null) ? new ByteArrayInputStream(array) : null;
-	}
-
 	@Override
-	public String toString() {
-		int size = (getPayload() != null) ? getPayload().remaining() : 0;
-		return "WebSocket binary message size=" + size;
+	protected int getPayloadSize() {
+		return (getPayload() != null) ? getPayload().remaining() : 0;
 	}
 
 }

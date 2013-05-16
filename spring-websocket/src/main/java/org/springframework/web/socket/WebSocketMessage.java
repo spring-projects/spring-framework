@@ -31,14 +31,17 @@ public abstract class WebSocketMessage<T> {
 
 	private final T payload;
 
+	private final boolean last;
+
 
 	/**
 	 * Create a new {@link WebSocketMessage} instance with the given payload.
 	 * @param payload a non-null payload
 	 */
-	WebSocketMessage(T payload) {
+	WebSocketMessage(T payload, boolean isLast) {
 		Assert.notNull(payload, "Payload must not be null");
 		this.payload = payload;
+		this.last = isLast;
 	}
 
 	/**
@@ -48,9 +51,13 @@ public abstract class WebSocketMessage<T> {
 		return this.payload;
 	}
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " [payload=" + this.payload + "]";
+	/**
+	 * Whether this is the last part of a message, when partial message support on a
+	 * {@link WebSocketHandler} is enabled. If partial message support is not enabled the
+	 * returned value is always {@code true}.
+	 */
+	public boolean isLast() {
+		return this.last;
 	}
 
 	@Override
@@ -69,5 +76,12 @@ public abstract class WebSocketMessage<T> {
 		WebSocketMessage otherMessage = (WebSocketMessage) other;
 		return ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload);
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [payload length=" + getPayloadSize() + ", last=" + isLast() + "]";
+	}
+
+	protected abstract int getPayloadSize();
 
 }

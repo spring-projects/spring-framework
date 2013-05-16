@@ -57,9 +57,16 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	private final Map<WebSocketSession, WebSocketHandler> handlers =
 			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
 
+	private final boolean supportsPartialMessages;
+
 
 	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType) {
+		this(handlerType, false);
+	}
+
+	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType, boolean supportsPartialMessages) {
 		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
+		this.supportsPartialMessages = supportsPartialMessages;
 	}
 
 	@Override
@@ -110,6 +117,11 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 		catch (Throwable t) {
 			logger.warn("Error while destroying handler", t);
 		}
+	}
+
+	@Override
+	public boolean supportsPartialMessages() {
+		return this.supportsPartialMessages;
 	}
 
 	@Override

@@ -73,4 +73,9 @@ public interface WebSocketHandler {
 	 */
 	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception;
 
+	/**
+	 * Whether the WebSocketHandler handles messages in parts.
+	 */
+	boolean supportsPartialMessages();
+
 }

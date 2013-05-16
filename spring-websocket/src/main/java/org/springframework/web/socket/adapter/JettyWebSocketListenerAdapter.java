@@ -74,7 +74,7 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	@Override
 	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		BinaryMessage message = new BinaryMessage(payload, offset, len);
+		BinaryMessage message = new BinaryMessage(payload, offset, len, true);
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}

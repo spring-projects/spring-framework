@@ -110,12 +110,12 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
-		this.session.getBasicRemote().sendText(message.getPayload());
+		this.session.getBasicRemote().sendText(message.getPayload(), message.isLast());
 	}
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		this.session.getBasicRemote().sendBinary(message.getPayload());
+		this.session.getBasicRemote().sendBinary(message.getPayload(), message.isLast());
 	}
 
 	@Override

@@ -63,6 +63,12 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 	}
 
 	@Override
+	public boolean supportsPartialMessages() {
+		return this.delegate.supportsPartialMessages();
+	}
+
+
+	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [delegate=" + this.delegate + "]";
 	}
