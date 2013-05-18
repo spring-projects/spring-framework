@@ -961,7 +961,7 @@ configure(rootProject) {
 		gradleVersion = "1.6"
 
 		doLast() {
-			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
+			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
 			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
 			File wrapperFile = file("gradlew")
 			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
