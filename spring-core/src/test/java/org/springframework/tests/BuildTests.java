@@ -30,7 +30,7 @@ public class BuildTests {
 	@Test
 	public void javaVersion() throws Exception {
 		Assume.group(TestGroup.CI);
-		assertThat("Java Version", JavaVersion.runningVersion(), equalTo(JavaVersion.JAVA_16));
+		assertThat("Java Version", JavaVersion.runningVersion(), equalTo(JavaVersion.JAVA_17));
 	}
 
 }
