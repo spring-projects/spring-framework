@@ -42,14 +42,14 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
 
-### compile and test, build all jars, distribution zips and docs
-`./gradlew build`
+### import sources into your IDE
+Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
 
 ### install all spring-\* jars into your local Maven cache
 `./gradlew install`
 
-### import sources into your IDE
-Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
+### compile and test, build all jars, distribution zips and docs
+`./gradlew build`
 
 ... and discover more commands with `./gradlew tasks`. See also the [Gradle
 build and release FAQ][].
