@@ -44,6 +44,7 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 ### import sources into your IDE
 Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
+> **Note:** Per the prerequisites above, ensure that you have JDK 8 configured properly in your IDE.
 
 ### install all spring-\* jars into your local Maven cache
 `./gradlew install`
