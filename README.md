@@ -37,7 +37,9 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 ### prerequisites
 
-[Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88].
+[Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88] (get 
+the JDK and don't get the lambda edition). Set the environment variable `JAVA_HOME`
+to point to the `jdk1.8.0` folder extracted from the JDK download.
 
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
