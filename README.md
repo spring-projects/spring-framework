@@ -37,16 +37,21 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 ### prerequisites
 
-[Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88] (get 
-the JDK and don't get the lambda edition). Set the environment variable `JAVA_HOME`
-to point to the `jdk1.8.0` folder extracted from the JDK download.
+[Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88]
+> **Note:** Do not use the "lambda" edition of JDK b88 when building the
+ramework, as it still causes some errors. It should be fine, however, to
+*run* against various versions of OpenJDK 1.8, lambda or otherwise.
+
+Be sure that your `JAVA_HOME` environment variable points to the `jdk1.8.0` folder
+extracted from the JDK download.
 
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
 
 ### import sources into your IDE
 Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
-> **Note:** Per the prerequisites above, ensure that you have JDK 8 configured properly in your IDE.
+> **Note:** Per the prerequisites above, ensure that you have JDK 8 configured
+properly in your IDE.
 
 ### install all spring-\* jars into your local Maven cache
 `./gradlew install`
