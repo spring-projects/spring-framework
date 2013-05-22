@@ -121,7 +121,7 @@ class MergePlugin implements Plugin<Project> {
 		project.configurations.each { configuration ->
 			Conf2ScopeMapping mapping = project.conf2ScopeMappings.getMapping([configuration])
 			if(mapping.scope) {
-				Configuration intoConfiguration = project.merge.into.create(
+				Configuration intoConfiguration = project.merge.into.configurations.create(
 					project.name + "-" + configuration.name)
 				configuration.excludeRules.each {
 					configuration.exclude([
@@ -153,13 +153,6 @@ class MergePlugin implements Plugin<Project> {
 			}
 		});
 	}
-
-//	private Configuration createConfiguration(Project project, String name) {
-//		if (project.configurations.respondsTo('create', String)) {
-//			return project.configurations.create(name)
-//		}
-//		project.configurations.add(name)
-//	}
 }
 
 class MergeModel {
