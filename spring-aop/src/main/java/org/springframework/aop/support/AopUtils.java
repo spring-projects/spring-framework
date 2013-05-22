@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -157,6 +159,22 @@ public abstract class AopUtils {
 		return (method != null && method.getName().equals("finalize") &&
 				method.getParameterTypes().length == 0);
 	}
+
+    public static boolean isReadExternalMethod(Method method) {
+        if (method == null || !method.getName().equals("readExternal")) {
+            return false;
+        }
+        Class<?>[] paramTypes = method.getParameterTypes();
+        return (paramTypes.length == 1 && paramTypes[0] == ObjectInput.class);
+    }
+
+    public static boolean isWriteExternalMethod(Method method) {
+        if (method == null || !method.getName().equals("writeExternal")) {
+            return false;
+        }
+        Class<?>[] paramTypes = method.getParameterTypes();
+        return (paramTypes.length == 1 && paramTypes[0] == ObjectOutput.class);
+    }
 
 	/**
 	 * Given a method, which may come from an interface, and a target class used

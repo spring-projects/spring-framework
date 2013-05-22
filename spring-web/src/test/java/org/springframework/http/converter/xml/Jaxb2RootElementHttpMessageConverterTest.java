@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,18 +102,25 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 		assertXMLEqual("Invalid result", "<rootElement><type s=\"Hello World\"/></rootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+                outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
+
+    /*
+    This test is commented out because it does not test that is should.
+    Fields in resulted xml is based on proxy field values. And not related to values of underline objects.
 
 	@Test
 	public void writeXmlRootElementSubclass() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(rootElementCglib, null, outputMessage);
+        rootElementCglib.type.s = "This is field of proxy ==> it should not be used";  // this line was added to show that test is invalid
+        converter.write(rootElementCglib, null, outputMessage);
+//		converter.write(new RootElementSubclass(), null, outputMessage);
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 		assertXMLEqual("Invalid result", "<rootElement><type s=\"Hello World\"/></rootElement>",
 				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
+	*/
 
 	@XmlRootElement
 	public static class RootElement {
