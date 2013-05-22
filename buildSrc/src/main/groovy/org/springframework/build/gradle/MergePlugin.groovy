@@ -67,8 +67,8 @@ class MergePlugin implements Plugin<Project> {
 		project.plugins.apply(IdeaPlugin)
 
 		MergeModel model = project.extensions.create("merge", MergeModel)
-		project.configurations.add("merging")
-		Configuration runtimeMerge = project.configurations.add("runtimeMerge")
+		project.configurations.create("merging")
+		Configuration runtimeMerge = project.configurations.create("runtimeMerge")
 
 		// Ensure the IDE can reference merged projects
 		project.eclipse.classpath.plusConfigurations += [runtimeMerge]
@@ -121,7 +121,7 @@ class MergePlugin implements Plugin<Project> {
 		project.configurations.each { configuration ->
 			Conf2ScopeMapping mapping = project.conf2ScopeMappings.getMapping([configuration])
 			if(mapping.scope) {
-				Configuration intoConfiguration = project.merge.into.configurations.add(
+				Configuration intoConfiguration = project.merge.into.create(
 					project.name + "-" + configuration.name)
 				configuration.excludeRules.each {
 					configuration.exclude([
@@ -153,6 +153,13 @@ class MergePlugin implements Plugin<Project> {
 			}
 		});
 	}
+
+//	private Configuration createConfiguration(Project project, String name) {
+//		if (project.configurations.respondsTo('create', String)) {
+//			return project.configurations.create(name)
+//		}
+//		project.configurations.add(name)
+//	}
 }
 
 class MergeModel {
