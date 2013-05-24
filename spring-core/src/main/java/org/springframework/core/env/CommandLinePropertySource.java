@@ -185,7 +185,7 @@ import org.springframework.util.StringUtils;
  * @see SimpleCommandLinePropertySource
  * @see JOptCommandLinePropertySource
  */
-public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
+public abstract class CommandLinePropertySource<T> extends EnumerablePropertySource<T> {
 
 	/** The default name given to {@link CommandLinePropertySource} instances: {@value} */
 	public static final String COMMAND_LINE_PROPERTY_SOURCE_NAME = "commandLineArgs";
@@ -218,7 +218,7 @@ public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
 	public void setNonOptionArgsPropertyName(String nonOptionArgsPropertyName) {
 		this.nonOptionArgsPropertyName = nonOptionArgsPropertyName;
 	}
-
+	
 	/**
 	 * Return whether this {@code PropertySource} contains a property with the given name.
 	 * <p>This implementation first checks to see if the name specified is the special

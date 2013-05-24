@@ -94,6 +94,14 @@ public class SimpleCommandLinePropertySource extends CommandLinePropertySource<C
 	public SimpleCommandLinePropertySource(String name, String[] args) {
 		super(name, new SimpleCommandLineArgsParser().parse(args));
 	}
+	
+	/**
+	 * Get the property names for the option arguments.
+	 */
+	@Override
+	public String[] getPropertyNames() {
+		return source.getOptionNames().toArray(new String[source.getOptionNames().size()]);
+	}
 
 	@Override
 	protected boolean containsOption(String name) {
