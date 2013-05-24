@@ -67,6 +67,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
+//		mavenCentral()
 	}
 
 	dependencies {
@@ -273,6 +274,7 @@ project("spring-aop") {
 		compile(project(":spring-beans"))
 		compile("aopalliance:aopalliance:1.0")
 		optional("com.jamonapi:jamon:2.4")
+		optional("org.objenesis:objenesis:1.3")
 		optional("commons-pool:commons-pool:1.5.3")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}

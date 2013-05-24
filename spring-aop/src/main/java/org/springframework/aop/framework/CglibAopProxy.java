@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,27 @@
 
 package org.springframework.aop.framework;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-
-import org.springframework.cglib.core.CodeGenerationException;
-import org.springframework.cglib.proxy.Callback;
-import org.springframework.cglib.proxy.CallbackFilter;
-import org.springframework.cglib.proxy.Dispatcher;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.cglib.proxy.NoOp;
-import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.aop.Advisor;
-import org.springframework.aop.AopInvocationException;
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.RawTargetAccess;
-import org.springframework.aop.TargetSource;
+import org.springframework.aop.*;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.cglib.core.CodeGenerationException;
+import org.springframework.cglib.core.DefaultGeneratorStrategy;
+import org.springframework.cglib.proxy.*;
+import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
 import org.springframework.core.SmartClassLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.*;
 
 /**
  * CGLIB-based {@link AopProxy} implementation for the Spring AOP framework.
@@ -89,6 +76,8 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	private static final int DISPATCH_ADVISED = 4;
 	private static final int INVOKE_EQUALS = 5;
 	private static final int INVOKE_HASHCODE = 6;
+	private static final int INVOKE_WRITE_EXTERNAL = 7;
+	private static final int INVOKE_READ_EXTERNAL = 8;
 
 
 	/** Logger available to subclasses; static to optimize serialization */
@@ -182,13 +171,14 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			}
 			enhancer.setSuperclass(proxySuperClass);
 			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
-			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
-			enhancer.setInterceptDuringConstruction(false);
 
 			Callback[] callbacks = getCallbacks(rootClass);
-			enhancer.setCallbacks(callbacks);
-			enhancer.setCallbackFilter(new ProxyCallbackFilter(
-					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
+
+            boolean skipSuperclassSerialization = ObjenesisSupport.isObjenesisAvaliable() &&
+                    (Serializable.class.isAssignableFrom(proxySuperClass) || Externalizable.class.isAssignableFrom(proxySuperClass));
+
+            enhancer.setCallbackFilter(new ProxyCallbackFilter(
+					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset, skipSuperclassSerialization));
 
 			Class<?>[] types = new Class[callbacks.length];
 			for (int x = 0; x < types.length; x++) {
@@ -196,16 +186,37 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			}
 			enhancer.setCallbackTypes(types);
 
-			// Generate the proxy class and create a proxy instance.
-			Object proxy;
-			if (this.constructorArgs != null) {
-				proxy = enhancer.create(this.constructorArgTypes, this.constructorArgs);
+            Class[] interfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
+            if (ObjenesisSupport.isObjenesisAvaliable()){
+                enhancer.setInterceptDuringConstruction(true);// we will not call constructor => we need interception enabled right now
+                if (skipSuperclassSerialization){
+                    Class[] interfacesWithExternalizable = new Class[interfaces.length+1];
+                    for (int i = 0; i < interfaces.length; i++) {
+                        interfacesWithExternalizable[i] = interfaces[i];
+                    }
+                    interfacesWithExternalizable[interfacesWithExternalizable.length-1] = Externalizable.class;
+                    enhancer.setInterfaces(interfacesWithExternalizable);
+                }else{
+                    enhancer.setInterfaces(interfaces);
+                }
+                Class clazz = enhancer.createClass();
+                Object proxy = new ObjenesisSupport().newInstance(clazz);
+                if (skipSuperclassSerialization){
+                    Enhancer.registerStaticCallbacks(clazz, callbacks);
+                }else{
+                    ((Factory) proxy).setCallbacks(callbacks);
+                }
+				return proxy;
+			}else{
+                enhancer.setInterceptDuringConstruction(false);
+                enhancer.setInterfaces(interfaces);
+				enhancer.setCallbacks(callbacks);
+				if (this.constructorArgs != null) {
+					return enhancer.create(this.constructorArgTypes, this.constructorArgs);
+				}else {
+					return enhancer.create();
+				}
 			}
-			else {
-				proxy = enhancer.create();
-			}
-
-			return proxy;
 		}
 		catch (CodeGenerationException ex) {
 			throw new AopConfigException("Could not generate CGLIB subclass of class [" +
@@ -294,9 +305,12 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			aopInterceptor, // for normal advice
 			targetInterceptor, // invoke target without considering advice, if optimized
 			new SerializableNoOp(), // no override for methods mapped to this
-			targetDispatcher, this.advisedDispatcher,
+			targetDispatcher,
+            this.advisedDispatcher,
 			new EqualsInterceptor(this.advised),
-			new HashCodeInterceptor(this.advised)
+			new HashCodeInterceptor(this.advised),
+            new WriteExternalInterceptor(),
+            new ReadExternalInterceptor()
 		};
 
 		Callback[] callbacks;
@@ -557,6 +571,55 @@ final class CglibAopProxy implements AopProxy, Serializable {
 		}
 	}
 
+	private static class ReadExternalInterceptor implements MethodInterceptor, Serializable {
+
+		public Void intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws IOException, ClassNotFoundException, IllegalAccessException {
+            ObjectInput input = (ObjectInput) args[0];
+            Field[] declaredFields = proxy.getClass().getDeclaredFields();
+            Arrays.sort(declaredFields, new Comparator<Field>() {
+                @Override
+                public int compare(Field o1, Field o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+
+            for (Field declaredField : declaredFields) {
+                if (Modifier.isTransient(declaredField.getModifiers()) || Modifier.isStatic(declaredField.getModifiers())){
+                    continue;
+                }
+                declaredField.setAccessible(true);
+                declaredField.set(proxy, input.readObject());
+            }
+
+            return null;
+		}
+	}
+
+	private static class WriteExternalInterceptor implements MethodInterceptor, Serializable {
+
+		public Void intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws IOException, ClassNotFoundException, IllegalAccessException {
+            ObjectOutput output = (ObjectOutput) args[0];
+            Field[] declaredFields = proxy.getClass().getDeclaredFields();
+            Arrays.sort(declaredFields, new Comparator<Field>() {
+                @Override
+                public int compare(Field o1, Field o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+
+            for (Field declaredField : declaredFields) {
+                if (Modifier.isTransient(declaredField.getModifiers()) || Modifier.isStatic(declaredField.getModifiers())){
+                    continue;
+                }
+                declaredField.setAccessible(true);
+                Object value = declaredField.get(proxy);
+                output.writeObject(value);
+            }
+
+            return null;
+		}
+	}
+
 
 	/**
 	 * Interceptor used specifically for advised methods on a frozen, static proxy.
@@ -712,11 +775,14 @@ final class CglibAopProxy implements AopProxy, Serializable {
 
 		private final int fixedInterceptorOffset;
 
-		public ProxyCallbackFilter(AdvisedSupport advised, Map<String, Integer> fixedInterceptorMap, int fixedInterceptorOffset) {
+        private final boolean skipSuperclassSerialization;
+
+        public ProxyCallbackFilter(AdvisedSupport advised, Map<String, Integer> fixedInterceptorMap, int fixedInterceptorOffset, boolean skipSuperclassSerialization) {
 			this.advised = advised;
 			this.fixedInterceptorMap = fixedInterceptorMap;
 			this.fixedInterceptorOffset = fixedInterceptorOffset;
-		}
+            this.skipSuperclassSerialization = skipSuperclassSerialization;
+        }
 
 		/**
 		 * Implementation of CallbackFilter.accept() to return the index of the
@@ -776,6 +842,18 @@ final class CglibAopProxy implements AopProxy, Serializable {
 				logger.debug("Found 'hashCode' method: " + method);
 				return INVOKE_HASHCODE;
 			}
+
+            if (AopUtils.isReadExternalMethod(method) && skipSuperclassSerialization) {
+                logger.debug("Found 'readExternal' method: " + method);
+                return INVOKE_READ_EXTERNAL;
+            }
+
+            if (AopUtils.isWriteExternalMethod(method) && skipSuperclassSerialization) {
+                logger.debug("Found 'writeExternal' method: " + method);
+                return INVOKE_WRITE_EXTERNAL;
+            }
+
+
 			Class<?> targetClass = this.advised.getTargetClass();
 			// Proxy is not yet available, but that shouldn't matter.
 			List<?> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
