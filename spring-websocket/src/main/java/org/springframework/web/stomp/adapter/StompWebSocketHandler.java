@@ -23,6 +23,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.stomp.StompCommand;
+import org.springframework.web.stomp.StompHeaders;
 import org.springframework.web.stomp.StompMessage;
 import org.springframework.web.stomp.StompSession;
 import org.springframework.web.stomp.support.StompMessageConverter;
@@ -54,18 +56,43 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) {
 
 		StompSession stompSession = this.sessions.get(session.getId());
 		Assert.notNull(stompSession, "No STOMP session for WebSocket session id=" + session.getId());
 
-		StompMessage stompMessage = this.messageConverter.toStompMessage(message.getPayload());
-		this.messageProcessor.processMessage(stompSession, stompMessage);
+		try {
+			StompMessage stompMessage = this.messageConverter.toStompMessage(message.getPayload());
+			stompMessage.setSessionId(stompSession.getId());
+
+			// TODO: validate size limits
+			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
+
+			this.messageProcessor.processMessage(stompSession, stompMessage);
+
+			// TODO: send RECEIPT message if incoming message has "receipt" header
+			// http://stomp.github.io/stomp-specification-1.2.html#Header_receipt
+
+		}
+		catch (Throwable error) {
+			StompHeaders headers = new StompHeaders();
+			headers.setMessage(error.getMessage());
+			StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
+			try {
+				stompSession.sendMessage(errorMessage);
+			}
+			catch (Throwable t) {
+				// ignore
+			}
+		}
 	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		this.sessions.remove(session.getId());
+		StompSession stompSession = this.sessions.remove(session.getId());
+		if (stompSession != null) {
+			this.messageProcessor.processConnectionClosed(stompSession);
+		}
 	}
 
 }

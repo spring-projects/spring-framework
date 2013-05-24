@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.stomp.StompCommand;
 import org.springframework.web.stomp.StompException;
 import org.springframework.web.stomp.StompHeaders;
@@ -37,7 +37,6 @@ import reactor.core.Reactor;
 import reactor.fn.Consumer;
 import reactor.fn.Event;
 import reactor.fn.Registration;
-import reactor.fn.Tuple;
 
 /**
  * @author Gary Russell
@@ -59,35 +58,66 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 		this.reactor = reactor;
 	}
 
-	public void processMessage(StompSession session, StompMessage message) throws IOException {
+	public void processMessage(StompSession session, StompMessage message) {
 
-		StompCommand command = message.getCommand();
-		Assert.notNull(command, "STOMP command not found");
-
-		if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
-			connect(session, message);
+		try {
+			StompCommand command = message.getCommand();
+			if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
+				connect(session, message);
+			}
+			else if (StompCommand.SUBSCRIBE.equals(command)) {
+				subscribe(session, message);
+			}
+			else if (StompCommand.UNSUBSCRIBE.equals(command)) {
+				unsubscribe(session, message);
+			}
+			else if (StompCommand.SEND.equals(command)) {
+				send(session, message);
+			}
+			else if (StompCommand.DISCONNECT.equals(command)) {
+				disconnect(session, message);
+			}
+			else if (StompCommand.ACK.equals(command) || StompCommand.NACK.equals(command)) {
+				// TODO
+				logger.warn("Ignoring " + command + ". It is not supported yet.");
+			}
+			else if (StompCommand.BEGIN.equals(command) || StompCommand.COMMIT.equals(command) || StompCommand.ABORT.equals(command)) {
+				// TODO
+				logger.warn("Ignoring " + command + ". It is not supported yet.");
+			}
+			else {
+				sendErrorMessage(session, "Invalid STOMP command " + command);
+			}
 		}
-		else if (StompCommand.SUBSCRIBE.equals(command)) {
-			subscribe(session, message);
-		}
-		else if (StompCommand.UNSUBSCRIBE.equals(command)) {
-			unsubscribe(session, message);
-		}
-		else if (StompCommand.SEND.equals(command)) {
-			send(session, message);
-		}
-		else if (StompCommand.DISCONNECT.equals(command)) {
-			disconnect(session);
-		}
-		else {
-			throw new IllegalStateException("Unexpected command: " + command);
+		catch (Throwable t) {
+			handleError(session, t);
 		}
 	}
 
-	protected void connect(StompSession session, StompMessage connectMessage) throws IOException {
+	private void handleError(final StompSession session, Throwable t) {
+		logger.error("Terminating STOMP session due to failure to send message: ", t);
+		sendErrorMessage(session, t.getMessage());
+		if (removeSubscriptions(session.getId())) {
+			// TODO: send error event and including exception info
+		}
+	}
+
+	private void sendErrorMessage(StompSession session, String errorText) {
+		StompHeaders headers = new StompHeaders();
+		headers.setMessage(errorText);
+		StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
+		try {
+			session.sendMessage(errorMessage);
+		}
+		catch (Throwable t) {
+			// ignore
+		}
+	}
+
+	protected void connect(StompSession session, StompMessage stompMessage) throws IOException {
 
 		StompHeaders headers = new StompHeaders();
-		Set<String> acceptVersions = connectMessage.getHeaders().getAcceptVersion();
+		Set<String> acceptVersions = stompMessage.getHeaders().getAcceptVersion();
 		if (acceptVersions.contains("1.2")) {
 			headers.setVersion("1.2");
 		}
@@ -105,15 +135,18 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 
 		// TODO: security
 
-		this.reactor.notify(StompCommand.CONNECT, Fn.event(session.getId()));
-
 		session.sendMessage(new StompMessage(StompCommand.CONNECTED, headers));
+
+		this.reactor.notify(StompCommand.CONNECT, Fn.event(stompMessage));
 	}
 
-	protected void subscribe(final StompSession session, StompMessage message) {
+	protected void subscribe(final StompSession session, StompMessage stompMessage) {
 
-		final String subscription = message.getHeaders().getId();
+		final String subscription = stompMessage.getHeaders().getId();
 		String replyToKey = StompCommand.SUBSCRIBE + ":" + session.getId() + ":" + subscription;
+
+		// TODO: extract and remember "ack" mode
+		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE_ack_Header
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Adding subscription with replyToKey=" + replyToKey);
@@ -126,17 +159,19 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 				try {
 					session.sendMessage(event.getData());
 				}
-				catch (IOException e) {
-					// TODO: stomp error, close session, websocket close status
-					ReactorServerStompMessageProcessor.this.removeSubscriptions(session.getId());
-					e.printStackTrace();
+				catch (Throwable t) {
+					handleError(session, t);
 				}
 			}
 		});
 
 		addSubscription(session.getId(), registration);
 
-		this.reactor.notify(StompCommand.SUBSCRIBE, Fn.event(Tuple.of(session.getId(), message), replyToKey));
+		this.reactor.notify(StompCommand.SUBSCRIBE, Fn.event(stompMessage, replyToKey));
+
+		// TODO: need a way to communicate back if subscription was successfully created or
+		// not in which case an ERROR should be sent back and close the connection
+		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
 	}
 
 	private void addSubscription(String sessionId, Registration<?> registration) {
@@ -148,27 +183,38 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 		list.add(registration);
 	}
 
-	protected void unsubscribe(StompSession session, StompMessage message) {
-		this.reactor.notify(StompCommand.UNSUBSCRIBE, Fn.event(Tuple.of(session.getId(), message)));
+	protected void unsubscribe(StompSession session, StompMessage stompMessage) {
+		this.reactor.notify(StompCommand.UNSUBSCRIBE, Fn.event(stompMessage));
 	}
 
-	protected void send(StompSession session, StompMessage message) {
-		this.reactor.notify(StompCommand.SEND, Fn.event(Tuple.of(session.getId(), message)));
+	protected void send(StompSession session, StompMessage stompMessage) {
+		this.reactor.notify(StompCommand.SEND, Fn.event(stompMessage));
 	}
 
-	protected void disconnect(StompSession session) {
+	protected void disconnect(StompSession session, StompMessage stompMessage) {
 		String sessionId = session.getId();
 		removeSubscriptions(sessionId);
-		this.reactor.notify(StompCommand.DISCONNECT, Fn.event(sessionId));
+		this.reactor.notify(StompCommand.DISCONNECT, Fn.event(stompMessage));
 	}
 
-	private void removeSubscriptions(String sessionId) {
+	private boolean removeSubscriptions(String sessionId) {
 		List<Registration<?>> registrations = this.subscriptionsBySession.remove(sessionId);
+		if (CollectionUtils.isEmpty(registrations)) {
+			return false;
+		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Cancelling " + registrations.size() + " subscriptions for session=" + sessionId);
 		}
 		for (Registration<?> registration : registrations) {
 			registration.cancel();
+		}
+		return true;
+	}
+
+	@Override
+	public void processConnectionClosed(StompSession session) {
+		if (removeSubscriptions(session.getId())) {
+			// TODO: this implies abnormal closure from the underlying transport (no DISCONNECT) .. send an error event
 		}
 	}
 

@@ -39,6 +39,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	private static final long serialVersionUID = 1L;
 
+	// TODO: separate client from server headers so they can't be mixed
+
 	// Client
 	private static final String ACCEPT_VERSION = "accept-version";
 
@@ -55,6 +57,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	private static final String SUBSCRIPTION = "subscription";
 
 	private static final String VERSION = "version";
+
+	private static final String MESSAGE = "message";
 
 	// Client and Server
 
@@ -161,6 +165,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	public void setSubscription(String id) {
 		set(SUBSCRIPTION, id);
+	}
+
+	public String getMessage() {
+		return getFirst(MESSAGE);
+	}
+
+	public void setMessage(String id) {
+		set(MESSAGE, id);
 	}
 
 

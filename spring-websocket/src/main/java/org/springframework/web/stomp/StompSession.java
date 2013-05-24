@@ -27,8 +27,10 @@ public interface StompSession {
 
 	String getId();
 
+	/**
+	 * If the message is a STOMP ERROR message, the session will also be closed.
+	 *
+	 */
 	void sendMessage(StompMessage message) throws IOException;
-
-	void close() throws Exception;
 
 }

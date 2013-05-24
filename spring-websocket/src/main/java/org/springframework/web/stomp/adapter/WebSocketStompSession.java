@@ -19,8 +19,10 @@ package org.springframework.web.stomp.adapter;
 import java.io.IOException;
 
 import org.springframework.util.Assert;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.stomp.StompCommand;
 import org.springframework.web.stomp.StompMessage;
 import org.springframework.web.stomp.StompSession;
 import org.springframework.web.stomp.support.StompMessageConverter;
@@ -53,19 +55,19 @@ public class WebSocketStompSession implements StompSession {
 
 	@Override
 	public void sendMessage(StompMessage message) throws IOException {
+
 		Assert.notNull(this.webSocketSession, "Cannot send message without active session");
-		byte[] bytes = this.messageConverter.fromStompMessage(message);
-		this.webSocketSession.sendMessage(new TextMessage(new String(bytes, StompMessage.CHARSET)));
-	}
 
-	public void sessionClosed() {
-		this.webSocketSession = null;
-	}
-
-	@Override
-	public void close() throws Exception {
-		this.webSocketSession.close();
-		this.webSocketSession = null;
+		try {
+			byte[] bytes = this.messageConverter.fromStompMessage(message);
+			this.webSocketSession.sendMessage(new TextMessage(new String(bytes, StompMessage.CHARSET)));
+		}
+		finally {
+			if (StompCommand.ERROR.equals(message.getCommand())) {
+				this.webSocketSession.close(CloseStatus.PROTOCOL_ERROR);
+				this.webSocketSession = null;
+			}
+		}
 	}
 
 }

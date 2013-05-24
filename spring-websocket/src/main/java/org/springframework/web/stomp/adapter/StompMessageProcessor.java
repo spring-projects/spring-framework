@@ -16,8 +16,6 @@
 
 package org.springframework.web.stomp.adapter;
 
-import java.io.IOException;
-
 import org.springframework.web.stomp.StompMessage;
 import org.springframework.web.stomp.StompSession;
 
@@ -28,6 +26,8 @@ import org.springframework.web.stomp.StompSession;
  */
 public interface StompMessageProcessor {
 
-	void processMessage(StompSession stompSession, StompMessage message) throws IOException;
+	void processMessage(StompSession stompSession, StompMessage message);
+
+	void processConnectionClosed(StompSession stompSession);
 
 }

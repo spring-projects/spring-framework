@@ -34,6 +34,8 @@ public class StompMessage {
 
 	private final byte[] payload;
 
+	private String sessionId;
+
 
 	public StompMessage(StompCommand command, StompHeaders headers, byte[] payload) {
 		this.command = command;
@@ -58,6 +60,14 @@ public class StompMessage {
 
 	public byte[] getPayload() {
 		return this.payload;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public String getStompSessionId() {
+		return this.sessionId;
 	}
 
 	@Override

@@ -32,7 +32,6 @@ import reactor.core.Reactor;
 import reactor.fn.Consumer;
 import reactor.fn.Event;
 import reactor.fn.Registration;
-import reactor.fn.Tuple2;
 
 
 /**
@@ -75,14 +74,12 @@ public class SimpleStompReactorService {
 	}
 
 
-	private final class SubscribeConsumer implements Consumer<Event<Tuple2<String, StompMessage>>> {
+	private final class SubscribeConsumer implements Consumer<Event<StompMessage>> {
 
 		@Override
-		public void accept(Event<Tuple2<String, StompMessage>> event) {
+		public void accept(Event<StompMessage> event) {
 
-			String sessionId = event.getData().getT1();
-			StompMessage message = event.getData().getT2();
-			final Object replyToKey = event.getReplyTo();
+			StompMessage message = event.getData();
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Subscribe " + message);
@@ -97,19 +94,19 @@ public class SimpleStompReactorService {
 							StompHeaders headers = new StompHeaders();
 							headers.setDestination(inMessage.getHeaders().getDestination());
 							StompMessage outMessage = new StompMessage(StompCommand.MESSAGE, headers, inMessage.getPayload());
-							SimpleStompReactorService.this.reactor.notify(replyToKey, Fn.event(outMessage));
+							SimpleStompReactorService.this.reactor.notify(event.getReplyTo(), Fn.event(outMessage));
 						}
 			});
 
-			addSubscription(sessionId, registration);
+			addSubscription(message.getStompSessionId(), registration);
 		}
 	}
 
-	private final class SendConsumer implements Consumer<Event<Tuple2<String, StompMessage>>> {
+	private final class SendConsumer implements Consumer<Event<StompMessage>> {
 
 		@Override
-		public void accept(Event<Tuple2<String, StompMessage>> event) {
-			StompMessage message = event.getData().getT2();
+		public void accept(Event<StompMessage> event) {
+			StompMessage message = event.getData();
 			logger.debug("Message received: " + message);
 
 			String destination = message.getHeaders().getDestination();
