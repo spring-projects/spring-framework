@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 /**
  * {@link CommandLinePropertySource} implementation backed by a JOpt {@link OptionSet}.
@@ -76,7 +77,20 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	protected boolean containsOption(String name) {
 		return this.source.has(name);
 	}
-
+	
+	@Override
+	public String[] getPropertyNames() {
+		List<String> names = new ArrayList<>();
+		for (OptionSpec<?> spec : source.specs()) {
+			List<String> aliases = new ArrayList<>(spec.options());
+			if (!aliases.isEmpty()) {
+				// Only the longest name is used for enumerating
+				names.add(aliases.get(aliases.size()-1));				
+			}
+		}
+		return names.toArray(new String[names.size()]);
+	}
+	
 	@Override
 	public List<String> getOptionValues(String name) {
 		List<?> argValues = this.source.valuesOf(name);
