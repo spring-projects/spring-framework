@@ -39,7 +39,7 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 
 [Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88]
 > **Note:** Do not use the "lambda" edition of JDK b88 when building the
-ramework, as it still causes some errors. It should be fine, however, to
+framework, as it still causes some errors. It should be fine, however, to
 *run* against various versions of OpenJDK 1.8, lambda or otherwise.
 
 Be sure that your `JAVA_HOME` environment variable points to the `jdk1.8.0` folder
