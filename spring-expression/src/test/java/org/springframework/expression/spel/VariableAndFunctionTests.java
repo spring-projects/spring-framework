@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,15 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.expression.AccessException;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -27,6 +33,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
  *
  * @author Andy Clement
+ * @author Oliver Becker
  */
 public class VariableAndFunctionTests extends ExpressionTestCase {
 
@@ -38,8 +45,8 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 
 	@Test
 	public void testVariableAccess_WellKnownVariables() {
-		evaluate("#this.getName()","Nikola Tesla",String.class);
-		evaluate("#root.getName()","Nikola Tesla",String.class);
+		evaluate("#this.getName()", "Nikola Tesla", String.class);
+		evaluate("#root.getName()", "Nikola Tesla", String.class);
 	}
 
 	@Test
@@ -88,6 +95,25 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 	}
 	// this method is used by the test above
 	public void nonStatic() {
+	}
+
+	@Test
+	public void testMethodExecutorFunction() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("timesTwo", new MethodExecutor() {
+			@Override
+			public TypedValue execute(EvaluationContext context, Object target,
+					Object... arguments) throws AccessException {
+				Integer anInteger = (Integer) context.getTypeConverter().convertValue(
+						arguments[0], TypeDescriptor.forObject(arguments[0]),
+						TypeDescriptor.valueOf(Integer.class));
+				return new TypedValue(anInteger * 2);
+			}
+		});
+		Object value = parser.parseRaw("#timesTwo(21)").getValue(ctx);
+		assertEquals(42, value);
+		assertEquals(Integer.class, value.getClass());
 	}
 
 }
