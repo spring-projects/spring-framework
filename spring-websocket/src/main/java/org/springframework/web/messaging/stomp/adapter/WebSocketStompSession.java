@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.web.stomp.adapter;
+package org.springframework.web.messaging.stomp.adapter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.util.Assert;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.StompSession;
+import org.springframework.web.messaging.stomp.support.StompMessageConverter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.stomp.StompCommand;
-import org.springframework.web.stomp.StompMessage;
-import org.springframework.web.stomp.StompSession;
-import org.springframework.web.stomp.support.StompMessageConverter;
 
 
 /**
@@ -39,6 +41,8 @@ public class WebSocketStompSession implements StompSession {
 	private WebSocketSession webSocketSession;
 
 	private final StompMessageConverter messageConverter;
+
+	private final List<Runnable> connectionClosedTasks = new ArrayList<Runnable>();
 
 
 	public WebSocketStompSession(WebSocketSession webSocketSession, StompMessageConverter messageConverter) {
@@ -66,6 +70,21 @@ public class WebSocketStompSession implements StompSession {
 			if (StompCommand.ERROR.equals(message.getCommand())) {
 				this.webSocketSession.close(CloseStatus.PROTOCOL_ERROR);
 				this.webSocketSession = null;
+			}
+		}
+	}
+
+	public void registerConnectionClosedCallback(Runnable task) {
+		this.connectionClosedTasks.add(task);
+	}
+
+	public void handleConnectionClosed() {
+		for (Runnable task : this.connectionClosedTasks) {
+			try {
+				task.run();
+			}
+			catch (Throwable t) {
+				// ignore
 			}
 		}
 	}

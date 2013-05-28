@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.stomp;
+package org.springframework.web.messaging.stomp;
 
 import java.io.IOException;
 
 
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -28,9 +27,15 @@ public interface StompSession {
 	String getId();
 
 	/**
+	 * TODO...
+	 * <p>
 	 * If the message is a STOMP ERROR message, the session will also be closed.
-	 *
 	 */
 	void sendMessage(StompMessage message) throws IOException;
+
+	/**
+	 * Register a task to be invoked if the underlying connection is closed.
+	 */
+	void registerConnectionClosedCallback(Runnable task);
 
 }

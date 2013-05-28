@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.web.stomp.adapter;
-
-import org.springframework.web.stomp.StompMessage;
-import org.springframework.web.stomp.StompSession;
+package org.springframework.web.messaging.stomp;
 
 
 /**
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface StompMessageProcessor {
+public enum StompCommand {
 
-	void processMessage(StompSession stompSession, StompMessage message);
+	// client
+	CONNECT,
+	STOMP,
+	SEND,
+	SUBSCRIBE,
+	UNSUBSCRIBE,
+	ACK,
+	NACK,
+	BEGIN,
+	COMMIT,
+	ABORT,
+	DISCONNECT,
 
-	void processConnectionClosed(StompSession stompSession);
+	// server
+	CONNECTED,
+	MESSAGE,
+	RECEIPT,
+	ERROR
 
 }

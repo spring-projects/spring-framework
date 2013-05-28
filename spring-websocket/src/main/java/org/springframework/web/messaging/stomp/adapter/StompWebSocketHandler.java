@@ -13,39 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.stomp.adapter;
+package org.springframework.web.messaging.stomp.adapter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.Assert;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompHeaders;
+import org.springframework.web.messaging.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.StompSession;
+import org.springframework.web.messaging.stomp.support.StompMessageConverter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.stomp.StompCommand;
-import org.springframework.web.stomp.StompHeaders;
-import org.springframework.web.stomp.StompMessage;
-import org.springframework.web.stomp.StompSession;
-import org.springframework.web.stomp.support.StompMessageConverter;
 
 
 /**
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
-	private final StompMessageProcessor messageProcessor;
+	private final StompMessageHandler messageHandler;
 
 	private final StompMessageConverter messageConverter = new StompMessageConverter();
 
-	private final Map<String, StompSession> sessions = new ConcurrentHashMap<String, StompSession>();
+	private final Map<String, WebSocketStompSession> sessions = new ConcurrentHashMap<String, WebSocketStompSession>();
 
 
-	public StompWebSocketHandler(StompMessageProcessor messageProcessor) {
-		this.messageProcessor = messageProcessor;
+	public StompWebSocketHandler(StompMessageHandler messageHandler) {
+		this.messageHandler = messageHandler;
 	}
 
 
@@ -68,7 +67,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
 
-			this.messageProcessor.processMessage(stompSession, stompMessage);
+			this.messageHandler.handleMessage(stompSession, stompMessage);
 
 			// TODO: send RECEIPT message if incoming message has "receipt" header
 			// http://stomp.github.io/stomp-specification-1.2.html#Header_receipt
@@ -89,9 +88,9 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		StompSession stompSession = this.sessions.remove(session.getId());
+		WebSocketStompSession stompSession = this.sessions.remove(session.getId());
 		if (stompSession != null) {
-			this.messageProcessor.processConnectionClosed(stompSession);
+			stompSession.handleConnectionClosed();
 		}
 	}
 

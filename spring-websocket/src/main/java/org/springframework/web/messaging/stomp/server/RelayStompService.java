@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.stomp.server;
+package org.springframework.web.messaging.stomp.server;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -31,10 +31,10 @@ import javax.net.SocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.web.stomp.StompCommand;
-import org.springframework.web.stomp.StompHeaders;
-import org.springframework.web.stomp.StompMessage;
-import org.springframework.web.stomp.support.StompMessageConverter;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompHeaders;
+import org.springframework.web.messaging.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.support.StompMessageConverter;
 
 import reactor.Fn;
 import reactor.core.Reactor;
@@ -47,9 +47,9 @@ import reactor.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class RelayStompReactorService {
+public class RelayStompService {
 
-	private static final Log logger = LogFactory.getLog(RelayStompReactorService.class);
+	private static final Log logger = LogFactory.getLog(RelayStompService.class);
 
 
 	private final Reactor reactor;
@@ -61,7 +61,7 @@ public class RelayStompReactorService {
 	private final TaskExecutor taskExecutor;
 
 
-	public RelayStompReactorService(Reactor reactor, TaskExecutor executor) {
+	public RelayStompService(Reactor reactor, TaskExecutor executor) {
 		this.reactor = reactor;
 		this.taskExecutor = executor; // For now, a naively way to manage socket reading
 
@@ -91,7 +91,7 @@ public class RelayStompReactorService {
 	}
 
 	private RelaySession getRelaySession(String stompSessionId) {
-		RelaySession session = RelayStompReactorService.this.relaySessions.get(stompSessionId);
+		RelaySession session = RelayStompService.this.relaySessions.get(stompSessionId);
 		Assert.notNull(session, "RelaySession not found");
 		return session;
 	}
@@ -188,8 +188,8 @@ public class RelayStompReactorService {
 					}
 					else if (b == 0x00) {
 						byte[] bytes = out.toByteArray();
-						StompMessage message = RelayStompReactorService.this.converter.toStompMessage(bytes);
-						RelayStompReactorService.this.reactor.notify(replyTo, Fn.event(message));
+						StompMessage message = RelayStompService.this.converter.toStompMessage(bytes);
+						RelayStompService.this.reactor.notify(replyTo, Fn.event(message));
 						out.reset();
 					}
 					else {
@@ -209,7 +209,7 @@ public class RelayStompReactorService {
 			StompHeaders headers = new StompHeaders();
 			headers.setMessage("Lost connection");
 			StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
-			RelayStompReactorService.this.reactor.notify(replyTo, Fn.event(errorMessage));
+			RelayStompService.this.reactor.notify(replyTo, Fn.event(errorMessage));
 		}
 	}
 

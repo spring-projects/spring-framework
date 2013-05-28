@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.stomp.server;
+package org.springframework.web.messaging.stomp.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,12 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.stomp.StompCommand;
-import org.springframework.web.stomp.StompException;
-import org.springframework.web.stomp.StompHeaders;
-import org.springframework.web.stomp.StompMessage;
-import org.springframework.web.stomp.StompSession;
-import org.springframework.web.stomp.adapter.StompMessageProcessor;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompException;
+import org.springframework.web.messaging.stomp.StompHeaders;
+import org.springframework.web.messaging.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.StompSession;
+import org.springframework.web.messaging.stomp.adapter.StompMessageHandler;
 
 import reactor.Fn;
 import reactor.core.Reactor;
@@ -43,24 +43,26 @@ import reactor.fn.Registration;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorServerStompMessageProcessor implements StompMessageProcessor {
+public class ServerStompMessageHandler implements StompMessageHandler {
 
-	private static Log logger = LogFactory.getLog(ReactorServerStompMessageProcessor.class);
+	private static Log logger = LogFactory.getLog(ServerStompMessageHandler.class);
 
 
 	private final Reactor reactor;
 
-	private Map<String, List<Registration<?>>> registrationsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
+	private Map<String, List<Registration<?>>> registrationsBySession =
+			new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public ReactorServerStompMessageProcessor(Reactor reactor) {
+	public ServerStompMessageHandler(Reactor reactor) {
 		this.reactor = reactor;
 	}
 
-	public void processMessage(StompSession session, StompMessage message) {
+	public void handleMessage(StompSession session, StompMessage message) {
 		try {
 			StompCommand command = message.getCommand();
 			if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
+				registerConnectionClosedCallback(session);
 				connect(session, message);
 			}
 			else if (StompCommand.SUBSCRIBE.equals(command)) {
@@ -90,6 +92,16 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 		catch (Throwable t) {
 			handleError(session, t);
 		}
+	}
+
+	private void registerConnectionClosedCallback(final StompSession session) {
+		session.registerConnectionClosedCallback(new Runnable() {
+			@Override
+			public void run() {
+				removeSubscriptions(session);
+				reactor.notify("CONNECTION_CLOSED", Fn.event(session.getId()));
+			}
+		});
 	}
 
 	private void handleError(final StompSession session, Throwable t) {
@@ -231,12 +243,6 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 			registration.cancel();
 		}
 		return true;
-	}
-
-	@Override
-	public void processConnectionClosed(StompSession session) {
-		removeSubscriptions(session);
-		this.reactor.notify("CONNECTION_CLOSED", Fn.event(session.getId()));
 	}
 
 }

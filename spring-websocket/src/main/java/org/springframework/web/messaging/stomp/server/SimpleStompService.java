@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.stomp.server;
+package org.springframework.web.messaging.stomp.server;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.web.stomp.StompCommand;
-import org.springframework.web.stomp.StompHeaders;
-import org.springframework.web.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompHeaders;
+import org.springframework.web.messaging.stomp.StompMessage;
 
 import reactor.Fn;
 import reactor.core.Reactor;
@@ -38,16 +38,16 @@ import reactor.fn.Registration;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleStompReactorService {
+public class SimpleStompService {
 
-	private static final Log logger = LogFactory.getLog(SimpleStompReactorService.class);
+	private static final Log logger = LogFactory.getLog(SimpleStompService.class);
 
 	private final Reactor reactor;
 
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public SimpleStompReactorService(Reactor reactor) {
+	public SimpleStompService(Reactor reactor) {
 		this.reactor = reactor;
 		this.reactor.on(Fn.$(StompCommand.SUBSCRIBE), new SubscribeConsumer());
 		this.reactor.on(Fn.$(StompCommand.SEND), new SendConsumer());
@@ -85,7 +85,7 @@ public class SimpleStompReactorService {
 				logger.debug("Subscribe " + message);
 			}
 
-			Registration<?> registration = SimpleStompReactorService.this.reactor.on(
+			Registration<?> registration = SimpleStompService.this.reactor.on(
 					Fn.$("destination:" + message.getHeaders().getDestination()),
 					new Consumer<Event<StompMessage>>() {
 						@Override
@@ -94,7 +94,7 @@ public class SimpleStompReactorService {
 							StompHeaders headers = new StompHeaders();
 							headers.setDestination(inMessage.getHeaders().getDestination());
 							StompMessage outMessage = new StompMessage(StompCommand.MESSAGE, headers, inMessage.getPayload());
-							SimpleStompReactorService.this.reactor.notify(event.getReplyTo(), Fn.event(outMessage));
+							SimpleStompService.this.reactor.notify(event.getReplyTo(), Fn.event(outMessage));
 						}
 			});
 
@@ -110,7 +110,7 @@ public class SimpleStompReactorService {
 			logger.debug("Message received: " + message);
 
 			String destination = message.getHeaders().getDestination();
-			SimpleStompReactorService.this.reactor.notify("destination:" + destination, Fn.event(message));
+			SimpleStompService.this.reactor.notify("destination:" + destination, Fn.event(message));
 		}
 	}
 
@@ -119,7 +119,7 @@ public class SimpleStompReactorService {
 		@Override
 		public void accept(Event<String> event) {
 			String sessionId = event.getData();
-			SimpleStompReactorService.this.removeSubscriptions(sessionId);
+			SimpleStompService.this.removeSubscriptions(sessionId);
 		}
 	}
 

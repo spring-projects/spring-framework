@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.stomp.support;
+package org.springframework.web.messaging.stomp.support;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.springframework.util.Assert;
-import org.springframework.web.stomp.StompCommand;
-import org.springframework.web.stomp.StompException;
-import org.springframework.web.stomp.StompHeaders;
-import org.springframework.web.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompException;
+import org.springframework.web.messaging.stomp.StompHeaders;
+import org.springframework.web.messaging.stomp.StompMessage;
 
 /**
  * @author Gary Russell

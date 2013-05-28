@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.stomp;
 
-import org.springframework.core.NestedRuntimeException;
+package org.springframework.web.messaging.stomp.adapter;
+
+import org.springframework.web.messaging.stomp.StompMessage;
+import org.springframework.web.messaging.stomp.StompSession;
+
 
 /**
- * @author Gary Russell
+ * @author Rossen Stoyanchev
  * @since 4.0
- *
  */
-@SuppressWarnings("serial")
-public class StompException extends NestedRuntimeException {
+public interface StompMessageHandler {
 
-
-	public StompException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
-
-	public StompException(String msg) {
-		super(msg);
-	}
+	void handleMessage(StompSession stompSession, StompMessage message);
 
 }

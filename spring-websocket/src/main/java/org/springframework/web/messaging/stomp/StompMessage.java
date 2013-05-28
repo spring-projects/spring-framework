@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.stomp;
+package org.springframework.web.messaging.stomp;
 
 import java.nio.charset.Charset;
 
