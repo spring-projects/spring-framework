@@ -47,13 +47,11 @@ future pull requests as well, simply so that the Spring Framework team knows
 immediately that this process is complete.
 
 
-## Create your branch from `3.2.x`
+## Create your branch from `master`
 
-If your pull request addresses a bug or improvement, please create your branch
-from Spring Framework's `3.2.x` branch. `master` is reserved for work on new features
-for the next major version of the framework. Rest assured that if your pull
-request is accepted and merged into `3.2.x`, these changes will also eventually
-be merged into `master`.
+Master currently represents work toward Spring Framework 4.0. Please submit
+all pull requests there, even bug fixes and minor improvements. Backports to
+`3.2.x` will be considered on a case-by-case basis.
 
 
 ## Use short branch names
@@ -129,7 +127,7 @@ e.g.
  * ...
  *
  * @author First Last
- * @since 3.2
+ * @since 4.0
  * @see ...
  */
 ```
