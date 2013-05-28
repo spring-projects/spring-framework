@@ -22,6 +22,10 @@
 		<level value="trace" />
 	</logger>
 
+	<logger name="org.springframework.web.stomp">
+		<level value="trace" />
+	</logger>
+
 	<root>
 		<priority value="warn" />
 		<appender-ref ref="console" />

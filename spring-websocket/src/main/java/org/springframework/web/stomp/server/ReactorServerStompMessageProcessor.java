@@ -42,7 +42,6 @@ import reactor.fn.Registration;
  * @author Gary Russell
  * @author Rossen Stoyanchev
  * @since 4.0
- *
  */
 public class ReactorServerStompMessageProcessor implements StompMessageProcessor {
 
@@ -51,7 +50,7 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 
 	private final Reactor reactor;
 
-	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
+	private Map<String, List<Registration<?>>> registrationsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
 	public ReactorServerStompMessageProcessor(Reactor reactor) {
@@ -59,7 +58,6 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 	}
 
 	public void processMessage(StompSession session, StompMessage message) {
-
 		try {
 			StompCommand command = message.getCommand();
 			if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
@@ -97,8 +95,8 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 	private void handleError(final StompSession session, Throwable t) {
 		logger.error("Terminating STOMP session due to failure to send message: ", t);
 		sendErrorMessage(session, t.getMessage());
-		if (removeSubscriptions(session.getId())) {
-			// TODO: send error event and including exception info
+		if (removeSubscriptions(session)) {
+			// TODO: send error event including exception info
 		}
 	}
 
@@ -114,7 +112,7 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 		}
 	}
 
-	protected void connect(StompSession session, StompMessage stompMessage) throws IOException {
+	protected void connect(final StompSession session, StompMessage stompMessage) throws IOException {
 
 		StompHeaders headers = new StompHeaders();
 		Set<String> acceptVersions = stompMessage.getHeaders().getAcceptVersion();
@@ -137,7 +135,31 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 
 		session.sendMessage(new StompMessage(StompCommand.CONNECTED, headers));
 
-		this.reactor.notify(StompCommand.CONNECT, Fn.event(stompMessage));
+		String replyToKey = "relay-message" + session.getId();
+
+		Registration<?> registration = this.reactor.on(Fn.$(replyToKey), new Consumer<Event<StompMessage>>() {
+			@Override
+			public void accept(Event<StompMessage> event) {
+				try {
+					StompMessage message = event.getData();
+					if (StompCommand.CONNECTED.equals(message.getCommand())) {
+						// TODO: skip for now (we already sent CONNECTED)
+						return;
+					}
+					if (logger.isTraceEnabled()) {
+						logger.trace("Relaying back to client: " + message);
+					}
+					session.sendMessage(message);
+				}
+				catch (Throwable t) {
+					handleError(session, t);
+				}
+			}
+		});
+
+		addRegistration(session.getId(), registration);
+
+		this.reactor.notify(StompCommand.CONNECT, Fn.event(stompMessage, replyToKey));
 	}
 
 	protected void subscribe(final StompSession session, StompMessage stompMessage) {
@@ -165,7 +187,7 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 			}
 		});
 
-		addSubscription(session.getId(), registration);
+		addRegistration(session.getId(), registration);
 
 		this.reactor.notify(StompCommand.SUBSCRIBE, Fn.event(stompMessage, replyToKey));
 
@@ -174,11 +196,11 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
 	}
 
-	private void addSubscription(String sessionId, Registration<?> registration) {
-		List<Registration<?>> list = this.subscriptionsBySession.get(sessionId);
+	private void addRegistration(String sessionId, Registration<?> registration) {
+		List<Registration<?>> list = this.registrationsBySession.get(sessionId);
 		if (list == null) {
 			list = new ArrayList<Registration<?>>();
-			this.subscriptionsBySession.put(sessionId, list);
+			this.registrationsBySession.put(sessionId, list);
 		}
 		list.add(registration);
 	}
@@ -192,13 +214,13 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 	}
 
 	protected void disconnect(StompSession session, StompMessage stompMessage) {
-		String sessionId = session.getId();
-		removeSubscriptions(sessionId);
+		removeSubscriptions(session);
 		this.reactor.notify(StompCommand.DISCONNECT, Fn.event(stompMessage));
 	}
 
-	private boolean removeSubscriptions(String sessionId) {
-		List<Registration<?>> registrations = this.subscriptionsBySession.remove(sessionId);
+	private boolean removeSubscriptions(StompSession session) {
+		String sessionId = session.getId();
+		List<Registration<?>> registrations = this.registrationsBySession.remove(sessionId);
 		if (CollectionUtils.isEmpty(registrations)) {
 			return false;
 		}
@@ -213,9 +235,8 @@ public class ReactorServerStompMessageProcessor implements StompMessageProcessor
 
 	@Override
 	public void processConnectionClosed(StompSession session) {
-		if (removeSubscriptions(session.getId())) {
-			// TODO: this implies abnormal closure from the underlying transport (no DISCONNECT) .. send an error event
-		}
+		removeSubscriptions(session);
+		this.reactor.notify("CONNECTION_CLOSED", Fn.event(session.getId()));
 	}
 
 }

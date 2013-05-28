@@ -72,7 +72,7 @@ public class StompMessage {
 
 	@Override
 	public String toString() {
-		return "StompMessage [headers=" + this.headers + ", payload=" + new String(this.payload) + "]";
+		return "StompMessage [" + command + ", headers=" + this.headers + ", payload=" + new String(this.payload) + "]";
 	}
 
 }
