@@ -69,6 +69,11 @@ public class RelayStompService {
 		this.reactor.on(Fn.$(StompCommand.SUBSCRIBE), new RelayConsumer());
 		this.reactor.on(Fn.$(StompCommand.SEND), new RelayConsumer());
 		this.reactor.on(Fn.$(StompCommand.DISCONNECT), new RelayConsumer());
+		this.reactor.on(Fn.$(StompCommand.ACK), new RelayConsumer());
+		this.reactor.on(Fn.$(StompCommand.NACK), new RelayConsumer());
+		this.reactor.on(Fn.$(StompCommand.BEGIN), new RelayConsumer());
+		this.reactor.on(Fn.$(StompCommand.COMMIT), new RelayConsumer());
+		this.reactor.on(Fn.$(StompCommand.ABORT), new RelayConsumer());
 
 		this.reactor.on(Fn.$("CONNECTION_CLOSED"), new Consumer<Event<String>>() {
 			@Override

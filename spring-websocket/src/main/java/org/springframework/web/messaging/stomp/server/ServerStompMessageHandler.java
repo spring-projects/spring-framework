@@ -78,12 +78,10 @@ public class ServerStompMessageHandler implements StompMessageHandler {
 				disconnect(session, message);
 			}
 			else if (StompCommand.ACK.equals(command) || StompCommand.NACK.equals(command)) {
-				// TODO
-				logger.warn("Ignoring " + command + ". It is not supported yet.");
+				this.reactor.notify(command, Fn.event(message));
 			}
 			else if (StompCommand.BEGIN.equals(command) || StompCommand.COMMIT.equals(command) || StompCommand.ABORT.equals(command)) {
-				// TODO
-				logger.warn("Ignoring " + command + ". It is not supported yet.");
+				this.reactor.notify(command, Fn.event(message));
 			}
 			else {
 				sendErrorMessage(session, "Invalid STOMP command " + command);
@@ -174,22 +172,22 @@ public class ServerStompMessageHandler implements StompMessageHandler {
 		this.reactor.notify(StompCommand.CONNECT, Fn.event(stompMessage, replyToKey));
 	}
 
-	protected void subscribe(final StompSession session, StompMessage stompMessage) {
+	protected void subscribe(final StompSession session, StompMessage message) {
 
-		final String subscription = stompMessage.getHeaders().getId();
-		String replyToKey = StompCommand.SUBSCRIBE + ":" + session.getId() + ":" + subscription;
+		final String subscriptionId = message.getHeaders().getId();
+		String replyToKey = getSubscriptionReplyKey(session, subscriptionId);
 
 		// TODO: extract and remember "ack" mode
 		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE_ack_Header
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Adding subscription with replyToKey=" + replyToKey);
+			logger.trace("Adding subscription, key=" + replyToKey);
 		}
 
 		Registration<?> registration = this.reactor.on(Fn.$(replyToKey), new Consumer<Event<StompMessage>>() {
 			@Override
 			public void accept(Event<StompMessage> event) {
-				event.getData().getHeaders().setSubscription(subscription);
+				event.getData().getHeaders().setSubscription(subscriptionId);
 				try {
 					session.sendMessage(event.getData());
 				}
@@ -201,11 +199,15 @@ public class ServerStompMessageHandler implements StompMessageHandler {
 
 		addRegistration(session.getId(), registration);
 
-		this.reactor.notify(StompCommand.SUBSCRIBE, Fn.event(stompMessage, replyToKey));
+		this.reactor.notify(StompCommand.SUBSCRIBE, Fn.event(message, replyToKey));
 
 		// TODO: need a way to communicate back if subscription was successfully created or
 		// not in which case an ERROR should be sent back and close the connection
 		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
+	}
+
+	private String getSubscriptionReplyKey(StompSession session, String subscriptionId) {
+		return StompCommand.SUBSCRIBE + ":" + session.getId() + ":" + subscriptionId;
 	}
 
 	private void addRegistration(String sessionId, Registration<?> registration) {
@@ -217,8 +219,23 @@ public class ServerStompMessageHandler implements StompMessageHandler {
 		list.add(registration);
 	}
 
-	protected void unsubscribe(StompSession session, StompMessage stompMessage) {
-		this.reactor.notify(StompCommand.UNSUBSCRIBE, Fn.event(stompMessage));
+	protected void unsubscribe(StompSession session, StompMessage message) {
+		cancelRegistration(session, message.getHeaders().getId());
+		this.reactor.notify(StompCommand.UNSUBSCRIBE, Fn.event(message));
+	}
+
+	private void cancelRegistration(StompSession session, String subscriptionId) {
+		String key = getSubscriptionReplyKey(session, subscriptionId);
+		List<Registration<?>> list = this.registrationsBySession.get(session.getId());
+		for (Registration<?> registration : list) {
+			if (registration.getSelector().matches(key)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Cancelling subscription, key=" + key);
+				}
+				list.remove(registration);
+				registration.cancel();
+			}
+		}
 	}
 
 	protected void send(StompSession session, StompMessage stompMessage) {
