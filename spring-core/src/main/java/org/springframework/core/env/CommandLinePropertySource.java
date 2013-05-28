@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,7 +218,7 @@ public abstract class CommandLinePropertySource<T> extends EnumerablePropertySou
 	public void setNonOptionArgsPropertyName(String nonOptionArgsPropertyName) {
 		this.nonOptionArgsPropertyName = nonOptionArgsPropertyName;
 	}
-	
+
 	/**
 	 * Return whether this {@code PropertySource} contains a property with the given name.
 	 * <p>This implementation first checks to see if the name specified is the special
