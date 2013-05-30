@@ -490,7 +490,7 @@ project("spring-websocket") {
 	repositories {
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
-		maven { url 'http://repo.springsource.org/libs-snapshot' } // reactor
+		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
 }
 

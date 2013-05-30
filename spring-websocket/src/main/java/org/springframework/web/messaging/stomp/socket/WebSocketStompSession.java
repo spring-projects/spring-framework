@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp.adapter;
+package org.springframework.web.messaging.stomp.socket;
 
 import java.io.IOException;
 import java.util.ArrayList;

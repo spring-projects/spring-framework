@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.messaging.stomp.server;
+package org.springframework.web.messaging.stomp.socket;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +30,6 @@ import org.springframework.web.messaging.stomp.StompException;
 import org.springframework.web.messaging.stomp.StompHeaders;
 import org.springframework.web.messaging.stomp.StompMessage;
 import org.springframework.web.messaging.stomp.StompSession;
-import org.springframework.web.messaging.stomp.adapter.StompMessageHandler;
 
 import reactor.Fn;
 import reactor.core.Reactor;
@@ -43,9 +42,9 @@ import reactor.fn.Registration;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServerStompMessageHandler implements StompMessageHandler {
+public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler {
 
-	private static Log logger = LogFactory.getLog(ServerStompMessageHandler.class);
+	private static Log logger = LogFactory.getLog(DefaultStompWebSocketHandler.class);
 
 
 	private final Reactor reactor;
@@ -54,11 +53,11 @@ public class ServerStompMessageHandler implements StompMessageHandler {
 			new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public ServerStompMessageHandler(Reactor reactor) {
+	public DefaultStompWebSocketHandler(Reactor reactor) {
 		this.reactor = reactor;
 	}
 
-	public void handleMessage(StompSession session, StompMessage message) {
+	public void handleStompMessage(StompSession session, StompMessage message) {
 		try {
 			StompCommand command = message.getCommand();
 			if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {

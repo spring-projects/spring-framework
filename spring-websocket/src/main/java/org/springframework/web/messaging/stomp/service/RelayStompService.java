@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp.server;
+package org.springframework.web.messaging.stomp.service;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -63,7 +63,7 @@ public class RelayStompService {
 
 	public RelayStompService(Reactor reactor, TaskExecutor executor) {
 		this.reactor = reactor;
-		this.taskExecutor = executor; // For now, a naively way to manage socket reading
+		this.taskExecutor = executor; // For now, a naive way to manage socket reading
 
 		this.reactor.on(Fn.$(StompCommand.CONNECT), new ConnectConsumer());
 		this.reactor.on(Fn.$(StompCommand.SUBSCRIBE), new RelayConsumer());
@@ -228,7 +228,6 @@ public class RelayStompService {
 				relayStompMessage(session, stompMessage);
 			}
 			catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				clearRelaySession(stompMessage.getStompSessionId());
 			}

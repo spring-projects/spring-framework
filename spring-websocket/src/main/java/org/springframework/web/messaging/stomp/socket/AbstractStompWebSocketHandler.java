@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.messaging.stomp.adapter;
+package org.springframework.web.messaging.stomp.socket;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,18 +34,11 @@ import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
-
-	private final StompMessageHandler messageHandler;
+public abstract class AbstractStompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final StompMessageConverter messageConverter = new StompMessageConverter();
 
 	private final Map<String, WebSocketStompSession> sessions = new ConcurrentHashMap<String, WebSocketStompSession>();
-
-
-	public StompWebSocketHandler(StompMessageHandler messageHandler) {
-		this.messageHandler = messageHandler;
-	}
 
 
 	@Override
@@ -67,7 +60,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
 
-			this.messageHandler.handleMessage(stompSession, stompMessage);
+			handleStompMessage(stompSession, stompMessage);
 
 			// TODO: send RECEIPT message if incoming message has "receipt" header
 			// http://stomp.github.io/stomp-specification-1.2.html#Header_receipt
@@ -85,6 +78,8 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 			}
 		}
 	}
+
+	protected abstract void handleStompMessage(StompSession stompSession, StompMessage stompMessage);
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {

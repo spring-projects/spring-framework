@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp.adapter;
-
-import org.springframework.web.messaging.stomp.StompMessage;
-import org.springframework.web.messaging.stomp.StompSession;
+package org.springframework.web.messaging;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface StompMessageHandler {
+public enum MessageType {
 
-	void handleMessage(StompSession stompSession, StompMessage message);
+	CONNECT, SUBSCRIBE, UNSUBSCRIBE, SEND, NONE
 
 }

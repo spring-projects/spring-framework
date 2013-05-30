@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp.server;
+package org.springframework.web.messaging.stomp.service;
 
 import java.util.ArrayList;
 import java.util.List;
