@@ -77,10 +77,10 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 				disconnect(session, message);
 			}
 			else if (StompCommand.ACK.equals(command) || StompCommand.NACK.equals(command)) {
-				this.reactor.notify(command, Fn.event(message));
+				this.reactor.notify(command, Event.wrap(message));
 			}
 			else if (StompCommand.BEGIN.equals(command) || StompCommand.COMMIT.equals(command) || StompCommand.ABORT.equals(command)) {
-				this.reactor.notify(command, Fn.event(message));
+				this.reactor.notify(command, Event.wrap(message));
 			}
 			else {
 				sendErrorMessage(session, "Invalid STOMP command " + command);
@@ -96,7 +96,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 			@Override
 			public void run() {
 				removeSubscriptions(session);
-				reactor.notify("CONNECTION_CLOSED", Fn.event(session.getId()));
+				reactor.notify("CONNECTION_CLOSED", Event.wrap(session.getId()));
 			}
 		});
 	}
@@ -168,7 +168,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 
 		addRegistration(session.getId(), registration);
 
-		this.reactor.notify(StompCommand.CONNECT, Fn.event(stompMessage, replyToKey));
+		this.reactor.notify(StompCommand.CONNECT, Event.wrap(stompMessage, replyToKey));
 	}
 
 	protected void subscribe(final StompSession session, StompMessage message) {
@@ -198,7 +198,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 
 		addRegistration(session.getId(), registration);
 
-		this.reactor.notify(StompCommand.SUBSCRIBE, Fn.event(message, replyToKey));
+		this.reactor.notify(StompCommand.SUBSCRIBE, Event.wrap(message, replyToKey));
 
 		// TODO: need a way to communicate back if subscription was successfully created or
 		// not in which case an ERROR should be sent back and close the connection
@@ -220,7 +220,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 
 	protected void unsubscribe(StompSession session, StompMessage message) {
 		cancelRegistration(session, message.getHeaders().getId());
-		this.reactor.notify(StompCommand.UNSUBSCRIBE, Fn.event(message));
+		this.reactor.notify(StompCommand.UNSUBSCRIBE, Event.wrap(message));
 	}
 
 	private void cancelRegistration(StompSession session, String subscriptionId) {
@@ -238,12 +238,12 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 	}
 
 	protected void send(StompSession session, StompMessage stompMessage) {
-		this.reactor.notify(StompCommand.SEND, Fn.event(stompMessage));
+		this.reactor.notify(StompCommand.SEND, Event.wrap(stompMessage));
 	}
 
 	protected void disconnect(StompSession session, StompMessage stompMessage) {
 		removeSubscriptions(session);
-		this.reactor.notify(StompCommand.DISCONNECT, Fn.event(stompMessage));
+		this.reactor.notify(StompCommand.DISCONNECT, Event.wrap(stompMessage));
 	}
 
 	private boolean removeSubscriptions(StompSession session) {

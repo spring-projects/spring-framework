@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompHeaders;
 import org.springframework.web.messaging.stomp.StompMessage;
@@ -38,20 +36,35 @@ import reactor.fn.Registration;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleStompService {
+public class SimpleStompService extends AbstractStompService {
 
-	private static final Log logger = LogFactory.getLog(SimpleStompService.class);
-
-	private final Reactor reactor;
-
-	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
+	private Map<String, List<Registration<?>>> subscriptionsBySession =
+			new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
 	public SimpleStompService(Reactor reactor) {
-		this.reactor = reactor;
-		this.reactor.on(Fn.$(StompCommand.SUBSCRIBE), new SubscribeConsumer());
-		this.reactor.on(Fn.$(StompCommand.SEND), new SendConsumer());
-		this.reactor.on(Fn.$(StompCommand.DISCONNECT), new DisconnectConsumer());
+		super(reactor);
+	}
+
+
+	@Override
+	protected void processSubscribe(StompMessage message, final Object replyTo) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Subscribe " + message);
+		}
+		Registration<?> registration = getReactor().on(
+				Fn.$("destination:" + message.getHeaders().getDestination()),
+				new Consumer<Event<StompMessage>>() {
+					@Override
+					public void accept(Event<StompMessage> sendEvent) {
+						StompMessage inMessage = sendEvent.getData();
+						StompHeaders headers = new StompHeaders();
+						headers.setDestination(inMessage.getHeaders().getDestination());
+						StompMessage outMessage = new StompMessage(StompCommand.MESSAGE, headers, inMessage.getPayload());
+						getReactor().notify(replyTo, Event.wrap(outMessage));
+					}
+		});
+		addSubscription(message.getStompSessionId(), registration);
 	}
 
 	private void addSubscription(String sessionId, Registration<?> registration) {
@@ -63,6 +76,23 @@ public class SimpleStompService {
 		list.add(registration);
 	}
 
+	@Override
+	protected void processSend(StompMessage message) {
+		logger.debug("Message received: " + message);
+		String destination = message.getHeaders().getDestination();
+		getReactor().notify("destination:" + destination, Event.wrap(message));
+	}
+
+	@Override
+	protected void processDisconnect(StompMessage message) {
+		removeSubscriptions(message.getStompSessionId());
+	}
+
+	@Override
+	protected void processConnectionClosed(String sessionId) {
+		removeSubscriptions(sessionId);
+	}
+
 	private void removeSubscriptions(String sessionId) {
 		List<Registration<?>> registrations = this.subscriptionsBySession.remove(sessionId);
 		if (logger.isTraceEnabled()) {
@@ -70,56 +100,6 @@ public class SimpleStompService {
 		}
 		for (Registration<?> registration : registrations) {
 			registration.cancel();
-		}
-	}
-
-
-	private final class SubscribeConsumer implements Consumer<Event<StompMessage>> {
-
-		@Override
-		public void accept(Event<StompMessage> event) {
-
-			StompMessage message = event.getData();
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Subscribe " + message);
-			}
-
-			Registration<?> registration = SimpleStompService.this.reactor.on(
-					Fn.$("destination:" + message.getHeaders().getDestination()),
-					new Consumer<Event<StompMessage>>() {
-						@Override
-						public void accept(Event<StompMessage> event) {
-							StompMessage inMessage = event.getData();
-							StompHeaders headers = new StompHeaders();
-							headers.setDestination(inMessage.getHeaders().getDestination());
-							StompMessage outMessage = new StompMessage(StompCommand.MESSAGE, headers, inMessage.getPayload());
-							SimpleStompService.this.reactor.notify(event.getReplyTo(), Fn.event(outMessage));
-						}
-			});
-
-			addSubscription(message.getStompSessionId(), registration);
-		}
-	}
-
-	private final class SendConsumer implements Consumer<Event<StompMessage>> {
-
-		@Override
-		public void accept(Event<StompMessage> event) {
-			StompMessage message = event.getData();
-			logger.debug("Message received: " + message);
-
-			String destination = message.getHeaders().getDestination();
-			SimpleStompService.this.reactor.notify("destination:" + destination, Fn.event(message));
-		}
-	}
-
-	private final class DisconnectConsumer implements Consumer<Event<String>> {
-
-		@Override
-		public void accept(Event<String> event) {
-			String sessionId = event.getData();
-			SimpleStompService.this.removeSubscriptions(sessionId);
 		}
 	}
 

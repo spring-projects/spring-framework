@@ -28,17 +28,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.SocketFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompHeaders;
 import org.springframework.web.messaging.stomp.StompMessage;
 import org.springframework.web.messaging.stomp.support.StompMessageConverter;
 
-import reactor.Fn;
 import reactor.core.Reactor;
-import reactor.fn.Consumer;
 import reactor.fn.Event;
 import reactor.util.Assert;
 
@@ -47,12 +43,8 @@ import reactor.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class RelayStompService {
+public class RelayStompService extends AbstractStompService {
 
-	private static final Log logger = LogFactory.getLog(RelayStompService.class);
-
-
-	private final Reactor reactor;
 
 	private Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
 
@@ -62,43 +54,46 @@ public class RelayStompService {
 
 
 	public RelayStompService(Reactor reactor, TaskExecutor executor) {
-		this.reactor = reactor;
+		super(reactor);
 		this.taskExecutor = executor; // For now, a naive way to manage socket reading
-
-		this.reactor.on(Fn.$(StompCommand.CONNECT), new ConnectConsumer());
-		this.reactor.on(Fn.$(StompCommand.SUBSCRIBE), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.SEND), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.DISCONNECT), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.ACK), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.NACK), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.BEGIN), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.COMMIT), new RelayConsumer());
-		this.reactor.on(Fn.$(StompCommand.ABORT), new RelayConsumer());
-
-		this.reactor.on(Fn.$("CONNECTION_CLOSED"), new Consumer<Event<String>>() {
-			@Override
-			public void accept(Event<String> event) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("CONNECTION_CLOSED, STOMP session=" + event.getData() + ". Clearing relay session");
-				}
-				clearRelaySession(event.getData());
-			}
-		});
 	}
 
-	private void relayStompMessage(RelaySession session, StompMessage stompMessage) throws Exception {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Forwarding: " + stompMessage);
+	protected void processConnect(StompMessage stompMessage, final Object replyTo) {
+
+		final String stompSessionId = stompMessage.getStompSessionId();
+
+		final RelaySession session = new RelaySession();
+		this.relaySessions.put(stompSessionId, session);
+
+		try {
+			Socket socket = SocketFactory.getDefault().createSocket("127.0.0.1", 61613);
+			session.setSocket(socket);
+
+			relayStompMessage(stompMessage);
+
+			taskExecutor.execute(new RelayReadTask(stompSessionId, replyTo, session));
 		}
-		byte[] bytes = converter.fromStompMessage(stompMessage);
-		session.getOutputStream().write(bytes);
-		session.getOutputStream().flush();
+		catch (Throwable t) {
+			t.printStackTrace();
+			clearRelaySession(stompSessionId);
+		}
 	}
 
-	private RelaySession getRelaySession(String stompSessionId) {
-		RelaySession session = RelayStompService.this.relaySessions.get(stompSessionId);
+	private void relayStompMessage(StompMessage stompMessage) {
+		RelaySession session = RelayStompService.this.relaySessions.get(stompMessage.getStompSessionId());
 		Assert.notNull(session, "RelaySession not found");
-		return session;
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Forwarding: " + stompMessage);
+			}
+			byte[] bytes = converter.fromStompMessage(stompMessage);
+			session.getOutputStream().write(bytes);
+			session.getOutputStream().flush();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			clearRelaySession(stompMessage.getStompSessionId());
+		}
 	}
 
 	private void clearRelaySession(String stompSessionId) {
@@ -114,33 +109,54 @@ public class RelayStompService {
 		}
 	}
 
-
-	private final class ConnectConsumer implements Consumer<Event<StompMessage>> {
-
-		@Override
-		public void accept(Event<StompMessage> event) {
-
-			StompMessage stompMessage = event.getData();
-			final Object replyTo = event.getReplyTo();
-			final String stompSessionId = stompMessage.getStompSessionId();
-
-			final RelaySession session = new RelaySession();
-			relaySessions.put(stompSessionId, session);
-
-			try {
-				Socket socket = SocketFactory.getDefault().createSocket("127.0.0.1", 61613);
-				session.setSocket(socket);
-
-				relayStompMessage(session, stompMessage);
-
-				taskExecutor.execute(new RelayReadTask(stompSessionId, replyTo, session));
-			}
-			catch (Throwable t) {
-				t.printStackTrace();
-				clearRelaySession(stompSessionId);
-			}
-		}
+	@Override
+	protected void processSubscribe(StompMessage message, Object replyTo) {
+		relayStompMessage(message);
 	}
+
+	@Override
+	protected void processSend(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processDisconnect(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processAck(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processNack(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processBegin(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processCommit(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processAbort(StompMessage message) {
+		relayStompMessage(message);
+	}
+
+	@Override
+	protected void processConnectionClosed(String sessionId) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Client connection closed for STOMP session=" + sessionId + ". Clearing relay session.");
+		}
+		clearRelaySession(sessionId);
+	}
+
 
 	private final static class RelaySession {
 
@@ -194,7 +210,7 @@ public class RelayStompService {
 					else if (b == 0x00) {
 						byte[] bytes = out.toByteArray();
 						StompMessage message = RelayStompService.this.converter.toStompMessage(bytes);
-						RelayStompService.this.reactor.notify(replyTo, Fn.event(message));
+						getReactor().notify(replyTo, Event.wrap(message));
 						out.reset();
 					}
 					else {
@@ -202,35 +218,19 @@ public class RelayStompService {
 					}
 				}
 				logger.debug("Socket closed, STOMP session=" + stompSessionId);
-				sendLostConnectionErrorMessage();
+				sendErrorMessage("Lost connection");
 			}
 			catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Socket error: " + e.getMessage());
 				clearRelaySession(stompSessionId);
 			}
 		}
 
-		private void sendLostConnectionErrorMessage() {
+		private void sendErrorMessage(String message) {
 			StompHeaders headers = new StompHeaders();
-			headers.setMessage("Lost connection");
+			headers.setMessage(message);
 			StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
-			RelayStompService.this.reactor.notify(replyTo, Fn.event(errorMessage));
-		}
-	}
-
-	private class RelayConsumer implements Consumer<Event<StompMessage>> {
-
-		@Override
-		public void accept(Event<StompMessage> event) {
-			StompMessage stompMessage = event.getData();
-			RelaySession session = getRelaySession(stompMessage.getStompSessionId());
-			try {
-				relayStompMessage(session, stompMessage);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				clearRelaySession(stompMessage.getStompSessionId());
-			}
+			getReactor().notify(replyTo, Event.wrap(errorMessage));
 		}
 	}
 
