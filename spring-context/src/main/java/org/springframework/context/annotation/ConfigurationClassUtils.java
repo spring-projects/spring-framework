@@ -27,7 +27,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Utilities for processing @{@link Configuration} classes.
@@ -105,7 +104,6 @@ abstract class ConfigurationClassUtils {
 			return false; // do not consider an interface or an annotation
 		}
 		return metadata.isAnnotated(Import.class.getName()) ||
-				metadata.isAnnotated(Component.class.getName()) ||
 				metadata.hasAnnotatedMethods(Bean.class.getName());
 	}
 
