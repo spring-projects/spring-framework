@@ -26,7 +26,6 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -305,12 +304,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory,
 					this.resourceLoader, this.environment, this.importBeanNameGenerator);
 		}
-		for (ConfigurationClass configurationClass : parser.getConfigurationClasses()) {
-			if (!ConditionalAnnotationHelper.shouldSkip(configurationClass, registry,
-					this.environment, this.importBeanNameGenerator)) {
-				reader.loadBeanDefinitionsForConfigurationClass(configurationClass);
-			}
-		}
+
+		reader.loadBeanDefinitions(parser.getConfigurationClasses());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {

@@ -92,7 +92,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Set the Environment to use when evaluating whether
-	 * {@link Profile @Profile}-annotated component classes should be registered.
+	 * {@link Conditional @Conditional}-annotated component classes should be registered.
 	 * <p>The default is a {@link StandardEnvironment}.
 	 * @see #registerBean(Class, String, Class...)
 	 */
@@ -133,8 +133,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
-		if (ConditionalAnnotationHelper.shouldSkip(abd, this.registry,
-				this.environment, this.beanNameGenerator)) {
+		if (ConditionEvaluator.get(abd.getMetadata(), true).shouldSkip(this.registry, this.environment)) {
 			return;
 		}
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);

@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -60,6 +61,9 @@ final class ConfigurationClass {
 
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<String, Class<? extends BeanDefinitionReader>>();
+
+	private final Set<ImportBeanDefinitionRegistrar> importBeanDefinitionRegistrars =
+			new LinkedHashSet<ImportBeanDefinitionRegistrar>();
 
 
 	/**
@@ -173,10 +177,17 @@ final class ConfigurationClass {
 		this.importedResources.put(importedResource, readerClass);
 	}
 
+	public void addImportBeanDefinitionRegistrar(ImportBeanDefinitionRegistrar registrar) {
+		this.importBeanDefinitionRegistrars.add(registrar);
+	}
+
+	public Set<ImportBeanDefinitionRegistrar> getImportBeanDefinitionRegistrars() {
+		return Collections.unmodifiableSet(importBeanDefinitionRegistrars);
+	}
+
 	public Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
 		return this.importedResources;
 	}
-
 
 	public void validate(ProblemReporter problemReporter) {
 		// A configuration class may not be final (CGLIB limitation)

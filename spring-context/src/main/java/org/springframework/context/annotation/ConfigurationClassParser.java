@@ -76,7 +76,8 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  *
  * <p>This class helps separate the concern of parsing the structure of a Configuration
  * class from the concern of registering BeanDefinition objects based on the
- * content of that model.
+ * content of that model (with the exception of {@code @ComponentScan} annotations which
+ * need to be registered immediately).
  *
  * <p>This ASM-based implementation avoids reflection and eager class loading in order to
  * interoperate effectively with lazy class loading in a Spring ApplicationContext.
@@ -108,8 +109,6 @@ class ConfigurationClassParser {
 
 	private final BeanDefinitionRegistry registry;
 
-	private final BeanNameGenerator beanNameGenerator;
-
 	private final ComponentScanAnnotationParser componentScanParser;
 
 	private final Set<ConfigurationClass> configurationClasses = new LinkedHashSet<ConfigurationClass>();
@@ -136,7 +135,6 @@ class ConfigurationClassParser {
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
 		this.registry = registry;
-		this.beanNameGenerator = componentScanBeanNameGenerator;
 		this.componentScanParser = new ComponentScanAnnotationParser(
 				resourceLoader, environment, componentScanBeanNameGenerator, registry);
 	}
@@ -182,9 +180,6 @@ class ConfigurationClassParser {
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
-		if (ConditionalAnnotationHelper.shouldSkip(configClass, this.registry, this.environment, this.beanNameGenerator)) {
-			return;
-		}
 
 		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
@@ -226,13 +221,16 @@ class ConfigurationClassParser {
 		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			Set<BeanDefinitionHolder> scannedBeanDefinitions =
-					this.componentScanParser.parse(componentScan, metadata.getClassName());
+			if (!ConditionEvaluator.get(configClass.getMetadata(), false).shouldSkip(
+					this.registry, this.environment)) {
+				Set<BeanDefinitionHolder> scannedBeanDefinitions =
+						this.componentScanParser.parse(componentScan, metadata.getClassName());
 
-			// check the set of scanned definitions for any further config classes and parse recursively if necessary
-			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-					this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+				// check the set of scanned definitions for any further config classes and parse recursively if necessary
+				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
+					if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
+						this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+					}
 				}
 			}
 		}
@@ -451,7 +449,7 @@ class ConfigurationClassParser {
 								this.resourceLoader.getClassLoader().loadClass((String) candidate));
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
 						invokeAwareMethods(registrar);
-						registrar.registerBeanDefinitions(importingClassMetadata, this.registry);
+						configClass.addImportBeanDefinitionRegistrar(registrar);
 					}
 					else {
 						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class

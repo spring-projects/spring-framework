@@ -31,6 +31,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
@@ -52,7 +53,6 @@ import org.springframework.util.PatternMatchUtils;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
- * @author Phillip Webb
  * @since 2.5
  * @see AnnotationConfigApplicationContext#scan
  * @see org.springframework.stereotype.Component
@@ -262,6 +262,12 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		return beanDefinitions;
 	}
 
+	@Override
+	protected boolean isConditionMatch(MetadataReader metadataReader) {
+		return !ConditionEvaluator.get(metadataReader.getAnnotationMetadata(), true).shouldSkip(
+				getRegistry(), getEnvironment());
+	}
+
 	/**
 	 * Apply further settings to the given bean definition,
 	 * beyond the contents retrieved from scanning the component class.
@@ -299,10 +305,6 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * bean definition has been found for the specified name
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
-		if (ConditionalAnnotationHelper.shouldSkip(beanDefinition, getRegistry(),
-				getEnvironment(), this.beanNameGenerator)) {
-			return false;
-		}
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}

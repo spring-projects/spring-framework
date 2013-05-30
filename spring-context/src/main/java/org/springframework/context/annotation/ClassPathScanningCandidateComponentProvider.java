@@ -25,12 +25,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
@@ -39,7 +37,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -159,7 +156,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Set the Environment to use when resolving placeholders and evaluating
-	 * {@link Profile @Profile}-annotated component classes.
+	 * {@link Conditional @Conditional}-annotated component classes.
 	 * <p>The default is a {@link StandardEnvironment}
 	 * @param environment the Environment to use
 	 */
@@ -333,15 +330,21 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
-				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-				if (!metadata.isAnnotated(Profile.class.getName())) {
-					return true;
-				}
-				AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
-				return this.environment.acceptsProfiles(profile.getStringArray("value"));
+				return isConditionMatch(metadataReader);
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determine whether the given class is a candidate component based on any
+	 * {@code @Conditional} annotations.
+	 * @param metadataReader the ASM ClassReader for the class
+	 * @return whether the class qualifies as a candidate component
+	 */
+	protected boolean isConditionMatch(MetadataReader metadataReader) {
+		return !ConditionEvaluator.get(metadataReader.getAnnotationMetadata(), true).shouldSkip(
+				null, getEnvironment());
 	}
 
 	/**
