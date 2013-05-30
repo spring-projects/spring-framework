@@ -379,7 +379,7 @@ public class CallMetaDataContext {
 					else {
 						String returnNameToUse =(StringUtils.hasLength(meta.getParameterName()) ?
 								parNameToUse : getFunctionReturnName());
-						workParameters.add(new SqlOutParameter(returnNameToUse, meta.getSqlType()));
+						workParameters.add(this.metaDataProvider.createDefaultOutParameter(returnNameToUse, meta));
 						if (isFunction()) {
 							setFunctionReturnName(returnNameToUse);
 							outParameterNames.add(returnNameToUse);
