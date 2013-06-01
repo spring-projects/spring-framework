@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,21 @@ public class ModelResultMatchers {
 			}
 		};
 	}
+
+    /**
+     * Assert the given model attributes do not exist
+     */
+    public ResultMatcher attributeDoesNotExist(final String... names) {
+        return new ResultMatcher() {
+            @Override
+            public void match(MvcResult result) throws Exception {
+                ModelAndView mav = getModelAndView(result);
+                for (String name : names) {
+                    assertTrue("Model attribute '" + name + "' exists", mav.getModel().get(name) == null);
+                }
+            }
+        };
+    }
 
 	/**
 	 * Assert the given model attribute(s) have errors.
