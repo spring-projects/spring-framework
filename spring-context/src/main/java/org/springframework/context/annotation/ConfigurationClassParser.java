@@ -47,6 +47,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.NestedIOException;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -486,6 +487,9 @@ class ConfigurationClassParser {
 	 */
 	private void invokeAwareMethods(Object importStrategyBean) {
 		if (importStrategyBean instanceof Aware) {
+			if (importStrategyBean instanceof EnvironmentAware) {
+				((EnvironmentAware) importStrategyBean).setEnvironment(this.environment);
+			}
 			if (importStrategyBean instanceof ResourceLoaderAware) {
 				((ResourceLoaderAware) importStrategyBean).setResourceLoader(this.resourceLoader);
 			}

@@ -16,11 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.spy;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,11 +23,26 @@ import java.lang.annotation.Target;
 
 import org.junit.Test;
 import org.mockito.InOrder;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.MessageSource;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrarTests.SampleRegistrar;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link ImportSelector} and {@link DeferredImportSelector}.
@@ -50,10 +60,62 @@ public class ImportSelectorTests {
 		context.refresh();
 		context.getBean(Config.class);
 		InOrder ordered = inOrder(beanFactory);
-		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), any(BeanDefinition.class));
-		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), any(BeanDefinition.class));
-		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any(BeanDefinition.class));
-		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any(BeanDefinition.class));
+		ordered.verify(beanFactory).registerBeanDefinition(eq("a"), (BeanDefinition) anyObject());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), (BeanDefinition) anyObject());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), (BeanDefinition) anyObject());
+		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), (BeanDefinition) anyObject());
+	}
+
+	@Test
+	public void invokeAwareMethodsInImportSelector() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AwareConfig.class);
+		context.getBean(MessageSource.class);
+
+		assertThat(SampleRegistrar.beanFactory, is((BeanFactory) context.getBeanFactory()));
+		assertThat(SampleRegistrar.classLoader, is(context.getBeanFactory().getBeanClassLoader()));
+		assertThat(SampleRegistrar.resourceLoader, is(notNullValue()));
+		assertThat(SampleRegistrar.environment, is((Environment) context.getEnvironment()));
+	}
+
+	@Configuration
+	@Import(SampleImportSelector.class)
+	static class AwareConfig {
+
+	}
+
+	static class SampleImportSelector implements ImportSelector, BeanClassLoaderAware, ResourceLoaderAware,
+			BeanFactoryAware, EnvironmentAware {
+
+		static ClassLoader classLoader;
+		static ResourceLoader resourceLoader;
+		static BeanFactory beanFactory;
+		static Environment environment;
+
+		@Override
+		public void setBeanClassLoader(ClassLoader classLoader) {
+			SampleRegistrar.classLoader = classLoader;
+		}
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			SampleRegistrar.beanFactory = beanFactory;
+		}
+
+		@Override
+		public void setResourceLoader(ResourceLoader resourceLoader) {
+			SampleRegistrar.resourceLoader = resourceLoader;
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			SampleRegistrar.environment = environment;
+		}
+
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return new String[] {};
+		}
 	}
 
 	@Sample
