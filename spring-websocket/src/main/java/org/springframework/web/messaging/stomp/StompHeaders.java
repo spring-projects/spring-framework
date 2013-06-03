@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -65,6 +66,10 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	private static final String ACK = "ack";
 
 	private static final String DESTINATION = "destination";
+
+	private static final String CONTENT_TYPE = "content-type";
+
+	private static final String CONTENT_LENGTH = "content-length";
 
 	private static final String HEARTBEAT = "heart-beat";
 
@@ -127,6 +132,29 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	public void setDestination(String destination) {
 		set(DESTINATION, destination);
+	}
+
+	public MediaType getContentType() {
+		String contentType = getFirst(CONTENT_TYPE);
+		return StringUtils.hasText(contentType) ? MediaType.valueOf(contentType) : null;
+	}
+
+	public void setContentType(MediaType mediaType) {
+		if (mediaType != null) {
+			set(CONTENT_TYPE, mediaType.toString());
+		}
+		else {
+			remove(CONTENT_TYPE);
+		}
+	}
+
+	public Integer getContentLength() {
+		String contentLength = getFirst(CONTENT_LENGTH);
+		return StringUtils.hasText(contentLength) ? new Integer(contentLength) : null;
+	}
+
+	public void setContentLength(int contentLength) {
+		set(CONTENT_LENGTH, String.valueOf(contentLength));
 	}
 
 	public long[] getHeartbeat() {

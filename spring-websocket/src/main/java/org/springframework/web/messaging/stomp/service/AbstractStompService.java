@@ -16,9 +16,15 @@
 
 package org.springframework.web.messaging.stomp.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompMessage;
 
@@ -39,6 +45,12 @@ public abstract class AbstractStompService {
 
 	private final Reactor reactor;
 
+	private final List<String> allowedDestinations = new ArrayList<String>();
+
+	private final List<String> disallowedDestinations = new ArrayList<String>();
+
+	private final PathMatcher pathMatcher = new AntPathMatcher();
+
 
 	public AbstractStompService(Reactor reactor) {
 
@@ -54,13 +66,19 @@ public abstract class AbstractStompService {
 		this.reactor.on(Fn.$(StompCommand.SUBSCRIBE), new Consumer<Event<StompMessage>>() {
 			@Override
 			public void accept(Event<StompMessage> event) {
-				processSubscribe(event.getData(), event.getReplyTo());
+				StompMessage message = event.getData();
+				if (isAllowedDestination(message)) {
+					processSubscribe(event.getData(), event.getReplyTo());
+				}
 			}
 		});
 		this.reactor.on(Fn.$(StompCommand.SEND), new Consumer<Event<StompMessage>>() {
 			@Override
 			public void accept(Event<StompMessage> event) {
-				processSend(event.getData());
+				StompMessage message = event.getData();
+				if (isAllowedDestination(message)) {
+					processSend(event.getData());
+				}
 			}
 		});
 		this.reactor.on(Fn.$(StompCommand.DISCONNECT), new Consumer<Event<StompMessage>>() {
@@ -108,8 +126,47 @@ public abstract class AbstractStompService {
 	}
 
 
+	/**
+	 * Ant-style destination patterns that this STOMP service is allowed to process.
+	 */
+	public void setAllowedDestinations(String... patterns) {
+		this.allowedDestinations.clear();
+		this.allowedDestinations.addAll(Arrays.asList(patterns));
+	}
+
+	/**
+	 * Ant-style destination patterns that this STOMP service should skip.
+	 */
+	public void setDisallowedDestinations(String... patterns) {
+		this.disallowedDestinations.clear();
+		this.disallowedDestinations.addAll(Arrays.asList(patterns));
+	}
+
 	public Reactor getReactor() {
 		return this.reactor;
+	}
+
+	private boolean isAllowedDestination(StompMessage message) {
+		String destination = message.getHeaders().getDestination();
+		if (destination == null) {
+			return true;
+		}
+		if (!this.disallowedDestinations.isEmpty()) {
+			for (String pattern : this.disallowedDestinations) {
+				if (this.pathMatcher.match(pattern, destination)) {
+					return false;
+				}
+			}
+		}
+		if (!this.allowedDestinations.isEmpty()) {
+			for (String pattern : this.allowedDestinations) {
+				if (this.pathMatcher.match(pattern, destination)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	protected void processConnect(StompMessage message, Object replyTo) {

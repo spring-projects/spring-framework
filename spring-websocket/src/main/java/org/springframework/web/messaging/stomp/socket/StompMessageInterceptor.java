@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.stomp.socket;
+
+import org.springframework.web.messaging.stomp.StompMessage;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public enum MessageType {
+public interface StompMessageInterceptor {
 
-	CONNECT, SUBSCRIBE, UNSUBSCRIBE, SEND, OTHER, NONE
+	boolean handleConnect(StompMessage message);
+
+	boolean handleSubscribe(StompMessage message);
+
+	boolean handleUnsubscribe(StompMessage message);
+
+	StompMessage handleSend(StompMessage message);
+
+	void handleDisconnect();
 
 }

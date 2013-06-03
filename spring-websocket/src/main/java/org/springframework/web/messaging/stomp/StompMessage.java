@@ -66,7 +66,7 @@ public class StompMessage {
 		this.sessionId = sessionId;
 	}
 
-	public String getStompSessionId() {
+	public String getSessionId() {
 		return this.sessionId;
 	}
 

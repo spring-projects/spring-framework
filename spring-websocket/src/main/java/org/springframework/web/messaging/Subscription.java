@@ -16,13 +16,20 @@
 
 package org.springframework.web.messaging;
 
+import java.io.IOException;
+
+import org.springframework.http.MediaType;
+import org.springframework.web.messaging.converter.ContentTypeNotSupportedException;
+
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public enum MessageType {
+public interface Subscription {
 
-	CONNECT, SUBSCRIBE, UNSUBSCRIBE, SEND, OTHER, NONE
+	void reply(Object content) throws IOException, ContentTypeNotSupportedException;
+
+	void reply(Object content, MediaType mediaType) throws IOException, ContentTypeNotSupportedException;
 
 }

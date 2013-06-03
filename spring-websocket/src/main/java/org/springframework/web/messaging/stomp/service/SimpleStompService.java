@@ -29,7 +29,7 @@ import reactor.Fn;
 import reactor.core.Reactor;
 import reactor.fn.Consumer;
 import reactor.fn.Event;
-import reactor.fn.Registration;
+import reactor.fn.registry.Registration;
 
 
 /**
@@ -64,7 +64,7 @@ public class SimpleStompService extends AbstractStompService {
 						getReactor().notify(replyTo, Event.wrap(outMessage));
 					}
 		});
-		addSubscription(message.getStompSessionId(), registration);
+		addSubscription(message.getSessionId(), registration);
 	}
 
 	private void addSubscription(String sessionId, Registration<?> registration) {
@@ -85,7 +85,7 @@ public class SimpleStompService extends AbstractStompService {
 
 	@Override
 	protected void processDisconnect(StompMessage message) {
-		removeSubscriptions(message.getStompSessionId());
+		removeSubscriptions(message.getSessionId());
 	}
 
 	@Override

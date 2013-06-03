@@ -35,7 +35,7 @@ import reactor.Fn;
 import reactor.core.Reactor;
 import reactor.fn.Consumer;
 import reactor.fn.Event;
-import reactor.fn.Registration;
+import reactor.fn.registry.Registration;
 
 /**
  * @author Gary Russell
@@ -62,19 +62,19 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 			StompCommand command = message.getCommand();
 			if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
 				registerConnectionClosedCallback(session);
-				connect(session, message);
+				handleConnect(session, message);
 			}
 			else if (StompCommand.SUBSCRIBE.equals(command)) {
-				subscribe(session, message);
+				handleSubscribe(session, message);
 			}
 			else if (StompCommand.UNSUBSCRIBE.equals(command)) {
-				unsubscribe(session, message);
+				handleUnsubscribe(session, message);
 			}
 			else if (StompCommand.SEND.equals(command)) {
-				send(session, message);
+				handleSend(session, message);
 			}
 			else if (StompCommand.DISCONNECT.equals(command)) {
-				disconnect(session, message);
+				handleDisconnect(session, message);
 			}
 			else if (StompCommand.ACK.equals(command) || StompCommand.NACK.equals(command)) {
 				this.reactor.notify(command, Event.wrap(message));
@@ -121,7 +121,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 		}
 	}
 
-	protected void connect(final StompSession session, StompMessage stompMessage) throws IOException {
+	protected void handleConnect(final StompSession session, StompMessage stompMessage) throws IOException {
 
 		StompHeaders headers = new StompHeaders();
 		Set<String> acceptVersions = stompMessage.getHeaders().getAcceptVersion();
@@ -171,7 +171,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 		this.reactor.notify(StompCommand.CONNECT, Event.wrap(stompMessage, replyToKey));
 	}
 
-	protected void subscribe(final StompSession session, StompMessage message) {
+	protected void handleSubscribe(final StompSession session, StompMessage message) {
 
 		final String subscriptionId = message.getHeaders().getId();
 		String replyToKey = getSubscriptionReplyKey(session, subscriptionId);
@@ -218,7 +218,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 		list.add(registration);
 	}
 
-	protected void unsubscribe(StompSession session, StompMessage message) {
+	protected void handleUnsubscribe(StompSession session, StompMessage message) {
 		cancelRegistration(session, message.getHeaders().getId());
 		this.reactor.notify(StompCommand.UNSUBSCRIBE, Event.wrap(message));
 	}
@@ -237,11 +237,11 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 		}
 	}
 
-	protected void send(StompSession session, StompMessage stompMessage) {
+	protected void handleSend(StompSession session, StompMessage stompMessage) {
 		this.reactor.notify(StompCommand.SEND, Event.wrap(stompMessage));
 	}
 
-	protected void disconnect(StompSession session, StompMessage stompMessage) {
+	protected void handleDisconnect(StompSession session, StompMessage stompMessage) {
 		removeSubscriptions(session);
 		this.reactor.notify(StompCommand.DISCONNECT, Event.wrap(stompMessage));
 	}

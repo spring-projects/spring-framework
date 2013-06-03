@@ -48,7 +48,7 @@ public class RelayStompService extends AbstractStompService {
 
 	private Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
 
-	private final StompMessageConverter converter = new StompMessageConverter();
+	private final StompMessageConverter messageConverter = new StompMessageConverter();
 
 	private final TaskExecutor taskExecutor;
 
@@ -58,9 +58,10 @@ public class RelayStompService extends AbstractStompService {
 		this.taskExecutor = executor; // For now, a naive way to manage socket reading
 	}
 
+
 	protected void processConnect(StompMessage stompMessage, final Object replyTo) {
 
-		final String stompSessionId = stompMessage.getStompSessionId();
+		final String stompSessionId = stompMessage.getSessionId();
 
 		final RelaySession session = new RelaySession();
 		this.relaySessions.put(stompSessionId, session);
@@ -80,19 +81,19 @@ public class RelayStompService extends AbstractStompService {
 	}
 
 	private void relayStompMessage(StompMessage stompMessage) {
-		RelaySession session = RelayStompService.this.relaySessions.get(stompMessage.getStompSessionId());
+		RelaySession session = RelayStompService.this.relaySessions.get(stompMessage.getSessionId());
 		Assert.notNull(session, "RelaySession not found");
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Forwarding: " + stompMessage);
 			}
-			byte[] bytes = converter.fromStompMessage(stompMessage);
+			byte[] bytes = messageConverter.fromStompMessage(stompMessage);
 			session.getOutputStream().write(bytes);
 			session.getOutputStream().flush();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			clearRelaySession(stompMessage.getStompSessionId());
+			clearRelaySession(stompMessage.getSessionId());
 		}
 	}
 
@@ -209,7 +210,7 @@ public class RelayStompService extends AbstractStompService {
 					}
 					else if (b == 0x00) {
 						byte[] bytes = out.toByteArray();
-						StompMessage message = RelayStompService.this.converter.toStompMessage(bytes);
+						StompMessage message = RelayStompService.this.messageConverter.toStompMessage(bytes);
 						getReactor().notify(replyTo, Event.wrap(message));
 						out.reset();
 					}

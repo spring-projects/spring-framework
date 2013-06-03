@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,31 @@
 
 package org.springframework.web.messaging;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public enum MessageType {
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface MessageMapping {
 
-	CONNECT, SUBSCRIBE, UNSUBSCRIBE, SEND, OTHER, NONE
+	/**
+	 * The primary mapping expressed by this annotation.
+	 * <p>The destination for a message (e.g. "/topic/echo").
+	 */
+	String[] value() default {};
+
+	/**
+	 * TODO
+	 */
+	MessageType messageType() default MessageType.NONE;
 
 }

@@ -14,15 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.converter;
+
+import org.springframework.http.MediaType;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public enum MessageType {
+public class ContentTypeNotSupportedException extends Exception {
 
-	CONNECT, SUBSCRIBE, UNSUBSCRIBE, SEND, OTHER, NONE
+	private final MediaType mediaType;
+
+	private final Class<?> sourceOrTargetType;
+
+
+	public ContentTypeNotSupportedException(MediaType mediaType, Class<?> sourceOrTargetType) {
+		super("Content type '" + mediaType + "' not supported");
+		this.mediaType = mediaType;
+		this.sourceOrTargetType = sourceOrTargetType;
+	}
+
+	public MediaType getMediaType() {
+		return this.mediaType;
+	}
+
+	public Class<?> getSourceOrTargetType() {
+		return this.sourceOrTargetType;
+	}
 
 }
