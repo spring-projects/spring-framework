@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,12 @@ import org.springframework.context.NoSuchMessageException;
  * <p>If "code" isn't set or cannot be resolved, "text" will be used
  * as default message.
  *
+ * <p>Uses of this tag may contain arguments specified with nested spring:argument tags.
+ * The {@link #setArguments(Object) 'arguments'} attribute can be used instead of nested
+ * spring:argument tags, but they may never be used together. If using the arguments
+ * attribute, the {@link #setArgumentSeparator(String) 'argumentSeparator'} attribute can
+ * indicate an argument delimiter other than the default (a comma).
+ *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @see org.springframework.ui.context.Theme
@@ -39,6 +45,7 @@ import org.springframework.context.NoSuchMessageException;
  * @see #setHtmlEscape
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
+ * @see ArgumentTag
  */
 @SuppressWarnings("serial")
 public class ThemeTag extends MessageTag {
