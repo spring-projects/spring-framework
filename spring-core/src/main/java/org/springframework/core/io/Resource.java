@@ -42,6 +42,7 @@ import java.net.URL;
  * @see UrlResource
  * @see ByteArrayResource
  * @see InputStreamResource
+ * @see PathResource
  */
 public interface Resource extends InputStreamSource {
 
