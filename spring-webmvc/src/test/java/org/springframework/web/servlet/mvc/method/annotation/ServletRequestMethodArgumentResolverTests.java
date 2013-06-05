@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.time.ZoneId;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -35,7 +37,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ServletRequestMethodArgumentResolver;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.i18n.FixedTimeZoneResolver;
 
 import static org.junit.Assert.*;
 
@@ -60,7 +63,8 @@ public class ServletRequestMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
-				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class, WebRequest.class);
+				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class,
+				WebRequest.class, TimeZone.class, ZoneId.class);
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -122,6 +126,32 @@ public class ServletRequestMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void timeZone() throws Exception {
+		TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
+		servletRequest.setAttribute(DispatcherServlet.TIME_ZONE_RESOLVER_ATTRIBUTE,
+				new FixedTimeZoneResolver(timeZone));
+		MethodParameter timeZoneParameter = new MethodParameter(method, 8);
+
+		assertTrue("TimeZone not supported", resolver.supportsParameter(timeZoneParameter));
+
+		Object result = resolver.resolveArgument(timeZoneParameter, null, webRequest, null);
+		assertEquals("Invalid result", "America/Los_Angeles", ((TimeZone)result).getID());
+	}
+
+	@Test
+	public void zoneId() throws Exception {
+		TimeZone timeZone = TimeZone.getTimeZone("America/New_York");
+		servletRequest.setAttribute(DispatcherServlet.TIME_ZONE_RESOLVER_ATTRIBUTE,
+				new FixedTimeZoneResolver(timeZone));
+		MethodParameter zoneIdParameter = new MethodParameter(method, 9);
+
+		assertTrue("ZoneId not supported", resolver.supportsParameter(zoneIdParameter));
+
+		Object result = resolver.resolveArgument(zoneIdParameter, null, webRequest, null);
+		assertEquals("Invalid result", "America/New_York", ((ZoneId)result).getId());
+	}
+
+	@Test
 	public void inputStream() throws Exception {
 		MethodParameter inputStreamParameter = new MethodParameter(method, 5);
 
@@ -151,6 +181,7 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertSame("Invalid result", webRequest, result);
 	}
 
+	@SuppressWarnings("unused")
 	public void supportedParams(ServletRequest p0,
 								MultipartRequest p1,
 								HttpSession p2,
@@ -158,7 +189,9 @@ public class ServletRequestMethodArgumentResolverTests {
 								Locale p4,
 								InputStream p5,
 								Reader p6,
-								WebRequest p7) {
+								WebRequest p7,
+								TimeZone p8,
+								ZoneId p9) {
 	}
 
 }

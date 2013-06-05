@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.TimeZoneContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -108,6 +110,11 @@ import org.springframework.web.util.WebUtils;
  * HTTP accept header, cookie, or session. The LocaleResolver bean name is "localeResolver"; default is {@link
  * org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver}.
  *
+ * <li>Its time zone resolution strategy is determined by a {@link TimeZoneResolver}.
+ * Out-of-the-box implementations work with a custom HTTP header, cookie, or session. The
+ * TimeZoneResolver bean name is "timeZoneResolver"; the default is
+ * {@link org.springframework.web.servlet.i18n.FixedTimeZoneResolver}.
+ *
  * <li>Its theme resolution strategy is determined by a {@link ThemeResolver}. Implementations for a fixed theme and for
  * cookie and session storage are included. The ThemeResolver bean name is "themeResolver"; default is {@link
  * org.springframework.web.servlet.theme.FixedThemeResolver}. </ul>
@@ -145,6 +152,14 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** Well-known name for the LocaleResolver object in the bean factory for this namespace. */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
+
+	/**
+	 * Well-known name for the TimeZoneResolver object in the bean factory for this
+	 * namespace.
+	 *
+	 * @since 4.0
+	 */
+	public static final String TIME_ZONE_RESOLVER_BEAN_NAME = "timeZoneResolver";
 
 	/** Well-known name for the ThemeResolver object in the bean factory for this namespace. */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
@@ -199,6 +214,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
+
+	/**
+	 * Request attribute to hold the current TimeZoneResolver, retrievable by views.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZoneResolver
+	 * @since 4.0
+	 */
+	public static final String TIME_ZONE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".TIME_ZONE_RESOLVER";
 
 	/**
 	 * Request attribute to hold the current ThemeResolver, retrievable by views.
@@ -282,6 +304,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** LocaleResolver used by this servlet */
 	private LocaleResolver localeResolver;
+
+	/** TimeZoneResolver used by this servlet */
+	private TimeZoneResolver timeZoneResolver;
 
 	/** ThemeResolver used by this servlet */
 	private ThemeResolver themeResolver;
@@ -439,6 +464,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void initStrategies(ApplicationContext context) {
 		initMultipartResolver(context);
 		initLocaleResolver(context);
+		initTimeZoneResolver(context);
 		initThemeResolver(context);
 		initHandlerMappings(context);
 		initHandlerAdapters(context);
@@ -488,6 +514,23 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
 						"': using default [" + this.localeResolver + "]");
+			}
+		}
+	}
+
+	private void initTimeZoneResolver(ApplicationContext context) {
+		try {
+			this.timeZoneResolver = context.getBean(TIME_ZONE_RESOLVER_BEAN_NAME, TimeZoneResolver.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using TimeZoneResolver [" + this.timeZoneResolver + "]");
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// We need to use the default
+			this.timeZoneResolver = getDefaultStrategy(context, TimeZoneResolver.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate TimeZoneResolver with name '" + TIME_ZONE_RESOLVER_BEAN_NAME +
+						"': using default [" + this.timeZoneResolver + "]");
 			}
 		}
 	}
@@ -842,6 +885,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
+		request.setAttribute(TIME_ZONE_RESOLVER_ATTRIBUTE, this.timeZoneResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
@@ -1028,6 +1072,28 @@ public class DispatcherServlet extends FrameworkServlet {
 			@Override
 			public String toString() {
 				return getLocale().toString();
+			}
+		};
+	}
+
+	/**
+	 * Build a TimeZoneContext for the given request, exposing the JVM's default time zone
+	 * as the current time zone.
+	 * <p>The default implementation uses the dispatcher's TimeZoneResolver to obtain the
+	 * current time zone, which might change during a request.
+	 * @param request current HTTP request
+	 * @return the corresponding TimeZoneContext
+	 */
+	@Override
+	protected TimeZoneContext buildTimeZoneContext(final HttpServletRequest request) {
+		return new TimeZoneContext() {
+			@Override
+			public TimeZone getTimeZone() {
+				return timeZoneResolver.resolveTimeZone(request);
+			}
+			@Override
+			public String toString() {
+				return getTimeZone().getID();
 			}
 		};
 	}

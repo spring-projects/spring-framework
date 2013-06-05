@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +43,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.TimeZoneResolver;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UrlPathHelper;
@@ -59,7 +60,8 @@ import org.springframework.web.util.WebUtils;
  * "requestContextAttribute" property.
  *
  * <p>Will also work outside of DispatcherServlet requests, accessing the root WebApplicationContext and using an
- * appropriate fallback for the locale (the HttpServletRequest's primary locale).
+ * appropriate fallback for the locale and time zone (the HttpServletRequest's primary
+ * locale and the system's time zone).
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -68,6 +70,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
  * @see org.springframework.web.servlet.view.UrlBasedViewResolver#setRequestContextAttribute
  * @see #getFallbackLocale()
+ * @see #getFallbackTimeZone()
  */
 public class RequestContext {
 
@@ -102,6 +105,8 @@ public class RequestContext {
 	private WebApplicationContext webApplicationContext;
 
 	private Locale locale;
+
+	private TimeZone timeZone;
 
 	private Theme theme;
 
@@ -183,16 +188,19 @@ public class RequestContext {
 
 	/**
 	 * Initialize this context with the given request, using the given model attributes for Errors retrieval.
-	 * <p>Delegates to {@code getFallbackLocale} and {@code getFallbackTheme} for determining the fallback
-	 * locale and theme, respectively, if no LocaleResolver and/or ThemeResolver can be found in the request.
+	 * <p>Delegates to {@code getFallbackLocale}, {@code getFallbackTimeZone}, and
+	 * {@code getFallbackTheme} for determining the fallback locale, time zone, and theme,
+	 * respectively, if no LocaleResolver, TimeZoneResolver, and/or ThemeResolver can be found in the request.
 	 * @param request current HTTP request
 	 * @param servletContext the servlet context of the web application (can be {@code null}; necessary for
 	 * fallback to root WebApplicationContext)
 	 * @param model the model attributes for the current view (can be {@code null}, using the request attributes
 	 * for Errors retrieval)
 	 * @see #getFallbackLocale
+	 * @see #getFallbackTimeZone
 	 * @see #getFallbackTheme
 	 * @see org.springframework.web.servlet.DispatcherServlet#LOCALE_RESOLVER_ATTRIBUTE
+	 * @see org.springframework.web.servlet.DispatcherServlet#TIME_ZONE_RESOLVER_ATTRIBUTE
 	 * @see org.springframework.web.servlet.DispatcherServlet#THEME_RESOLVER_ATTRIBUTE
 	 */
 	protected void initContext(HttpServletRequest request, HttpServletResponse response, ServletContext servletContext,
@@ -217,6 +225,15 @@ public class RequestContext {
 		} else {
 			// No LocaleResolver available -> try fallback.
 			this.locale = getFallbackLocale();
+		}
+
+		TimeZoneResolver timeZoneResolver = RequestContextUtils.getTimeZoneResolver(request);
+		if (timeZoneResolver != null) {
+			// Try TimeZoneResolver (we're within a DispatcherServlet request).
+			this.timeZone = timeZoneResolver.resolveTimeZone(request);
+		} else {
+			// No TimeZoneResolver available -> try fallback.
+			this.timeZone = getFallbackTimeZone();
 		}
 
 		// Determine default HTML escape setting from the "defaultHtmlEscape"
@@ -250,6 +267,19 @@ public class RequestContext {
 			}
 		}
 		return getRequest().getLocale();
+	}
+
+	/**
+	 * Determine the fallback locale for this context.
+	 * <p>The default implementation checks for a JSTL locale attribute in request,
+	 * session or application scope; if not found, returns the {@code null}.
+	 * @return the fallback locale or {@code null}
+	 */
+	protected TimeZone getFallbackTimeZone() {
+		if (jstlPresent) {
+			return JstlTimeZoneResolver.getJstlTimeZone(getRequest(), getServletContext());
+		}
+		return null;
 	}
 
 	/**
@@ -313,6 +343,14 @@ public class RequestContext {
 	}
 
 	/**
+	 * Return the current TimeZone (never {@code null}).
+	 * @return the current TimeZone.
+	 */
+	public final TimeZone getTimeZone() {
+		return this.timeZone;
+	}
+
+	/**
 	 * Return the current theme (never {@code null}).
 	 * <p>Resolved lazily for more efficiency when theme support is not being used.
 	 */
@@ -341,7 +379,7 @@ public class RequestContext {
 	 * Is default HTML escaping active? Falls back to {@code false} in case of no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
-		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
+		return this.defaultHtmlEscape != null && this.defaultHtmlEscape;
 	}
 
 	/**
@@ -764,6 +802,28 @@ public class RequestContext {
 				}
 			}
 			return (localeObject instanceof Locale ? (Locale) localeObject : null);
+		}
+	}
+
+	/**
+	 * Inner class that isolates the JSTL dependency. Just called to resolve the fallback
+	 * time zone if the JSTL API is present.
+	 */
+	private static class JstlTimeZoneResolver {
+
+		public static TimeZone getJstlTimeZone(HttpServletRequest request,
+											   ServletContext servletContext) {
+			Object timeZoneObject = Config.get(request, Config.FMT_TIME_ZONE);
+			if (timeZoneObject == null) {
+				HttpSession session = request.getSession(false);
+				if (session != null) {
+					timeZoneObject = Config.get(session, Config.FMT_TIME_ZONE);
+				}
+				if (timeZoneObject == null && servletContext != null) {
+					timeZoneObject = Config.get(servletContext, Config.FMT_TIME_ZONE);
+				}
+			}
+			return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);
 		}
 	}
 

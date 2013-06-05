@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -340,6 +341,29 @@ public class DispatcherServletTests extends TestCase {
 		request.addUserRole("role2");
 		request.addParameter("locale", "en");
 		request.addParameter("locale2", "en_CA");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertTrue("Not forwarded", response.getForwardedUrl() == null);
+	}
+
+	public void testTimeZoneChangeInterceptor1() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/timezone.do");
+		request.addUserRole("role2");
+		request.addParameter("timezone", "America/Denver");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("forwarded to failed", "failed0.jsp", response.getForwardedUrl());
+		assertTrue("Exception exposed", request.getAttribute("exception").getClass().equals(ServletException.class));
+	}
+
+	public void testTimeZoneChangeInterceptor2() throws Exception {
+		String id = TimeZone.getDefault().getID().equals("America/Chicago") ?
+				"America/Los_Angeles" : "America/Chicago";
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/timezone.do");
+		request.addUserRole("role2");
+		request.addParameter("timezone", "America/Denver");
+		request.addParameter("timezone2", id);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);

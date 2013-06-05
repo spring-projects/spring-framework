@@ -41,6 +41,7 @@ import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.TimeZoneResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
@@ -49,6 +50,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.i18n.FixedTimeZoneResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
@@ -100,6 +102,8 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	private List<ViewResolver> viewResolvers;
 
 	private LocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
+
+	private TimeZoneResolver timeZoneResolver = new FixedTimeZoneResolver();
 
 	private FlashMapManager flashMapManager = null;
 
@@ -246,6 +250,15 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	}
 
 	/**
+	 * Provide a TimeZoneResolver instance.
+	 * If not provided, the default one used is {@link FixedTimeZoneResolver}.
+	 */
+	public StandaloneMockMvcBuilder setTimeZoneResolver(TimeZoneResolver timeZoneResolver) {
+		this.timeZoneResolver = timeZoneResolver;
+		return this;
+	}
+
+	/**
 	 * Provide a custom FlashMapManager instance.
 	 * If not provided, {@code SessionFlashMapManager} is used by default.
 	 */
@@ -300,6 +313,7 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 
 		cxt.addBeans(initViewResolvers(cxt));
 		cxt.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, this.localeResolver);
+		cxt.addBean(DispatcherServlet.TIME_ZONE_RESOLVER_BEAN_NAME, this.timeZoneResolver);
 		cxt.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, new FixedThemeResolver());
 		cxt.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, new DefaultRequestToViewNameTranslator());
 

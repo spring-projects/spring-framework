@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -80,6 +80,8 @@ public abstract class JstlUtils {
 	public static void exposeLocalizationContext(HttpServletRequest request, MessageSource messageSource) {
 		Locale jstlLocale = RequestContextUtils.getLocale(request);
 		Config.set(request, Config.FMT_LOCALE, jstlLocale);
+		TimeZone jstlTimeZone = RequestContextUtils.getTimeZone(request);
+		Config.set(request, Config.FMT_TIME_ZONE, jstlTimeZone);
 		if (messageSource != null) {
 			LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, request);
 			Config.set(request, Config.FMT_LOCALIZATION_CONTEXT, jstlContext);
@@ -95,6 +97,7 @@ public abstract class JstlUtils {
 	 */
 	public static void exposeLocalizationContext(RequestContext requestContext) {
 		Config.set(requestContext.getRequest(), Config.FMT_LOCALE, requestContext.getLocale());
+		Config.set(requestContext.getRequest(), Config.FMT_TIME_ZONE, requestContext.getTimeZone());
 		MessageSource messageSource = getJstlAwareMessageSource(
 				requestContext.getServletContext(), requestContext.getMessageSource());
 		LocalizationContext jstlContext = new SpringLocalizationContext(messageSource, requestContext.getRequest());
@@ -141,6 +144,6 @@ public abstract class JstlUtils {
 			}
 			return RequestContextUtils.getLocale(this.request);
 		}
-	};
+	}
 
 }
