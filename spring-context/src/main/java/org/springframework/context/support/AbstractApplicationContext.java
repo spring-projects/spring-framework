@@ -635,18 +635,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					regularPostProcessors.add(postProcessor);
 				}
 			}
-			Map<String, BeanDefinitionRegistryPostProcessor> beanMap =
-					beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false);
-			List<BeanDefinitionRegistryPostProcessor> registryPostProcessorBeans =
-					new ArrayList<BeanDefinitionRegistryPostProcessor>(beanMap.values());
-			OrderComparator.sort(registryPostProcessorBeans);
-			for (BeanDefinitionRegistryPostProcessor postProcessor : registryPostProcessorBeans) {
-				postProcessor.postProcessBeanDefinitionRegistry(registry);
-			}
 			invokeBeanFactoryPostProcessors(registryPostProcessors, beanFactory);
-			invokeBeanFactoryPostProcessors(registryPostProcessorBeans, beanFactory);
+			processedBeans.addAll(
+					invokeBeanDefinitionRegistryPostProcessorsBeans(registry, beanFactory));
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
-			processedBeans.addAll(beanMap.keySet());
 		}
 		else {
 			// Invoke factory processors registered with the context instance.
@@ -696,6 +688,34 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			nonOrderedPostProcessors.add(getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
+	}
+
+	/**
+	 * Process {@link BeanDefinitionRegistryPostProcessor} beans.
+	 */
+	private Collection<String> invokeBeanDefinitionRegistryPostProcessorsBeans(
+			BeanDefinitionRegistry registry, ConfigurableListableBeanFactory beanFactory) {
+		Set<String> processed = new HashSet<String>();
+
+		Map<String, BeanDefinitionRegistryPostProcessor> beanMap;
+
+		do {
+			beanMap = beanFactory.getBeansOfType(BeanDefinitionRegistryPostProcessor.class, true, false);
+			beanMap.keySet().removeAll(processed);
+
+			List<BeanDefinitionRegistryPostProcessor> beans =
+					new ArrayList<BeanDefinitionRegistryPostProcessor>(beanMap.values());
+			OrderComparator.sort(beans);
+			for (BeanDefinitionRegistryPostProcessor postProcessor : beans) {
+				postProcessor.postProcessBeanDefinitionRegistry(registry);
+			}
+
+			invokeBeanFactoryPostProcessors(beans, beanFactory);
+			processed.addAll(beanMap.keySet());
+		}
+		while (!beanMap.isEmpty()); // Loop in case further BDRPPs were added
+
+		return processed;
 	}
 
 	/**

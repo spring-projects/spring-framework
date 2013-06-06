@@ -19,11 +19,14 @@ package org.springframework.context.support;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -93,6 +96,28 @@ public class BeanFactoryPostProcessorTests {
 		assertFalse(bfpp.wasCalled);
 	}
 
+	@Test
+	public void testBeanDefinitionRegistryPostProcessor() throws Exception {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		TestBeanDefinitionRegistryPostProcessor bdrpp = new TestBeanDefinitionRegistryPostProcessor();
+		ac.addBeanFactoryPostProcessor(bdrpp);
+		assertFalse(bdrpp.wasCalled);
+		ac.refresh();
+		assertTrue(bdrpp.wasCalled);
+		assertTrue(ac.getBean(TestBeanFactoryPostProcessor.class).wasCalled);
+	}
+
+	@Test
+	public void testBeanDefinitionRegistryPostProcessorRegisteringAnother() throws Exception {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb1", TestBean.class);
+		ac.registerSingleton("tb2", TestBean.class);
+		ac.registerBeanDefinition("bdrpp2", new RootBeanDefinition(TestBeanDefinitionRegistryPostProcessor2.class));
+		ac.refresh();
+		assertTrue(ac.getBean(TestBeanFactoryPostProcessor.class).wasCalled);
+	}
 
 	public static class TestBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
@@ -110,4 +135,36 @@ public class BeanFactoryPostProcessorTests {
 		}
 	}
 
+	public static class TestBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+
+		public boolean wasCalled;
+
+		@Override
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
+				throws BeansException {
+			registry.registerBeanDefinition("bfpp", new RootBeanDefinition(TestBeanFactoryPostProcessor.class));
+		}
+
+		@Override
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+				throws BeansException {
+			this.wasCalled = true;
+		}
+
+	}
+
+	public static class TestBeanDefinitionRegistryPostProcessor2 implements BeanDefinitionRegistryPostProcessor {
+
+		@Override
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+				throws BeansException {
+		}
+
+		@Override
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
+				throws BeansException {
+			registry.registerBeanDefinition("anotherpp", new RootBeanDefinition(TestBeanDefinitionRegistryPostProcessor.class));
+		}
+
+	}
 }
