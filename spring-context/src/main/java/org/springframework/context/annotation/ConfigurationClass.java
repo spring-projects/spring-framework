@@ -27,6 +27,8 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
@@ -64,6 +66,8 @@ final class ConfigurationClass {
 
 	private final Set<ImportBeanDefinitionRegistrar> importBeanDefinitionRegistrars =
 			new LinkedHashSet<ImportBeanDefinitionRegistrar>();
+
+	private Boolean shouldSkip;
 
 
 	/**
@@ -219,6 +223,16 @@ final class ConfigurationClass {
 		}
 	}
 
+	public boolean evaluateConditionals(BeanDefinitionRegistry registry, Environment environment) {
+		if(isImported() && getImportedBy().evaluateConditionals(registry, environment)) {
+			return true;
+		}
+		if(this.shouldSkip == null) {
+			this.shouldSkip = ConditionEvaluator.get(getMetadata(), false).shouldSkip(
+					registry, environment);
+		}
+		return this.shouldSkip;
+	}
 
 	@Override
 	public boolean equals(Object other) {

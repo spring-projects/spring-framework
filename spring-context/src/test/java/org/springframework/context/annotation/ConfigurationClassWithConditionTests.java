@@ -16,12 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,15 +25,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test for {@link Conditional} beans.
  *
  * @author Phillip Webb
  */
+@SuppressWarnings("resource")
 public class ConfigurationClassWithConditionTests {
 
 	@Rule
@@ -107,6 +107,13 @@ public class ConfigurationClassWithConditionTests {
 		ctx.refresh();
 		thrown.expect(NoSuchBeanDefinitionException.class);
 		assertNull(ctx.getBean(ExampleBean.class));
+	}
+
+	@Test
+	public void importsNotCreated() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportsNotCreated.class);
+		ctx.refresh();
 	}
 
 	@Configuration
@@ -203,6 +210,46 @@ public class ConfigurationClassWithConditionTests {
 		public ExampleBean bean1() {
 			return new ExampleBean();
 		}
+	}
+
+	@Configuration
+	@Never
+	@Import({ ConfigurationNotCreated.class, RegistrarNotCreated.class, ImportSelectorNotCreated.class })
+	static class ImportsNotCreated {
+		static {
+			if (true) throw new RuntimeException();
+		}
+	}
+
+	@Configuration
+	static class ConfigurationNotCreated {
+		static {
+			if (true) throw new RuntimeException();
+		}
+	}
+
+	static class RegistrarNotCreated implements ImportBeanDefinitionRegistrar {
+		static {
+			if (true) throw new RuntimeException();
+		}
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
+		}
+	}
+
+	static class ImportSelectorNotCreated implements ImportSelector {
+
+		static {
+			if (true) throw new RuntimeException();
+		}
+
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return new String[] {};
+		}
+
 	}
 
 	static class ExampleBean {
