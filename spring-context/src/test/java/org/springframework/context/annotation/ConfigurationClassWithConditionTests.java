@@ -27,6 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,18 +37,24 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
 
 /**
- * Test for {@link Conditional} beans.
- *
+ * Tests for {@link Conditional} beans.
+ * 
  * @author Phillip Webb
  */
 public class ConfigurationClassWithConditionTests {
 
+	private final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
+	@After
+	public void closeContext() {
+		ctx.close();
+	}
+
 	@Test
 	public void conditionalOnMissingBeanMatch() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanOneConfiguration.class, BeanTwoConfiguration.class);
 		ctx.refresh();
 		assertTrue(ctx.containsBean("bean1"));
@@ -57,7 +64,6 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void conditionalOnMissingBeanNoMatch() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanTwoConfiguration.class);
 		ctx.refresh();
 		assertFalse(ctx.containsBean("bean1"));
@@ -67,7 +73,6 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void conditionalOnBeanMatch() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanOneConfiguration.class, BeanThreeConfiguration.class);
 		ctx.refresh();
 		assertTrue(ctx.containsBean("bean1"));
@@ -76,7 +81,6 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void conditionalOnBeanNoMatch() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanThreeConfiguration.class);
 		ctx.refresh();
 		assertFalse(ctx.containsBean("bean1"));
@@ -85,7 +89,6 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void metaConditional() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigurationWithMetaCondition.class);
 		ctx.refresh();
 		assertTrue(ctx.containsBean("bean"));
@@ -93,7 +96,6 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void nonConfigurationClass() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(NonConfigurationClass.class);
 		ctx.refresh();
 		thrown.expect(NoSuchBeanDefinitionException.class);
@@ -102,7 +104,6 @@ public class ConfigurationClassWithConditionTests {
 
 	@Test
 	public void methodConditional() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConditionOnMethodConfiguration.class);
 		ctx.refresh();
 		thrown.expect(NoSuchBeanDefinitionException.class);

@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a component is is only eligible for registration when all
+ * Indicates that a component is only eligible for registration when all
  * {@linkplain #value() specified conditions} match.
  *
  * <p>A <em>condition</em> is any state that can be determined programmatically
