@@ -16,13 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -46,12 +42,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
-
 import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -115,7 +111,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
 
-		List input = new ArrayList();
+		List<Integer> input = new ArrayList<Integer>();
 		input.add(1);
 		rbd.getPropertyValues().add("testBeanList", input);
 
@@ -655,18 +651,22 @@ public class BeanFactoryGenericsTests {
 	}
 
 	/**
-	 * Tests support for parameterized {@code factory-method} declarations such
-	 * as Mockito {@code mock()} method which has the following signature.
-	 *
-	 * <pre>{@code
+	 * Tests support for parameterized static {@code factory-method} declarations such as
+	 * Mockito's {@code mock()} method which has the following signature.
+	 * 
+	 * <pre>
+	 * {@code
 	 * public static <T> T mock(Class<T> classToMock)
-	 * }</pre>
-	 *
+	 * }
+	 * </pre>
+	 * 
+	 * <p>
 	 * See SPR-9493
+	 * 
 	 * @since 3.2
 	 */
 	@Test
-	public void parameterizedFactoryMethod() {
+	public void parameterizedStaticFactoryMethod() {
 		RootBeanDefinition rbd = new RootBeanDefinition(Mockito.class);
 		rbd.setFactoryMethodName("mock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
@@ -678,6 +678,39 @@ public class BeanFactoryGenericsTests {
 		assertEquals(1, beans.size());
 	}
 
+	/**
+	 * Tests support for parameterized instance {@code factory-method} declarations such
+	 * as EasyMock's {@code IMocksControl.createMock()} method which has the following
+	 * signature.
+	 * 
+	 * <pre>
+	 * {@code
+	 * public <T> T createMock(Class<T> toMock)
+	 * }
+	 * </pre>
+	 * 
+	 * <p>
+	 * See SPR-10411
+	 * 
+	 * @since 4.0
+	 */
+	@Test
+	public void parameterizedInstanceFactoryMethod() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(MocksControl.class);
+		bf.registerBeanDefinition("mocksControl", rbd);
+
+		rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("mocksControl");
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
+
+		bf.registerBeanDefinition("mock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
+	}
 
 	@SuppressWarnings("serial")
 	public static class NamedUrlList extends LinkedList<URL> {
@@ -719,6 +752,27 @@ public class BeanFactoryGenericsTests {
 			for (URI urlName : urlNames) {
 				add(urlName.toURL());
 			}
+		}
+	}
+
+	/**
+	 * Pseudo-implementation of EasyMock's {@code MocksControl} class.
+	 */
+	public static class MocksControl {
+
+		@SuppressWarnings("unchecked")
+		public <T> T createMock(Class<T> toMock) {
+
+			return (T) Proxy.newProxyInstance(
+					BeanFactoryGenericsTests.class.getClassLoader(),
+					new Class[] { toMock }, new InvocationHandler() {
+
+						@Override
+						public Object invoke(Object proxy, Method method, Object[] args)
+								throws Throwable {
+							throw new UnsupportedOperationException("mocked!");
+						}
+					});
 		}
 	}
 
