@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 4.0
  */
-public abstract class AbstractMessageConverter<T> implements MessageConverter<T> {
+public abstract class AbstractMessageConverter implements MessageConverter {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -79,7 +79,6 @@ public abstract class AbstractMessageConverter<T> implements MessageConverter<T>
 		this.supportedMediaTypes = new ArrayList<MediaType>(supportedMediaTypes);
 	}
 
-	@Override
 	public List<MediaType> getSupportedMediaTypes() {
 		return Collections.unmodifiableList(this.supportedMediaTypes);
 	}
@@ -159,8 +158,8 @@ public abstract class AbstractMessageConverter<T> implements MessageConverter<T>
 	 * implementations might add some default behavior, however.
 	 */
 	@Override
-	public T convertFromPayload(Class<? extends T> clazz, MediaType contentType, byte[] payload)
-			throws IOException {
+	public Object convertFromPayload(Class<?> clazz, MediaType contentType, byte[] payload)
+			throws IOException, ContentTypeNotSupportedException {
 
 		return convertFromPayloadInternal(clazz, contentType, payload);
 	}
@@ -173,8 +172,8 @@ public abstract class AbstractMessageConverter<T> implements MessageConverter<T>
 	 * @return the converted object
 	 * @throws IOException in case of I/O errors
 	 */
-	protected abstract T convertFromPayloadInternal(Class<? extends T> clazz, MediaType contentType,
-			byte[] payload) throws IOException;
+	protected abstract Object convertFromPayloadInternal(Class<?> clazz, MediaType contentType, byte[] payload)
+			throws IOException, ContentTypeNotSupportedException;
 
 	/**
 	 * This implementation simply delegates to
@@ -182,25 +181,13 @@ public abstract class AbstractMessageConverter<T> implements MessageConverter<T>
 	 * implementations might add some default behavior, however.
 	 */
 	@Override
-	public byte[] convertToPayload(T t, MediaType contentType) throws IOException {
-		return convertToPayloadInternal(t, contentType);
+	public byte[] convertToPayload(Object content, MediaType contentType)
+			throws IOException, ContentTypeNotSupportedException {
+
+		return convertToPayloadInternal(content, contentType);
 	}
 
-	protected abstract byte[] convertToPayloadInternal(T t, MediaType contentType)
-			throws IOException;
-
-	/**
-	 * Returns the default content type for the given type. Called when {@link #write}
-	 * is invoked without a specified content type parameter.
-	 * <p>By default, this returns the first element of the
-	 * {@link #setSupportedMediaTypes(List) supportedMediaTypes} property, if any.
-	 * Can be overridden in subclasses.
-	 * @param t the type to return the content type for
-	 * @return the content type, or {@code null} if not known
-	 */
-	protected MediaType getDefaultContentType(T t) throws IOException {
-		List<MediaType> mediaTypes = getSupportedMediaTypes();
-		return (!mediaTypes.isEmpty() ? mediaTypes.get(0) : null);
-	}
+	protected abstract byte[] convertToPayloadInternal(Object content, MediaType contentType)
+			throws IOException, ContentTypeNotSupportedException;
 
 }

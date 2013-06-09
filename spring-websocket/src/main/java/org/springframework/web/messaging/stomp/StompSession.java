@@ -36,6 +36,6 @@ public interface StompSession {
 	/**
 	 * Register a task to be invoked if the underlying connection is closed.
 	 */
-	void registerConnectionClosedCallback(Runnable task);
+	void registerConnectionClosedTask(Runnable task);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.messaging.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -24,22 +24,17 @@ import java.lang.annotation.Target;
 
 
 /**
- * Annotation indicating a method parameter should be bound to the body of a message.
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface MessageBody {
+public @interface MessageMapping {
 
 	/**
-	 * Whether body content is required.
-	 * <p>Default is {@code true}, leading to an exception thrown in case
-	 * there is no body content. Switch this to {@code false} if you prefer
-	 * {@code null} to be passed when the body content is {@code null}.
+	 * Destination values for the message.
 	 */
-	boolean required() default true;
+	String[] value() default {};
 
 }

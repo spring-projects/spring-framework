@@ -14,33 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.converter;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
 /**
- * @author Rossen Stoyanchev
+ * @author Mark Fisher
  * @since 4.0
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface MessageMapping {
+@SuppressWarnings("serial")
+public class MessageConversionException extends MessagingException {
 
-	/**
-	 * The primary mapping expressed by this annotation.
-	 * <p>The destination for a message (e.g. "/topic/echo").
-	 */
-	String[] value() default {};
+	public MessageConversionException(String description, Throwable cause) {
+		super(description, cause);
+	}
 
-	/**
-	 * TODO
-	 */
-	MessageType messageType() default MessageType.NONE;
+	public MessageConversionException(Message<?> failedMessage, String description, Throwable cause) {
+		super(failedMessage, description, cause);
+	}
 
 }

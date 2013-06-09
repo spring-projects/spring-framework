@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp.service;
+package org.springframework.web.messaging.service.method;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.web.messaging.stomp.StompMessage;
+import org.springframework.messaging.Message;
 
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.web.messaging.stomp.StompMessage;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface MessageMethodArgumentResolver {
+public interface ArgumentResolver {
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is
@@ -48,12 +48,11 @@ public interface MessageMethodArgumentResolver {
 	 * {@link #supportsParameter(org.springframework.core.MethodParameter)}
 	 * and it must have returned {@code true}
 	 * @param message
-	 * @param replyTo
 	 *
 	 * @return the resolved argument value, or {@code null}.
 	 *
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */
-	Object resolveArgument(MethodParameter parameter, StompMessage message, Object replyTo) throws Exception;
+	Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception;
 
 }

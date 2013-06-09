@@ -74,7 +74,7 @@ public class WebSocketStompSession implements StompSession {
 		}
 	}
 
-	public void registerConnectionClosedCallback(Runnable task) {
+	public void registerConnectionClosedTask(Runnable task) {
 		this.connectionClosedTasks.add(task);
 	}
 

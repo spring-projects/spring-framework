@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp.service;
+package org.springframework.web.messaging.service.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -23,21 +23,21 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.messaging.Message;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.messaging.stomp.StompMessage;
 import org.springframework.web.method.HandlerMethod;
 
 /**
  * Invokes the handler method for a given message after resolving
- * its method argument values through registered {@link MessageMethodArgumentResolver}s.
+ * its method argument values through registered {@link ArgumentResolver}s.
  * <p>
  * Argument resolution often requires a {@link WebDataBinder} for data binding or for type
  * conversion. Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to
  * supply a binder factory to pass to argument resolvers.
  * <p>
- * Use {@link #setMessageMethodArgumentResolvers(MessageMethodArgumentResolverComposite)}
+ * Use {@link #setMessageMethodArgumentResolvers(ArgumentResolverComposite)}
  * to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
@@ -45,7 +45,7 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class InvocableMessageHandlerMethod extends HandlerMethod {
 
-	private MessageMethodArgumentResolverComposite argumentResolvers = new MessageMethodArgumentResolverComposite();
+	private ArgumentResolverComposite argumentResolvers = new ArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
@@ -72,10 +72,10 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Set {@link MessageMethodArgumentResolver}s to use to use for resolving method
+	 * Set {@link ArgumentResolver}s to use to use for resolving method
 	 * argument values.
 	 */
-	public void setMessageMethodArgumentResolvers(MessageMethodArgumentResolverComposite argumentResolvers) {
+	public void setMessageMethodArgumentResolvers(ArgumentResolverComposite argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 
@@ -97,9 +97,9 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	 * @exception Exception raised if no suitable argument resolver can be found, or the
 	 *            method raised an exception
 	 */
-	public final Object invoke(StompMessage message, Object replyTo) throws Exception {
+	public final Object invoke(Message<?> message) throws Exception {
 
-		Object[] args = getMethodArgumentValues(message, replyTo);
+		Object[] args = getMethodArgumentValues(message);
 
 		if (logger.isTraceEnabled()) {
 			StringBuilder builder = new StringBuilder("Invoking [");
@@ -120,7 +120,7 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(StompMessage message, Object replyTo) throws Exception {
+	private Object[] getMethodArgumentValues(Message<?> message) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
@@ -136,7 +136,7 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 
 			if (this.argumentResolvers.supportsParameter(parameter)) {
 				try {
-					args[i] = this.argumentResolvers.resolveArgument(parameter, message, replyTo);
+					args[i] = this.argumentResolvers.resolveArgument(parameter, message);
 					continue;
 				} catch (Exception ex) {
 					if (logger.isTraceEnabled()) {

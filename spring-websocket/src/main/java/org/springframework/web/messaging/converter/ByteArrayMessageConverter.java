@@ -14,22 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
-
-import java.io.IOException;
+package org.springframework.web.messaging.converter;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.messaging.converter.ContentTypeNotSupportedException;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface Subscription {
+public class ByteArrayMessageConverter implements MessageConverter {
 
-	void reply(Object content) throws IOException, ContentTypeNotSupportedException;
+	@Override
+	public boolean canConvertFromPayload(Class<?> clazz, MediaType contentType) {
+		return byte[].class.equals(clazz);
+	}
 
-	void reply(Object content, MediaType mediaType) throws IOException, ContentTypeNotSupportedException;
+	@Override
+	public Object convertFromPayload(Class<?> clazz, MediaType contentType, byte[] payload) {
+		return payload;
+	}
+
+	@Override
+	public boolean canConvertToPayload(Class<?> clazz, MediaType mediaType) {
+		return byte[].class.equals(clazz);
+	}
+
+	@Override
+	public byte[] convertToPayload(Object content, MediaType contentType) {
+		return (byte[]) content;
+	}
 
 }

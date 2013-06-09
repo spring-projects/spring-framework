@@ -17,6 +17,7 @@
 package org.springframework.web.messaging.stomp;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -43,11 +44,11 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	// TODO: separate client from server headers so they can't be mixed
 
 	// Client
-	private static final String ACCEPT_VERSION = "accept-version";
-
 	private static final String ID = "id";
 
 	private static final String HOST = "host";
+
+	private static final String ACCEPT_VERSION = "accept-version";
 
 	// Server
 
@@ -72,6 +73,11 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	private static final String CONTENT_LENGTH = "content-length";
 
 	private static final String HEARTBEAT = "heart-beat";
+
+
+	public static final List<String> STANDARD_HEADER_NAMES =
+			Arrays.asList(ID, HOST, ACCEPT_VERSION, MESSAGE_ID, RECEIPT_ID, SUBSCRIPTION,
+					VERSION, MESSAGE, ACK, DESTINATION, CONTENT_LENGTH, CONTENT_TYPE, HEARTBEAT);
 
 
 	private final Map<String, List<String>> headers;

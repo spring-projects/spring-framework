@@ -16,8 +16,6 @@
 
 package org.springframework.web.messaging.stomp;
 
-import org.springframework.web.messaging.MessageType;
-
 
 /**
  *
@@ -44,24 +42,5 @@ public enum StompCommand {
 	MESSAGE,
 	RECEIPT,
 	ERROR;
-
-
-	public MessageType getMessageType() {
-		if (this == CONNECT) {
-			return MessageType.CONNECT;
-		}
-		else if (this == SUBSCRIBE) {
-			return MessageType.SUBSCRIBE;
-		}
-		else if (this == UNSUBSCRIBE) {
-			return MessageType.UNSUBSCRIBE;
-		}
-		else if (this == SEND) {
-			return MessageType.SEND;
-		}
-		else {
-			return MessageType.OTHER;
-		}
-	}
 
 }

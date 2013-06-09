@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.event;
+
 
 
 /**
- * @author Rossen Stoyanchev
- * @since 4.0
+ *
  */
-public enum MessageType {
+public interface EventConsumer<T> {
 
-	CONNECT,
 
-	MESSAGE,
-
-	SUBSCRIBE,
-
-	UNSUBSCRIBE,
-
-	DISCONNECT,
-
-	OTHER;
+	void accept(T data);
 
 }

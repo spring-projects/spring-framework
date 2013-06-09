@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.annotation;
 
-import java.io.IOException;
-
-import org.springframework.http.MediaType;
-import org.springframework.web.messaging.converter.ContentTypeNotSupportedException;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface MessageBroker {
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface SubscribeEvent {
 
-	void send(String destination, Object content, MediaType contentType)
-			throws IOException, ContentTypeNotSupportedException;
+	/**
+	 * Destination value(s) for the subscription.
+	 */
+	String[] value() default {};
 
 }

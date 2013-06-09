@@ -17,21 +17,20 @@
 package org.springframework.web.messaging.converter;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.http.MediaType;
 
 /**
- * Strategy for converting byte a array message payload to and from a typed object.
+ * Strategy for converting a byte array message payload to and from a typed object.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface MessageConverter<T> {
+public interface MessageConverter {
 
 
 	/**
-	 * Whether the given class can be converted from a byte array by this converter.
+	 * Whether instances of the given class can be converted to from a byte array.
 	 *
 	 * @param clazz the class to convert from
 	 * @param mediaType the media type of the content, can be {@code null} if not
@@ -41,7 +40,7 @@ public interface MessageConverter<T> {
 	boolean canConvertFromPayload(Class<?> clazz, MediaType mediaType);
 
 	/**
-	 * Convert the payload of the given type.
+	 * Convert the byte array payload to the given type.
 	 *
 	 * @param clazz the type of object to return. This type must have previously been
 	 *        passed to {@link #canConvertFromPayload(Class, MediaType)} and it must have
@@ -51,10 +50,11 @@ public interface MessageConverter<T> {
 	 * @return the converted object
 	 * @throws IOException in case of I/O errors
 	 */
-	T convertFromPayload(Class<? extends T> clazz, MediaType contentType, byte[] payload) throws IOException;
+	Object convertFromPayload(Class<?> clazz, MediaType contentType, byte[] payload)
+			throws IOException, ContentTypeNotSupportedException;
 
 	/**
-	 * Whether the given class can be converted to a byte array by this converter.
+	 * Whether instances of the given class can be converted to a byte array.
 	 *
 	 * @param clazz the class to test
 	 * @param mediaType the media type of the content, can be {@code null} if not specified.
@@ -72,13 +72,6 @@ public interface MessageConverter<T> {
 	 * @return the output message
 	 * @throws IOException in case of I/O errors
 	 */
-	byte[] convertToPayload(T t, MediaType contentType) throws IOException;
-
-	/**
-	 * Return the list of {@link MediaType} objects supported by this converter.
-	 *
-	 * @return the list of supported media types
-	 */
-	List<MediaType> getSupportedMediaTypes();
+	byte[] convertToPayload(Object content, MediaType contentType) throws IOException, ContentTypeNotSupportedException;
 
 }

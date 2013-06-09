@@ -26,7 +26,7 @@ import org.springframework.http.MediaType;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StringMessageConverter extends AbstractMessageConverter<String> {
+public class StringMessageConverter extends AbstractMessageConverter {
 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -41,15 +41,15 @@ public class StringMessageConverter extends AbstractMessageConverter<String> {
 	}
 
 	@Override
-	protected String convertFromPayloadInternal(Class<? extends String> clazz, MediaType contentType,
-			byte[] payload) throws IOException {
+	protected String convertFromPayloadInternal(Class<?> clazz, MediaType contentType, byte[] payload)
+			throws IOException {
 
 		return new String(payload, UTF_8);
 	}
 
 	@Override
-	protected byte[] convertToPayloadInternal(String content, MediaType contentType) throws IOException {
-		return content.getBytes(UTF_8);
+	protected byte[] convertToPayloadInternal(Object content, MediaType contentType) throws IOException {
+		return ((String) content).getBytes(UTF_8);
 	}
 
 }

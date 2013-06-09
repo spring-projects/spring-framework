@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Arjen Poutsma
  * @since 4.0
  */
-public class MappingJackson2MessageConverter extends AbstractMessageConverter<Object> {
+public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
