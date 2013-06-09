@@ -249,8 +249,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
-		this.method = method;
-		this.requestURI = requestURI;
+		this.method = (method == null ? "" : method);
+		this.requestURI = (requestURI == null ? "" : requestURI);
 		this.locales.add(Locale.ENGLISH);
 	}
 
@@ -859,7 +859,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void setMethod(String method) {
-		this.method = method;
+		this.method = (method == null ? "" : method);
 	}
 
 	@Override
@@ -937,7 +937,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void setRequestURI(String requestURI) {
-		this.requestURI = requestURI;
+		this.requestURI = (requestURI == null ? "" : requestURI);
 	}
 
 	@Override
