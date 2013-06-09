@@ -193,6 +193,39 @@ public class MockHttpServletRequestTests {
 		assertEqualEnumerations(Collections.enumeration(preferredLocales), request.getLocales());
 	}
 
+	@Test
+	public void getRequestURL() {
+		request.setServerPort(8080);
+		request.setRequestURI("/path");
+		assertEquals("http://localhost:8080/path", request.getRequestURL().toString());
+
+		request.setScheme("https");
+		request.setServerName("example.com");
+		request.setServerPort(8443);
+		assertEquals("https://example.com:8443/path", request.getRequestURL().toString());
+	}
+
+	@Test
+	public void getRequestURLWithDefaults() {
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://localhost", requestURL.toString());
+	}
+
+	@Test
+	public void getRequestURLWithDefaultsAndHttps() {
+		request.setScheme("https");
+		request.setServerPort(443);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("https://localhost", requestURL.toString());
+	}
+
+	@Test
+	public void getRequestURLWithNegativePort() {
+		request.setServerPort(-99);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://localhost", requestURL.toString());
+	}
+
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {
 		assertNotNull(enum1);
 		assertNotNull(enum2);

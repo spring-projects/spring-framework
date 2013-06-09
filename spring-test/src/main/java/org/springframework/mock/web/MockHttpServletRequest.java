@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -946,8 +947,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		StringBuffer url = new StringBuffer(this.scheme);
-		url.append("://").append(this.serverName).append(':').append(this.serverPort);
+		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
+
+		if (this.serverPort > 0
+				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+			url.append(':').append(this.serverPort);
+		}
+
 		url.append(getRequestURI());
 		return url;
 	}
