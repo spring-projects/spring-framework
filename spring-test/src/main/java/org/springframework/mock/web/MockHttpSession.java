@@ -102,6 +102,7 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public long getCreationTime() {
+		assertIsValid();
 		return this.creationTime;
 	}
 
@@ -117,6 +118,7 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public long getLastAccessedTime() {
+		assertIsValid();
 		return this.lastAccessedTime;
 	}
 
@@ -142,6 +144,7 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public Object getAttribute(String name) {
+		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
@@ -153,16 +156,19 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public Enumeration<String> getAttributeNames() {
+		assertIsValid();
 		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	@Override
 	public String[] getValueNames() {
+		assertIsValid();
 		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
 	}
 
 	@Override
 	public void setAttribute(String name, Object value) {
+		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -182,6 +188,7 @@ public class MockHttpSession implements HttpSession {
 
 	@Override
 	public void removeAttribute(String name) {
+		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		Object value = this.attributes.remove(name);
 		if (value instanceof HttpSessionBindingListener) {
@@ -216,11 +223,7 @@ public class MockHttpSession implements HttpSession {
 	 */
 	@Override
 	public void invalidate() {
-		if (this.invalid) {
-			throw new IllegalStateException("The session has already been invalidated");
-		}
-
-		// else
+		assertIsValid();
 		this.invalid = true;
 		clearAttributes();
 	}
@@ -229,12 +232,25 @@ public class MockHttpSession implements HttpSession {
 		return this.invalid;
 	}
 
+	/**
+	 * Convenience method for asserting that this session has not been
+	 * {@linkplain #invalidate() invalidated}.
+	 * 
+	 * @throws IllegalStateException if this session has been invalidated
+	 */
+	private void assertIsValid() {
+		if (isInvalid()) {
+			throw new IllegalStateException("The session has already been invalidated");
+		}
+	}
+
 	public void setNew(boolean value) {
 		this.isNew = value;
 	}
 
 	@Override
 	public boolean isNew() {
+		assertIsValid();
 		return this.isNew;
 	}
 
