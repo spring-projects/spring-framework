@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Gary Russell
  * @since 4.0
  */
-public final class MessageHeaders implements Map<String, Object>, Serializable {
+public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final long serialVersionUID = 8946067357652612145L;
 
