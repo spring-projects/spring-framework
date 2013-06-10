@@ -221,8 +221,7 @@ class ConfigurationClassParser {
 		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			if (!ConditionEvaluator.get(configClass.getMetadata(), false).shouldSkip(
-					this.registry, this.environment)) {
+			if (!configClass.evaluateConditionals(this.registry, this.environment)) {
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, metadata.getClassName());
 
@@ -280,8 +279,16 @@ class ConfigurationClassParser {
 					}
 				}
 				else {
-					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superclass);
-					return reader.getAnnotationMetadata();
+					try {
+						MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superclass);
+						return reader.getAnnotationMetadata();
+					}
+					catch (IOException ex) {
+						// Loading failed, evaluate the conditionals to see if it is important
+						if (!configClass.evaluateConditionals(this.registry, this.environment)) {
+							throw ex;
+						}
+					}
 				}
 			}
 		}
@@ -425,40 +432,9 @@ class ConfigurationClassParser {
 		}
 		else {
 			this.importStack.push(configClass);
-			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			try {
 				for (Object candidate : classesToImport) {
-					Object candidateToCheck = (candidate instanceof Class ? (Class) candidate :
-							this.metadataReaderFactory.getMetadataReader((String) candidate));
-					if (checkAssignability(ImportSelector.class, candidateToCheck)) {
-						// the candidate class is an ImportSelector -> delegate to it to determine imports
-						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
-								this.resourceLoader.getClassLoader().loadClass((String) candidate));
-						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
-						invokeAwareMethods(selector);
-						if(selector instanceof DeferredImportSelector) {
-							this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
-						}
-						else {
-							processImport(configClass, Arrays.asList(selector.selectImports(importingClassMetadata)), false);
-						}
-					}
-					else if (checkAssignability(ImportBeanDefinitionRegistrar.class, candidateToCheck)) {
-						// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
-						Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
-								this.resourceLoader.getClassLoader().loadClass((String) candidate));
-						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
-						invokeAwareMethods(registrar);
-						configClass.addImportBeanDefinitionRegistrar(registrar);
-					}
-					else {
-						// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
-						this.importStack.registerImport(importingClassMetadata.getClassName(),
-								(candidate instanceof Class ? ((Class) candidate).getName() : (String) candidate));
-						processConfigurationClass((candidateToCheck instanceof Class ?
-								new ConfigurationClass((Class) candidateToCheck, configClass) :
-								new ConfigurationClass((MetadataReader) candidateToCheck, configClass)));
-					}
+					processImportCandidate(configClass, candidate);
 				}
 			}
 			catch (ClassNotFoundException ex) {
@@ -470,12 +446,64 @@ class ConfigurationClassParser {
 		}
 	}
 
-	private boolean checkAssignability(Class<?> clazz, Object candidate) throws IOException {
-		if (candidate instanceof Class) {
-			return clazz.isAssignableFrom((Class) candidate);
+	private void processImportCandidate(ConfigurationClass configClass, Object candidate)
+			throws IOException, ClassNotFoundException {
+
+		ImportType importType;
+		try {
+			importType = candidate instanceof Class ?
+					ImportType.get((Class) candidate) :
+						ImportType.get(
+							this.metadataReaderFactory.getMetadataReader((String) candidate),
+							this.metadataReaderFactory);
+		}
+		catch(IOException ex) {
+			if(configClass.evaluateConditionals(this.registry, this.environment)) {
+				return;
+			}
+			throw ex;
+		}
+
+		if (importType == ImportType.SELECTOR) {
+			if (!configClass.evaluateConditionals(this.registry, this.environment)) {
+				// the candidate class is an ImportSelector -> delegate to it to determine imports
+				Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
+						this.resourceLoader.getClassLoader().loadClass((String) candidate));
+				ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
+				invokeAwareMethods(selector);
+				if(selector instanceof DeferredImportSelector) {
+					this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));
+				}
+				else {
+					processImport(configClass, Arrays.asList(selector.selectImports(configClass.getMetadata())), false);
+				}
+			}
+			return;
+		}
+
+		if (importType == ImportType.REGISTRAR) {
+			if (!configClass.evaluateConditionals(this.registry, this.environment)) {
+				// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
+				Class<?> candidateClass = (candidate instanceof Class ? (Class) candidate :
+					this.resourceLoader.getClassLoader().loadClass((String) candidate));
+				ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);
+				invokeAwareMethods(registrar);
+				configClass.addImportBeanDefinitionRegistrar(registrar);
+			}
+			return;
+		}
+
+		// candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
+		if(candidate instanceof Class) {
+			Class candidateClass = (Class) candidate;
+			this.importStack.registerImport(configClass.getMetadata().getClassName(), candidateClass.getName());
+			processConfigurationClass(new ConfigurationClass(candidateClass, configClass));
 		}
 		else {
-			return new AssignableTypeFilter(clazz).match((MetadataReader) candidate, this.metadataReaderFactory);
+			String candidateClassName = (String) candidate;
+			this.importStack.registerImport(configClass.getMetadata().getClassName(), candidateClassName);
+			processConfigurationClass(new ConfigurationClass(
+					this.metadataReaderFactory.getMetadataReader(candidateClassName), configClass));
 		}
 	}
 
@@ -622,5 +650,45 @@ class ConfigurationClassParser {
 					new Location(importStack.peek().getResource(), metadata));
 		}
 	}
+
+
+	private static enum ImportType {
+
+		SELECTOR(ImportSelector.class),
+
+		REGISTRAR(ImportBeanDefinitionRegistrar.class),
+
+		CONFIGURATION(null);
+
+
+		private Class<?> typeClass;
+
+
+		private ImportType(Class<?> typeClass) {
+			this.typeClass = typeClass;
+		}
+
+
+		public static ImportType get(Class<?> candidate) {
+			for (ImportType type : values()) {
+				if (type.typeClass == null || type.typeClass.isAssignableFrom(candidate)) {
+					return type;
+				}
+			}
+			throw new IllegalStateException();
+		}
+
+		public static ImportType get(MetadataReader candidate,
+				MetadataReaderFactory metadataReaderFactory) throws IOException {
+			for (ImportType type : values()) {
+				if (type.typeClass == null
+						|| new AssignableTypeFilter(type.typeClass).match(candidate,
+								metadataReaderFactory)) {
+					return type;
+				}
+			}
+			throw new IllegalStateException();
+		}
+	};
 
 }

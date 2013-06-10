@@ -109,9 +109,8 @@ class ConfigurationClassBeanDefinitionReader {
 	 * based on its contents.
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
-		TrackedConditionEvaluator conditionEvaluator = new TrackedConditionEvaluator();
 		for (ConfigurationClass configClass : configurationModel) {
-			loadBeanDefinitionsForConfigurationClass(configClass, conditionEvaluator);
+			loadBeanDefinitionsForConfigurationClass(configClass);
 		}
 	}
 
@@ -119,10 +118,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions for the
 	 * class itself, all its {@link Bean} methods
 	 */
-	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass,
-			TrackedConditionEvaluator conditionEvaluator) {
+	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 
-		if(conditionEvaluator.shouldSkip(configClass)) {
+		if(configClass.evaluateConditionals(this.registry, this.environment)) {
 			removeBeanDefinition(configClass);
 			return;
 		}
@@ -384,32 +382,5 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
-	/**
-	 * Evaluate {@Code @Conditional} annotations, tracking results and taking into
-	 * account 'imported by'.
-	 */
-	private class TrackedConditionEvaluator {
-
-		private final Map<ConfigurationClass, Boolean> skipped = new HashMap<ConfigurationClass, Boolean>();
-
-		public boolean shouldSkip(ConfigurationClass configClass) {
-			Boolean skip = this.skipped.get(configClass);
-			if (skip == null) {
-				if (configClass.isImported()) {
-					if (shouldSkip(configClass.getImportedBy())) {
-						// The config that imported this one was skipped, therefore we are skipped
-						skip = true;
-					}
-				}
-				if (skip == null) {
-					skip = ConditionEvaluator.get(configClass.getMetadata(), false).shouldSkip(
-							registry, environment);
-				}
-				this.skipped.put(configClass, skip);
-			}
-			return skip;
-		}
-
-	}
 
 }
