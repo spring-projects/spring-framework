@@ -31,8 +31,6 @@ import org.springframework.web.messaging.event.EventBus;
 import org.springframework.web.messaging.event.EventConsumer;
 import org.springframework.web.messaging.event.EventRegistration;
 
-import reactor.fn.Event;
-
 
 /**
  * @author Rossen Stoyanchev
@@ -74,7 +72,7 @@ public class PubSubMessageService extends AbstractMessageService {
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
 			message = new GenericMessage<byte[]>(payload, headers);
 
-			getEventBus().send(getPublishKey(message), Event.wrap(message));
+			getEventBus().send(getPublishKey(message), message);
 		}
 		catch (Exception ex) {
 			logger.error("Failed to publish " + message, ex);

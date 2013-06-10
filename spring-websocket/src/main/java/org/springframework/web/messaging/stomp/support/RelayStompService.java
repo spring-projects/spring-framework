@@ -40,7 +40,6 @@ import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompHeaders;
 import org.springframework.web.messaging.stomp.StompMessage;
 
-import reactor.fn.Event;
 import reactor.util.Assert;
 
 
@@ -243,7 +242,7 @@ public class RelayStompService extends AbstractMessageService {
 			StompHeaders headers = new StompHeaders();
 			headers.setMessage(message);
 			StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
-			getEventBus().send(this.replyTo, Event.wrap(errorMessage));
+			getEventBus().send(this.replyTo, errorMessage);
 		}
 	}
 
