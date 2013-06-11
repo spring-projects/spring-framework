@@ -16,41 +16,31 @@
 
 package org.springframework.web.messaging.stomp;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.StringUtils;
+import org.springframework.web.messaging.PubSubHeaders;
+
+import reactor.util.Assert;
 
 
 /**
+ * STOMP adapter for {@link MessageHeaders}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompHeaders implements MultiValueMap<String, String>, Serializable {
+public class StompHeaders extends PubSubHeaders {
 
-	private static final long serialVersionUID = 1L;
-
-	// TODO: separate client from server headers so they can't be mixed
-
-	// Client
 	private static final String ID = "id";
 
 	private static final String HOST = "host";
 
 	private static final String ACCEPT_VERSION = "accept-version";
-
-	// Server
 
 	private static final String MESSAGE_ID = "message-id";
 
@@ -61,8 +51,6 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	private static final String VERSION = "version";
 
 	private static final String MESSAGE = "message";
-
-	// Client and Server
 
 	private static final String ACK = "ack";
 
@@ -75,96 +63,63 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	private static final String HEARTBEAT = "heart-beat";
 
 
-	public static final List<String> STANDARD_HEADER_NAMES =
-			Arrays.asList(ID, HOST, ACCEPT_VERSION, MESSAGE_ID, RECEIPT_ID, SUBSCRIPTION,
-					VERSION, MESSAGE, ACK, DESTINATION, CONTENT_LENGTH, CONTENT_TYPE, HEARTBEAT);
-
-
-	private final Map<String, List<String>> headers;
-
-
 	/**
-	 * Private constructor that can create read-only {@code StompHeaders} instances.
+	 * Constructor for building new headers.
+	 *
+	 * @param command the STOMP command
 	 */
-	private StompHeaders(Map<String, List<String>> headers, boolean readOnly) {
-		Assert.notNull(headers, "'headers' must not be null");
-		if (readOnly) {
-			Map<String, List<String>> map = new LinkedHashMap<String, List<String>>(headers.size());
-			for (Entry<String, List<String>> entry : headers.entrySet()) {
-				List<String> values = Collections.unmodifiableList(entry.getValue());
-				map.put(entry.getKey(), values);
-			}
-			this.headers = Collections.unmodifiableMap(map);
-		}
-		else {
-			this.headers = headers;
-		}
+	public StompHeaders(StompCommand command) {
+		super(command.getMessageType(), command);
 	}
 
 	/**
-	 * Constructs a new, empty instance of the {@code StompHeaders} object.
+	 * Constructor for access to existing {@link MessageHeaders}.
+	 *
+	 * @param messageHeaders the existing message headers
+	 * @param readOnly whether the resulting instance will be used for read-only access,
+	 *        if {@code true}, then set methods will throw exceptions; if {@code false}
+	 *        they will work.
 	 */
-	public StompHeaders() {
-		this(new LinkedHashMap<String, List<String>>(4), false);
+	public StompHeaders(MessageHeaders messageHeaders, boolean readOnly) {
+		super(messageHeaders, readOnly);
 	}
 
-	/**
-	 * Returns {@code StompHeaders} object that can only be read, not written to.
-	 */
-	public static StompHeaders readOnlyStompHeaders(StompHeaders headers) {
-		return new StompHeaders(headers, true);
+	@Override
+	public StompCommand getProtocolMessageType() {
+		return (StompCommand) super.getProtocolMessageType();
+	}
+
+	public StompCommand getStompCommand() {
+		return (StompCommand) super.getProtocolMessageType();
 	}
 
 	public Set<String> getAcceptVersion() {
-		String rawValue = getFirst(ACCEPT_VERSION);
+		String rawValue = getRawHeaders().get(ACCEPT_VERSION);
 		return (rawValue != null) ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet();
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
-		set(ACCEPT_VERSION, acceptVersion);
+		getRawHeaders().put(ACCEPT_VERSION, acceptVersion);
 	}
 
-	public String getVersion() {
-		return getFirst(VERSION);
-	}
-
-	public void setVersion(String version) {
-		set(VERSION, version);
-	}
-
-	public String getDestination() {
-		return getFirst(DESTINATION);
-	}
-
+	@Override
 	public void setDestination(String destination) {
-		set(DESTINATION, destination);
-	}
-
-	public MediaType getContentType() {
-		String contentType = getFirst(CONTENT_TYPE);
-		return StringUtils.hasText(contentType) ? MediaType.valueOf(contentType) : null;
-	}
-
-	public void setContentType(MediaType mediaType) {
-		if (mediaType != null) {
-			set(CONTENT_TYPE, mediaType.toString());
-		}
-		else {
-			remove(CONTENT_TYPE);
+		if (destination != null) {
+			super.setDestination(destination);
+			getRawHeaders().put(DESTINATION, destination);
 		}
 	}
 
-	public Integer getContentLength() {
-		String contentLength = getFirst(CONTENT_LENGTH);
-		return StringUtils.hasText(contentLength) ? new Integer(contentLength) : null;
-	}
-
-	public void setContentLength(int contentLength) {
-		set(CONTENT_LENGTH, String.valueOf(contentLength));
+	@Override
+	public void setDestinations(List<String> destinations) {
+		if (destinations != null) {
+			super.setDestinations(destinations);
+			getRawHeaders().put(DESTINATION, destinations.get(0));
+		}
 	}
 
 	public long[] getHeartbeat() {
-		String rawValue = getFirst(HEARTBEAT);
+		String rawValue = getRawHeaders().get(HEARTBEAT);
 		if (!StringUtils.hasText(rawValue)) {
 			return null;
 		}
@@ -173,172 +128,102 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 		return new long[] { Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
 	}
 
+	public void setContentType(MediaType mediaType) {
+		if (mediaType != null) {
+			super.setContentType(mediaType);
+			getRawHeaders().put(CONTENT_TYPE, mediaType.toString());
+		}
+	}
+
+	public Integer getContentLength() {
+		String contentLength = getRawHeaders().get(CONTENT_LENGTH);
+		return StringUtils.hasText(contentLength) ? new Integer(contentLength) : null;
+	}
+
+	public void setContentLength(int contentLength) {
+		getRawHeaders().put(CONTENT_LENGTH, String.valueOf(contentLength));
+	}
+
+	@Override
+	public String getSubscriptionId() {
+		return StompCommand.SUBSCRIBE.equals(getStompCommand()) ? getRawHeaders().get(ID) : null;
+	}
+
+	@Override
+	public void setSubscriptionId(String subscriptionId) {
+		Assert.isTrue(StompCommand.MESSAGE.equals(getStompCommand()),
+				"\"subscription\" can only be set on a STOMP MESSAGE frame");
+		super.setSubscriptionId(subscriptionId);
+		getRawHeaders().put(SUBSCRIPTION, subscriptionId);
+	}
+
 	public void setHeartbeat(long cx, long cy) {
-		set(HEARTBEAT, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
-	}
-
-	public String getId() {
-		return getFirst(ID);
-	}
-
-	public void setId(String id) {
-		set(ID, id);
-	}
-
-	public String getMessageId() {
-		return getFirst(MESSAGE_ID);
-	}
-
-	public void setMessageId(String id) {
-		set(MESSAGE_ID, id);
-	}
-
-	public String getSubscription() {
-		return getFirst(SUBSCRIPTION);
-	}
-
-	public void setSubscription(String id) {
-		set(SUBSCRIPTION, id);
+		getRawHeaders().put(HEARTBEAT, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
 	}
 
 	public String getMessage() {
-		return getFirst(MESSAGE);
+		return getRawHeaders().get(MESSAGE);
 	}
 
-	public void setMessage(String id) {
-		set(MESSAGE, id);
+	public void setMessage(String content) {
+		getRawHeaders().put(MESSAGE, content);
 	}
 
+	public String getMessageId() {
+		return getRawHeaders().get(MESSAGE_ID);
+	}
 
-	// MultiValueMap methods
+	public void setMessageId(String id) {
+		getRawHeaders().put(MESSAGE_ID, id);
+	}
+
+	public String getVersion() {
+		return getRawHeaders().get(VERSION);
+	}
+
+	public void setVersion(String version) {
+		getRawHeaders().put(VERSION, version);
+	}
+
 
 	/**
-	 * Return the first header value for the given header name, if any.
-	 * @param headerName the header name
-	 * @return the first header value; or {@code null}
+	 * Update generic message headers from raw headers. This method only needs to be
+	 * invoked when raw headers are added via {@link #getRawHeaders()}.
 	 */
-	public String getFirst(String headerName) {
-		List<String> headerValues = headers.get(headerName);
-		return headerValues != null ? headerValues.get(0) : null;
+	public void updateMessageHeaders() {
+		String destination = getRawHeaders().get(DESTINATION);
+		if (destination != null) {
+			setDestination(destination);
+		}
+		String contentType = getRawHeaders().get(CONTENT_TYPE);
+		if (contentType != null) {
+			setContentType(MediaType.parseMediaType(contentType));
+		}
+		if (StompCommand.SUBSCRIBE.equals(getStompCommand())) {
+			if (getRawHeaders().get(ID) != null) {
+				super.setSubscriptionId(getRawHeaders().get(ID));
+			}
+		}
 	}
 
 	/**
-	 * Add the given, single header value under the given name.
-	 * @param headerName  the header name
-	 * @param headerValue the header value
-	 * @throws UnsupportedOperationException if adding headers is not supported
-	 * @see #put(String, List)
-	 * @see #set(String, String)
+	 * Update raw headers from generic message headers. This method only needs to be
+	 * invoked if creating {@link StompHeaders} from {@link MessageHeaders} that never
+	 * contained raw headers.
 	 */
-	public void add(String headerName, String headerValue) {
-		List<String> headerValues = headers.get(headerName);
-		if (headerValues == null) {
-			headerValues = new LinkedList<String>();
-			this.headers.put(headerName, headerValues);
+	public void updateRawHeaders() {
+		String destination = getDestination();
+		if (destination != null) {
+			getRawHeaders().put(DESTINATION, destination);
 		}
-		headerValues.add(headerValue);
-	}
-
-	/**
-	 * Set the given, single header value under the given name.
-	 * @param headerName  the header name
-	 * @param headerValue the header value
-	 * @throws UnsupportedOperationException if adding headers is not supported
-	 * @see #put(String, List)
-	 * @see #add(String, String)
-	 */
-	public void set(String headerName, String headerValue) {
-		List<String> headerValues = new LinkedList<String>();
-		headerValues.add(headerValue);
-		headers.put(headerName, headerValues);
-	}
-
-	public void setAll(Map<String, String> values) {
-		for (Entry<String, String> entry : values.entrySet()) {
-			set(entry.getKey(), entry.getValue());
+		MediaType contentType = getContentType();
+		if (contentType != null) {
+			getRawHeaders().put(CONTENT_TYPE, contentType.toString());
 		}
-	}
-
-	public Map<String, String> toSingleValueMap() {
-		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
-		for (Entry<String, List<String>> entry : headers.entrySet()) {
-			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
+		String subscriptionId = getSubscriptionId();
+		if (subscriptionId != null) {
+			getRawHeaders().put(SUBSCRIPTION, subscriptionId);
 		}
-		return singleValueMap;
-	}
-
-
-	// Map implementation
-
-	public int size() {
-		return this.headers.size();
-	}
-
-	public boolean isEmpty() {
-		return this.headers.isEmpty();
-	}
-
-	public boolean containsKey(Object key) {
-		return this.headers.containsKey(key);
-	}
-
-	public boolean containsValue(Object value) {
-		return this.headers.containsValue(value);
-	}
-
-	public List<String> get(Object key) {
-		return this.headers.get(key);
-	}
-
-	public List<String> put(String key, List<String> value) {
-		return this.headers.put(key, value);
-	}
-
-	public List<String> remove(Object key) {
-		return this.headers.remove(key);
-	}
-
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		this.headers.putAll(m);
-	}
-
-	public void clear() {
-		this.headers.clear();
-	}
-
-	public Set<String> keySet() {
-		return this.headers.keySet();
-	}
-
-	public Collection<List<String>> values() {
-		return this.headers.values();
-	}
-
-	public Set<Entry<String, List<String>>> entrySet() {
-		return this.headers.entrySet();
-	}
-
-
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof StompHeaders)) {
-			return false;
-		}
-		StompHeaders otherHeaders = (StompHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
-	}
-
-	@Override
-	public int hashCode() {
-		return this.headers.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.headers.toString();
 	}
 
 }

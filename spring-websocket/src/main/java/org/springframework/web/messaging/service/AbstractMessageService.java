@@ -27,6 +27,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.event.EventBus;
 import org.springframework.web.messaging.event.EventConsumer;
 
@@ -37,11 +38,14 @@ import org.springframework.web.messaging.event.EventConsumer;
  */
 public abstract class AbstractMessageService {
 
-	public static final String MESSAGE_KEY = "messageKey";
+	protected final Log logger = LogFactory.getLog(getClass());
+
+
+	public static final String CLIENT_TO_SERVER_MESSAGE_KEY = "clientToServerMessageKey";
 
 	public static final String CLIENT_CONNECTION_CLOSED_KEY = "clientConnectionClosed";
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	public static final String SERVER_TO_CLIENT_MESSAGE_KEY = "serverToClientMessageKey";
 
 
 	private final EventBus eventBus;
@@ -58,7 +62,7 @@ public abstract class AbstractMessageService {
 		Assert.notNull(reactor, "reactor is required");
 		this.eventBus = reactor;
 
-		this.eventBus.registerConsumer(MESSAGE_KEY, new EventConsumer<Message<?>>() {
+		this.eventBus.registerConsumer(CLIENT_TO_SERVER_MESSAGE_KEY, new EventConsumer<Message<?>>() {
 
 			@Override
 			public void accept(Message<?> message) {
@@ -124,7 +128,8 @@ public abstract class AbstractMessageService {
 	}
 
 	private boolean isAllowedDestination(Message<?> message) {
-		String destination = (String) message.getHeaders().get("destination");
+		PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+		String destination = headers.getDestination();
 		if (destination == null) {
 			return true;
 		}

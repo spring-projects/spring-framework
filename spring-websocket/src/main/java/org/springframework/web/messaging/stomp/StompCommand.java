@@ -16,6 +16,11 @@
 
 package org.springframework.web.messaging.stomp;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.web.messaging.MessageType;
+
 
 /**
  *
@@ -42,5 +47,22 @@ public enum StompCommand {
 	MESSAGE,
 	RECEIPT,
 	ERROR;
+
+
+	private static Map<StompCommand, MessageType> commandToMessageType = new HashMap<StompCommand, MessageType>();
+
+	static {
+		commandToMessageType.put(StompCommand.CONNECT, MessageType.CONNECT);
+		commandToMessageType.put(StompCommand.STOMP, MessageType.CONNECT);
+		commandToMessageType.put(StompCommand.SEND, MessageType.MESSAGE);
+		commandToMessageType.put(StompCommand.SUBSCRIBE, MessageType.SUBSCRIBE);
+		commandToMessageType.put(StompCommand.UNSUBSCRIBE, MessageType.UNSUBSCRIBE);
+		commandToMessageType.put(StompCommand.DISCONNECT, MessageType.DISCONNECT);
+	}
+
+	public MessageType getMessageType() {
+		MessageType messageType = commandToMessageType.get(this);
+		return (messageType != null) ? messageType : MessageType.OTHER;
+	}
 
 }

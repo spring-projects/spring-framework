@@ -31,6 +31,7 @@ import javax.net.SocketFactory;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
@@ -38,7 +39,6 @@ import org.springframework.web.messaging.event.EventBus;
 import org.springframework.web.messaging.service.AbstractMessageService;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompHeaders;
-import org.springframework.web.messaging.stomp.StompMessage;
 
 import reactor.util.Assert;
 
@@ -56,8 +56,6 @@ public class RelayStompService extends AbstractMessageService {
 	private Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
-
-	private final StompHeaderMapper stompHeaderMapper = new StompHeaderMapper();
 
 
 	public RelayStompService(EventBus eventBus, TaskExecutor executor) {
@@ -84,8 +82,7 @@ public class RelayStompService extends AbstractMessageService {
 
 			forwardMessage(message, StompCommand.CONNECT);
 
-			String replyTo = (String) message.getHeaders().getReplyChannel();
-			RelayReadTask readTask = new RelayReadTask(sessionId, replyTo, session);
+			RelayReadTask readTask = new RelayReadTask(sessionId, session);
 			this.taskExecutor.execute(readTask);
 		}
 		catch (Throwable t) {
@@ -96,23 +93,25 @@ public class RelayStompService extends AbstractMessageService {
 
 	private void forwardMessage(Message<?> message, StompCommand command) {
 
-		String sessionId = (String) message.getHeaders().get("sessionId");
+		StompHeaders stompHeaders = new StompHeaders(message.getHeaders(), false);
+		String sessionId = stompHeaders.getSessionId();
 		RelaySession session = RelayStompService.this.relaySessions.get(sessionId);
 		Assert.notNull(session, "RelaySession not found");
 
 		try {
-			StompHeaders stompHeaders = new StompHeaders();
-			this.stompHeaderMapper.fromMessageHeaders(message.getHeaders(), stompHeaders);
+			if (stompHeaders.getProtocolMessageType() == null) {
+				stompHeaders.setProtocolMessageType(StompCommand.SEND);
+			}
 			MediaType contentType = stompHeaders.getContentType();
 			byte[] payload = this.payloadConverter.convertToPayload(message.getPayload(), contentType);
-			StompMessage stompMessage = new StompMessage(command, stompHeaders, payload);
+			Message<byte[]> byteMessage = new GenericMessage<byte[]>(payload, stompHeaders.getMessageHeaders());
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding: " + stompMessage);
+				logger.trace("Forwarding: " + byteMessage);
 			}
 
-			byte[] bytesToWrite = this.stompMessageConverter.fromStompMessage(stompMessage);
-			session.getOutputStream().write(bytesToWrite);
+			byte[] bytes = this.stompMessageConverter.fromMessage(byteMessage);
+			session.getOutputStream().write(bytes);
 			session.getOutputStream().flush();
 		}
 		catch (Exception ex) {
@@ -200,13 +199,12 @@ public class RelayStompService extends AbstractMessageService {
 
 	private final class RelayReadTask implements Runnable {
 
-		private final String stompSessionId;
-		private final String replyTo;
+		private final String sessionId;
+
 		private final RelaySession session;
 
-		private RelayReadTask(String stompSessionId, String replyTo, RelaySession session) {
-			this.stompSessionId = stompSessionId;
-			this.replyTo = replyTo;
+		private RelayReadTask(String sessionId, RelaySession session) {
+			this.sessionId = sessionId;
 			this.session = session;
 		}
 
@@ -221,28 +219,28 @@ public class RelayStompService extends AbstractMessageService {
 					}
 					else if (b == 0x00) {
 						byte[] bytes = out.toByteArray();
-						StompMessage message = RelayStompService.this.stompMessageConverter.toStompMessage(bytes);
-						getEventBus().send(this.replyTo, message);
+						Message<byte[]> message = stompMessageConverter.toMessage(bytes, sessionId);
+						getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, message);
 						out.reset();
 					}
 					else {
 						out.write(b);
 					}
 				}
-				logger.debug("Socket closed, STOMP session=" + stompSessionId);
+				logger.debug("Socket closed, STOMP session=" + sessionId);
 				sendErrorMessage("Lost connection");
 			}
 			catch (IOException e) {
 				logger.error("Socket error: " + e.getMessage());
-				clearRelaySession(stompSessionId);
+				clearRelaySession(sessionId);
 			}
 		}
 
 		private void sendErrorMessage(String message) {
-			StompHeaders headers = new StompHeaders();
-			headers.setMessage(message);
-			StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
-			getEventBus().send(this.replyTo, errorMessage);
+			StompHeaders stompHeaders = new StompHeaders(StompCommand.ERROR);
+			stompHeaders.setMessage(message);
+			Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.getMessageHeaders());
+			getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, errorMessage);
 		}
 	}
 

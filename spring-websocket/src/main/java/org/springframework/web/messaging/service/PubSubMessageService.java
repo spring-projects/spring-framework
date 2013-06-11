@@ -17,14 +17,13 @@
 package org.springframework.web.messaging.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.http.MediaType;
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.event.EventBus;
@@ -61,26 +60,21 @@ public class PubSubMessageService extends AbstractMessageService {
 			logger.debug("Message received: " + message);
 		}
 
-		Map<String, Object> headers = new HashMap<String, Object>();
-		headers.put("destination", message.getHeaders().get("destination"));
-
-		MediaType contentType = (MediaType) message.getHeaders().get("content-type");
-		headers.put("content-type", contentType);
-
 		try {
 			// Convert to byte[] payload before the fan-out
-			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
-			message = new GenericMessage<byte[]>(payload, headers);
+			PubSubHeaders inHeaders = new PubSubHeaders(message.getHeaders(), true);
+			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), inHeaders.getContentType());
+			message = new GenericMessage<byte[]>(payload, message.getHeaders());
 
-			getEventBus().send(getPublishKey(message), message);
+			getEventBus().send(getPublishKey(inHeaders.getDestination()), message);
 		}
 		catch (Exception ex) {
 			logger.error("Failed to publish " + message, ex);
 		}
 	}
 
-	private String getPublishKey(Message<?> message) {
-		return "destination:" + (String) message.getHeaders().get("destination");
+	private String getPublishKey(String destination) {
+		return "destination:" + destination;
 	}
 
 	@Override
@@ -88,12 +82,20 @@ public class PubSubMessageService extends AbstractMessageService {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Subscribe " + message);
 		}
-		final String replyKey = (String) message.getHeaders().getReplyChannel();
-		EventRegistration registration = getEventBus().registerConsumer(getPublishKey(message),
+		PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+		final String subscriptionId = headers.getSubscriptionId();
+		EventRegistration registration = getEventBus().registerConsumer(getPublishKey(headers.getDestination()),
 				new EventConsumer<Message<?>>() {
 					@Override
 					public void accept(Message<?> message) {
-						getEventBus().send(replyKey, message);
+						PubSubHeaders inHeaders = new PubSubHeaders(message.getHeaders(), true);
+						PubSubHeaders outHeaders = new PubSubHeaders();
+						outHeaders.setDestinations(inHeaders.getDestinations());
+						outHeaders.setContentType(inHeaders.getContentType());
+						outHeaders.setSubscriptionId(subscriptionId);
+						Object payload = message.getPayload();
+						message = new GenericMessage<Object>(payload, outHeaders.getMessageHeaders());
+						getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, message);
 					}
 				});
 

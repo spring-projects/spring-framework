@@ -16,11 +16,12 @@
 
 package org.springframework.web.messaging.service.method;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.event.EventBus;
+import org.springframework.web.messaging.service.AbstractMessageService;
 
 import reactor.util.Assert;
 
@@ -30,8 +31,6 @@ import reactor.util.Assert;
  * @since 4.0
  */
 public class MessageReturnValueHandler implements ReturnValueHandler {
-
-	private static Log logger = LogFactory.getLog(MessageReturnValueHandler.class);
 
 	private final EventBus eventBus;
 
@@ -67,13 +66,17 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 			return;
 		}
 
-		String replyTo = (String) message.getHeaders().getReplyChannel();
-		Assert.notNull(replyTo, "Cannot reply to: " + message);
+		PubSubHeaders inHeaders = new PubSubHeaders(message.getHeaders(), true);
+		String sessionId = inHeaders.getSessionId();
+		String subscriptionId = inHeaders.getSubscriptionId();
+		Assert.notNull(subscriptionId, "No subscription id: " + message);
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Sending notification: " + message);
-		}
-		this.eventBus.send(replyTo, returnMessage);
+		PubSubHeaders outHeaders = new PubSubHeaders(returnMessage.getHeaders(), false);
+		outHeaders.setSessionId(sessionId);
+		outHeaders.setSubscriptionId(subscriptionId);
+		returnMessage = new GenericMessage<Object>(returnMessage.getPayload(), outHeaders.getMessageHeaders());
+
+		this.eventBus.send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, returnMessage);
  	}
 
 }

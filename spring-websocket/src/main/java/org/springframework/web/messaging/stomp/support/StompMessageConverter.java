@@ -17,21 +17,27 @@ package org.springframework.web.messaging.stomp.support;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.stomp.StompCommand;
-import org.springframework.web.messaging.stomp.StompException;
+import org.springframework.web.messaging.stomp.StompConversionException;
 import org.springframework.web.messaging.stomp.StompHeaders;
-import org.springframework.web.messaging.stomp.StompMessage;
+
 
 /**
  * @author Gary Russell
+ * @author Rossen Stoyanchev
  * @since 4.0
- *
  */
 public class StompMessageConverter {
+
+	private static final Charset STOMP_CHARSET = Charset.forName("UTF-8");
 
 	public static final byte LF = 0x0a;
 
@@ -39,74 +45,121 @@ public class StompMessageConverter {
 
 	private static final byte COLON = ':';
 
+
 	/**
-	 * @param bytes a complete STOMP message (without the trailing 0x00).
+	 * @param stompContent a complete STOMP message (without the trailing 0x00) as byte[] or String.
 	 */
-	public StompMessage toStompMessage(Object stomp) {
-		Assert.state(stomp instanceof String || stomp instanceof byte[], "'stomp' must be String or byte[]");
-		byte[] stompBytes = null;
-		if (stomp instanceof String) {
-			stompBytes = ((String) stomp).getBytes(StompMessage.CHARSET);
+	public Message<byte[]> toMessage(Object stompContent, String sessionId) {
+
+		byte[] byteContent = null;
+		if (stompContent instanceof String) {
+			byteContent = ((String) stompContent).getBytes(STOMP_CHARSET);
+		}
+		else if (stompContent instanceof byte[]){
+			byteContent = (byte[]) stompContent;
 		}
 		else {
-			stompBytes = (byte[]) stomp;
+			throw new IllegalArgumentException(
+					"stompContent is neither String nor byte[]: " + stompContent.getClass());
 		}
-		int totalLength = stompBytes.length;
-		if (stompBytes[totalLength-1] == 0) {
+
+		int totalLength = byteContent.length;
+		if (byteContent[totalLength-1] == 0) {
 			totalLength--;
 		}
-		int payloadIndex = findPayloadStart(stompBytes);
+
+		int payloadIndex = findIndexOfPayload(byteContent);
 		if (payloadIndex == 0) {
-			throw new StompException("No command found");
+			throw new StompConversionException("No command found");
 		}
-		String headerString = new String(stompBytes, 0, payloadIndex, StompMessage.CHARSET);
-		Parser parser = new Parser(headerString);
-		StompHeaders headers = new StompHeaders();
+
+		String headerContent = new String(byteContent, 0, payloadIndex, STOMP_CHARSET);
+		Parser parser = new Parser(headerContent);
+
 		// TODO: validate command and whether a payload is allowed
 		StompCommand command = StompCommand.valueOf(parser.nextToken(LF).trim());
 		Assert.notNull(command, "No command found");
+
+		StompHeaders stompHeaders = new StompHeaders(command);
+		stompHeaders.setSessionId(sessionId);
+
 		while (parser.hasNext()) {
 			String header = parser.nextToken(COLON);
 			if (header != null) {
 				if (parser.hasNext()) {
 					String value = parser.nextToken(LF);
-					headers.add(header, value);
+					stompHeaders.getRawHeaders().put(header, value);
 				}
 				else {
-					throw new StompException("Parse exception for " + headerString);
+					throw new StompConversionException("Parse exception for " + headerContent);
 				}
 			}
 		}
+
 		byte[] payload = new byte[totalLength - payloadIndex];
-		System.arraycopy(stompBytes, payloadIndex, payload, 0, totalLength - payloadIndex);
-		return new StompMessage(command, headers, payload);
+		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
+
+		stompHeaders.updateMessageHeaders();
+
+		return createMessage(command, stompHeaders.getMessageHeaders(), payload);
 	}
 
-	public byte[] fromStompMessage(StompMessage message) {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		StompHeaders headers = message.getHeaders();
-		StompCommand command = message.getCommand();
+	private int findIndexOfPayload(byte[] bytes) {
+		int i;
+		// ignore any leading EOL from the previous message
+		for (i = 0; i < bytes.length; i++) {
+			if (bytes[i] != '\n' && bytes[i] != '\r') {
+				break;
+			}
+			bytes[i] = ' ';
+		}
+		int index = 0;
+		for (; i < bytes.length - 1; i++) {
+			if (bytes[i] == LF && bytes[i+1] == LF) {
+				index = i + 2;
+				break;
+			}
+			if ((i < (bytes.length - 3)) &&
+					(bytes[i] == CR && bytes[i+1] == LF && bytes[i+2] == CR && bytes[i+3] == LF)) {
+				index = i + 4;
+				break;
+			}
+		}
+		if (i >= bytes.length) {
+			throw new StompConversionException("No end of headers found");
+		}
+		return index;
+	}
+
+	protected Message<byte[]> createMessage(StompCommand command, Map<String, Object> headers, byte[] payload) {
+		return new GenericMessage<byte[]>(payload, headers);
+	}
+
+	public byte[] fromMessage(Message<byte[]> message) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		MessageHeaders messageHeaders = message.getHeaders();
+		StompHeaders stompHeaders = new StompHeaders(messageHeaders, false);
+		stompHeaders.updateRawHeaders();
 		try {
-			outputStream.write(command.toString().getBytes("UTF-8"));
-			outputStream.write(LF);
-			for (Entry<String, List<String>> entry : headers.entrySet()) {
+			out.write(stompHeaders.getStompCommand().toString().getBytes("UTF-8"));
+			out.write(LF);
+			for (Entry<String, String> entry : stompHeaders.getRawHeaders().entrySet()) {
 				String key = entry.getKey();
 				key = replaceAllOutbound(key);
-				for (String value : entry.getValue()) {
-					outputStream.write(key.getBytes("UTF-8"));
-					outputStream.write(COLON);
-					value = replaceAllOutbound(value);
-					outputStream.write(value.getBytes("UTF-8"));
-					outputStream.write(LF);
-				}
+				String value = entry.getValue();
+				out.write(key.getBytes("UTF-8"));
+				out.write(COLON);
+				value = replaceAllOutbound(value);
+				out.write(value.getBytes("UTF-8"));
+				out.write(LF);
 			}
-			outputStream.write(LF);
-			outputStream.write(message.getPayload());
-			outputStream.write(0);
-			return outputStream.toByteArray();
+			out.write(LF);
+			out.write(message.getPayload());
+			out.write(0);
+			return out.toByteArray();
 		}
 		catch (IOException e) {
-			throw new StompException("Failed to serialize " + message, e);
+			throw new StompConversionException("Failed to serialize " + message, e);
 		}
 	}
 
@@ -117,33 +170,6 @@ public class StompMessageConverter {
 				.replaceAll("\r", "\\\\r");
 	}
 
-	private int findPayloadStart(byte[] bytes) {
-		int i;
-		// ignore any leading EOL from the previous message
-		for (i = 0; i < bytes.length; i++) {
-			if (bytes[i] != '\n' && bytes[i] != '\r' ) {
-				break;
-			}
-			bytes[i] = ' ';
-		}
-		int payloadOffset = 0;
-		for (; i < bytes.length - 1; i++) {
-			if ((bytes[i] == LF && bytes[i+1] == LF)) {
-				payloadOffset = i + 2;
-				break;
-			}
-			if (i < bytes.length - 3 &&
-				(bytes[i] == CR && bytes[i+1] == LF &&
-				 bytes[i+2] == CR && bytes[i+3] == LF)) {
-				payloadOffset = i + 4;
-				break;
-			}
-		}
-		if (i >= bytes.length) {
-			throw new StompException("No end of headers found");
-		}
-		return payloadOffset;
-	}
 
 	private class Parser {
 
@@ -177,7 +203,7 @@ public class StompMessageConverter {
 					return null;
 				}
 				else {
-					throw new StompException("No delimiter found at offset " + offset + " in " + this.content);
+					throw new StompConversionException("No delimiter found at offset " + offset + " in " + this.content);
 				}
 			}
 			int escapeAt = this.content.indexOf('\\', this.offset);
@@ -192,7 +218,7 @@ public class StompMessageConverter {
 							.replaceAll("\\\\\\\\", "\\\\");
 				}
 				else {
-					throw new StompException("Invalid escape sequence \\" + escaped);
+					throw new StompConversionException("Invalid escape sequence \\" + escaped);
 				}
 			}
 			int length = token.length();

@@ -16,6 +16,9 @@
 
 package org.springframework.web.messaging.event;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import reactor.core.Reactor;
 import reactor.fn.Consumer;
 import reactor.fn.Event;
@@ -28,6 +31,8 @@ import reactor.fn.selector.ObjectSelector;
  */
 public class ReactorEventBus implements EventBus {
 
+	private static Log logger = LogFactory.getLog(ReactorEventBus.class);
+
 	private final Reactor reactor;
 
 
@@ -37,6 +42,9 @@ public class ReactorEventBus implements EventBus {
 
 	@Override
 	public void send(String key, Object data) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Sending notification key=" + key + ", data=" + data);
+		}
 		this.reactor.notify(key, Event.wrap(data));
 	}
 

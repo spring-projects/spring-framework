@@ -15,14 +15,14 @@
  */
 package org.springframework.web.messaging.stomp.socket;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.util.Assert;
-import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.Message;
 import org.springframework.web.messaging.stomp.StompHeaders;
-import org.springframework.web.messaging.stomp.StompMessage;
-import org.springframework.web.messaging.stomp.StompSession;
+import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.support.StompMessageConverter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -36,57 +36,65 @@ import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
  */
 public abstract class AbstractStompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
-	private final StompMessageConverter messageConverter = new StompMessageConverter();
+	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
-	private final Map<String, WebSocketStompSession> sessions = new ConcurrentHashMap<String, WebSocketStompSession>();
+	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
 
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		WebSocketStompSession stompSession = new WebSocketStompSession(session, this.messageConverter);
-		this.sessions.put(session.getId(), stompSession);
+	public StompMessageConverter getStompMessageConverter() {
+		return this.stompMessageConverter;
+	}
+
+	protected WebSocketSession getWebSocketSession(String sessionId) {
+		return this.sessions.get(sessionId);
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.sessions.put(session.getId(), session);
+	}
 
-		StompSession stompSession = this.sessions.get(session.getId());
-		Assert.notNull(stompSession, "No STOMP session for WebSocket session id=" + session.getId());
-
+	@Override
+	protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 		try {
-			StompMessage stompMessage = this.messageConverter.toStompMessage(message.getPayload());
-			stompMessage.setSessionId(stompSession.getId());
+			String payload = textMessage.getPayload();
+			Message<byte[]> message = this.stompMessageConverter.toMessage(payload, session.getId());
 
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
 
-			handleStompMessage(stompSession, stompMessage);
+			handleStompMessage(session, message);
 
 			// TODO: send RECEIPT message if incoming message has "receipt" header
 			// http://stomp.github.io/stomp-specification-1.2.html#Header_receipt
 
 		}
 		catch (Throwable error) {
-			StompHeaders headers = new StompHeaders();
-			headers.setMessage(error.getMessage());
-			StompMessage errorMessage = new StompMessage(StompCommand.ERROR, headers);
-			try {
-				stompSession.sendMessage(errorMessage);
-			}
-			catch (Throwable t) {
-				// ignore
-			}
+			sendErrorMessage(session, error);
 		}
 	}
 
-	protected abstract void handleStompMessage(StompSession stompSession, StompMessage stompMessage);
+	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
+
+		StompHeaders stompHeaders = new StompHeaders(StompCommand.ERROR);
+		stompHeaders.setMessage(error.getMessage());
+
+		Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.getMessageHeaders());
+		byte[] bytes = this.stompMessageConverter.fromMessage(errorMessage);
+
+		try {
+			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
+		}
+		catch (Throwable t) {
+			// ignore
+		}
+	}
+
+	protected abstract void handleStompMessage(WebSocketSession session, Message<byte[]> message);
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		WebSocketStompSession stompSession = this.sessions.remove(session.getId());
-		if (stompSession != null) {
-			stompSession.handleConnectionClosed();
-		}
+		this.sessions.remove(session.getId());
 	}
 
 }

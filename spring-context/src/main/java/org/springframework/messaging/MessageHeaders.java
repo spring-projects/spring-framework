@@ -37,8 +37,9 @@ import org.apache.commons.logging.LogFactory;
  * The headers for a {@link Message}.<br>
  * IMPORTANT: MessageHeaders are immutable. Any mutating operation (e.g., put(..), putAll(..) etc.)
  * will result in {@link UnsupportedOperationException}
+ *
  * <p>
- * TODO: update javadoc
+ * TODO: update below instructions
  *
  * <p>To create MessageHeaders instance use fluent MessageBuilder API
  * <pre>
@@ -76,16 +77,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public static final String TIMESTAMP = "timestamp";
 
-	public static final String REPLY_CHANNEL = "replyChannel";
-
-	public static final String ERROR_CHANNEL = "errorChannel";
-
-	public static final String CONTENT_TYPE = "content-type";
-
-	// DESTINATION ?
-
-	public static final List<String> HEADER_NAMES =
-			Arrays.asList(ID, TIMESTAMP, REPLY_CHANNEL, ERROR_CHANNEL, CONTENT_TYPE);
+	public static final List<String> HEADER_NAMES = Arrays.asList(ID, TIMESTAMP);
 
 
 	private final Map<String, Object> headers;
@@ -109,14 +101,6 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public Long getTimestamp() {
 		return this.get(TIMESTAMP, Long.class);
-	}
-
-	public Object getReplyChannel() {
-		return this.get(REPLY_CHANNEL);
-	}
-
-	public Object getErrorChannel() {
-		return this.get(ERROR_CHANNEL);
 	}
 
 	@SuppressWarnings("unchecked")
