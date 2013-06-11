@@ -75,7 +75,8 @@ public abstract class AbstractMessageService {
 					logger.trace("Processing notification: " + message);
 				}
 
-				MessageType messageType = (MessageType) message.getHeaders().get("messageType");
+				PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+				MessageType messageType = headers.getMessageType();
 				if (messageType == null || messageType.equals(MessageType.OTHER)) {
 					processOther(message);
 				}

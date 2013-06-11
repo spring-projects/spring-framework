@@ -224,6 +224,9 @@ public class StompHeaders extends PubSubHeaders {
 		if (subscriptionId != null) {
 			getRawHeaders().put(SUBSCRIPTION, subscriptionId);
 		}
+		if (StompCommand.MESSAGE.equals(getStompCommand()) && (getMessageId() == null)) {
+			getRawHeaders().put(MESSAGE_ID, getMessageHeaders().get(ID).toString());
+		}
 	}
 
 }

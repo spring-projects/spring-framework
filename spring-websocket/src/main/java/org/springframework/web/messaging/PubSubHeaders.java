@@ -17,6 +17,7 @@
 package org.springframework.web.messaging;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class PubSubHeaders {
 
 		this.messageHeaders = readOnly ? messageHeaders : new HashMap<String, Object>(messageHeaders);
 		this.rawHeaders = this.messageHeaders.containsKey(RAW_HEADERS) ?
-				(Map<String, String>) messageHeaders.get(RAW_HEADERS) : new HashMap<String, String>();
+				(Map<String, String>) messageHeaders.get(RAW_HEADERS) : Collections.<String, String>emptyMap();
 
 		if (this.messageHeaders.get(MESSAGE_TYPE) == null) {
 			this.messageHeaders.put(MESSAGE_TYPE, MessageType.MESSAGE);
