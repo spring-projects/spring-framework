@@ -62,7 +62,7 @@ public class PubSubMessageService extends AbstractMessageService {
 
 		try {
 			// Convert to byte[] payload before the fan-out
-			PubSubHeaders inHeaders = new PubSubHeaders(message.getHeaders(), true);
+			PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), inHeaders.getContentType());
 			message = new GenericMessage<byte[]>(payload, message.getHeaders());
 
@@ -82,19 +82,19 @@ public class PubSubMessageService extends AbstractMessageService {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Subscribe " + message);
 		}
-		PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		final String subscriptionId = headers.getSubscriptionId();
 		EventRegistration registration = getEventBus().registerConsumer(getPublishKey(headers.getDestination()),
 				new EventConsumer<Message<?>>() {
 					@Override
 					public void accept(Message<?> message) {
-						PubSubHeaders inHeaders = new PubSubHeaders(message.getHeaders(), true);
-						PubSubHeaders outHeaders = new PubSubHeaders();
+						PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+						PubSubHeaders outHeaders = PubSubHeaders.create();
 						outHeaders.setDestinations(inHeaders.getDestinations());
 						outHeaders.setContentType(inHeaders.getContentType());
 						outHeaders.setSubscriptionId(subscriptionId);
 						Object payload = message.getPayload();
-						message = new GenericMessage<Object>(payload, outHeaders.getMessageHeaders());
+						message = new GenericMessage<Object>(payload, outHeaders.toMessageHeaders());
 						getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, message);
 					}
 				});

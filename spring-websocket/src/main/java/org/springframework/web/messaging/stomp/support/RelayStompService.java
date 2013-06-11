@@ -93,21 +93,20 @@ public class RelayStompService extends AbstractMessageService {
 
 	private void forwardMessage(Message<?> message, StompCommand command) {
 
-		StompHeaders stompHeaders = new StompHeaders(message.getHeaders(), false);
+		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
 		String sessionId = stompHeaders.getSessionId();
 		RelaySession session = RelayStompService.this.relaySessions.get(sessionId);
 		Assert.notNull(session, "RelaySession not found");
 
 		try {
-			if (stompHeaders.getProtocolMessageType() == null) {
-				stompHeaders.setProtocolMessageType(StompCommand.SEND);
-			}
+			stompHeaders.setStompCommandIfNotSet(StompCommand.SEND);
+
 			MediaType contentType = stompHeaders.getContentType();
 			byte[] payload = this.payloadConverter.convertToPayload(message.getPayload(), contentType);
-			Message<byte[]> byteMessage = new GenericMessage<byte[]>(payload, stompHeaders.getMessageHeaders());
+			Message<byte[]> byteMessage = new GenericMessage<byte[]>(payload, stompHeaders.toMessageHeaders());
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding: " + byteMessage);
+				logger.trace("Forwarding STOMP " + stompHeaders.getStompCommand() + " message");
 			}
 
 			byte[] bytes = this.stompMessageConverter.fromMessage(byteMessage);
@@ -115,7 +114,7 @@ public class RelayStompService extends AbstractMessageService {
 			session.getOutputStream().flush();
 		}
 		catch (Exception ex) {
-			logger.error("Couldn't forward message", ex);
+			logger.error("Couldn't forward message " + message, ex);
 			clearRelaySession(sessionId);
 		}
 	}
@@ -233,13 +232,15 @@ public class RelayStompService extends AbstractMessageService {
 			catch (IOException e) {
 				logger.error("Socket error: " + e.getMessage());
 				clearRelaySession(sessionId);
+				sendErrorMessage("Lost connection");
 			}
 		}
 
 		private void sendErrorMessage(String message) {
-			StompHeaders stompHeaders = new StompHeaders(StompCommand.ERROR);
+			StompHeaders stompHeaders = StompHeaders.create(StompCommand.ERROR);
 			stompHeaders.setMessage(message);
-			Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.getMessageHeaders());
+			stompHeaders.setSessionId(this.sessionId);
+			Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.toMessageHeaders());
 			getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, errorMessage);
 		}
 	}

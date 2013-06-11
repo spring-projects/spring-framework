@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
-import org.springframework.web.messaging.stomp.StompHeaders;
 import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.stomp.StompHeaders;
 import org.springframework.web.messaging.stomp.support.StompMessageConverter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -76,10 +76,10 @@ public abstract class AbstractStompWebSocketHandler extends TextWebSocketHandler
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
 
-		StompHeaders stompHeaders = new StompHeaders(StompCommand.ERROR);
+		StompHeaders stompHeaders = StompHeaders.create(StompCommand.ERROR);
 		stompHeaders.setMessage(error.getMessage());
 
-		Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.getMessageHeaders());
+		Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.toMessageHeaders());
 		byte[] bytes = this.stompMessageConverter.fromMessage(errorMessage);
 
 		try {

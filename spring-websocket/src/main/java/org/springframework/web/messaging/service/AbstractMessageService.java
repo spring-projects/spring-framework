@@ -72,10 +72,10 @@ public abstract class AbstractMessageService {
 				}
 
 				if (logger.isTraceEnabled()) {
-					logger.trace("Processing notification: " + message);
+					logger.trace("Processing message id=" + message.getHeaders().getId());
 				}
 
-				PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+				PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 				MessageType messageType = headers.getMessageType();
 				if (messageType == null || messageType.equals(MessageType.OTHER)) {
 					processOther(message);
@@ -129,7 +129,7 @@ public abstract class AbstractMessageService {
 	}
 
 	private boolean isAllowedDestination(Message<?> message) {
-		PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String destination = headers.getDestination();
 		if (destination == null) {
 			return true;
@@ -138,7 +138,7 @@ public abstract class AbstractMessageService {
 			for (String pattern : this.disallowedDestinations) {
 				if (this.pathMatcher.match(pattern, destination)) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("Skip notification: " + message);
+						logger.trace("Skip notification message id=" + message.getHeaders().getId());
 					}
 					return false;
 				}
@@ -151,7 +151,7 @@ public abstract class AbstractMessageService {
 				}
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace("Skip notification: " + message);
+				logger.trace("Skip notification message id=" + message.getHeaders().getId());
 			}
 			return false;
 		}

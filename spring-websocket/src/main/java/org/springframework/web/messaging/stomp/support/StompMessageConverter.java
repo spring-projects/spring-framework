@@ -18,6 +18,7 @@ package org.springframework.web.messaging.stomp.support;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -25,6 +26,8 @@ import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
 import org.springframework.web.messaging.stomp.StompHeaders;
@@ -80,15 +83,13 @@ public class StompMessageConverter {
 		StompCommand command = StompCommand.valueOf(parser.nextToken(LF).trim());
 		Assert.notNull(command, "No command found");
 
-		StompHeaders stompHeaders = new StompHeaders(command);
-		stompHeaders.setSessionId(sessionId);
-
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		while (parser.hasNext()) {
 			String header = parser.nextToken(COLON);
 			if (header != null) {
 				if (parser.hasNext()) {
 					String value = parser.nextToken(LF);
-					stompHeaders.getRawHeaders().put(header, value);
+					headers.add(header, value);
 				}
 				else {
 					throw new StompConversionException("Parse exception for " + headerContent);
@@ -96,12 +97,13 @@ public class StompMessageConverter {
 			}
 		}
 
+		StompHeaders stompHeaders = StompHeaders.fromParsedFrame(command, headers);
+		stompHeaders.setSessionId(sessionId);
+
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
 
-		stompHeaders.updateMessageHeaders();
-
-		return createMessage(command, stompHeaders.getMessageHeaders(), payload);
+		return createMessage(command, stompHeaders.toMessageHeaders(), payload);
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -138,20 +140,20 @@ public class StompMessageConverter {
 	public byte[] fromMessage(Message<byte[]> message) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		MessageHeaders messageHeaders = message.getHeaders();
-		StompHeaders stompHeaders = new StompHeaders(messageHeaders, false);
-		stompHeaders.updateRawHeaders();
+		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
 		try {
 			out.write(stompHeaders.getStompCommand().toString().getBytes("UTF-8"));
 			out.write(LF);
-			for (Entry<String, String> entry : stompHeaders.getRawHeaders().entrySet()) {
+			for (Entry<String, List<String>> entry : stompHeaders.toStompMessageHeaders().entrySet()) {
 				String key = entry.getKey();
 				key = replaceAllOutbound(key);
-				String value = entry.getValue();
-				out.write(key.getBytes("UTF-8"));
-				out.write(COLON);
-				value = replaceAllOutbound(value);
-				out.write(value.getBytes("UTF-8"));
-				out.write(LF);
+				for (String value : entry.getValue()) {
+					out.write(key.getBytes("UTF-8"));
+					out.write(COLON);
+					value = replaceAllOutbound(value);
+					out.write(value.getBytes("UTF-8"));
+					out.write(LF);
+				}
 			}
 			out.write(LF);
 			out.write(message.getPayload());

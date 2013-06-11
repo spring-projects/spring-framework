@@ -167,7 +167,7 @@ public class AnnotationMessageService extends AbstractMessageService implements 
 
 	private void handleMessage(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
-		PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), true);
+		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String destination = headers.getDestination();
 
 		HandlerMethod match = getHandlerMethod(destination, handlerMethods);

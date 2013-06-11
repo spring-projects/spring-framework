@@ -66,15 +66,15 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 			return;
 		}
 
-		PubSubHeaders inHeaders = new PubSubHeaders(message.getHeaders(), true);
+		PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String sessionId = inHeaders.getSessionId();
 		String subscriptionId = inHeaders.getSubscriptionId();
 		Assert.notNull(subscriptionId, "No subscription id: " + message);
 
-		PubSubHeaders outHeaders = new PubSubHeaders(returnMessage.getHeaders(), false);
+		PubSubHeaders outHeaders = PubSubHeaders.fromMessageHeaders(returnMessage.getHeaders());
 		outHeaders.setSessionId(sessionId);
 		outHeaders.setSubscriptionId(subscriptionId);
-		returnMessage = new GenericMessage<Object>(returnMessage.getPayload(), outHeaders.getMessageHeaders());
+		returnMessage = new GenericMessage<Object>(returnMessage.getPayload(), outHeaders.toMessageHeaders());
 
 		this.eventBus.send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, returnMessage);
  	}

@@ -63,10 +63,8 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 					@Override
 					public void accept(Message<?> message) {
 
-						StompHeaders stompHeaders = new StompHeaders(message.getHeaders(), false);
-						if (stompHeaders.getProtocolMessageType() == null) {
-							stompHeaders.setProtocolMessageType(StompCommand.MESSAGE);
-						}
+						StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
+						stompHeaders.setStompCommandIfNotSet(StompCommand.MESSAGE);
 
 						if (StompCommand.CONNECTED.equals(stompHeaders.getStompCommand())) {
 							// Ignore for now since we already sent it
@@ -74,6 +72,9 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 						}
 
 						String sessionId = stompHeaders.getSessionId();
+						if (sessionId == null) {
+							logger.error("Cannot send message without a session id: " + message);
+						}
 						WebSocketSession session = getWebSocketSession(sessionId);
 
 						byte[] payload;
@@ -87,7 +88,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 						}
 
 						try {
-							Map<String, Object> messageHeaders = stompHeaders.getMessageHeaders();
+							Map<String, Object> messageHeaders = stompHeaders.toMessageHeaders();
 							Message<byte[]> byteMessage = new GenericMessage<byte[]>(payload, messageHeaders);
 							byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
 							session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
@@ -116,11 +117,11 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 	public void handleStompMessage(final WebSocketSession session, Message<byte[]> message) {
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Processing: " + message);
+			logger.trace("Processing STOMP message: " + message);
 		}
 
 		try {
-			StompHeaders stompHeaders = new StompHeaders(message.getHeaders(), true);
+			StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
 			MessageType messageType = stompHeaders.getMessageType();
 			if (MessageType.CONNECT.equals(messageType)) {
 				handleConnect(session, message);
@@ -147,8 +148,8 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 
 	protected void handleConnect(final WebSocketSession session, Message<byte[]> message) throws IOException {
 
-		StompHeaders connectStompHeaders = new StompHeaders(message.getHeaders(), true);
-		StompHeaders connectedStompHeaders = new StompHeaders(StompCommand.CONNECTED);
+		StompHeaders connectStompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
+		StompHeaders connectedStompHeaders = StompHeaders.create(StompCommand.CONNECTED);
 
 		Set<String> acceptVersions = connectStompHeaders.getAcceptVersion();
 		if (acceptVersions.contains("1.2")) {
@@ -167,7 +168,7 @@ public class DefaultStompWebSocketHandler extends AbstractStompWebSocketHandler 
 
 		// TODO: security
 
-		Message<byte[]> connectedMessage = new GenericMessage<byte[]>(new byte[0], connectedStompHeaders.getMessageHeaders());
+		Message<byte[]> connectedMessage = new GenericMessage<byte[]>(new byte[0], connectedStompHeaders.toMessageHeaders());
 		byte[] bytes = getStompMessageConverter().fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}

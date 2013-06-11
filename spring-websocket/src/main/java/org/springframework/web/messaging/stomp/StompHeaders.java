@@ -17,11 +17,17 @@
 package org.springframework.web.messaging.stomp;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.messaging.PubSubHeaders;
 
@@ -29,7 +35,12 @@ import reactor.util.Assert;
 
 
 /**
- * STOMP adapter for {@link MessageHeaders}.
+ * Can be used to prepare headers for a new STOMP message, or to access and/or modify
+ * STOMP-specific headers of an existing message.
+ * <p>
+ * Use one of the static factory method in this class, then call getters and setters, and
+ * at the end if necessary call {@link #toMessageHeaders()} to obtain the updated headers
+ * or call {@link #toStompMessageHeaders()} to obtain only the STOMP-specific headers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -54,6 +65,8 @@ public class StompHeaders extends PubSubHeaders {
 
 	private static final String ACK = "ack";
 
+	private static final String NACK = "nack";
+
 	private static final String DESTINATION = "destination";
 
 	private static final String CONTENT_TYPE = "content-type";
@@ -63,30 +76,133 @@ public class StompHeaders extends PubSubHeaders {
 	private static final String HEARTBEAT = "heart-beat";
 
 
+	private static final String STOMP_HEADERS = "stompHeaders";
+
+
+	private final Map<String, String> headers;
+
+
 	/**
-	 * Constructor for building new headers.
-	 *
-	 * @param command the STOMP command
+	 * A constructor for creating new STOMP message headers.
+	 * This constructor is private. See factory methods in this sub-classes.
 	 */
-	public StompHeaders(StompCommand command) {
-		super(command.getMessageType(), command);
+	private StompHeaders(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
+		super(command.getMessageType(), command, externalSourceHeaders);
+		this.headers = new HashMap<String, String>(4);
+		updateMessageHeaders();
+	}
+
+	private void updateMessageHeaders() {
+		if (getExternalSourceHeaders().isEmpty()) {
+			return;
+		}
+		String destination = getHeaderValue(DESTINATION);
+		if (destination != null) {
+			super.setDestination(destination);
+		}
+		String contentType = getHeaderValue(CONTENT_TYPE);
+		if (contentType != null) {
+			super.setContentType(MediaType.parseMediaType(contentType));
+		}
+		if (StompCommand.SUBSCRIBE.equals(getStompCommand())) {
+			if (getHeaderValue(ID) != null) {
+				super.setSubscriptionId(getHeaderValue(ID));
+			}
+		}
 	}
 
 	/**
-	 * Constructor for access to existing {@link MessageHeaders}.
-	 *
-	 * @param messageHeaders the existing message headers
-	 * @param readOnly whether the resulting instance will be used for read-only access,
-	 *        if {@code true}, then set methods will throw exceptions; if {@code false}
-	 *        they will work.
+	 * A constructor for accessing and modifying existing message headers. This
+	 * constructor is protected. See factory methods in this class.
 	 */
-	public StompHeaders(MessageHeaders messageHeaders, boolean readOnly) {
-		super(messageHeaders, readOnly);
+	@SuppressWarnings("unchecked")
+	private StompHeaders(MessageHeaders messageHeaders) {
+		super(messageHeaders);
+		this.headers = (messageHeaders.get(STOMP_HEADERS) != null) ?
+				(Map<String, String>) messageHeaders.get(STOMP_HEADERS) : new HashMap<String, String>(4);
+	}
+
+
+	/**
+	 * Create {@link StompHeaders} for a new {@link Message}.
+	 */
+	public static StompHeaders create(StompCommand command) {
+		return new StompHeaders(command, null);
+	}
+
+	/**
+	 * Create {@link StompHeaders} from the headers of an existing {@link Message}.
+	 */
+	public static StompHeaders fromMessageHeaders(MessageHeaders messageHeaders) {
+		return new StompHeaders(messageHeaders);
+	}
+
+	/**
+	 * Create {@link StompHeaders} from parsed STOP frame content.
+	 */
+	public static StompHeaders fromParsedFrame(StompCommand command, Map<String, List<String>> headers) {
+		return new StompHeaders(command, headers);
+	}
+
+
+	/**
+	 * Return the original, wrapped headers (i.e. unmodified) or a new Map including any
+	 * updates made via setters.
+	 */
+	@Override
+	public Map<String, Object> toMessageHeaders() {
+		Map<String, Object> result = super.toMessageHeaders();
+		if (isModified()) {
+			result.put(STOMP_HEADERS, this.headers);
+		}
+		return result;
 	}
 
 	@Override
-	public StompCommand getProtocolMessageType() {
-		return (StompCommand) super.getProtocolMessageType();
+	public boolean isModified() {
+		return (super.isModified() || !this.headers.isEmpty());
+	}
+
+	/**
+	 * Return STOMP headers and any custom headers that may have been sent by
+	 * a remote endpoint, if this message originated from outside.
+	 */
+	public Map<String, List<String>> toStompMessageHeaders() {
+
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
+		result.putAll(getExternalSourceHeaders());
+		result.setAll(this.headers);
+
+		String destination = super.getDestination();
+		if (destination != null) {
+			result.set(DESTINATION, destination);
+		}
+
+		MediaType contentType = getContentType();
+		if (contentType != null) {
+			result.set(CONTENT_TYPE, contentType.toString());
+		}
+
+		if (StompCommand.MESSAGE.equals(getStompCommand())) {
+			String subscriptionId = getSubscriptionId();
+			if (subscriptionId != null) {
+				result.set(SUBSCRIPTION, subscriptionId);
+			}
+			else {
+				logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
+			}
+			if ((getMessageId() == null)) {
+				this.headers.put(MESSAGE_ID, toMessageHeaders().get(ID).toString());
+			}
+		}
+
+		return result;
+	}
+
+	public void setStompCommandIfNotSet(StompCommand command) {
+		if (getStompCommand() == null) {
+			setProtocolMessageType(command);
+		}
 	}
 
 	public StompCommand getStompCommand() {
@@ -94,32 +210,42 @@ public class StompHeaders extends PubSubHeaders {
 	}
 
 	public Set<String> getAcceptVersion() {
-		String rawValue = getRawHeaders().get(ACCEPT_VERSION);
+		String rawValue = getHeaderValue(ACCEPT_VERSION);
 		return (rawValue != null) ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet();
 	}
 
+	private String getHeaderValue(String headerName) {
+		List<String> values = getExternalSourceHeaders().get(headerName);
+		return !CollectionUtils.isEmpty(values) ? values.get(0) : this.headers.get(headerName);
+	}
+
 	public void setAcceptVersion(String acceptVersion) {
-		getRawHeaders().put(ACCEPT_VERSION, acceptVersion);
+		this.headers.put(ACCEPT_VERSION, acceptVersion);
+	}
+
+	public void setHost(String host) {
+		this.headers.put(HOST, host);
+	}
+
+	public String getHost() {
+		return getHeaderValue(HOST);
 	}
 
 	@Override
 	public void setDestination(String destination) {
-		if (destination != null) {
-			super.setDestination(destination);
-			getRawHeaders().put(DESTINATION, destination);
-		}
+		super.setDestination(destination);
+		this.headers.put(DESTINATION, destination);
 	}
 
 	@Override
 	public void setDestinations(List<String> destinations) {
-		if (destinations != null) {
-			super.setDestinations(destinations);
-			getRawHeaders().put(DESTINATION, destinations.get(0));
-		}
+		Assert.isTrue((destinations != null) && (destinations.size() == 1), "STOMP allows one destination per message");
+		super.setDestinations(destinations);
+		this.headers.put(DESTINATION, destinations.get(0));
 	}
 
 	public long[] getHeartbeat() {
-		String rawValue = getRawHeaders().get(HEARTBEAT);
+		String rawValue = getHeaderValue(HEARTBEAT);
 		if (!StringUtils.hasText(rawValue)) {
 			return null;
 		}
@@ -131,102 +257,82 @@ public class StompHeaders extends PubSubHeaders {
 	public void setContentType(MediaType mediaType) {
 		if (mediaType != null) {
 			super.setContentType(mediaType);
-			getRawHeaders().put(CONTENT_TYPE, mediaType.toString());
+			this.headers.put(CONTENT_TYPE, mediaType.toString());
 		}
 	}
 
+	public MediaType getContentType() {
+		String value = getHeaderValue(CONTENT_TYPE);
+		return (value != null) ? MediaType.parseMediaType(value) : null;
+	}
+
 	public Integer getContentLength() {
-		String contentLength = getRawHeaders().get(CONTENT_LENGTH);
+		String contentLength = getHeaderValue(CONTENT_LENGTH);
 		return StringUtils.hasText(contentLength) ? new Integer(contentLength) : null;
 	}
 
 	public void setContentLength(int contentLength) {
-		getRawHeaders().put(CONTENT_LENGTH, String.valueOf(contentLength));
-	}
-
-	@Override
-	public String getSubscriptionId() {
-		return StompCommand.SUBSCRIBE.equals(getStompCommand()) ? getRawHeaders().get(ID) : null;
-	}
-
-	@Override
-	public void setSubscriptionId(String subscriptionId) {
-		Assert.isTrue(StompCommand.MESSAGE.equals(getStompCommand()),
-				"\"subscription\" can only be set on a STOMP MESSAGE frame");
-		super.setSubscriptionId(subscriptionId);
-		getRawHeaders().put(SUBSCRIPTION, subscriptionId);
+		this.headers.put(CONTENT_LENGTH, String.valueOf(contentLength));
 	}
 
 	public void setHeartbeat(long cx, long cy) {
-		getRawHeaders().put(HEARTBEAT, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
+		this.headers.put(HEARTBEAT, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
+	}
+
+	public void setAck(String ack) {
+		this.headers.put(ACK, ack);
+	}
+
+	public String getAck() {
+		return getHeaderValue(ACK);
+	}
+
+	public void setNack(String nack) {
+		this.headers.put(NACK, nack);
+	}
+
+	public String getNack() {
+		return getHeaderValue(NACK);
+	}
+
+	public void setReceiptId(String receiptId) {
+		this.headers.put(RECEIPT_ID, receiptId);
+	}
+
+	public String getReceiptId() {
+		return getHeaderValue(RECEIPT_ID);
 	}
 
 	public String getMessage() {
-		return getRawHeaders().get(MESSAGE);
+		return getHeaderValue(MESSAGE);
 	}
 
 	public void setMessage(String content) {
-		getRawHeaders().put(MESSAGE, content);
+		this.headers.put(MESSAGE, content);
 	}
 
 	public String getMessageId() {
-		return getRawHeaders().get(MESSAGE_ID);
+		return getHeaderValue(MESSAGE_ID);
 	}
 
 	public void setMessageId(String id) {
-		getRawHeaders().put(MESSAGE_ID, id);
+		this.headers.put(MESSAGE_ID, id);
 	}
 
 	public String getVersion() {
-		return getRawHeaders().get(VERSION);
+		return getHeaderValue(VERSION);
 	}
 
 	public void setVersion(String version) {
-		getRawHeaders().put(VERSION, version);
+		this.headers.put(VERSION, version);
 	}
 
-
-	/**
-	 * Update generic message headers from raw headers. This method only needs to be
-	 * invoked when raw headers are added via {@link #getRawHeaders()}.
-	 */
-	public void updateMessageHeaders() {
-		String destination = getRawHeaders().get(DESTINATION);
-		if (destination != null) {
-			setDestination(destination);
-		}
-		String contentType = getRawHeaders().get(CONTENT_TYPE);
-		if (contentType != null) {
-			setContentType(MediaType.parseMediaType(contentType));
-		}
-		if (StompCommand.SUBSCRIBE.equals(getStompCommand())) {
-			if (getRawHeaders().get(ID) != null) {
-				super.setSubscriptionId(getRawHeaders().get(ID));
-			}
-		}
-	}
-
-	/**
-	 * Update raw headers from generic message headers. This method only needs to be
-	 * invoked if creating {@link StompHeaders} from {@link MessageHeaders} that never
-	 * contained raw headers.
-	 */
-	public void updateRawHeaders() {
-		String destination = getDestination();
-		if (destination != null) {
-			getRawHeaders().put(DESTINATION, destination);
-		}
-		MediaType contentType = getContentType();
-		if (contentType != null) {
-			getRawHeaders().put(CONTENT_TYPE, contentType.toString());
-		}
-		String subscriptionId = getSubscriptionId();
-		if (subscriptionId != null) {
-			getRawHeaders().put(SUBSCRIPTION, subscriptionId);
-		}
-		if (StompCommand.MESSAGE.equals(getStompCommand()) && (getMessageId() == null)) {
-			getRawHeaders().put(MESSAGE_ID, getMessageHeaders().get(ID).toString());
-		}
+	@Override
+	public String toString() {
+		return "StompHeaders [" + "messageType=" + getMessageType() + ", protocolMessageType="
+				+ getProtocolMessageType() + ", destination=" + getDestination()
+				+ ", subscriptionId=" + getSubscriptionId() + ", sessionId=" + getSessionId()
+				+ ", externalSourceHeaders=" + getExternalSourceHeaders() + ", headers=" + this.headers + "]";
 	}
 
 }

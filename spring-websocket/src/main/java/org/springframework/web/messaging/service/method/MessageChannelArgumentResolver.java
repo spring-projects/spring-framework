@@ -49,16 +49,16 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 
-		final String sessionId = new PubSubHeaders(message.getHeaders(), true).getSessionId();
+		final String sessionId = PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
 
 		return new MessageChannel() {
 
 			@Override
 			public boolean send(Message<?> message) {
 
-				PubSubHeaders headers = new PubSubHeaders(message.getHeaders(), false);
+				PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 				headers.setSessionId(sessionId);
-				message = new GenericMessage<Object>(message.getPayload(), headers.getMessageHeaders());
+				message = new GenericMessage<Object>(message.getPayload(), headers.toMessageHeaders());
 
 				eventBus.send(AbstractMessageService.CLIENT_TO_SERVER_MESSAGE_KEY, message);
 

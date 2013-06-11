@@ -22,17 +22,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 
 
 /**
+ * A base class for working with message headers in Web, messaging protocols that support
+ * the publish-subscribe message pattern. Provides uniform access to specific values
+ * common across protocols such as a destination, message type (publish,
+ * subscribe/unsubscribe), session id, and others.
+ * <p>
+ * This class can be used to prepare headers for a new pub-sub message, or to access
+ * and/or modify headers of an existing message.
+ * <p>
+ * Use one of the static factory method in this class, then call getters and setters, and
+ * at the end if necessary call {@link #toMessageHeaders()} to obtain the updated headers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class PubSubHeaders {
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 	private static final String DESTINATIONS = "destinations";
 
@@ -40,125 +57,185 @@ public class PubSubHeaders {
 
 	private static final String MESSAGE_TYPE = "messageType";
 
-	private static final String SUBSCRIPTION_ID = "subscriptionId";
-
 	private static final String PROTOCOL_MESSAGE_TYPE = "protocolMessageType";
 
 	private static final String SESSION_ID = "sessionId";
 
-	private static final String RAW_HEADERS = "rawHeaders";
+	private static final String SUBSCRIPTION_ID = "subscriptionId";
+
+	private static final String EXTERNAL_SOURCE_HEADERS = "extSourceHeaders";
 
 
-	private final Map<String, Object> messageHeaders;
+	private static final Map<String, List<String>> emptyMultiValueMap =
+			Collections.unmodifiableMap(new LinkedMultiValueMap<String, String>(0));
 
-	private final Map<String, String> rawHeaders;
+
+	// wrapped read-only message headers
+	private final MessageHeaders originalHeaders;
+
+	// header updates
+	private final Map<String, Object> headers = new HashMap<String, Object>(4);
+
+	// saved headers from a message from a remote source
+	private final Map<String, List<String>> externalSourceHeaders;
+
 
 
 	/**
-	 * Constructor for building new headers.
-	 *
-	 * @param messageType the message type
-	 * @param protocolMessageType the protocol-specific message type or command
+	 * A constructor for creating new message headers.
+	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
-	public PubSubHeaders(MessageType messageType, Object protocolMessageType) {
+	protected PubSubHeaders(MessageType messageType, Object protocolMessageType,
+			Map<String, List<String>> externalSourceHeaders) {
 
-		this.messageHeaders = new HashMap<String, Object>();
-		this.messageHeaders.put(MESSAGE_TYPE, messageType);
+		this.originalHeaders = null;
+
+		Assert.notNull(messageType, "messageType is required");
+		this.headers.put(MESSAGE_TYPE, messageType);
+
 		if (protocolMessageType != null) {
-			this.messageHeaders.put(PROTOCOL_MESSAGE_TYPE, protocolMessageType);
+			this.headers.put(PROTOCOL_MESSAGE_TYPE, protocolMessageType);
 		}
 
-		this.rawHeaders = new HashMap<String, String>();
-		this.messageHeaders.put(RAW_HEADERS, this.rawHeaders);
-	}
-
-	public PubSubHeaders() {
-		this(MessageType.MESSAGE, null);
+		if (externalSourceHeaders == null) {
+			this.externalSourceHeaders = emptyMultiValueMap;
+		}
+		else {
+			this.externalSourceHeaders = Collections.unmodifiableMap(externalSourceHeaders); // TODO: list values must also be read-only
+			this.headers.put(EXTERNAL_SOURCE_HEADERS, this.externalSourceHeaders);
+		}
 	}
 
 	/**
-	 * Constructor for access to existing {@link MessageHeaders}.
-	 *
-	 * @param messageHeaders
+	 * A constructor for accessing and modifying existing message headers. This
+	 * constructor is protected. See factory methods in this and sub-classes.
 	 */
 	@SuppressWarnings("unchecked")
-	public PubSubHeaders(MessageHeaders messageHeaders, boolean readOnly) {
+	protected PubSubHeaders(MessageHeaders originalHeaders) {
+		this.originalHeaders = originalHeaders;
+		this.externalSourceHeaders = (originalHeaders.get(EXTERNAL_SOURCE_HEADERS) != null) ?
+				(Map<String, List<String>>) originalHeaders.get(EXTERNAL_SOURCE_HEADERS) : emptyMultiValueMap;
+	}
 
-		this.messageHeaders = readOnly ? messageHeaders : new HashMap<String, Object>(messageHeaders);
-		this.rawHeaders = this.messageHeaders.containsKey(RAW_HEADERS) ?
-				(Map<String, String>) messageHeaders.get(RAW_HEADERS) : Collections.<String, String>emptyMap();
 
-		if (this.messageHeaders.get(MESSAGE_TYPE) == null) {
-			this.messageHeaders.put(MESSAGE_TYPE, MessageType.MESSAGE);
+	/**
+	 * Create {@link PubSubHeaders} for a new {@link Message}.
+	 */
+	public static PubSubHeaders create() {
+		return new PubSubHeaders(MessageType.MESSAGE, null, null);
+	}
+
+	/**
+	 * Create {@link PubSubHeaders} from existing message headers.
+	 */
+	public static PubSubHeaders fromMessageHeaders(MessageHeaders originalHeaders) {
+		return new PubSubHeaders(originalHeaders);
+	}
+
+
+	/**
+	 * Return the original, wrapped headers (i.e. unmodified) or a new Map including any
+	 * updates made via setters.
+	 */
+	public Map<String, Object> toMessageHeaders() {
+		if (!isModified()) {
+			return this.originalHeaders;
 		}
+		Map<String, Object> result = new HashMap<String, Object>();
+		if (this.originalHeaders != null) {
+			result.putAll(this.originalHeaders);
+		}
+		result.putAll(this.headers);
+		return result;
 	}
 
-
-	public Map<String, Object> getMessageHeaders() {
-		return this.messageHeaders;
-	}
-
-	public Map<String, String> getRawHeaders() {
-		return this.rawHeaders;
+	public boolean isModified() {
+		return ((this.originalHeaders == null) || !this.headers.isEmpty());
 	}
 
 	public MessageType getMessageType() {
-		return (MessageType) this.messageHeaders.get(MESSAGE_TYPE);
+		return (MessageType) getHeaderValue(MESSAGE_TYPE);
 	}
 
-	public void setProtocolMessageType(Object protocolMessageType) {
-		this.messageHeaders.put(PROTOCOL_MESSAGE_TYPE, protocolMessageType);
+	private Object getHeaderValue(String headerName) {
+		if (this.headers.get(headerName) != null) {
+			return this.headers.get(headerName);
+		}
+		else if (this.originalHeaders.get(headerName) != null) {
+			return this.originalHeaders.get(headerName);
+		}
+		return null;
 	}
 
-	public Object getProtocolMessageType() {
-		return this.messageHeaders.get(PROTOCOL_MESSAGE_TYPE);
+	protected void setProtocolMessageType(Object protocolMessageType) {
+		this.headers.put(PROTOCOL_MESSAGE_TYPE, protocolMessageType);
+	}
+
+	protected Object getProtocolMessageType() {
+		return getHeaderValue(PROTOCOL_MESSAGE_TYPE);
 	}
 
 	public void setDestination(String destination) {
-		this.messageHeaders.put(DESTINATIONS, Arrays.asList(destination));
+		Assert.notNull(destination, "destination is required");
+		this.headers.put(DESTINATIONS, Arrays.asList(destination));
 	}
 
+	@SuppressWarnings("unchecked")
 	public String getDestination() {
-		@SuppressWarnings("unchecked")
-		List<String> destination = (List<String>) messageHeaders.get(DESTINATIONS);
-		return CollectionUtils.isEmpty(destination) ? null : destination.get(0);
+		List<String> destinations = (List<String>) getHeaderValue(DESTINATIONS);
+		return CollectionUtils.isEmpty(destinations) ? null : destinations.get(0);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<String> getDestinations() {
-		return (List<String>) messageHeaders.get(DESTINATIONS);
+		List<String> destinations = (List<String>) getHeaderValue(DESTINATIONS);
+		return CollectionUtils.isEmpty(destinations) ? null : destinations;
 	}
 
 	public void setDestinations(List<String> destinations) {
-		if (destinations != null) {
-			this.messageHeaders.put(DESTINATIONS, destinations);
-		}
+		Assert.notNull(destinations, "destinations are required");
+		this.headers.put(DESTINATIONS, destinations);
 	}
 
 	public MediaType getContentType() {
-		return (MediaType) this.messageHeaders.get(CONTENT_TYPE);
+		return (MediaType) getHeaderValue(CONTENT_TYPE);
 	}
 
-	public void setContentType(MediaType mediaType) {
-		if (mediaType != null) {
-			this.messageHeaders.put(CONTENT_TYPE, mediaType);
-		}
+	public void setContentType(MediaType contentType) {
+		Assert.notNull(contentType, "contentType is required");
+		this.headers.put(CONTENT_TYPE, contentType);
 	}
 
 	public String getSubscriptionId() {
-		return (String) this.messageHeaders.get(SUBSCRIPTION_ID);
+		return (String) getHeaderValue(SUBSCRIPTION_ID);
 	}
 
 	public void setSubscriptionId(String subscriptionId) {
-		this.messageHeaders.put(SUBSCRIPTION_ID, subscriptionId);
+		this.headers.put(SUBSCRIPTION_ID, subscriptionId);
 	}
 
 	public String getSessionId() {
-		return (String) this.messageHeaders.get(SESSION_ID);
+		return (String) getHeaderValue(SESSION_ID);
 	}
 
 	public void setSessionId(String sessionId) {
-		this.messageHeaders.put(SESSION_ID, sessionId);
+		this.headers.put(SESSION_ID, sessionId);
+	}
+
+	/**
+	 * Return a read-only map of headers originating from a message received by the
+	 * application from an external source (e.g. from a remote WebSocket endpoint). The
+	 * header names and values are exactly as they were, and are protocol specific but may
+	 * also be custom application headers if the protocol allows that.
+	 */
+	public Map<String, List<String>> getExternalSourceHeaders() {
+		return this.externalSourceHeaders;
+	}
+
+	@Override
+	public String toString() {
+		return "PubSubHeaders [originalHeaders=" + this.originalHeaders + ", headers="
+				+ this.headers + ", externalSourceHeaders=" + this.externalSourceHeaders + "]";
 	}
 
 }
