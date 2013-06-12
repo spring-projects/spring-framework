@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * {@linkplain #value() specified conditions} match.
  *
  * <p>A <em>condition</em> is any state that can be determined programmatically
- * immediately before the bean is due to be created (see {@link Condition} for details).
+ * before the bean definition is due to be registered (see {@link Condition} for details).
  *
  * <p>The {@code @Conditional} annotation may be used in any of the following ways:
  * <ul>

@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
@@ -84,6 +85,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
 	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
+
+	private ConditionEvaluator conditionEvaluator;
 
 
 	/**
@@ -162,11 +165,19 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
+		this.conditionEvaluator = null;
 	}
 
 	@Override
 	public final Environment getEnvironment() {
 		return this.environment;
+	}
+
+	/**
+	 * Returns the {@link BeanDefinitionRegistry} used by this scanner or {@code null}.
+	 */
+	protected BeanDefinitionRegistry getRegistry() {
+		return null;
 	}
 
 	/**
@@ -342,9 +353,12 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @param metadataReader the ASM ClassReader for the class
 	 * @return whether the class qualifies as a candidate component
 	 */
-	protected boolean isConditionMatch(MetadataReader metadataReader) {
-		return !ConditionEvaluator.get(metadataReader.getAnnotationMetadata(), true).shouldSkip(
-				null, getEnvironment());
+	private boolean isConditionMatch(MetadataReader metadataReader) {
+		if (this.conditionEvaluator == null) {
+			this.conditionEvaluator = new ConditionEvaluator(getRegistry(),
+					getEnvironment(), null, null, getResourceLoader());
+		}
+		return !conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
 	}
 
 	/**

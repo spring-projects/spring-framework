@@ -42,6 +42,8 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -85,14 +87,17 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final BeanNameGenerator importBeanNameGenerator;
 
+	private final ConditionEvaluator conditionEvaluator;
+
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
 	 */
 	public ConfigurationClassBeanDefinitionReader(
-			BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
-			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator) {
+			BeanDefinitionRegistry registry, ApplicationContext applicationContext,
+			SourceExtractor sourceExtractor, ProblemReporter problemReporter,
+			MetadataReaderFactory metadataReaderFactory, ResourceLoader resourceLoader,
+			Environment environment, BeanNameGenerator importBeanNameGenerator) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
@@ -101,6 +106,8 @@ class ConfigurationClassBeanDefinitionReader {
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
 		this.importBeanNameGenerator = importBeanNameGenerator;
+		this.conditionEvaluator = new ConditionEvaluator(registry, environment,
+				applicationContext, null, resourceLoader);
 	}
 
 
@@ -109,9 +116,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 * based on its contents.
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
-		TrackedConditionEvaluator conditionEvaluator = new TrackedConditionEvaluator();
+		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
 		for (ConfigurationClass configClass : configurationModel) {
-			loadBeanDefinitionsForConfigurationClass(configClass, conditionEvaluator);
+			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
 		}
 	}
 
@@ -120,9 +127,8 @@ class ConfigurationClassBeanDefinitionReader {
 	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass,
-			TrackedConditionEvaluator conditionEvaluator) {
-
-		if(conditionEvaluator.shouldSkip(configClass)) {
+			TrackedConditionEvaluator trackedConditionEvaluator) {
+		if (trackedConditionEvaluator.shouldSkip(configClass)) {
 			removeBeanDefinition(configClass);
 			return;
 		}
@@ -172,8 +178,8 @@ class ConfigurationClassBeanDefinitionReader {
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
-		if (ConditionEvaluator.get(beanMethod.getMetadata(), false).shouldSkip(
-				this.registry, this.environment)) {
+		if (conditionEvaluator.shouldSkip(beanMethod.getMetadata(),
+				ConfigurationPhase.REGISTER_BEAN)) {
 			return;
 		}
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
@@ -384,6 +390,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
+
 	/**
 	 * Evaluate {@Code @Conditional} annotations, tracking results and taking into
 	 * account 'imported by'.
@@ -402,14 +409,13 @@ class ConfigurationClassBeanDefinitionReader {
 					}
 				}
 				if (skip == null) {
-					skip = ConditionEvaluator.get(configClass.getMetadata(), false).shouldSkip(
-							registry, environment);
+					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(),
+							ConfigurationPhase.REGISTER_BEAN);
 				}
 				this.skipped.put(configClass, skip);
 			}
 			return skip;
 		}
-
 	}
 
 }

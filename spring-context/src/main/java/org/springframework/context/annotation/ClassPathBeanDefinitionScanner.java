@@ -262,12 +262,6 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		return beanDefinitions;
 	}
 
-	@Override
-	protected boolean isConditionMatch(MetadataReader metadataReader) {
-		return !ConditionEvaluator.get(metadataReader.getAnnotationMetadata(), true).shouldSkip(
-				getRegistry(), getEnvironment());
-	}
-
 	/**
 	 * Apply further settings to the given bean definition,
 	 * beyond the contents retrieved from scanning the component class.

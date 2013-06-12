@@ -46,8 +46,10 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.NestedIOException;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -119,6 +121,8 @@ class ConfigurationClassParser {
 
 	private final List<DeferredImportSelectorHolder> deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
 
+	private final ConditionEvaluator conditionEvaluator;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
@@ -126,7 +130,8 @@ class ConfigurationClassParser {
 	 */
 	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory,
 			ProblemReporter problemReporter, Environment environment, ResourceLoader resourceLoader,
-			BeanNameGenerator componentScanBeanNameGenerator, BeanDefinitionRegistry registry) {
+			BeanNameGenerator componentScanBeanNameGenerator, BeanDefinitionRegistry registry,
+			ApplicationContext applicationContext) {
 
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
@@ -135,6 +140,8 @@ class ConfigurationClassParser {
 		this.registry = registry;
 		this.componentScanParser = new ComponentScanAnnotationParser(
 				resourceLoader, environment, componentScanBeanNameGenerator, registry);
+		this.conditionEvaluator = new ConditionEvaluator(registry, environment,
+				applicationContext, null, resourceLoader);
 	}
 
 
@@ -162,7 +169,7 @@ class ConfigurationClassParser {
 	 * @param beanName may be null, but if populated represents the bean id
 	 * (assumes that this configuration class was configured via XML)
 	 */
-	public void parse(String className, String beanName) throws IOException {
+	protected final void parse(String className, String beanName) throws IOException {
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
 		processConfigurationClass(new ConfigurationClass(reader, beanName));
 	}
@@ -172,12 +179,16 @@ class ConfigurationClassParser {
 	 * @param clazz the Class to parse
 	 * @param beanName must not be null (as of Spring 3.1.1)
 	 */
-	public void parse(Class<?> clazz, String beanName) throws IOException {
+	protected final void parse(Class<?> clazz, String beanName) throws IOException {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
 	}
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
+
+		if (conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
+			return;
+		}
 
 		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
@@ -224,15 +235,14 @@ class ConfigurationClassParser {
 		AnnotationAttributes componentScan = attributesFor(sourceClass.getMetadata(), ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			if (!ConditionEvaluator.get(configClass.getMetadata(), false).shouldSkip(
-					this.registry, this.environment)) {
+			if (!conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 
 				// check the set of scanned definitions for any further config classes and parse recursively if necessary
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-						this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+						parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
 					}
 				}
 			}

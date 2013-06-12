@@ -16,12 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,15 +26,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link Conditional} beans.
- * 
+ *
  * @author Phillip Webb
  */
+@SuppressWarnings("resource")
 public class ConfigurationClassWithConditionTests {
 
 	private final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -110,6 +111,32 @@ public class ConfigurationClassWithConditionTests {
 		assertNull(ctx.getBean(ExampleBean.class));
 	}
 
+	@Test
+	public void importsNotCreated() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportsNotCreated.class);
+		ctx.refresh();
+	}
+
+	@Test
+	public void importsNotLoaded() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportsNotLoaded.class);
+		ctx.refresh();
+		assertThat(ctx.containsBeanDefinition("a"), equalTo(false));
+		assertThat(ctx.containsBeanDefinition("b"), equalTo(false));
+	}
+
+	@Test
+	public void sensibleConditionContext() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setResourceLoader(new DefaultResourceLoader());
+		ctx.setClassLoader(getClass().getClassLoader());
+		ctx.register(SensibleConditionContext.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(ExampleBean.class), instanceOf(ExampleBean.class));
+	}
+
 	@Configuration
 	static class BeanOneConfiguration {
 		@Bean
@@ -166,7 +193,12 @@ public class ConfigurationClassWithConditionTests {
 		}
 	}
 
-	static class HasBeanOneCondition implements Condition {
+	static class HasBeanOneCondition implements ConfigurationCondition {
+
+		@Override
+		public ConfigurationPhase getConfigurationPhase() {
+			return ConfigurationPhase.REGISTER_BEAN;
+		}
 
 		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -204,6 +236,112 @@ public class ConfigurationClassWithConditionTests {
 		public ExampleBean bean1() {
 			return new ExampleBean();
 		}
+	}
+
+	@Configuration
+	@Never
+	@Import({ ConfigurationNotCreated.class, RegistrarNotCreated.class, ImportSelectorNotCreated.class })
+	static class ImportsNotCreated {
+		static {
+			if (true) throw new RuntimeException();
+		}
+	}
+
+	@Configuration
+	static class ConfigurationNotCreated {
+		static {
+			if (true) throw new RuntimeException();
+		}
+	}
+
+	static class RegistrarNotCreated implements ImportBeanDefinitionRegistrar {
+		static {
+			if (true) throw new RuntimeException();
+		}
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
+		}
+	}
+
+	static class ImportSelectorNotCreated implements ImportSelector {
+
+		static {
+			if (true) throw new RuntimeException();
+		}
+
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return new String[] {};
+		}
+
+	}
+
+	@Configuration
+	@Never
+	@Import({ ConfigurationNotLoaded.class, RegistrarNotLoaded.class, ImportSelectorNotLoaded.class })
+	static class ImportsNotLoaded {
+		static {
+			if (true) throw new RuntimeException();
+		}
+	}
+
+	@Configuration
+	static class ConfigurationNotLoaded {
+		@Bean
+		public String a() {
+			return "a";
+		}
+	}
+
+	static class RegistrarNotLoaded implements ImportBeanDefinitionRegistrar {
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
+			throw new RuntimeException();
+		}
+	}
+
+	static class ImportSelectorNotLoaded implements ImportSelector {
+
+		@Override
+		public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+			return new String[] { SelectedConfigurationNotLoaded.class.getName() };
+		}
+
+	}
+
+	@Configuration
+	static class SelectedConfigurationNotLoaded {
+		@Bean
+		public String b() {
+			return "b";
+		}
+	}
+
+	@Configuration
+	@Conditional(SensibleConditionContextCondition.class)
+	static class SensibleConditionContext {
+		@Bean
+		ExampleBean exampleBean() {
+			return new ExampleBean();
+		}
+	}
+
+	static class SensibleConditionContextCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			assertThat(context.getApplicationContext(), notNullValue());
+			assertThat(context.getBeanFactory(), notNullValue());
+			assertThat(context.getClassLoader(), notNullValue());
+			assertThat(context.getEnvironment(), notNullValue());
+			assertThat(context.getRegistry(), notNullValue());
+			assertThat(context.getResourceLoader(), notNullValue());
+			return true;
+		}
+
 	}
 
 	static class ExampleBean {
