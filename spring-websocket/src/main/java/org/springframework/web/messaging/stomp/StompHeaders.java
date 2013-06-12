@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
@@ -47,7 +48,7 @@ import reactor.util.Assert;
  */
 public class StompHeaders extends PubSubHeaders {
 
-	private static final String ID = "id";
+	private static final String STOMP_ID = "id";
 
 	private static final String HOST = "host";
 
@@ -78,6 +79,8 @@ public class StompHeaders extends PubSubHeaders {
 
 	private static final String STOMP_HEADERS = "stompHeaders";
 
+	private static final AtomicLong messageIdCounter = new AtomicLong();
+
 
 	private final Map<String, String> headers;
 
@@ -105,8 +108,8 @@ public class StompHeaders extends PubSubHeaders {
 			super.setContentType(MediaType.parseMediaType(contentType));
 		}
 		if (StompCommand.SUBSCRIBE.equals(getStompCommand())) {
-			if (getHeaderValue(ID) != null) {
-				super.setSubscriptionId(getHeaderValue(ID));
+			if (getHeaderValue(STOMP_ID) != null) {
+				super.setSubscriptionId(getHeaderValue(STOMP_ID));
 			}
 		}
 	}
@@ -192,7 +195,7 @@ public class StompHeaders extends PubSubHeaders {
 				logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
 			}
 			if ((getMessageId() == null)) {
-				this.headers.put(MESSAGE_ID, toMessageHeaders().get(ID).toString());
+				result.set(MESSAGE_ID, getSessionId() + "-" + messageIdCounter.getAndIncrement());
 			}
 		}
 

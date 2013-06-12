@@ -112,6 +112,7 @@ public class PubSubHeaders {
 	 */
 	@SuppressWarnings("unchecked")
 	protected PubSubHeaders(MessageHeaders originalHeaders) {
+		Assert.notNull(originalHeaders, "originalHeaders is required");
 		this.originalHeaders = originalHeaders;
 		this.externalSourceHeaders = (originalHeaders.get(EXTERNAL_SOURCE_HEADERS) != null) ?
 				(Map<String, List<String>>) originalHeaders.get(EXTERNAL_SOURCE_HEADERS) : emptyMultiValueMap;

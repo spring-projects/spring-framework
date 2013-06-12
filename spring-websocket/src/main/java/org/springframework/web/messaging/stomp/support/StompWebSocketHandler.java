@@ -211,17 +211,20 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 			String sessionId = stompHeaders.getSessionId();
 			if (sessionId == null) {
-				logger.error("Cannot send message without a session id: " + message);
+				logger.error("No \"sessionId\" header in message: " + message);
 			}
 			WebSocketSession session = getWebSocketSession(sessionId);
+			if (session == null) {
+				logger.error("Session not found: " + message);
+			}
 
 			byte[] payload;
 			try {
 				MediaType contentType = stompHeaders.getContentType();
 				payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
 			}
-			catch (Exception e) {
-				logger.error("Failed to send " + message, e);
+			catch (Throwable t) {
+				logger.error("Failed to send " + message, t);
 				return;
 			}
 
