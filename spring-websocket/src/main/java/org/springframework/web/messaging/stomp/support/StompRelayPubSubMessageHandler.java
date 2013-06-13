@@ -38,6 +38,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
@@ -85,7 +86,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	@Override
 	public void handleConnect(Message<?> message) {
 
-		String sessionId = (String) message.getHeaders().get("sessionId");
+		String sessionId = (String) message.getHeaders().get(PubSubHeaders.SESSION_ID);
 
 		RelaySession session = new RelaySession();
 		this.relaySessions.put(sessionId, session);
@@ -168,7 +169,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	@Override
 	public void handleOther(Message<?> message) {
-		StompCommand command = (StompCommand) message.getHeaders().get("stompCommand");
+		StompCommand command = (StompCommand) message.getHeaders().get(PubSubHeaders.PROTOCOL_MESSAGE_TYPE);
 		Assert.notNull(command, "Expected STOMP command: " + message.getHeaders());
 		forwardMessage(message, command);
 	}

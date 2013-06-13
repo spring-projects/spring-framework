@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
+import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.annotation.MessageBody;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConversionException;
@@ -51,7 +52,7 @@ public class MessageBodyArgumentResolver implements ArgumentResolver {
 		Object arg = null;
 
 		MessageBody annot = parameter.getParameterAnnotation(MessageBody.class);
-		MediaType contentType = (MediaType) message.getHeaders().get("content-type");
+		MediaType contentType = (MediaType) message.getHeaders().get(PubSubHeaders.CONTENT_TYPE);
 
 		if (annot == null || annot.required()) {
 			Class<?> sourceType = message.getPayload().getClass();
