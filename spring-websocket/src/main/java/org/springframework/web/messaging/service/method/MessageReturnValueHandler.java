@@ -20,9 +20,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.util.Assert;
 import org.springframework.web.messaging.PubSubHeaders;
-
-import reactor.util.Assert;
 
 
 /**
