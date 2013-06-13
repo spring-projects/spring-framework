@@ -19,6 +19,7 @@ package org.springframework.web.messaging.service.method;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,16 +32,18 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.event.EventBus;
-import org.springframework.web.messaging.service.AbstractMessageService;
+import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 
@@ -49,7 +52,8 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotationMessageService extends AbstractMessageService implements ApplicationContextAware, InitializingBean {
+public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
+		implements ApplicationContextAware, InitializingBean {
 
 	private List<MessageConverter> messageConverters;
 
@@ -66,10 +70,10 @@ public class AnnotationMessageService extends AbstractMessageService implements 
 	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
 
-	public AnnotationMessageService(EventBus eventBus) {
-		super(eventBus);
-	}
 
+	public AnnotationPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel) {
+		super(publishChannel, clientChannel);
+	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.messageConverters = converters;
@@ -81,11 +85,16 @@ public class AnnotationMessageService extends AbstractMessageService implements 
 	}
 
 	@Override
+	protected Collection<MessageType> getSupportedMessageTypes() {
+		return Arrays.asList(MessageType.MESSAGE, MessageType.SUBSCRIBE, MessageType.UNSUBSCRIBE);
+	}
+
+	@Override
 	public void afterPropertiesSet() {
 		initHandlerMethods();
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(getEventBus()));
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(getPublishChannel()));
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(getEventBus()));
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(getClientChannel()));
 	}
 
 	protected void initHandlerMethods() {
@@ -151,21 +160,21 @@ public class AnnotationMessageService extends AbstractMessageService implements 
 	}
 
 	@Override
-	protected void processMessage(Message<?> message) {
-		handleMessage(message, this.messageMethods);
+	public void handlePublish(Message<?> message) {
+		handleMessageInternal(message, this.messageMethods);
 	}
 
 	@Override
-	protected void processSubscribe(Message<?> message) {
-		handleMessage(message, this.subscribeMethods);
+	public void handleSubscribe(Message<?> message) {
+		handleMessageInternal(message, this.subscribeMethods);
 	}
 
 	@Override
-	protected void processUnsubscribe(Message<?> message) {
-		handleMessage(message, this.unsubscribeMethods);
+	public void handleUnsubscribe(Message<?> message) {
+		handleMessageInternal(message, this.unsubscribeMethods);
 	}
 
-	private void handleMessage(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
+	private void handleMessageInternal(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String destination = headers.getDestination();

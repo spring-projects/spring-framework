@@ -19,9 +19,8 @@ package org.springframework.web.messaging.service.method;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.web.messaging.PubSubHeaders;
-import org.springframework.web.messaging.event.EventBus;
-import org.springframework.web.messaging.service.AbstractMessageService;
 
 import reactor.util.Assert;
 
@@ -32,11 +31,12 @@ import reactor.util.Assert;
  */
 public class MessageReturnValueHandler implements ReturnValueHandler {
 
-	private final EventBus eventBus;
+	private final MessageChannel clientChannel;
 
 
-	public MessageReturnValueHandler(EventBus eventBus) {
-		this.eventBus = eventBus;
+	public MessageReturnValueHandler(MessageChannel clientChannel) {
+		Assert.notNull(clientChannel, "clientChannel is required");
+		this.clientChannel = clientChannel;
 	}
 
 
@@ -76,7 +76,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		outHeaders.setSubscriptionId(subscriptionId);
 		returnMessage = new GenericMessage<Object>(returnMessage.getPayload(), outHeaders.toMessageHeaders());
 
-		this.eventBus.send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, returnMessage);
+		this.clientChannel.send(returnMessage);
  	}
 
 }

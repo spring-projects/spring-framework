@@ -17,34 +17,47 @@
 package org.springframework.web.messaging.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.event.EventBus;
-import org.springframework.web.messaging.event.EventConsumer;
-import org.springframework.web.messaging.event.EventRegistration;
+
+import reactor.core.Reactor;
+import reactor.fn.Consumer;
+import reactor.fn.Event;
+import reactor.fn.registry.Registration;
+import reactor.fn.selector.ObjectSelector;
+import reactor.fn.selector.Selector;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class PubSubMessageService extends AbstractMessageService {
+public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
+
+	private final Reactor reactor;
 
 	private MessageConverter payloadConverter;
 
-	private Map<String, List<EventRegistration>> subscriptionsBySession =
-			new ConcurrentHashMap<String, List<EventRegistration>>();
+	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public PubSubMessageService(EventBus reactor) {
-		super(reactor);
+	public ReactorPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel,
+			Reactor reactor) {
+
+		super(publishChannel, clientChannel);
+		this.reactor = reactor;
 		this.payloadConverter = new CompositeMessageConverter(null);
 	}
 
@@ -54,7 +67,7 @@ public class PubSubMessageService extends AbstractMessageService {
 	}
 
 	@Override
-	protected void processMessage(Message<?> message) {
+	public void handlePublish(Message<?> message) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Message received: " + message);
@@ -66,7 +79,7 @@ public class PubSubMessageService extends AbstractMessageService {
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), inHeaders.getContentType());
 			message = new GenericMessage<byte[]>(payload, message.getHeaders());
 
-			getEventBus().send(getPublishKey(inHeaders.getDestination()), message);
+			this.reactor.notify(getPublishKey(inHeaders.getDestination()), Event.wrap(message));
 		}
 		catch (Exception ex) {
 			logger.error("Failed to publish " + message, ex);
@@ -78,56 +91,69 @@ public class PubSubMessageService extends AbstractMessageService {
 	}
 
 	@Override
-	protected void processSubscribe(Message<?> message) {
+	protected Collection<MessageType> getSupportedMessageTypes() {
+		return Arrays.asList(MessageType.MESSAGE, MessageType.SUBSCRIBE, MessageType.UNSUBSCRIBE);
+	}
+
+
+	@Override
+	public void handleSubscribe(Message<?> message) {
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Subscribe " + message);
 		}
+
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		final String subscriptionId = headers.getSubscriptionId();
-		EventRegistration registration = getEventBus().registerConsumer(getPublishKey(headers.getDestination()),
-				new EventConsumer<Message<?>>() {
+
+		Selector selector = new ObjectSelector<String>(getPublishKey(headers.getDestination()));
+		Registration<?> registration = this.reactor.on(selector,
+				new Consumer<Event<Message<?>>>() {
 					@Override
-					public void accept(Message<?> message) {
+					public void accept(Event<Message<?>> event) {
+						Message<?> message = event.getData();
 						PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 						PubSubHeaders outHeaders = PubSubHeaders.create();
 						outHeaders.setDestinations(inHeaders.getDestinations());
-						outHeaders.setContentType(inHeaders.getContentType());
+						if (inHeaders.getContentType() != null) {
+							outHeaders.setContentType(inHeaders.getContentType());
+						}
 						outHeaders.setSubscriptionId(subscriptionId);
 						Object payload = message.getPayload();
 						message = new GenericMessage<Object>(payload, outHeaders.toMessageHeaders());
-						getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, message);
+						getClientChannel().send(message);
 					}
 				});
 
-		addSubscription((String) message.getHeaders().get("sessionId"), registration);
+		addSubscription(headers.getSessionId(), registration);
 	}
 
-	private void addSubscription(String sessionId, EventRegistration registration) {
-		List<EventRegistration> list = this.subscriptionsBySession.get(sessionId);
+	private void addSubscription(String sessionId, Registration<?> registration) {
+		List<Registration<?>> list = this.subscriptionsBySession.get(sessionId);
 		if (list == null) {
-			list = new ArrayList<EventRegistration>();
+			list = new ArrayList<Registration<?>>();
 			this.subscriptionsBySession.put(sessionId, list);
 		}
 		list.add(registration);
 	}
 
 	@Override
-	public void processDisconnect(Message<?> message) {
-		String sessionId = (String) message.getHeaders().get("sessionId");
-		removeSubscriptions(sessionId);
+	public void handleDisconnect(Message<?> message) {
+		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		removeSubscriptions(headers.getSessionId());
 	}
 
-	@Override
-	protected void processClientConnectionClosed(String sessionId) {
+/*	@Override
+	public void handleClientConnectionClosed(String sessionId) {
 		removeSubscriptions(sessionId);
 	}
-
+*/
 	private void removeSubscriptions(String sessionId) {
-		List<EventRegistration> registrations = this.subscriptionsBySession.remove(sessionId);
+		List<Registration<?>> registrations = this.subscriptionsBySession.remove(sessionId);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Cancelling " + registrations.size() + " subscriptions for session=" + sessionId);
 		}
-		for (EventRegistration registration : registrations) {
+		for (Registration<?> registration : registrations) {
 			registration.cancel();
 		}
 	}

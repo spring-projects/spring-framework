@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +34,12 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.event.EventBus;
-import org.springframework.web.messaging.service.AbstractMessageService;
+import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompHeaders;
 
@@ -47,7 +50,10 @@ import reactor.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class RelayStompService extends AbstractMessageService {
+public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler {
+
+
+	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
 	private MessageConverter payloadConverter;
 
@@ -55,11 +61,14 @@ public class RelayStompService extends AbstractMessageService {
 
 	private Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
 
-	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
+	/**
+	 * @param executor
+	 */
+	public StompRelayPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel,
+			TaskExecutor executor) {
 
-	public RelayStompService(EventBus eventBus, TaskExecutor executor) {
-		super(eventBus);
+		super(publishChannel, clientChannel);
 		this.taskExecutor = executor; // For now, a naive way to manage socket reading
 		this.payloadConverter = new CompositeMessageConverter(null);
 	}
@@ -69,7 +78,13 @@ public class RelayStompService extends AbstractMessageService {
 		this.payloadConverter = new CompositeMessageConverter(converters);
 	}
 
-	protected void processConnect(Message<?> message) {
+	@Override
+	protected Collection<MessageType> getSupportedMessageTypes() {
+		return null;
+	}
+
+	@Override
+	public void handleConnect(Message<?> message) {
 
 		String sessionId = (String) message.getHeaders().get("sessionId");
 
@@ -95,7 +110,7 @@ public class RelayStompService extends AbstractMessageService {
 
 		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
 		String sessionId = stompHeaders.getSessionId();
-		RelaySession session = RelayStompService.this.relaySessions.get(sessionId);
+		RelaySession session = StompRelayPubSubMessageHandler.this.relaySessions.get(sessionId);
 		Assert.notNull(session, "RelaySession not found");
 
 		try {
@@ -133,40 +148,40 @@ public class RelayStompService extends AbstractMessageService {
 	}
 
 	@Override
-	protected void processMessage(Message<?> message) {
+	public void handlePublish(Message<?> message) {
 		forwardMessage(message, StompCommand.SEND);
 	}
 
 	@Override
-	protected void processSubscribe(Message<?> message) {
+	public void handleSubscribe(Message<?> message) {
 		forwardMessage(message, StompCommand.SUBSCRIBE);
 	}
 
 	@Override
-	protected void processUnsubscribe(Message<?> message) {
+	public void handleUnsubscribe(Message<?> message) {
 		forwardMessage(message, StompCommand.UNSUBSCRIBE);
 	}
 
 	@Override
-	protected void processDisconnect(Message<?> message) {
+	public void handleDisconnect(Message<?> message) {
 		forwardMessage(message, StompCommand.DISCONNECT);
 	}
 
 	@Override
-	protected void processOther(Message<?> message) {
+	public void handleOther(Message<?> message) {
 		StompCommand command = (StompCommand) message.getHeaders().get("stompCommand");
 		Assert.notNull(command, "Expected STOMP command: " + message.getHeaders());
 		forwardMessage(message, command);
 	}
 
-	@Override
-	protected void processClientConnectionClosed(String sessionId) {
+/*	@Override
+	public void handleClientConnectionClosed(String sessionId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Client connection closed for STOMP session=" + sessionId + ". Clearing relay session.");
 		}
 		clearRelaySession(sessionId);
 	}
-
+*/
 
 	private final static class RelaySession {
 
@@ -219,7 +234,7 @@ public class RelayStompService extends AbstractMessageService {
 					else if (b == 0x00) {
 						byte[] bytes = out.toByteArray();
 						Message<byte[]> message = stompMessageConverter.toMessage(bytes, sessionId);
-						getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, message);
+						getClientChannel().send(message);
 						out.reset();
 					}
 					else {
@@ -241,7 +256,7 @@ public class RelayStompService extends AbstractMessageService {
 			stompHeaders.setMessage(message);
 			stompHeaders.setSessionId(this.sessionId);
 			Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.toMessageHeaders());
-			getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY, errorMessage);
+			getClientChannel().send(errorMessage);
 		}
 	}
 

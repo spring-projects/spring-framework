@@ -21,8 +21,6 @@ import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.web.messaging.PubSubHeaders;
-import org.springframework.web.messaging.event.EventBus;
-import org.springframework.web.messaging.service.AbstractMessageService;
 
 import reactor.util.Assert;
 
@@ -33,12 +31,12 @@ import reactor.util.Assert;
  */
 public class MessageChannelArgumentResolver implements ArgumentResolver {
 
-	private final EventBus eventBus;
+	private final MessageChannel publishChannel;
 
 
-	public MessageChannelArgumentResolver(EventBus eventBus) {
-		Assert.notNull(eventBus, "reactor is required");
-		this.eventBus = eventBus;
+	public MessageChannelArgumentResolver(MessageChannel publishChannel) {
+		Assert.notNull(publishChannel, "publishChannel is required");
+		this.publishChannel = publishChannel;
 	}
 
 	@Override
@@ -55,13 +53,15 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 
 			@Override
 			public boolean send(Message<?> message) {
+				return send(message, -1);
+			}
 
+			@Override
+			public boolean send(Message<?> message, long timeout) {
 				PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 				headers.setSessionId(sessionId);
 				message = new GenericMessage<Object>(message.getPayload(), headers.toMessageHeaders());
-
-				eventBus.send(AbstractMessageService.CLIENT_TO_SERVER_MESSAGE_KEY, message);
-
+				publishChannel.send(message);
 				return true;
 			}
 		};

@@ -27,12 +27,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.event.EventBus;
-import org.springframework.web.messaging.event.EventConsumer;
-import org.springframework.web.messaging.service.AbstractMessageService;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
 import org.springframework.web.messaging.stomp.StompHeaders;
@@ -50,19 +51,22 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
+	private final MessageChannel publishChannel;
+
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
-	private final EventBus eventBus;
-
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
 
-	public StompWebSocketHandler(EventBus eventBus) {
-		this.eventBus = eventBus;
-		this.eventBus.registerConsumer(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY,
-				new ClientMessageConsumer());
+	public StompWebSocketHandler(MessageChannel publishChannel, SubscribableChannel clientChannel) {
+
+		Assert.notNull(publishChannel, "publishChannel is required");
+		Assert.notNull(clientChannel, "clientChannel is required");
+
+		this.publishChannel = publishChannel;
+		clientChannel.subscribe(new ClientMessageConsumer());
 	}
 
 
@@ -115,7 +119,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 				else if (MessageType.DISCONNECT.equals(messageType)) {
 					handleDisconnect(message);
 				}
-				this.eventBus.send(AbstractMessageService.CLIENT_TO_SERVER_MESSAGE_KEY, message);
+				this.publishChannel.send(message);
 			}
 			catch (Throwable t) {
 				logger.error("Terminating STOMP session due to failure to send message: ", t);
@@ -189,17 +193,18 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 		}
 	}
 
-	@Override
+/*	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		this.sessions.remove(session.getId());
 		eventBus.send(AbstractMessageService.CLIENT_CONNECTION_CLOSED_KEY, session.getId());
-	}
+	}*/
 
 
-	private final class ClientMessageConsumer implements EventConsumer<Message<?>> {
+	private final class ClientMessageConsumer implements MessageHandler {
+
 
 		@Override
-		public void accept(Message<?> message) {
+		public void handleMessage(Message<?> message) {
 
 			StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
 			stompHeaders.setStompCommandIfNotSet(StompCommand.MESSAGE);
