@@ -16,6 +16,7 @@
 
 package org.springframework.messaging;
 
+
 /**
  * Base channel interface defining common behavior for sending messages.
  *
@@ -38,5 +39,18 @@ public interface MessageChannel {
 	 * @return whether or not the Message has been sent successfully
 	 */
 	boolean send(Message<?> message);
+
+	/**
+	 * Send a message, blocking until either the message is accepted or the
+	 * specified timeout period elapses.
+	 *
+	 * @param message the {@link Message} to send
+	 * @param timeout the timeout in milliseconds
+	 *
+	 * @return <code>true</code> if the message is sent successfully,
+	 * <code>false</code> if the specified timeout period elapses or
+	 * the send is interrupted
+	 */
+	boolean send(Message<?> message, long timeout);
 
 }

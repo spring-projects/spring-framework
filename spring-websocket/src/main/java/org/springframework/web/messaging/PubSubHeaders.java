@@ -51,19 +51,19 @@ public class PubSubHeaders {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private static final String DESTINATIONS = "destinations";
+	public static final String DESTINATIONS = "destinations";
 
-	private static final String CONTENT_TYPE = "contentType";
+	public static final String CONTENT_TYPE = "contentType";
 
-	private static final String MESSAGE_TYPE = "messageType";
+	public static final String MESSAGE_TYPE = "messageType";
 
-	private static final String PROTOCOL_MESSAGE_TYPE = "protocolMessageType";
+	public static final String PROTOCOL_MESSAGE_TYPE = "protocolMessageType";
 
-	private static final String SESSION_ID = "sessionId";
+	public static final String SESSION_ID = "sessionId";
 
-	private static final String SUBSCRIPTION_ID = "subscriptionId";
+	public static final String SUBSCRIPTION_ID = "subscriptionId";
 
-	private static final String EXTERNAL_SOURCE_HEADERS = "extSourceHeaders";
+	public static final String EXTERNAL_SOURCE_HEADERS = "extSourceHeaders";
 
 
 	private static final Map<String, List<String>> emptyMultiValueMap =

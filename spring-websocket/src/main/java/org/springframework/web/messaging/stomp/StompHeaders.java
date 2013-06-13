@@ -48,33 +48,33 @@ import reactor.util.Assert;
  */
 public class StompHeaders extends PubSubHeaders {
 
-	private static final String STOMP_ID = "id";
+	public static final String STOMP_ID = "id";
 
-	private static final String HOST = "host";
+	public static final String HOST = "host";
 
-	private static final String ACCEPT_VERSION = "accept-version";
+	public static final String ACCEPT_VERSION = "accept-version";
 
-	private static final String MESSAGE_ID = "message-id";
+	public static final String MESSAGE_ID = "message-id";
 
-	private static final String RECEIPT_ID = "receipt-id";
+	public static final String RECEIPT_ID = "receipt-id";
 
-	private static final String SUBSCRIPTION = "subscription";
+	public static final String SUBSCRIPTION = "subscription";
 
-	private static final String VERSION = "version";
+	public static final String VERSION = "version";
 
-	private static final String MESSAGE = "message";
+	public static final String MESSAGE = "message";
 
-	private static final String ACK = "ack";
+	public static final String ACK = "ack";
 
-	private static final String NACK = "nack";
+	public static final String NACK = "nack";
 
-	private static final String DESTINATION = "destination";
+	public static final String DESTINATION = "destination";
 
-	private static final String CONTENT_TYPE = "content-type";
+	public static final String CONTENT_TYPE = "content-type";
 
-	private static final String CONTENT_LENGTH = "content-length";
+	public static final String CONTENT_LENGTH = "content-length";
 
-	private static final String HEARTBEAT = "heart-beat";
+	public static final String HEARTBEAT = "heart-beat";
 
 
 	private static final String STOMP_HEADERS = "stompHeaders";
