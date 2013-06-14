@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.springframework.messaging.GenericMessage;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -48,11 +48,10 @@ public class StompMessageConverter {
 
 	private static final byte COLON = ':';
 
-
 	/**
 	 * @param stompContent a complete STOMP message (without the trailing 0x00) as byte[] or String.
 	 */
-	public Message<byte[]> toMessage(Object stompContent, String sessionId) {
+	public <M extends Message<?>> M toMessage(Object stompContent, String sessionId, MessageFactory<M> messageFactory) {
 
 		byte[] byteContent = null;
 		if (stompContent instanceof String) {
@@ -103,7 +102,7 @@ public class StompMessageConverter {
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
 
-		return createMessage(command, stompHeaders.toMessageHeaders(), payload);
+		return createMessage(command, stompHeaders.toMessageHeaders(), payload, messageFactory);
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -133,8 +132,8 @@ public class StompMessageConverter {
 		return index;
 	}
 
-	protected Message<byte[]> createMessage(StompCommand command, Map<String, Object> headers, byte[] payload) {
-		return new GenericMessage<byte[]>(payload, headers);
+	protected <M extends Message<?>> M createMessage(StompCommand command, Map<String, Object> headers, byte[] payload, MessageFactory<M> messageFactory) {
+		return messageFactory.createMessage(payload, headers);
 	}
 
 	public byte[] fromMessage(Message<byte[]> message) {

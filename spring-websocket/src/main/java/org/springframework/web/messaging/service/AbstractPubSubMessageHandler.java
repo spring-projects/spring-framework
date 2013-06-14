@@ -40,7 +40,7 @@ import org.springframework.web.messaging.PubSubHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractPubSubMessageHandler implements MessageHandler {
+public abstract class AbstractPubSubMessageHandler implements MessageHandler<Message<?>> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -54,11 +54,9 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler {
 
 	private final PathMatcher pathMatcher = new AntPathMatcher();
 
-
 	/**
 	 * @param publishChannel a channel for publishing messages from within the
-	 *        application; this constructor will also automatically subscribe the
-	 *        current instance to this channel
+	 *        application
 	 *
 	 * @param clientChannel a channel for sending messages to connected clients.
 	 */
@@ -67,9 +65,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler {
 		Assert.notNull(publishChannel, "publishChannel is required");
 		Assert.notNull(clientChannel, "clientChannel is required");
 
-		publishChannel.subscribe(this);
 		this.publishChannel = publishChannel;
-
 		this.clientChannel = clientChannel;
 	}
 
@@ -145,7 +141,6 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler {
 
 		return true;
 	}
-
 
 	@Override
 	public final void handleMessage(Message<?> message) throws MessagingException {

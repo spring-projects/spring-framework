@@ -36,7 +36,7 @@ import reactor.fn.selector.ObjectSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorMessageChannel implements SubscribableChannel {
+public class ReactorMessageChannel implements SubscribableChannel<Message<?>, MessageHandler<Message<?>>> {
 
 	private static Log logger = LogFactory.getLog(ReactorMessageChannel.class);
 
@@ -125,6 +125,7 @@ public class ReactorMessageChannel implements SubscribableChannel {
 			this.handler = handler;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void accept(Event<Message<?>> event) {
 			Message<?> message = event.getData();

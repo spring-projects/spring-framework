@@ -17,9 +17,10 @@
 package org.springframework.web.messaging.service.method;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.PubSubHeaders;
 
@@ -32,10 +33,16 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 
 	private final MessageChannel publishChannel;
 
+	private MessageFactory messageFactory;
 
 	public MessageChannelArgumentResolver(MessageChannel publishChannel) {
 		Assert.notNull(publishChannel, "publishChannel is required");
 		this.publishChannel = publishChannel;
+		this.messageFactory = new GenericMessageFactory();
+	}
+
+	public void setMessageFactory(MessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
 	}
 
 	@Override
@@ -48,19 +55,19 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 
 		final String sessionId = PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
 
-		return new MessageChannel() {
+		return new MessageChannel<Message<?>>() {
 
 			@Override
 			public boolean send(Message<?> message) {
 				return send(message, -1);
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public boolean send(Message<?> message, long timeout) {
 				PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 				headers.setSessionId(sessionId);
-				message = new GenericMessage<Object>(message.getPayload(), headers.toMessageHeaders());
-				publishChannel.send(message);
+				publishChannel.send(messageFactory.createMessage(message.getPayload(), headers.toMessageHeaders()));
 				return true;
 			}
 		};

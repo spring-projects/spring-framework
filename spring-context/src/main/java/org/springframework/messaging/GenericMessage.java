@@ -44,7 +44,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	 *
 	 * @param payload the message payload
 	 */
-	public GenericMessage(T payload) {
+	protected GenericMessage(T payload) {
 		this(payload, null);
 	}
 
@@ -56,7 +56,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	 * @param headers message headers
 	 * @see MessageHeaders
 	 */
-	public GenericMessage(T payload, Map<String, Object> headers) {
+	protected GenericMessage(T payload, Map<String, Object> headers) {
 		Assert.notNull(payload, "payload must not be null");
 		if (headers == null) {
 			headers = new HashMap<String, Object>();

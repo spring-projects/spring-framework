@@ -25,9 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.util.Assert;
@@ -59,7 +60,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
+	private MessageFactory messageFactory = new GenericMessageFactory();
 
+
+	@SuppressWarnings("unchecked")
 	public StompWebSocketHandler(MessageChannel publishChannel, SubscribableChannel clientChannel) {
 
 		Assert.notNull(publishChannel, "publishChannel is required");
@@ -72,6 +76,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
+	}
+
+	public void setMessageFactory(MessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
 	}
 
 	public StompMessageConverter getStompMessageConverter() {
@@ -88,11 +96,12 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 		this.sessions.put(session.getId(), session);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 		try {
 			String payload = textMessage.getPayload();
-			Message<byte[]> message = this.stompMessageConverter.toMessage(payload, session.getId());
+			Message<byte[]> message = this.stompMessageConverter.toMessage(payload, session.getId(), messageFactory);
 
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
@@ -135,6 +144,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void handleConnect(final WebSocketSession session, Message<byte[]> message) throws IOException {
 
 		StompHeaders connectStompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
@@ -157,7 +167,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 		// TODO: security
 
-		Message<byte[]> connectedMessage = new GenericMessage<byte[]>(new byte[0], connectedStompHeaders.toMessageHeaders());
+		Message<byte[]> connectedMessage = messageFactory.createMessage(new byte[0], connectedStompHeaders.toMessageHeaders());
 		byte[] bytes = getStompMessageConverter().fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
@@ -177,12 +187,13 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 	protected void handleDisconnect(Message<byte[]> stompMessage) {
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
 
 		StompHeaders stompHeaders = StompHeaders.create(StompCommand.ERROR);
 		stompHeaders.setMessage(error.getMessage());
 
-		Message<byte[]> errorMessage = new GenericMessage<byte[]>(new byte[0], stompHeaders.toMessageHeaders());
+		Message<byte[]> errorMessage = messageFactory.createMessage(new byte[0], stompHeaders.toMessageHeaders());
 		byte[] bytes = this.stompMessageConverter.fromMessage(errorMessage);
 
 		try {
@@ -200,9 +211,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 	}*/
 
 
-	private final class ClientMessageConsumer implements MessageHandler {
+	private final class ClientMessageConsumer implements MessageHandler<Message<?>> {
 
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message<?> message) {
 
@@ -235,7 +247,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 			try {
 				Map<String, Object> messageHeaders = stompHeaders.toMessageHeaders();
-				Message<byte[]> byteMessage = new GenericMessage<byte[]>(payload, messageHeaders);
+				Message<byte[]> byteMessage = messageFactory.createMessage(payload, messageHeaders);
 				byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
 				session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 			}

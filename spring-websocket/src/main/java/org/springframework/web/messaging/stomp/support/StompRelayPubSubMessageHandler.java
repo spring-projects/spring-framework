@@ -23,9 +23,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
-import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
@@ -52,16 +53,16 @@ import reactor.tcp.netty.NettyTcpClient;
  */
 public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
-
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
 	private MessageConverter payloadConverter;
+
+	private MessageFactory messageFactory = new GenericMessageFactory();
 
 	private final TcpClient<String, String> tcpClient;
 
 	private final Map<String, TcpConnection<String, String>> connections =
 			new ConcurrentHashMap<String, TcpConnection<String, String>>();
-
 
 	public StompRelayPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel) {
 
@@ -79,6 +80,10 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
+	}
+
+	public void setMessageFactory(MessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
 	}
 
 	@Override
@@ -105,13 +110,14 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			@Override
 			public void accept(TcpConnection<String, String> connection) {
 				connection.in().consume(new Consumer<String>() {
+					@SuppressWarnings("unchecked")
 					@Override
 					public void accept(String stompFrame) {
 						if (stompFrame.isEmpty()) {
 							// TODO: why are we getting empty frames?
 							return;
 						}
-						Message<byte[]> message = stompMessageConverter.toMessage(stompFrame, sessionId);
+						Message<byte[]> message = stompMessageConverter.toMessage(stompFrame, sessionId, messageFactory);
 						getClientChannel().send(message);
 					}
 				});
@@ -128,6 +134,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void forwardMessage(Message<?> message, StompCommand command) {
 
 		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
@@ -139,7 +146,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 			MediaType contentType = stompHeaders.getContentType();
 			byte[] payload = this.payloadConverter.convertToPayload(message.getPayload(), contentType);
-			Message<byte[]> byteMessage = new GenericMessage<byte[]>(payload, stompHeaders.toMessageHeaders());
+			Message<byte[]> byteMessage = messageFactory.createMessage(payload, stompHeaders.toMessageHeaders());
 			bytesToWrite = this.stompMessageConverter.fromMessage(byteMessage);
 		}
 		catch (Throwable ex) {

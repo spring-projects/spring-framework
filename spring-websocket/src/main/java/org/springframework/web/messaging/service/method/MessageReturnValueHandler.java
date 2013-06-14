@@ -17,9 +17,10 @@
 package org.springframework.web.messaging.service.method;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.PubSubHeaders;
 
@@ -32,10 +33,16 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 
 	private final MessageChannel clientChannel;
 
+	private MessageFactory messageFactory = new GenericMessageFactory();
+
 
 	public MessageReturnValueHandler(MessageChannel clientChannel) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		this.clientChannel = clientChannel;
+	}
+
+	public void setMessageFactory(MessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
 	}
 
 
@@ -56,6 +63,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 //		return Message.class.isAssignableFrom(paramType);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
@@ -73,7 +81,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		PubSubHeaders outHeaders = PubSubHeaders.fromMessageHeaders(returnMessage.getHeaders());
 		outHeaders.setSessionId(sessionId);
 		outHeaders.setSubscriptionId(subscriptionId);
-		returnMessage = new GenericMessage<Object>(returnMessage.getPayload(), outHeaders.toMessageHeaders());
+		returnMessage = messageFactory.createMessage(returnMessage.getPayload(), outHeaders.toMessageHeaders());
 
 		this.clientChannel.send(returnMessage);
  	}

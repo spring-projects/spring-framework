@@ -24,7 +24,7 @@ package org.springframework.messaging;
  * @author Iwein Fuld
  * @since 4.0
  */
-public interface MessageHandler {
+public interface MessageHandler<M extends Message> {
 
 	/**
 	 * TODO: support exceptions?
@@ -46,6 +46,6 @@ public interface MessageHandler {
 	 * @throws org.springframework.integration.MessageDeliveryException when this handler failed to deliver the
 	 * reply related to the handling of the message
 	 */
-	void handleMessage(Message<?> message) throws MessagingException;
+	void handleMessage(M message) throws MessagingException;
 
 }

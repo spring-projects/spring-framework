@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.messaging.GenericMessage;
+import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubHeaders;
@@ -50,6 +51,8 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 	private MessageConverter payloadConverter;
 
+	private MessageFactory messageFactory;
+
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
@@ -59,13 +62,18 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 		super(publishChannel, clientChannel);
 		this.reactor = reactor;
 		this.payloadConverter = new CompositeMessageConverter(null);
+		this.messageFactory = new GenericMessageFactory();
 	}
 
+	public void setMessageFactory(MessageFactory messageFactory) {
+		this.messageFactory = messageFactory;
+	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handlePublish(Message<?> message) {
 
@@ -77,7 +85,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 			// Convert to byte[] payload before the fan-out
 			PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), inHeaders.getContentType());
-			message = new GenericMessage<byte[]>(payload, message.getHeaders());
+			message = messageFactory.createMessage(payload, message.getHeaders());
 
 			this.reactor.notify(getPublishKey(inHeaders.getDestination()), Event.wrap(message));
 		}
@@ -109,6 +117,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 		Selector selector = new ObjectSelector<String>(getPublishKey(headers.getDestination()));
 		Registration<?> registration = this.reactor.on(selector,
 				new Consumer<Event<Message<?>>>() {
+					@SuppressWarnings("unchecked")
 					@Override
 					public void accept(Event<Message<?>> event) {
 						Message<?> message = event.getData();
@@ -120,8 +129,9 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 						}
 						outHeaders.setSubscriptionId(subscriptionId);
 						Object payload = message.getPayload();
-						message = new GenericMessage<Object>(payload, outHeaders.toMessageHeaders());
-						getClientChannel().send(message);
+
+						Message outMessage = messageFactory.createMessage(payload, outHeaders.toMessageHeaders());
+						getClientChannel().send(outMessage);
 					}
 				});
 

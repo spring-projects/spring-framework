@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,25 +16,26 @@
 
 package org.springframework.messaging;
 
+import java.util.Map;
+
 
 /**
- * Interface for any MessageChannel implementation that accepts subscribers.
- * The subscribers must implement the {@link MessageHandler} interface and
- * will be invoked when a Message is available.
+ * A factory for creating messages, allowing for control of the concrete type of the message.
  *
- * @author Mark Fisher
- * @since 4.0
+ *
+ *
+ * @author Andy Wilkinson
  */
-public interface SubscribableChannel<M extends Message, H extends MessageHandler<M>> extends MessageChannel<M> {
+public interface MessageFactory<M extends Message<?>> {
 
 	/**
-	 * Register a {@link MessageHandler} as a subscriber to this channel.
+	 * Creates a new message with the given payload and headers
+	 *
+	 * @param payload The message payload
+	 * @param headers The message headers
+	 * @param <P> The payload's type
+	 *
+	 * @return the message
 	 */
-	boolean subscribe(H handler);
-
-	/**
-	 * Remove a {@link MessageHandler} from the subscribers of this channel.
-	 */
-	boolean unsubscribe(H handler);
-
+	<P> M createMessage(P payload, Map<String, Object> headers);
 }
