@@ -25,7 +25,9 @@ package org.springframework.messaging;
  * @author Mark Fisher
  * @since 4.0
  */
-public interface SubscribableChannel<M extends Message, H extends MessageHandler<M>> extends MessageChannel<M> {
+@SuppressWarnings("rawtypes")
+public interface SubscribableChannel<M extends Message, H extends MessageHandler<M>>
+		extends MessageChannel<M> {
 
 	/**
 	 * Register a {@link MessageHandler} as a subscriber to this channel.

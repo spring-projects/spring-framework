@@ -24,6 +24,7 @@ package org.springframework.messaging;
  * @author Iwein Fuld
  * @since 4.0
  */
+@SuppressWarnings("rawtypes")
 public interface MessageHandler<M extends Message> {
 
 	/**

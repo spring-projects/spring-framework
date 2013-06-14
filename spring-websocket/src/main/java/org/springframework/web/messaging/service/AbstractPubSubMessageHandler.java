@@ -54,6 +54,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 
 	private final PathMatcher pathMatcher = new AntPathMatcher();
 
+
 	/**
 	 * @param publishChannel a channel for publishing messages from within the
 	 *        application

@@ -23,11 +23,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.MediaType;
-import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubHeaders;
@@ -57,8 +56,6 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	private MessageConverter payloadConverter;
 
-	private MessageFactory messageFactory = new GenericMessageFactory();
-
 	private final TcpClient<String, String> tcpClient;
 
 	private final Map<String, TcpConnection<String, String>> connections =
@@ -80,10 +77,6 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
-	}
-
-	public void setMessageFactory(MessageFactory messageFactory) {
-		this.messageFactory = messageFactory;
 	}
 
 	@Override
@@ -117,7 +110,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 							// TODO: why are we getting empty frames?
 							return;
 						}
-						Message<byte[]> message = stompMessageConverter.toMessage(stompFrame, sessionId, messageFactory);
+						Message<byte[]> message = stompMessageConverter.toMessage(stompFrame, sessionId);
 						getClientChannel().send(message);
 					}
 				});
@@ -134,19 +127,18 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	}
 
-	@SuppressWarnings("unchecked")
 	private void forwardMessage(Message<?> message, StompCommand command) {
 
-		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
-		String sessionId = stompHeaders.getSessionId();
+		StompHeaders headers = StompHeaders.fromMessageHeaders(message.getHeaders());
+		String sessionId = headers.getSessionId();
 		byte[] bytesToWrite;
 
 		try {
-			stompHeaders.setStompCommandIfNotSet(StompCommand.SEND);
+			headers.setStompCommandIfNotSet(StompCommand.SEND);
 
-			MediaType contentType = stompHeaders.getContentType();
+			MediaType contentType = headers.getContentType();
 			byte[] payload = this.payloadConverter.convertToPayload(message.getPayload(), contentType);
-			Message<byte[]> byteMessage = messageFactory.createMessage(payload, stompHeaders.toMessageHeaders());
+			Message<byte[]> byteMessage = MessageBuilder.fromPayloadAndHeaders(payload, headers.toMessageHeaders()).build();
 			bytesToWrite = this.stompMessageConverter.fromMessage(byteMessage);
 		}
 		catch (Throwable ex) {
@@ -158,7 +150,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 		Assert.notNull(connection, "TCP connection to message broker not found, sessionId=" + sessionId);
 		try {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding STOMP " + stompHeaders.getStompCommand() + " message");
+				logger.trace("Forwarding STOMP " + headers.getStompCommand() + " message");
 			}
 			connection.out().accept(new String(bytesToWrite, Charset.forName("UTF-8")));
 		}

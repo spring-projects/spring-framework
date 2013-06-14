@@ -19,9 +19,7 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.stomp.StompCommand;
@@ -37,22 +35,19 @@ public class StompMessageConverterTests {
 
 	private StompMessageConverter converter;
 
-	private MessageFactory messageFactory = new GenericMessageFactory();
-
 
 	@Before
 	public void setup() {
 		this.converter = new StompMessageConverter();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void connectFrame() throws Exception {
 
 		String accept = "accept-version:1.1\n";
 		String host = "host:github.org\n";
 		String frame = "\n\n\nCONNECT\n" + accept + host + "\n";
-		Message<byte[]> message = this.converter.toMessage(frame.getBytes("UTF-8"), "session-123", messageFactory);
+		Message<byte[]> message = this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
@@ -76,14 +71,13 @@ public class StompMessageConverterTests {
 		assertTrue(convertedBack.contains(host));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void connectWithEscapes() throws Exception {
 
 		String accept = "accept-version:1.1\n";
 		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
 		String frame = "CONNECT\n" + accept + host + "\n";
-		Message<byte[]> message = this.converter.toMessage(frame.getBytes("UTF-8"), "session-123", messageFactory);
+		Message<byte[]> message = this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
@@ -99,14 +93,13 @@ public class StompMessageConverterTests {
 		assertTrue(convertedBack.contains(host));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void connectCR12() throws Exception {
 
 		String accept = "accept-version:1.2\n";
 		String host = "host:github.org\n";
 		String test = "CONNECT\r\n" + accept.replaceAll("\n", "\r\n") + host.replaceAll("\n", "\r\n") + "\r\n";
-		Message<byte[]> message = this.converter.toMessage(test.getBytes("UTF-8"), "session-123", messageFactory);
+		Message<byte[]> message = this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
@@ -122,14 +115,13 @@ public class StompMessageConverterTests {
 		assertTrue(convertedBack.contains(host));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void connectWithEscapesAndCR12() throws Exception {
 
 		String accept = "accept-version:1.1\n";
 		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
 		String test = "\n\n\nCONNECT\r\n" + accept.replaceAll("\n", "\r\n") + host.replaceAll("\n", "\r\n") + "\r\n";
-		Message<byte[]> message = this.converter.toMessage(test.getBytes("UTF-8"), "session-123", messageFactory);
+		Message<byte[]> message = this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 

@@ -19,12 +19,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -51,7 +50,7 @@ public class StompMessageConverter {
 	/**
 	 * @param stompContent a complete STOMP message (without the trailing 0x00) as byte[] or String.
 	 */
-	public <M extends Message<?>> M toMessage(Object stompContent, String sessionId, MessageFactory<M> messageFactory) {
+	public Message<byte[]> toMessage(Object stompContent, String sessionId) {
 
 		byte[] byteContent = null;
 		if (stompContent instanceof String) {
@@ -102,7 +101,7 @@ public class StompMessageConverter {
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
 
-		return createMessage(command, stompHeaders.toMessageHeaders(), payload, messageFactory);
+		return MessageBuilder.fromPayloadAndHeaders(payload, stompHeaders.toMessageHeaders()).build();
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -130,10 +129,6 @@ public class StompMessageConverter {
 			throw new StompConversionException("No end of headers found");
 		}
 		return index;
-	}
-
-	protected <M extends Message<?>> M createMessage(StompCommand command, Map<String, Object> headers, byte[] payload, MessageFactory<M> messageFactory) {
-		return messageFactory.createMessage(payload, headers);
 	}
 
 	public byte[] fromMessage(Message<byte[]> message) {

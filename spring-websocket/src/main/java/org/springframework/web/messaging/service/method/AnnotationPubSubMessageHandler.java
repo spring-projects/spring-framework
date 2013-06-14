@@ -31,10 +31,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
@@ -71,9 +69,6 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
-	private MessageFactory messageFactory = new GenericMessageFactory();
-
-
 
 	public AnnotationPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel) {
 		super(publishChannel, clientChannel);
@@ -81,10 +76,6 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.messageConverters = converters;
-	}
-
-	public void setMessageFactory(MessageFactory messageFactory) {
-		this.messageFactory = messageFactory;
 	}
 
 	@Override
@@ -99,17 +90,13 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	@Override
 	public void afterPropertiesSet() {
+
 		initHandlerMethods();
 
-		MessageChannelArgumentResolver messageChannelArgumentResolver = new MessageChannelArgumentResolver(getPublishChannel());
-		messageChannelArgumentResolver.setMessageFactory(messageFactory);
-		this.argumentResolvers.addResolver(messageChannelArgumentResolver);
-
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(getPublishChannel()));
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
 
-		MessageReturnValueHandler messageReturnValueHandler = new MessageReturnValueHandler(getClientChannel());
-		messageReturnValueHandler.setMessageFactory(messageFactory);
-		this.returnValueHandlers.addHandler(messageReturnValueHandler);
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(getClientChannel()));
 	}
 
 	protected void initHandlerMethods() {

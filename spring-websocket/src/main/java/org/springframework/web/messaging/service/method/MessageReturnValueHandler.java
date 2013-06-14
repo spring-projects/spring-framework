@@ -17,10 +17,11 @@
 package org.springframework.web.messaging.service.method;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageFactory;
+import org.springframework.messaging.support.GenericMessageFactory;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.PubSubHeaders;
 
@@ -73,17 +74,24 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 			return;
 		}
 
-		PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
-		String sessionId = inHeaders.getSessionId();
-		String subscriptionId = inHeaders.getSubscriptionId();
-		Assert.notNull(subscriptionId, "No subscription id: " + message);
-
-		PubSubHeaders outHeaders = PubSubHeaders.fromMessageHeaders(returnMessage.getHeaders());
-		outHeaders.setSessionId(sessionId);
-		outHeaders.setSubscriptionId(subscriptionId);
-		returnMessage = messageFactory.createMessage(returnMessage.getPayload(), outHeaders.toMessageHeaders());
+		returnMessage = updateReturnMessage(returnMessage, message);
 
 		this.clientChannel.send(returnMessage);
  	}
+
+	protected Message<?> updateReturnMessage(Message<?> returnMessage, Message<?> message) {
+
+		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		String sessionId = headers.getSessionId();
+		String subscriptionId = headers.getSubscriptionId();
+
+		Assert.notNull(subscriptionId, "No subscription id: " + message);
+
+		PubSubHeaders returnHeaders = PubSubHeaders.fromMessageHeaders(returnMessage.getHeaders());
+		returnHeaders.setSessionId(sessionId);
+		returnHeaders.setSubscriptionId(subscriptionId);
+
+		return MessageBuilder.fromPayloadAndHeaders(returnMessage.getPayload(), returnHeaders.toMessageHeaders()).build();
+	}
 
 }

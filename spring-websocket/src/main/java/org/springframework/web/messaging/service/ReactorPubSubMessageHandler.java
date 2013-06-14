@@ -23,11 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.messaging.GenericMessageFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageFactory;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
@@ -38,7 +37,6 @@ import reactor.fn.Consumer;
 import reactor.fn.Event;
 import reactor.fn.registry.Registration;
 import reactor.fn.selector.ObjectSelector;
-import reactor.fn.selector.Selector;
 
 
 /**
@@ -51,8 +49,6 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 	private MessageConverter payloadConverter;
 
-	private MessageFactory messageFactory;
-
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
@@ -62,47 +58,16 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 		super(publishChannel, clientChannel);
 		this.reactor = reactor;
 		this.payloadConverter = new CompositeMessageConverter(null);
-		this.messageFactory = new GenericMessageFactory();
-	}
-
-	public void setMessageFactory(MessageFactory messageFactory) {
-		this.messageFactory = messageFactory;
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void handlePublish(Message<?> message) {
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Message received: " + message);
-		}
-
-		try {
-			// Convert to byte[] payload before the fan-out
-			PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
-			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), inHeaders.getContentType());
-			message = messageFactory.createMessage(payload, message.getHeaders());
-
-			this.reactor.notify(getPublishKey(inHeaders.getDestination()), Event.wrap(message));
-		}
-		catch (Exception ex) {
-			logger.error("Failed to publish " + message, ex);
-		}
-	}
-
-	private String getPublishKey(String destination) {
-		return "destination:" + destination;
-	}
-
 	@Override
 	protected Collection<MessageType> getSupportedMessageTypes() {
 		return Arrays.asList(MessageType.MESSAGE, MessageType.SUBSCRIBE, MessageType.UNSUBSCRIBE);
 	}
-
 
 	@Override
 	public void handleSubscribe(Message<?> message) {
@@ -112,39 +77,43 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 		}
 
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
-		final String subscriptionId = headers.getSubscriptionId();
+		String subscriptionId = headers.getSubscriptionId();
+		BroadcastingConsumer consumer = new BroadcastingConsumer(subscriptionId);
 
-		Selector selector = new ObjectSelector<String>(getPublishKey(headers.getDestination()));
-		Registration<?> registration = this.reactor.on(selector,
-				new Consumer<Event<Message<?>>>() {
-					@SuppressWarnings("unchecked")
-					@Override
-					public void accept(Event<Message<?>> event) {
-						Message<?> message = event.getData();
-						PubSubHeaders inHeaders = PubSubHeaders.fromMessageHeaders(message.getHeaders());
-						PubSubHeaders outHeaders = PubSubHeaders.create();
-						outHeaders.setDestinations(inHeaders.getDestinations());
-						if (inHeaders.getContentType() != null) {
-							outHeaders.setContentType(inHeaders.getContentType());
-						}
-						outHeaders.setSubscriptionId(subscriptionId);
-						Object payload = message.getPayload();
+		String key = getPublishKey(headers.getDestination());
+		Registration<?> registration = this.reactor.on(new ObjectSelector<String>(key), consumer);
 
-						Message outMessage = messageFactory.createMessage(payload, outHeaders.toMessageHeaders());
-						getClientChannel().send(outMessage);
-					}
-				});
-
-		addSubscription(headers.getSessionId(), registration);
-	}
-
-	private void addSubscription(String sessionId, Registration<?> registration) {
+		String sessionId = headers.getSessionId();
 		List<Registration<?>> list = this.subscriptionsBySession.get(sessionId);
 		if (list == null) {
 			list = new ArrayList<Registration<?>>();
 			this.subscriptionsBySession.put(sessionId, list);
 		}
 		list.add(registration);
+	}
+
+	private String getPublishKey(String destination) {
+		return "destination:" + destination;
+	}
+
+	@Override
+	public void handlePublish(Message<?> message) {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Message received: " + message);
+		}
+
+		try {
+			// Convert to byte[] payload before the fan-out
+			PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), headers.getContentType());
+			message = MessageBuilder.fromPayloadAndHeaders(payload, message.getHeaders()).build();
+
+			this.reactor.notify(getPublishKey(headers.getDestination()), Event.wrap(message));
+		}
+		catch (Exception ex) {
+			logger.error("Failed to publish " + message, ex);
+		}
 	}
 
 	@Override
@@ -158,6 +127,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 		removeSubscriptions(sessionId);
 	}
 */
+
 	private void removeSubscriptions(String sessionId) {
 		List<Registration<?>> registrations = this.subscriptionsBySession.remove(sessionId);
 		if (logger.isTraceEnabled()) {
@@ -165,6 +135,32 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 		}
 		for (Registration<?> registration : registrations) {
 			registration.cancel();
+		}
+	}
+
+
+	private final class BroadcastingConsumer implements Consumer<Event<Message<?>>> {
+
+		private final String subscriptionId;
+
+
+		private BroadcastingConsumer(String subscriptionId) {
+			this.subscriptionId = subscriptionId;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void accept(Event<Message<?>> event) {
+
+			Message<?> sentMessage = event.getData();
+
+			PubSubHeaders clientHeaders = PubSubHeaders.fromMessageHeaders(sentMessage.getHeaders());
+			clientHeaders.setSubscriptionId(this.subscriptionId);
+
+			Message<?> clientMessage = MessageBuilder.fromPayloadAndHeaders(sentMessage.getPayload(),
+					clientHeaders.toMessageHeaders()).build();
+
+			getClientChannel().send(clientMessage);
 		}
 	}
 

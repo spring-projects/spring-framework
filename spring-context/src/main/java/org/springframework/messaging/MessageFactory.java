@@ -22,9 +22,8 @@ import java.util.Map;
 /**
  * A factory for creating messages, allowing for control of the concrete type of the message.
  *
- *
- *
  * @author Andy Wilkinson
+ * @since 4.0
  */
 public interface MessageFactory<M extends Message<?>> {
 

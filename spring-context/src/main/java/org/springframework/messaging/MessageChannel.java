@@ -23,6 +23,7 @@ package org.springframework.messaging;
  * @author Mark Fisher
  * @since 4.0
  */
+@SuppressWarnings("rawtypes")
 public interface MessageChannel<M extends Message> {
 
 	/**

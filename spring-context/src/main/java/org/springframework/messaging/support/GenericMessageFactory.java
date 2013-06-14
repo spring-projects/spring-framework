@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging;
+package org.springframework.messaging.support;
 
 import java.util.Map;
+
+import org.springframework.messaging.MessageFactory;
 
 
 /**
  * A {@link MessageFactory} that creates {@link GenericMessage GenericMessages}.
  *
  * @author Andy Wilkinson
+ * @since 4.0
  */
 public class GenericMessageFactory implements MessageFactory<GenericMessage<?>> {
 
+
 	@Override
-	public <P> GenericMessage<?> createMessage(P payload, Map<String, Object> headers) {
+	public <P> GenericMessage<P> createMessage(P payload, Map<String, Object> headers) {
 		return new GenericMessage<P>(payload, headers);
 	}
 
