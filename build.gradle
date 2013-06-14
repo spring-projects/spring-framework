@@ -482,13 +482,15 @@ project("spring-websocket") {
 		}
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.3.v20130506")
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.3.v20130506")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // required for SockJS support currently
-		optional("reactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // currently needed for SockJS support
+		optional("reactor:reactor-core:1.0.0.BUILD-SNAPSHOT") // STOMP message processing
+		optional("reactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")  // STOMP relay to message broker
 	}
 
 	repositories {
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
+    mavenLocal() // temporary workaround for locally installed (latest) reactor
 		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
 }

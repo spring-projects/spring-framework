@@ -25,6 +25,8 @@ import org.springframework.http.MediaType;
  */
 public class ContentTypeNotSupportedException extends Exception {
 
+	private static final long serialVersionUID = -3597879520747071896L;
+
 	private final MediaType mediaType;
 
 	private final Class<?> sourceOrTargetType;
