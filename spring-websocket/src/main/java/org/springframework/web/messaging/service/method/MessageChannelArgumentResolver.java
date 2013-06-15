@@ -19,23 +19,25 @@ package org.springframework.web.messaging.service.method;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
+import org.springframework.web.messaging.support.SessionMessageChannel;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageChannelArgumentResolver implements ArgumentResolver {
+public class MessageChannelArgumentResolver implements ArgumentResolver, PubSubChannelRegistryAware {
 
-	private final MessageChannel publishChannel;
+	private MessageChannel<Message<?>> messageBrokerChannel;
 
 
-	public MessageChannelArgumentResolver(MessageChannel publishChannel) {
-		Assert.notNull(publishChannel, "publishChannel is required");
-		this.publishChannel = publishChannel;
+	@Override
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		this.messageBrokerChannel = registry.getMessageBrokerChannel();
 	}
 
 	@Override
@@ -45,27 +47,9 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
+		Assert.notNull(this.messageBrokerChannel, "messageBrokerChannel is required");
 		final String sessionId = PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
-
-		return new MessageChannel<Message<?>>() {
-
-			@Override
-			public boolean send(Message<?> message) {
-				return send(message, -1);
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean send(Message<?> message, long timeout) {
-				PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
-				headers.setSessionId(sessionId);
-				MessageBuilder<?> messageToSend = MessageBuilder.fromPayloadAndHeaders(
-						message.getPayload(), headers.toMessageHeaders());
-				publishChannel.send(messageToSend.build());
-				return true;
-			}
-		};
+		return new SessionMessageChannel(this.messageBrokerChannel, sessionId);
 	}
 
 }

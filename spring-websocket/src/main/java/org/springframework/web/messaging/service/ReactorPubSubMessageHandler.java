@@ -25,9 +25,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
@@ -43,7 +45,10 @@ import reactor.fn.selector.ObjectSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
+public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler
+		implements PubSubChannelRegistryAware {
+
+	private MessageChannel<Message<?>> clientChannel;
 
 	private final Reactor reactor;
 
@@ -52,12 +57,20 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public ReactorPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel,
-			Reactor reactor) {
-
-		super(publishChannel, clientChannel);
+	/**
+	 * @param clientChannel a channel for broadcasting messages to subscribed clients
+	 * @param reactor
+	 */
+	public ReactorPubSubMessageHandler(Reactor reactor) {
+		Assert.notNull(reactor, "reactor is required");
 		this.reactor = reactor;
 		this.payloadConverter = new CompositeMessageConverter(null);
+	}
+
+
+	@Override
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		this.clientChannel = registry.getClientOutputChannel();
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
@@ -148,7 +161,6 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 			this.subscriptionId = subscriptionId;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void accept(Event<Message<?>> event) {
 
@@ -160,7 +172,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 			Message<?> clientMessage = MessageBuilder.fromPayloadAndHeaders(sentMessage.getPayload(),
 					clientHeaders.toMessageHeaders()).build();
 
-			getClientChannel().send(clientMessage);
+			clientChannel.send(clientMessage);
 		}
 	}
 

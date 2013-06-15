@@ -28,10 +28,10 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
@@ -42,21 +42,21 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
 
+import reactor.util.Assert;
+
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
+public class StompWebSocketHandler extends TextWebSocketHandlerAdapter
+		implements MessageHandler<Message<?>>, PubSubChannelRegistryAware {
 
-	/**
-	 *
-	 */
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
-	private final MessageChannel publishChannel;
+	private MessageChannel outputChannel;
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
@@ -65,16 +65,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
 
-	@SuppressWarnings("unchecked")
-	public StompWebSocketHandler(MessageChannel publishChannel, SubscribableChannel clientChannel) {
-
-		Assert.notNull(publishChannel, "publishChannel is required");
-		Assert.notNull(clientChannel, "clientChannel is required");
-
-		this.publishChannel = publishChannel;
-		clientChannel.subscribe(new ClientMessageConsumer());
+	@Override
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		this.outputChannel = registry.getClientInputChannel();
 	}
-
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
@@ -91,9 +85,13 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		Assert.notNull(this.outputChannel, "No output channel for STOMP messages.");
 		this.sessions.put(session.getId(), session);
 	}
 
+	/**
+	 * Handle incoming WebSocket messages from clients.
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
@@ -115,7 +113,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 					handleConnect(session, message);
 				}
 				else if (MessageType.MESSAGE.equals(messageType)) {
-					handleMessage(message);
+					handlePublish(message);
 				}
 				else if (MessageType.SUBSCRIBE.equals(messageType)) {
 					handleSubscribe(message);
@@ -126,7 +124,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 				else if (MessageType.DISCONNECT.equals(messageType)) {
 					handleDisconnect(message);
 				}
-				this.publishChannel.send(message);
+				this.outputChannel.send(message);
 			}
 			catch (Throwable t) {
 				logger.error("Terminating STOMP session due to failure to send message: ", t);
@@ -170,6 +168,9 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
+	protected void handlePublish(Message<byte[]> stompMessage) {
+	}
+
 	protected void handleSubscribe(Message<byte[]> message) {
 		// TODO: need a way to communicate back if subscription was successfully created or
 		// not in which case an ERROR should be sent back and close the connection
@@ -177,9 +178,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 	}
 
 	protected void handleUnsubscribe(Message<byte[]> message) {
-	}
-
-	protected void handleMessage(Message<byte[]> stompMessage) {
 	}
 
 	protected void handleDisconnect(Message<byte[]> stompMessage) {
@@ -202,62 +200,62 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter {
 		}
 	}
 
-/*	@Override
+	/*
+	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		this.sessions.remove(session.getId());
 		eventBus.send(AbstractMessageService.CLIENT_CONNECTION_CLOSED_KEY, session.getId());
-	}*/
+	}
+	*/
 
+	/**
+	 * Handle STOMP messages going back out to WebSocket clients.
+	 */
+	@Override
+	public void handleMessage(Message<?> message) {
 
-	private final class ClientMessageConsumer implements MessageHandler<Message<?>> {
+		StompHeaders headers = StompHeaders.fromMessageHeaders(message.getHeaders());
+		headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
 
+		if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
+			// Ignore for now since we already sent it
+			return;
+		}
 
-		@Override
-		public void handleMessage(Message<?> message) {
+		String sessionId = headers.getSessionId();
+		if (sessionId == null) {
+			logger.error("No \"sessionId\" header in message: " + message);
+		}
+		WebSocketSession session = getWebSocketSession(sessionId);
+		if (session == null) {
+			logger.error("Session not found: " + message);
+		}
 
-			StompHeaders headers = StompHeaders.fromMessageHeaders(message.getHeaders());
-			headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
+		byte[] payload;
+		try {
+			MediaType contentType = headers.getContentType();
+			payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
+		}
+		catch (Throwable t) {
+			logger.error("Failed to send " + message, t);
+			return;
+		}
 
-			if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
-				// Ignore for now since we already sent it
-				return;
-			}
-
-			String sessionId = headers.getSessionId();
-			if (sessionId == null) {
-				logger.error("No \"sessionId\" header in message: " + message);
-			}
-			WebSocketSession session = getWebSocketSession(sessionId);
-			if (session == null) {
-				logger.error("Session not found: " + message);
-			}
-
-			byte[] payload;
-			try {
-				MediaType contentType = headers.getContentType();
-				payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
-			}
-			catch (Throwable t) {
-				logger.error("Failed to send " + message, t);
-				return;
-			}
-
-			try {
-				Message<byte[]> byteMessage = MessageBuilder.fromPayloadAndHeaders(payload,
-						headers.toMessageHeaders()).build();
-				byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
-				session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
-			}
-			catch (Throwable t) {
-				sendErrorMessage(session, t);
-			}
-			finally {
-				if (StompCommand.ERROR.equals(headers.getStompCommand())) {
-					try {
-						session.close(CloseStatus.PROTOCOL_ERROR);
-					}
-					catch (IOException e) {
-					}
+		try {
+			Message<byte[]> byteMessage = MessageBuilder.fromPayloadAndHeaders(payload,
+					headers.toMessageHeaders()).build();
+			byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
+			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
+		}
+		catch (Throwable t) {
+			sendErrorMessage(session, t);
+		}
+		finally {
+			if (StompCommand.ERROR.equals(headers.getStompCommand())) {
+				try {
+					session.close(CloseStatus.PROTOCOL_ERROR);
+				}
+				catch (IOException e) {
 				}
 			}
 		}

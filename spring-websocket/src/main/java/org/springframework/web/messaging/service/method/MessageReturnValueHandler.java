@@ -19,10 +19,10 @@ package org.springframework.web.messaging.service.method;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageFactory;
-import org.springframework.messaging.support.GenericMessageFactory;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 
 
@@ -30,22 +30,15 @@ import org.springframework.web.messaging.PubSubHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageReturnValueHandler implements ReturnValueHandler {
+public class MessageReturnValueHandler implements ReturnValueHandler, PubSubChannelRegistryAware {
 
-	private final MessageChannel clientChannel;
-
-	private MessageFactory messageFactory = new GenericMessageFactory();
+	private MessageChannel clientChannel;
 
 
-	public MessageReturnValueHandler(MessageChannel clientChannel) {
-		Assert.notNull(clientChannel, "clientChannel is required");
-		this.clientChannel = clientChannel;
+	@Override
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		this.clientChannel = registry.getClientOutputChannel();
 	}
-
-	public void setMessageFactory(MessageFactory messageFactory) {
-		this.messageFactory = messageFactory;
-	}
-
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -69,6 +62,8 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
+		Assert.notNull(this.clientChannel, "No clientChannel to send messages to");
+
 		Message<?> returnMessage = (Message<?>) returnValue;
 		if (returnMessage == null) {
 			return;
@@ -91,7 +86,8 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		returnHeaders.setSessionId(sessionId);
 		returnHeaders.setSubscriptionId(subscriptionId);
 
-		return MessageBuilder.fromPayloadAndHeaders(returnMessage.getPayload(), returnHeaders.toMessageHeaders()).build();
+		Object payload = returnMessage.getPayload();
+		return MessageBuilder.fromPayloadAndHeaders(payload, returnHeaders.toMessageHeaders()).build();
 	}
 
 }

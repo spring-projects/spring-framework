@@ -25,10 +25,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
@@ -50,7 +51,10 @@ import reactor.tcp.netty.NettyTcpClient;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler {
+public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
+		implements PubSubChannelRegistryAware {
+
+	private MessageChannel<Message<?>> clientChannel;
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
@@ -61,9 +65,12 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	private final Map<String, TcpConnection<String, String>> connections =
 			new ConcurrentHashMap<String, TcpConnection<String, String>>();
 
-	public StompRelayPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel) {
 
-		super(publishChannel, clientChannel);
+	/**
+	 * @param clientChannel a channel for sending messages from the remote message broker
+	 *        back to clients
+	 */
+	public StompRelayPubSubMessageHandler() {
 
 		this.tcpClient = new TcpClient.Spec<String, String>(NettyTcpClient.class)
 				.using(new Environment())
@@ -74,6 +81,11 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 		this.payloadConverter = new CompositeMessageConverter(null);
 	}
 
+
+	@Override
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		this.clientChannel = registry.getClientOutputChannel();
+	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
@@ -103,7 +115,6 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			@Override
 			public void accept(TcpConnection<String, String> connection) {
 				connection.in().consume(new Consumer<String>() {
-					@SuppressWarnings("unchecked")
 					@Override
 					public void accept(String stompFrame) {
 						if (stompFrame.isEmpty()) {
@@ -111,7 +122,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 							return;
 						}
 						Message<byte[]> message = stompMessageConverter.toMessage(stompFrame, sessionId);
-						getClientChannel().send(message);
+						clientChannel.send(message);
 					}
 				});
 			}

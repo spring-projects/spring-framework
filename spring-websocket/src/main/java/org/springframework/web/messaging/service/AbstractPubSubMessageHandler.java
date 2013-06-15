@@ -24,12 +24,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.messaging.MessageType;
@@ -44,39 +41,12 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final MessageChannel publishChannel;
-
-	private final MessageChannel clientChannel;
-
 	private final List<String> allowedDestinations = new ArrayList<String>();
 
 	private final List<String> disallowedDestinations = new ArrayList<String>();
 
 	private final PathMatcher pathMatcher = new AntPathMatcher();
 
-
-	/**
-	 * @param publishChannel a channel for publishing messages from within the
-	 *        application
-	 *
-	 * @param clientChannel a channel for sending messages to connected clients.
-	 */
-	public AbstractPubSubMessageHandler(SubscribableChannel publishChannel, MessageChannel clientChannel) {
-
-		Assert.notNull(publishChannel, "publishChannel is required");
-		Assert.notNull(clientChannel, "clientChannel is required");
-
-		this.publishChannel = publishChannel;
-		this.clientChannel = clientChannel;
-	}
-
-	public MessageChannel getPublishChannel() {
-		return this.publishChannel;
-	}
-
-	public MessageChannel getClientChannel() {
-		return this.clientChannel;
-	}
 
 	/**
 	 * Ant-style destination patterns that this service is allowed to process.

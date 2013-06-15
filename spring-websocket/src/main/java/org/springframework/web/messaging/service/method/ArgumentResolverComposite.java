@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 
 /**
  * Resolves method parameters by delegating to a list of registered
@@ -81,9 +83,9 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 	private ArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		ArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
-			for (ArgumentResolver methodArgumentResolver : this.argumentResolvers) {
-				if (methodArgumentResolver.supportsParameter(parameter)) {
-					result = methodArgumentResolver;
+			for (ArgumentResolver resolver : this.argumentResolvers) {
+				if (resolver.supportsParameter(parameter)) {
+					result = resolver;
 					this.argumentResolverCache.put(parameter, result);
 					break;
 				}
@@ -103,14 +105,21 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 	/**
 	 * Add the given {@link ArgumentResolver}s.
 	 */
-	public ArgumentResolverComposite addResolvers(
-			List<? extends ArgumentResolver> argumentResolvers) {
+	public ArgumentResolverComposite addResolvers(List<? extends ArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			for (ArgumentResolver resolver : argumentResolvers) {
 				this.argumentResolvers.add(resolver);
 			}
 		}
 		return this;
+	}
+
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		for (ArgumentResolver resolver : this.argumentResolvers) {
+			if (resolver instanceof PubSubChannelRegistryAware) {
+				((PubSubChannelRegistryAware) resolver).setPubSubChannelRegistry(registry);
+			}
+		}
 	}
 
 }

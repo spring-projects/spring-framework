@@ -22,6 +22,8 @@ import java.util.List;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubChannelRegistryAware;
 
 
 /**
@@ -75,6 +77,14 @@ public class ReturnValueHandlerComposite implements ReturnValueHandler {
 		ReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
 		handler.handleReturnValue(returnValue, returnType, message);
+	}
+
+	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+		for (ReturnValueHandler handler : this.returnValueHandlers) {
+			if (handler instanceof PubSubChannelRegistryAware) {
+				((PubSubChannelRegistryAware) handler).setPubSubChannelRegistry(registry);
+			}
+		}
 	}
 
 }
