@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4.profile.xml;
+package org.springframework.test.context.junit4.profile.resolver;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.test.context.ActiveProfilesResolver;
 
 /**
- * JUnit test suite for <em>bean definition profile</em> support in the
- * Spring TestContext Framework with XML-based configuration.
- *
- * @author Sam Brannen
- * @since 3.1
+ * @author Michail Nikolaev
+ * @since 4.0
  */
-@RunWith(Suite.class)
-// Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses({//
-DefaultProfileXmlConfigTests.class,//
-	DevProfileXmlConfigTests.class,//
-	DevProfileResolverXmlConfigTests.class //
-})
-public class ProfileXmlConfigTestSuite {
+public class ClassNameActiveProfilesResolver implements ActiveProfilesResolver {
+
+	@Override
+	public String[] resolve(Class<?> testClass) {
+		return new String[] { testClass.getSimpleName().toLowerCase() };
+	}
 }

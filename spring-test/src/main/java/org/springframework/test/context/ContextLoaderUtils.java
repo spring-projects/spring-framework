@@ -16,11 +16,6 @@
 
 package org.springframework.test.context;
 
-import static org.springframework.beans.BeanUtils.instantiateClass;
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClassForTypes;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -42,6 +37,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.beans.BeanUtils.*;
+import static org.springframework.core.annotation.AnnotationUtils.*;
+
 /**
  * Utility methods for working with {@link ContextLoader ContextLoaders} and
  * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
@@ -49,12 +47,14 @@ import org.springframework.util.StringUtils;
  * initializers.
  *
  * @author Sam Brannen
+ * @author Michail Nikolaev
  * @since 3.1
  * @see ContextLoader
  * @see SmartContextLoader
  * @see ContextConfiguration
  * @see ContextConfigurationAttributes
  * @see ActiveProfiles
+ * @see ActiveProfilesResolver
  * @see ApplicationContextInitializer
  * @see ContextHierarchy
  * @see MergedContextConfiguration
@@ -477,24 +477,43 @@ abstract class ContextLoaderUtils {
 
 		while (declaringClass != null) {
 			ActiveProfiles annotation = declaringClass.getAnnotation(annotationType);
-
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
 					declaringClass.getName()));
 			}
+			validateActiveProfilesConfiguration(declaringClass, annotation);
 
 			String[] profiles = annotation.profiles();
 			String[] valueProfiles = annotation.value();
+			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
 
-			if (!ObjectUtils.isEmpty(valueProfiles) && !ObjectUtils.isEmpty(profiles)) {
-				String msg = String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] "
-						+ "and 'profiles' [%s] attributes. Only one declaration of active bean "
-						+ "definition profiles is permitted per @ActiveProfiles annotation.", declaringClass.getName(),
-					ObjectUtils.nullSafeToString(valueProfiles), ObjectUtils.nullSafeToString(profiles));
-				logger.error(msg);
-				throw new IllegalStateException(msg);
+			boolean resolverDeclared = !ActiveProfilesResolver.class.equals(resolverClass);
+			boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
+
+			if (resolverDeclared) {
+				ActiveProfilesResolver resolver = null;
+				try {
+					resolver = instantiateClass(resolverClass, ActiveProfilesResolver.class);
+				}
+				catch (Exception e) {
+					String msg = String.format("Could not instantiate ActiveProfilesResolver of "
+							+ "type [%s] for test class [%s].", resolverClass.getName(), declaringClass.getName());
+					logger.error(msg);
+					throw new IllegalStateException(msg, e);
+				}
+
+				if (resolver != null) {
+					profiles = resolver.resolve(declaringClass);
+					if (profiles == null) {
+						String msg = String.format(
+							"ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",
+							resolverClass.getName());
+						logger.error(msg);
+						throw new IllegalStateException(msg);
+					}
+				}
 			}
-			else if (!ObjectUtils.isEmpty(valueProfiles)) {
+			else if (valueDeclared) {
 				profiles = valueProfiles;
 			}
 
@@ -509,6 +528,43 @@ abstract class ContextLoaderUtils {
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
+	}
+
+	private static void validateActiveProfilesConfiguration(Class<?> declaringClass, ActiveProfiles annotation) {
+		String[] valueProfiles = annotation.value();
+		String[] profiles = annotation.profiles();
+		Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
+		boolean valueDeclared = !ObjectUtils.isEmpty(valueProfiles);
+		boolean profilesDeclared = !ObjectUtils.isEmpty(profiles);
+		boolean resolverDeclared = !ActiveProfilesResolver.class.equals(resolverClass);
+
+		String msg = null;
+
+		if (valueDeclared && profilesDeclared) {
+			msg = String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] "
+					+ "and 'profiles' [%s] attributes. Only one declaration of active bean "
+					+ "definition profiles is permitted per @ActiveProfiles annotation.", declaringClass.getName(),
+				ObjectUtils.nullSafeToString(valueProfiles), ObjectUtils.nullSafeToString(profiles));
+		}
+		else if (valueDeclared && resolverDeclared) {
+			msg = String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] "
+					+ "and 'resolver' [%s] attributes. Only one source of active bean "
+					+ "definition profiles is permitted per @ActiveProfiles annotation, "
+					+ "either declaritively or programmatically.", declaringClass.getName(),
+				ObjectUtils.nullSafeToString(valueProfiles), resolverClass.getName());
+		}
+		else if (profilesDeclared && resolverDeclared) {
+			msg = String.format("Test class [%s] has been configured with @ActiveProfiles' 'profiles' [%s] "
+					+ "and 'resolver' [%s] attributes. Only one source of active bean "
+					+ "definition profiles is permitted per @ActiveProfiles annotation, "
+					+ "either declaritively or programmatically.", declaringClass.getName(),
+				ObjectUtils.nullSafeToString(profiles), resolverClass.getName());
+		}
+
+		if (msg != null) {
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
 	}
 
 	/**

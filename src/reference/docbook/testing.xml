@@ -197,7 +197,6 @@
       TestContext framework is agnostic of the actual testing framework in use,
       thus allowing instrumentation of tests in various environments including
       JUnit, TestNG, and so on.</para>
-
     </section>
 
     <section xml:id="integration-testing-goals">
@@ -444,13 +443,13 @@
 
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>("/test-config.xml")
 public class XmlApplicationContextTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
                 role="bold">classes</emphasis> = TestConfig.class)
 public class ConfigClassApplicationContextTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <para>As an alternative or in addition to declaring resource
@@ -462,7 +461,7 @@ public class ConfigClassApplicationContextTests {
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
                 role="bold">initializers</emphasis> = CustomContextIntializer.class)
 public class ContextInitializerTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <para><interfacename>@ContextConfiguration</interfacename> may
@@ -477,7 +476,7 @@ public class ContextInitializerTests {
                 role="bold">locations</emphasis> = "/test-context.xml", <emphasis
                 role="bold">loader</emphasis> = CustomContextLoader.class)
 public class CustomLoaderXmlApplicationContextTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <note>
@@ -514,7 +513,7 @@ public class CustomLoaderXmlApplicationContextTests {
             <programlisting language="java">@ContextConfiguration
 <emphasis role="bold">@WebAppConfiguration</emphasis>
 public class WebAppTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <para>To override the default, specify a different base resource
@@ -527,7 +526,7 @@ public class WebAppTests {
             <programlisting language="java">@ContextConfiguration
 <emphasis role="bold">@WebAppConfiguration("classpath:test-web-resources")</emphasis>
 public class WebAppTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <para>Note that <interfacename>@WebAppConfiguration</interfacename>
@@ -559,7 +558,7 @@ public class WebAppTests {
     @ContextConfiguration("/child-config.xml")
 })
 public class ContextHierarchyTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <programlisting language="java">@WebAppConfiguration
@@ -568,7 +567,7 @@ public class ContextHierarchyTests {
     @ContextConfiguration(classes = WebConfig.class)
 })
 public class WebIntegrationTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <para>If you need to merge or override the configuration for a given
@@ -594,19 +593,24 @@ public class WebIntegrationTests {
             <programlisting language="java">@ContextConfiguration
 <emphasis role="bold">@ActiveProfiles</emphasis>("dev")
 public class DeveloperTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <programlisting language="java">@ContextConfiguration
 <emphasis role="bold">@ActiveProfiles</emphasis>({"dev", "integration"})
 public class DeveloperIntegrationTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <note>
               <para><interfacename>@ActiveProfiles</interfacename> provides
               support for <emphasis>inheriting</emphasis> active bean definition
-              profiles declared by superclasses by default.</para>
+              profiles declared by superclasses by default. It is also possible
+              to resolve active bean definition profiles programmatically by
+              implementing a custom
+              <interfacename>ActiveProfilesResolver</interfacename> and
+              registering it via the <varname>resolver</varname> attribute of
+              <interfacename>@ActiveProfiles</interfacename>.</para>
             </note>
 
             <para>See <xref linkend="testcontext-ctx-management-env-profiles"/>
@@ -649,19 +653,20 @@ public class DeveloperIntegrationTests {
 
                 <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
 public class ContextDirtyingTests {
-    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
+    // some tests that result in the Spring container being dirtied
 }</programlisting>
               </listitem>
 
               <listitem>
                 <para>After each test method in the current test class, when
                 declared on a class with class mode set to
-                <literal>AFTER_EACH_TEST_METHOD.</literal><programlisting
-                language="java"><emphasis role="bold">@DirtiesContext</emphasis>(<emphasis
-                      role="bold">classMode</emphasis> = ClassMode.AFTER_EACH_TEST_METHOD)
+                <literal>AFTER_EACH_TEST_METHOD.</literal></para>
+
+                <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>(<emphasis
+                    role="bold">classMode</emphasis> = ClassMode.AFTER_EACH_TEST_METHOD)
 public class ContextDirtyingTests {
-    <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
-}</programlisting></para>
+    // some tests that result in the Spring container being dirtied
+}</programlisting>
               </listitem>
 
               <listitem>
@@ -670,7 +675,7 @@ public class ContextDirtyingTests {
                 <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
 @Test
 public void testProcessWhichDirtiesAppCtx() {
-    <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
+    // some logic that results in the Spring container being dirtied
 }</programlisting>
               </listitem>
             </itemizedlist>
@@ -696,7 +701,7 @@ public void testProcessWhichDirtiesAppCtx() {
     @ContextConfiguration("/child-config.xml")
 })
 public class BaseTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }
 
 public class ExtendedTests extends BaseTests {
@@ -704,7 +709,7 @@ public class ExtendedTests extends BaseTests {
     @Test
     @DirtiesContext(<emphasis role="bold">hierarchyMode = HierarchyMode.CURRENT_LEVEL</emphasis>)
     public void test() {
-        <lineannotation>// some logic that results in the child context being dirtied</lineannotation>
+        // some logic that results in the child context being dirtied
     }
 }</programlisting>
 
@@ -729,7 +734,7 @@ public class ExtendedTests extends BaseTests {
             <programlisting language="java">@ContextConfiguration
 <emphasis role="bold">@TestExecutionListeners</emphasis>({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
 public class CustomTestExecutionListenerTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <para><interfacename>@TestExecutionListeners</interfacename>
@@ -761,7 +766,7 @@ public class CustomTestExecutionListenerTests {
 <emphasis role="bold">@TransactionConfiguration</emphasis>(<emphasis role="bold">transactionManager</emphasis> = "txMgr", <emphasis
                 role="bold">defaultRollback</emphasis> = false)
 public class CustomConfiguredTransactionalTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
             <note>
@@ -793,7 +798,7 @@ public class CustomConfiguredTransactionalTests {
             <programlisting language="java"><emphasis role="bold">@Rollback</emphasis>(false)
 @Test
 public void testProcessWithoutRollback() {
-    <lineannotation>// ...</lineannotation>
+    // ...
 }</programlisting>
           </listitem>
 
@@ -809,7 +814,7 @@ public void testProcessWithoutRollback() {
 
             <programlisting language="java"><emphasis role="bold">@BeforeTransaction
 </emphasis>public void beforeTransaction() {
-    <lineannotation>// logic to be executed before a transaction is started</lineannotation>
+    // logic to be executed before a transaction is started
 }</programlisting>
           </listitem>
 
@@ -825,7 +830,7 @@ public void testProcessWithoutRollback() {
 
             <programlisting language="java"><emphasis role="bold">@AfterTransaction
 </emphasis>public void afterTransaction() {
-    <lineannotation>// logic to be executed after a transaction has ended</lineannotation>
+    // logic to be executed after a transaction has ended
 }</programlisting>
           </listitem>
         </itemizedlist>
@@ -944,7 +949,7 @@ public void testProcessWithoutRollback() {
                 role="bold">name</emphasis>="java.vendor", <emphasis role="bold">value</emphasis>="Sun Microsystems Inc.")
 @Test
 public void testProcessWhichRunsOnlyOnSunJvm() {
-    <lineannotation>// some logic that should run only on Java VMs from Sun Microsystems</lineannotation>
+    // some logic that should run only on Java VMs from Sun Microsystems
 }</programlisting>
 
             <para>Alternatively, you can configure
@@ -957,7 +962,7 @@ public void testProcessWhichRunsOnlyOnSunJvm() {
                 role="bold">name</emphasis>="test-groups", <emphasis role="bold">values</emphasis>={"unit-tests", "integration-tests"})
 @Test
 public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
-    <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
+    // some logic that should run only for unit and integration test groups
 }</programlisting>
           </listitem>
 
@@ -977,7 +982,7 @@ public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
 
             <programlisting language="java"><emphasis role="bold">@ProfileValueSourceConfiguration</emphasis>(CustomProfileValueSource.class)
 public class CustomProfileValueSourceTests {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
           </listitem>
 
@@ -997,7 +1002,7 @@ public class CustomProfileValueSourceTests {
 
             <programlisting language="java"><emphasis role="bold">@Timed</emphasis>(millis=1000)
 public void testProcessWithOneSecondTimeout() {
-    <lineannotation>// some logic that should not take longer than 1 second to execute</lineannotation>
+    // some logic that should not take longer than 1 second to execute
 }</programlisting>
 
             <para>Spring's <interfacename>@Timed</interfacename> annotation has
@@ -1030,7 +1035,7 @@ public void testProcessWithOneSecondTimeout() {
             <programlisting language="java"><emphasis role="bold">@Repeat</emphasis>(10)
 @Test
 public void testProcessRepeatedly() {
-    <lineannotation>// ...</lineannotation>
+    // ...
 }</programlisting>
           </listitem>
         </itemizedlist>
@@ -1286,7 +1291,7 @@ public class MyTest {
     <emphasis role="bold">@Autowired</emphasis>
     private ApplicationContext applicationContext;
 
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>Similarly, if your test is configured to load a
@@ -1301,7 +1306,7 @@ public class MyWebAppTest {
     <emphasis role="bold">@Autowired</emphasis>
     private WebApplicationContext wac;
 
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>Dependency injection via
@@ -1355,11 +1360,11 @@ public class MyWebAppTest {
           is</emphasis>.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from "/app-config.xml" and
-// "/test-config.xml" in the root of the classpath</lineannotation>
+// ApplicationContext will be loaded from "/app-config.xml" and
+// "/test-config.xml" in the root of the classpath
 <emphasis role="bold">@ContextConfiguration(locations={"/app-config.xml", "/test-config.xml"})</emphasis>
 public class MyTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para><interfacename>@ContextConfiguration</interfacename> supports an
@@ -1374,7 +1379,7 @@ public class MyTest {
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <emphasis role="bold">@ContextConfiguration({"/app-config.xml", "/test-config.xml"})</emphasis>
 public class MyTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>If you omit both the <varname>locations</varname> and
@@ -1391,11 +1396,11 @@ public class MyTest {
           <programlisting language="java">package com.example;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from
-// "classpath:/com/example/MyTest-context.xml"</lineannotation>
+// ApplicationContext will be loaded from
+// "classpath:/com/example/MyTest-context.xml"
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public class MyTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
         </section>
 
@@ -1410,10 +1415,10 @@ public class MyTest {
           references to annotated classes.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from AppConfig and TestConfig</lineannotation>
+// ApplicationContext will be loaded from AppConfig and TestConfig
 <emphasis role="bold">@ContextConfiguration(classes = {AppConfig.class, TestConfig.class})</emphasis>
 public class MyTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>If you omit the <varname>classes</varname> attribute from the
@@ -1433,19 +1438,19 @@ public class MyTest {
           configuration class if desired.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from the
-// static inner Config class</lineannotation>
+// ApplicationContext will be loaded from the
+// static inner Config class
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public class OrderServiceTest {
 
     @Configuration
     static class Config {
 
-        <lineannotation>// this bean will be injected into the OrderServiceTest class</lineannotation>
+        // this bean will be injected into the OrderServiceTest class
         @Bean
         public OrderService orderService() {
             OrderService orderService = new OrderServiceImpl();
-            <lineannotation>// set properties, etc.</lineannotation>
+            // set properties, etc.
             return orderService;
         }
     }
@@ -1455,7 +1460,7 @@ public class OrderServiceTest {
 
     @Test
     public void testOrderService() {
-        <lineannotation>// test the orderService</lineannotation>
+        // test the orderService
     }
 
 }</programlisting>
@@ -1520,13 +1525,13 @@ public class OrderServiceTest {
           Spring's <interfacename>@Order</interfacename> annotation.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from TestConfig
-</lineannotation><lineannotation>// and initialized by TestAppCtxInitializer</lineannotation>
+// ApplicationContext will be loaded from TestConfig
+// and initialized by TestAppCtxInitializer
 <emphasis role="bold">@ContextConfiguration(
     classes = TestConfig.class,
     initializers = TestAppCtxInitializer.class)</emphasis>
 public class MyTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>It is also possible to omit the declaration of XML configuration
@@ -1539,11 +1544,11 @@ public class MyTest {
           or configuration classes.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be initialized by EntireAppInitializer
-</lineannotation><lineannotation>// which presumably registers beans in the context</lineannotation>
+// ApplicationContext will be initialized by EntireAppInitializer
+// which presumably registers beans in the context
 <emphasis role="bold">@ContextConfiguration(initializers = EntireAppInitializer.class)</emphasis>
 public class MyTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
         </section>
 
@@ -1585,18 +1590,18 @@ public class MyTest {
           <emphasis>"base-config.xml"</emphasis>.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from "/base-config.xml"
-// in the root of the classpath</lineannotation>
+// ApplicationContext will be loaded from "/base-config.xml"
+// in the root of the classpath
 <emphasis role="bold">@ContextConfiguration("/base-config.xml")</emphasis>
 public class BaseTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }
 
-<lineannotation>// ApplicationContext will be loaded from "/base-config.xml" and
-// "/extended-config.xml" </lineannotation><lineannotation>in the root of the classpath</lineannotation>
+// ApplicationContext will be loaded from "/base-config.xml" and
+// "/extended-config.xml" in the root of the classpath
 <emphasis role="bold">@ContextConfiguration("/extended-config.xml")</emphasis>
 public class ExtendedTest extends BaseTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>Similarly, in the following example that uses annotated classes,
@@ -1609,16 +1614,16 @@ public class ExtendedTest extends BaseTest {
           <classname>BaseConfig</classname>.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from BaseConfig</lineannotation>
+// ApplicationContext will be loaded from BaseConfig
 <emphasis role="bold">@ContextConfiguration(classes = BaseConfig.class)</emphasis>
 public class BaseTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }
 
-<lineannotation>// ApplicationContext will be loaded from BaseConfig and ExtendedConfig</lineannotation>
+// ApplicationContext will be loaded from BaseConfig and ExtendedConfig
 <emphasis role="bold">@ContextConfiguration(classes = ExtendedConfig.class)</emphasis>
 public class ExtendedTest extends BaseTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
 
           <para>In the following example that uses context initializers, the
@@ -1632,17 +1637,17 @@ public class ExtendedTest extends BaseTest {
           Spring's <interfacename>@Order</interfacename> annotation.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be initialized by BaseInitializer</lineannotation>
+// ApplicationContext will be initialized by BaseInitializer
 <emphasis role="bold">@ContextConfiguration(initializers=BaseInitializer.class)</emphasis>
 public class BaseTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }
 
-<lineannotation>// ApplicationContext will be initialized by BaseInitializer
-// and ExtendedInitializer</lineannotation>
+// ApplicationContext will be initialized by BaseInitializer
+// and ExtendedInitializer
 <emphasis role="bold">@ContextConfiguration(initializers=ExtendedInitializer.class)</emphasis>
 public class ExtendedTest extends BaseTest {
-    <lineannotation>// class body...</lineannotation>
+    // class body...
 }</programlisting>
         </section>
 
@@ -1814,7 +1819,7 @@ public class TransferServiceTest {
 
    @Test
    public void testTransferService() {
-       // test the transferService
+      // test the transferService
    }
 }</programlisting>
 
@@ -1849,7 +1854,113 @@ public class TransferServiceTest {
           <interfacename>@ContextConfiguration </interfacename>annotation. The
           body of the test class itself remains completely unchanged.</para>
 
-          <!-- TODO Consider documenting inheritance for active profiles. -->
+          <para>It is often the case that a single set of profiles is used
+          across multiple test classes within a given project. Thus, to avoid
+          duplicate declarations of the
+          <interfacename>@ActiveProfiles</interfacename> annotation it is
+          possible to declare <interfacename>@ActiveProfiles</interfacename>
+          once on a base class, and subclasses will automatically inherit the
+          <interfacename>@ActiveProfiles</interfacename> configuration from the
+          base class. In the following example, the declaration of
+          <interfacename>@ActiveProfiles</interfacename> (as well as other
+          annotations) has been moved to an abstract superclass,
+          <classname>AbstractIntegrationTest</classname>.</para>
+
+          <programlisting language="java">package com.bank.service;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(
+    classes = {
+        TransferServiceConfig.class,
+        StandaloneDataConfig.class,
+        JndiDataConfig.class})
+@ActiveProfiles("dev")
+public abstract class AbstractIntegrationTest {
+}</programlisting>
+
+          <programlisting language="java">package com.bank.service;
+
+// "dev" profile inherited from superclass
+public class TransferServiceTest extends AbstractIntegrationTest {
+
+   @Autowired
+   private TransferService transferService;
+
+   @Test
+   public void testTransferService() {
+      // test the transferService
+   }
+}</programlisting>
+
+          <para><interfacename>@ActiveProfiles</interfacename> also supports an
+          <methodname>inheritProfiles</methodname> attribute that can be used to
+          disable the inheritance of active profiles.</para>
+
+          <programlisting language="java">package com.bank.service;
+
+// "dev" profile overridden with "production"
+@ActiveProfiles(profiles = "production", inheritProfiles = false)
+public class ProductionTransferServiceTest extends AbstractIntegrationTest {
+    // test body
+}</programlisting>
+
+          <para>Furthermore, it is sometimes necessary to resolve active
+          profiles for tests <emphasis>programmatically</emphasis> instead of
+          declaratively — for example, based on:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>the current operating system</para>
+            </listitem>
+
+            <listitem>
+              <para>whether tests are being executed on a continuous integration
+              build server</para>
+            </listitem>
+
+            <listitem>
+              <para>the presence of certain environment variables</para>
+            </listitem>
+
+            <listitem>
+              <para>the presence of custom class-level annotations</para>
+            </listitem>
+
+            <listitem>
+              <para>etc.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>To resolve active bean definition profiles programmatically,
+          simply implement a custom
+          <interfacename>ActiveProfilesResolver</interfacename> and register it
+          via the <varname>resolver</varname> attribute of
+          <interfacename>@ActiveProfiles</interfacename>. The following example
+          demonstrates how to implement and register a custom
+          <classname>OperatingSystemActiveProfilesResolver</classname>. For
+          further information, refer to the respective Javadoc.</para>
+
+          <programlisting language="java">package com.bank.service;
+
+// "dev" profile overridden programmatically via a custom resolver
+@ActiveProfiles(
+    resolver = OperatingSystemActiveProfilesResolver.class,
+    inheritProfiles = false)
+public class TransferServiceTest extends AbstractIntegrationTest {
+    // test body
+}</programlisting>
+
+          <programlisting language="java">package com.bank.service.test;
+
+public class OperatingSystemActiveProfilesResolver implements ActiveProfilesResolver {
+
+    @Override
+    String[] resolve(Class&lt;?&gt; testClass) {
+        String profile = ...;
+        // determine the value of profile based on the operating system
+        return new String[] {profile};
+    }
+}</programlisting>
         </section>
 
         <section xml:id="testcontext-ctx-management-web">
@@ -2416,11 +2527,11 @@ public class ExtendedTests extends BaseTests {}</programlisting>
         injection.</para>
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
+// specifies the Spring configuration to load for this test fixture
 <emphasis role="bold">@ContextConfiguration("repository-config.xml")</emphasis>
 public class HibernateTitleRepositoryTests {
 
-    <lineannotation>// this instance will be dependency injected by type</lineannotation>
+    // this instance will be dependency injected by type
     <emphasis role="bold">@Autowired</emphasis>
     private HibernateTitleRepository titleRepository;
 
@@ -2436,11 +2547,11 @@ public class HibernateTitleRepositoryTests {
         below.</para>
 
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
+// specifies the Spring configuration to load for this test fixture
 <emphasis role="bold">@ContextConfiguration("repository-config.xml")</emphasis>
 public class HibernateTitleRepositoryTests {
 
-    <lineannotation>// this instance will be dependency injected by type</lineannotation>
+    // this instance will be dependency injected by type
     private HibernateTitleRepository titleRepository;
 
     <emphasis role="bold">@Autowired</emphasis>
@@ -2490,7 +2601,7 @@ public class HibernateTitleRepositoryTests {
           specific target bean as follows, but make sure to delegate to the
           overridden method in the superclass as well.</para>
 
-          <programlisting language="java"><lineannotation>// ...</lineannotation>
+          <programlisting language="java">// ...
 
     @Autowired
     @Override
@@ -2498,7 +2609,7 @@ public class HibernateTitleRepositoryTests {
         <emphasis role="bold">super</emphasis>.setDataSource(dataSource);
     }
 
-<lineannotation>// ...</lineannotation></programlisting>
+// ...</programlisting>
 
           <para>The specified qualifier value indicates the specific
           <interfacename>DataSource</interfacename> bean to inject, narrowing
@@ -2749,29 +2860,29 @@ public class FictitiousTransactionalTest {
 
     <emphasis role="bold">@BeforeTransaction</emphasis>
     public void verifyInitialDatabaseState() {
-        <lineannotation>// logic to verify the initial state before a transaction is started</lineannotation>
+        // logic to verify the initial state before a transaction is started
     }
 
     @Before
     public void setUpTestDataWithinTransaction() {
-        <lineannotation>// set up test data within the transaction</lineannotation>
+        // set up test data within the transaction
     }
 
     @Test
-    <lineannotation>// overrides the class-level defaultRollback setting</lineannotation>
+    // overrides the class-level defaultRollback setting
     <emphasis role="bold">@Rollback(true)</emphasis>
     public void modifyDatabaseWithinTransaction() {
-        <lineannotation>// logic which uses the test data and modifies database state</lineannotation>
+        // logic which uses the test data and modifies database state
     }
 
     @After
     public void tearDownWithinTransaction() {
-        <lineannotation>// execute "tear down" logic within the transaction</lineannotation>
+        // execute "tear down" logic within the transaction
     }
 
     <emphasis role="bold">@AfterTransaction</emphasis>
     public void verifyFinalDatabaseState() {
-        <lineannotation>// logic to verify the final state after transaction has rolled back</lineannotation>
+        // logic to verify the final state after transaction has rolled back
     }
 
 }</programlisting>
@@ -2793,7 +2904,7 @@ public class FictitiousTransactionalTest {
           frameworks that maintain an in-memory <emphasis>unit of
           work</emphasis>.</para>
 
-          <programlisting language="java"><lineannotation>// ...</lineannotation>
+          <programlisting language="java">// ...
 
 @Autowired
 private SessionFactory sessionFactory;
@@ -2812,7 +2923,7 @@ public void updateWithSessionFlush() {
     sessionFactory.getCurrentSession().flush();
 }
 
-<lineannotation>// ...</lineannotation></programlisting>
+// ...</programlisting>
         </note>
       </section>
 
@@ -2922,7 +3033,7 @@ public class SimpleTest {
 
     @Test
     public void testMethod() {
-        <lineannotation>// execute test logic...</lineannotation>
+        // execute test logic...
     }
 }</programlisting>
         </section>
@@ -3226,8 +3337,7 @@ public class MyWebTests {
 
           <programlisting language="xml">&lt;bean id="accountService" class="org.mockito.Mockito" factory-method="mock"&gt;
     &lt;constructor-arg value="org.example.AccountService"/&gt;
-&lt;/bean&gt;
-</programlisting>
+&lt;/bean&gt;</programlisting>
 
           <para>Then you can inject the mock service into the test in order set
           up and verify expectations:</para>
@@ -3274,26 +3384,22 @@ public class AccountTests {
           additional builder-style methods corresponding to properties of
           <classname>MockHttpServletRequest</classname>. For example:</para>
 
-          <programlisting language="java">mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));
-</programlisting>
+          <programlisting language="java">mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));</programlisting>
 
           <para>In addition to all the HTTP methods, you can also perform file
           upload requests, which internally creates an instance of
           <classname>MockMultipartHttpServletRequest</classname>:</para>
 
-          <programlisting language="java">mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));
-</programlisting>
+          <programlisting language="java">mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));</programlisting>
 
           <para>Query string parameters can be specified in the URI
           template:</para>
 
-          <programlisting language="java">mockMvc.perform(get("/hotels?foo={foo}", "bar"));
-</programlisting>
+          <programlisting language="java">mockMvc.perform(get("/hotels?foo={foo}", "bar"));</programlisting>
 
           <para>Or by adding Servlet request parameters:</para>
 
-          <programlisting language="java">mockMvc.perform(get("/hotels").param("foo", "bar"));
-</programlisting>
+          <programlisting language="java">mockMvc.perform(get("/hotels").param("foo", "bar"));</programlisting>
 
           <para>If application code relies on Servlet request parameters, and
           doesn't check the query string, as is most often the case, then it
@@ -3308,8 +3414,7 @@ public class AccountTests {
           <function>servletPath</function> accordingly so that request mappings
           will work:</para>
 
-          <programlisting language="java">mockMvc.perform(get("/app/main/hotels/{id}").contextPath("/app").servletPath("/main"))
-</programlisting>
+          <programlisting language="java">mockMvc.perform(get("/app/main/hotels/{id}").contextPath("/app").servletPath("/main"))</programlisting>
 
           <para>Looking at the above example, it would be cumbersome to set the
           contextPath and servletPath with every performed request. That's why
@@ -3326,9 +3431,7 @@ public class AccountTests {
             .defaultRequest(get("/")
                 .contextPath("/app").servletPath("/main")
                 .accept(MediaType.APPLICATION_JSON).build();
-    }
-
-}</programlisting>
+    }</programlisting>
 
           <para>The above properties will apply to every request performed
           through the <classname>MockMvc</classname>. If the same property is
@@ -3345,8 +3448,7 @@ public class AccountTests {
           <function>.andExpect(..)</function> after call to perform the
           request:</para>
 
-          <programlisting language="java">mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
-</programlisting>
+          <programlisting language="java">mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());</programlisting>
 
           <para><literal>MockMvcResultMatchers.*</literal> defines a number of
           static members, some of which return types with additional methods,
@@ -3369,8 +3471,7 @@ public class AccountTests {
           <programlisting language="java">
 mockMvc.perform(post("/persons"))
   .andExpect(status().isOk())
-  .andExpect(model().attributeHasErrors("person"));
-</programlisting>
+  .andExpect(model().attributeHasErrors("person"));</programlisting>
 
           <para>Many times when writing tests, it's useful to dump the result of
           the performed request. This can be done as follows, where
@@ -3518,7 +3619,7 @@ mockServer.verify();</programlisting>
       shown below:</para>
 
       <programlisting language="java">import static org.junit.Assert.assertEquals;
-<lineannotation>// import ...</lineannotation>
+// import ...
 
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public abstract class AbstractClinicTests <emphasis role="bold">extends AbstractTransactionalJUnit4SpringContextTests</emphasis> {
@@ -3535,10 +3636,10 @@ public abstract class AbstractClinicTests <emphasis role="bold">extends Abstract
         assertEquals("Leary", v1.getLastName());
         assertEquals(1, v1.getNrOfSpecialties());
         assertEquals("radiology", (v1.getSpecialties().get(0)).getName());
-        <lineannotation>// ...</lineannotation>
+        // ...
     }
 
-    <lineannotation>// ...</lineannotation>
+    // ...
 }</programlisting>
 
       <para>Notes:</para>
@@ -3608,8 +3709,7 @@ public abstract class AbstractClinicTests <emphasis role="bold">extends Abstract
       <literal>AbstractClinicTests-context.xml</literal>.</para>
 
       <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>
-public class HibernateClinicTests extends AbstractClinicTests { }
-</programlisting>
+public class HibernateClinicTests extends AbstractClinicTests { }</programlisting>
 
       <para>In a large-scale application, the Spring configuration is often
       split across multiple files. Consequently, configuration locations are
