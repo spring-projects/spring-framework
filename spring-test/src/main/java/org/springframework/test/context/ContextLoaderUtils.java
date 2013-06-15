@@ -502,15 +502,13 @@ abstract class ContextLoaderUtils {
 					throw new IllegalStateException(msg, e);
 				}
 
-				if (resolver != null) {
-					profiles = resolver.resolve(declaringClass);
-					if (profiles == null) {
-						String msg = String.format(
-							"ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",
-							resolverClass.getName());
-						logger.error(msg);
-						throw new IllegalStateException(msg);
-					}
+				profiles = resolver.resolve(declaringClass);
+				if (profiles == null) {
+					String msg = String.format(
+						"ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",
+						resolverClass.getName());
+					logger.error(msg);
+					throw new IllegalStateException(msg);
 				}
 			}
 			else if (valueDeclared) {
