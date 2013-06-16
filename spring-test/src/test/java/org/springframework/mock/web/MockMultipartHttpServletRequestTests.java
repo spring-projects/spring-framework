@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.multipart;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+package org.springframework.mock.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,10 +26,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
