@@ -127,6 +127,13 @@ public class PubSubHeaders {
 	}
 
 	/**
+	 * Create {@link PubSubHeaders} for a new {@link Message} of a specific type.
+	 */
+	public static PubSubHeaders create(MessageType messageType) {
+		return new PubSubHeaders(messageType, null, null);
+	}
+
+	/**
 	 * Create {@link PubSubHeaders} from existing message headers.
 	 */
 	public static PubSubHeaders fromMessageHeaders(MessageHeaders originalHeaders) {

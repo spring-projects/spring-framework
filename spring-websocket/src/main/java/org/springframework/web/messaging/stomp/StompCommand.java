@@ -55,6 +55,7 @@ public enum StompCommand {
 		commandToMessageType.put(StompCommand.CONNECT, MessageType.CONNECT);
 		commandToMessageType.put(StompCommand.STOMP, MessageType.CONNECT);
 		commandToMessageType.put(StompCommand.SEND, MessageType.MESSAGE);
+		commandToMessageType.put(StompCommand.MESSAGE, MessageType.MESSAGE);
 		commandToMessageType.put(StompCommand.SUBSCRIBE, MessageType.SUBSCRIBE);
 		commandToMessageType.put(StompCommand.UNSUBSCRIBE, MessageType.UNSUBSCRIBE);
 		commandToMessageType.put(StompCommand.DISCONNECT, MessageType.DISCONNECT);

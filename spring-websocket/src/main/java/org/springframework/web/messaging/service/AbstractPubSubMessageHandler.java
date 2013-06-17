@@ -91,7 +91,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 			for (String pattern : this.disallowedDestinations) {
 				if (this.pathMatcher.match(pattern, destination)) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("Skip notification message id=" + message.getHeaders().getId());
+						logger.trace("Skip message id=" + message.getHeaders().getId());
 					}
 					return false;
 				}
@@ -105,7 +105,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 				}
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace("Skip notification message id=" + message.getHeaders().getId());
+				logger.trace("Skip message id=" + message.getHeaders().getId());
 			}
 			return false;
 		}
@@ -121,10 +121,6 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 
 		if (!canHandle(message, messageType)) {
 			return;
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Handling message id=" + message.getHeaders().getId());
 		}
 
 		if (MessageType.MESSAGE.equals(messageType)) {

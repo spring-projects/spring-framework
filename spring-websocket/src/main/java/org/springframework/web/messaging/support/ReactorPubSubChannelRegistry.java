@@ -32,9 +32,17 @@ public class ReactorPubSubChannelRegistry extends AbstractPubSubChannelRegistry 
 
 		Assert.notNull(reactor, "reactor is required");
 
-		setClientInputChannel(new ReactorMessageChannel(reactor));
-		setClientOutputChannel(new ReactorMessageChannel(reactor));
-		setMessageBrokerChannel(new ReactorMessageChannel(reactor));
+		ReactorMessageChannel channel = new ReactorMessageChannel(reactor);
+		channel.setName("clientInputChannel");
+		setClientInputChannel(channel);
+
+		channel = new ReactorMessageChannel(reactor);
+		channel.setName("clientOutputChannel");
+		setClientOutputChannel(channel);
+
+		channel = new ReactorMessageChannel(reactor);
+		channel.setName("messageBrokerChannel");
+		setMessageBrokerChannel(channel);
 	}
 
 }

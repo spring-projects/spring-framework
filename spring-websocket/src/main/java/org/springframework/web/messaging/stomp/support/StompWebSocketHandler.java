@@ -31,6 +31,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
+import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
@@ -198,13 +199,15 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		}
 	}
 
-	/*
+	@SuppressWarnings("unchecked")
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		this.sessions.remove(session.getId());
-		eventBus.send(AbstractMessageService.CLIENT_CONNECTION_CLOSED_KEY, session.getId());
+		PubSubHeaders headers = PubSubHeaders.create(MessageType.DISCONNECT);
+		headers.setSessionId(session.getId());
+		Message<?> message = MessageBuilder.fromPayloadAndHeaders(new byte[0], headers.toMessageHeaders()).build();
+		this.outputChannel.send(message);
 	}
-	*/
 
 	/**
 	 * Handle STOMP messages going back out to WebSocket clients.
