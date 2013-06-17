@@ -28,39 +28,39 @@ import org.springframework.web.messaging.PubSubChannelRegistry;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AbstractPubSubChannelRegistry implements PubSubChannelRegistry, InitializingBean {
+public class AbstractPubSubChannelRegistry<M extends Message<?>, H extends MessageHandler<M>> implements PubSubChannelRegistry<M, H>, InitializingBean {
 
-	private SubscribableChannel<Message<?>, MessageHandler<Message<?>>> clientInputChannel;
+	private SubscribableChannel<M, H> clientInputChannel;
 
-	private SubscribableChannel<Message<?>, MessageHandler<Message<?>>> clientOutputChannel;
+	private SubscribableChannel<M, H> clientOutputChannel;
 
-	private SubscribableChannel<Message<?>, MessageHandler<Message<?>>> messageBrokerChannel;
+	private SubscribableChannel<M, H> messageBrokerChannel;
 
 
-	public void setClientInputChannel(SubscribableChannel<Message<?>, MessageHandler<Message<?>>> channel) {
+	@Override
+	public SubscribableChannel<M, H> getClientInputChannel() {
+		return this.clientInputChannel;
+	}
+
+	public void setClientInputChannel(SubscribableChannel<M, H> channel) {
 		this.clientInputChannel = channel;
 	}
 
 	@Override
-	public SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getClientInputChannel() {
-		return this.clientInputChannel;
-	}
-
-	@Override
-	public SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getClientOutputChannel() {
+	public SubscribableChannel<M, H> getClientOutputChannel() {
 		return this.clientOutputChannel;
 	}
 
-	public void setClientOutputChannel(SubscribableChannel<Message<?>, MessageHandler<Message<?>>> channel) {
+	public void setClientOutputChannel(SubscribableChannel<M, H> channel) {
 		this.clientOutputChannel = channel;
 	}
 
 	@Override
-	public SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getMessageBrokerChannel() {
+	public SubscribableChannel<M, H> getMessageBrokerChannel() {
 		return this.messageBrokerChannel;
 	}
 
-	public void setMessageBrokerChannel(SubscribableChannel<Message<?>, MessageHandler<Message<?>>> channel) {
+	public void setMessageBrokerChannel(SubscribableChannel<M, H> channel) {
 		this.messageBrokerChannel = channel;
 	}
 

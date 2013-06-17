@@ -25,12 +25,12 @@ import org.springframework.messaging.SubscribableChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface PubSubChannelRegistry {
+public interface PubSubChannelRegistry<M extends Message<?>, H extends MessageHandler<M>> {
 
-	SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getClientInputChannel();
+	SubscribableChannel<M, H> getClientInputChannel();
 
-	SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getClientOutputChannel();
+	SubscribableChannel<M, H> getClientOutputChannel();
 
-	SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getMessageBrokerChannel();
+	SubscribableChannel<M, H> getMessageBrokerChannel();
 
 }
