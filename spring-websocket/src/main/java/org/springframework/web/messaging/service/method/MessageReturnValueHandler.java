@@ -84,6 +84,10 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		returnHeaders.setSessionId(sessionId);
 		returnHeaders.setSubscriptionId(subscriptionId);
 
+		if (returnHeaders.getDestination() == null) {
+			returnHeaders.setDestination(headers.getDestination());
+		}
+
 		Object payload = returnMessage.getPayload();
 		return MessageBuilder.fromPayloadAndHeaders(payload, returnHeaders.toMessageHeaders()).build();
 	}
