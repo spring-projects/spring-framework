@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.support;
+
+import org.springframework.util.Assert;
+
+import reactor.core.Reactor;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface PubSubChannelRegistryAware {
+public class ReactorPubSubChannelRegistry extends AbstractPubSubChannelRegistry {
 
-	void setPubSubChannelRegistry(PubSubChannelRegistry registry);
+
+	public ReactorPubSubChannelRegistry(Reactor reactor) {
+
+		Assert.notNull(reactor, "reactor is required");
+
+		setClientInputChannel(new ReactorMessageChannel(reactor));
+		setClientOutputChannel(new ReactorMessageChannel(reactor));
+		setMessageBrokerChannel(new ReactorMessageChannel(reactor));
+	}
 
 }

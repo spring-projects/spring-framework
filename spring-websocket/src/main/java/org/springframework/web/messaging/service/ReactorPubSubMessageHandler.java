@@ -29,7 +29,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
@@ -45,8 +44,7 @@ import reactor.fn.selector.ObjectSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler
-		implements PubSubChannelRegistryAware {
+public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 	private MessageChannel<Message<?>> clientChannel;
 
@@ -57,20 +55,11 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	/**
-	 * @param clientChannel a channel for broadcasting messages to subscribed clients
-	 * @param reactor
-	 */
-	public ReactorPubSubMessageHandler(Reactor reactor) {
+	public ReactorPubSubMessageHandler(PubSubChannelRegistry registry, Reactor reactor) {
 		Assert.notNull(reactor, "reactor is required");
+		this.clientChannel = registry.getClientOutputChannel();
 		this.reactor = reactor;
 		this.payloadConverter = new CompositeMessageConverter(null);
-	}
-
-
-	@Override
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
-		this.clientChannel = registry.getClientOutputChannel();
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {

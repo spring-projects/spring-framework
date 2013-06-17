@@ -20,8 +20,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
-import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.support.SessionMessageChannel;
 
@@ -30,14 +28,14 @@ import org.springframework.web.messaging.support.SessionMessageChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageChannelArgumentResolver implements ArgumentResolver, PubSubChannelRegistryAware {
+public class MessageChannelArgumentResolver implements ArgumentResolver {
 
 	private MessageChannel<Message<?>> messageBrokerChannel;
 
 
-	@Override
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
-		this.messageBrokerChannel = registry.getMessageBrokerChannel();
+	public MessageChannelArgumentResolver(MessageChannel<Message<?>> messageBrokerChannel) {
+		Assert.notNull(messageBrokerChannel, "messageBrokerChannel is required");
+		this.messageBrokerChannel = messageBrokerChannel;
 	}
 
 	@Override

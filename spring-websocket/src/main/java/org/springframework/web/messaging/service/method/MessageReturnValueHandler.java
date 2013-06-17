@@ -21,8 +21,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 
 
@@ -30,14 +28,14 @@ import org.springframework.web.messaging.PubSubHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageReturnValueHandler implements ReturnValueHandler, PubSubChannelRegistryAware {
+public class MessageReturnValueHandler implements ReturnValueHandler {
 
-	private MessageChannel clientChannel;
+	private MessageChannel<Message<?>> clientChannel;
 
 
-	@Override
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
-		this.clientChannel = registry.getClientOutputChannel();
+	public MessageReturnValueHandler(MessageChannel<Message<?>> clientChannel) {
+		Assert.notNull(clientChannel, "clientChannel is required");
+		this.clientChannel = clientChannel;
 	}
 
 	@Override

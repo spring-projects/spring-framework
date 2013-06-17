@@ -29,7 +29,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
@@ -51,8 +50,7 @@ import reactor.tcp.netty.NettyTcpClient;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
-		implements PubSubChannelRegistryAware {
+public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 	private MessageChannel<Message<?>> clientChannel;
 
@@ -70,21 +68,18 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	 * @param clientChannel a channel for sending messages from the remote message broker
 	 *        back to clients
 	 */
-	public StompRelayPubSubMessageHandler() {
+	public StompRelayPubSubMessageHandler(PubSubChannelRegistry registry) {
+
+		Assert.notNull(registry, "registry is required");
+		this.clientChannel = registry.getClientOutputChannel();
 
 		this.tcpClient = new TcpClient.Spec<String, String>(NettyTcpClient.class)
 				.using(new Environment())
-				.codec(new DelimitedCodec<String, String>((byte) 0, StandardCodecs.STRING_CODEC))
+				.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
 				.connect("127.0.0.1", 61613)
 				.get();
 
 		this.payloadConverter = new CompositeMessageConverter(null);
-	}
-
-
-	@Override
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
-		this.clientChannel = registry.getClientOutputChannel();
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {

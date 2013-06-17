@@ -27,8 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
-import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 
 /**
  * Resolves method parameters by delegating to a list of registered
@@ -112,14 +110,6 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 			}
 		}
 		return this;
-	}
-
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
-		for (ArgumentResolver resolver : this.argumentResolvers) {
-			if (resolver instanceof PubSubChannelRegistryAware) {
-				((PubSubChannelRegistryAware) resolver).setPubSubChannelRegistry(registry);
-			}
-		}
 	}
 
 }

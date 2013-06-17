@@ -34,11 +34,11 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
@@ -53,7 +53,9 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @since 4.0
  */
 public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
-		implements ApplicationContextAware, InitializingBean, PubSubChannelRegistryAware {
+		implements ApplicationContextAware, InitializingBean {
+
+	private PubSubChannelRegistry registry;
 
 	private List<MessageConverter> messageConverters;
 
@@ -70,10 +72,9 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
 
-	@Override
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
-		this.argumentResolvers.setPubSubChannelRegistry(registry);
-		this.returnValueHandlers.setPubSubChannelRegistry(registry);
+	public AnnotationPubSubMessageHandler(PubSubChannelRegistry registry) {
+		Assert.notNull(registry, "registry is required");
+		this.registry = registry;
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
@@ -95,10 +96,10 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver());
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.registry.getMessageBrokerChannel()));
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
 
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler());
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.registry.getClientOutputChannel()));
 	}
 
 	protected void initHandlerMethods() {

@@ -31,7 +31,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubChannelRegistryAware;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
@@ -49,8 +48,7 @@ import reactor.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompWebSocketHandler extends TextWebSocketHandlerAdapter
-		implements MessageHandler<Message<?>>, PubSubChannelRegistryAware {
+public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implements MessageHandler<Message<?>> {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
@@ -65,8 +63,8 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
 
-	@Override
-	public void setPubSubChannelRegistry(PubSubChannelRegistry registry) {
+	public StompWebSocketHandler(PubSubChannelRegistry registry) {
+		Assert.notNull(registry, "registry is required");
 		this.outputChannel = registry.getClientInputChannel();
 	}
 

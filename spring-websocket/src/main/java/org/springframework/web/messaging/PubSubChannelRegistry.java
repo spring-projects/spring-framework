@@ -17,7 +17,8 @@
 package org.springframework.web.messaging;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 
 
 /**
@@ -26,10 +27,10 @@ import org.springframework.messaging.MessageChannel;
  */
 public interface PubSubChannelRegistry {
 
-	MessageChannel<Message<?>> getClientInputChannel();
+	SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getClientInputChannel();
 
-	MessageChannel<Message<?>> getClientOutputChannel();
+	SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getClientOutputChannel();
 
-	MessageChannel<Message<?>> getMessageBrokerChannel();
+	SubscribableChannel<Message<?>, MessageHandler<Message<?>>> getMessageBrokerChannel();
 
 }
