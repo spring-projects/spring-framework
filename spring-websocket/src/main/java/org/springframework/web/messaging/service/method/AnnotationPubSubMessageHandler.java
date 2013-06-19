@@ -39,11 +39,11 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
+import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 
@@ -182,7 +182,7 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 
 	private void handleMessageInternal(final M message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
-		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		String destination = headers.getDestination();
 
 		HandlerMethod match = getHandlerMethod(destination, handlerMethods);

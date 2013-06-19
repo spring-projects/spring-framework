@@ -20,7 +20,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
-import org.springframework.web.messaging.PubSubHeaders;
+import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 import org.springframework.web.messaging.support.SessionMessageChannel;
 
 
@@ -47,7 +47,7 @@ public class MessageChannelArgumentResolver<M extends Message> implements Argume
 	@Override
 	public Object resolveArgument(MethodParameter parameter, M message) throws Exception {
 		Assert.notNull(this.messageBrokerChannel, "messageBrokerChannel is required");
-		final String sessionId = PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
+		final String sessionId = PubSubHeaderAccesssor.wrap(message).getSessionId();
 		return new SessionMessageChannel<M>(this.messageBrokerChannel, sessionId);
 	}
 

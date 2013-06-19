@@ -22,14 +22,12 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
-import org.springframework.web.messaging.stomp.StompHeaders;
 
 
 /**
@@ -96,7 +94,7 @@ public class StompMessageConverter<M extends Message> {
 			}
 		}
 
-		StompHeaders stompHeaders = StompHeaders.fromParsedFrame(command, headers);
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.create(command, headers);
 		stompHeaders.setSessionId(sessionId);
 
 		byte[] payload = new byte[totalLength - payloadIndex];
@@ -106,8 +104,8 @@ public class StompMessageConverter<M extends Message> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private M createMessage(StompHeaders stompHeaders, byte[] payload) {
-		return (M) MessageBuilder.fromPayloadAndHeaders(payload, stompHeaders.toMessageHeaders()).build();
+	private M createMessage(StompHeaderAccessor stompHeaders, byte[] payload) {
+		return (M) MessageBuilder.withPayload(payload).copyHeaders(stompHeaders.toHeaders()).build();
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -149,8 +147,7 @@ public class StompMessageConverter<M extends Message> {
 		}
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		MessageHeaders messageHeaders = message.getHeaders();
-		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 
 		try {
 			out.write(stompHeaders.getStompCommand().toString().getBytes("UTF-8"));

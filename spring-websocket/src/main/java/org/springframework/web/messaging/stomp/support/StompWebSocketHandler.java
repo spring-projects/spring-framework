@@ -31,12 +31,11 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
-import org.springframework.web.messaging.stomp.StompHeaders;
+import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -107,7 +106,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 			}
 
 			try {
-				StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
+				StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 				MessageType messageType = stompHeaders.getMessageType();
 				if (MessageType.CONNECT.equals(messageType)) {
 					handleConnect(session, message);
@@ -142,8 +141,8 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 
 	protected void handleConnect(final WebSocketSession session, M message) throws IOException {
 
-		StompHeaders connectHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
-		StompHeaders connectedHeaders = StompHeaders.create(StompCommand.CONNECTED);
+		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(message);
+		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 
 		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
 		if (acceptVersions.contains("1.2")) {
@@ -163,8 +162,8 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		// TODO: security
 
 		@SuppressWarnings("unchecked")
-		M connectedMessage = (M) MessageBuilder.fromPayloadAndHeaders(EMPTY_PAYLOAD,
-				connectedHeaders.toMessageHeaders()).build();
+		M connectedMessage = (M) MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(
+				connectedHeaders.toHeaders()).build();
 		byte[] bytes = getStompMessageConverter().fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
@@ -186,11 +185,11 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
 
-		StompHeaders headers = StompHeaders.create(StompCommand.ERROR);
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
 
 		@SuppressWarnings("unchecked")
-		M message = (M) MessageBuilder.fromPayloadAndHeaders(EMPTY_PAYLOAD, headers.toMessageHeaders()).build();
+		M message = (M) MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(headers.toHeaders()).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(message);
 
 		try {
@@ -204,10 +203,10 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		this.sessions.remove(session.getId());
-		PubSubHeaders headers = PubSubHeaders.create(MessageType.DISCONNECT);
+		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.create(MessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
 		@SuppressWarnings("unchecked")
-		M message = (M) MessageBuilder.fromPayloadAndHeaders(new byte[0], headers.toMessageHeaders()).build();
+		M message = (M) MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toHeaders()).build();
 		this.outputChannel.send(message);
 	}
 
@@ -217,7 +216,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 	@Override
 	public void handleMessage(M message) {
 
-		StompHeaders headers = StompHeaders.fromMessageHeaders(message.getHeaders());
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 		headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
 
 		if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
@@ -246,7 +245,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 
 		try {
 			@SuppressWarnings("unchecked")
-			M byteMessage = (M) MessageBuilder.fromPayloadAndHeaders(payload, headers.toMessageHeaders()).build();
+			M byteMessage = (M) MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
 			byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}

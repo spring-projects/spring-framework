@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.support;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +30,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.messaging.MessageType;
 
 
 /**
@@ -42,12 +43,12 @@ import org.springframework.util.LinkedMultiValueMap;
  * and/or modify headers of an existing message.
  * <p>
  * Use one of the static factory method in this class, then call getters and setters, and
- * at the end if necessary call {@link #toMessageHeaders()} to obtain the updated headers.
+ * at the end if necessary call {@link #toHeaders()} to obtain the updated headers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class PubSubHeaders {
+public class PubSubHeaderAccesssor {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
@@ -85,7 +86,7 @@ public class PubSubHeaders {
 	 * A constructor for creating new message headers.
 	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
-	protected PubSubHeaders(MessageType messageType, Object protocolMessageType,
+	protected PubSubHeaderAccesssor(MessageType messageType, Object protocolMessageType,
 			Map<String, List<String>> externalSourceHeaders) {
 
 		this.originalHeaders = null;
@@ -111,33 +112,34 @@ public class PubSubHeaders {
 	 * constructor is protected. See factory methods in this and sub-classes.
 	 */
 	@SuppressWarnings("unchecked")
-	protected PubSubHeaders(MessageHeaders originalHeaders) {
-		Assert.notNull(originalHeaders, "originalHeaders is required");
-		this.originalHeaders = originalHeaders;
-		this.externalSourceHeaders = (originalHeaders.get(EXTERNAL_SOURCE_HEADERS) != null) ?
-				(Map<String, List<String>>) originalHeaders.get(EXTERNAL_SOURCE_HEADERS) : emptyMultiValueMap;
+	protected PubSubHeaderAccesssor(Message<?> message) {
+		Assert.notNull(message, "message is required");
+		this.originalHeaders = message.getHeaders();
+		this.externalSourceHeaders = (this.originalHeaders.get(EXTERNAL_SOURCE_HEADERS) != null) ?
+				(Map<String, List<String>>) this.originalHeaders.get(EXTERNAL_SOURCE_HEADERS) : emptyMultiValueMap;
 	}
 
 
 	/**
-	 * Create {@link PubSubHeaders} for a new {@link Message}.
+	 * Create {@link PubSubHeaderAccesssor} for a new {@link Message} with
+	 * {@link MessageType#MESSAGE}.
 	 */
-	public static PubSubHeaders create() {
-		return new PubSubHeaders(MessageType.MESSAGE, null, null);
+	public static PubSubHeaderAccesssor create() {
+		return new PubSubHeaderAccesssor(MessageType.MESSAGE, null, null);
 	}
 
 	/**
-	 * Create {@link PubSubHeaders} for a new {@link Message} of a specific type.
+	 * Create {@link PubSubHeaderAccesssor} for a new {@link Message} of a specific type.
 	 */
-	public static PubSubHeaders create(MessageType messageType) {
-		return new PubSubHeaders(messageType, null, null);
+	public static PubSubHeaderAccesssor create(MessageType messageType) {
+		return new PubSubHeaderAccesssor(messageType, null, null);
 	}
 
 	/**
-	 * Create {@link PubSubHeaders} from existing message headers.
+	 * Create {@link PubSubHeaderAccesssor} from the headers of an existing message.
 	 */
-	public static PubSubHeaders fromMessageHeaders(MessageHeaders originalHeaders) {
-		return new PubSubHeaders(originalHeaders);
+	public static PubSubHeaderAccesssor wrap(Message<?> message) {
+		return new PubSubHeaderAccesssor(message);
 	}
 
 
@@ -145,7 +147,7 @@ public class PubSubHeaders {
 	 * Return the original, wrapped headers (i.e. unmodified) or a new Map including any
 	 * updates made via setters.
 	 */
-	public Map<String, Object> toMessageHeaders() {
+	public Map<String, Object> toHeaders() {
 		if (!isModified()) {
 			return this.originalHeaders;
 		}

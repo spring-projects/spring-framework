@@ -94,18 +94,6 @@ public final class MessageBuilder<T> {
 	}
 
 	/**
-	 * Create a builder for a new {@link Message} instance with the provided payload and
-	 * headers.
-	 *
-	 * @param payload the payload for the new message
-	 * @param headers the headers to use
-	 */
-	public static <T> MessageBuilder<T> fromPayloadAndHeaders(T payload, Map<String, Object> headers) {
-		MessageBuilder<T> builder = new MessageBuilder<T>(payload, headers);
-		return builder;
-	}
-
-	/**
 	 * Create a builder for a new {@link Message} instance with the provided payload.
 	 *
 	 * @param payload the payload for the new message

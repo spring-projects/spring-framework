@@ -21,7 +21,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-import org.springframework.web.messaging.PubSubHeaders;
+import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 
 
 /**
@@ -75,13 +75,13 @@ public class MessageReturnValueHandler<M extends Message> implements ReturnValue
 
 	protected M updateReturnMessage(M returnMessage, M message) {
 
-		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		String sessionId = headers.getSessionId();
 		String subscriptionId = headers.getSubscriptionId();
 
 		Assert.notNull(subscriptionId, "No subscription id: " + message);
 
-		PubSubHeaders returnHeaders = PubSubHeaders.fromMessageHeaders(returnMessage.getHeaders());
+		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(returnMessage);
 		returnHeaders.setSessionId(sessionId);
 		returnHeaders.setSubscriptionId(subscriptionId);
 
@@ -89,13 +89,12 @@ public class MessageReturnValueHandler<M extends Message> implements ReturnValue
 			returnHeaders.setDestination(headers.getDestination());
 		}
 
-		Object payload = returnMessage.getPayload();
-		return createMessage(returnHeaders, payload);
+		return createMessage(returnHeaders, returnMessage.getPayload());
 	}
 
 	@SuppressWarnings("unchecked")
-	private M createMessage(PubSubHeaders returnHeaders, Object payload) {
-		return (M) MessageBuilder.fromPayloadAndHeaders(payload, returnHeaders.toMessageHeaders()).build();
+	private M createMessage(PubSubHeaderAccesssor returnHeaders, Object payload) {
+		return (M) MessageBuilder.withPayload(payload).copyHeaders(returnHeaders.toHeaders()).build();
 	}
 
 }

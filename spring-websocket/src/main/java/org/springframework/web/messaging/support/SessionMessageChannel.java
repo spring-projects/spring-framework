@@ -19,7 +19,6 @@ package org.springframework.web.messaging.support;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.web.messaging.PubSubHeaders;
 
 import reactor.util.Assert;
 
@@ -50,10 +49,11 @@ public class SessionMessageChannel<M extends Message> implements MessageChannel<
 
 	@Override
 	public boolean send(M message, long timeout) {
-		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		headers.setSessionId(this.sessionId);
+		Object payload = message.getPayload();
 		@SuppressWarnings("unchecked")
-		M messageToSend = (M) MessageBuilder.fromPayloadAndHeaders(message.getPayload(), headers.toMessageHeaders()).build();
+		M messageToSend = (M) MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
 		this.delegate.send(messageToSend);
 		return true;
 	}

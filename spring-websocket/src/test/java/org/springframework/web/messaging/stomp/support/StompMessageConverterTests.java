@@ -23,7 +23,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.stomp.StompCommand;
-import org.springframework.web.messaging.stomp.StompHeaders;
 
 import static org.junit.Assert.*;
 
@@ -33,12 +32,12 @@ import static org.junit.Assert.*;
  */
 public class StompMessageConverterTests {
 
-	private StompMessageConverter converter;
+	private StompMessageConverter<Message<byte[]>> converter;
 
 
 	@Before
 	public void setup() {
-		this.converter = new StompMessageConverter();
+		this.converter = new StompMessageConverter<Message<byte[]>>();
 	}
 
 	@Test
@@ -51,9 +50,9 @@ public class StompMessageConverterTests {
 
 		assertEquals(0, message.getPayload().length);
 
-		MessageHeaders messageHeaders = message.getHeaders();
-		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
-		assertEquals(7, stompHeaders.toMessageHeaders().size());
+		MessageHeaders headers = message.getHeaders();
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
+		assertEquals(7, stompHeaders.toHeaders().size());
 
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
 		assertEquals("github.org", stompHeaders.getHost());
@@ -61,8 +60,8 @@ public class StompMessageConverterTests {
 		assertEquals(MessageType.CONNECT, stompHeaders.getMessageType());
 		assertEquals(StompCommand.CONNECT, stompHeaders.getStompCommand());
 		assertEquals("session-123", stompHeaders.getSessionId());
-		assertNotNull(messageHeaders.get(MessageHeaders.ID));
-		assertNotNull(messageHeaders.get(MessageHeaders.TIMESTAMP));
+		assertNotNull(headers.get(MessageHeaders.ID));
+		assertNotNull(headers.get(MessageHeaders.TIMESTAMP));
 
 		String convertedBack = new String(this.converter.fromMessage(message), "UTF-8");
 
@@ -81,8 +80,7 @@ public class StompMessageConverterTests {
 
 		assertEquals(0, message.getPayload().length);
 
-		MessageHeaders messageHeaders = message.getHeaders();
-		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
 		assertEquals("st\nomp.gi:thu\\b.org", stompHeaders.getExternalSourceHeaders().get("ho:\ns\rt").get(0));
 
@@ -103,8 +101,7 @@ public class StompMessageConverterTests {
 
 		assertEquals(0, message.getPayload().length);
 
-		MessageHeaders messageHeaders = message.getHeaders();
-		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		assertEquals(Collections.singleton("1.2"), stompHeaders.getAcceptVersion());
 		assertEquals("github.org", stompHeaders.getHost());
 
@@ -125,8 +122,7 @@ public class StompMessageConverterTests {
 
 		assertEquals(0, message.getPayload().length);
 
-		MessageHeaders messageHeaders = message.getHeaders();
-		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
 		assertEquals("st\nomp.gi:thu\\b.org", stompHeaders.getExternalSourceHeaders().get("ho:\ns\rt").get(0));
 

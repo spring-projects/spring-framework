@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.stomp;
+package org.springframework.web.messaging.stomp.support;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,13 +25,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.messaging.PubSubHeaders;
+import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 
 
 /**
@@ -39,13 +39,13 @@ import org.springframework.web.messaging.PubSubHeaders;
  * STOMP-specific headers of an existing message.
  * <p>
  * Use one of the static factory method in this class, then call getters and setters, and
- * at the end if necessary call {@link #toMessageHeaders()} to obtain the updated headers
+ * at the end if necessary call {@link #toHeaders()} to obtain the updated headers
  * or call {@link #toStompMessageHeaders()} to obtain only the STOMP-specific headers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompHeaders extends PubSubHeaders {
+public class StompHeaderAccessor extends PubSubHeaderAccesssor {
 
 	public static final String STOMP_ID = "id";
 
@@ -88,7 +88,7 @@ public class StompHeaders extends PubSubHeaders {
 	 * A constructor for creating new STOMP message headers.
 	 * This constructor is private. See factory methods in this sub-classes.
 	 */
-	private StompHeaders(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
+	private StompHeaderAccessor(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
 		super(command.getMessageType(), command, externalSourceHeaders);
 		this.headers = new HashMap<String, String>(4);
 		updateMessageHeaders();
@@ -118,32 +118,32 @@ public class StompHeaders extends PubSubHeaders {
 	 * constructor is protected. See factory methods in this class.
 	 */
 	@SuppressWarnings("unchecked")
-	private StompHeaders(MessageHeaders messageHeaders) {
-		super(messageHeaders);
-		this.headers = (messageHeaders.get(STOMP_HEADERS) != null) ?
-				(Map<String, String>) messageHeaders.get(STOMP_HEADERS) : new HashMap<String, String>(4);
+	private StompHeaderAccessor(Message<?> message) {
+		super(message);
+		this.headers = (message.getHeaders() .get(STOMP_HEADERS) != null) ?
+				(Map<String, String>) message.getHeaders().get(STOMP_HEADERS) : new HashMap<String, String>(4);
 	}
 
 
 	/**
-	 * Create {@link StompHeaders} for a new {@link Message}.
+	 * Create {@link StompHeaderAccessor} for a new {@link Message}.
 	 */
-	public static StompHeaders create(StompCommand command) {
-		return new StompHeaders(command, null);
+	public static StompHeaderAccessor create(StompCommand command) {
+		return new StompHeaderAccessor(command, null);
 	}
 
 	/**
-	 * Create {@link StompHeaders} from the headers of an existing {@link Message}.
+	 * Create {@link StompHeaderAccessor} from parsed STOP frame content.
 	 */
-	public static StompHeaders fromMessageHeaders(MessageHeaders messageHeaders) {
-		return new StompHeaders(messageHeaders);
+	public static StompHeaderAccessor create(StompCommand command, Map<String, List<String>> headers) {
+		return new StompHeaderAccessor(command, headers);
 	}
 
 	/**
-	 * Create {@link StompHeaders} from parsed STOP frame content.
+	 * Create {@link StompHeaderAccessor} from the headers of an existing {@link Message}.
 	 */
-	public static StompHeaders fromParsedFrame(StompCommand command, Map<String, List<String>> headers) {
-		return new StompHeaders(command, headers);
+	public static StompHeaderAccessor wrap(Message<?> message) {
+		return new StompHeaderAccessor(message);
 	}
 
 
@@ -152,8 +152,8 @@ public class StompHeaders extends PubSubHeaders {
 	 * updates made via setters.
 	 */
 	@Override
-	public Map<String, Object> toMessageHeaders() {
-		Map<String, Object> result = super.toMessageHeaders();
+	public Map<String, Object> toHeaders() {
+		Map<String, Object> result = super.toHeaders();
 		if (isModified()) {
 			result.put(STOMP_HEADERS, this.headers);
 		}

@@ -29,9 +29,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
-import org.springframework.web.messaging.PubSubHeaders;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
+import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 
 import reactor.core.Reactor;
 import reactor.fn.Consumer;
@@ -79,7 +79,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 			logger.debug("Subscribe " + message);
 		}
 
-		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		String subscriptionId = headers.getSubscriptionId();
 		BroadcastingConsumer consumer = new BroadcastingConsumer(subscriptionId);
 
@@ -108,10 +108,10 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 
 		try {
 			// Convert to byte[] payload before the fan-out
-			PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+			PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), headers.getContentType());
 			@SuppressWarnings("unchecked")
-			M m = (M) MessageBuilder.fromPayloadAndHeaders(payload, message.getHeaders()).build();
+			M m = (M) MessageBuilder.withPayload(payload).copyHeaders(message.getHeaders()).build();
 
 			this.reactor.notify(getPublishKey(headers.getDestination()), Event.wrap(m));
 		}
@@ -122,7 +122,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 
 	@Override
 	public void handleDisconnect(M message) {
-		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
+		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		removeSubscriptions(headers.getSessionId());
 	}
 
@@ -151,12 +151,11 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 
 			Message<?> sentMessage = event.getData();
 
-			PubSubHeaders clientHeaders = PubSubHeaders.fromMessageHeaders(sentMessage.getHeaders());
-			clientHeaders.setSubscriptionId(this.subscriptionId);
+			PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(sentMessage);
+			headers.setSubscriptionId(this.subscriptionId);
 
 			@SuppressWarnings("unchecked")
-			M clientMessage = (M) MessageBuilder.fromPayloadAndHeaders(sentMessage.getPayload(),
-					clientHeaders.toMessageHeaders()).build();
+			M clientMessage = (M) MessageBuilder.withPayload(sentMessage.getPayload()).copyHeaders(headers.toHeaders()).build();
 
 			clientChannel.send(clientMessage);
 		}
