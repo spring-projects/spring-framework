@@ -250,13 +250,15 @@ public class StompRelayPubSubMessageHandler<M extends Message> extends AbstractP
 
 		public void forward(M message, StompHeaders headers) {
 
-			synchronized(this.monitor) {
-				if (!this.isConnected) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Adding to queue message " + message + ", queue size=" + this.messageQueue.size());
+			if (!this.isConnected) {
+				synchronized(this.monitor) {
+					if (!this.isConnected) {
+						this.messageQueue.add(message);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Queued message " + message + ", queue size=" + this.messageQueue.size());
+						}
+						return;
 					}
-					this.messageQueue.add(message);
-					return;
 				}
 			}
 
