@@ -67,6 +67,10 @@ public class StompHeaderAccessor extends PubSubHeaderAccesssor {
 
 	public static final String NACK = "nack";
 
+	public static final String LOGIN = "login";
+
+	public static final String PASSCODE = "passcode";
+
 	public static final String DESTINATION = "destination";
 
 	public static final String CONTENT_TYPE = "content-type";
@@ -295,6 +299,23 @@ public class StompHeaderAccessor extends PubSubHeaderAccesssor {
 
 	public String getNack() {
 		return getHeaderValue(NACK);
+	}
+
+	public void setLogin(String login) {
+		this.headers.put(LOGIN, login);
+	}
+
+	public String getLogin() {
+		return getHeaderValue(LOGIN);
+	}
+
+
+	public void setPasscode(String passcode) {
+		this.headers.put(PASSCODE, passcode);
+	}
+
+	public String getPasscode() {
+		return getHeaderValue(PASSCODE);
 	}
 
 	public void setReceiptId(String receiptId) {

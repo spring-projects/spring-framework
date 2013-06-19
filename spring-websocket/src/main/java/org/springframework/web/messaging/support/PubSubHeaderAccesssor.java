@@ -171,7 +171,7 @@ public class PubSubHeaderAccesssor {
 		if (this.headers.get(headerName) != null) {
 			return this.headers.get(headerName);
 		}
-		else if (this.originalHeaders.get(headerName) != null) {
+		else if ((this.originalHeaders != null) && (this.originalHeaders.get(headerName) != null)) {
 			return this.originalHeaders.get(headerName);
 		}
 		return null;
