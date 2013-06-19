@@ -37,7 +37,8 @@ import org.springframework.web.messaging.stomp.StompHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompMessageConverter {
+@SuppressWarnings("rawtypes")
+public class StompMessageConverter<M extends Message> {
 
 	private static final Charset STOMP_CHARSET = Charset.forName("UTF-8");
 
@@ -50,7 +51,7 @@ public class StompMessageConverter {
 	/**
 	 * @param stompContent a complete STOMP message (without the trailing 0x00) as byte[] or String.
 	 */
-	public Message<byte[]> toMessage(Object stompContent, String sessionId) {
+	public M toMessage(Object stompContent, String sessionId) {
 
 		byte[] byteContent = null;
 		if (stompContent instanceof String) {
@@ -101,7 +102,12 @@ public class StompMessageConverter {
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
 
-		return MessageBuilder.fromPayloadAndHeaders(payload, stompHeaders.toMessageHeaders()).build();
+		return createMessage(stompHeaders, payload);
+	}
+
+	@SuppressWarnings("unchecked")
+	private M createMessage(StompHeaders stompHeaders, byte[] payload) {
+		return (M) MessageBuilder.fromPayloadAndHeaders(payload, stompHeaders.toMessageHeaders()).build();
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -131,10 +137,21 @@ public class StompMessageConverter {
 		return index;
 	}
 
-	public byte[] fromMessage(Message<byte[]> message) {
+	public byte[] fromMessage(M message) {
+
+		byte[] payload;
+		if (message.getPayload() instanceof byte[]) {
+			payload = (byte[]) message.getPayload();
+		}
+		else {
+			throw new IllegalArgumentException(
+					"stompContent is not byte[]: " + message.getPayload().getClass());
+		}
+
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		MessageHeaders messageHeaders = message.getHeaders();
 		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(messageHeaders);
+
 		try {
 			out.write(stompHeaders.getStompCommand().toString().getBytes("UTF-8"));
 			out.write(LF);
@@ -150,7 +167,7 @@ public class StompMessageConverter {
 				}
 			}
 			out.write(LF);
-			out.write(message.getPayload());
+			out.write(payload);
 			out.write(0);
 			return out.toByteArray();
 		}

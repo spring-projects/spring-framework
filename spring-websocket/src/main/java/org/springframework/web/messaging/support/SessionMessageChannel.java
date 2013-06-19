@@ -28,14 +28,15 @@ import reactor.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SessionMessageChannel implements MessageChannel<Message<?>> {
+@SuppressWarnings("rawtypes")
+public class SessionMessageChannel<M extends Message> implements MessageChannel<M> {
 
-	private MessageChannel<Message<?>> delegate;
+	private MessageChannel<M> delegate;
 
 	private final String sessionId;
 
 
-	public SessionMessageChannel(MessageChannel<Message<?>> delegate, String sessionId) {
+	public SessionMessageChannel(MessageChannel<M> delegate, String sessionId) {
 		Assert.notNull(delegate, "delegate is required");
 		Assert.notNull(sessionId, "sessionId is required");
 		this.sessionId = sessionId;
@@ -43,17 +44,17 @@ public class SessionMessageChannel implements MessageChannel<Message<?>> {
 	}
 
 	@Override
-	public boolean send(Message<?> message) {
+	public boolean send(M message) {
 		return send(message, -1);
 	}
 
 	@Override
-	public boolean send(Message<?> message, long timeout) {
+	public boolean send(M message, long timeout) {
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		headers.setSessionId(this.sessionId);
-		MessageBuilder<?> messageToSend = MessageBuilder.fromPayloadAndHeaders(
-				message.getPayload(), headers.toMessageHeaders());
-		this.delegate.send(messageToSend.build());
+		@SuppressWarnings("unchecked")
+		M messageToSend = (M) MessageBuilder.fromPayloadAndHeaders(message.getPayload(), headers.toMessageHeaders()).build();
+		this.delegate.send(messageToSend);
 		return true;
 	}
 }

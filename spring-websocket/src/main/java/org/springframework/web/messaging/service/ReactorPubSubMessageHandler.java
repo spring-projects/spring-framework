@@ -44,9 +44,10 @@ import reactor.fn.selector.ObjectSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
+@SuppressWarnings("rawtypes")
+public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubSubMessageHandler<M> {
 
-	private MessageChannel<Message<?>> clientChannel;
+	private MessageChannel<M> clientChannel;
 
 	private final Reactor reactor;
 
@@ -55,7 +56,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public ReactorPubSubMessageHandler(PubSubChannelRegistry registry, Reactor reactor) {
+	public ReactorPubSubMessageHandler(PubSubChannelRegistry<M, ?> registry, Reactor reactor) {
 		Assert.notNull(reactor, "reactor is required");
 		this.clientChannel = registry.getClientOutputChannel();
 		this.reactor = reactor;
@@ -72,7 +73,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 	}
 
 	@Override
-	public void handleSubscribe(Message<?> message) {
+	public void handleSubscribe(M message) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Subscribe " + message);
@@ -99,7 +100,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 	}
 
 	@Override
-	public void handlePublish(Message<?> message) {
+	public void handlePublish(M message) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Message received: " + message);
@@ -109,9 +110,10 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 			// Convert to byte[] payload before the fan-out
 			PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), headers.getContentType());
-			message = MessageBuilder.fromPayloadAndHeaders(payload, message.getHeaders()).build();
+			@SuppressWarnings("unchecked")
+			M m = (M) MessageBuilder.fromPayloadAndHeaders(payload, message.getHeaders()).build();
 
-			this.reactor.notify(getPublishKey(headers.getDestination()), Event.wrap(message));
+			this.reactor.notify(getPublishKey(headers.getDestination()), Event.wrap(m));
 		}
 		catch (Exception ex) {
 			logger.error("Failed to publish " + message, ex);
@@ -119,16 +121,10 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 	}
 
 	@Override
-	public void handleDisconnect(Message<?> message) {
+	public void handleDisconnect(M message) {
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		removeSubscriptions(headers.getSessionId());
 	}
-
-/*	@Override
-	public void handleClientConnectionClosed(String sessionId) {
-		removeSubscriptions(sessionId);
-	}
-*/
 
 	private void removeSubscriptions(String sessionId) {
 		List<Registration<?>> registrations = this.subscriptionsBySession.remove(sessionId);
@@ -158,7 +154,8 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 			PubSubHeaders clientHeaders = PubSubHeaders.fromMessageHeaders(sentMessage.getHeaders());
 			clientHeaders.setSubscriptionId(this.subscriptionId);
 
-			Message<?> clientMessage = MessageBuilder.fromPayloadAndHeaders(sentMessage.getPayload(),
+			@SuppressWarnings("unchecked")
+			M clientMessage = (M) MessageBuilder.fromPayloadAndHeaders(sentMessage.getPayload(),
 					clientHeaders.toMessageHeaders()).build();
 
 			clientChannel.send(clientMessage);

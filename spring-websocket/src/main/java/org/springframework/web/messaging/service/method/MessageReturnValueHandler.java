@@ -28,12 +28,13 @@ import org.springframework.web.messaging.PubSubHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageReturnValueHandler implements ReturnValueHandler {
+@SuppressWarnings("rawtypes")
+public class MessageReturnValueHandler<M extends Message> implements ReturnValueHandler<M> {
 
-	private MessageChannel<Message<?>> clientChannel;
+	private MessageChannel<M> clientChannel;
 
 
-	public MessageReturnValueHandler(MessageChannel<Message<?>> clientChannel) {
+	public MessageReturnValueHandler(MessageChannel<M> clientChannel) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		this.clientChannel = clientChannel;
 	}
@@ -55,14 +56,14 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 //		return Message.class.isAssignableFrom(paramType);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, M message)
 			throws Exception {
 
 		Assert.notNull(this.clientChannel, "No clientChannel to send messages to");
 
-		Message<?> returnMessage = (Message<?>) returnValue;
+		@SuppressWarnings("unchecked")
+		M returnMessage = (M) returnValue;
 		if (returnMessage == null) {
 			return;
 		}
@@ -72,7 +73,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		this.clientChannel.send(returnMessage);
  	}
 
-	protected Message<?> updateReturnMessage(Message<?> returnMessage, Message<?> message) {
+	protected M updateReturnMessage(M returnMessage, M message) {
 
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String sessionId = headers.getSessionId();
@@ -89,7 +90,12 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		}
 
 		Object payload = returnMessage.getPayload();
-		return MessageBuilder.fromPayloadAndHeaders(payload, returnHeaders.toMessageHeaders()).build();
+		return createMessage(returnHeaders, payload);
+	}
+
+	@SuppressWarnings("unchecked")
+	private M createMessage(PubSubHeaders returnHeaders, Object payload) {
+		return (M) MessageBuilder.fromPayloadAndHeaders(payload, returnHeaders.toMessageHeaders()).build();
 	}
 
 }

@@ -25,7 +25,8 @@ import org.springframework.messaging.SubscribableChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface PubSubChannelRegistry<M extends Message<?>, H extends MessageHandler<M>> {
+@SuppressWarnings("rawtypes")
+public interface PubSubChannelRegistry<M extends Message, H extends MessageHandler<M>> {
 
 	SubscribableChannel<M, H> getClientInputChannel();
 

@@ -55,11 +55,12 @@ import reactor.tcp.netty.NettyTcpClient;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler {
+@SuppressWarnings("rawtypes")
+public class StompRelayPubSubMessageHandler<M extends Message> extends AbstractPubSubMessageHandler<M> {
 
-	private MessageChannel<Message<?>> clientChannel;
+	private MessageChannel<M> clientChannel;
 
-	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
+	private final StompMessageConverter<M> stompMessageConverter = new StompMessageConverter<M>();
 
 	private MessageConverter payloadConverter;
 
@@ -72,7 +73,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	 * @param clientChannel a channel for sending messages from the remote message broker
 	 *        back to clients
 	 */
-	public StompRelayPubSubMessageHandler(PubSubChannelRegistry registry) {
+	public StompRelayPubSubMessageHandler(PubSubChannelRegistry<M, ?> registry) {
 
 		Assert.notNull(registry, "registry is required");
 		this.clientChannel = registry.getClientOutputChannel();
@@ -96,7 +97,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	}
 
 	@Override
-	public void handleConnect(Message<?> message) {
+	public void handleConnect(M message) {
 		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
 		String sessionId = stompHeaders.getSessionId();
 		if (sessionId == null) {
@@ -108,22 +109,22 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	}
 
 	@Override
-	public void handlePublish(Message<?> message) {
+	public void handlePublish(M message) {
 		forwardMessage(message, StompCommand.SEND);
 	}
 
 	@Override
-	public void handleSubscribe(Message<?> message) {
+	public void handleSubscribe(M message) {
 		forwardMessage(message, StompCommand.SUBSCRIBE);
 	}
 
 	@Override
-	public void handleUnsubscribe(Message<?> message) {
+	public void handleUnsubscribe(M message) {
 		forwardMessage(message, StompCommand.UNSUBSCRIBE);
 	}
 
 	@Override
-	public void handleDisconnect(Message<?> message) {
+	public void handleDisconnect(M message) {
 		StompHeaders stompHeaders = StompHeaders.fromMessageHeaders(message.getHeaders());
 		if (stompHeaders.getStompCommand() != null) {
 			forwardMessage(message, StompCommand.DISCONNECT);
@@ -136,13 +137,13 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	}
 
 	@Override
-	public void handleOther(Message<?> message) {
+	public void handleOther(M message) {
 		StompCommand command = (StompCommand) message.getHeaders().get(PubSubHeaders.PROTOCOL_MESSAGE_TYPE);
 		Assert.notNull(command, "Expected STOMP command: " + message.getHeaders());
 		forwardMessage(message, command);
 	}
 
-	private void forwardMessage(Message<?> message, StompCommand command) {
+	private void forwardMessage(M message, StompCommand command) {
 
 		StompHeaders headers = StompHeaders.fromMessageHeaders(message.getHeaders());
 		headers.setStompCommandIfNotSet(command);
@@ -172,10 +173,10 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 		private final AtomicBoolean isConnected = new AtomicBoolean(false);
 
-		private final BlockingQueue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>(50);
+		private final BlockingQueue<M> messageQueue = new LinkedBlockingQueue<M>(50);
 
 
-		public RelaySession(final Message<?> message, final StompHeaders stompHeaders) {
+		public RelaySession(final M message, final StompHeaders stompHeaders) {
 
 			Assert.notNull(message, "message is required");
 			Assert.notNull(stompHeaders, "stompHeaders is required");
@@ -216,7 +217,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 				return;
 			}
 
-			Message<byte[]> message = stompMessageConverter.toMessage(stompFrame, this.sessionId);
+			M message = stompMessageConverter.toMessage(stompFrame, this.sessionId);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Reading message " + message);
 			}
@@ -240,19 +241,20 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			StompHeaders stompHeaders = StompHeaders.create(StompCommand.ERROR);
 			stompHeaders.setSessionId(sessionId);
 			stompHeaders.setMessage(errorText);
-			Message<byte[]> errorMessage = MessageBuilder.fromPayloadAndHeaders(
-					new byte[0], stompHeaders.toMessageHeaders()).build();
+			@SuppressWarnings("unchecked")
+			M errorMessage = (M) MessageBuilder.fromPayloadAndHeaders(new byte[0], stompHeaders.toMessageHeaders()).build();
 			clientChannel.send(errorMessage);
 		}
 
-		public void forward(Message<?> message, StompHeaders headers) {
+		public void forward(M message, StompHeaders headers) {
 
 			if (!this.isConnected.get()) {
-				message = MessageBuilder.fromPayloadAndHeaders(message.getPayload(), headers.toMessageHeaders()).build();
+				@SuppressWarnings("unchecked")
+				M m = (M) MessageBuilder.fromPayloadAndHeaders(message.getPayload(), headers.toMessageHeaders()).build();
 				if (logger.isTraceEnabled()) {
-					logger.trace("Adding to queue message " + message + ", queue size=" + this.messageQueue.size());
+					logger.trace("Adding to queue message " + m + ", queue size=" + this.messageQueue.size());
 				}
-				this.messageQueue.add(message);
+				this.messageQueue.add(m);
 				return;
 			}
 
@@ -268,7 +270,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 		}
 
 		private void flushMessages(TcpConnection<String, String> connection) {
-			List<Message<?>> messages = new ArrayList<Message<?>>();
+			List<M> messages = new ArrayList<M>();
 			this.messageQueue.drainTo(messages);
 			for (Message<?> message : messages) {
 				StompHeaders headers = StompHeaders.fromMessageHeaders(message.getHeaders());
@@ -284,7 +286,8 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 				MediaType contentType = headers.getContentType();
 				byte[] payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
-				Message<byte[]> byteMessage = MessageBuilder.fromPayloadAndHeaders(payload, headers.toMessageHeaders()).build();
+				@SuppressWarnings("unchecked")
+				M byteMessage = (M) MessageBuilder.fromPayloadAndHeaders(payload, headers.toMessageHeaders()).build();
 
 				if (logger.isTraceEnabled()) {
 					logger.trace("Forwarding message " + byteMessage);

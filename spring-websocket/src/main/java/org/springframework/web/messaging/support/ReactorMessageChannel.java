@@ -47,8 +47,8 @@ public class ReactorMessageChannel implements SubscribableChannel<Message<?>, Me
 	private String name = toString(); // TODO
 
 
-	private final Map<MessageHandler, Registration<?>> registrations =
-			new HashMap<MessageHandler, Registration<?>>();
+	private final Map<MessageHandler<Message<?>>, Registration<?>> registrations =
+			new HashMap<MessageHandler<Message<?>>, Registration<?>>();
 
 
 	public ReactorMessageChannel(Reactor reactor) {
@@ -78,7 +78,7 @@ public class ReactorMessageChannel implements SubscribableChannel<Message<?>, Me
 	}
 
 	@Override
-	public boolean subscribe(final MessageHandler handler) {
+	public boolean subscribe(final MessageHandler<Message<?>> handler) {
 
 		if (this.registrations.containsKey(handler)) {
 			logger.warn("Channel " + getName() + ", handler already subscribed " + handler);
@@ -98,7 +98,7 @@ public class ReactorMessageChannel implements SubscribableChannel<Message<?>, Me
 	}
 
 	@Override
-	public boolean unsubscribe(MessageHandler handler) {
+	public boolean unsubscribe(MessageHandler<Message<?>> handler) {
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Channel " + getName() + ", removing subscription for handler " + handler);
@@ -119,13 +119,12 @@ public class ReactorMessageChannel implements SubscribableChannel<Message<?>, Me
 
 	private static final class MessageHandlerConsumer implements Consumer<Event<Message<?>>> {
 
-		private final MessageHandler handler;
+		private final MessageHandler<Message<?>> handler;
 
-		private MessageHandlerConsumer(MessageHandler handler) {
+		private MessageHandlerConsumer(MessageHandler<Message<?>> handler) {
 			this.handler = handler;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void accept(Event<Message<?>> event) {
 			Message<?> message = event.getData();

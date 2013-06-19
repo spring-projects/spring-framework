@@ -28,7 +28,9 @@ import org.springframework.web.messaging.PubSubChannelRegistry;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AbstractPubSubChannelRegistry<M extends Message<?>, H extends MessageHandler<M>> implements PubSubChannelRegistry<M, H>, InitializingBean {
+@SuppressWarnings("rawtypes")
+public class AbstractPubSubChannelRegistry<M extends Message, H extends MessageHandler<M>>
+		implements PubSubChannelRegistry<M, H>, InitializingBean {
 
 	private SubscribableChannel<M, H> clientInputChannel;
 

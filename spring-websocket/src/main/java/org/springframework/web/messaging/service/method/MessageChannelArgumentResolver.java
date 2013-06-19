@@ -28,12 +28,13 @@ import org.springframework.web.messaging.support.SessionMessageChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageChannelArgumentResolver implements ArgumentResolver {
+@SuppressWarnings("rawtypes")
+public class MessageChannelArgumentResolver<M extends Message> implements ArgumentResolver<M> {
 
-	private MessageChannel<Message<?>> messageBrokerChannel;
+	private MessageChannel<M> messageBrokerChannel;
 
 
-	public MessageChannelArgumentResolver(MessageChannel<Message<?>> messageBrokerChannel) {
+	public MessageChannelArgumentResolver(MessageChannel<M> messageBrokerChannel) {
 		Assert.notNull(messageBrokerChannel, "messageBrokerChannel is required");
 		this.messageBrokerChannel = messageBrokerChannel;
 	}
@@ -44,10 +45,10 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, M message) throws Exception {
 		Assert.notNull(this.messageBrokerChannel, "messageBrokerChannel is required");
 		final String sessionId = PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
-		return new SessionMessageChannel(this.messageBrokerChannel, sessionId);
+		return new SessionMessageChannel<M>(this.messageBrokerChannel, sessionId);
 	}
 
 }

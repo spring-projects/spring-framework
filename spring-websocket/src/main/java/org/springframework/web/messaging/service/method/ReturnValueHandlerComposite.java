@@ -28,16 +28,16 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReturnValueHandlerComposite implements ReturnValueHandler {
+@SuppressWarnings("rawtypes")
+public class ReturnValueHandlerComposite<M extends Message> implements ReturnValueHandler<M> {
 
-	private final List<ReturnValueHandler> returnValueHandlers =
-		new ArrayList<ReturnValueHandler>();
+	private final List<ReturnValueHandler<M>> returnValueHandlers = new ArrayList<ReturnValueHandler<M>>();
 
 
 	/**
 	 * Add the given {@link ReturnValueHandler}.
 	 */
-	public ReturnValueHandlerComposite addHandler(ReturnValueHandler returnValuehandler) {
+	public ReturnValueHandlerComposite<M> addHandler(ReturnValueHandler<M> returnValuehandler) {
 		this.returnValueHandlers.add(returnValuehandler);
 		return this;
 	}
@@ -45,9 +45,9 @@ public class ReturnValueHandlerComposite implements ReturnValueHandler {
 	/**
 	 * Add the given {@link ReturnValueHandler}s.
 	 */
-	public ReturnValueHandlerComposite addHandlers(List<? extends ReturnValueHandler> handlers) {
+	public ReturnValueHandlerComposite<M> addHandlers(List<? extends ReturnValueHandler<M>> handlers) {
 		if (handlers != null) {
-			for (ReturnValueHandler handler : handlers) {
+			for (ReturnValueHandler<M> handler : handlers) {
 				this.returnValueHandlers.add(handler);
 			}
 		}
@@ -59,8 +59,8 @@ public class ReturnValueHandlerComposite implements ReturnValueHandler {
 		return getReturnValueHandler(returnType) != null;
 	}
 
-	private ReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (ReturnValueHandler handler : this.returnValueHandlers) {
+	private ReturnValueHandler<M> getReturnValueHandler(MethodParameter returnType) {
+		for (ReturnValueHandler<M> handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
 			}
@@ -69,10 +69,10 @@ public class ReturnValueHandlerComposite implements ReturnValueHandler {
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, M message)
 			throws Exception {
 
-		ReturnValueHandler handler = getReturnValueHandler(returnType);
+		ReturnValueHandler<M> handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
 		handler.handleReturnValue(returnValue, returnType, message);
 	}

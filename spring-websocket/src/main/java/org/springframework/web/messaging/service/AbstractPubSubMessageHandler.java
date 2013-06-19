@@ -37,7 +37,8 @@ import org.springframework.web.messaging.PubSubHeaders;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractPubSubMessageHandler implements MessageHandler<Message<?>> {
+@SuppressWarnings("rawtypes")
+public abstract class AbstractPubSubMessageHandler<M extends Message> implements MessageHandler<M> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -67,7 +68,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 	protected abstract Collection<MessageType> getSupportedMessageTypes();
 
 
-	protected boolean canHandle(Message<?> message, MessageType messageType) {
+	protected boolean canHandle(M message, MessageType messageType) {
 
 		if (!CollectionUtils.isEmpty(getSupportedMessageTypes())) {
 			if (!getSupportedMessageTypes().contains(messageType)) {
@@ -78,7 +79,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 		return isDestinationAllowed(message);
 	}
 
-	protected boolean isDestinationAllowed(Message<?> message) {
+	protected boolean isDestinationAllowed(M message) {
 
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String destination = headers.getDestination();
@@ -114,7 +115,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 	}
 
 	@Override
-	public final void handleMessage(Message<?> message) throws MessagingException {
+	public final void handleMessage(M message) throws MessagingException {
 
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		MessageType messageType = headers.getMessageType();
@@ -143,22 +144,22 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler<Mes
 		}
 	}
 
-	protected void handleConnect(Message<?> message) {
+	protected void handleConnect(M message) {
 	}
 
-	protected void handlePublish(Message<?> message) {
+	protected void handlePublish(M message) {
 	}
 
-	protected void handleSubscribe(Message<?> message) {
+	protected void handleSubscribe(M message) {
 	}
 
-	protected void handleUnsubscribe(Message<?> message) {
+	protected void handleUnsubscribe(M message) {
 	}
 
-	protected void handleDisconnect(Message<?> message) {
+	protected void handleDisconnect(M message) {
 	}
 
-	protected void handleOther(Message<?> message) {
+	protected void handleOther(M message) {
 	}
 
 }

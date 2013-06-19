@@ -32,7 +32,8 @@ import org.springframework.web.messaging.converter.MessageConverter;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageBodyArgumentResolver implements ArgumentResolver {
+@SuppressWarnings("rawtypes")
+public class MessageBodyArgumentResolver<M extends Message> implements ArgumentResolver<M> {
 
 	private final MessageConverter converter;
 
@@ -47,7 +48,7 @@ public class MessageBodyArgumentResolver implements ArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, M message) throws Exception {
 
 		Object arg = null;
 

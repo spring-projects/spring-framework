@@ -36,21 +36,21 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ArgumentResolverComposite implements ArgumentResolver {
+@SuppressWarnings("rawtypes")
+public class ArgumentResolverComposite<M extends Message> implements ArgumentResolver<M> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<ArgumentResolver> argumentResolvers =
-			new LinkedList<ArgumentResolver>();
+	private final List<ArgumentResolver<M>> argumentResolvers =	new LinkedList<ArgumentResolver<M>>();
 
-	private final Map<MethodParameter, ArgumentResolver> argumentResolverCache =
-			new ConcurrentHashMap<MethodParameter, ArgumentResolver>(256);
+	private final Map<MethodParameter, ArgumentResolver<M>> argumentResolverCache =
+			new ConcurrentHashMap<MethodParameter, ArgumentResolver<M>>(256);
 
 
 	/**
 	 * Return a read-only list with the contained resolvers, or an empty list.
 	 */
-	public List<ArgumentResolver> getResolvers() {
+	public List<ArgumentResolver<M>> getResolvers() {
 		return Collections.unmodifiableList(this.argumentResolvers);
 	}
 
@@ -68,9 +68,9 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 	 * @exception IllegalStateException if no suitable {@link ArgumentResolver} is found.
 	 */
 	@Override
-	public Object resolveArgument(MethodParameter parameter, Message message) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, M message) throws Exception {
 
-		ArgumentResolver resolver = getArgumentResolver(parameter);
+		ArgumentResolver<M> resolver = getArgumentResolver(parameter);
 		Assert.notNull(resolver, "Unknown parameter type [" + parameter.getParameterType().getName() + "]");
 		return resolver.resolveArgument(parameter, message);
 	}
@@ -78,10 +78,10 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 	/**
 	 * Find a registered {@link ArgumentResolver} that supports the given method parameter.
 	 */
-	private ArgumentResolver getArgumentResolver(MethodParameter parameter) {
-		ArgumentResolver result = this.argumentResolverCache.get(parameter);
+	private ArgumentResolver<M> getArgumentResolver(MethodParameter parameter) {
+		ArgumentResolver<M> result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
-			for (ArgumentResolver resolver : this.argumentResolvers) {
+			for (ArgumentResolver<M> resolver : this.argumentResolvers) {
 				if (resolver.supportsParameter(parameter)) {
 					result = resolver;
 					this.argumentResolverCache.put(parameter, result);
@@ -95,7 +95,7 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 	/**
 	 * Add the given {@link ArgumentResolver}.
 	 */
-	public ArgumentResolverComposite addResolver(ArgumentResolver argumentResolver) {
+	public ArgumentResolverComposite<M> addResolver(ArgumentResolver<M> argumentResolver) {
 		this.argumentResolvers.add(argumentResolver);
 		return this;
 	}
@@ -103,9 +103,9 @@ public class ArgumentResolverComposite implements ArgumentResolver {
 	/**
 	 * Add the given {@link ArgumentResolver}s.
 	 */
-	public ArgumentResolverComposite addResolvers(List<? extends ArgumentResolver> argumentResolvers) {
+	public ArgumentResolverComposite<M> addResolvers(List<? extends ArgumentResolver<M>> argumentResolvers) {
 		if (argumentResolvers != null) {
-			for (ArgumentResolver resolver : argumentResolvers) {
+			for (ArgumentResolver<M> resolver : argumentResolvers) {
 				this.argumentResolvers.add(resolver);
 			}
 		}

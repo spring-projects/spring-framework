@@ -43,9 +43,10 @@ import org.springframework.web.method.HandlerMethod;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class InvocableMessageHandlerMethod extends HandlerMethod {
+@SuppressWarnings("rawtypes")
+public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMethod {
 
-	private ArgumentResolverComposite argumentResolvers = new ArgumentResolverComposite();
+	private ArgumentResolverComposite<M> argumentResolvers = new ArgumentResolverComposite<M>();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
@@ -75,7 +76,7 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	 * Set {@link ArgumentResolver}s to use to use for resolving method
 	 * argument values.
 	 */
-	public void setMessageMethodArgumentResolvers(ArgumentResolverComposite argumentResolvers) {
+	public void setMessageMethodArgumentResolvers(ArgumentResolverComposite<M> argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 
@@ -97,7 +98,7 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	 * @exception Exception raised if no suitable argument resolver can be found, or the
 	 *            method raised an exception
 	 */
-	public final Object invoke(Message<?> message) throws Exception {
+	public final Object invoke(M message) throws Exception {
 
 		Object[] args = getMethodArgumentValues(message);
 
@@ -120,7 +121,7 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(Message<?> message) throws Exception {
+	private Object[] getMethodArgumentValues(M message) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];

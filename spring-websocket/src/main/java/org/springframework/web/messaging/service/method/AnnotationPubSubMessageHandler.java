@@ -52,10 +52,11 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
+@SuppressWarnings("rawtypes")
+public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractPubSubMessageHandler<M>
 		implements ApplicationContextAware, InitializingBean {
 
-	private PubSubChannelRegistry registry;
+	private PubSubChannelRegistry<M, ?> registry;
 
 	private List<MessageConverter> messageConverters;
 
@@ -67,12 +68,12 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	private Map<MappingInfo, HandlerMethod> unsubscribeMethods = new HashMap<MappingInfo, HandlerMethod>();
 
-	private ArgumentResolverComposite argumentResolvers = new ArgumentResolverComposite();
+	private ArgumentResolverComposite<M> argumentResolvers = new ArgumentResolverComposite<M>();
 
-	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
+	private ReturnValueHandlerComposite<M> returnValueHandlers = new ReturnValueHandlerComposite<M>();
 
 
-	public AnnotationPubSubMessageHandler(PubSubChannelRegistry registry) {
+	public AnnotationPubSubMessageHandler(PubSubChannelRegistry<M, ?> registry) {
 		Assert.notNull(registry, "registry is required");
 		this.registry = registry;
 	}
@@ -96,10 +97,10 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.registry.getMessageBrokerChannel()));
-		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver<M>(this.registry.getMessageBrokerChannel()));
+		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver<M>(this.messageConverters));
 
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.registry.getClientOutputChannel()));
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler<M>(this.registry.getClientOutputChannel()));
 	}
 
 	protected void initHandlerMethods() {
@@ -165,21 +166,21 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 	}
 
 	@Override
-	public void handlePublish(Message<?> message) {
+	public void handlePublish(M message) {
 		handleMessageInternal(message, this.messageMethods);
 	}
 
 	@Override
-	public void handleSubscribe(Message<?> message) {
+	public void handleSubscribe(M message) {
 		handleMessageInternal(message, this.subscribeMethods);
 	}
 
 	@Override
-	public void handleUnsubscribe(Message<?> message) {
+	public void handleUnsubscribe(M message) {
 		handleMessageInternal(message, this.unsubscribeMethods);
 	}
 
-	private void handleMessageInternal(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
+	private void handleMessageInternal(final M message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
 		PubSubHeaders headers = PubSubHeaders.fromMessageHeaders(message.getHeaders());
 		String destination = headers.getDestination();
@@ -192,7 +193,7 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 		HandlerMethod handlerMethod = match.createWithResolvedBean();
 
 		// TODO:
-		InvocableMessageHandlerMethod invocableHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod);
+		InvocableMessageHandlerMethod<M> invocableHandlerMethod = new InvocableMessageHandlerMethod<M>(handlerMethod);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
