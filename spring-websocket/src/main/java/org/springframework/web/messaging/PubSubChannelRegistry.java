@@ -28,10 +28,21 @@ import org.springframework.messaging.SubscribableChannel;
 @SuppressWarnings("rawtypes")
 public interface PubSubChannelRegistry<M extends Message, H extends MessageHandler<M>> {
 
+
+	/**
+	 * A channel for messaging arriving from clients.
+	 */
 	SubscribableChannel<M, H> getClientInputChannel();
 
+	/**
+	 * A channel for sending direct messages to a client. The client must be have
+	 * previously subscribed to the destination of the message.
+	 */
 	SubscribableChannel<M, H> getClientOutputChannel();
 
+	/**
+	 * A channel for broadcasting messages through a message broker.
+	 */
 	SubscribableChannel<M, H> getMessageBrokerChannel();
 
 }

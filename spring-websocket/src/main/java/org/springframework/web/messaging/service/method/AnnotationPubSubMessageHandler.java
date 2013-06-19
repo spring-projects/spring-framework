@@ -43,6 +43,7 @@ import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
+import org.springframework.web.messaging.support.MessageHolder;
 import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
@@ -197,6 +198,8 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
+			MessageHolder.setMessage(message);
+
 			Object value = invocableHandlerMethod.invoke(message);
 
 			MethodParameter returnType = handlerMethod.getReturnType();
@@ -205,11 +208,13 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 			}
 
 			this.returnValueHandlers.handleReturnValue(value, returnType, message);
-
 		}
 		catch (Throwable e) {
 			// TODO: send error message, or add @ExceptionHandler-like capability
 			e.printStackTrace();
+		}
+		finally {
+			MessageHolder.reset();
 		}
 	}
 

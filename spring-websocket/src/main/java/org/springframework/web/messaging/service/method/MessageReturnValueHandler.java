@@ -16,6 +16,8 @@
 
 package org.springframework.web.messaging.service.method;
 
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -68,33 +70,30 @@ public class MessageReturnValueHandler<M extends Message> implements ReturnValue
 			return;
 		}
 
-		returnMessage = updateReturnMessage(returnMessage, message);
+		returnMessage = processReturnMessage(returnMessage, message);
 
 		this.clientChannel.send(returnMessage);
  	}
 
-	protected M updateReturnMessage(M returnMessage, M message) {
+	protected M processReturnMessage(M returnMessage, M message) {
 
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
-		String sessionId = headers.getSessionId();
-		String subscriptionId = headers.getSubscriptionId();
-
-		Assert.notNull(subscriptionId, "No subscription id: " + message);
+		Assert.notNull(headers.getSubscriptionId(), "No subscription id: " + message);
 
 		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(returnMessage);
-		returnHeaders.setSessionId(sessionId);
-		returnHeaders.setSubscriptionId(subscriptionId);
+		returnHeaders.setSessionId(headers.getSessionId());
+		returnHeaders.setSubscriptionId(headers.getSubscriptionId());
 
 		if (returnHeaders.getDestination() == null) {
 			returnHeaders.setDestination(headers.getDestination());
 		}
 
-		return createMessage(returnHeaders, returnMessage.getPayload());
+		return createMessage(returnMessage.getPayload(), returnHeaders.toHeaders());
 	}
 
 	@SuppressWarnings("unchecked")
-	private M createMessage(PubSubHeaderAccesssor returnHeaders, Object payload) {
-		return (M) MessageBuilder.withPayload(payload).copyHeaders(returnHeaders.toHeaders()).build();
+	private M createMessage(Object payload, Map<String, Object> headers) {
+		return (M) MessageBuilder.withPayload(payload).copyHeaders(headers).build();
 	}
 
 }
