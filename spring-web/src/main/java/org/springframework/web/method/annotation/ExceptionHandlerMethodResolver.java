@@ -56,11 +56,15 @@ public class ExceptionHandlerMethodResolver {
 	 * @param handlerType the type to introspect
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
-		for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
+		for (Method method : HandlerMethodSelector.selectMethods(handlerType, getExceptionHandlerMethods())) {
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
 				addExceptionMapping(exceptionType, method);
 			}
 		}
+	}
+
+	protected MethodFilter getExceptionHandlerMethods() {
+		return EXCEPTION_HANDLER_METHODS;
 	}
 
 	/**
@@ -71,8 +75,7 @@ public class ExceptionHandlerMethodResolver {
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
 		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
 
-		ExceptionHandler annotation = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
-		result.addAll(Arrays.asList(annotation.value()));
+		detectAnnotationExceptionMappings(method, result);
 
 		if (result.isEmpty()) {
 			for (Class<?> paramType : method.getParameterTypes()) {
@@ -85,6 +88,11 @@ public class ExceptionHandlerMethodResolver {
 		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
 
 		return result;
+	}
+
+	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
+		ExceptionHandler annotation = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		result.addAll(Arrays.asList(annotation.value()));
 	}
 
 	private void addExceptionMapping(Class<? extends Throwable> exceptionType, Method method) {

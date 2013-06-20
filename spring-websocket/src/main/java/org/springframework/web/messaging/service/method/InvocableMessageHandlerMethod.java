@@ -17,6 +17,7 @@
 package org.springframework.web.messaging.service.method;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.springframework.core.GenericTypeResolver;
@@ -59,6 +60,13 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	}
 
 	/**
+	 * Create an instance from a bean instance and a method.
+	 */
+	public InvocableMessageHandlerMethod(Object bean, Method method) {
+		super(bean, method);
+	}
+
+	/**
 	 * Constructs a new handler method with the given bean instance, method name and
 	 * parameters.
 	 *
@@ -67,8 +75,9 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
-	public InvocableMessageHandlerMethod(
-			Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
+	public InvocableMessageHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
 		super(bean, methodName, parameterTypes);
 	}
 
@@ -98,9 +107,9 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	 * @exception Exception raised if no suitable argument resolver can be found, or the
 	 *            method raised an exception
 	 */
-	public final Object invoke(M message) throws Exception {
+	public final Object invoke(M message, Object... providedArgs) throws Exception {
 
-		Object[] args = getMethodArgumentValues(message);
+		Object[] args = getMethodArgumentValues(message, providedArgs);
 
 		if (logger.isTraceEnabled()) {
 			StringBuilder builder = new StringBuilder("Invoking [");
@@ -121,7 +130,7 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(M message) throws Exception {
+	private Object[] getMethodArgumentValues(M message, Object... providedArgs) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
@@ -130,7 +139,7 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 			parameter.initParameterNameDiscovery(parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
 
-			args[i] = resolveProvidedArgument(parameter);
+			args[i] = resolveProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
 			}

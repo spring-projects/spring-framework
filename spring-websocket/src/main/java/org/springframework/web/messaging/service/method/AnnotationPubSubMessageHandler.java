@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -68,6 +69,9 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 	private Map<MappingInfo, HandlerMethod> subscribeMethods = new HashMap<MappingInfo, HandlerMethod>();
 
 	private Map<MappingInfo, HandlerMethod> unsubscribeMethods = new HashMap<MappingInfo, HandlerMethod>();
+
+	private final Map<Class<?>, MessageExceptionHandlerMethodResolver> exceptionHandlerCache =
+			new ConcurrentHashMap<Class<?>, MessageExceptionHandlerMethodResolver>(64);
 
 	private ArgumentResolverComposite<M> argumentResolvers = new ArgumentResolverComposite<M>();
 
@@ -193,7 +197,7 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 
 		HandlerMethod handlerMethod = match.createWithResolvedBean();
 
-		// TODO:
+		// TODO: avoid re-creating invocableHandlerMethod
 		InvocableMessageHandlerMethod<M> invocableHandlerMethod = new InvocableMessageHandlerMethod<M>(handlerMethod);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
@@ -209,12 +213,43 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 
 			this.returnValueHandlers.handleReturnValue(value, returnType, message);
 		}
-		catch (Throwable e) {
-			// TODO: send error message, or add @ExceptionHandler-like capability
-			e.printStackTrace();
+		catch (Exception ex) {
+			invokeExceptionHandler(message, handlerMethod, ex);
+		}
+		catch (Throwable ex) {
+			// TODO
+			ex.printStackTrace();
 		}
 		finally {
 			MessageHolder.reset();
+		}
+	}
+
+	private void invokeExceptionHandler(M message, HandlerMethod handlerMethod, Exception ex) {
+
+		InvocableMessageHandlerMethod<M> invocableHandlerMethod;
+		Class<?> beanType = handlerMethod.getBeanType();
+		MessageExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
+		if (resolver == null) {
+			resolver = new MessageExceptionHandlerMethodResolver(beanType);
+			this.exceptionHandlerCache.put(beanType, resolver);
+		}
+
+		Method method = resolver.resolveMethod(ex);
+		if (method == null) {
+			logger.error("Unhandled exception", ex);
+			return;
+		}
+
+		invocableHandlerMethod = new InvocableMessageHandlerMethod<M>(handlerMethod.getBean(), method);
+		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
+
+		try {
+			invocableHandlerMethod.invoke(message, ex);
+		}
+		catch (Throwable t) {
+			logger.error("Error while handling exception", t);
+			return;
 		}
 	}
 

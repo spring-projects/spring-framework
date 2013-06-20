@@ -17,6 +17,7 @@ package org.springframework.web.messaging.stomp.support;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
@@ -60,7 +63,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 
 	private final StompMessageConverter<M> stompMessageConverter = new StompMessageConverter<M>();
 
-	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
+	private final Map<String, SessionInfo> sessionInfos = new ConcurrentHashMap<String, SessionInfo>();
 
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
@@ -78,15 +81,11 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		return this.stompMessageConverter;
 	}
 
-	protected WebSocketSession getWebSocketSession(String sessionId) {
-		return this.sessions.get(sessionId);
-	}
-
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Assert.notNull(this.outputChannel, "No output channel for STOMP messages.");
-		this.sessions.put(session.getId(), session);
+		this.sessionInfos.put(session.getId(), new SessionInfo(session));
 	}
 
 	/**
@@ -172,12 +171,23 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 	}
 
 	protected void handleSubscribe(M message) {
+
 		// TODO: need a way to communicate back if subscription was successfully created or
 		// not in which case an ERROR should be sent back and close the connection
 		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
+
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+		String sessionId = headers.getSessionId();
+		String destination = headers.getDestination();
+
+		SessionInfo sessionInfo = this.sessionInfos.get(sessionId);
+		sessionInfo.addSubscription(destination, headers.getSubscriptionId());
 	}
 
 	protected void handleUnsubscribe(M message) {
+
+		// TODO: remove subscription
+
 	}
 
 	protected void handleDisconnect(M stompMessage) {
@@ -202,7 +212,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		this.sessions.remove(session.getId());
+		this.sessionInfos.remove(session.getId());
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.create(MessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
 		@SuppressWarnings("unchecked")
@@ -228,9 +238,24 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		if (sessionId == null) {
 			logger.error("No \"sessionId\" header in message: " + message);
 		}
-		WebSocketSession session = getWebSocketSession(sessionId);
+
+		SessionInfo sessionInfo = this.sessionInfos.get(sessionId);
+		WebSocketSession session = sessionInfo.getWebSocketSession();
 		if (session == null) {
 			logger.error("Session not found: " + message);
+		}
+
+		if (headers.getSubscriptionId() == null) {
+			String destination = headers.getDestination();
+			Set<String> subs = sessionInfo.getSubscriptionsForDestination(destination);
+			if (subs != null) {
+				// TODO: send to all sub ids
+				headers.setSubscriptionId(subs.iterator().next());
+			}
+			else {
+				logger.error("No subscription id: " + message);
+				return;
+			}
 		}
 
 		byte[] payload;
@@ -260,6 +285,32 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 				catch (IOException e) {
 				}
 			}
+		}
+	}
+
+
+	private static class SessionInfo {
+
+		private final WebSocketSession session;
+
+		private final MultiValueMap<String, String> subscriptions = new LinkedMultiValueMap<String, String>(4);
+
+
+		public SessionInfo(WebSocketSession session) {
+			this.session = session;
+		}
+
+		public WebSocketSession getWebSocketSession() {
+			return this.session;
+		}
+
+		public void addSubscription(String destination, String subscriptionId) {
+			this.subscriptions.add(destination, subscriptionId);
+		}
+
+		public Set<String> getSubscriptionsForDestination(String destination) {
+			List<String> ids = this.subscriptions.get(destination);
+			return (ids != null) ? new HashSet<String>(ids) : null;
 		}
 	}
 

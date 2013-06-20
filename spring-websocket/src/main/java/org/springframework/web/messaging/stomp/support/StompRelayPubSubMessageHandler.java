@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.MediaType;
@@ -147,7 +148,12 @@ public class StompRelayPubSubMessageHandler<M extends Message> extends AbstractP
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			this.running = false;
-			this.tcpClient.close();
+			try {
+				this.tcpClient.close().await(5000, TimeUnit.MILLISECONDS);
+			}
+			catch (InterruptedException e) {
+				// ignore
+			}
 		}
 	}
 
