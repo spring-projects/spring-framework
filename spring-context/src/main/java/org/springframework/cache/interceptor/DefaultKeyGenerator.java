@@ -27,9 +27,17 @@ import org.springframework.cache.interceptor.KeyGenerator;
  * Uses the constant value {@value #NULL_PARAM_KEY} for any
  * {@code null} parameters given.
  *
+ * <p>NOTE: As this implementation returns only a hash of the parameters
+ * it is possible for key collisions to occur. Since Spring 4.0 the
+ * {@link SimpleKeyGenerator} is used when no explicit key generator
+ * has been defined. This class remains for applications that do not
+ * wish to migrate to the {@link SimpleKeyGenerator}.
+ *
  * @author Costin Leau
  * @author Chris Beams
  * @since 3.1
+ * @see SimpleKeyGenerator
+ * @see org.springframework.cache.annotation.CachingConfigurer
  */
 public class DefaultKeyGenerator implements KeyGenerator {
 

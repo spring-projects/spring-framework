@@ -73,7 +73,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
 
-	private KeyGenerator keyGenerator = new DefaultKeyGenerator();
+	private KeyGenerator keyGenerator = new SimpleKeyGenerator();
 
 	private boolean initialized = false;
 
@@ -116,7 +116,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	/**
 	 * Set the KeyGenerator for this cache aspect.
-	 * Default is {@link DefaultKeyGenerator}.
+	 * Default is {@link SimpleKeyGenerator}.
 	 */
 	public void setKeyGenerator(KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;
