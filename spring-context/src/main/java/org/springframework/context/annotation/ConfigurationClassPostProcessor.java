@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,15 +28,18 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
@@ -50,6 +54,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
 import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -95,6 +100,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
+
+	private static final String ENHANCED_CONFIGURATION_PROCESSOR_BEAN_NAME =
+			ConfigurationClassPostProcessor.class.getName() + ".enhancedConfigurationProcessor";
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -224,6 +232,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		RootBeanDefinition iabpp = new RootBeanDefinition(ImportAwareBeanPostProcessor.class);
 		iabpp.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(IMPORT_AWARE_PROCESSOR_BEAN_NAME, iabpp);
+
+		RootBeanDefinition ecbpp = new RootBeanDefinition(EnhancedConfigurationBeanPostProcessor.class);
+		ecbpp.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		registry.registerBeanDefinition(ENHANCED_CONFIGURATION_PROCESSOR_BEAN_NAME, ecbpp);
 
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
@@ -424,4 +436,40 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+
+	/**
+	 * {@link InstantiationAwareBeanPostProcessorAdapter} that ensures
+	 * {@link EnhancedConfiguration} beans are injected with the {@link BeanFactory}
+	 * before the {@link AutowiredAnnotationBeanPostProcessor} runs (SPR-10668).
+	 */
+	private static class EnhancedConfigurationBeanPostProcessor extends
+			InstantiationAwareBeanPostProcessorAdapter implements PriorityOrdered,
+			BeanFactoryAware {
+
+		private BeanFactory beanFactory;
+
+		@Override
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+
+		@Override
+		public PropertyValues postProcessPropertyValues(PropertyValues pvs,
+				PropertyDescriptor[] pds, Object bean, String beanName)
+				throws BeansException {
+			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
+			// postProcessPropertyValues method attempts to auto-wire other configuration
+			// beans.
+			if (bean instanceof EnhancedConfiguration) {
+				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
+			}
+			return pvs;
+		}
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.beanFactory = beanFactory;
+		}
+
+	}
 }

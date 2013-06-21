@@ -411,7 +411,8 @@ class ConfigurationClassEnhancer {
 			Field field = ReflectionUtils.findField(enhancedConfigInstance.getClass(), BEAN_FACTORY_FIELD);
 			Assert.state(field != null, "Unable to find generated bean factory field");
 			Object beanFactory = ReflectionUtils.getField(field, enhancedConfigInstance);
-			Assert.isInstanceOf(ConfigurableBeanFactory.class, beanFactory);
+			Assert.state(beanFactory != null, "The BeanFactory has not been injected into the @Configuration class");
+			Assert.state(beanFactory instanceof ConfigurableBeanFactory, "The injected BeanFactory is not a ConfigurableBeanFactory");
 			return (ConfigurableBeanFactory) beanFactory;
 		}
 	}
