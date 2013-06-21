@@ -63,11 +63,11 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
@@ -218,8 +218,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * Return the configured argument resolvers, or possibly {@code null} if
 	 * not initialized yet via {@link #afterPropertiesSet()}.
 	 */
-	public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
-		return this.argumentResolvers;
+	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
+		return this.argumentResolvers.getResolvers();
 	}
 
 	/**
@@ -239,8 +239,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * Return the argument resolvers for {@code @InitBinder} methods, or possibly
 	 * {@code null} if not initialized yet via {@link #afterPropertiesSet()}.
 	 */
-	public HandlerMethodArgumentResolverComposite getInitBinderArgumentResolvers() {
-		return this.initBinderArgumentResolvers;
+	public List<HandlerMethodArgumentResolver> getInitBinderArgumentResolvers() {
+		return this.initBinderArgumentResolvers.getResolvers();
 	}
 
 	/**
@@ -277,8 +277,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * Return the configured handlers, or possibly {@code null} if not
 	 * initialized yet via {@link #afterPropertiesSet()}.
 	 */
-	public HandlerMethodReturnValueHandlerComposite getReturnValueHandlers() {
-		return this.returnValueHandlers;
+	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		return this.returnValueHandlers.getHandlers();
 	}
 
 	/**
