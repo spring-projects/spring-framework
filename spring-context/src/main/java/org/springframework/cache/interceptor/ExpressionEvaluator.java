@@ -42,6 +42,7 @@ class ExpressionEvaluator {
 
 	public static final Object NO_RESULT = new Object();
 
+
 	private final SpelExpressionParser parser = new SpelExpressionParser();
 
 	// shared param discoverer since it caches data internally

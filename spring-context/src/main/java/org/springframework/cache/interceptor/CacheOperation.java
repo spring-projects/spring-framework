@@ -23,15 +23,18 @@ import java.util.Set;
 import org.springframework.util.Assert;
 
 /**
- * Base class implementing {@link CacheOperation}.
+ * Base class for cache operations.
  *
  * @author Costin Leau
  */
 public abstract class CacheOperation {
 
 	private Set<String> cacheNames = Collections.emptySet();
+
 	private String condition = "";
+
 	private String key = "";
+
 	private String name = "";
 
 
