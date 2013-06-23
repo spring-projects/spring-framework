@@ -70,4 +70,6 @@ public interface CacheableService<T> {
 	T multiConditionalCacheAndEvict(Object arg1);
 
 	T multiUpdate(Object arg1);
+
+	TestEntity putRefersToResult(TestEntity arg1);
 }

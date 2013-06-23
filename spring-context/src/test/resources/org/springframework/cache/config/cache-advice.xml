@@ -45,6 +45,7 @@
 			<cache:cache-evict method="multiConditionalCacheAndEvict" cache="secondary"/>
 			<cache:cache-put method="multiUpdate" cache="primary"/>
 			<cache:cache-put method="multiUpdate" cache="secondary"/>
+			<cache:cache-put method="putRefersToResult" cache="primary" key="#result.id"/>
 		</cache:caching>
 	</cache:advice>
 
@@ -82,6 +83,7 @@
 			<cache:cache-evict method="multiConditionalCacheAndEvict" cache="secondary"/>
 			<cache:cache-put method="multiUpdate" cache="primary"/>
 			<cache:cache-put method="multiUpdate" cache="secondary"/>
+			<cache:cache-put method="putRefersToResult" cache="primary" key="#result.id"/>
 		</cache:caching>
 	</cache:advice>
 

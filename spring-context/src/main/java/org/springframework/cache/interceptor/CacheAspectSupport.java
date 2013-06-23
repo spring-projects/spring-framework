@@ -148,15 +148,15 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// Process any early evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true, ExpressionEvaluator.NO_RESULT);
 
-		// Collect puts, either explicit @CachePuts or from a @Cachable miss
+		// Collect puts from any @Cachable miss
 		List<CachePutRequest> cachePutRequests = new ArrayList<CachePutRequest>();
-		collectPutRequests(contexts.get(CachePutOperation.class), cachePutRequests, false);
-		collectPutRequests(contexts.get(CacheableOperation.class), cachePutRequests, true);
+		collectPutRequests(contexts.get(CacheableOperation.class),
+				ExpressionEvaluator.NO_RESULT, cachePutRequests, true);
 
 		ValueWrapper result = null;
 
 		// We only attempt to get a cached result if there are no put requests
-		if(cachePutRequests.isEmpty()) {
+		if(cachePutRequests.isEmpty() && contexts.get(CachePutOperation.class).isEmpty()) {
 			result = findCachedResult(contexts.get(CacheableOperation.class));
 		}
 
@@ -164,6 +164,10 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		if(result == null) {
 			result = new SimpleValueWrapper(invoker.invoke());
 		}
+
+		// Collect any explicit @CachePuts
+		collectPutRequests(contexts.get(CachePutOperation.class), result.get(),
+				cachePutRequests, false);
 
 		// Process any collected put requests, either from @CachePut or a @Cacheable miss
 		for (CachePutRequest cachePutRequest : cachePutRequests) {
@@ -182,13 +186,13 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			CacheEvictOperation operation = (CacheEvictOperation) context.operation;
 			if (beforeInvocation == operation.isBeforeInvocation() &&
 					isConditionPassing(context, result)) {
-				performCacheEvict(context, operation);
+				performCacheEvict(context, operation, result);
 			}
 		}
 	}
 
 	private void performCacheEvict(CacheOperationContext context,
-			CacheEvictOperation operation) {
+			CacheEvictOperation operation, Object result) {
 		Object key = null;
 		for (Cache cache : context.getCaches()) {
 			if (operation.isCacheWide()) {
@@ -196,7 +200,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				cache.clear();
 			} else {
 				if(key == null) {
-					key = context.generateKey();
+					key = context.generateKey(result);
 				}
 				logInvalidating(context, operation, key);
 				cache.evict(key);
@@ -213,10 +217,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 	}
 
-	private void collectPutRequests(Collection<CacheOperationContext> contexts, Collection<CachePutRequest> putRequests, boolean whenNotInCache) {
+	private void collectPutRequests(Collection<CacheOperationContext> contexts,
+			Object result, Collection<CachePutRequest> putRequests, boolean whenNotInCache) {
 		for (CacheOperationContext context : contexts) {
-			if (isConditionPassing(context, ExpressionEvaluator.NO_RESULT)) {
-				Object key = generateKey(context);
+			if (isConditionPassing(context, result)) {
+				Object key = generateKey(context, result);
 				if (!whenNotInCache || findInCaches(context, key) == null) {
 					putRequests.add(new CachePutRequest(context, key));
 				}
@@ -229,7 +234,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		for (CacheOperationContext context : contexts) {
 			if (isConditionPassing(context, ExpressionEvaluator.NO_RESULT)) {
 				if(result == null) {
-					result = findInCaches(context, generateKey(context));
+					result = findInCaches(context,
+							generateKey(context, ExpressionEvaluator.NO_RESULT));
 				}
 			}
 		}
@@ -254,8 +260,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return passing;
 	}
 
-	private Object generateKey(CacheOperationContext context) {
-		Object key = context.generateKey();
+	private Object generateKey(CacheOperationContext context, Object result) {
+		Object key = context.generateKey(result);
 		Assert.notNull(key, "Null key returned for cache operation (maybe you "
 				+ "are using named params on classes without debug info?) "
 				+ context.operation);
@@ -393,9 +399,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		 * Computes the key for the given caching operation.
 		 * @return generated key (null if none can be generated)
 		 */
-		protected Object generateKey() {
+		protected Object generateKey(Object result) {
 			if (StringUtils.hasText(this.operation.getKey())) {
-				EvaluationContext evaluationContext = createEvaluationContext(ExpressionEvaluator.NO_RESULT);
+				EvaluationContext evaluationContext = createEvaluationContext(result);
 				return CacheAspectSupport.this.evaluator.key(this.operation.getKey(), this.method, evaluationContext);
 			}
 			return CacheAspectSupport.this.keyGenerator.generate(this.target, this.method, this.args);
