@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package org.springframework.expression.spel.standard;
 
 /**
- * Holder for a kind of token, the associated data and its position in the input data stream (start/end).
+ * Holder for a kind of token, the associated data and its position in the input data
+ * stream (start/end).
  *
  * @author Andy Clement
  * @since 3.0
@@ -25,12 +26,17 @@ package org.springframework.expression.spel.standard;
 class Token {
 
 	TokenKind kind;
+
 	String data;
+
 	int startpos; // index of first character
+
 	int endpos;   // index of char after the last character
 
+
 	/**
-	 * Constructor for use when there is no particular data for the token (eg. TRUE or '+')
+	 * Constructor for use when there is no particular data for the token (eg. TRUE or
+	 * '+')
 	 * @param startpos the exact start
 	 * @param endpos the index to the last character
 	 */
@@ -47,42 +53,42 @@ class Token {
 
 
 	public TokenKind getKind() {
-		return kind;
+		return this.kind;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		s.append("[").append(kind.toString());
-		if (kind.hasPayload()) {
-			s.append(":").append(data);
+		s.append("[").append(this.kind.toString());
+		if (this.kind.hasPayload()) {
+			s.append(":").append(this.data);
 		}
 		s.append("]");
-		s.append("(").append(startpos).append(",").append(endpos).append(")");
+		s.append("(").append(this.startpos).append(",").append(this.endpos).append(")");
 		return s.toString();
 	}
 
 	public boolean isIdentifier() {
-		return kind==TokenKind.IDENTIFIER;
+		return this.kind==TokenKind.IDENTIFIER;
 	}
 
 	public boolean isNumericRelationalOperator() {
-		return kind==TokenKind.GT || kind==TokenKind.GE || kind==TokenKind.LT || kind==TokenKind.LE || kind==TokenKind.EQ || kind==TokenKind.NE;
+		return this.kind==TokenKind.GT || this.kind==TokenKind.GE || this.kind==TokenKind.LT || this.kind==TokenKind.LE || this.kind==TokenKind.EQ || this.kind==TokenKind.NE;
 	}
 
 	public String stringValue() {
-		return data;
+		return this.data;
 	}
 
 	public Token asInstanceOfToken() {
-		return new Token(TokenKind.INSTANCEOF,startpos,endpos);
+		return new Token(TokenKind.INSTANCEOF,this.startpos,this.endpos);
 	}
 
 	public Token asMatchesToken() {
-		return new Token(TokenKind.MATCHES,startpos,endpos);
+		return new Token(TokenKind.MATCHES,this.startpos,this.endpos);
 	}
 
 	public Token asBetweenToken() {
-		return new Token(TokenKind.BETWEEN,startpos,endpos);
+		return new Token(TokenKind.BETWEEN,this.startpos,this.endpos);
 	}
 }

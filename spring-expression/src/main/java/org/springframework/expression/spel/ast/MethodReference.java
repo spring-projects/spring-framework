@@ -33,6 +33,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
+ * Expression language AST node that represents a method reference.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -112,8 +114,8 @@ public class MethodReference extends SpelNodeImpl {
 		MethodExecutor executorToUse = this.cachedExecutor;
 		if (executorToUse != null) {
 			try {
-				return executorToUse.execute(
-						state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
+				return executorToUse.execute(state.getEvaluationContext(),
+						state.getActiveContextObject().getValue(), arguments);
 			}
 			catch (AccessException ae) {
 				// Two reasons this can occur:
@@ -137,8 +139,8 @@ public class MethodReference extends SpelNodeImpl {
 		executorToUse = findAccessorForMethod(this.name, getTypes(arguments), state);
 		this.cachedExecutor = executorToUse;
 		try {
-			return executorToUse.execute(
-					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
+			return executorToUse.execute(state.getEvaluationContext(),
+					state.getActiveContextObject().getValue(), arguments);
 		}
 		catch (AccessException ae) {
 			// Same unwrapping exception handling as above in above catch block
@@ -158,12 +160,10 @@ public class MethodReference extends SpelNodeImpl {
 			if (rootCause instanceof RuntimeException) {
 				throw (RuntimeException) rootCause;
 			}
-			else {
-				throw new ExpressionInvocationTargetException(getStartPosition(),
-						"A problem occurred when trying to execute method '" + this.name +
-						"' on object of type '" + state.getActiveContextObject().getValue().getClass().getName() + "'",
-						rootCause);
-			}
+			throw new ExpressionInvocationTargetException(getStartPosition(),
+					"A problem occurred when trying to execute method '" + this.name +
+					"' on object of type '" + state.getActiveContextObject().getValue().getClass().getName() + "'",
+					rootCause);
 		}
 	}
 
@@ -180,42 +180,49 @@ public class MethodReference extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.name).append("(");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0)
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append(getChild(i).toStringAST());
 		}
 		sb.append(")");
 		return sb.toString();
 	}
 
-	private MethodExecutor findAccessorForMethod(String name, List<TypeDescriptor> argumentTypes, ExpressionState state)
+	private MethodExecutor findAccessorForMethod(String name,
+			List<TypeDescriptor> argumentTypes, ExpressionState state)
 			throws SpelEvaluationException {
-
-		return findAccessorForMethod(name,argumentTypes,state.getActiveContextObject().getValue(),state.getEvaluationContext());
+		return findAccessorForMethod(name, argumentTypes,
+				state.getActiveContextObject().getValue(), state.getEvaluationContext());
 	}
 
 	private MethodExecutor findAccessorForMethod(String name,
 			List<TypeDescriptor> argumentTypes, Object contextObject, EvaluationContext eContext)
 			throws SpelEvaluationException {
 
-		List<MethodResolver> mResolvers = eContext.getMethodResolvers();
-		if (mResolvers != null) {
-			for (MethodResolver methodResolver : mResolvers) {
+		List<MethodResolver> methodResolvers = eContext.getMethodResolvers();
+		if (methodResolvers != null) {
+			for (MethodResolver methodResolver : methodResolvers) {
 				try {
-					MethodExecutor cEx = methodResolver.resolve(eContext, contextObject, name, argumentTypes);
-					if (cEx != null) {
-						return cEx;
+					MethodExecutor methodExecutor = methodResolver.resolve(eContext,
+							contextObject, name, argumentTypes);
+					if (methodExecutor != null) {
+						return methodExecutor;
 					}
 				}
 				catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessage.PROBLEM_LOCATING_METHOD,
-							name, contextObject.getClass());
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.PROBLEM_LOCATING_METHOD, name,
+							contextObject.getClass());
 				}
 			}
 		}
-		throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_NOT_FOUND,
+		throw new SpelEvaluationException(
+				getStartPosition(),
+				SpelMessage.METHOD_NOT_FOUND,
 				FormatHelper.formatMethodForMessage(name, argumentTypes),
-				FormatHelper.formatClassNameForMessage(contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
+				FormatHelper.formatClassNameForMessage(contextObject instanceof Class ? ((Class<?>) contextObject)
+						: contextObject.getClass()));
 	}
 
 
@@ -229,6 +236,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final Object[] arguments;
 
+
 		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext, Object object, Object[] arguments) {
 			this.state = state;
 			this.evaluationContext = evaluationContext;
@@ -236,9 +244,10 @@ public class MethodReference extends SpelNodeImpl {
 			this.arguments = arguments;
 		}
 
+
 		@Override
 		public TypedValue getValue() {
-			MethodExecutor executorToUse = cachedExecutor;
+			MethodExecutor executorToUse = MethodReference.this.cachedExecutor;
 			if (executorToUse != null) {
 				try {
 					return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
@@ -257,21 +266,23 @@ public class MethodReference extends SpelNodeImpl {
 					throwSimpleExceptionIfPossible(this.state, ae);
 
 					// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
-					cachedExecutor = null;
+					MethodReference.this.cachedExecutor = null;
 				}
 			}
 
 			// either there was no accessor or it no longer existed
-			executorToUse = findAccessorForMethod(name, getTypes(this.arguments), this.target, this.evaluationContext);
-			cachedExecutor = executorToUse;
+			executorToUse = findAccessorForMethod(MethodReference.this.name, getTypes(this.arguments), this.target, this.evaluationContext);
+			MethodReference.this.cachedExecutor = executorToUse;
 			try {
 				return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
 			}
-			catch (AccessException ae) {
+			catch (AccessException ex) {
 				// Same unwrapping exception handling as above in above catch block
-				throwSimpleExceptionIfPossible(this.state, ae);
-				throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
-						name, this.state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
+				throwSimpleExceptionIfPossible(this.state, ex);
+				throw new SpelEvaluationException(getStartPosition(), ex,
+						SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
+						MethodReference.this.name, this.state.getActiveContextObject().getValue().getClass().getName(),
+						ex.getMessage());
 			}
 		}
 

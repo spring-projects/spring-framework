@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
- * A simple basic TypeComparator implementation. It supports comparison of numbers and types implementing Comparable.
+ * A simple basic TypeComparator implementation. It supports comparison of numbers and
+ * types implementing Comparable.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -35,7 +36,8 @@ public class StandardTypeComparator implements TypeComparator {
 		// If one is null, check if the other is
 		if (left == null) {
 			return right == null ? 0 : -1;
-		} else if (right == null) {
+		}
+		else if (right == null) {
 			return 1; // left cannot be null
 		}
 
@@ -46,20 +48,24 @@ public class StandardTypeComparator implements TypeComparator {
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				double d1 = leftNumber.doubleValue();
 				double d2 = rightNumber.doubleValue();
-				return Double.compare(d1,d2);
-			} else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return Double.compare(d1, d2);
+			}
+
+			if (leftNumber instanceof Float || rightNumber instanceof Float) {
 				float f1 = leftNumber.floatValue();
 				float f2 = rightNumber.floatValue();
-				return Float.compare(f1,f2);
-			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				return Float.compare(f1, f2);
+			}
+
+			if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				Long l1 = leftNumber.longValue();
 				Long l2 = rightNumber.longValue();
 				return l1.compareTo(l2);
-			} else {
-				Integer i1 = leftNumber.intValue();
-				Integer i2 = rightNumber.intValue();
-				return i1.compareTo(i2);
 			}
+
+			Integer i1 = leftNumber.intValue();
+			Integer i2 = rightNumber.intValue();
+			return i1.compareTo(i2);
 		}
 
 		try {
@@ -78,12 +84,15 @@ public class StandardTypeComparator implements TypeComparator {
 		if (left == null || right == null) {
 			return true;
 		}
+
 		if (left instanceof Number && right instanceof Number) {
 			return true;
 		}
+
 		if (left instanceof Comparable) {
 			return true;
 		}
+
 		return false;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
 /**
- * The common supertype of all AST nodes in a parsed Spring Expression Language format expression.
+ * The common supertype of all AST nodes in a parsed Spring Expression Language format
+ * expression.
  *
  * @author Andy Clement
  * @since 3.0
@@ -37,8 +38,11 @@ public abstract class SpelNodeImpl implements SpelNode {
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 	protected int pos; // start = top 16bits, end = bottom 16bits
+
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
+
 	private SpelNodeImpl parent;
+
 
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
@@ -52,11 +56,14 @@ public abstract class SpelNodeImpl implements SpelNode {
 		}
 	}
 
+
 	protected SpelNodeImpl getPreviousChild() {
 		SpelNodeImpl result = null;
-		if (parent != null) {
-			for (SpelNodeImpl child : parent.children) {
-				if (this==child) break;
+		if (this.parent != null) {
+			for (SpelNodeImpl child : this.parent.children) {
+				if (this==child) {
+					break;
+				}
 				result = child;
 			}
 		}
@@ -67,21 +74,22 @@ public abstract class SpelNodeImpl implements SpelNode {
      * @return true if the next child is one of the specified classes
      */
 	protected boolean nextChildIs(Class... clazzes) {
-		if (parent!=null) {
-			SpelNodeImpl[] peers = parent.children;
-			for (int i=0,max=peers.length;i<max;i++) {
-				if (peers[i]==this) {
-					if ((i+1)>=max) {
-						return false;
-					} else {
-						Class clazz = peers[i+1].getClass();
-						for (Class desiredClazz: clazzes) {
-							if (clazz.equals(desiredClazz)) {
-								return true;
-							}
-						}
+		if (this.parent != null) {
+			SpelNodeImpl[] peers = this.parent.children;
+			for (int i = 0, max = peers.length; i < max; i++) {
+				if (peers[i] == this) {
+					if ((i + 1) >= max) {
 						return false;
 					}
+
+					Class clazz = peers[i + 1].getClass();
+					for (Class desiredClazz : clazzes) {
+						if (clazz.equals(desiredClazz)) {
+							return true;
+						}
+					}
+
+					return false;
 				}
 			}
 		}
@@ -92,7 +100,8 @@ public abstract class SpelNodeImpl implements SpelNode {
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState).getValue();
-		} else {
+		}
+		else {
 			// configuration not set - does that matter?
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
@@ -102,7 +111,8 @@ public abstract class SpelNodeImpl implements SpelNode {
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState);
-		} else {
+		}
+		else {
 			// configuration not set - does that matter?
 			return getTypedValue(new ExpressionState(new StandardEvaluationContext()));
 		}
@@ -116,17 +126,18 @@ public abstract class SpelNodeImpl implements SpelNode {
 
 	@Override
 	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelEvaluationException(getStartPosition(), SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
+		throw new SpelEvaluationException(getStartPosition(),
+				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
 	@Override
 	public SpelNode getChild(int index) {
-		return children[index];
+		return this.children[index];
 	}
 
 	@Override
 	public int getChildCount() {
-		return children.length;
+		return this.children.length;
 	}
 
 	@Override
@@ -148,15 +159,15 @@ public abstract class SpelNodeImpl implements SpelNode {
 
 	@Override
 	public int getStartPosition() {
-		return (pos>>16);
+		return (this.pos>>16);
 	}
 
 	@Override
 	public int getEndPosition() {
-		return (pos&0xffff);
+		return (this.pos&0xffff);
 	}
 
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		throw new SpelEvaluationException(pos,SpelMessage.NOT_ASSIGNABLE,toStringAST());
+		throw new SpelEvaluationException(this.pos,SpelMessage.NOT_ASSIGNABLE,toStringAST());
 	}
 }

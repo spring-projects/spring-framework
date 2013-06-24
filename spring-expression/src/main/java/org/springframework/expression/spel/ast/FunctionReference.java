@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,15 @@ import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in the context prior to the
- * expression being evaluated or within the expression itself using a lambda function definition. For example: Lambda
- * function definition in an expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
- * "#isEven(37)". Functions may also be static java methods, registered in the context prior to invocation of the
- * expression.
+ * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in
+ * the context prior to the expression being evaluated or within the expression itself
+ * using a lambda function definition. For example: Lambda function definition in an
+ * expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
+ * "#isEven(37)". Functions may also be static java methods, registered in the context
+ * prior to invocation of the expression.
  *
- * <p>Functions are very simplistic, the arguments are not part of the definition (right now),
- * so the names must be unique.
+ * <p>Functions are very simplistic, the arguments are not part of the definition (right
+ * now), so the names must be unique.
  *
  * @author Andy Clement
  * @since 3.0
@@ -47,21 +48,23 @@ public class FunctionReference extends SpelNodeImpl {
 
 	private final String name;
 
+
 	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
 		super(pos,arguments);
-		name = functionName;
+		this.name = functionName;
 	}
+
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		TypedValue o = state.lookupVariable(name);
+		TypedValue o = state.lookupVariable(this.name);
 		if (o == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, name);
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 
 		// Two possibilities: a lambda function or a Java static method registered as a function
 		if (!(o.getValue() instanceof Method)) {
-			throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, name, o.getClass());
+			throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, o.getClass());
 		}
 		try {
 			return executeFunctionJLRMethod(state, (Method) o.getValue());
@@ -89,9 +92,9 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		// Only static methods can be called in this way
 		if (!Modifier.isStatic(method.getModifiers())) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_MUST_BE_STATIC, method
-					.getDeclaringClass().getName()
-					+ "." + method.getName(), name);
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.FUNCTION_MUST_BE_STATIC,
+					method.getDeclaringClass().getName() + "." + method.getName(), this.name);
 		}
 
 		// Convert arguments if necessary and remap them for varargs if required
@@ -100,7 +103,8 @@ public class FunctionReference extends SpelNodeImpl {
 			ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		}
 		if (method.isVarArgs()) {
-			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
+			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(
+					method.getParameterTypes(), functionArgs);
 		}
 
 		try {
@@ -116,11 +120,12 @@ public class FunctionReference extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder("#").append(name);
+		StringBuilder sb = new StringBuilder("#").append(this.name);
 		sb.append("(");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0)
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append(getChild(i).toStringAST());
 		}
 		sb.append(")");
@@ -137,7 +142,7 @@ public class FunctionReference extends SpelNodeImpl {
 		// Compute arguments to the function
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			arguments[i] = children[i].getValueInternal(state).getValue();
+			arguments[i] = this.children[i].getValueInternal(state).getValue();
 		}
 		return arguments;
 	}

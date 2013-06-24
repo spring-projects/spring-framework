@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,21 +29,23 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class TypeReference extends SpelNodeImpl {
 
-	private int dimensions;
+	private final int dimensions;
 
-	public TypeReference(int pos,SpelNodeImpl qualifiedId) {
+
+	public TypeReference(int pos, SpelNodeImpl qualifiedId) {
 		this(pos,qualifiedId,0);
 	}
 
-	public TypeReference(int pos,SpelNodeImpl qualifiedId,int dims) {
+	public TypeReference(int pos, SpelNodeImpl qualifiedId, int dims) {
 		super(pos,qualifiedId);
 		this.dimensions = dims;
 	}
 
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		// TODO possible optimization here if we cache the discovered type reference, but can we do that?
-		String typename = (String) children[0].getValueInternal(state).getValue();
+		String typename = (String) this.children[0].getValueInternal(state).getValue();
 		if (typename.indexOf(".") == -1 && Character.isLowerCase(typename.charAt(0))) {
 			TypeCode tc = TypeCode.valueOf(typename.toUpperCase());
 			if (tc != TypeCode.OBJECT) {
@@ -59,8 +61,8 @@ public class TypeReference extends SpelNodeImpl {
 	}
 
 	private Class makeArrayIfNecessary(Class clazz) {
-		if (dimensions!=0) {
-			for (int i=0;i<dimensions;i++) {
+		if (this.dimensions!=0) {
+			for (int i=0;i<this.dimensions;i++) {
 				Object o = Array.newInstance(clazz, 0);
 				clazz = o.getClass();
 			}
@@ -73,7 +75,7 @@ public class TypeReference extends SpelNodeImpl {
 		StringBuilder sb = new StringBuilder();
 		sb.append("T(");
 		sb.append(getChild(0).toStringAST());
-		for (int d=0;d<dimensions;d++) {
+		for (int d=0;d<this.dimensions;d++) {
 			sb.append("[]");
 		}
 		sb.append(")");

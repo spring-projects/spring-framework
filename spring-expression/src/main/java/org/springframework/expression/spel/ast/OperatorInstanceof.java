@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * The operator 'instanceof' checks if an object is of the class specified in the right hand operand,
- * in the same way that {@code instanceof} does in Java.
+ * The operator 'instanceof' checks if an object is of the class specified in the right
+ * hand operand, in the same way that {@code instanceof} does in Java.
  *
  * @author Andy Clement
  * @since 3.0
@@ -36,11 +36,13 @@ public class OperatorInstanceof extends Operator {
 		super("instanceof", pos, operands);
 	}
 
+
 	/**
-	 * Compare the left operand to see it is an instance of the type specified as the right operand.
-	 * The right operand must be a class.
+	 * Compare the left operand to see it is an instance of the type specified as the
+	 * right operand. The right operand must be a class.
 	 * @param state the expression state
-	 * @return true if the left operand is an instanceof of the right operand, otherwise false
+	 * @return true if the left operand is an instanceof of the right operand, otherwise
+	 *         false
 	 * @throws EvaluationException if there is a problem evaluating the expression
 	 */
 	@Override

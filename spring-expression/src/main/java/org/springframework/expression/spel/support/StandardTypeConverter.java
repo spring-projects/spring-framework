@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link TypeConverter} interface,
- * delegating to a core Spring {@link ConversionService}.
+ * Default implementation of the {@link TypeConverter} interface, delegating to a core
+ * Spring {@link ConversionService}.
  *
  * @author Juergen Hoeller
  * @author Andy Clement

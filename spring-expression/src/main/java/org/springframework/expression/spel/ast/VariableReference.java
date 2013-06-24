@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 
 /**
- * Represents a variable reference, eg. #someVar. Note this is different to a *local* variable like $someVar
+ * Represents a variable reference, eg. #someVar. Note this is different to a *local*
+ * variable like $someVar
  *
  * @author Andy Clement
  * @since 3.0
@@ -30,46 +31,17 @@ import org.springframework.expression.spel.SpelEvaluationException;
 public class VariableReference extends SpelNodeImpl {
 
 	// Well known variables:
-	private final static String THIS = "this";  // currently active context object
-	private final static String ROOT = "root";  // root context object
+	private static final String THIS = "this";  // currently active context object
+
+	private static final String ROOT = "root";  // root context object
+
 
 	private final String name;
 
 
 	public VariableReference(String variableName, int pos) {
 		super(pos);
-		name = variableName;
-	}
-
-
-	class VariableRef implements ValueRef {
-
-		private String name;
-		private TypedValue value;
-		private EvaluationContext eContext;
-
-		public VariableRef(String name, TypedValue value,
-				EvaluationContext evaluationContext) {
-			this.name = name;
-			this.value = value;
-			this.eContext = evaluationContext;
-		}
-
-		@Override
-		public TypedValue getValue() {
-			return value;
-		}
-
-		@Override
-		public void setValue(Object newValue) {
-			eContext.setVariable(name, newValue);
-		}
-
-		@Override
-		public boolean isWritable() {
-			return true;
-		}
-
+		this.name = variableName;
 	}
 
 
@@ -113,5 +85,40 @@ public class VariableReference extends SpelNodeImpl {
 	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
 		return !(this.name.equals(THIS) || this.name.equals(ROOT));
 	}
+
+
+	class VariableRef implements ValueRef {
+
+		private final String name;
+
+		private final TypedValue value;
+
+		private final EvaluationContext evaluationContext;
+
+
+		public VariableRef(String name, TypedValue value,
+				EvaluationContext evaluationContext) {
+			this.name = name;
+			this.value = value;
+			this.evaluationContext = evaluationContext;
+		}
+
+
+		@Override
+		public TypedValue getValue() {
+			return this.value;
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			this.evaluationContext.setVariable(this.name, newValue);
+		}
+
+		@Override
+		public boolean isWritable() {
+			return true;
+		}
+	}
+
 
 }

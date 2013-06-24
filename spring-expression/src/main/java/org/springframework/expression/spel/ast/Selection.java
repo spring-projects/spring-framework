@@ -47,14 +47,18 @@ import org.springframework.util.ObjectUtils;
  */
 public class Selection extends SpelNodeImpl {
 
-	public final static int ALL = 0; // ?[]
-	public final static int FIRST = 1; // ^[]
-	public final static int LAST = 2; // $[]
+	public static final int ALL = 0; // ?[]
+
+	public static final int FIRST = 1; // ^[]
+
+	public static final int LAST = 2; // $[]
 
 	private final int variant;
+
 	private final boolean nullSafe;
 
-	public Selection(boolean nullSafe, int variant,int pos,SpelNodeImpl expression) {
+
+	public Selection(boolean nullSafe, int variant, int pos, SpelNodeImpl expression) {
 		super(pos, expression != null ? new SpelNodeImpl[] { expression }
 				: new SpelNodeImpl[] {});
 		Assert.notNull(expression, "Expression must not be null");
@@ -72,7 +76,7 @@ public class Selection extends SpelNodeImpl {
 		TypedValue op = state.getActiveContextObject();
 		Object operand = op.getValue();
 
-		SpelNodeImpl selectionCriteria = children[0];
+		SpelNodeImpl selectionCriteria = this.children[0];
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			// TODO don't lose generic info for the new map
@@ -85,32 +89,38 @@ public class Selection extends SpelNodeImpl {
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
-							if (variant == FIRST) {
+							if (this.variant == FIRST) {
 								result.put(entry.getKey(),entry.getValue());
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 							}
 							result.put(entry.getKey(),entry.getValue());
 							lastKey = entry.getKey();
 						}
-					} else {
+					}
+					else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
 					}
-				} finally {
+				}
+				finally {
 					state.popActiveContextObject();
 				}
 			}
-			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+			if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(null),this);
 			}
-			if (variant == LAST) {
+
+			if (this.variant == LAST) {
 				Map<Object, Object> resultMap = new HashMap<Object, Object>();
 				Object lastValue = result.get(lastKey);
 				resultMap.put(lastKey,lastValue);
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap),this);
 			}
+
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
-		} else if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
+		}
+
+		if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
 			List<Object> data = new ArrayList<Object>();
 			Collection<?> c = (operand instanceof Collection) ?
 					(Collection<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
@@ -124,64 +134,64 @@ public class Selection extends SpelNodeImpl {
 					Object o = selectionCriteria.getValueInternal(state).getValue();
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
-							if (variant == FIRST) {
+							if (this.variant == FIRST) {
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element),this);
 							}
 							result.add(element);
 						}
-					} else {
+					}
+					else {
 						throw new SpelEvaluationException(selectionCriteria.getStartPosition(),
 								SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);// ,selectionCriteria.stringifyAST());
 					}
 					idx++;
-				} finally {
+				}
+				finally {
 					state.exitScope();
 					state.popActiveContextObject();
 				}
 			}
-			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+
+			if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
 				return ValueRef.NullValueRef.instance;
 			}
-			if (variant == LAST) {
+
+			if (this.variant == LAST) {
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(result.get(result.size() - 1)),this);
 			}
+
 			if (operand instanceof Collection) {
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 			}
-			else {
-				Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
-				Object resultArray = Array.newInstance(elementType, result.size());
-				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
-				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
-			}
-		} else {
-			if (operand==null) {
-				if (nullSafe) {
-					return ValueRef.NullValueRef.instance;
-				} else {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
-							"null");
-				}
-			} else {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
-						operand.getClass().getName());
-			}
+			Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
+			Object resultArray = Array.newInstance(elementType, result.size());
+			System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 		}
+		if (operand==null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.instance;
+			}
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
+		}
+		throw new SpelEvaluationException(getStartPosition(),
+				SpelMessage.INVALID_TYPE_FOR_SELECTION, operand.getClass().getName());
 	}
 
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
-		switch (variant) {
-		case ALL:
-			sb.append("?[");
-			break;
-		case FIRST:
-			sb.append("^[");
-			break;
-		case LAST:
-			sb.append("$[");
-			break;
+		switch (this.variant) {
+			case ALL:
+				sb.append("?[");
+				break;
+			case FIRST:
+				sb.append("^[");
+				break;
+			case LAST:
+				sb.append("$[");
+				break;
 		}
 		return sb.append(getChild(0).toStringAST()).append("]").toString();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.expression.spel.ast;
 import org.springframework.expression.TypedValue;
 
 /**
+ * Expression language AST node that represents a string literal.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -27,12 +29,14 @@ public class StringLiteral extends Literal {
 
 	private final TypedValue value;
 
+
 	public StringLiteral(String payload, int pos, String value) {
 		super(payload,pos);
 		// TODO should these have been skipped being created by the parser rules? or not?
 		value = value.substring(1, value.length() - 1);
 		this.value = new TypedValue(value.replaceAll("''", "'").replaceAll("\"\"", "\""));
 	}
+
 
 	@Override
 	public TypedValue getLiteralValue() {

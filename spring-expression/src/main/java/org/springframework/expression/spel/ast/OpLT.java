@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,10 @@ public class OpLT extends Operator {
 		super("<", pos, operands);
 	}
 
+
 	@Override
-	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+	public BooleanTypedValue getValueInternal(ExpressionState state)
+			throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
 		Object right = getRightOperand().getValueInternal(state).getValue();
 		// TODO could leave all of these to the comparator - just seems quicker to do some here
@@ -42,11 +44,14 @@ public class OpLT extends Operator {
 			Number rightNumber = (Number) right;
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return BooleanTypedValue.forValue(leftNumber.doubleValue() < rightNumber.doubleValue());
-			} else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+			}
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
 				return BooleanTypedValue.forValue(leftNumber.floatValue() < rightNumber.floatValue());
-			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+			}
+			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return BooleanTypedValue.forValue(leftNumber.longValue() < rightNumber.longValue());
-			} else {
+			}
+			else {
 				return BooleanTypedValue.forValue(leftNumber.intValue() < rightNumber.intValue());
 			}
 		}

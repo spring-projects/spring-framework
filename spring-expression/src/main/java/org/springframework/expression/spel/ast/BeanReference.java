@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,25 +31,31 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class BeanReference extends SpelNodeImpl {
 
-	private String beanname;
+	private final String beanname;
+
 
 	public BeanReference(int pos,String beanname) {
 		super(pos);
 		this.beanname = beanname;
 	}
 
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		BeanResolver beanResolver = state.getEvaluationContext().getBeanResolver();
 		if (beanResolver==null) {
-			throw new SpelEvaluationException(getStartPosition(),SpelMessage.NO_BEAN_RESOLVER_REGISTERED, beanname);
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.NO_BEAN_RESOLVER_REGISTERED, this.beanname);
 		}
+
 		try {
-		   TypedValue bean = new TypedValue(beanResolver.resolve(state.getEvaluationContext(),beanname));
+			TypedValue bean = new TypedValue(beanResolver.resolve(
+					state.getEvaluationContext(), this.beanname));
 		   return bean;
-		} catch (AccessException ae) {
+		}
+		catch (AccessException ae) {
 			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION,
-				beanname, ae.getMessage());
+				this.beanname, ae.getMessage());
 		}
 	}
 
@@ -57,10 +63,11 @@ public class BeanReference extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("@");
-		if (beanname.indexOf('.')==-1) {
-			sb.append(beanname);
-		} else {
-			sb.append("'").append(beanname).append("'");
+		if (this.beanname.indexOf('.') == -1) {
+			sb.append(this.beanname);
+		}
+		else {
+			sb.append("'").append(this.beanname).append("'");
 		}
 		return sb.toString();
 	}

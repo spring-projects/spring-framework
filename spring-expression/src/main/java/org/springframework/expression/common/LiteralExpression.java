@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.TypedValue;
 
 /**
- * A very simple hardcoded implementation of the Expression interface that represents a string literal.
- * It is used with CompositeStringExpression when representing a template expression which is made up
- * of pieces - some being real expressions to be handled by an EL implementation like Spel, and some
- * being just textual elements.
- *
+ * A very simple hardcoded implementation of the Expression interface that represents a
+ * string literal. It is used with CompositeStringExpression when representing a template
+ * expression which is made up of pieces - some being real expressions to be handled by an
+ * EL implementation like Spel, and some being just textual elements.
+ * 
  * @author Andy Clement
  * @since 3.0
  */
@@ -78,19 +79,19 @@ public class LiteralExpression implements Expression {
 
 	@Override
 	public void setValue(EvaluationContext context, Object value) throws EvaluationException {
-		throw new EvaluationException(literalValue, "Cannot call setValue() on a LiteralExpression");
+		throw new EvaluationException(this.literalValue, "Cannot call setValue() on a LiteralExpression");
 	}
 
 	@Override
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue(context);
-		return ExpressionUtils.convert(context, value, expectedResultType);
+		return ExpressionUtils.convertTypedValue(context, new TypedValue(value), expectedResultType);
 	}
 
 	@Override
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
-		return ExpressionUtils.convert(null, value, expectedResultType);
+		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
 	}
 
 	@Override
@@ -106,7 +107,7 @@ public class LiteralExpression implements Expression {
 	@Override
 	public <T> T getValue(Object rootObject, Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(rootObject);
-		return ExpressionUtils.convert(null, value, desiredResultType);
+		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
 	}
 
 	@Override
@@ -117,7 +118,7 @@ public class LiteralExpression implements Expression {
 	@Override
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(context, rootObject);
-		return ExpressionUtils.convert(null, value, desiredResultType);
+		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
 	}
 
 	@Override
@@ -147,7 +148,7 @@ public class LiteralExpression implements Expression {
 
 	@Override
 	public void setValue(EvaluationContext context, Object rootObject, Object value) throws EvaluationException {
-		throw new EvaluationException(literalValue, "Cannot call setValue() on a LiteralExpression");
+		throw new EvaluationException(this.literalValue, "Cannot call setValue() on a LiteralExpression");
 	}
 
 	@Override
@@ -157,7 +158,7 @@ public class LiteralExpression implements Expression {
 
 	@Override
 	public void setValue(Object rootObject, Object value) throws EvaluationException {
-		throw new EvaluationException(literalValue, "Cannot call setValue() on a LiteralExpression");
+		throw new EvaluationException(this.literalValue, "Cannot call setValue() on a LiteralExpression");
 	}
 
 }
