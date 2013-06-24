@@ -1477,7 +1477,6 @@ public class CustomEditorTests {
 		assertEquals("Invalid Charset conversion", name, editor.getAsText());
 	}
 
-
 	private static class TestBeanEditor extends PropertyEditorSupport {
 
 		@Override

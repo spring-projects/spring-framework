@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,16 @@
 package org.springframework.core.io;
 
 import java.beans.PropertyEditor;
+import java.io.File;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.springframework.core.env.StandardEnvironment;
+
+import static org.hamcrest.Matchers.*;
 
 import static org.junit.Assert.*;
-import org.junit.Test;
-import org.springframework.core.env.StandardEnvironment;
 
 /**
  * Unit tests for the {@link ResourceEditor} class.
@@ -30,6 +36,9 @@ import org.springframework.core.env.StandardEnvironment;
  * @author Dave Syer
  */
 public final class ResourceEditorTests {
+
+	@Rule
+	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
 	public void sunnyDay() throws Exception {
@@ -85,6 +94,16 @@ public final class ResourceEditorTests {
 		finally {
 			System.getProperties().remove("test.prop");
 		}
+	}
+
+	@Test
+	public void writableFileResource() throws Exception {
+		PropertyEditor editor = new ResourceEditor();
+		File file = temporaryFolder.newFile();
+		editor.setAsText("file:"+file.getPath());
+		Resource resolved = (Resource) editor.getValue();
+		assertEquals(file, resolved.getFile());
+		assertThat(resolved, instanceOf(WritableResource.class));
 	}
 
 }
