@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,9 @@ import org.springframework.web.method.HandlerMethod;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMethod {
+public class InvocableMessageHandlerMethod extends HandlerMethod {
 
-	private ArgumentResolverComposite<M> argumentResolvers = new ArgumentResolverComposite<M>();
+	private ArgumentResolverComposite argumentResolvers = new ArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
@@ -85,7 +84,7 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	 * Set {@link ArgumentResolver}s to use to use for resolving method
 	 * argument values.
 	 */
-	public void setMessageMethodArgumentResolvers(ArgumentResolverComposite<M> argumentResolvers) {
+	public void setMessageMethodArgumentResolvers(ArgumentResolverComposite argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 
@@ -107,7 +106,7 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	 * @exception Exception raised if no suitable argument resolver can be found, or the
 	 *            method raised an exception
 	 */
-	public final Object invoke(M message, Object... providedArgs) throws Exception {
+	public final Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 
@@ -130,7 +129,7 @@ public class InvocableMessageHandlerMethod<M extends Message> extends HandlerMet
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(M message, Object... providedArgs) throws Exception {
+	private Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
 
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];

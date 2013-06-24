@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,21 +18,24 @@ package org.springframework.messaging.support;
 
 import java.util.Map;
 
-import org.springframework.messaging.MessageFactory;
-
-
 /**
- * A {@link MessageFactory} that creates {@link GenericMessage GenericMessages}.
+ * A message implementation that accepts a {@link Throwable} payload.
+ * Once created this object is immutable.
  *
- * @author Andy Wilkinson
+ * @author Mark Fisher
+ * @author Oleg Zhurakousky
  * @since 4.0
  */
-public class GenericMessageFactory implements MessageFactory<GenericMessage<?>> {
+public class ErrorMessage extends GenericMessage<Throwable> {
 
+	private static final long serialVersionUID = -5470210965279837728L;
 
-	@Override
-	public <P> GenericMessage<P> createMessage(P payload, Map<String, Object> headers) {
-		return new GenericMessage<P>(payload, headers);
+	public ErrorMessage(Throwable payload) {
+		super(payload);
+	}
+
+	public ErrorMessage(Throwable payload, Map<String, Object> headers) {
+		super(payload, headers);
 	}
 
 }

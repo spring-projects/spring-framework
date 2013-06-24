@@ -32,8 +32,7 @@ import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class MessageBodyArgumentResolver<M extends Message> implements ArgumentResolver<M> {
+public class MessageBodyArgumentResolver implements ArgumentResolver {
 
 	private final MessageConverter converter;
 
@@ -48,7 +47,7 @@ public class MessageBodyArgumentResolver<M extends Message> implements ArgumentR
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, M message) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 
 		Object arg = null;
 

@@ -23,8 +23,7 @@ package org.springframework.messaging;
  * @author Mark Fisher
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public interface MessageChannel<M extends Message> {
+public interface MessageChannel {
 
 	/**
 	 * Send a {@link Message} to this channel. May throw a RuntimeException for
@@ -39,7 +38,7 @@ public interface MessageChannel<M extends Message> {
 	 *
 	 * @return whether or not the Message has been sent successfully
 	 */
-	boolean send(M message);
+	boolean send(Message<?> message);
 
 	/**
 	 * Send a message, blocking until either the message is accepted or the
@@ -52,6 +51,6 @@ public interface MessageChannel<M extends Message> {
 	 * <code>false</code> if the specified timeout period elapses or
 	 * the send is interrupted
 	 */
-	boolean send(M message, long timeout);
+	boolean send(Message<?> message, long timeout);
 
 }

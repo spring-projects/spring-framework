@@ -54,11 +54,10 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractPubSubMessageHandler<M>
+public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 		implements ApplicationContextAware, InitializingBean {
 
-	private PubSubChannelRegistry<M, ?> registry;
+	private PubSubChannelRegistry registry;
 
 	private List<MessageConverter> messageConverters;
 
@@ -73,12 +72,12 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 	private final Map<Class<?>, MessageExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, MessageExceptionHandlerMethodResolver>(64);
 
-	private ArgumentResolverComposite<M> argumentResolvers = new ArgumentResolverComposite<M>();
+	private ArgumentResolverComposite argumentResolvers = new ArgumentResolverComposite();
 
-	private ReturnValueHandlerComposite<M> returnValueHandlers = new ReturnValueHandlerComposite<M>();
+	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
 
-	public AnnotationPubSubMessageHandler(PubSubChannelRegistry<M, ?> registry) {
+	public AnnotationPubSubMessageHandler(PubSubChannelRegistry registry) {
 		Assert.notNull(registry, "registry is required");
 		this.registry = registry;
 	}
@@ -102,10 +101,10 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver<M>(this.registry.getMessageBrokerChannel()));
-		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver<M>(this.messageConverters));
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.registry.getMessageBrokerChannel()));
+		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
 
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler<M>(this.registry.getClientOutputChannel()));
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.registry.getClientOutputChannel()));
 	}
 
 	protected void initHandlerMethods() {
@@ -139,9 +138,8 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 				new UnsubscribeMappingInfoCreator(), this.unsubscribeMethods);
 	}
 
-	@SuppressWarnings("unchecked")
 	private <A extends Annotation> void initHandlerMethods(Object handler, Class<?> handlerType,
-			final Class<A> annotationType, MappingInfoCreator mappingInfoCreator,
+			final Class<A> annotationType, MappingInfoCreator<A> mappingInfoCreator,
 			Map<MappingInfo, HandlerMethod> handlerMethods) {
 
 		Set<Method> messageMethods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
@@ -171,21 +169,21 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 	}
 
 	@Override
-	public void handlePublish(M message) {
+	public void handlePublish(Message<?> message) {
 		handleMessageInternal(message, this.messageMethods);
 	}
 
 	@Override
-	public void handleSubscribe(M message) {
+	public void handleSubscribe(Message<?> message) {
 		handleMessageInternal(message, this.subscribeMethods);
 	}
 
 	@Override
-	public void handleUnsubscribe(M message) {
+	public void handleUnsubscribe(Message<?> message) {
 		handleMessageInternal(message, this.unsubscribeMethods);
 	}
 
-	private void handleMessageInternal(final M message, Map<MappingInfo, HandlerMethod> handlerMethods) {
+	private void handleMessageInternal(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		String destination = headers.getDestination();
@@ -198,7 +196,7 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 		HandlerMethod handlerMethod = match.createWithResolvedBean();
 
 		// TODO: avoid re-creating invocableHandlerMethod
-		InvocableMessageHandlerMethod<M> invocableHandlerMethod = new InvocableMessageHandlerMethod<M>(handlerMethod);
+		InvocableMessageHandlerMethod invocableHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
@@ -225,9 +223,9 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 		}
 	}
 
-	private void invokeExceptionHandler(M message, HandlerMethod handlerMethod, Exception ex) {
+	private void invokeExceptionHandler(Message<?> message, HandlerMethod handlerMethod, Exception ex) {
 
-		InvocableMessageHandlerMethod<M> invocableHandlerMethod;
+		InvocableMessageHandlerMethod invocableHandlerMethod;
 		Class<?> beanType = handlerMethod.getBeanType();
 		MessageExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
 		if (resolver == null) {
@@ -241,7 +239,7 @@ public class AnnotationPubSubMessageHandler<M extends Message> extends AbstractP
 			return;
 		}
 
-		invocableHandlerMethod = new InvocableMessageHandlerMethod<M>(handlerMethod.getBean(), method);
+		invocableHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod.getBean(), method);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {

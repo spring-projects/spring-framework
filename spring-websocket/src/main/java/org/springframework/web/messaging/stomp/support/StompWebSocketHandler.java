@@ -51,24 +51,22 @@ import reactor.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandlerAdapter
-		implements MessageHandler<M> {
+public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implements MessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
-	private MessageChannel<M> outputChannel;
+	private MessageChannel outputChannel;
 
-	private final StompMessageConverter<M> stompMessageConverter = new StompMessageConverter<M>();
+	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
 	private final Map<String, SessionInfo> sessionInfos = new ConcurrentHashMap<String, SessionInfo>();
 
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
 
-	public StompWebSocketHandler(PubSubChannelRegistry<M, ?> registry) {
+	public StompWebSocketHandler(PubSubChannelRegistry registry) {
 		Assert.notNull(registry, "registry is required");
 		this.outputChannel = registry.getClientInputChannel();
 	}
@@ -77,7 +75,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		this.payloadConverter = new CompositeMessageConverter(converters);
 	}
 
-	public StompMessageConverter<M> getStompMessageConverter() {
+	public StompMessageConverter getStompMessageConverter() {
 		return this.stompMessageConverter;
 	}
 
@@ -95,7 +93,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 	protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 		try {
 			String payload = textMessage.getPayload();
-			M message = this.stompMessageConverter.toMessage(payload, session.getId());
+			Message<?> message = this.stompMessageConverter.toMessage(payload, session.getId());
 
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
@@ -138,7 +136,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		}
 	}
 
-	protected void handleConnect(final WebSocketSession session, M message) throws IOException {
+	protected void handleConnect(final WebSocketSession session, Message<?> message) throws IOException {
 
 		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(message);
 		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
@@ -160,17 +158,16 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 
 		// TODO: security
 
-		@SuppressWarnings("unchecked")
-		M connectedMessage = (M) MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(
+		Message<?> connectedMessage = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(
 				connectedHeaders.toHeaders()).build();
 		byte[] bytes = getStompMessageConverter().fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
-	protected void handlePublish(M stompMessage) {
+	protected void handlePublish(Message<?> stompMessage) {
 	}
 
-	protected void handleSubscribe(M message) {
+	protected void handleSubscribe(Message<?> message) {
 
 		// TODO: need a way to communicate back if subscription was successfully created or
 		// not in which case an ERROR should be sent back and close the connection
@@ -184,13 +181,13 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		sessionInfo.addSubscription(destination, headers.getSubscriptionId());
 	}
 
-	protected void handleUnsubscribe(M message) {
+	protected void handleUnsubscribe(Message<?> message) {
 
 		// TODO: remove subscription
 
 	}
 
-	protected void handleDisconnect(M stompMessage) {
+	protected void handleDisconnect(Message<?> stompMessage) {
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
@@ -198,8 +195,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
 
-		@SuppressWarnings("unchecked")
-		M message = (M) MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(headers.toHeaders()).build();
+		Message<?> message = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(headers.toHeaders()).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(message);
 
 		try {
@@ -215,8 +211,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		this.sessionInfos.remove(session.getId());
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.create(MessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
-		@SuppressWarnings("unchecked")
-		M message = (M) MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toHeaders()).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toHeaders()).build();
 		this.outputChannel.send(message);
 	}
 
@@ -224,7 +219,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 	 * Handle STOMP messages going back out to WebSocket clients.
 	 */
 	@Override
-	public void handleMessage(M message) {
+	public void handleMessage(Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 		headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
@@ -269,8 +264,7 @@ public class StompWebSocketHandler<M extends Message> extends TextWebSocketHandl
 		}
 
 		try {
-			@SuppressWarnings("unchecked")
-			M byteMessage = (M) MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
+			Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
 			byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}

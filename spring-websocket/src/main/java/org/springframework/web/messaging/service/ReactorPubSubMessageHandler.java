@@ -44,10 +44,9 @@ import reactor.fn.selector.ObjectSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubSubMessageHandler<M> {
+public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
-	private MessageChannel<M> clientChannel;
+	private MessageChannel clientChannel;
 
 	private final Reactor reactor;
 
@@ -56,7 +55,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 	private Map<String, List<Registration<?>>> subscriptionsBySession = new ConcurrentHashMap<String, List<Registration<?>>>();
 
 
-	public ReactorPubSubMessageHandler(PubSubChannelRegistry<M, ?> registry, Reactor reactor) {
+	public ReactorPubSubMessageHandler(PubSubChannelRegistry registry, Reactor reactor) {
 		Assert.notNull(reactor, "reactor is required");
 		this.clientChannel = registry.getClientOutputChannel();
 		this.reactor = reactor;
@@ -73,7 +72,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 	}
 
 	@Override
-	public void handleSubscribe(M message) {
+	public void handleSubscribe(Message<?> message) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Subscribe " + message);
@@ -100,7 +99,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 	}
 
 	@Override
-	public void handlePublish(M message) {
+	public void handlePublish(Message<?> message) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Message received: " + message);
@@ -110,8 +109,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 			// Convert to byte[] payload before the fan-out
 			PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), headers.getContentType());
-			@SuppressWarnings("unchecked")
-			M m = (M) MessageBuilder.withPayload(payload).copyHeaders(message.getHeaders()).build();
+			Message<?> m = MessageBuilder.withPayload(payload).copyHeaders(message.getHeaders()).build();
 
 			this.reactor.notify(getPublishKey(headers.getDestination()), Event.wrap(m));
 		}
@@ -121,7 +119,7 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 	}
 
 	@Override
-	public void handleDisconnect(M message) {
+	public void handleDisconnect(Message<?> message) {
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		removeSubscriptions(headers.getSessionId());
 	}
@@ -154,8 +152,8 @@ public class ReactorPubSubMessageHandler<M extends Message> extends AbstractPubS
 			PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(sentMessage);
 			headers.setSubscriptionId(this.subscriptionId);
 
-			@SuppressWarnings("unchecked")
-			M clientMessage = (M) MessageBuilder.withPayload(sentMessage.getPayload()).copyHeaders(headers.toHeaders()).build();
+			Message<?> clientMessage = MessageBuilder.withPayload(
+					sentMessage.getPayload()).copyHeaders(headers.toHeaders()).build();
 
 			clientChannel.send(clientMessage);
 		}

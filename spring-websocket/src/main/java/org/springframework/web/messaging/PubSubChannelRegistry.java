@@ -16,8 +16,6 @@
 
 package org.springframework.web.messaging;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
 
@@ -25,24 +23,22 @@ import org.springframework.messaging.SubscribableChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public interface PubSubChannelRegistry<M extends Message, H extends MessageHandler<M>> {
-
+public interface PubSubChannelRegistry {
 
 	/**
 	 * A channel for messaging arriving from clients.
 	 */
-	SubscribableChannel<M, H> getClientInputChannel();
+	SubscribableChannel getClientInputChannel();
 
 	/**
 	 * A channel for sending direct messages to a client. The client must be have
 	 * previously subscribed to the destination of the message.
 	 */
-	SubscribableChannel<M, H> getClientOutputChannel();
+	SubscribableChannel getClientOutputChannel();
 
 	/**
 	 * A channel for broadcasting messages through a message broker.
 	 */
-	SubscribableChannel<M, H> getMessageBrokerChannel();
+	SubscribableChannel getMessageBrokerChannel();
 
 }

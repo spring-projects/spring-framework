@@ -35,8 +35,7 @@ import org.springframework.web.messaging.stomp.StompConversionException;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class StompMessageConverter<M extends Message> {
+public class StompMessageConverter {
 
 	private static final Charset STOMP_CHARSET = Charset.forName("UTF-8");
 
@@ -49,7 +48,7 @@ public class StompMessageConverter<M extends Message> {
 	/**
 	 * @param stompContent a complete STOMP message (without the trailing 0x00) as byte[] or String.
 	 */
-	public M toMessage(Object stompContent, String sessionId) {
+	public Message<?> toMessage(Object stompContent, String sessionId) {
 
 		byte[] byteContent = null;
 		if (stompContent instanceof String) {
@@ -100,12 +99,7 @@ public class StompMessageConverter<M extends Message> {
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
 
-		return createMessage(stompHeaders, payload);
-	}
-
-	@SuppressWarnings("unchecked")
-	private M createMessage(StompHeaderAccessor stompHeaders, byte[] payload) {
-		return (M) MessageBuilder.withPayload(payload).copyHeaders(stompHeaders.toHeaders()).build();
+		return MessageBuilder.withPayload(payload).copyHeaders(stompHeaders.toHeaders()).build();
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -135,7 +129,7 @@ public class StompMessageConverter<M extends Message> {
 		return index;
 	}
 
-	public byte[] fromMessage(M message) {
+	public byte[] fromMessage(Message<?> message) {
 
 		byte[] payload;
 		if (message.getPayload() instanceof byte[]) {

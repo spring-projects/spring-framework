@@ -16,8 +16,6 @@
 
 package org.springframework.web.messaging.service.method;
 
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -30,13 +28,12 @@ import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class MessageReturnValueHandler<M extends Message> implements ReturnValueHandler<M> {
+public class MessageReturnValueHandler implements ReturnValueHandler {
 
-	private MessageChannel<M> clientChannel;
+	private MessageChannel clientChannel;
 
 
-	public MessageReturnValueHandler(MessageChannel<M> clientChannel) {
+	public MessageReturnValueHandler(MessageChannel clientChannel) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		this.clientChannel = clientChannel;
 	}
@@ -59,28 +56,19 @@ public class MessageReturnValueHandler<M extends Message> implements ReturnValue
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, M message)
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
 		Assert.notNull(this.clientChannel, "No clientChannel to send messages to");
 
-		@SuppressWarnings("unchecked")
-		M returnMessage = (M) returnValue;
-		if (returnMessage == null) {
+		if (message == null) {
 			return;
 		}
-
-		returnMessage = processReturnMessage(returnMessage, message);
-
-		this.clientChannel.send(returnMessage);
- 	}
-
-	protected M processReturnMessage(M returnMessage, M message) {
 
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		Assert.notNull(headers.getSubscriptionId(), "No subscription id: " + message);
 
-		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(returnMessage);
+		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(message);
 		returnHeaders.setSessionId(headers.getSessionId());
 		returnHeaders.setSubscriptionId(headers.getSubscriptionId());
 
@@ -88,12 +76,11 @@ public class MessageReturnValueHandler<M extends Message> implements ReturnValue
 			returnHeaders.setDestination(headers.getDestination());
 		}
 
-		return createMessage(returnMessage.getPayload(), returnHeaders.toHeaders());
-	}
+		Message<?> returnMessage = MessageBuilder.withPayload(
+				message.getPayload()).copyHeaders(headers.toHeaders()).build();
 
-	@SuppressWarnings("unchecked")
-	private M createMessage(Object payload, Map<String, Object> headers) {
-		return (M) MessageBuilder.withPayload(payload).copyHeaders(headers).build();
-	}
+		this.clientChannel.send(returnMessage);
+ 	}
+
 
 }

@@ -27,8 +27,7 @@ import org.springframework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public interface ArgumentResolver<M extends Message> {
+public interface ArgumentResolver {
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is
@@ -54,6 +53,6 @@ public interface ArgumentResolver<M extends Message> {
 	 *
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */
-	Object resolveArgument(MethodParameter parameter, M message) throws Exception;
+	Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception;
 
 }

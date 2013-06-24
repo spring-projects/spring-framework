@@ -18,23 +18,29 @@ package org.springframework.messaging;
 
 
 /**
- * Interface for any MessageChannel implementation that accepts subscribers.
- * The subscribers must implement the {@link MessageHandler} interface and
- * will be invoked when a Message is available.
+ * Interface for Message Channels from which Messages may be actively received through polling.
  *
  * @author Mark Fisher
  * @since 4.0
  */
-public interface SubscribableChannel extends MessageChannel {
+public interface PollableChannel extends MessageChannel {
 
 	/**
-	 * Register a {@link MessageHandler} as a subscriber to this channel.
+	 * Receive a message from this channel, blocking indefinitely if necessary.
+	 *
+	 * @return the next available {@link Message} or <code>null</code> if interrupted
 	 */
-	boolean subscribe(MessageHandler handler);
+	Message<?> receive();
 
 	/**
-	 * Remove a {@link MessageHandler} from the subscribers of this channel.
+	 * Receive a message from this channel, blocking until either a message is
+	 * available or the specified timeout period elapses.
+	 *
+	 * @param timeout the timeout in milliseconds
+	 *
+	 * @return the next available {@link Message} or <code>null</code> if the
+	 * specified timeout period elapses or the message reception is interrupted
 	 */
-	boolean unsubscribe(MessageHandler handler);
+	Message<?> receive(long timeout);
 
 }

@@ -26,13 +26,12 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class MessageChannelArgumentResolver<M extends Message> implements ArgumentResolver<M> {
+public class MessageChannelArgumentResolver implements ArgumentResolver {
 
-	private MessageChannel<M> messageBrokerChannel;
+	private MessageChannel messageBrokerChannel;
 
 
-	public MessageChannelArgumentResolver(MessageChannel<M> messageBrokerChannel) {
+	public MessageChannelArgumentResolver(MessageChannel messageBrokerChannel) {
 		Assert.notNull(messageBrokerChannel, "messageBrokerChannel is required");
 		this.messageBrokerChannel = messageBrokerChannel;
 	}
@@ -43,7 +42,7 @@ public class MessageChannelArgumentResolver<M extends Message> implements Argume
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, M message) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		return this.messageBrokerChannel;
 	}
 

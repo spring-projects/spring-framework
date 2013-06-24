@@ -24,11 +24,10 @@ package org.springframework.messaging;
  * @author Iwein Fuld
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public interface MessageHandler<M extends Message> {
+public interface MessageHandler {
 
 	/**
-	 * TODO: support exceptions?
+	 * TODO: exceptions
 	 *
 	 * Handles the message if possible. If the handler cannot deal with the
 	 * message this will result in a <code>MessageRejectedException</code> e.g.
@@ -47,6 +46,6 @@ public interface MessageHandler<M extends Message> {
 	 * @throws org.springframework.integration.MessageDeliveryException when this handler failed to deliver the
 	 * reply related to the handling of the message
 	 */
-	void handleMessage(M message) throws MessagingException;
+	void handleMessage(Message<?> message) throws MessagingException;
 
 }

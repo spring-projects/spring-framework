@@ -16,8 +16,6 @@
 
 package org.springframework.web.messaging.support;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.util.Assert;
 
 import reactor.core.Reactor;
@@ -27,7 +25,7 @@ import reactor.core.Reactor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorPubSubChannelRegistry extends AbstractPubSubChannelRegistry<Message<?>, MessageHandler<Message<?>>> {
+public class ReactorPubSubChannelRegistry extends AbstractPubSubChannelRegistry {
 
 	public ReactorPubSubChannelRegistry(Reactor reactor) {
 

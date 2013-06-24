@@ -27,8 +27,7 @@ import org.springframework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public interface ReturnValueHandler<M extends Message> {
+public interface ReturnValueHandler {
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method return type} is
@@ -51,6 +50,6 @@ public interface ReturnValueHandler<M extends Message> {
 	 * @param message the message that caused this method to be called
 	 * @throws Exception if the return value handling results in an error
 	 */
-	void handleReturnValue(Object returnValue, MethodParameter returnType, M message) throws Exception;
+	void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception;
 
 }
