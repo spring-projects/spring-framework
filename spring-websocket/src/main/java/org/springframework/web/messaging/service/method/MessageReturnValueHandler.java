@@ -61,6 +61,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 
 		Assert.notNull(this.clientChannel, "No clientChannel to send messages to");
 
+		Message<?> returnMessage = (Message<?>) returnValue;
 		if (message == null) {
 			return;
 		}
@@ -68,7 +69,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
 		Assert.notNull(headers.getSubscriptionId(), "No subscription id: " + message);
 
-		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(message);
+		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(returnMessage);
 		returnHeaders.setSessionId(headers.getSessionId());
 		returnHeaders.setSubscriptionId(headers.getSubscriptionId());
 
@@ -76,11 +77,10 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 			returnHeaders.setDestination(headers.getDestination());
 		}
 
-		Message<?> returnMessage = MessageBuilder.withPayload(
-				message.getPayload()).copyHeaders(headers.toHeaders()).build();
+		returnMessage = MessageBuilder.withPayload(
+				returnMessage.getPayload()).copyHeaders(returnHeaders.toHeaders()).build();
 
 		this.clientChannel.send(returnMessage);
  	}
-
 
 }

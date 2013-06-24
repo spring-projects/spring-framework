@@ -32,21 +32,22 @@ import static org.junit.Assert.*;
  */
 public class StompMessageConverterTests {
 
-	private StompMessageConverter<Message<byte[]>> converter;
+	private StompMessageConverter converter;
 
 
 	@Before
 	public void setup() {
-		this.converter = new StompMessageConverter<Message<byte[]>>();
+		this.converter = new StompMessageConverter();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void connectFrame() throws Exception {
 
 		String accept = "accept-version:1.1\n";
 		String host = "host:github.org\n";
 		String frame = "\n\n\nCONNECT\n" + accept + host + "\n";
-		Message<byte[]> message = this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
@@ -76,7 +77,8 @@ public class StompMessageConverterTests {
 		String accept = "accept-version:1.1\n";
 		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
 		String frame = "CONNECT\n" + accept + host + "\n";
-		Message<byte[]> message = this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
+		@SuppressWarnings("unchecked")
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
@@ -97,7 +99,8 @@ public class StompMessageConverterTests {
 		String accept = "accept-version:1.2\n";
 		String host = "host:github.org\n";
 		String test = "CONNECT\r\n" + accept.replaceAll("\n", "\r\n") + host.replaceAll("\n", "\r\n") + "\r\n";
-		Message<byte[]> message = this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
+		@SuppressWarnings("unchecked")
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
@@ -118,7 +121,8 @@ public class StompMessageConverterTests {
 		String accept = "accept-version:1.1\n";
 		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
 		String test = "\n\n\nCONNECT\r\n" + accept.replaceAll("\n", "\r\n") + host.replaceAll("\n", "\r\n") + "\r\n";
-		Message<byte[]> message = this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
+		@SuppressWarnings("unchecked")
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
 
 		assertEquals(0, message.getPayload().length);
 
