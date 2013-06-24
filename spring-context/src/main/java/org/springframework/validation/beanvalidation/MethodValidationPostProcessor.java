@@ -83,7 +83,12 @@ public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProce
 	 * <p>Default is the default ValidatorFactory's default Validator.
 	 */
 	public void setValidator(Validator validator) {
-		this.validator = validator;
+		if(validator instanceof ValidatorFactory) {
+			this.validator = ((ValidatorFactory) validator).getValidator();
+		}
+		else {
+			this.validator = validator;
+		}
 	}
 
 	/**
