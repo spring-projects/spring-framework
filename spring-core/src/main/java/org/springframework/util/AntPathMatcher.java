@@ -429,6 +429,16 @@ public class AntPathMatcher implements PathMatcher {
 			else if (pattern2EqualsPath) {
 				return 1;
 			}
+
+			//SPR-10550
+			if (pattern1.equals("/**") && pattern2.equals("/**")){
+				return 0;
+			}else if (pattern1.equals("/**")){
+				return 1;
+			}else if (pattern2.equals("/**")){
+				return -1;
+			}
+
 			int wildCardCount1 = getWildCardCount(pattern1);
 			int wildCardCount2 = getWildCardCount(pattern2);
 
