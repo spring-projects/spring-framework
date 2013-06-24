@@ -335,6 +335,9 @@ project("spring-context") {
 		testCompile("javax.inject:javax.inject-tck:1")
 	}
 
+	// pick up RmiInvocationWrapperRTD.xml in src/main
+	sourceSets.main.resources.srcDirs += "src/main/java"
+
 	test {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
 	}
