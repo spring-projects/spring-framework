@@ -42,13 +42,17 @@ import org.springframework.util.CollectionUtils;
 public abstract class AbstractCachingConfiguration implements ImportAware {
 
 	protected AnnotationAttributes enableCaching;
+
 	protected CacheManager cacheManager;
+
 	protected KeyGenerator keyGenerator;
 
 	@Autowired(required=false)
 	private Collection<CacheManager> cacheManagerBeans;
+
 	@Autowired(required=false)
 	private Collection<CachingConfigurer> cachingConfigurers;
+
 
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
@@ -58,6 +62,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 				"@EnableCaching is not present on importing class " +
 				importMetadata.getClassName());
 	}
+
 
 	/**
 	 * Determine which {@code CacheManager} bean to use. Prefer the result of

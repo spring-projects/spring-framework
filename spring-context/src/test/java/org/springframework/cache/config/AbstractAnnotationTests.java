@@ -367,6 +367,16 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r2, secondary.get(o).get());
 	}
 
+	public void testPutRefersToResult(CacheableService<?> service) throws Exception {
+		Long id = Long.MIN_VALUE;
+		TestEntity entity = new TestEntity();
+		Cache primary = cm.getCache("primary");
+		assertNull(primary.get(id));
+		assertNull(entity.getId());
+		service.putRefersToResult(entity);
+		assertSame(entity, primary.get(id).get());
+	}
+
 	public void testMultiCacheAndEvict(CacheableService<?> service) {
 		String methodName = "multiCacheAndEvict";
 
@@ -619,6 +629,16 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testClassMultiPut() {
 		testMultiPut(ccs);
+	}
+
+	@Test
+	public void testPutRefersToResult() throws Exception {
+		testPutRefersToResult(cs);
+	}
+
+	@Test
+	public void testClassPutRefersToResult() throws Exception {
+		testPutRefersToResult(ccs);
 	}
 
 	@Test

@@ -163,4 +163,11 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	public Object multiUpdate(Object arg1) {
 		return arg1;
 	}
+
+	@Override
+	@CachePut(value="primary", key="#result.id")
+	public TestEntity putRefersToResult(TestEntity arg1) {
+		arg1.setId(Long.MIN_VALUE);
+		return arg1;
+	}
 }

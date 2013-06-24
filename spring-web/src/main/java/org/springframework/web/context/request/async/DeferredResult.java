@@ -108,6 +108,22 @@ public class DeferredResult<T> {
 	}
 
 	/**
+	 * @return {@code true} if the DeferredResult has been set.
+	 */
+	public boolean hasResult() {
+		return this.result != RESULT_NONE;
+	}
+
+	/**
+	 * @return the result or {@code null} if the result wasn't set; since the result can
+	 *         also be {@code null}, it is recommended to use {@link #hasResult()} first
+	 *         to check if there is a result prior to calling this method.
+	 */
+	public Object getResult() {
+		return hasResult() ? this.result : null;
+	}
+
+	/**
 	 * Return the configured timeout value in milliseconds.
 	 */
 	final Long getTimeoutValue() {

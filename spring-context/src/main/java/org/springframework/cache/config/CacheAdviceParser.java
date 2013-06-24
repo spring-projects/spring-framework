@@ -48,68 +48,16 @@ import org.w3c.dom.Element;
  */
 class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
-	/**
-	 * Simple, reusable class used for overriding defaults.
-	 *
-	 * @author Costin Leau
-	 */
-	private static class Props {
-
-		private String key;
-		private String condition;
-		private String method;
-		private String[] caches = null;
-
-		Props(Element root) {
-			String defaultCache = root.getAttribute("cache");
-			key = root.getAttribute("key");
-			condition = root.getAttribute("condition");
-			method = root.getAttribute(METHOD_ATTRIBUTE);
-
-			if (StringUtils.hasText(defaultCache)) {
-				caches = StringUtils.commaDelimitedListToStringArray(defaultCache.trim());
-			}
-		}
-
-		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
-			String cache = element.getAttribute("cache");
-
-			// sanity check
-			String[] localCaches = caches;
-			if (StringUtils.hasText(cache)) {
-				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
-			} else {
-				if (caches == null) {
-					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
-				}
-			}
-			op.setCacheNames(localCaches);
-
-			op.setKey(getAttributeValue(element, "key", this.key));
-			op.setCondition(getAttributeValue(element, "condition", this.condition));
-
-			return op;
-		}
-
-		String merge(Element element, ReaderContext readerCtx) {
-			String m = element.getAttribute(METHOD_ATTRIBUTE);
-
-			if (StringUtils.hasText(m)) {
-				return m.trim();
-			}
-			if (StringUtils.hasText(method)) {
-				return method;
-			}
-			readerCtx.error("No method specified for " + element.getNodeName(), element);
-			return null;
-		}
-	}
-
 	private static final String CACHEABLE_ELEMENT = "cacheable";
+
 	private static final String CACHE_EVICT_ELEMENT = "cache-evict";
+
 	private static final String CACHE_PUT_ELEMENT = "cache-put";
+
 	private static final String METHOD_ATTRIBUTE = "method";
+
 	private static final String DEFS_ELEMENT = "caching";
+
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
@@ -226,4 +174,66 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		return defaultValue;
 	}
 
+
+	/**
+	 * Simple, reusable class used for overriding defaults.
+	 *
+	 * @author Costin Leau
+	 */
+	private static class Props {
+
+		private String key;
+
+		private String condition;
+
+		private String method;
+
+		private String[] caches = null;
+
+
+		Props(Element root) {
+			String defaultCache = root.getAttribute("cache");
+			key = root.getAttribute("key");
+			condition = root.getAttribute("condition");
+			method = root.getAttribute(METHOD_ATTRIBUTE);
+
+			if (StringUtils.hasText(defaultCache)) {
+				caches = StringUtils.commaDelimitedListToStringArray(defaultCache.trim());
+			}
+		}
+
+
+		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
+			String cache = element.getAttribute("cache");
+
+			// sanity check
+			String[] localCaches = caches;
+			if (StringUtils.hasText(cache)) {
+				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
+			} else {
+				if (caches == null) {
+					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
+				}
+			}
+			op.setCacheNames(localCaches);
+
+			op.setKey(getAttributeValue(element, "key", this.key));
+			op.setCondition(getAttributeValue(element, "condition", this.condition));
+
+			return op;
+		}
+
+		String merge(Element element, ReaderContext readerCtx) {
+			String m = element.getAttribute(METHOD_ATTRIBUTE);
+
+			if (StringUtils.hasText(m)) {
+				return m.trim();
+			}
+			if (StringUtils.hasText(method)) {
+				return method;
+			}
+			readerCtx.error("No method specified for " + element.getNodeName(), element);
+			return null;
+		}
+	}
 }

@@ -193,8 +193,8 @@ public class ScopingTests {
 	@Test
 	public void testScopedConfigurationBeanDefinitionCount() throws Exception {
 		// count the beans
-		// 6 @Beans + 1 Configuration + 2 scoped proxy + 1 importRegistry
-		assertEquals(10, ctx.getBeanDefinitionCount());
+		// 6 @Beans + 1 Configuration + 2 scoped proxy + 1 importRegistry + 1 enhanced config post processor
+		assertEquals(11, ctx.getBeanDefinitionCount());
 	}
 
 //	/**

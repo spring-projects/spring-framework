@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -469,11 +468,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-		Set<String> beanNames = new LinkedHashSet<String>(getBeanDefinitionCount());
-		beanNames.addAll(Arrays.asList(getBeanDefinitionNames()));
-		beanNames.addAll(Arrays.asList(getSingletonNames()));
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
-		for (String beanName : beanNames) {
+		for (String beanName : getBeanDefinitionNames()) {
+			BeanDefinition beanDefinition = getBeanDefinition(beanName);
+			if (!beanDefinition.isAbstract() && (findAnnotationOnBean(beanName, annotationType) != null)) {
+				results.put(beanName, getBean(beanName));
+			}
+		}
+		for (String beanName : getSingletonNames()) {
 			if (findAnnotationOnBean(beanName, annotationType) != null) {
 				results.put(beanName, getBean(beanName));
 			}

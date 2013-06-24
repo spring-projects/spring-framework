@@ -31,6 +31,7 @@ public class SimpleCacheManager extends AbstractCacheManager {
 
 	private Collection<? extends Cache> caches;
 
+
 	/**
 	 * Specify the collection of Cache instances to use for this CacheManager.
 	 */

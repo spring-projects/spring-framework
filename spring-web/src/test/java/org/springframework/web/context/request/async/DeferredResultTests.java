@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * DeferredResult tests.
@@ -67,6 +67,21 @@ public class DeferredResultTests {
 		assertTrue(result.isSetOrExpired());
 
 		verify(handler).handleResult("hello");
+	}
+
+	@Test
+	public void hasResult() {
+		DeferredResultHandler handler = mock(DeferredResultHandler.class);
+
+		DeferredResult<String> result = new DeferredResult<String>();
+		result.setResultHandler(handler);
+
+		assertFalse(result.hasResult());
+		assertNull(result.getResult());
+
+		result.setResult("hello");
+
+		assertEquals("hello", result.getResult());
 	}
 
 	@Test

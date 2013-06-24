@@ -326,7 +326,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	public void testRequestDataValueProcessorHooks() throws Exception {
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
-		given(processor.processAction(this.request, action)).willReturn(action);
+		given(processor.processAction(this.request, action, "post")).willReturn(action);
 		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key", "value"));
 
 		this.tag.doStartTag();

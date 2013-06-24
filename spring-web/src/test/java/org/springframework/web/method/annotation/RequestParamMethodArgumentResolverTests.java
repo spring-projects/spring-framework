@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
+
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestParamMethodArgumentResolver}.
  *
@@ -70,6 +71,7 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramServlet30Part;
 	private MethodParameter paramRequestPartAnnot;
 	private MethodParameter paramRequired;
+	private MethodParameter paramNotRequired;
 
 	private NativeWebRequest webRequest;
 
@@ -81,8 +83,10 @@ public class RequestParamMethodArgumentResolverTests {
 
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
-		Method method = getClass().getMethod("params", String.class, String[].class, Map.class, MultipartFile.class,
-				Map.class, String.class, MultipartFile.class, List.class, Part.class, MultipartFile.class, String.class);
+		Method method = getClass().getMethod("params", String.class, String[].class,
+				Map.class, MultipartFile.class, Map.class, String.class,
+				MultipartFile.class, List.class, Part.class, MultipartFile.class,
+				String.class, String.class);
 
 		paramNamedDefaultValueString = new MethodParameter(method, 0);
 		paramNamedStringArray = new MethodParameter(method, 1);
@@ -99,6 +103,7 @@ public class RequestParamMethodArgumentResolverTests {
 		paramServlet30Part.initParameterNameDiscovery(paramNameDiscoverer);
 		paramRequestPartAnnot = new MethodParameter(method, 9);
 		paramRequired = new MethodParameter(method, 10);
+		paramNotRequired = new MethodParameter(method, 11);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -243,9 +248,9 @@ public class RequestParamMethodArgumentResolverTests {
 		fail("Expected exception");
 	}
 
-	// SPR-10402
+	// SPR-10578
 
-	@Test(expected = MissingServletRequestParameterException.class)
+	@Test
 	public void missingRequestParamEmptyValueConvertedToNull() throws Exception {
 
 		WebDataBinder binder = new WebRequestDataBinder(null);
@@ -256,8 +261,25 @@ public class RequestParamMethodArgumentResolverTests {
 
 		this.request.addParameter("stringNotAnnot", "");
 
-		resolver.resolveArgument(paramStringNotAnnot, null, webRequest, binderFactory);
-		fail("Expected exception");
+		Object arg = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, binderFactory);
+
+		assertNull(arg);
+	}
+
+	@Test
+	public void missingRequestParamEmptyValueNotRequired() throws Exception {
+
+		WebDataBinder binder = new WebRequestDataBinder(null);
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
+
+		this.request.addParameter("name", "");
+
+		Object arg = resolver.resolveArgument(paramNotRequired, null, webRequest, binderFactory);
+
+		assertNull(arg);
 	}
 
 	@Test
@@ -311,7 +333,8 @@ public class RequestParamMethodArgumentResolverTests {
 			List<MultipartFile> multipartFileList,
 			Part servlet30Part,
 			@RequestPart MultipartFile requestPartAnnot,
-			@RequestParam(value = "name") String paramRequired) {
+			@RequestParam(value = "name") String paramRequired,
+			@RequestParam(value = "name", required=false) String paramNotRequired) {
 	}
 
 }

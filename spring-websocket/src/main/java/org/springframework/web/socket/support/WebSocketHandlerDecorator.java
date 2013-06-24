@@ -42,6 +42,14 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 		return this.delegate;
 	}
 
+	public WebSocketHandler getLastHandler() {
+		WebSocketHandler result = delegate;
+		while (result instanceof WebSocketHandlerDecorator) {
+			result = ((WebSocketHandlerDecorator) result).getDelegate();
+		}
+		return result;
+	}
+
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.delegate.afterConnectionEstablished(session);
