@@ -18,6 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -45,7 +46,7 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
-	private volatile MethodExecutor cachedExecutor;
+	private volatile CachedMethodExecutor cachedExecutor;
 
 
 	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
@@ -101,17 +102,18 @@ public class MethodReference extends SpelNodeImpl {
 				state.popActiveContextObject();
 			}
 		}
+		List<TypeDescriptor> argumentTypes = getTypes(arguments);
 		if (currentContext.getValue() == null) {
 			if (this.nullSafe) {
 				return TypedValue.NULL;
 			}
 			else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-						FormatHelper.formatMethodForMessage(this.name, getTypes(arguments)));
+						FormatHelper.formatMethodForMessage(this.name, argumentTypes));
 			}
 		}
 
-		MethodExecutor executorToUse = this.cachedExecutor;
+		MethodExecutor executorToUse = getCachedExecutor(argumentTypes);
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(state.getEvaluationContext(),
@@ -136,8 +138,8 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		// either there was no accessor or it no longer existed
-		executorToUse = findAccessorForMethod(this.name, getTypes(arguments), state);
-		this.cachedExecutor = executorToUse;
+		executorToUse = findAccessorForMethod(this.name, argumentTypes, state);
+		this.cachedExecutor = new CachedMethodExecutor(executorToUse, argumentTypes);
 		try {
 			return executorToUse.execute(state.getEvaluationContext(),
 					state.getActiveContextObject().getValue(), arguments);
@@ -172,7 +174,7 @@ public class MethodReference extends SpelNodeImpl {
 		for (Object argument : arguments) {
 			descriptors.add(TypeDescriptor.forObject(argument));
 		}
-		return descriptors;
+		return Collections.unmodifiableList(descriptors);
 	}
 
 	@Override
@@ -225,6 +227,14 @@ public class MethodReference extends SpelNodeImpl {
 						: contextObject.getClass()));
 	}
 
+	private MethodExecutor getCachedExecutor(List<TypeDescriptor> argumentTypes) {
+		if (this.cachedExecutor == null || !this.cachedExecutor.isSuitable(argumentTypes)) {
+			this.cachedExecutor = null;
+			return null;
+		}
+		return this.cachedExecutor.get();
+	}
+
 
 	private class MethodValueRef implements ValueRef {
 
@@ -236,18 +246,21 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final Object[] arguments;
 
+		private List<TypeDescriptor> argumentTypes;
+
 
 		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext, Object object, Object[] arguments) {
 			this.state = state;
 			this.evaluationContext = evaluationContext;
 			this.target = object;
 			this.arguments = arguments;
+			this.argumentTypes = getTypes(this.arguments);
 		}
 
 
 		@Override
 		public TypedValue getValue() {
-			MethodExecutor executorToUse = MethodReference.this.cachedExecutor;
+			MethodExecutor executorToUse = getCachedExecutor(this.argumentTypes);
 			if (executorToUse != null) {
 				try {
 					return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
@@ -271,8 +284,8 @@ public class MethodReference extends SpelNodeImpl {
 			}
 
 			// either there was no accessor or it no longer existed
-			executorToUse = findAccessorForMethod(MethodReference.this.name, getTypes(this.arguments), this.target, this.evaluationContext);
-			MethodReference.this.cachedExecutor = executorToUse;
+			executorToUse = findAccessorForMethod(MethodReference.this.name, argumentTypes, this.target, this.evaluationContext);
+			MethodReference.this.cachedExecutor = new CachedMethodExecutor(executorToUse, this.argumentTypes);
 			try {
 				return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
 			}
@@ -297,4 +310,27 @@ public class MethodReference extends SpelNodeImpl {
 		}
 	}
 
+
+	private static class CachedMethodExecutor {
+
+		private final MethodExecutor methodExecutor;
+
+		private final List<TypeDescriptor> argumentTypes;
+
+
+		public CachedMethodExecutor(MethodExecutor methodExecutor,
+				List<TypeDescriptor> argumentTypes) {
+			this.methodExecutor = methodExecutor;
+			this.argumentTypes = argumentTypes;
+		}
+
+
+		public boolean isSuitable(List<TypeDescriptor> argumentTypes) {
+			return (this.methodExecutor != null && this.argumentTypes.equals(argumentTypes));
+		}
+
+		public MethodExecutor get() {
+			return this.methodExecutor;
+		}
+	}
 }
