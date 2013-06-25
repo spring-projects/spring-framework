@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -49,6 +50,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -544,18 +546,26 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
+
 		Assert.notEmpty(sql, "SQL array must not be empty");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
+
 		class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
+
 			private String currSql;
+
 			@Override
 			public int[] doInStatement(Statement stmt) throws SQLException, DataAccessException {
+
 				int[] rowsAffected = new int[sql.length];
+
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
 					for (String sqlStmt : sql) {
-						this.currSql = sqlStmt;
+						this.currSql = (StringUtils.isEmpty(this.currSql) ? sqlStmt
+								: this.currSql + "; " + sqlStmt);
 						stmt.addBatch(sqlStmt);
 					}
 					rowsAffected = stmt.executeBatch();
