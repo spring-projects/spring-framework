@@ -35,8 +35,8 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * The headers for a {@link Message}.<br>
- * IMPORTANT: MessageHeaders are immutable. Any mutating operation (e.g., put(..), putAll(..) etc.)
- * will result in {@link UnsupportedOperationException}
+ * IMPORTANT: This class is immutable. Any mutating operation (e.g., put(..), putAll(..) etc.)
+ * will throw {@link UnsupportedOperationException}
  *
  * <p>To create MessageHeaders instance use fluent MessageBuilder API
  * <pre>
@@ -52,11 +52,10 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
- * @author Oleg Zhurakousky
  * @author Gary Russell
  * @since 4.0
  */
-public class MessageHeaders implements Map<String, Object>, Serializable {
+public final class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final long serialVersionUID = -4615750558355702881L;
 
@@ -74,25 +73,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public static final String TIMESTAMP = "timestamp";
 
-	public static final String CORRELATION_ID = "correlationId";
-
 	public static final String REPLY_CHANNEL = "replyChannel";
 
 	public static final String ERROR_CHANNEL = "errorChannel";
 
-	public static final String EXPIRATION_DATE = "expirationDate";
-
-	public static final String PRIORITY = "priority";
-
-	public static final String SEQUENCE_NUMBER = "sequenceNumber";
-
-	public static final String SEQUENCE_SIZE = "sequenceSize";
-
-	public static final String SEQUENCE_DETAILS = "sequenceDetails";
-
 	public static final String CONTENT_TYPE = "contentType";
-
-	public static final String POSTPROCESS_RESULT = "postProcessResult";
 
 
 	public static final List<String> HEADER_NAMES = Arrays.asList(ID, TIMESTAMP);
@@ -119,28 +104,6 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	public Long getTimestamp() {
 		return this.get(TIMESTAMP, Long.class);
-	}
-
-	public Long getExpirationDate() {
-		return this.get(EXPIRATION_DATE, Long.class);
-	}
-
-	public Object getCorrelationId() {
-		return this.get(CORRELATION_ID);
-	}
-
-	public Integer getSequenceNumber() {
-		Integer sequenceNumber = this.get(SEQUENCE_NUMBER, Integer.class);
-		return (sequenceNumber != null ? sequenceNumber : 0);
-	}
-
-	public Integer getSequenceSize() {
-		Integer sequenceSize = this.get(SEQUENCE_SIZE, Integer.class);
-		return (sequenceSize != null ? sequenceSize : 0);
-	}
-
-	public Integer getPriority() {
-		return this.get(PRIORITY, Integer.class);
 	}
 
 	public Object getReplyChannel() {

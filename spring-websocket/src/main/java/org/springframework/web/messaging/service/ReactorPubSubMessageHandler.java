@@ -31,7 +31,7 @@ import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.PubSubChannelRegistry;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 import reactor.core.Reactor;
 import reactor.fn.Consumer;
@@ -78,7 +78,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 			logger.debug("Subscribe " + message);
 		}
 
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 		String subscriptionId = headers.getSubscriptionId();
 		BroadcastingConsumer consumer = new BroadcastingConsumer(subscriptionId);
 
@@ -107,7 +107,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 		try {
 			// Convert to byte[] payload before the fan-out
-			PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+			WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 			byte[] payload = payloadConverter.convertToPayload(message.getPayload(), headers.getContentType());
 			Message<?> m = MessageBuilder.withPayload(payload).copyHeaders(message.getHeaders()).build();
 
@@ -120,7 +120,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 	@Override
 	public void handleDisconnect(Message<?> message) {
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 		removeSubscriptions(headers.getSessionId());
 	}
 
@@ -149,11 +149,11 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 
 			Message<?> sentMessage = event.getData();
 
-			PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(sentMessage);
+			WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(sentMessage);
 			headers.setSubscriptionId(this.subscriptionId);
 
 			Message<?> clientMessage = MessageBuilder.withPayload(
-					sentMessage.getPayload()).copyHeaders(headers.toHeaders()).build();
+					sentMessage.getPayload()).copyHeaders(headers.toMap()).build();
 
 			clientChannel.send(clientMessage);
 		}

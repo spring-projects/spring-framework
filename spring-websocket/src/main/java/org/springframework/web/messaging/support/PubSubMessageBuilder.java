@@ -29,7 +29,7 @@ import reactor.util.Assert;
  */
 public class PubSubMessageBuilder<T> {
 
-	private final PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.create();
+	private final WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.create();
 
 	private final T payload;
 
@@ -67,11 +67,11 @@ public class PubSubMessageBuilder<T> {
 
 		Message<?> message = MessageHolder.getMessage();
 		if (message != null) {
-			String sessionId = PubSubHeaderAccesssor.wrap(message).getSessionId();
+			String sessionId = WebMessageHeaderAccesssor.wrap(message).getSessionId();
 			this.headers.setSessionId(sessionId);
 		}
 
-		return MessageBuilder.withPayload(this.payload).copyHeaders(this.headers.toHeaders()).build();
+		return MessageBuilder.withPayload(this.payload).copyHeaders(this.headers.toMap()).build();
 	}
 
 }

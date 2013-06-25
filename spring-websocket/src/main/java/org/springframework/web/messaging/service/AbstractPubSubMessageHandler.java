@@ -30,7 +30,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 
 /**
@@ -80,7 +80,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler {
 
 	protected boolean isDestinationAllowed(Message<?> message) {
 
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 		String destination = headers.getDestination();
 
 		if (destination == null) {
@@ -116,7 +116,7 @@ public abstract class AbstractPubSubMessageHandler implements MessageHandler {
 	@Override
 	public final void handleMessage(Message<?> message) throws MessagingException {
 
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 		MessageType messageType = headers.getMessageType();
 
 		if (!canHandle(message, messageType)) {

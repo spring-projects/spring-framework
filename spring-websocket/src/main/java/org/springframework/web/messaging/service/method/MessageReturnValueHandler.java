@@ -21,7 +21,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 
 /**
@@ -66,10 +66,10 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 			return;
 		}
 
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 		Assert.notNull(headers.getSubscriptionId(), "No subscription id: " + message);
 
-		PubSubHeaderAccesssor returnHeaders = PubSubHeaderAccesssor.wrap(returnMessage);
+		WebMessageHeaderAccesssor returnHeaders = WebMessageHeaderAccesssor.wrap(returnMessage);
 		returnHeaders.setSessionId(headers.getSessionId());
 		returnHeaders.setSubscriptionId(headers.getSubscriptionId());
 
@@ -78,7 +78,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		}
 
 		returnMessage = MessageBuilder.withPayload(
-				returnMessage.getPayload()).copyHeaders(returnHeaders.toHeaders()).build();
+				returnMessage.getPayload()).copyHeaders(returnHeaders.toMap()).build();
 
 		this.clientChannel.send(returnMessage);
  	}

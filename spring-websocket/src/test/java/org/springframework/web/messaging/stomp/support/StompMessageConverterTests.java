@@ -53,7 +53,7 @@ public class StompMessageConverterTests {
 
 		MessageHeaders headers = message.getHeaders();
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
-		assertEquals(7, stompHeaders.toHeaders().size());
+		assertEquals(7, stompHeaders.toMap().size());
 
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
 		assertEquals("github.org", stompHeaders.getHost());
@@ -84,7 +84,7 @@ public class StompMessageConverterTests {
 
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
-		assertEquals("st\nomp.gi:thu\\b.org", stompHeaders.getExternalSourceHeaders().get("ho:\ns\rt").get(0));
+		assertEquals("st\nomp.gi:thu\\b.org", stompHeaders.toNativeHeaderMap().get("ho:\ns\rt").get(0));
 
 		String convertedBack = new String(this.converter.fromMessage(message), "UTF-8");
 
@@ -128,7 +128,7 @@ public class StompMessageConverterTests {
 
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
-		assertEquals("st\nomp.gi:thu\\b.org", stompHeaders.getExternalSourceHeaders().get("ho:\ns\rt").get(0));
+		assertEquals("st\nomp.gi:thu\\b.org", stompHeaders.toNativeHeaderMap().get("ho:\ns\rt").get(0));
 
 		String convertedBack = new String(this.converter.fromMessage(message), "UTF-8");
 

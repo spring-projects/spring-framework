@@ -38,7 +38,7 @@ import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
-import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -159,7 +159,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		// TODO: security
 
 		Message<?> connectedMessage = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(
-				connectedHeaders.toHeaders()).build();
+				connectedHeaders.toMap()).build();
 		byte[] bytes = getStompMessageConverter().fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
@@ -195,7 +195,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
 
-		Message<?> message = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(headers.toHeaders()).build();
+		Message<?> message = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(headers.toMap()).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(message);
 
 		try {
@@ -209,9 +209,9 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		this.sessionInfos.remove(session.getId());
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.create(MessageType.DISCONNECT);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.create(MessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toHeaders()).build();
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
 		this.outputChannel.send(message);
 	}
 
@@ -264,7 +264,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		}
 
 		try {
-			Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
+			Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
 			byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}

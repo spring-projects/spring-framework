@@ -45,7 +45,7 @@ import org.springframework.web.messaging.annotation.UnsubscribeEvent;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
 import org.springframework.web.messaging.support.MessageHolder;
-import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 
@@ -185,7 +185,7 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	private void handleMessageInternal(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
-		PubSubHeaderAccesssor headers = PubSubHeaderAccesssor.wrap(message);
+		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
 		String destination = headers.getDestination();
 
 		HandlerMethod match = getHandlerMethod(destination, handlerMethods);

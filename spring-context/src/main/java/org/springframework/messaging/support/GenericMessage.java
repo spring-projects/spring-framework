@@ -66,14 +66,10 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		else {
 			headers = new HashMap<String, Object>(headers);
 		}
-		this.headers = createMessageHeaders(headers);
+		this.headers = new MessageHeaders(headers);
 		this.payload = payload;
 	}
 
-
-	protected MessageHeaders createMessageHeaders(Map<String, Object> headers) {
-		return new MessageHeaders(headers);
-	}
 
 	public MessageHeaders getHeaders() {
 		return this.headers;

@@ -16,41 +16,28 @@
 
 package org.springframework.messaging.support;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
-import org.springframework.util.PatternMatchUtils;
-import org.springframework.util.StringUtils;
 
 /**
- * TODO
+ * A builder for creating {@link GenericMessage} or {@link ErrorMessage} if the payload is
+ * {@link Throwable}.
  *
  * @author Arjen Poutsma
  * @author Mark Fisher
- * @author Oleg Zhurakousky
- * @author Dave Syer
  * @since 4.0
  */
 public final class MessageBuilder<T> {
 
 	private final T payload;
 
-	private final Map<String, Object> headers = new HashMap<String, Object>();
+	private final MessageHeaderAccesssor headerAccessor;
 
 	private final Message<T> originalMessage;
 
-	private volatile boolean modified;
 
 	/**
 	 * Private constructor to be invoked from the static factory methods only.
@@ -59,15 +46,13 @@ public final class MessageBuilder<T> {
 		Assert.notNull(payload, "payload must not be null");
 		this.payload = payload;
 		this.originalMessage = originalMessage;
-		if (originalMessage != null) {
-			this.copyHeaders(originalMessage.getHeaders());
-			this.modified = (!this.payload.equals(originalMessage.getPayload()));
-		}
+		this.headerAccessor = new MessageHeaderAccesssor(originalMessage);
 	}
 
 	/**
-	 * Create a builder for a new {@link Message} instance pre-populated with all of the headers copied from the
-	 * provided message. The payload of the provided Message will also be used as the payload for the new message.
+	 * Create a builder for a new {@link Message} instance pre-populated with all of the
+	 * headers copied from the provided message. The payload of the provided Message will
+	 * also be used as the payload for the new message.
 	 *
 	 * @param message the Message from which the payload and all headers will be copied
 	 */
@@ -88,248 +73,88 @@ public final class MessageBuilder<T> {
 	}
 
 	/**
-	 * Set the value for the given header name. If the provided value is <code>null</code>, the header will be removed.
+	 * Set the value for the given header name. If the provided value is <code>null</code>
+	 * , the header will be removed.
 	 */
 	public MessageBuilder<T> setHeader(String headerName, Object headerValue) {
-		Assert.isTrue(!this.isReadOnly(headerName), "The '" + headerName + "' header is read-only.");
-		if (StringUtils.hasLength(headerName) && !headerName.equals(MessageHeaders.ID)
-				&& !headerName.equals(MessageHeaders.TIMESTAMP)) {
-			this.verifyType(headerName, headerValue);
-			if (headerValue == null) {
-				Object removedValue = this.headers.remove(headerName);
-				if (removedValue != null) {
-					this.modified = true;
-				}
-			}
-			else {
-				Object replacedValue = this.headers.put(headerName, headerValue);
-				if (!headerValue.equals(replacedValue)) {
-					this.modified = true;
-				}
-			}
-		}
+		this.headerAccessor.setHeader(headerName, headerValue);
 		return this;
 	}
 
 	/**
-	 * Set the value for the given header name only if the header name is not already associated with a value.
+	 * Set the value for the given header name only if the header name is not already
+	 * associated with a value.
 	 */
 	public MessageBuilder<T> setHeaderIfAbsent(String headerName, Object headerValue) {
-		if (this.headers.get(headerName) == null) {
-			this.setHeader(headerName, headerValue);
-		}
+		this.headerAccessor.setHeaderIfAbsent(headerName, headerValue);
 		return this;
 	}
 
 	/**
-	 * Removes all headers provided via array of 'headerPatterns'. As the name suggests the array
-	 * may contain simple matching patterns for header names. Supported pattern styles are:
-	 * "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
-	 *
-	 * @param headerPatterns
+	 * Removes all headers provided via array of 'headerPatterns'. As the name suggests
+	 * the array may contain simple matching patterns for header names. Supported pattern
+	 * styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
 	public MessageBuilder<T> removeHeaders(String... headerPatterns) {
-		List<String> headersToRemove = new ArrayList<String>();
-		for (String pattern : headerPatterns) {
-			if (StringUtils.hasLength(pattern)){
-				if (pattern.contains("*")){
-					for (String headerName : this.headers.keySet()) {
-						if (PatternMatchUtils.simpleMatch(pattern, headerName)){
-							headersToRemove.add(headerName);
-						}
-					}
-				}
-				else {
-					headersToRemove.add(pattern);
-				}
-			}
-		}
-		for (String headerToRemove : headersToRemove) {
-			this.removeHeader(headerToRemove);
-		}
+		this.headerAccessor.removeHeaders(headerPatterns);
 		return this;
 	}
 	/**
 	 * Remove the value for the given header name.
 	 */
 	public MessageBuilder<T> removeHeader(String headerName) {
-		if (StringUtils.hasLength(headerName) && !headerName.equals(MessageHeaders.ID)
-				&& !headerName.equals(MessageHeaders.TIMESTAMP)) {
-			Object removedValue = this.headers.remove(headerName);
-			if (removedValue != null) {
-				this.modified = true;
-			}
-		}
+		this.headerAccessor.removeHeader(headerName);
 		return this;
 	}
 
 	/**
-	 * Copy the name-value pairs from the provided Map. This operation will overwrite any existing values. Use {
-	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values. Note that the 'id' and 'timestamp' header values
-	 * will never be overwritten.
-	 *
-	 * @see MessageHeaders#ID
-	 * @see MessageHeaders#TIMESTAMP
+	 * Copy the name-value pairs from the provided Map. This operation will overwrite any
+	 * existing values. Use { {@link #copyHeadersIfAbsent(Map)} to avoid overwriting
+	 * values. Note that the 'id' and 'timestamp' header values will never be overwritten.
 	 */
 	public MessageBuilder<T> copyHeaders(Map<String, ?> headersToCopy) {
-		Set<String> keys = headersToCopy.keySet();
-		for (String key : keys) {
-			if (!this.isReadOnly(key)) {
-				this.setHeader(key, headersToCopy.get(key));
-			}
-		}
+		this.headerAccessor.copyHeaders(headersToCopy);
 		return this;
 	}
 
 	/**
-	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em> overwrite any existing values.
+	 * Copy the name-value pairs from the provided Map. This operation will <em>not</em>
+	 * overwrite any existing values.
 	 */
 	public MessageBuilder<T> copyHeadersIfAbsent(Map<String, ?> headersToCopy) {
-		Set<String> keys = headersToCopy.keySet();
-		for (String key : keys) {
-			if (!this.isReadOnly(key)) {
-				this.setHeaderIfAbsent(key, headersToCopy.get(key));
-			}
-		}
-		return this;
-	}
-
-	public MessageBuilder<T> setExpirationDate(Long expirationDate) {
-		return this.setHeader(MessageHeaders.EXPIRATION_DATE, expirationDate);
-	}
-
-	public MessageBuilder<T> setExpirationDate(Date expirationDate) {
-		if (expirationDate != null) {
-			return this.setHeader(MessageHeaders.EXPIRATION_DATE, expirationDate.getTime());
-		}
-		else {
-			return this.setHeader(MessageHeaders.EXPIRATION_DATE, null);
-		}
-	}
-
-	public MessageBuilder<T> setCorrelationId(Object correlationId) {
-		return this.setHeader(MessageHeaders.CORRELATION_ID, correlationId);
-	}
-
-	public MessageBuilder<T> pushSequenceDetails(Object correlationId, int sequenceNumber, int sequenceSize) {
-		Object incomingCorrelationId = headers.get(MessageHeaders.CORRELATION_ID);
-		@SuppressWarnings("unchecked")
-		List<List<Object>> incomingSequenceDetails = (List<List<Object>>) headers.get(MessageHeaders.SEQUENCE_DETAILS);
-		if (incomingCorrelationId != null) {
-			if (incomingSequenceDetails == null) {
-				incomingSequenceDetails = new ArrayList<List<Object>>();
-			}
-			else {
-				incomingSequenceDetails = new ArrayList<List<Object>>(incomingSequenceDetails);
-			}
-			incomingSequenceDetails.add(Arrays.asList(incomingCorrelationId,
-					headers.get(MessageHeaders.SEQUENCE_NUMBER), headers.get(MessageHeaders.SEQUENCE_SIZE)));
-			incomingSequenceDetails = Collections.unmodifiableList(incomingSequenceDetails);
-		}
-		if (incomingSequenceDetails != null) {
-			setHeader(MessageHeaders.SEQUENCE_DETAILS, incomingSequenceDetails);
-		}
-		return setCorrelationId(correlationId).setSequenceNumber(sequenceNumber).setSequenceSize(sequenceSize);
-	}
-
-	public MessageBuilder<T> popSequenceDetails() {
-		String key = MessageHeaders.SEQUENCE_DETAILS;
-		if (!headers.containsKey(key)) {
-			return this;
-		}
-		@SuppressWarnings("unchecked")
-		List<List<Object>> incomingSequenceDetails = new ArrayList<List<Object>>((List<List<Object>>) headers.get(key));
-		List<Object> sequenceDetails = incomingSequenceDetails.remove(incomingSequenceDetails.size() - 1);
-		Assert.state(sequenceDetails.size() == 3, "Wrong sequence details (not created by MessageBuilder?): "
-				+ sequenceDetails);
-		setCorrelationId(sequenceDetails.get(0));
-		Integer sequenceNumber = (Integer) sequenceDetails.get(1);
-		Integer sequenceSize = (Integer) sequenceDetails.get(2);
-		if (sequenceNumber != null) {
-			setSequenceNumber(sequenceNumber);
-		}
-		if (sequenceSize != null) {
-			setSequenceSize(sequenceSize);
-		}
-		if (!incomingSequenceDetails.isEmpty()) {
-			headers.put(MessageHeaders.SEQUENCE_DETAILS, incomingSequenceDetails);
-		}
-		else {
-			headers.remove(MessageHeaders.SEQUENCE_DETAILS);
-		}
+		this.headerAccessor.copyHeadersIfAbsent(headersToCopy);
 		return this;
 	}
 
 	public MessageBuilder<T> setReplyChannel(MessageChannel replyChannel) {
-		return this.setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
+		this.headerAccessor.setReplyChannel(replyChannel);
+		return this;
 	}
 
 	public MessageBuilder<T> setReplyChannelName(String replyChannelName) {
-		return this.setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
+		this.headerAccessor.setReplyChannelName(replyChannelName);
+		return this;
 	}
 
 	public MessageBuilder<T> setErrorChannel(MessageChannel errorChannel) {
-		return this.setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
+		this.headerAccessor.setErrorChannel(errorChannel);
+		return this;
 	}
 
 	public MessageBuilder<T> setErrorChannelName(String errorChannelName) {
-		return this.setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
-	}
-
-	public MessageBuilder<T> setSequenceNumber(Integer sequenceNumber) {
-		return this.setHeader(MessageHeaders.SEQUENCE_NUMBER, sequenceNumber);
-	}
-
-	public MessageBuilder<T> setSequenceSize(Integer sequenceSize) {
-		return this.setHeader(MessageHeaders.SEQUENCE_SIZE, sequenceSize);
-	}
-
-	public MessageBuilder<T> setPriority(Integer priority) {
-		return this.setHeader(MessageHeaders.PRIORITY, priority);
+		this.headerAccessor.setErrorChannelName(errorChannelName);
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Message<T> build() {
-		if (!this.modified && this.originalMessage != null) {
+		if ((this.originalMessage != null) && !this.headerAccessor.isModified()) {
 			return this.originalMessage;
 		}
 		if (this.payload instanceof Throwable) {
-			return (Message<T>) new ErrorMessage((Throwable) this.payload, this.headers);
+			return (Message<T>) new ErrorMessage((Throwable) this.payload, this.headerAccessor.toMap());
 		}
-		return new GenericMessage<T>(this.payload, this.headers);
-	}
-
-	private boolean isReadOnly(String headerName) {
-		return MessageHeaders.ID.equals(headerName) || MessageHeaders.TIMESTAMP.equals(headerName);
-	}
-
-	private void verifyType(String headerName, Object headerValue) {
-		if (headerName != null && headerValue != null) {
-			if (MessageHeaders.ID.equals(headerName)) {
-				Assert.isTrue(headerValue instanceof UUID, "The '" + headerName + "' header value must be a UUID.");
-			}
-			else if (MessageHeaders.TIMESTAMP.equals(headerName)) {
-				Assert.isTrue(headerValue instanceof Long, "The '" + headerName + "' header value must be a Long.");
-			}
-			else if (MessageHeaders.EXPIRATION_DATE.equals(headerName)) {
-				Assert.isTrue(headerValue instanceof Date || headerValue instanceof Long, "The '" + headerName
-						+ "' header value must be a Date or Long.");
-			}
-			else if (MessageHeaders.ERROR_CHANNEL.equals(headerName)
-					|| MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
-				Assert.isTrue(headerValue instanceof MessageChannel || headerValue instanceof String, "The '"
-						+ headerName + "' header value must be a MessageChannel or String.");
-			}
-			else if (MessageHeaders.SEQUENCE_NUMBER.equals(headerName)
-					|| MessageHeaders.SEQUENCE_SIZE.equals(headerName)) {
-				Assert.isTrue(Integer.class.isAssignableFrom(headerValue.getClass()), "The '" + headerName
-						+ "' header value must be an Integer.");
-			}
-			else if (MessageHeaders.PRIORITY.equals(headerName)) {
-				Assert.isTrue(Integer.class.isAssignableFrom(headerValue.getClass()), "The '" + headerName
-						+ "' header value must be an Integer.");
-			}
-		}
+		return new GenericMessage<T>(this.payload, this.headerAccessor.toMap());
 	}
 
 }

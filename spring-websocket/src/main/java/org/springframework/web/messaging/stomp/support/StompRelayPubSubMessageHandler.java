@@ -39,7 +39,7 @@ import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
 import org.springframework.web.messaging.stomp.StompCommand;
-import org.springframework.web.messaging.support.PubSubHeaderAccesssor;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 import reactor.core.Environment;
 import reactor.core.Promise;
@@ -120,7 +120,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			this.tcpClient = new TcpClient.Spec<String, String>(NettyTcpClient.class)
 					.using(new Environment())
 					.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
-					.connect("127.0.0.1", 61613)
+					.connect("127.0.0.1", 61616)
 					.get();
 
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
@@ -129,7 +129,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			headers.setPasscode("guest");
 			headers.setHeartbeat(0, 0);
 			Message<?> message = MessageBuilder.withPayload(
-					new byte[0]).copyHeaders(headers.toStompMessageHeaders()).build();
+					new byte[0]).copyHeaders(headers.toNativeHeaderMap()).build();
 
 			RelaySession session = new RelaySession(message, headers) {
 				@Override
@@ -206,7 +206,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	@Override
 	public void handleOther(Message<?> message) {
-		StompCommand command = (StompCommand) message.getHeaders().get(PubSubHeaderAccesssor.PROTOCOL_MESSAGE_TYPE);
+		StompCommand command = (StompCommand) message.getHeaders().get(WebMessageHeaderAccesssor.PROTOCOL_MESSAGE_TYPE);
 		Assert.notNull(command, "Expected STOMP command: " + message.getHeaders());
 		forwardMessage(message, command);
 	}
@@ -326,7 +326,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 			headers.setSessionId(sessionId);
 			headers.setMessage(errorText);
-			Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toHeaders()).build();
+			Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
 			sendMessageToClient(errorMessage);
 		}
 
@@ -372,7 +372,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 				MediaType contentType = headers.getContentType();
 				byte[] payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
-				Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
+				Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
 
 				if (logger.isTraceEnabled()) {
 					logger.trace("Forwarding message " + byteMessage);
