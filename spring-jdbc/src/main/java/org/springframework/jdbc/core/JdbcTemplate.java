@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -564,11 +565,24 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
 					for (String sqlStmt : sql) {
-						this.currSql = (StringUtils.isEmpty(this.currSql) ? sqlStmt
-								: this.currSql + "; " + sqlStmt);
+						this.currSql = appendSql(this.currSql, sqlStmt);
 						stmt.addBatch(sqlStmt);
 					}
-					rowsAffected = stmt.executeBatch();
+					try {
+						rowsAffected = stmt.executeBatch();
+					}
+					catch (BatchUpdateException ex) {
+						String batchExceptionSql = null;
+						for (int i = 0; i < ex.getUpdateCounts().length; i++) {
+							if (ex.getUpdateCounts()[i] == Statement.EXECUTE_FAILED) {
+								batchExceptionSql = appendSql(batchExceptionSql, sql[i]);
+							}
+						}
+						if (StringUtils.hasLength(batchExceptionSql)) {
+							this.currSql = batchExceptionSql;
+						}
+						throw ex;
+					}
 				}
 				else {
 					for (int i = 0; i < sql.length; i++) {
@@ -583,6 +597,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				return rowsAffected;
 			}
+
+			private String appendSql(String sql, String statement) {
+				return (StringUtils.isEmpty(sql) ? statement : sql + "; " + statement);
+			}
+
 			@Override
 			public String getSql() {
 				return this.currSql;
