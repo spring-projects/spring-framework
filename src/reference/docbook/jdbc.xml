@@ -383,7 +383,7 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
         "Leonor", "Watling");</programlisting>
 
           <programlisting language="java">this.jdbcTemplate.update(
-        "update t_actor set = ? where id = ?",
+        "update t_actor set last_name = ? where id = ?",
         "Banjo", 5276L);</programlisting>
 
           <programlisting language="java">this.jdbcTemplate.update(
