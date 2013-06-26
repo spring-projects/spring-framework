@@ -33,13 +33,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.PubSubChannelRegistry;
 import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
 import org.springframework.web.messaging.converter.MessageConverter;
@@ -57,7 +57,9 @@ import org.springframework.web.method.HandlerMethodSelector;
 public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 		implements ApplicationContextAware, InitializingBean {
 
-	private PubSubChannelRegistry registry;
+	private final MessageChannel clientChannel;
+
+	private final MessageChannel brokerChannel;
 
 	private List<MessageConverter> messageConverters;
 
@@ -77,9 +79,11 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
 
-	public AnnotationPubSubMessageHandler(PubSubChannelRegistry registry) {
-		Assert.notNull(registry, "registry is required");
-		this.registry = registry;
+	public AnnotationPubSubMessageHandler(MessageChannel clientChannel, MessageChannel brokerChannel) {
+		Assert.notNull(clientChannel, "clientChannel is required");
+		Assert.notNull(brokerChannel, "brokerChannel is required");
+		this.clientChannel = clientChannel;
+		this.brokerChannel = brokerChannel;
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
@@ -101,10 +105,10 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.registry.getMessageBrokerChannel()));
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.brokerChannel));
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
 
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.registry.getClientOutputChannel()));
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.clientChannel));
 	}
 
 	protected void initHandlerMethods() {

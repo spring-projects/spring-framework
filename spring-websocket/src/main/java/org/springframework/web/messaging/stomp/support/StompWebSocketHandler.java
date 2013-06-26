@@ -33,7 +33,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.PubSubChannelRegistry;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
@@ -66,9 +65,13 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
 
-	public StompWebSocketHandler(PubSubChannelRegistry registry) {
-		Assert.notNull(registry, "registry is required");
-		this.outputChannel = registry.getClientInputChannel();
+	/**
+	 * @param outputChannel the channel to which incoming STOMP/WebSocket messages should
+	 *        be sent to
+	 */
+	public StompWebSocketHandler(MessageChannel outputChannel) {
+		Assert.notNull(outputChannel, "clientInputChannel is required");
+		this.outputChannel = outputChannel;
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {

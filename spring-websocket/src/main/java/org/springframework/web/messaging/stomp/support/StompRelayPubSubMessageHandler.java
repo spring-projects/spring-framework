@@ -34,7 +34,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.PubSubChannelRegistry;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
@@ -76,12 +75,11 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 
 	/**
-	 * @param clientChannel a channel for sending messages from the remote message broker
-	 *        back to clients
+	 * @param clientChannel the channel to which messages for clients should be sent.
 	 */
-	public StompRelayPubSubMessageHandler(PubSubChannelRegistry registry) {
-		Assert.notNull(registry, "registry is required");
-		this.clientChannel = registry.getClientOutputChannel();
+	public StompRelayPubSubMessageHandler(MessageChannel clientChannel) {
+		Assert.notNull(clientChannel, "clientChannel is required");
+		this.clientChannel = clientChannel;
 		this.payloadConverter = new CompositeMessageConverter(null);
 	}
 
