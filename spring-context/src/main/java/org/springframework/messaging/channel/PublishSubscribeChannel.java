@@ -26,10 +26,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.util.Assert;
 
 /**
- * A {@link SubscribableChannel} that sends messages to each of its subscribers. For a
- * more feature complete implementation consider
- * {@code org.springframework.integration.channel.PublishSubscribeChannel} from the
- * Spring Integration project.
+ * A {@link SubscribableChannel} that sends messages to each of its subscribers.
  *
  * @author Phillip Webb
  * @since 4.0
