@@ -16,11 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 
@@ -32,6 +27,9 @@ import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
@@ -77,6 +75,7 @@ public class JdoInterceptorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestInvocation implements MethodInvocation {
 
 		private PersistenceManagerFactory persistenceManagerFactory;

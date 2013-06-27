@@ -26,8 +26,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.junit.Test;
 
 /**
- * Tests for {@link DateTimeFormatterFactoryBean}.
- *
  * @author Phillip Webb
  * @author Sam Brannen
  */
@@ -60,4 +58,5 @@ public class DateTimeFormatterFactoryBeanTests {
 		factory.setStyle("LL");
 		assertThat(factory.getObject(), is(sameInstance(formatter)));
 	}
+
 }

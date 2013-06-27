@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,15 +302,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final List<LifecycleGroupMember> members = new ArrayList<LifecycleGroupMember>();
 
-		private Map<String, ? extends Lifecycle> lifecycleBeans = getLifecycleBeans();
-
-		private volatile int smartMemberCount;
-
 		private final int phase;
 
 		private final long timeout;
 
+		private final Map<String, ? extends Lifecycle> lifecycleBeans;
+
 		private final boolean autoStartupOnly;
+
+		private volatile int smartMemberCount;
 
 		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
 			this.phase = phase;

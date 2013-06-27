@@ -560,6 +560,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class StringGenericParameter implements GenericParameter<String> {
 
 		@Override
@@ -1163,6 +1164,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
 
 		public void receive(NewMegaMessageEvent event) {
@@ -1198,6 +1200,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
 
 		@Override

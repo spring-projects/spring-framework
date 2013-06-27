@@ -358,7 +358,6 @@ public class GenericConversionServiceTests {
 		GenericConversionService service = new DefaultConversionService();
 		List<String> list1 = Arrays.asList("Foo", "Bar");
 		List<String> list2 = Arrays.asList("Baz", "Boop");
-		@SuppressWarnings("unchecked")
 		List<List<String>> list = Arrays.asList(list1, list2);
 		String result = service.convert(list, String.class);
 		assertNotNull(result);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -38,9 +33,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
+
 /**
- * A FactoryBean for creating a Jackson {@link ObjectMapper} with setters to
- * enable or disable Jackson features from within XML configuration.
+ * A {@link FactoryBean} for creating a Jackson 2 {@link ObjectMapper} with setters
+ * to enable or disable Jackson features from within XML configuration.
  *
  * <p>Example usage with
  * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}:
@@ -56,7 +56,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  * &lt;/bean>
  * </pre>
  *
- * <p>Example usage with {@link org.springframework.web.servlet.view.json.MappingJackson2JsonView}:
+ * <p>Example usage with MappingJackson2JsonView:
  *
  * <pre>
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
@@ -94,12 +94,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  * &lt;/bean>
  * </pre>
  *
- * <p>Note: This BeanFctory is singleton, so if you need more than one you'll need
- * to configure multiple instances.
- *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
- *
  * @since 3.2
  */
 public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, InitializingBean {
@@ -127,6 +123,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Define the format for date/time with the given {@link DateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setSimpleDateFormat(String)
 	 */
 	public void setDateFormat(DateFormat dateFormat) {
@@ -135,6 +133,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Define the date/time format with a {@link SimpleDateFormat}.
+	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
+	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setDateFormat(DateFormat)
 	 */
 	public void setSimpleDateFormat(String format) {
@@ -197,8 +197,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * {@link MapperFeature#AUTO_DETECT_GETTERS} option.
 	 */
 	public void setAutoDetectGettersSetters(boolean autoDetectGettersSetters) {
-		this.features.put(MapperFeature.AUTO_DETECT_SETTERS, autoDetectGettersSetters);
 		this.features.put(MapperFeature.AUTO_DETECT_GETTERS, autoDetectGettersSetters);
+		this.features.put(MapperFeature.AUTO_DETECT_SETTERS, autoDetectGettersSetters);
 	}
 
 	/**
@@ -217,12 +217,11 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Specify features to enable.
-	 *
-	 * @see MapperFeature
-	 * @see SerializationFeature
-	 * @see DeserializationFeature
-	 * @see org.codehaus.jackson.map.JsonParser.Feature
-	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
+	 * @see com.fasterxml.jackson.core.JsonParser.Feature
+	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
+	 * @see com.fasterxml.jackson.databind.SerializationFeature
+	 * @see com.fasterxml.jackson.databind.DeserializationFeature
+	 * @see com.fasterxml.jackson.databind.MapperFeature
 	 */
 	public void setFeaturesToEnable(Object... featuresToEnable) {
 		if (featuresToEnable != null) {
@@ -234,12 +233,11 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Specify features to disable.
-	 *
-	 * @see MapperFeature
-	 * @see SerializationFeature
-	 * @see DeserializationFeature
-	 * @see org.codehaus.jackson.map.JsonParser.Feature
-	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
+	 * @see com.fasterxml.jackson.core.JsonParser.Feature
+	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
+	 * @see com.fasterxml.jackson.databind.SerializationFeature
+	 * @see com.fasterxml.jackson.databind.DeserializationFeature
+	 * @see com.fasterxml.jackson.databind.MapperFeature
 	 */
 	public void setFeaturesToDisable(Object... featuresToDisable) {
 		if (featuresToDisable != null) {
@@ -249,7 +247,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		}
 	}
 
-	public void afterPropertiesSet() throws FatalBeanException {
+
+	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
 			this.objectMapper = new ObjectMapper();
 		}
@@ -258,7 +257,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 			this.objectMapper.setDateFormat(this.dateFormat);
 		}
 
-		if (this.serializers != null || this.deserializers != null) {
+		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
 			SimpleModule module = new SimpleModule();
 			addSerializers(module);
 			addDeserializers(module);
@@ -289,25 +288,26 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	private void configureFeature(Object feature, boolean enabled) {
-		if (feature instanceof MapperFeature) {
-			this.objectMapper.configure((MapperFeature) feature, enabled);
-		}
-		else if (feature instanceof DeserializationFeature) {
-			this.objectMapper.configure((DeserializationFeature) feature, enabled);
-		}
-		else if (feature instanceof SerializationFeature) {
-			this.objectMapper.configure((SerializationFeature) feature, enabled);
-		}
-		else if (feature instanceof JsonParser.Feature) {
+		if (feature instanceof JsonParser.Feature) {
 			this.objectMapper.configure((JsonParser.Feature) feature, enabled);
 		}
 		else if (feature instanceof JsonGenerator.Feature) {
 			this.objectMapper.configure((JsonGenerator.Feature) feature, enabled);
 		}
+		else if (feature instanceof SerializationFeature) {
+			this.objectMapper.configure((SerializationFeature) feature, enabled);
+		}
+		else if (feature instanceof DeserializationFeature) {
+			this.objectMapper.configure((DeserializationFeature) feature, enabled);
+		}
+		else if (feature instanceof MapperFeature) {
+			this.objectMapper.configure((MapperFeature) feature, enabled);
+		}
 		else {
 			throw new FatalBeanException("Unknown feature class " + feature.getClass().getName());
 		}
 	}
+
 
 	/**
 	 * Return the singleton ObjectMapper.

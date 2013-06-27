@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,15 +65,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 
 	public String[] getParameterNames(Method method) {
-		Class<?> declaringClass = method.getDeclaringClass();
+		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
+		Class<?> declaringClass = originalMethod.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
-			// initialize cache
 			map = inspectClass(declaringClass);
 			this.parameterNamesCache.put(declaringClass, map);
 		}
 		if (map != NO_DEBUG_INFO_MAP) {
-			return map.get(method);
+			return map.get(originalMethod);
 		}
 		return null;
 	}
@@ -82,14 +82,12 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
-			// initialize cache
 			map = inspectClass(declaringClass);
 			this.parameterNamesCache.put(declaringClass, map);
 		}
 		if (map != NO_DEBUG_INFO_MAP) {
 			return map.get(ctor);
 		}
-
 		return null;
 	}
 
@@ -116,8 +114,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		catch (IOException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Exception thrown while reading '.class' file for class [" + clazz
-						+ "] - unable to determine constructors/methods parameter names", ex);
+				logger.debug("Exception thrown while reading '.class' file for class [" + clazz +
+						"] - unable to determine constructors/methods parameter names", ex);
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("ASM ClassReader failed to parse class file [" + clazz +
+						"], probably due to a new Java class file version that isn't supported yet " +
+						"- unable to determine constructors/methods parameter names", ex);
 			}
 		}
 		finally {

@@ -47,7 +47,7 @@ public class BeanMethodPolymorphismTests {
 
 	@Test
 	public void beanMethodOverloadingWithoutInheritance() {
-		@SuppressWarnings({ "unused", "hiding" })
+		@SuppressWarnings({ "hiding" })
 		@Configuration class Config {
 			@Bean String aString() { return "na"; }
 			@Bean String aString(Integer dependency) { return "na"; }

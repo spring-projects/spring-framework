@@ -74,10 +74,12 @@ public class PathExtensionContentNegotiationStrategyTests {
 		assertEquals(Arrays.asList(new MediaType("application", "vnd.ms-excel")), mediaTypes);
 	}
 
+	// SPR-10334
+
 	@Test
 	public void getMediaTypeFromFilenameNoJaf() {
 
-		this.servletRequest.setRequestURI("test.xls");
+		this.servletRequest.setRequestURI("test.json");
 
 		ServletContext servletContext = this.servletRequest.getServletContext();
 		PathExtensionContentNegotiationStrategy strategy =
@@ -86,7 +88,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(this.webRequest);
 
-		assertEquals(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM), mediaTypes);
+		assertEquals(Collections.emptyList(), mediaTypes);
 	}
 
 	// SPR-8678

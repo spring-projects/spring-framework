@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class CronTrigger implements Trigger {
 	 * following cron expression conventions
 	 */
 	public CronTrigger(String cronExpression) {
-		this(cronExpression, TimeZone.getDefault());
+		this.sequenceGenerator = new CronSequenceGenerator(cronExpression);
 	}
 
 	/**
@@ -55,6 +55,12 @@ public class CronTrigger implements Trigger {
 	}
 
 
+	/**
+	 * Determine the next execution time according to the given trigger context.
+	 * <p>Next execution times are calculated based on the
+	 * {@linkplain TriggerContext#lastCompletionTime completion time} of the
+	 * previous execution; therefore, overlapping executions won't occur.
+	 */
 	public Date nextExecutionTime(TriggerContext triggerContext) {
 		Date date = triggerContext.lastCompletionTime();
 		if (date != null) {
@@ -89,7 +95,7 @@ public class CronTrigger implements Trigger {
 
 	@Override
 	public String toString() {
-		return sequenceGenerator.toString();
+		return this.sequenceGenerator.toString();
 	}
 
 }

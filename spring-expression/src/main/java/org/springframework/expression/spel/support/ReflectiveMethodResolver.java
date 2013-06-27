@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,16 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -37,11 +40,10 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.util.CollectionUtils;
 
 /**
- * Reflection-based {@link MethodResolver} used by default in
- * {@link StandardEvaluationContext} unless explicit method resolvers have been specified.
+ * Reflection-based {@link MethodResolver} used by default in {@link StandardEvaluationContext}
+ * unless explicit method resolvers have been specified.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -61,7 +63,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 
 	public ReflectiveMethodResolver() {
-
 	}
 
 	/**
@@ -92,31 +93,33 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-			Method[] methods = getMethods(type, targetObject);
+			List<Method> methods = new ArrayList<Method>(Arrays.asList(getMethods(type, targetObject)));
 
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
-				List<Method> methodsForFiltering = new ArrayList<Method>();
-				for (Method method: methods) {
-					methodsForFiltering.add(method);
-				}
-				List<Method> methodsFiltered = filter.filter(methodsForFiltering);
-				if (CollectionUtils.isEmpty(methodsFiltered)) {
-					methods = NO_METHODS;
-				}
-				else {
-					methods = methodsFiltered.toArray(new Method[methodsFiltered.size()]);
-				}
+				List<Method> filtered = filter.filter(methods);
+				methods = (filtered instanceof ArrayList ? filtered : new ArrayList<Method>(filtered));
 			}
 
-			Arrays.sort(methods, new Comparator<Method>() {
-				public int compare(Method m1, Method m2) {
-					int m1pl = m1.getParameterTypes().length;
-					int m2pl = m2.getParameterTypes().length;
-					return (new Integer(m1pl)).compareTo(m2pl);
-				}
-			});
+			// Sort methods into a sensible order
+			if (methods.size() > 1) {
+				Collections.sort(methods, new Comparator<Method>() {
+					public int compare(Method m1, Method m2) {
+						int m1pl = m1.getParameterTypes().length;
+						int m2pl = m2.getParameterTypes().length;
+						return (new Integer(m1pl)).compareTo(m2pl);
+					}
+				});
+			}
+
+			// Resolve any bridge methods
+			for (int i = 0; i < methods.size(); i++) {
+				methods.set(i, BridgeMethodResolver.findBridgedMethod(methods.get(i)));
+			}
+
+			// Remove duplicate methods (possible due to resolved bridge methods)
+			Set<Method> methodsToIterate = new LinkedHashSet<Method>(methods);
 
 			Method closeMatch = null;
 			int closeMatchDistance = Integer.MAX_VALUE;
@@ -124,10 +127,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			Method matchRequiringConversion = null;
 			boolean multipleOptions = false;
 
-			for (Method method : methods) {
-				if (method.isBridge()) {
-					continue;
-				}
+			for (Method method : methodsToIterate) {
 				if (method.getName().equals(name)) {
 					Class<?>[] paramTypes = method.getParameterTypes();
 					List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
@@ -148,9 +148,10 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							return new ReflectiveMethodExecutor(method, null);
 						}
 						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
-							if (!useDistance) {
+							if (!this.useDistance) {
 								closeMatch = method;
-							} else {
+							}
+							else {
 								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
 								if (matchDistance<closeMatchDistance) {
 									// this is a better match
@@ -200,7 +201,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	private Method[] getMethods(Class<?> type, Object targetObject) {
-		if(targetObject instanceof Class) {
+		if (targetObject instanceof Class) {
 			Set<Method> methods = new HashSet<Method>();
 			methods.addAll(Arrays.asList(getMethods(type)));
 			methods.addAll(Arrays.asList(getMethods(targetObject.getClass())));
@@ -211,9 +212,9 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	/**
 	 * Return the set of methods for this type. The default implementation returns the
-	 * result of Class#getMethods for the given {@code type}, but subclasses may override
-	 * in order to alter the results, e.g. specifying static methods declared elsewhere.
-	 *
+	 * result of {@link Class#getMethods()} for the given {@code type}, but subclasses
+	 * may override in order to alter the results, e.g. specifying static methods
+	 * declared elsewhere.
 	 * @param type the class for which to return the methods
 	 * @since 3.1.1
 	 */

@@ -151,7 +151,7 @@
 			<value>1062</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>630,839,840,893,1169,1215,1216,1217,1451,1452,1557</value>
+			<value>630,839,840,893,1169,1215,1216,1217,1364,1451,1452,1557</value>
 		</property>
 		<property name="dataAccessResourceFailureCodes">
 			<value>1</value>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,19 +105,11 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	}
 
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		return getAnnotationAttributes(annotationType, classValuesAsString, false);
-	}
-
-	public AnnotationAttributes getAnnotationAttributes(
-			String annotationType, boolean classValuesAsString, boolean nestedAttributesAsMap) {
-
 		AnnotationAttributes raw = this.attributeMap.get(annotationType);
-		return convertClassValues(raw, classValuesAsString, nestedAttributesAsMap);
+		return convertClassValues(raw, classValuesAsString);
 	}
 
-	private AnnotationAttributes convertClassValues(
-			AnnotationAttributes original, boolean classValuesAsString, boolean nestedAttributesAsMap) {
-
+	private AnnotationAttributes convertClassValues(AnnotationAttributes original, boolean classValuesAsString) {
 		if (original == null) {
 			return null;
 		}
@@ -126,12 +118,12 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 			try {
 				Object value = entry.getValue();
 				if (value instanceof AnnotationAttributes) {
-					value = convertClassValues((AnnotationAttributes)value, classValuesAsString, nestedAttributesAsMap);
+					value = convertClassValues((AnnotationAttributes) value, classValuesAsString);
 				}
 				else if (value instanceof AnnotationAttributes[]) {
 					AnnotationAttributes[] values = (AnnotationAttributes[])value;
 					for (int i = 0; i < values.length; i++) {
-						values[i] = convertClassValues(values[i], classValuesAsString, nestedAttributesAsMap);
+						values[i] = convertClassValues(values[i], classValuesAsString);
 					}
 				}
 				else if (value instanceof Type) {
@@ -182,4 +174,5 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		annotatedMethods.addAll(list);
 		return annotatedMethods;
 	}
+
 }

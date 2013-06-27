@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,9 @@ public class ContentResultMatchers {
 	}
 
 	/**
-	 * Assert the ServletResponse content type.
+	 * Assert the ServletResponse content type. The given content type must
+	 * fully match including type, sub-type, and parameters. For checking
+	 * only the type and sub-type see {@link #contentTypeCompatibleWith(String)}.
 	 */
 	public ResultMatcher contentType(String contentType) {
 		return contentType(MediaType.parseMediaType(contentType));
@@ -62,6 +64,9 @@ public class ContentResultMatchers {
 
 	/**
 	 * Assert the ServletResponse content type after parsing it as a MediaType.
+	 * The given content type must fully match including type, sub-type, and
+	 * parameters. For checking only the type and sub-type see
+	 * {@link #contentTypeCompatibleWith(MediaType)}.
 	 */
 	public ResultMatcher contentType(final MediaType contentType) {
 		return new ResultMatcher() {
@@ -69,6 +74,30 @@ public class ContentResultMatchers {
 				String actual = result.getResponse().getContentType();
 				assertTrue("Content type not set", actual != null);
 				assertEquals("Content type", contentType, MediaType.parseMediaType(actual));
+			}
+		};
+	}
+
+	/**
+	 * Assert the ServletResponse content type is compatible with the given
+	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
+	 */
+	public ResultMatcher contentTypeCompatibleWith(String contentType) {
+		return contentTypeCompatibleWith(MediaType.parseMediaType(contentType));
+	}
+
+	/**
+	 * Assert the ServletResponse content type is compatible with the given
+	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
+	 */
+	public ResultMatcher contentTypeCompatibleWith(final MediaType contentType) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String actual = result.getResponse().getContentType();
+				assertTrue("Content type not set", actual != null);
+				MediaType actualContentType = MediaType.parseMediaType(actual);
+				assertTrue("Content type [" + actual + "] is not compatible with [" + contentType + "]",
+						actualContentType.isCompatibleWith(contentType));
 			}
 		};
 	}

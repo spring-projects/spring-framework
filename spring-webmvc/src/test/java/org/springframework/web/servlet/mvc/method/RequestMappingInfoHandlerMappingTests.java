@@ -16,13 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +35,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,6 +53,8 @@ import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
@@ -181,6 +177,19 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
+	public void testMediaTypeNotValue() throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
+			request.setContentType("bogus");
+			this.handlerMapping.getHandler(request);
+			fail("HttpMediaTypeNotSupportedException expected");
+		}
+		catch (HttpMediaTypeNotSupportedException ex) {
+			assertEquals("Invalid media type \"bogus\": does not contain '/'", ex.getMessage());
+		}
+	}
+
+	@Test
 	public void mediaTypeNotAccepted() throws Exception {
 		testMediaTypeNotAccepted("/persons");
 
@@ -199,6 +208,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		catch (HttpMediaTypeNotAcceptableException ex) {
 			assertEquals("Invalid supported producible media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
+		}
+	}
+
+	@Test
+	public void testUnsatisfiedServletRequestParameterException() throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/params");
+			this.handlerMapping.getHandler(request);
+			fail("UnsatisfiedServletRequestParameterException expected");
+		}
+		catch (UnsatisfiedServletRequestParameterException ex) {
+			assertArrayEquals("Invalid request parameter conditions",
+					new String[] { "foo=bar" }, ex.getParamConditions());
 		}
 	}
 
@@ -411,6 +433,11 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "/persons", produces="application/xml")
 		public String produces() {
+			return "";
+		}
+
+		@RequestMapping(value = "/params", params="foo=bar")
+		public String param() {
 			return "";
 		}
 

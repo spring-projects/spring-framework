@@ -317,7 +317,9 @@ public class AntPathMatcher implements PathMatcher {
 		else if (!StringUtils.hasText(pattern2)) {
 			return pattern1;
 		}
-		else if (!pattern1.equals(pattern2) && !pattern1.contains("{") && match(pattern1, pattern2)) {
+
+		boolean pattern1ContainsUriVar = pattern1.indexOf('{') != -1;
+		if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1, pattern2)) {
 			// /* + /hotel -> /hotel ; "/*.*" + "/*.html" -> /*.html
 			// However /user + /user -> /usr/user ; /{foo} + /bar -> /{foo}/bar
 			return pattern2;
@@ -344,7 +346,7 @@ public class AntPathMatcher implements PathMatcher {
 		}
 		else {
 			int dotPos1 = pattern1.indexOf('.');
-			if (dotPos1 == -1) {
+			if (dotPos1 == -1 || pattern1ContainsUriVar) {
 				// simply concatenate the two patterns
 				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
 					return pattern1 + pattern2;

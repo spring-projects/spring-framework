@@ -76,7 +76,7 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 	}
 
 	private int countRowsInTable(String tableName) {
-		return jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
+		return jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
 	}
 
 	private int createPerson(String name) {

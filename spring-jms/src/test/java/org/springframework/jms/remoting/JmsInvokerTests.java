@@ -19,6 +19,7 @@ package org.springframework.jms.remoting;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -30,71 +31,50 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
  */
-public class JmsInvokerTests extends TestCase {
+public class JmsInvokerTests {
 
-	private MockControl connectionFactoryControl;
 	private QueueConnectionFactory mockConnectionFactory;
 
-	private MockControl connectionControl;
 	private QueueConnection mockConnection;
 
-	private MockControl sessionControl;
 	private QueueSession mockSession;
 
-	private MockControl queueControl;
 	private Queue mockQueue;
 
 
-	@Override
-	protected void setUp() throws Exception {
-		connectionFactoryControl = MockControl.createControl(QueueConnectionFactory.class);
-		mockConnectionFactory = (QueueConnectionFactory) connectionFactoryControl.getMock();
+	@Before
+	public void setUpMocks() throws Exception {
+		mockConnectionFactory = mock(QueueConnectionFactory.class);
+		mockConnection = mock(QueueConnection.class);
+		mockSession = mock(QueueSession.class);
+		mockQueue = mock(Queue.class);
 
-		connectionControl = MockControl.createControl(QueueConnection.class);
-		mockConnection = (QueueConnection) connectionControl.getMock();
-
-		sessionControl = MockControl.createControl(QueueSession.class);
-		mockSession = (QueueSession) sessionControl.getMock();
-
-		queueControl = MockControl.createControl(Queue.class);
-		mockQueue = (Queue) queueControl.getMock();
-
-		mockConnectionFactory.createConnection();
-		connectionFactoryControl.setReturnValue(mockConnection, 8);
-
-		mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		connectionControl.setReturnValue(mockSession, 8);
-
-		mockConnection.start();
-		connectionControl.setVoidCallable(8);
-
-		connectionFactoryControl.replay();
-		connectionControl.replay();
+		given(mockConnectionFactory.createConnection()).willReturn(mockConnection);
+		given(mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(mockSession);
 	}
 
 
+	@Test
 	public void testJmsInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
-		sessionControl.replay();
-
 		doTestJmsInvokerProxyFactoryBeanAndServiceExporter(false);
 	}
 
+	@Test
 	public void testJmsInvokerProxyFactoryBeanAndServiceExporterWithDynamicQueue() throws Throwable {
-		mockSession.createQueue("myQueue");
-		sessionControl.setReturnValue(mockQueue, 8);
-		sessionControl.replay();
-
+		given(mockSession.createQueue("myQueue")).willReturn(mockQueue);
 		doTestJmsInvokerProxyFactoryBeanAndServiceExporter(true);
 	}
 
@@ -110,14 +90,10 @@ public class JmsInvokerTests extends TestCase {
 		JmsInvokerProxyFactoryBean pfb = new JmsInvokerProxyFactoryBean() {
 			@Override
 			protected Message doExecuteRequest(Session session, Queue queue, Message requestMessage) throws JMSException {
-				MockControl exporterSessionControl = MockControl.createControl(Session.class);
-				Session mockExporterSession = (Session) exporterSessionControl.getMock();
+				Session mockExporterSession = mock(Session.class);
 				ResponseStoringProducer mockProducer = new ResponseStoringProducer();
-				mockExporterSession.createProducer(requestMessage.getJMSReplyTo());
-				exporterSessionControl.setReturnValue(mockProducer);
-				exporterSessionControl.replay();
+				given(mockExporterSession.createProducer(requestMessage.getJMSReplyTo())).willReturn(mockProducer);
 				exporter.onMessage(requestMessage, mockExporterSession);
-				exporterSessionControl.verify();
 				assertTrue(mockProducer.closed);
 				return mockProducer.response;
 			}
@@ -156,10 +132,6 @@ public class JmsInvokerTests extends TestCase {
 		catch (IllegalAccessException ex) {
 			// expected
 		}
-
-		connectionFactoryControl.verify();
-		connectionControl.verify();
-		sessionControl.verify();
 	}
 
 

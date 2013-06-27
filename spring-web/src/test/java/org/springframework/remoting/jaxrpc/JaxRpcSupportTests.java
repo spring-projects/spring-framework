@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,12 +33,11 @@ import javax.xml.rpc.ServiceFactory;
 import javax.xml.rpc.Stub;
 
 import junit.framework.TestCase;
-import org.easymock.ArgumentsMatcher;
-import org.easymock.MockControl;
 
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.util.ObjectUtils;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
@@ -117,7 +115,6 @@ public class JaxRpcSupportTests extends TestCase {
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		proxy.setName("myName");
 		assertEquals("myName", RemoteBean.name);
-		MockServiceFactory.service1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithProperties() throws Exception {
@@ -145,7 +142,6 @@ public class JaxRpcSupportTests extends TestCase {
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		proxy.setName("myName");
 		assertEquals("myName", RemoteBean.name);
-		MockServiceFactory.service1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithCustomProperties() throws Exception {
@@ -173,7 +169,6 @@ public class JaxRpcSupportTests extends TestCase {
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		proxy.setName("myName");
 		assertEquals("myName", RemoteBean.name);
-		MockServiceFactory.service1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithCustomPropertyMap() throws Exception {
@@ -203,7 +198,6 @@ public class JaxRpcSupportTests extends TestCase {
 		IRemoteBean proxy = (IRemoteBean) factory.getObject();
 		proxy.setName("myName");
 		assertEquals("myName", RemoteBean.name);
-		MockServiceFactory.service1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithDynamicCalls() throws Exception {
@@ -219,13 +213,11 @@ public class JaxRpcSupportTests extends TestCase {
 		assertTrue(factory.getObject() instanceof IBusinessBean);
 		IBusinessBean proxy = (IBusinessBean) factory.getObject();
 		proxy.setName("myName");
-		MockServiceFactory.service1Control.verify();
-		CallMockServiceFactory.call1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndProperties() throws Exception {
 		JaxRpcPortProxyFactoryBean factory = new JaxRpcPortProxyFactoryBean();
-		factory.setServiceFactoryClass(CallWithPropertiesMockServiceFactory.class);
+		factory.setServiceFactoryClass(CallMockServiceFactory.class);
 		factory.setNamespaceUri("myNamespace");
 		factory.setServiceName("myService1");
 		factory.setPortName("myPort");
@@ -240,8 +232,11 @@ public class JaxRpcSupportTests extends TestCase {
 		assertTrue(factory.getObject() instanceof IBusinessBean);
 		IBusinessBean proxy = (IBusinessBean) factory.getObject();
 		proxy.setName("myName");
-		MockServiceFactory.service1Control.verify();
-		CallMockServiceFactory.call1Control.verify();
+
+		verify(CallMockServiceFactory.call1).setProperty(Call.USERNAME_PROPERTY, "user");
+		verify(CallMockServiceFactory.call1).setProperty(Call.PASSWORD_PROPERTY, "pw");
+		verify(CallMockServiceFactory.call1).setTargetEndpointAddress("ea");
+		verify(CallMockServiceFactory.call1).setProperty(Call.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndServiceException() throws Exception {
@@ -310,9 +305,6 @@ public class JaxRpcSupportTests extends TestCase {
 		assertEquals("myName", RemoteBean.name);
 
 		assertEquals(1, serviceFactory.serviceCount);
-		MockServiceFactory.service1Control.verify();
-		CallMockServiceFactory.call1Control.verify();
-		ExceptionCallMockServiceFactory.call2Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithDynamicCallsAndRemoteExceptionAndRefresh() throws Exception {
@@ -344,9 +336,6 @@ public class JaxRpcSupportTests extends TestCase {
 		assertEquals("myName", RemoteBean.name);
 
 		assertEquals(2, serviceFactory.serviceCount);
-		MockServiceFactory.service1Control.verify();
-		CallMockServiceFactory.call1Control.verify();
-		ExceptionCallMockServiceFactory.call2Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithPortInterface() throws Exception {
@@ -363,7 +352,6 @@ public class JaxRpcSupportTests extends TestCase {
 		IBusinessBean proxy = (IBusinessBean) factory.getObject();
 		proxy.setName("myName");
 		assertEquals("myName", RemoteBean.name);
-		MockServiceFactory.service1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithPortInterfaceAndServiceException() throws Exception {
@@ -436,7 +424,6 @@ public class JaxRpcSupportTests extends TestCase {
 		assertEquals("myName", RemoteBean.name);
 
 		assertEquals(1, serviceFactory.serviceCount);
-		MockServiceFactory.service1Control.verify();
 	}
 
 	public void testJaxRpcPortProxyFactoryBeanWithPortInterfaceAndRemoteExceptionAndRefresh() throws Exception {
@@ -470,30 +457,25 @@ public class JaxRpcSupportTests extends TestCase {
 		assertEquals("myName", RemoteBean.name);
 
 		assertEquals(2, serviceFactory.serviceCount);
-		MockServiceFactory.service1Control.verify();
 	}
 
 
 	public static class MockServiceFactory extends ServiceFactory {
 
-		protected static MockControl service1Control;
 		protected static Service service1;
-		protected static MockControl service2Control;
 		protected static Service service2;
 		protected int serviceCount = 0;
 
 		public MockServiceFactory() throws Exception {
-			service1Control = MockControl.createControl(Service.class);
-			service1 = (Service) service1Control.getMock();
-			service2Control = MockControl.createControl(Service.class);
-			service2 = (Service) service2Control.getMock();
+			service1 = mock(Service.class);
+			service2 = mock(Service.class);
 			initMocks();
-			service1Control.replay();
 		}
 
 		protected void initMocks() throws Exception {
-			service1.getPort(new QName("myNamespace", "myPort"), IRemoteBean.class);
-			service1Control.setReturnValue(new RemoteBean());
+			RemoteBean remoteBean = new RemoteBean();
+			given(service1.getPort(new QName("myNamespace", "myPort"),
+					IRemoteBean.class)).willReturn(remoteBean);
 		}
 
 		@Override
@@ -572,15 +554,14 @@ public class JaxRpcSupportTests extends TestCase {
 		@Override
 		protected void initMocks() throws Exception {
 			super.initMocks();
-			service1.getPort(new QName("myNamespace", "myPort"), IRemoteBean.class);
-			service1Control.setReturnValue(new RemoteBean());
+			given(service1.getPort(new QName("myNamespace", "myPort"),
+					IRemoteBean.class)).willReturn(new RemoteBean());
 		}
 	}
 
 
 	public static class CallMockServiceFactory extends MockServiceFactory {
 
-		protected static MockControl call1Control;
 		protected static Call call1;
 
 		public CallMockServiceFactory() throws Exception {
@@ -589,38 +570,15 @@ public class JaxRpcSupportTests extends TestCase {
 
 		@Override
 		protected void initMocks() throws Exception {
-			initStandardCall(1);
-		}
-
-		protected void initStandardCall(int count) throws Exception {
-			call1Control = MockControl.createControl(Call.class);
-			call1 = (Call) call1Control.getMock();
-			service1.createCall(new QName("myNamespace", "myPort"), "setName");
-			service1Control.setReturnValue(call1, count);
-			call1.invoke(new Object[] {"myName"});
-			call1Control.setMatcher(new ArgumentsMatcher() {
-				@Override
-				public boolean matches(Object[] objects, Object[] objects1) {
-					return Arrays.equals((Object[]) objects[0], (Object[]) objects1[0]);
-				}
-				@Override
-				public String toString(Object[] objects) {
-					return ObjectUtils.nullSafeToString(objects[0]);
-				}
-			});
-			call1Control.setReturnValue(null, count);
-			extendStandardCall();
-			call1Control.replay();
-		}
-
-		protected void extendStandardCall() {
+			call1 = mock(Call.class);
+			given(service1.createCall(new QName("myNamespace", "myPort"), "setName")).willReturn(call1);
 		}
 	}
 
 
-	public static class ExceptionCallMockServiceFactory extends CallMockServiceFactory {
+	public static class ExceptionCallMockServiceFactory extends MockServiceFactory {
 
-		protected static MockControl call2Control;
+		protected static Call call1;
 		protected static Call call2;
 
 		public ExceptionCallMockServiceFactory() throws Exception {
@@ -628,47 +586,10 @@ public class JaxRpcSupportTests extends TestCase {
 
 		@Override
 		protected void initMocks() throws Exception {
-			initExceptionCall();
-			initStandardCall(2);
-		}
-
-		protected void initExceptionCall() throws Exception {
-			call2Control = MockControl.createControl(Call.class);
-			call2 = (Call) call2Control.getMock();
-			service1.createCall(new QName("myNamespace", "myPort"), "setName");
-			service1Control.setReturnValue(call2);
-			call2.invoke(new Object[] {"exception"});
-			call2Control.setMatcher(new ArgumentsMatcher() {
-				@Override
-				public boolean matches(Object[] objects, Object[] objects1) {
-					return Arrays.equals((Object[]) objects[0], (Object[]) objects1[0]);
-				}
-				@Override
-				public String toString(Object[] objects) {
-					return ObjectUtils.nullSafeToString(objects[0]);
-				}
-			});
-			call2Control.setThrowable(new RemoteException());
-			call2Control.replay();
-		}
-	}
-
-
-	public static class CallWithPropertiesMockServiceFactory extends CallMockServiceFactory {
-
-		public CallWithPropertiesMockServiceFactory() throws Exception {
-		}
-
-		@Override
-		protected void extendStandardCall() {
-			call1.setProperty(Call.USERNAME_PROPERTY, "user");
-			call1Control.setVoidCallable();
-			call1.setProperty(Call.PASSWORD_PROPERTY, "pw");
-			call1Control.setVoidCallable();
-			call1.setTargetEndpointAddress("ea");
-			call1Control.setVoidCallable();
-			call1.setProperty(Call.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
-			call1Control.setVoidCallable();
+			call1 = mock(Call.class);
+			call2 = mock(Call.class);
+			given(service1.createCall(new QName("myNamespace", "myPort"), "setName")).willReturn(call2, call1);
+			given(call2.invoke(new Object[] { "exception" })).willThrow(new RemoteException());
 		}
 	}
 

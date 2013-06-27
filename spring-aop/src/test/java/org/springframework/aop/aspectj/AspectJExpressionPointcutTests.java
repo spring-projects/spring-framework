@@ -309,10 +309,6 @@ public final class AspectJExpressionPointcutTests {
 		assertTrue("Expression should match TestBean class", classFilter.matches(TestBean.class));
 	}
 
-	private void assertDoesNotMatchStringClass(ClassFilter classFilter) {
-		assertFalse("Expression should not match String class", classFilter.matches(String.class));
-	}
-
 	@Test
 	public void testWithUnsupportedPointcutPrimitive() throws Exception {
 		String expression = "call(int org.springframework.tests.sample.beans.TestBean.getAge())";

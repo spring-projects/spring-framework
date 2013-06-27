@@ -1405,32 +1405,32 @@ assertEquals("Added two advisors",
   </section>
 
   <section xml:id="aop-autoproxy">
-    <title>Using the "autoproxy" facility</title>
+    <title>Using the "auto-proxy" facility</title>
 
     <para>So far we've considered explicit creation of AOP proxies using a
     <literal>ProxyFactoryBean</literal> or similar factory bean.</para>
 
-    <para>Spring also allows us to use "autoproxy" bean definitions, which can
+    <para>Spring also allows us to use "auto-proxy" bean definitions, which can
     automatically proxy selected bean definitions. This is built on Spring
     "bean post processor" infrastructure, which enables modification of any
     bean definition as the container loads.</para>
 
     <para>In this model, you set up some special bean definitions in your XML
     bean definition file to configure the auto proxy infrastructure. This
-    allows you just to declare the targets eligible for autoproxying: you
+    allows you just to declare the targets eligible for auto-proxying: you
     don't need to use <literal>ProxyFactoryBean</literal>.</para>
 
     <para>There are two ways to do this:</para>
 
     <itemizedlist>
       <listitem>
-        <para>Using an autoproxy creator that refers to specific beans in the
+        <para>Using an auto-proxy creator that refers to specific beans in the
         current context.</para>
       </listitem>
 
       <listitem>
-        <para>A special case of autoproxy creation that deserves to be
-        considered separately; autoproxy creation driven by source-level
+        <para>A special case of auto-proxy creation that deserves to be
+        considered separately; auto-proxy creation driven by source-level
         metadata attributes.</para>
       </listitem>
     </itemizedlist>
@@ -1439,7 +1439,7 @@ assertEquals("Added two advisors",
       <title>Autoproxy bean definitions</title>
 
       <para>The <literal>org.springframework.aop.framework.autoproxy</literal>
-      package provides the following standard autoproxy creators.</para>
+      package provides the following standard auto-proxy creators.</para>
 
       <section xml:id="aop-api-autoproxy">
         <title>BeanNameAutoProxyCreator</title>
@@ -1484,7 +1484,7 @@ assertEquals("Added two advisors",
         <para>A more general and extremely powerful auto proxy creator is
         <literal>DefaultAdvisorAutoProxyCreator</literal>. This will
         automagically apply eligible advisors in the current context, without
-        the need to include specific bean names in the autoproxy advisor's
+        the need to include specific bean names in the auto-proxy advisor's
         bean definition. It offers the same merit of consistent configuration
         and avoidance of duplication as
         <literal>BeanNameAutoProxyCreator</literal>.</para>
@@ -1561,7 +1561,7 @@ assertEquals("Added two advisors",
         <title>AbstractAdvisorAutoProxyCreator</title>
 
         <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
-        can create your own autoproxy creators by subclassing this class, in
+        can create your own auto-proxy creators by subclassing this class, in
         the unlikely event that advisor definitions offer insufficient
         customization to the behavior of the framework
         <literal>DefaultAdvisorAutoProxyCreator</literal>.</para>
@@ -1571,17 +1571,17 @@ assertEquals("Added two advisors",
     <section xml:id="aop-autoproxy-metadata">
       <title>Using metadata-driven auto-proxying</title>
 
-      <para>A particularly important type of autoproxying is driven by
+      <para>A particularly important type of auto-proxying is driven by
       metadata. This produces a similar programming model to .NET
-      <literal>ServicedComponents</literal>. Instead of using XML deployment
-      descriptors as in EJB, configuration for transaction management and
+      <literal>ServicedComponents</literal>. Instead of defining metadata
+      in XML descriptors, configuration for transaction management and
       other enterprise services is held in source-level attributes.</para>
 
       <para>In this case, you use the
       <literal>DefaultAdvisorAutoProxyCreator</literal>, in combination with
       Advisors that understand metadata attributes. The metadata specifics are
       held in the pointcut part of the candidate advisors, rather than in the
-      autoproxy creation class itself.</para>
+      auto-proxy creation class itself.</para>
 
       <para>This is really a special case of the
       <literal>DefaultAdvisorAutoProxyCreator</literal>, but deserves
@@ -1589,8 +1589,8 @@ assertEquals("Added two advisors",
       contained in the advisors, not the AOP framework itself.)</para>
 
       <para>The <literal>/attributes</literal> directory of the JPetStore
-      sample application shows the use of attribute-driven autoproxying. In
-      this case, there's no need to use the
+      sample application shows the use of attribute-driven auto-proxying.
+      In this case, there's no need to use the
       <literal>TransactionProxyFactoryBean</literal>. Simply defining
       transactional attributes on business objects is sufficient, because of
       the use of metadata-aware pointcuts. The bean definitions include the
@@ -1669,7 +1669,7 @@ assertEquals("Added two advisors",
         to that of .NET ServicedComponents.</para>
       </tip>
 
-      <para>This mechanism is extensible. It's possible to do autoproxying
+      <para>This mechanism is extensible. It's possible to do auto-proxying
       based on custom attributes. You need to:</para>
 
       <itemizedlist>
@@ -1866,8 +1866,8 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting>
         if resources are cached.</para>
       </note>
 
-      <para>Simpler pooling is available using autoproxying. It's possible to
-      set the TargetSources used by any autoproxy creator.</para>
+      <para>Simpler pooling is available using auto-proxying. It's possible to
+      set the TargetSources used by any auto-proxy creator.</para>
     </section>
 
     <section xml:id="aop-ts-prototype">

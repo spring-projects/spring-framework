@@ -45,7 +45,6 @@ import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -258,9 +257,16 @@ public class MockServletContext implements ServletContext {
 		return this.effectiveMinorVersion;
 	}
 
+	/**
+	 * This method uses the Java Activation framework, which returns "application/octet-stream"
+	 * when the mime type is unknown (i.e. it never returns {@code null}). In order to maintain
+	 * the {@link ServletContext#getMimeType(String)} contract, this method returns {@code null}
+	 * if the mimeType is "application/octet-stream", as of Spring 3.2.2.
+	 */
 	@Override
 	public String getMimeType(String filePath) {
-		return MimeTypeResolver.getMimeType(filePath);
+		String mimeType = MimeTypeResolver.getMimeType(filePath);
+		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * {@link FactoryBean} that creates a named EHCache {@link net.sf.ehcache.Cache} instance
+ * {@link FactoryBean} that creates a named EhCache {@link net.sf.ehcache.Cache} instance
  * (or a decorator that implements the {@link net.sf.ehcache.Ehcache} interface),
- * representing a cache region within an EHCache {@link net.sf.ehcache.CacheManager}.
+ * representing a cache region within an EhCache {@link net.sf.ehcache.CacheManager}.
  *
  * <p>If the specified named cache is not configured in the cache configuration descriptor,
  * this FactoryBean will construct an instance of a Cache with the provided name and the
@@ -52,7 +52,8 @@ import org.springframework.util.Assert;
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
  *
- * <p>Note: As of Spring 3.0, Spring's EHCache support requires EHCache 1.3 or higher.
+ * <p>Note: As of Spring 3.0, Spring's EhCache support requires EhCache 1.3 or higher.
+ * As of Spring 3.2, we recommend using EhCache 2.1 or higher.
 
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -117,7 +118,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	 * properly handle the shutdown of the CacheManager: Set up a separate
 	 * EhCacheManagerFactoryBean and pass a reference to this bean property.
 	 * <p>A separate EhCacheManagerFactoryBean is also necessary for loading
-	 * EHCache configuration from a non-default config location.
+	 * EhCache configuration from a non-default config location.
 	 * @see EhCacheManagerFactoryBean
 	 * @see net.sf.ehcache.CacheManager#getInstance
 	 */
@@ -152,7 +153,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	/**
 	 * Set the memory style eviction policy for this cache.
 	 * <p>Supported values are "LRU", "LFU" and "FIFO", according to the
-	 * constants defined in EHCache's MemoryStoreEvictionPolicy class.
+	 * constants defined in EhCache's MemoryStoreEvictionPolicy class.
 	 * Default is "LRU".
 	 */
 	public void setMemoryStoreEvictionPolicy(MemoryStoreEvictionPolicy memoryStoreEvictionPolicy) {
@@ -239,9 +240,9 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	}
 
 	/**
-	 * Set an EHCache {@link net.sf.ehcache.constructs.blocking.CacheEntryFactory}
+	 * Set an EhCache {@link net.sf.ehcache.constructs.blocking.CacheEntryFactory}
 	 * to use for a self-populating cache. If such a factory is specified,
-	 * the cache will be decorated with EHCache's
+	 * the cache will be decorated with EhCache's
 	 * {@link net.sf.ehcache.constructs.blocking.SelfPopulatingCache}.
 	 * <p>The specified factory can be of type
 	 * {@link net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory},
@@ -257,7 +258,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	}
 
 	/**
-	 * Set an EHCache {@link net.sf.ehcache.bootstrap.BootstrapCacheLoader}
+	 * Set an EhCache {@link net.sf.ehcache.bootstrap.BootstrapCacheLoader}
 	 * for this cache, if any.
 	 */
 	public void setBootstrapCacheLoader(BootstrapCacheLoader bootstrapCacheLoader) {
@@ -265,7 +266,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	}
 
 	/**
-	 * Specify EHCache {@link net.sf.ehcache.event.CacheEventListener cache event listeners}
+	 * Specify EhCache {@link net.sf.ehcache.event.CacheEventListener cache event listeners}
 	 * to registered with this cache.
 	 */
 	public void setCacheEventListeners(Set<CacheEventListener> cacheEventListeners) {
@@ -305,7 +306,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 		// If no CacheManager given, fetch the default.
 		if (this.cacheManager == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Using default EHCache CacheManager for cache region '" + this.cacheName + "'");
+				logger.debug("Using default EhCache CacheManager for cache region '" + this.cacheName + "'");
 			}
 			this.cacheManager = CacheManager.getInstance();
 		}
@@ -320,13 +321,13 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 		Ehcache rawCache;
 		if (this.cacheManager.cacheExists(this.cacheName)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Using existing EHCache cache region '" + this.cacheName + "'");
+				logger.debug("Using existing EhCache cache region '" + this.cacheName + "'");
 			}
 			rawCache = this.cacheManager.getEhcache(this.cacheName);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new EHCache cache region '" + this.cacheName + "'");
+				logger.debug("Creating new EhCache cache region '" + this.cacheName + "'");
 			}
 			rawCache = createCache();
 			this.cacheManager.addCache(rawCache);
@@ -359,7 +360,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	 * Create a raw Cache object based on the configuration of this FactoryBean.
 	 */
 	protected Cache createCache() {
-		// Only call EHCache 1.6 constructor if actually necessary (for compatibility with EHCache 1.3+)
+		// Only call EhCache 1.6 constructor if actually necessary (for compatibility with EhCache 1.3+)
 		return (!this.clearOnFlush) ?
 				new Cache(this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
 						this.overflowToDisk, null, this.eternal, this.timeToLive, this.timeToIdle,

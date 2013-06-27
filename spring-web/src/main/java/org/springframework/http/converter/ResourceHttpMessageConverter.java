@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 
@@ -28,7 +29,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -61,7 +62,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		byte[] body = FileCopyUtils.copyToByteArray(inputMessage.getBody());
+		byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
 		return new ByteArrayResource(body);
 	}
 
@@ -84,7 +85,17 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		FileCopyUtils.copy(resource.getInputStream(), outputMessage.getBody());
+		InputStream in = resource.getInputStream();
+		try {
+			StreamUtils.copy(in, outputMessage.getBody());
+		}
+		finally {
+			try {
+				in.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 		outputMessage.getBody().flush();
 	}
 

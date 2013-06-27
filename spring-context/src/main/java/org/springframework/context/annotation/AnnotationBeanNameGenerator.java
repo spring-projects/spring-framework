@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,10 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				(metaAnnotationTypes != null && metaAnnotationTypes.contains(COMPONENT_ANNOTATION_CLASSNAME)) ||
 				annotationType.equals("javax.annotation.ManagedBean") ||
 				annotationType.equals("javax.inject.Named");
-		return (isStereotype && attributes != null && attributes.containsKey("value"));
+
+		return (isStereotype && attributes != null &&
+				attributes.containsKey("value") &&
+				attributes.get("value") instanceof String);
 	}
 
 	/**

@@ -57,7 +57,7 @@
   <section xml:id="new-in-3.2-webmvc-content-negotiation">
     <title>Content negotiation improvements</title>
 
-    <para>A <interfacename>ContentNeogtiationStrategy</interfacename> is now
+    <para>A <interfacename>ContentNegotiationStrategy</interfacename> is now
     available for resolving the requested media types from an incoming
     request. The available implementations are based on the file extension,
     query parameter, the 'Accept' header, or a fixed content type.
@@ -120,7 +120,7 @@
     <interfacename>@ExceptionHandler</interfacename> method that handles
     standard Spring MVC exceptions and returns a
     <classname>ResponseEntity</classname> that allowing customizing and
-    writing the response with HTTP message converters. This servers as an
+    writing the response with HTTP message converters. This serves as an
     alternative to the <classname>DefaultHandlerExceptionResolver</classname>,
     which does the same but returns a <classname>ModelAndView</classname>
     instead.</para>
@@ -272,6 +272,12 @@
         <para>Configuring and <link
         linkend="testcontext-ctx-management-web">loading a
         WebApplicationContext</link> in integration tests</para>
+      </listitem>
+
+      <listitem>
+        <para>Configuring <link
+        linkend="testcontext-ctx-management-ctx-hierarchies">context hierarchies</link>
+        in integration tests</para>
       </listitem>
 
       <listitem>

@@ -33,7 +33,7 @@ task compileJava(overwrite: true)  {
 				destDir: outputDir.absolutePath,
 				aspectPath: configurations.aspects.asPath,
 				inpath: configurations.ajInpath.asPath,
-				sourceRootCopyFilter: "**/*.java",
+				sourceRootCopyFilter: "**/*.java,**/*.aj",
 				classpath: (sourceSets.main.runtimeClasspath + configurations.rt).asPath) {
 			sourceroots {
 				sourceSets.main.java.srcDirs.each {

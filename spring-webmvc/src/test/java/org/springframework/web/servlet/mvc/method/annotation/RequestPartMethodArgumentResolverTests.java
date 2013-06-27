@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -52,19 +38,21 @@ import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.test.MockPart;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
-import org.springframework.web.servlet.mvc.method.annotation.RequestPartMethodArgumentResolver;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
@@ -116,9 +104,8 @@ public class RequestPartMethodArgumentResolverTests {
 		paramServlet30Part.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		paramRequestParamAnnot = new MethodParameter(method, 8);
 
-		messageConverter = createMock(HttpMessageConverter.class);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		replay(messageConverter);
+		messageConverter = mock(HttpMessageConverter.class);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
 		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
 		reset(messageConverter);
@@ -246,17 +233,14 @@ public class RequestPartMethodArgumentResolverTests {
 	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws IOException, Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		expect(messageConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
-		expect(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).andReturn(argValue);
-		replay(messageConverter);
+		given(messageConverter.canRead(SimpleBean.class, contentType)).willReturn(true);
+		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(argValue);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 
 		assertEquals("Invalid argument value", argValue, actualValue);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
-
-		verify(messageConverter);
 	}
 
 	private static class SimpleBean {

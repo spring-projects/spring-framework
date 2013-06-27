@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 
 /**
- * Helps with configuring a options for asynchronous request processing.
+ * Helps with configuring options for asynchronous request processing.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -50,9 +50,9 @@ public class AsyncSupportConfigurer {
 	/**
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * returns a {@link Callable}. Controller methods can override this default on
-	 * a per-request basis by returning an {@link WebAsyncTask}.
+	 * a per-request basis by returning a {@link WebAsyncTask}.
 	 *
-	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used and it's
+	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used, and it's
 	 * highly recommended to change that default in production since the simple
 	 * executor does not re-use threads.
 	 *
@@ -79,7 +79,7 @@ public class AsyncSupportConfigurer {
 	}
 
 	/**
-	 * Configure lifecycle intercepters with callbacks around concurrent request
+	 * Configure lifecycle interceptors with callbacks around concurrent request
 	 * execution that starts when a controller returns a
 	 * {@link java.util.concurrent.Callable}.
 	 *
@@ -92,7 +92,7 @@ public class AsyncSupportConfigurer {
 	}
 
 	/**
-	 * Configure lifecycle intercepters with callbacks around concurrent request
+	 * Configure lifecycle interceptors with callbacks around concurrent request
 	 * execution that starts when a controller returns a {@link DeferredResult}.
 	 *
 	 * @param interceptors the interceptors to register

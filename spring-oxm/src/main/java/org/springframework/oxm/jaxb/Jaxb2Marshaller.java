@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
@@ -119,9 +118,8 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener)
  * @see #setAdapters(XmlAdapter[])
  */
-public class Jaxb2Marshaller
-		implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller, BeanClassLoaderAware,
-		ResourceLoaderAware, InitializingBean {
+public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller,
+		BeanClassLoaderAware, InitializingBean {
 
 	private static final String CID = "cid:";
 
@@ -155,13 +153,15 @@ public class Jaxb2Marshaller
 
 	private LSResourceResolver schemaResourceResolver;
 
-	private boolean mtomEnabled = false;
-
 	private boolean lazyInit = false;
+
+	private boolean mtomEnabled = false;
 
 	private boolean supportJaxbElementClass = false;
 
 	private boolean checkForXmlRootElement = true;
+
+	private Class<?> mappedClass;
 
 	private ClassLoader beanClassLoader;
 
@@ -175,8 +175,8 @@ public class Jaxb2Marshaller
 
 
 	/**
-	 * Set multiple JAXB context paths. The given array of context paths is converted to a
-	 * colon-delimited string, as supported by JAXB.
+	 * Set multiple JAXB context paths. The given array of context paths gets
+	 * converted to a colon-delimited string, as supported by JAXB.
 	 */
 	public void setContextPaths(String... contextPaths) {
 		Assert.notEmpty(contextPaths, "'contextPaths' must not be empty");
@@ -185,8 +185,8 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set a JAXB context path.
-	 * <p>Setting this property, {@link #setClassesToBeBound "classesToBeBound"}, or
-	 * {@link #setPackagesToScan "packagesToScan"} is required.
+	 * <p>Setting either this property, {@link #setClassesToBeBound "classesToBeBound"}
+	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
 	public void setContextPath(String contextPath) {
 		Assert.hasText(contextPath, "'contextPath' must not be null");
@@ -202,8 +202,8 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set the list of Java classes to be recognized by a newly created JAXBContext.
-	 * <p>Setting this property, {@link #setContextPath "contextPath"}, or
-	 * {@link #setPackagesToScan "packagesToScan"} is required.
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
+	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
 	public void setClassesToBeBound(Class<?>... classesToBeBound) {
 		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
@@ -218,10 +218,11 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the packages to search using Spring-based scanning for classes with JAXB2 annotations in the classpath.
-	 * <p>Setting this property, {@link #setContextPath "contextPath"}, or
-	 * {@link #setClassesToBeBound "classesToBeBound"} is required. This is analogous to Spring's component-scan feature
-	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * Set the packages to search for classes with JAXB2 annotations in the classpath.
+	 * This is using a Spring-bases search and therefore analogous to Spring's component-scan
+	 * feature ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
+	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
@@ -330,14 +331,6 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Specify whether MTOM support should be enabled or not.
-	 * Default is {@code false}: marshalling using XOP/MTOM not being enabled.
-	 */
-	public void setMtomEnabled(boolean mtomEnabled) {
-		this.mtomEnabled = mtomEnabled;
-	}
-
-	/**
 	 * Set whether to lazily initialize the {@link JAXBContext} for this marshaller.
 	 * Default is {@code false} to initialize on startup; can be switched to {@code true}.
 	 * <p>Early initialization just applies if {@link #afterPropertiesSet()} is called.
@@ -347,13 +340,21 @@ public class Jaxb2Marshaller
 	}
 
 	/**
+	 * Specify whether MTOM support should be enabled or not.
+	 * Default is {@code false}: marshalling using XOP/MTOM not being enabled.
+	 */
+	public void setMtomEnabled(boolean mtomEnabled) {
+		this.mtomEnabled = mtomEnabled;
+	}
+
+	/**
 	 * Specify whether the {@link #supports(Class)} returns {@code true} for the {@link JAXBElement} class.
 	 * <p>Default is {@code false}, meaning that {@code supports(Class)} always returns {@code false} for
-	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can obtain the
-	 * type parameters of {@code JAXBElement}).
+	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can
+	 * obtain the type parameters of {@code JAXBElement}).
 	 * <p>This property is typically enabled in combination with usage of classes like
-	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView}, since the {@code ModelAndView}
-	 * does not offer type parameter information at runtime.
+	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView},
+	 * since the {@code ModelAndView} does not offer type parameter information at runtime.
 	 * @see #supports(Class)
 	 * @see #supports(Type)
 	 */
@@ -376,15 +377,20 @@ public class Jaxb2Marshaller
 		this.checkForXmlRootElement = checkForXmlRootElement;
 	}
 
+	/**
+	 * Specify a JAXB mapped class for partial unmarshalling.
+	 * @see javax.xml.bind.Unmarshaller#unmarshal(javax.xml.transform.Source, Class)
+	 */
+	public void setMappedClass(Class<?> mappedClass) {
+		this.mappedClass = mappedClass;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
 
-	public final void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
 		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(this.classesToBeBound);
 		boolean hasPackagesToScan = !ObjectUtils.isEmpty(this.packagesToScan);
@@ -406,7 +412,10 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	protected JAXBContext getJaxbContext() {
+	/**
+	 * Return the JAXBContext used by this marshaller, lazily building it if necessary.
+	 */
+	public JAXBContext getJaxbContext() {
 		if (this.jaxbContext != null) {
 			return this.jaxbContext;
 		}
@@ -473,10 +482,8 @@ public class Jaxb2Marshaller
 			logger.info("Creating JAXBContext by scanning packages [" +
 					StringUtils.arrayToCommaDelimitedString(this.packagesToScan) + "]");
 		}
-		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.packagesToScan);
-		scanner.setResourceLoader(this.resourceLoader);
-		scanner.scanPackages();
-		Class<?>[] jaxb2Classes = scanner.getJaxb2Classes();
+		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.beanClassLoader, this.packagesToScan);
+		Class<?>[] jaxb2Classes = scanner.scanPackages();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found JAXB2 classes: [" + StringUtils.arrayToCommaDelimitedString(jaxb2Classes) + "]");
 		}
@@ -514,10 +521,8 @@ public class Jaxb2Marshaller
 
 
 	public boolean supports(Class<?> clazz) {
-		if (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
-			return true;
-		}
-		return supportsInternal(clazz, this.checkForXmlRootElement);
+		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
+				supportsInternal(clazz, this.checkForXmlRootElement));
 	}
 
 	public boolean supports(Type genericType) {
@@ -707,6 +712,9 @@ public class Jaxb2Marshaller
 			if (StaxUtils.isStaxSource(source)) {
 				return unmarshalStaxSource(unmarshaller, source);
 			}
+			else if (this.mappedClass != null) {
+				return unmarshaller.unmarshal(source, this.mappedClass).getValue();
+			}
 			else {
 				return unmarshaller.unmarshal(source);
 			}
@@ -716,15 +724,19 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	private Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
+	protected Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
 		XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(staxSource);
 		if (streamReader != null) {
-			return jaxbUnmarshaller.unmarshal(streamReader);
+			return (this.mappedClass != null ?
+					jaxbUnmarshaller.unmarshal(streamReader, this.mappedClass).getValue() :
+					jaxbUnmarshaller.unmarshal(streamReader));
 		}
 		else {
 			XMLEventReader eventReader = StaxUtils.getXMLEventReader(staxSource);
 			if (eventReader != null) {
-				return jaxbUnmarshaller.unmarshal(eventReader);
+				return (this.mappedClass != null ?
+						jaxbUnmarshaller.unmarshal(eventReader, this.mappedClass).getValue() :
+						jaxbUnmarshaller.unmarshal(eventReader));
 			}
 			else {
 				throw new IllegalArgumentException("StaxSource contains neither XMLStreamReader nor XMLEventReader");

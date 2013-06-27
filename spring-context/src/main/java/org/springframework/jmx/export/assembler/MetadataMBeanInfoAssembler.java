@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.support.MetricType;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -255,19 +256,17 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	@Override
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
 		ManagedOperationParameter[] params = this.attributeSource.getManagedOperationParameters(method);
-		if (params == null || params.length == 0) {
-			return new MBeanParameterInfo[0];
+		if (ObjectUtils.isEmpty(params)) {
+			return super.getOperationParameters(method, beanKey);
 		}
 
 		MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[params.length];
 		Class[] methodParameters = method.getParameterTypes();
-
 		for (int i = 0; i < params.length; i++) {
 			ManagedOperationParameter param = params[i];
 			parameterInfo[i] =
 					new MBeanParameterInfo(param.getName(), methodParameters[i].getName(), param.getDescription());
 		}
-
 		return parameterInfo;
 	}
 

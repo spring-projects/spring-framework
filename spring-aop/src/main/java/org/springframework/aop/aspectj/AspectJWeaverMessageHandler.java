@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,47 +45,41 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 
 	private static final String AJ_ID = "[AspectJ] ";
 
-	private static final Log LOGGER = LogFactory.getLog("AspectJ Weaver");
+	private static final Log logger = LogFactory.getLog("AspectJ Weaver");
 
 
 	public boolean handleMessage(IMessage message) throws AbortException {
 		Kind messageKind = message.getKind();
-
-		if (LOGGER.isDebugEnabled() || LOGGER.isTraceEnabled()) {
-			if (messageKind == IMessage.DEBUG) {
-				LOGGER.debug(makeMessageFor(message));
+		if (messageKind == IMessage.DEBUG) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(makeMessageFor(message));
 				return true;
 			}
 		}
-
-		if (LOGGER.isInfoEnabled()) {
-			if ((messageKind == IMessage.INFO) || (messageKind == IMessage.WEAVEINFO)) {
-				LOGGER.info(makeMessageFor(message));
+		else if (messageKind == IMessage.INFO || messageKind == IMessage.WEAVEINFO) {
+			if (logger.isInfoEnabled()) {
+				logger.info(makeMessageFor(message));
 				return true;
 			}
 		}
-
-		if (LOGGER.isWarnEnabled()) {
-			if (messageKind == IMessage.WARNING) {
-				LOGGER.warn(makeMessageFor(message));
+		else if (messageKind == IMessage.WARNING) {
+			if (logger.isWarnEnabled()) {
+				logger.warn(makeMessageFor(message));
 				return true;
 			}
 		}
-
-		if (LOGGER.isErrorEnabled()) {
-			if (messageKind == IMessage.ERROR) {
-				LOGGER.error(makeMessageFor(message));
+		else if (messageKind == IMessage.ERROR) {
+			if (logger.isErrorEnabled()) {
+				logger.error(makeMessageFor(message));
 				return true;
 			}
 		}
-
-		if (LOGGER.isFatalEnabled()) {
-			if (messageKind == IMessage.ABORT) {
-				LOGGER.fatal(makeMessageFor(message));
+		else if (messageKind == IMessage.ABORT) {
+			if (logger.isFatalEnabled()) {
+				logger.fatal(makeMessageFor(message));
 				return true;
 			}
 		}
-
 		return false;
 	}
 

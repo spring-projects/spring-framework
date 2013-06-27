@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServlet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -35,6 +34,7 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
@@ -42,9 +42,8 @@ import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.ConfigurableWebEnvironment;
-import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
+import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
@@ -91,7 +90,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	private ConfigurableWebEnvironment environment;
+	private ConfigurableEnvironment environment;
 
 
 	/**
@@ -187,11 +186,11 @@ public abstract class HttpServletBean extends HttpServlet
 	/**
 	 * {@inheritDoc}
 	 * @throws IllegalArgumentException if environment is not assignable to
-	 * {@code ConfigurableWebEnvironment}.
+	 * {@code ConfigurableEnvironment}.
 	 */
 	public void setEnvironment(Environment environment) {
-		Assert.isInstanceOf(ConfigurableWebEnvironment.class, environment);
-		this.environment = (ConfigurableWebEnvironment)environment;
+		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
+		this.environment = (ConfigurableEnvironment) environment;
 	}
 
 	/**
@@ -199,7 +198,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * <p>If {@code null}, a new environment will be initialized via
 	 * {@link #createEnvironment()}.
 	 */
-	public ConfigurableWebEnvironment getEnvironment() {
+	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
 			this.environment = this.createEnvironment();
 		}
@@ -210,7 +209,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * Create and return a new {@link StandardServletEnvironment}. Subclasses may override
 	 * in order to configure the environment or specialize the environment type returned.
 	 */
-	protected ConfigurableWebEnvironment createEnvironment() {
+	protected ConfigurableEnvironment createEnvironment() {
 		return new StandardServletEnvironment();
 	}
 

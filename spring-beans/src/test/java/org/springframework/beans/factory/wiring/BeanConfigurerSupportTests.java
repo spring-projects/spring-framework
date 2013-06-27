@@ -16,15 +16,14 @@
 
 package org.springframework.beans.factory.wiring;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import junit.framework.TestCase;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.mockito.BDDMockito.*;
 
 
 /**

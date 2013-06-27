@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,12 @@ import org.springframework.util.CollectionUtils;
  * convenient in that you don't have to perform yet another call on the factory, assuming that
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
+ *
+ * <p><b>NOTE: This class is based on Bean Validation 1.0 and (optionally) Hibernate Validator 4.x.</b>
+ * Nevertheless, its core functionality does work against Bean Validation 1.1 at runtime.
+ * However, there is no special support for Hibernate Validator 5.0 yet; as a consequence,
+ * {@link #setValidationMessageSource} won't work in that scenario. Please stick with
+ * Hibernate Validator 4.3 for the time being, or upgrade to Spring Framework 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -217,8 +223,21 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			configuration.addProperty(entry.getKey(), entry.getValue());
 		}
 
+		// Allow for custom post-processing before we actually build the ValidatorFactory.
+		postProcessConfiguration(configuration);
+
 		this.validatorFactory = configuration.buildValidatorFactory();
 		setTargetValidator(this.validatorFactory.getValidator());
+	}
+
+	/**
+	 * Post-process the given Bean Validation configuration,
+	 * adding to or overriding any of its settings.
+	 * <p>Invoked right before building the {@link ValidatorFactory}.
+	 * @param configuration the Configuration object, pre-populated with
+	 * settings driven by LocalValidatorFactoryBean's properties
+	 */
+	protected void postProcessConfiguration(Configuration configuration) {
 	}
 
 
@@ -244,7 +263,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 
 	/**
-	 * Inner class to avoid a hard-coded Hibernate Validator 4.1 dependency.
+	 * Inner class to avoid a hard-coded Hibernate Validator 4.1+ dependency.
 	 */
 	private static class HibernateValidatorDelegate {
 

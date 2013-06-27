@@ -16,14 +16,6 @@
 
 package org.springframework.orm.jpa.support;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -31,6 +23,9 @@ import org.junit.Test;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rod Johnson

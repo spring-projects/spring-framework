@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -55,6 +55,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
 	private static final String LOCATION_HEADER = "Location";
+
 
 	//---------------------------------------------------------------------
 	// ServletResponse properties
@@ -145,7 +146,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (this.contentType.toLowerCase().indexOf(CHARSET_PREFIX) == -1 && this.charset) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.charset) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
@@ -299,7 +300,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
 	 * @return the {@code Set} of header name {@code Strings}, or an empty {@code Set} if none
 	 */
-	public Set<String> getHeaderNames() {
+	public Collection<String> getHeaderNames() {
 		return this.headers.keySet();
 	}
 

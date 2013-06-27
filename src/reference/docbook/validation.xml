@@ -12,6 +12,24 @@
   <section xml:id="validation-introduction">
     <title>Introduction</title>
 
+    <sidebar xml:id="validation-beanvalidation-vs-spring-validation">
+      <title>JSR-303 Bean Validation</title>
+
+      <para>The Spring Framework supports JSR-303 Bean Validation adapting
+      it to Spring's <interfacename>Validator</interfacename> interface.</para>
+
+      <para>An application can choose to enable JSR-303 Bean Validation once globally,
+      as described in <xref linkend="validation-beanvalidation" />, and use it
+      exclusively for all validation needs.</para>
+
+      <para>An application can also register
+      additional Spring <interfacename>Validator</interfacename> instances
+      per <classname>DataBinder</classname> instance, as described in
+      <xref linkend="validation-binder" />. This may be useful for
+      plugging in validation logic without the use of annotations.</para>
+
+    </sidebar>
+
     <para>There are pros and cons for considering validation as business logic,
       and Spring offers a design for validation (and data binding) that does not
       exclude either one of them. Specifically validation should not be tied to
@@ -1778,6 +1796,16 @@ binder.validate();
 
 <lineannotation>// get BindingResult that includes any validation errors</lineannotation>
 BindingResult results = binder.getBindingResult();</programlisting>
+
+      <para> A DataBinder can also be configured with multiple
+      <interfacename>Validator</interfacename> instances
+      via <code>dataBinder.addValidators</code>
+      and <code>dataBinder.replaceValidators</code>.
+      This is useful when combining globally configured JSR-303 Bean Validation
+      with a Spring <interfacename>Validator</interfacename> configured
+      locally on a DataBinder instance.
+      See <xref linkend="validation-mvc-configuring" />.</para>
+
     </section>
 
     <section xml:id="validation-mvc">
@@ -1847,6 +1875,20 @@ public class MyController {
     <mvc:annotation-driven validator="globalValidator"/>
 
 </beans>]]></programlisting>
+
+        <para> To combine a global and a local validator, configure the
+        global validator as shown above and then add a local validator:</para>
+
+        <programlisting language="java"><![CDATA[@Controller
+public class MyController {
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(new FooValidator());
+    }
+
+}]]></programlisting>
+
       </section>
 
       <section xml:id="validation-mvc-jsr303">

@@ -68,8 +68,9 @@ public @interface RequestParam {
 	boolean required() default true;
 
 	/**
-	 * The default value to use as a fallback. Supplying a default value implicitly
-	 * sets {@link #required()} to false.
+	 * The default value to use as a fallback when the request parameter value
+	 * is not provided or empty. Supplying a default value implicitly sets
+	 * {@link #required()} to false.
 	 */
 	String defaultValue() default ValueConstants.DEFAULT_NONE;
 

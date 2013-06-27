@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
  * (lists/sets)/arrays
  *
  * @author Andy Clement
+ * @author Phillip Webb
  * @since 3.0
  */
 // TODO support multidimensional arrays
@@ -257,25 +258,20 @@ public class Indexer extends SpelNodeImpl {
 
 		private final boolean growCollection;
 
+		private int maximumSize;
+
 		CollectionIndexingValueRef(Collection collection, int index, TypeDescriptor collectionEntryTypeDescriptor,
-				TypeConverter typeConverter, boolean growCollection) {
+				TypeConverter typeConverter, boolean growCollection, int maximumSize) {
 			this.collection = collection;
 			this.index = index;
 			this.collectionEntryTypeDescriptor = collectionEntryTypeDescriptor;
 			this.typeConverter = typeConverter;
 			this.growCollection = growCollection;
+			this.maximumSize = maximumSize;
 		}
 
 		public TypedValue getValue() {
-			if (this.index >= this.collection.size()) {
-				if (this.growCollection) {
-					growCollection(this.collectionEntryTypeDescriptor, this.index, this.collection);
-				}
-				else {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
-							this.collection.size(), this.index);
-				}
-			}
+			growCollectionIfNecessary();
 			if (this.collection instanceof List) {
 				Object o = ((List) this.collection).get(this.index);
 				return new TypedValue(o, this.collectionEntryTypeDescriptor.elementTypeDescriptor(o));
@@ -291,15 +287,7 @@ public class Indexer extends SpelNodeImpl {
 		}
 
 		public void setValue(Object newValue) {
-			if (this.index >= this.collection.size()) {
-				if (this.growCollection) {
-					growCollection(this.collectionEntryTypeDescriptor, this.index, this.collection);
-				}
-				else {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
-							this.collection.size(), this.index);
-				}
-			}
+			growCollectionIfNecessary();
 			if (this.collection instanceof List) {
 				List list = (List) this.collection;
 				if (this.collectionEntryTypeDescriptor.getElementTypeDescriptor() != null) {
@@ -311,6 +299,36 @@ public class Indexer extends SpelNodeImpl {
 			else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
 						this.collectionEntryTypeDescriptor.toString());
+			}
+		}
+
+		private void growCollectionIfNecessary() {
+			if (this.index >= this.collection.size()) {
+
+				if (!this.growCollection) {
+					throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
+							this.collection.size(), this.index);
+				}
+
+				if(this.index >= this.maximumSize) {
+					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION);
+				}
+
+				if (this.collectionEntryTypeDescriptor.getElementTypeDescriptor() == null) {
+					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+				}
+
+				TypeDescriptor elementType = this.collectionEntryTypeDescriptor.getElementTypeDescriptor();
+				try {
+					int newElements = this.index - this.collection.size();
+					while (newElements >= 0) {
+						(this.collection).add(elementType.getType().newInstance());
+						newElements--;
+					}
+				}
+				catch (Exception ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);
+				}
 			}
 		}
 
@@ -403,7 +421,8 @@ public class Indexer extends SpelNodeImpl {
 			}
 			else if (targetObject instanceof Collection) {
 				return new CollectionIndexingValueRef((Collection<?>) targetObject, idx, targetObjectTypeDescriptor,
-						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections());
+						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
+						state.getConfiguration().getMaximumAutoGrowSize());
 			}
 			else if (targetObject instanceof String) {
 				return new StringIndexingLValue((String) targetObject, idx, targetObjectTypeDescriptor);
@@ -419,32 +438,6 @@ public class Indexer extends SpelNodeImpl {
 
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
 				targetObjectTypeDescriptor.toString());
-	}
-
-	/**
-	 * Attempt to grow the specified collection so that the specified index is valid.
-	 * @param targetType the type of the elements in the collection
-	 * @param index the index into the collection that needs to be valid
-	 * @param collection the collection to grow with elements
-	 */
-	private void growCollection(TypeDescriptor targetType, int index, Collection<Object> collection) {
-		if (targetType.getElementTypeDescriptor() == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
-		}
-		TypeDescriptor elementType = targetType.getElementTypeDescriptor();
-		Object newCollectionElement;
-		try {
-			int newElements = index - collection.size();
-			while (newElements > 0) {
-				collection.add(elementType.getType().newInstance());
-				newElements--;
-			}
-			newCollectionElement = elementType.getType().newInstance();
-		}
-		catch (Exception ex) {
-			throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);
-		}
-		collection.add(newCollectionElement);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,6 +199,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NonQualifiedTestBean {
 
 		@Autowired
@@ -305,6 +306,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class QualifiedByAttributesTestBean {
 
 		@Autowired @MultipleAttributeQualifier(name="moe", age=42)
@@ -323,6 +325,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		private String name;

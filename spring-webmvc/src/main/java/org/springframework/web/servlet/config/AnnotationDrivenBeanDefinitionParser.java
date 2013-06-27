@@ -154,9 +154,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("order", 0);
-		handlerMappingDef.getPropertyValues().add("removeSemicolonContent", false);
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		String methodMappingName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
+		if (element.hasAttribute("enableMatrixVariables")) {
+			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
+			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
+		}
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);

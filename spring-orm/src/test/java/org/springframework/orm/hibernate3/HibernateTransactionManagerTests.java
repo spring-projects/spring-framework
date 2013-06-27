@@ -16,18 +16,6 @@
 
 package org.springframework.orm.hibernate3;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -35,7 +23,6 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import org.hibernate.FlushMode;
@@ -53,6 +40,7 @@ import org.hibernate.exception.GenericJDBCException;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.InOrder;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
@@ -68,6 +56,9 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
@@ -450,7 +441,7 @@ public class HibernateTransactionManagerTests {
 	}
 
 	@Test
-	public void testParticipatingTransactionWithWithRequiresNew() throws Exception {
+	public void testParticipatingTransactionWithRequiresNew() throws Exception {
 		final SessionFactory sf = mock(SessionFactory.class);
 		Session session1 = mock(Session.class);
 		Session session2 = mock(Session.class);
@@ -512,7 +503,7 @@ public class HibernateTransactionManagerTests {
 	}
 
 	@Test
-	public void testParticipatingTransactionWithWithNotSupported() throws Exception {
+	public void testParticipatingTransactionWithNotSupported() throws Exception {
 		final SessionFactory sf = mock(SessionFactory.class);
 		Session session = mock(Session.class);
 		Connection con = mock(Connection.class);
@@ -1399,4 +1390,5 @@ public class HibernateTransactionManagerTests {
 		verify(tx).commit();
 		verify(session).close();
 	}
+
 }

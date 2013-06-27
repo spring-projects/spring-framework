@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ class MergePlugin implements Plugin<Project> {
 
 		// update 'into' project artifacts to contain the source artifact contents
 		project.merge.into.sourcesJar.from(project.sourcesJar.source)
-		project.merge.into.jar.from(project.jar.source)
+		project.merge.into.jar.from(project.sourceSets.main.output)
 		project.merge.into.javadoc {
 			source += project.javadoc.source
 			classpath += project.javadoc.classpath
@@ -128,7 +128,13 @@ class MergePlugin implements Plugin<Project> {
 						(ExcludeRule.GROUP_KEY) : it.group,
 						(ExcludeRule.MODULE_KEY) : it.module])
 				}
-				intoConfiguration.dependencies.addAll(configuration.dependencies)
+				configuration.dependencies.each {
+					def intoCompile = project.merge.into.configurations.getByName("compile")
+					// Protect against changing a compile scope dependency (SPR-10218)
+					if(!intoCompile.dependencies.contains(it)) {
+						intoConfiguration.dependencies.add(it)
+					}
+				}
 				project.merge.into.install.repositories.mavenInstaller.pom.scopeMappings.addMapping(
 					mapping.priority + 100, intoConfiguration, mapping.scope)
 			}

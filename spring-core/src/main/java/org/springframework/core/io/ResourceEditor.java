@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ package org.springframework.core.io;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
 
 /**
  * {@link java.beans.PropertyEditor Editor} for {@link Resource}
@@ -51,7 +50,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 	private final ResourceLoader resourceLoader;
 
-	private final PropertyResolver propertyResolver;
+	private PropertyResolver propertyResolver;
 
 	private final boolean ignoreUnresolvablePlaceholders;
 
@@ -61,7 +60,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * using a {@link DefaultResourceLoader} and {@link StandardEnvironment}.
 	 */
 	public ResourceEditor() {
-		this(new DefaultResourceLoader(), new StandardEnvironment());
+		this(new DefaultResourceLoader(), null);
 	}
 
 	/**
@@ -73,7 +72,21 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 */
 	@Deprecated
 	public ResourceEditor(ResourceLoader resourceLoader) {
-		this(resourceLoader, new StandardEnvironment(), true);
+		this(resourceLoader, null, true);
+	}
+
+	/**
+	 * Create a new instance of the {@link ResourceEditor} class
+	 * using the given {@link ResourceLoader}.
+	 * @param resourceLoader the {@code ResourceLoader} to use
+	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
+	 * if no corresponding property could be found
+	 * @deprecated as of Spring 3.1 in favor of
+	 * {@link #ResourceEditor(ResourceLoader, PropertyResolver, boolean)}
+	 */
+	@Deprecated
+	public ResourceEditor(ResourceLoader resourceLoader, boolean ignoreUnresolvablePlaceholders) {
+		this(resourceLoader, null, ignoreUnresolvablePlaceholders);
 	}
 
 	/**
@@ -90,27 +103,12 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * Create a new instance of the {@link ResourceEditor} class
 	 * using the given {@link ResourceLoader}.
 	 * @param resourceLoader the {@code ResourceLoader} to use
-	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
-	 * if no corresponding property could be found
-	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link #ResourceEditor(ResourceLoader, PropertyResolver, boolean)}
-	 */
-	@Deprecated
-	public ResourceEditor(ResourceLoader resourceLoader, boolean ignoreUnresolvablePlaceholders) {
-		this(resourceLoader, new StandardEnvironment(), ignoreUnresolvablePlaceholders);
-	}
-
-	/**
-	 * Create a new instance of the {@link ResourceEditor} class
-	 * using the given {@link ResourceLoader}.
-	 * @param resourceLoader the {@code ResourceLoader} to use
 	 * @param propertyResolver the {@code PropertyResolver} to use
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding property could be found in the given {@code propertyResolver}
 	 */
 	public ResourceEditor(ResourceLoader resourceLoader, PropertyResolver propertyResolver, boolean ignoreUnresolvablePlaceholders) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
-		Assert.notNull(propertyResolver, "PropertyResolver must not be null");
 		this.resourceLoader = resourceLoader;
 		this.propertyResolver = propertyResolver;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
@@ -137,9 +135,11 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 * @see PropertyResolver#resolveRequiredPlaceholders
 	 */
 	protected String resolvePath(String path) {
-		return this.ignoreUnresolvablePlaceholders ?
-				this.propertyResolver.resolvePlaceholders(path) :
-				this.propertyResolver.resolveRequiredPlaceholders(path);
+		if (this.propertyResolver == null) {
+			this.propertyResolver = new StandardEnvironment();
+		}
+		return (this.ignoreUnresolvablePlaceholders ? this.propertyResolver.resolvePlaceholders(path) :
+				this.propertyResolver.resolveRequiredPlaceholders(path));
 	}
 
 

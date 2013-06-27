@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package org.springframework.jms.support.destination;
 
-import static org.junit.Assert.*;
-
 import javax.jms.Destination;
 import javax.jms.Session;
 import javax.naming.NamingException;
 
-import org.easymock.MockControl;
 import org.junit.Test;
 import org.springframework.jms.StubTopic;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -40,24 +40,18 @@ public class JndiDestinationResolverTests {
 	@Test
 	public void testHitsCacheSecondTimeThrough() throws Exception {
 
-		MockControl mockSession = MockControl.createControl(Session.class);
-		Session session = (Session) mockSession.getMock();
-		mockSession.replay();
+		Session session = mock(Session.class);
 
 		JndiDestinationResolver resolver = new OneTimeLookupJndiDestinationResolver();
 		Destination destination = resolver.resolveDestinationName(session, DESTINATION_NAME, true);
 		assertNotNull(destination);
 		assertSame(DESTINATION, destination);
-
-		mockSession.verify();
 	}
 
 	@Test
 	public void testDoesNotUseCacheIfCachingIsTurnedOff() throws Exception {
 
-		MockControl mockSession = MockControl.createControl(Session.class);
-		Session session = (Session) mockSession.getMock();
-		mockSession.replay();
+		Session session = mock(Session.class);
 
 		CountingCannedJndiDestinationResolver resolver
 				= new CountingCannedJndiDestinationResolver();
@@ -71,21 +65,15 @@ public class JndiDestinationResolverTests {
 		assertNotNull(destination);
 		assertSame(DESTINATION, destination);
 		assertEquals(2, resolver.getCallCount());
-
-		mockSession.verify();
 	}
 
 	@Test
 	public void testDelegatesToFallbackIfNotResolvedInJndi() throws Exception {
-		MockControl mockSession = MockControl.createControl(Session.class);
-		Session session = (Session) mockSession.getMock();
-		mockSession.replay();
+		Session session = mock(Session.class);
 
-		MockControl mockDestinationResolver = MockControl.createControl(DestinationResolver.class);
-		DestinationResolver dynamicResolver = (DestinationResolver) mockDestinationResolver.getMock();
-		dynamicResolver.resolveDestinationName(session, DESTINATION_NAME, true);
-		mockDestinationResolver.setReturnValue(DESTINATION);
-		mockDestinationResolver.replay();
+		DestinationResolver dynamicResolver = mock(DestinationResolver.class);
+		given(dynamicResolver.resolveDestinationName(session, DESTINATION_NAME,
+				true)).willReturn(DESTINATION);
 
 		JndiDestinationResolver resolver = new JndiDestinationResolver() {
 			@Override
@@ -99,20 +87,12 @@ public class JndiDestinationResolverTests {
 
 		assertNotNull(destination);
 		assertSame(DESTINATION, destination);
-
-		mockSession.verify();
-		mockDestinationResolver.verify();
 	}
 
 	@Test
 	public void testDoesNotDelegateToFallbackIfNotResolvedInJndi() throws Exception {
-		MockControl mockSession = MockControl.createControl(Session.class);
-		final Session session = (Session) mockSession.getMock();
-		mockSession.replay();
-
-		MockControl mockDestinationResolver = MockControl.createControl(DestinationResolver.class);
-		DestinationResolver dynamicResolver = (DestinationResolver) mockDestinationResolver.getMock();
-		mockDestinationResolver.replay();
+		final Session session = mock(Session.class);
+		DestinationResolver dynamicResolver = mock(DestinationResolver.class);
 
 		final JndiDestinationResolver resolver = new JndiDestinationResolver() {
 			@Override
@@ -125,10 +105,10 @@ public class JndiDestinationResolverTests {
 		try {
 			resolver.resolveDestinationName(session, DESTINATION_NAME, true);
 			fail("expected DestinationResolutionException");
-		} catch (DestinationResolutionException ex) { /* expected */ }
-
-		mockSession.verify();
-		mockDestinationResolver.verify();
+		}
+		catch (DestinationResolutionException ex) {
+			// expected
+		}
 	}
 
 

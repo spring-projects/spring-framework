@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -89,6 +90,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Costin Leau
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -133,11 +135,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
 
-	/** Map of singleton bean names keyed by bean class */
-	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
+	/** Map of singleton and non-singleton bean names keyed by dependency type */
+	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
 
-	/** Map of non-singleton bean names keyed by bean class */
-	private final Map<Class<?>, String[]> nonSingletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
+	/** Map of singleton-only bean names keyed by dependency type */
+	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
 
 	/** List of bean definition names, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>();
@@ -270,12 +272,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (beanNames.length == 1) {
 			return getBean(beanNames[0], requiredType);
 		}
-		else if (beanNames.length == 0 && getParentBeanFactory() != null) {
+		else if (beanNames.length > 1) {
+			T primaryBean = null;
+			for (String beanName : beanNames) {
+				T beanInstance = getBean(beanName, requiredType);
+				if (isPrimary(beanName, beanInstance)) {
+					if (primaryBean != null) {
+						throw new NoUniqueBeanDefinitionException(requiredType, beanNames.length,
+								"more than one 'primary' bean found of required type: " + Arrays.asList(beanNames));
+					}
+					primaryBean = beanInstance;
+				}
+			}
+			if (primaryBean != null) {
+				return primaryBean;
+			}
+			throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+		}
+		else if (getParentBeanFactory() != null) {
 			return getParentBeanFactory().getBean(requiredType);
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " +
-					beanNames.length + ": " + StringUtils.arrayToCommaDelimitedString(beanNames));
+			throw new NoSuchBeanDefinitionException(requiredType);
 		}
 	}
 
@@ -308,8 +326,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (!isConfigurationFrozen()  || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
-		Map<Class<?>, String[]> cache = includeNonSingletons ?
-				this.nonSingletonBeanNamesByType : this.singletonBeanNamesByType;
+		Map<Class<?>, String[]> cache =
+				(includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
 		String[] resolvedBeanNames = cache.get(type);
 		if (resolvedBeanNames != null) {
 			return resolvedBeanNames;
@@ -689,9 +707,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
 		destroySingleton(beanName);
 
-		// Remove any assumptions about by-type mappings
-		this.singletonBeanNamesByType.clear();
-		this.nonSingletonBeanNamesByType.clear();
+		// Remove any assumptions about by-type mappings.
+		clearByTypeCache();
 
 		// Reset all bean definitions that have the given bean as parent (recursively).
 		for (String bdName : this.beanDefinitionNames) {
@@ -712,13 +729,33 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return this.allowBeanDefinitionOverriding;
 	}
 
+	@Override
+	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
+		super.registerSingleton(beanName, singletonObject);
+		clearByTypeCache();
+	}
+
+	@Override
+	public void destroySingleton(String beanName) {
+		super.destroySingleton(beanName);
+		clearByTypeCache();
+	}
+
+	/**
+	 * Remove any assumptions about by-type mappings.
+	 */
+	private void clearByTypeCache() {
+		this.allBeanNamesByType.clear();
+		this.singletonBeanNamesByType.clear();
+	}
+
 
 	//---------------------------------------------------------------------
 	// Dependency resolution functionality
 	//---------------------------------------------------------------------
 
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
@@ -733,7 +770,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	protected Object doResolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 		if (value != null) {
@@ -823,8 +860,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (matchingBeans.size() > 1) {
 				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
-					throw new NoSuchBeanDefinitionException(type, "expected single matching bean but found " +
-							matchingBeans.size() + ": " + matchingBeans.keySet());
+					throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 				}
 				if (autowiredBeanNames != null) {
 					autowiredBeanNames.add(primaryBeanName);
@@ -895,7 +931,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
 					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
 					if (candidateLocal == primaryLocal) {
-						throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),
+						throw new NoUniqueBeanDefinitionException(descriptor.getDependencyType(), candidateBeans.size(),
 								"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
 					}
 					else if (candidateLocal && !primaryLocal) {

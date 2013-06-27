@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -60,6 +46,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link RequestResponseBodyMethodProcessor} delegating to a
@@ -95,12 +84,10 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-		messageConverter = createMock(HttpMessageConverter.class);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		replay(messageConverter);
+		messageConverter = mock(HttpMessageConverter.class);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
 		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
-		reset(messageConverter);
 
 		Method methodHandle1 = getClass().getMethod("handle1", String.class, Integer.TYPE);
 		paramRequestBodyString = new MethodParameter(methodHandle1, 0);
@@ -138,15 +125,13 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		String body = "Foo";
 		servletRequest.setContent(body.getBytes());
 
-		expect(messageConverter.canRead(String.class, contentType)).andReturn(true);
-		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
-		replay(messageConverter);
+		given(messageConverter.canRead(String.class, contentType)).willReturn(true);
+		given(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).willReturn(body);
 
 		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, new ValidatingBinderFactory());
 
 		assertEquals("Invalid argument", body, result);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
-		verify(messageConverter);
 	}
 
 	@Test
@@ -172,16 +157,13 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		servletRequest.setContent(new byte[] {});
 
 		@SuppressWarnings("unchecked")
-		HttpMessageConverter<SimpleBean> beanConverter = createMock(HttpMessageConverter.class);
-		expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(beanConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
-		expect(beanConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).andReturn(simpleBean);
-		replay(beanConverter);
+		HttpMessageConverter<SimpleBean> beanConverter = mock(HttpMessageConverter.class);
+		given(beanConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(beanConverter.canRead(SimpleBean.class, contentType)).willReturn(true);
+		given(beanConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(simpleBean);
 
 		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
 		processor.resolveArgument(paramValidBean, mavContainer, webRequest, new ValidatingBinderFactory());
-
-		verify(beanConverter);
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
@@ -189,23 +171,20 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		expect(messageConverter.canRead(String.class, contentType)).andReturn(false);
-		replay(messageConverter);
+		given(messageConverter.canRead(String.class, contentType)).willReturn(false);
 
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 	}
 
 	@Test
 	public void resolveArgumentNoContentType() throws Exception {
-		expect(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).andReturn(false);
-		replay(messageConverter);
+		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
 		try {
 			processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 			fail("Expected exception");
 		}
 		catch (HttpMediaTypeNotSupportedException ex) {
 		}
-		verify(messageConverter);
 	}
 
 	@Test
@@ -223,16 +202,14 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		String body = "Foo";
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
-		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
-		replay(messageConverter);
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, accepted)).willReturn(true);
 
 		processor.handleReturnValue(body, returnTypeString, mavContainer, webRequest);
 
 		assertTrue("The requestHandled flag wasn't set", mavContainer.isRequestHandled());
-		verify(messageConverter);
+		verify(messageConverter).write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 	}
 
 	@Test
@@ -242,14 +219,12 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", "text/*");
 		servletRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
 
-		expect(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).andReturn(true);
-		messageConverter.write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
-		replay(messageConverter);
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).willReturn(true);
 
 		processor.handleReturnValue(body, returnTypeStringProduces, mavContainer, webRequest);
 
 		assertTrue(mavContainer.isRequestHandled());
-		verify(messageConverter);
+		verify(messageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
 
@@ -258,10 +233,9 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		MediaType accepted = MediaType.APPLICATION_ATOM_XML;
 		servletRequest.addHeader("Accept", accepted.toString());
 
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.TEXT_PLAIN));
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
-		replay(messageConverter);
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Arrays.asList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, accepted)).willReturn(false);
 
 		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
 	}
@@ -271,10 +245,9 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		MediaType accepted = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Accept", accepted.toString());
 
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
-		replay(messageConverter);
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, accepted)).willReturn(false);
 
 		processor.handleReturnValue("Foo", returnTypeStringProduces, mavContainer, webRequest);
 	}
@@ -289,16 +262,14 @@ public class RequestResponseBodyMethodProcessorMockTests {
 
 		servletRequest.addHeader("Accept", accepted);
 
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(supported);
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
-		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
-		replay(messageConverter);
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(supported);
+		given(messageConverter.canWrite(String.class, accepted)).willReturn(true);
 
 		processor.handleReturnValue(body, returnTypeStringProduces, mavContainer, webRequest);
 
 		assertTrue(mavContainer.isRequestHandled());
-		verify(messageConverter);
+		verify(messageConverter).write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 	}
 
 

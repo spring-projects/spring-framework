@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,24 @@
 package org.springframework.test.context;
 
 /**
+ * {@code TestExecutionListener} defines a <em>listener</em> API for reacting to
+ * test execution events published by the {@link TestContextManager} with which
+ * the listener is registered.
  * <p>
- * {@code TestExecutionListener} defines a <em>listener</em> API for
- * reacting to test execution events published by the {@link TestContextManager}
- * with which the listener is registered.
- * </p>
- * <p>
- * Concrete implementations must provide a {@code public} no-args
- * constructor, so that listeners can be instantiated transparently by tools and
- * configuration mechanisms.
- * </p>
+ * Concrete implementations must provide a {@code public} no-args constructor,
+ * so that listeners can be instantiated transparently by tools and configuration
+ * mechanisms.
  * <p>
  * Spring provides the following out-of-the-box implementations:
- * </p>
  * <ul>
- * <li>
- * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  * DependencyInjectionTestExecutionListener}</li>
- * <li>
- * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
  * DirtiesContextTestExecutionListener}</li>
- * <li>
- * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * TransactionalTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
+ * ServletTestExecutionListener}</li>
  * </ul>
  *
  * @author Sam Brannen

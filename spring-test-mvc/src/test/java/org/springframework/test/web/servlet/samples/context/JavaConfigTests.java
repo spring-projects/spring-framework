@@ -16,20 +16,21 @@
 
 package org.springframework.test.web.servlet.samples.context;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.samples.context.JavaConfigTests.RootConfig;
 import org.springframework.test.web.servlet.samples.context.JavaConfigTests.WebConfig;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -42,6 +43,13 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesView;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+
+
 /**
  * Tests with Java configuration.
  *
@@ -50,11 +58,17 @@ import org.springframework.web.servlet.view.tiles3.TilesView;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("src/test/resources/META-INF/web-resources")
-@ContextConfiguration(classes = WebConfig.class)
+@ContextHierarchy({
+	@ContextConfiguration(classes = RootConfig.class),
+	@ContextConfiguration(classes = WebConfig.class)
+})
 public class JavaConfigTests {
 
 	@Autowired
 	private WebApplicationContext wac;
+
+	@Autowired
+	private PersonDao personDao;
 
 	private MockMvc mockMvc;
 
@@ -62,6 +76,15 @@ public class JavaConfigTests {
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		when(this.personDao.getPerson(5L)).thenReturn(new Person("Joe"));
+	}
+
+	@Test
+	public void person() throws Exception {
+		this.mockMvc.perform(get("/person/5").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
 	@Test
@@ -73,8 +96,25 @@ public class JavaConfigTests {
 
 
 	@Configuration
+	static class RootConfig {
+
+		@Bean
+		public PersonDao personDao() {
+			return Mockito.mock(PersonDao.class);
+		}
+	}
+
+	@Configuration
 	@EnableWebMvc
 	static class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Autowired
+		private RootConfig rootConfig;
+
+		@Bean
+		public PersonController personController() {
+			return new PersonController(this.rootConfig.personDao());
+		}
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		 * Validate the call and provide the expected return value
 		 * @param lastSig
 		 * @param args
-		 * @return the return value
+		 * @return
 		 */
 		public Object respond(String lastSig, Object[] args) {
 			Call call = nextCall();
@@ -114,7 +114,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 			if (responseType == CallResponse.return_) {
 				return call.returnValue(lastSig, args);
 			} else if(responseType == CallResponse.throw_) {
-				return call.throwException(lastSig, args);
+				return (RuntimeException)call.throwException(lastSig, args);
 			} else if(responseType == CallResponse.nothing) {
 				// do nothing
 			}

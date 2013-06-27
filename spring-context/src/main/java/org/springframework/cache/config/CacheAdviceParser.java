@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.w3c.dom.Element;
  * BeanDefinitionParser} for the {@code <tx:advice/>} tag.
  *
  * @author Costin Leau
+ * @author Phillip Webb
  */
 class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
@@ -54,7 +55,9 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 	 */
 	private static class Props {
 
-		private String key, condition, method;
+		private String key;
+		private String condition;
+		private String method;
 		private String[] caches = null;
 
 		Props(Element root) {
@@ -70,13 +73,9 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
 			String cache = element.getAttribute("cache");
-			String k = element.getAttribute("key");
-			String c = element.getAttribute("condition");
-
-			String[] localCaches = caches;
-			String localKey = key, localCondition = condition;
 
 			// sanity check
+			String[] localCaches = caches;
 			if (StringUtils.hasText(cache)) {
 				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
 			} else {
@@ -84,17 +83,10 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
 				}
 			}
-
-			if (StringUtils.hasText(k)) {
-				localKey = k.trim();
-			}
-
-			if (StringUtils.hasText(c)) {
-				localCondition = c.trim();
-			}
 			op.setCacheNames(localCaches);
-			op.setKey(localKey);
-			op.setCondition(localCondition);
+
+			op.setKey(getAttributeValue(element, "key", this.key));
+			op.setCondition(getAttributeValue(element, "condition", this.condition));
 
 			return op;
 		}
@@ -165,7 +157,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheableOperation());
+			CacheableOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheableOperation());
+			op.setUnless(getAttributeValue(opElement, "unless", ""));
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
 			if (col == null) {
@@ -207,7 +200,8 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CachePutOperation());
+			CachePutOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CachePutOperation());
+			op.setUnless(getAttributeValue(opElement, "unless", ""));
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
 			if (col == null) {
@@ -222,4 +216,14 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		attributeSourceDefinition.getPropertyValues().add("nameMap", cacheOpMap);
 		return attributeSourceDefinition;
 	}
+
+
+	private static String getAttributeValue(Element element, String attributeName, String defaultValue) {
+		String attribute = element.getAttribute(attributeName);
+		if(StringUtils.hasText(attribute)) {
+			return attribute.trim();
+		}
+		return defaultValue;
+	}
+
 }

@@ -679,7 +679,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             covered in the chapter entitled <xref linkend="transaction"/>.</para>
             <tip>
                 <para>You are strongly encouraged to look at the
-                <filename>'spring-tx-3.0.xsd'</filename> file that ships with the Spring
+                <filename>'spring-tx.xsd'</filename> file that ships with the Spring
                 distribution. This file is (of course), the XML Schema for Spring's
                 transaction configuration, and covers all of the various tags in the
                 <literal>tx</literal> namespace, including attribute defaults and
@@ -812,7 +812,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             Spring as they are currently undergoing review. If you are a third party tool
             vendor and you would like to contribute to this review process, then do mail
             the Spring mailing list. The currently supported <literal>tool</literal>
-            tags can be found in the file <literal>'spring-tool-3.0.xsd'</literal> in the
+            tags can be found in the file <literal>'spring-tool.xsd'</literal> in the
             <literal>'src/org/springframework/beans/factory/xml'</literal> directory of the
             Spring source distribution.</para>
         </section>
@@ -931,8 +931,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 </beans>]]></programlisting>
                 <para>
@@ -1053,8 +1053,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 </beans>]]></programlisting>
                 <para>
@@ -1138,7 +1138,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 relevant XSD file. As can be seen in the following screenshot, the
                 <literal>'http://www.springframework.org/schema/util'</literal> namespace
                 is being associated with the file resource
-                <literal>'C:\bench\spring\src\org\springframework\beans\factory\xml\spring-util-3.0.xsd'</literal>.</para>
+                <literal>'C:\bench\spring\src\org\springframework\beans\factory\xml\spring-util.xsd'</literal>.</para>
                 <para>
                     <mediaobject>
                         <imageobject role="fo">

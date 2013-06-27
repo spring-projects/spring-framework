@@ -27,10 +27,17 @@ eclipse.classpath.file.whenMerged { classpath ->
 
 
 // Use separate main/test outputs (prevents WTP from packaging test classes)
-eclipse.classpath.defaultOutputDir = file(project.name+"/eclipse/bin")
+eclipse.classpath.defaultOutputDir = file(project.name+"/bin/eclipse")
+eclipse.classpath.file.beforeMerged { classpath ->
+	classpath.entries.findAll{ it instanceof SourceFolder }.each {
+		if(it.output.startsWith("bin/")) {
+			it.output = null
+		}
+	}
+}
 eclipse.classpath.file.whenMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		it.output = "build/eclipse/" + it.path.split("/")[1]
+		it.output = "bin/" + it.path.split("/")[1]
 	}
 }
 
@@ -44,6 +51,7 @@ task eclipseSettings(type: Copy) {
 		"src/eclipse/org.eclipse.jdt.ui.prefs",
 		"src/eclipse/org.eclipse.wst.common.project.facet.core.xml")
 	into project.file('.settings/')
+	outputs.upToDateWhen { false }
 }
 
 task eclipseWstComponent(type: Copy) {
@@ -51,19 +59,41 @@ task eclipseWstComponent(type: Copy) {
 		"src/eclipse/org.eclipse.wst.common.component")
 	into project.file('.settings/')
 	expand(deployname: project.name)
+	outputs.upToDateWhen { false }
 }
 
 task eclipseJdtPrepare(type: Copy) {
 	from rootProject.file("src/eclipse/org.eclipse.jdt.core.prefs")
 	into project.file(".settings/")
+	outputs.upToDateWhen { false }
 }
 
 task cleanEclipseJdtUi(type: Delete) {
-	delete project.file(".settings/org.eclipse.jdt.ui.prefs");
-	delete project.file(".settings/org.eclipse.wst.common.component");
-	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml");
+	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
+	delete project.file("org.eclipse.jdt.core.prefs")
+	delete project.file(".settings/org.eclipse.wst.common.component")
+	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
 }
 
 tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
 tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
 tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
+
+
+// Filter 'build' folder
+
+eclipse.project.file.withXml {
+	def node = it.asNode()
+
+	def filteredResources = node.get("filteredResources")
+	if(filteredResources) {
+		node.remove(filteredResources)
+	}
+	def filterNode = node.appendNode("filteredResources").appendNode("filter")
+	filterNode.appendNode("id", "1359048889071")
+	filterNode.appendNode("name", "")
+	filterNode.appendNode("type", "30")
+	def matcherNode = filterNode.appendNode("matcher")
+	matcherNode.appendNode("id", "org.eclipse.ui.ide.multiFilter")
+	matcherNode.appendNode("arguments", "1.0-projectRelativePath-matches-false-false-build")
+}

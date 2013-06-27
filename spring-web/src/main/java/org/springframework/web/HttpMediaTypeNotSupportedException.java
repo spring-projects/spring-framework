@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 
 	private final MediaType contentType;
 
+
 	/**
 	 * Create a new HttpMediaTypeNotSupportedException.
 	 * @param message the exception message
@@ -61,11 +62,12 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 		this.contentType = contentType;
 	}
 
+
 	/**
 	 * Return the HTTP request content type method that caused the failure.
 	 */
 	public MediaType getContentType() {
-		return contentType;
+		return this.contentType;
 	}
 
 }

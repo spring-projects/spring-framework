@@ -44,7 +44,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
- * @see TestContextCacheKeyTests
+ * @see ContextCacheTests
  */
 @RunWith(OrderedMethodsSpringJUnit4ClassRunner.class)
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })

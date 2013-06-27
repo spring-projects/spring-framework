@@ -211,6 +211,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 		MailClientDependencyInjectionAspect.aspectOf().setMailSender(new JavaMailSenderImpl());
 		Order testOrder = new Order();
 		Order deserializedOrder = serializeAndDeserialize(testOrder);
+		assertNotNull(deserializedOrder);
 		assertNotNull("Interface driven injection didn't occur for deserialization", testOrder.mailSender);
 	}
 
@@ -304,7 +305,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 //		}
 //	}
 
-
+	@SuppressWarnings("unused")
 	private static class ShouldNotBeConfiguredBySpring {
 
 		private String name;
@@ -335,6 +336,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable
+	@SuppressWarnings("unused")
 	private static class ShouldBeConfiguredBySpringUsingTypeNameAsBeanName {
 
 		private String name;
@@ -350,6 +352,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable(autowire=Autowire.BY_TYPE)
+	@SuppressWarnings("unused")
 	private static class ShouldBeConfiguredBySpringUsingAutowireByType {
 
 		private TestBean friend = null;
@@ -365,6 +368,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable(autowire=Autowire.BY_NAME)
+	@SuppressWarnings("unused")
 	private static class ValidAutowireByName {
 
 		private TestBean friend = null;
@@ -380,6 +384,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable(autowire=Autowire.BY_NAME, dependencyCheck=true)
+	@SuppressWarnings("unused")
 	private static class InvalidAutowireByName {
 
 		private TestBean friend;
@@ -393,7 +398,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 		}
 	}
 
-
+	@SuppressWarnings("unused")
 	private static class ArbitraryExistingPojo {
 
 		private TestBean friend;
@@ -426,6 +431,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable
+	@SuppressWarnings("unused")
 	private static class BaseBean {
 
 		public int setterCount;
@@ -447,7 +453,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	}
 
 	@Configurable
-	@SuppressWarnings("serial")
+	@SuppressWarnings({"serial", "unused"})
 	private static class BaseSerializableBean implements Serializable {
 
 		public int setterCount;
@@ -467,6 +473,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Aspect
+	@SuppressWarnings("unused")
 	private static class WireArbitraryExistingPojo extends AbstractBeanConfigurerAspect {
 
 		@Pointcut("initialization(ArbitraryExistingPojo.new(..)) && this(beanInstance)")
@@ -477,6 +484,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Aspect
+	@SuppressWarnings("unused")
 	private static class AspectThatWillNotBeUsed extends AbstractBeanConfigurerAspect {
 
 		@Pointcut("initialization(ClassThatWillNotActuallyBeWired.new(..)) && this(beanInstance)")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,12 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	}
 
 	/**
-	 * Create a new ResourceEditorRegistrar for the given ResourceLoader
+	 * Create a new ResourceEditorRegistrar for the given {@link ResourceLoader}
+	 * and {@link PropertyResolver}.
 	 * @param resourceLoader the ResourceLoader (or ResourcePatternResolver)
 	 * to create editors for (usually an ApplicationContext)
+	 * @param propertyResolver the PropertyResolver (usually an Environment)
+	 * @see org.springframework.core.env.Environment
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.context.ApplicationContext
 	 */

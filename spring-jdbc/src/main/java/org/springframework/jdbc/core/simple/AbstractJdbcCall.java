@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public abstract class AbstractJdbcCall {
 
 
 	/**
-	 * Get the configured {@link JdbcTemplate}
+	 * Get the configured {@link JdbcTemplate}.
 	 */
 	public JdbcTemplate getJdbcTemplate() {
 		return this.jdbcTemplate;
@@ -109,7 +109,6 @@ public abstract class AbstractJdbcCall {
 	protected CallableStatementCreatorFactory getCallableStatementFactory() {
 		return this.callableStatementFactory;
 	}
-
 
 	/**
 	 * Set the name of the stored procedure.
@@ -294,7 +293,7 @@ public abstract class AbstractJdbcCall {
 					this.callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
 			this.declaredParameters.add(resultSetParameter);
 		}
-		callMetaDataContext.processParameters(this.declaredParameters);
+		this.callMetaDataContext.processParameters(this.declaredParameters);
 
 		this.callString = this.callMetaDataContext.createCallString();
 		if (logger.isDebugEnabled()) {

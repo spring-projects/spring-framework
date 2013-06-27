@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import java.util.Properties;
  *
  * <p>Allows for reading from any Reader and writing to any Writer, for example
  * to specify a charset for a properties file. This is a capability that standard
- * {@code java.util.Properties} unfortunately lacks up until JDK 1.5:
- * You can only load files using the ISO-8859-1 charset there.
+ * {@code java.util.Properties} unfortunately lacked up until JDK 1.5:
+ * You were only able to load files using the ISO-8859-1 charset there.
  *
  * <p>Loading from and storing to a stream delegates to {@code Properties.load}
  * and {@code Properties.store}, respectively, to be fully compatible with
@@ -49,20 +49,11 @@ import java.util.Properties;
  * an encoding for a Reader/Writer (like ReloadableResourceBundleMessageSource's
  * "defaultEncoding" and "fileEncodings" properties).
  *
- * <p>As of Spring 1.2.2, this implementation also supports properties XML files,
- * through the {@code loadFromXml} and {@code storeToXml} methods.
- * The default implementations delegate to JDK 1.5's corresponding methods,
- * throwing an exception if running on an older JDK. Those implementations
- * could be subclassed to apply custom XML handling on JDK 1.4, for example.
- *
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see java.util.Properties
  * @see java.util.Properties#load
  * @see java.util.Properties#store
- * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setPropertiesPersister
- * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setDefaultEncoding
- * @see org.springframework.context.support.ReloadableResourceBundleMessageSource#setFileEncodings
  */
 public class DefaultPropertiesPersister implements PropertiesPersister {
 
@@ -228,30 +219,15 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 
 
 	public void loadFromXml(Properties props, InputStream is) throws IOException {
-		try {
-			props.loadFromXML(is);
-		}
-		catch (NoSuchMethodError err) {
-			throw new IOException("Cannot load properties XML file - not running on JDK 1.5+: " + err.getMessage());
-		}
+		props.loadFromXML(is);
 	}
 
 	public void storeToXml(Properties props, OutputStream os, String header) throws IOException {
-		try {
-			props.storeToXML(os, header);
-		}
-		catch (NoSuchMethodError err) {
-			throw new IOException("Cannot store properties XML file - not running on JDK 1.5+: " + err.getMessage());
-		}
+		props.storeToXML(os, header);
 	}
 
 	public void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException {
-		try {
-			props.storeToXML(os, header, encoding);
-		}
-		catch (NoSuchMethodError err) {
-			throw new IOException("Cannot store properties XML file - not running on JDK 1.5+: " + err.getMessage());
-		}
+		props.storeToXML(os, header, encoding);
 	}
 
 }

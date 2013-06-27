@@ -16,12 +16,6 @@
 
 package org.springframework.jdbc.core.simple;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -37,6 +31,9 @@ import org.junit.Test;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.metadata.TableMetaDataContext;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Mock object based tests for TableMetaDataContext.

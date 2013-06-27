@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,15 +147,6 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		return new StandardServletEnvironment();
 	}
 
-	@Override
-	public ConfigurableWebEnvironment getEnvironment() {
-		ConfigurableEnvironment env = super.getEnvironment();
-		Assert.isInstanceOf(ConfigurableWebEnvironment.class, env,
-				"ConfigurableWebApplicationContext environment must be of type " +
-				"ConfigurableWebEnvironment");
-		return (ConfigurableWebEnvironment) env;
-	}
-
 	/**
 	 * Register ServletContextAwareProcessor.
 	 * @see ServletContextAwareProcessor
@@ -202,7 +193,11 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	@Override
 	protected void initPropertySources() {
 		super.initPropertySources();
-		this.getEnvironment().initPropertySources(this.servletContext, null);
+		ConfigurableEnvironment env = this.getEnvironment();
+		if (env instanceof ConfigurableWebEnvironment) {
+			((ConfigurableWebEnvironment)env).initPropertySources(
+					this.servletContext, null);
+		}
 	}
 
 	public Theme getTheme(String themeName) {

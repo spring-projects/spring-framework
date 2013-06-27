@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,15 @@
 
 package org.springframework.core.convert.support;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.math.BigDecimal;
@@ -206,6 +214,11 @@ public class DefaultConversionTests {
 	}
 
 	@Test
+	public void testStringToEnumWithSubclss() throws Exception {
+		assertEquals(SubFoo.BAZ, conversionService.convert("BAZ", SubFoo.BAR.getClass()));
+	}
+
+	@Test
 	public void testStringToEnumEmptyString() {
 		assertEquals(null, conversionService.convert("", Foo.class));
 	}
@@ -217,6 +230,24 @@ public class DefaultConversionTests {
 
 	public static enum Foo {
 		BAR, BAZ;
+	}
+
+	public static enum SubFoo {
+
+		BAR {
+			@Override
+			String s() {
+				return "x";
+			}
+		},
+		BAZ {
+			@Override
+			String s() {
+				return "y";
+			}
+		};
+
+		abstract String s();
 	}
 
 	@Test
@@ -771,6 +802,30 @@ public class DefaultConversionTests {
 	public void convertObjectToObjectFinderMethodWithIdConversion() {
 		TestEntity e = conversionService.convert("1", TestEntity.class);
 		assertEquals(new Long(1), e.getId());
+	}
+
+	@Test
+	public void convertCharArrayToString() throws Exception {
+		String converted = conversionService.convert(new char[] { 'a', 'b', 'c' }, String.class);
+		assertThat(converted, equalTo("a,b,c"));
+	}
+
+	@Test
+	public void convertStringToCharArray() throws Exception {
+		char[] converted = conversionService.convert("a,b,c", char[].class);
+		assertThat(converted, equalTo(new char[] { 'a', 'b', 'c' }));
+	}
+
+	@Test
+	public void convertStringToCustomCharArray() throws Exception {
+		conversionService.addConverter(new Converter<String, char[]>() {
+			@Override
+			public char[] convert(String source) {
+				return source.toCharArray();
+			}
+		});
+		char[] converted = conversionService.convert("abc", char[].class);
+		assertThat(converted, equalTo(new char[] { 'a', 'b', 'c' }));
 	}
 
 	public static class TestEntity {

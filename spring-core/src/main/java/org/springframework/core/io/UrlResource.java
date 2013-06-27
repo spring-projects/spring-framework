@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -41,6 +42,11 @@ import org.springframework.util.StringUtils;
 public class UrlResource extends AbstractFileResolvingResource {
 
 	/**
+	 * Original URI, if available; used for URI and File access.
+	 */
+	private final URI uri;
+
+	/**
 	 * Original URL, used for actual access.
 	 */
 	private final URL url;
@@ -50,14 +56,21 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	private final URL cleanedUrl;
 
+
 	/**
-	 * Original URI, if available; used for URI and File access.
+	 * Create a new UrlResource based on the given URI object.
+	 * @param uri a URI
+	 * @throws MalformedURLException if the given URL path is not valid
 	 */
-	private final URI uri;
-
+	public UrlResource(URI uri) throws MalformedURLException {
+		Assert.notNull(uri, "URI must not be null");
+		this.uri = uri;
+		this.url = uri.toURL();
+		this.cleanedUrl = getCleanedUrl(this.url, uri.toString());
+	}
 
 	/**
-	 * Create a new UrlResource.
+	 * Create a new UrlResource based on the given URL object.
 	 * @param url a URL
 	 */
 	public UrlResource(URL url) {
@@ -68,27 +81,56 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new UrlResource.
-	 * @param uri a URI
-	 * @throws MalformedURLException if the given URL path is not valid
-	 */
-	public UrlResource(URI uri) throws MalformedURLException {
-		Assert.notNull(uri, "URI must not be null");
-		this.url = uri.toURL();
-		this.cleanedUrl = getCleanedUrl(this.url, uri.toString());
-		this.uri = uri;
-	}
-
-	/**
-	 * Create a new UrlResource.
+	 * Create a new UrlResource based on a URL path.
+	 * <p>Note: The given path needs to be pre-encoded if necessary.
 	 * @param path a URL path
 	 * @throws MalformedURLException if the given URL path is not valid
+	 * @see java.net.URL#URL(String)
 	 */
 	public UrlResource(String path) throws MalformedURLException {
 		Assert.notNull(path, "Path must not be null");
+		this.uri = null;
 		this.url = new URL(path);
 		this.cleanedUrl = getCleanedUrl(this.url, path);
-		this.uri = null;
+	}
+
+	/**
+	 * Create a new UrlResource based on a URI specification.
+	 * <p>The given parts will automatically get encoded if necessary.
+	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * also known as "scheme"
+	 * @param location the location (e.g. the file path within that protocol);
+	 * also known as "scheme-specific part"
+	 * @throws MalformedURLException if the given URL specification is not valid
+	 * @see java.net.URI#URI(String, String, String)
+	 */
+	public UrlResource(String protocol, String location) throws MalformedURLException  {
+		this(protocol, location, null);
+	}
+
+	/**
+	 * Create a new UrlResource based on a URI specification.
+	 * <p>The given parts will automatically get encoded if necessary.
+	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
+	 * also known as "scheme"
+	 * @param location the location (e.g. the file path within that protocol);
+	 * also known as "scheme-specific part"
+	 * @param fragment the fragment within that location (e.g. anchor on an HTML page,
+	 * as following after a "#" separator)
+	 * @throws MalformedURLException if the given URL specification is not valid
+	 * @see java.net.URI#URI(String, String, String)
+	 */
+	public UrlResource(String protocol, String location, String fragment) throws MalformedURLException  {
+		try {
+			this.uri = new URI(protocol, location, fragment);
+			this.url = this.uri.toURL();
+			this.cleanedUrl = getCleanedUrl(this.url, this.uri.toString());
+		}
+		catch (URISyntaxException ex) {
+			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
+			exToThrow.initCause(ex);
+			throw exToThrow;
+		}
 	}
 
 	/**

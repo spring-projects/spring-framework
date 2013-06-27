@@ -46,12 +46,32 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
+	public void sortInstancesWithSubclass() {
+		List<Object> list = new ArrayList<>();
+		list.add(new B());
+		list.add(new C());
+		AnnotationAwareOrderComparator.sort(list);
+		assertTrue(list.get(0) instanceof C);
+		assertTrue(list.get(1) instanceof B);
+	}
+
+	@Test
 	public void sortClasses() {
 		List<Object> list = new ArrayList<>();
 		list.add(B.class);
 		list.add(A.class);
 		AnnotationAwareOrderComparator.sort(list);
 		assertEquals(A.class, list.get(0));
+		assertEquals(B.class, list.get(1));
+	}
+
+	@Test
+	public void sortClassesWithSubclass() {
+		List<Object> list = new ArrayList<>();
+		list.add(B.class);
+		list.add(C.class);
+		AnnotationAwareOrderComparator.sort(list);
+		assertEquals(C.class, list.get(0));
 		assertEquals(B.class, list.get(1));
 	}
 
@@ -62,6 +82,9 @@ public class AnnotationAwareOrderComparatorTests {
 
 	@Order(2)
 	private static class B {
+	}
+
+	private static class C extends A {
 	}
 
 }

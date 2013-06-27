@@ -23,6 +23,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 
 import org.junit.Test;
 
@@ -192,7 +193,6 @@ public class ExtendedBeanInfoTests {
 			}
 		}
 		class Child extends Parent {
-			@Override
 			public Integer getProperty1() {
 				return 2;
 			}
@@ -214,7 +214,6 @@ public class ExtendedBeanInfoTests {
 	@Test
 	public void cornerSpr9453() throws IntrospectionException {
 		final class Bean implements Spr9453<Class<?>> {
-			@Override
 			public Class<?> getProp() {
 				return null;
 			}
@@ -583,6 +582,20 @@ public class ExtendedBeanInfoTests {
 		}
 	}
 
+	/**
+	 * Prior to SPR-10111 (a follow-up fix for SPR-9702), this method would throw an
+	 * IntrospectionException regarding a "type mismatch between indexed and non-indexed
+	 * methods" intermittently (approximately one out of every four times) under JDK 7
+	 * due to non-deterministic results from {@link Class#getDeclaredMethods()}.
+	 * See http://bugs.sun.com/view_bug.do?bug_id=7023180
+	 * @see #cornerSpr9702()
+	 */
+	@Test
+	public void cornerSpr10111() throws Exception {
+		new ExtendedBeanInfo(Introspector.getBeanInfo(BigDecimal.class));
+	}
+
+
 	@Test
 	public void subclassWriteMethodWithCovariantReturnType() throws IntrospectionException {
 		@SuppressWarnings("unused") class B {
@@ -590,9 +603,7 @@ public class ExtendedBeanInfoTests {
 			public Number setFoo(String foo) { return null; }
 		}
 		class C extends B {
-			@Override
 			public String getFoo() { return null; }
-			@Override
 			public Integer setFoo(String foo) { return null; }
 		}
 
@@ -695,7 +706,7 @@ public class ExtendedBeanInfoTests {
 
 		for (PropertyDescriptor pd : ebi.getPropertyDescriptors()) {
 			if (pd.getName().equals("foo")) {
-				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", int.class)));
+				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", String.class)));
 				return;
 			}
 		}
@@ -733,7 +744,7 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasReadMethodForProperty(ebi, "dateFormat"), is(false));
 		assertThat(hasWriteMethodForProperty(ebi, "dateFormat"), is(true));
 		assertThat(hasIndexedReadMethodForProperty(ebi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(true));
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(trueUntilJdk17()));
 	}
 
 	@Test
@@ -864,7 +875,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	interface TextBookOperations extends BookOperations {
-		@Override
 		TextBook getBook();
 	}
 
@@ -874,7 +884,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	class LawLibrary extends Library implements TextBookOperations {
-		@Override
 		public LawBook getBook() { return null; }
 	}
 
@@ -889,7 +898,6 @@ public class ExtendedBeanInfoTests {
 		}
 
 		class B extends A {
-			@Override
 			public boolean isTargetMethod() {
 				return false;
 			}
@@ -966,7 +974,6 @@ public class ExtendedBeanInfoTests {
 	}
 
 	static class WithStaticWriteMethod {
-		@SuppressWarnings("unused")
 		public static void setProp1(String prop1) {
 		}
 	}

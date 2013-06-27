@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
  */
 
 package org.springframework.beans.factory.support.security;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -39,8 +33,8 @@ import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
@@ -60,6 +54,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
+import static org.junit.Assert.*;
+
 /**
  * Security test case. Checks whether the container uses its privileges for its
  * internal work but does not leak them when touching/calling user code.
@@ -75,6 +71,7 @@ public class CallbacksSecurityTests {
 	private DefaultListableBeanFactory beanFactory;
 	private SecurityContextProvider provider;
 
+	@SuppressWarnings("unused")
 	private static class NonPrivilegedBean {
 
 		private String expectedName;
@@ -117,6 +114,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class NonPrivilegedSpringCallbacksBean implements
 			InitializingBean, DisposableBean, BeanClassLoaderAware,
 			BeanFactoryAware, BeanNameAware {
@@ -161,6 +159,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class NonPrivilegedFactoryBean implements SmartFactoryBean {
 		private String expectedName;
 
@@ -204,6 +203,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class NonPrivilegedFactory {
 
 		private final String expectedName;
@@ -452,9 +452,6 @@ public class CallbacksSecurityTests {
 	}
 
 	@Test
-	@Ignore("passes under Eclipse, but fails under Gradle with https://gist.github.com/1664133")
-	// TODO [SPR-10074] passes under Eclipse, but fails under Gradle with
-	// https://gist.github.com/1664133
 	public void testContainerPrivileges() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
 
@@ -511,8 +508,7 @@ public class CallbacksSecurityTests {
 		perms.add(new AuthPermission("getSubject"));
 		ProtectionDomain pd = new ProtectionDomain(null, perms);
 
-		AccessControlContext acc = new AccessControlContext(
-				new ProtectionDomain[] { pd });
+		new AccessControlContext(new ProtectionDomain[] { pd });
 
 		final Subject subject = new Subject();
 		subject.getPrincipals().add(new TestPrincipal("user1"));

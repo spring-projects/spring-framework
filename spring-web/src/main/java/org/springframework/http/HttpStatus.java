@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,9 @@ public enum HttpStatus {
 	/**
 	 * {@code 302 Moved Temporarily}.
 	 * @see <a href="http://tools.ietf.org/html/rfc1945#section-9.3">HTTP/1.0</a>
+	 * @deprecated In favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
 	 */
+	@Deprecated
 	MOVED_TEMPORARILY(302, "Moved Temporarily"),
 	/**
 	 * {@code 303 See Other}.

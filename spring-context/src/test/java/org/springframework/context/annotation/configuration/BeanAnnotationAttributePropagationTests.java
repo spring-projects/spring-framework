@@ -41,7 +41,6 @@ import org.springframework.context.annotation.DependsOn;
  *
  * @author Chris Beams
  */
-@SuppressWarnings("unused") // for unused @Bean methods in local classes
 public class BeanAnnotationAttributePropagationTests {
 
 	@Test

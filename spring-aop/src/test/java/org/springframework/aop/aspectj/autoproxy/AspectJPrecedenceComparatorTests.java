@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.BeforeAdvice;
@@ -35,11 +34,13 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AspectJPrecedenceComparatorTests {
+public class AspectJPrecedenceComparatorTests {
 
 	private static final int HIGH_PRECEDENCE_ADVISOR_ORDER = 100;
 	private static final int LOW_PRECEDENCE_ADVISOR_ORDER = 200;
@@ -89,7 +90,7 @@ public final class AspectJPrecedenceComparatorTests {
 	public void testSameAspectOneOfEach() {
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
-		assertEquals("advisor1 and advisor2 not comparable", 0, this.comparator.compare(advisor1, advisor2));
+		assertEquals("advisor1 and advisor2 not comparable", 1, this.comparator.compare(advisor1, advisor2));
 	}
 
 	@Test

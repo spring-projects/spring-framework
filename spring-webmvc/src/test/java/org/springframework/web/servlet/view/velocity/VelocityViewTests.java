@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,6 @@
  */
 
 package org.springframework.web.servlet.view.velocity;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -53,6 +44,9 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.view.AbstractView;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -63,12 +57,8 @@ public class VelocityViewTests {
 	@Test
 	public void testNoVelocityConfig() throws Exception {
 		VelocityView vv = new VelocityView();
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getBeansOfType(VelocityConfig.class, true, false);
-		expectLastCall().andReturn(new HashMap<String, Object>());
-		wac.getParentBeanFactory();
-		expectLastCall().andReturn(null);
-		replay(wac);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getBeansOfType(VelocityConfig.class, true, false)).willReturn(new HashMap<String, VelocityConfig>());
 
 		vv.setUrl("anythingButNull");
 		try {
@@ -79,8 +69,6 @@ public class VelocityViewTests {
 			// Check there's a helpful error message
 			assertTrue(ex.getMessage().contains("VelocityConfig"));
 		}
-
-		verify(wac);
 	}
 
 	@Test
@@ -131,7 +119,7 @@ public class VelocityViewTests {
 
 		final String templateName = "test.vm";
 
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 
@@ -142,17 +130,12 @@ public class VelocityViewTests {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfig.class, true, false);
-		Map<String, Object> configurers = new HashMap<String, Object>();
+		Map<String, VelocityConfig> configurers = new HashMap<String, VelocityConfig>();
 		configurers.put("velocityConfigurer", vc);
-		expectLastCall().andReturn(configurers);
-		wac.getParentBeanFactory();
-		expectLastCall().andReturn(null);
-		wac.getServletContext();
-		expectLastCall().andReturn(sc).times(3);
-		wac.getBean("requestDataValueProcessor", RequestDataValueProcessor.class);
-		expectLastCall().andReturn(null);
-		replay(wac);
+		given(wac.getBeansOfType(VelocityConfig.class, true, false)).willReturn(configurers);
+		given(wac.getServletContext()).willReturn(sc);
+		given(wac.getBean("requestDataValueProcessor",
+				RequestDataValueProcessor.class)).willReturn(null);
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
@@ -182,15 +165,13 @@ public class VelocityViewTests {
 			assertNotNull(mergeTemplateFailureException);
 			assertEquals(ex, mergeTemplateFailureException);
 		}
-
-		verify(wac);
 	}
 
 	@Test
 	public void testKeepExistingContentType() throws Exception {
 		final String templateName = "test.vm";
 
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
+		WebApplicationContext wac = mock(WebApplicationContext.class);
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 
@@ -201,17 +182,12 @@ public class VelocityViewTests {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfig.class, true, false);
-		Map<String, Object> configurers = new HashMap<String, Object>();
+		Map<String, VelocityConfig> configurers = new HashMap<String, VelocityConfig>();
 		configurers.put("velocityConfigurer", vc);
-		expectLastCall().andReturn(configurers);
-		wac.getParentBeanFactory();
-		expectLastCall().andReturn(null);
-		wac.getServletContext();
-		expectLastCall().andReturn(sc).times(3);
-		wac.getBean("requestDataValueProcessor", RequestDataValueProcessor.class);
-		expectLastCall().andReturn(null);
-		replay(wac);
+		given(wac.getBeansOfType(VelocityConfig.class, true, false)).willReturn(configurers);
+		given(wac.getServletContext()).willReturn(sc);
+		given(wac.getBean("requestDataValueProcessor",
+				RequestDataValueProcessor.class)).willReturn(null);
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
@@ -233,7 +209,6 @@ public class VelocityViewTests {
 		vv.setApplicationContext(wac);
 		vv.render(new HashMap<String, Object>(), request, expectedResponse);
 
-		verify(wac);
 		assertEquals("myContentType", expectedResponse.getContentType());
 	}
 
@@ -241,11 +216,8 @@ public class VelocityViewTests {
 	public void testExposeHelpers() throws Exception {
 		final String templateName = "test.vm";
 
-		WebApplicationContext wac = createMock(WebApplicationContext.class);
-		wac.getParentBeanFactory();
-		expectLastCall().andReturn(null);
-		wac.getServletContext();
-		expectLastCall().andReturn(new MockServletContext());
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
@@ -254,22 +226,16 @@ public class VelocityViewTests {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
 		};
-		wac.getBeansOfType(VelocityConfig.class, true, false);
-		Map<String, Object> configurers = new HashMap<String, Object>();
+		Map<String, VelocityConfig> configurers = new HashMap<String, VelocityConfig>();
 		configurers.put("velocityConfigurer", vc);
-		expectLastCall().andReturn(configurers);
-		replay(wac);
+		given(wac.getBeansOfType(VelocityConfig.class, true, false)).willReturn(configurers);
 
 
 		// let it ask for locale
-		HttpServletRequest req = createMock(HttpServletRequest.class);
-		req.getAttribute(View.PATH_VARIABLES);
-		expectLastCall().andReturn(null);
-		req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
-		expectLastCall().andReturn(new AcceptHeaderLocaleResolver());
-		req.getLocale();
-		expectLastCall().andReturn(Locale.CANADA);
-		replay(req);
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		given(req.getAttribute(View.PATH_VARIABLES)).willReturn(null);
+		given(req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE)).willReturn(new AcceptHeaderLocaleResolver());
+		given(req.getLocale()).willReturn(Locale.CANADA);
 
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
@@ -308,8 +274,6 @@ public class VelocityViewTests {
 
 		vv.render(new HashMap<String, Object>(), req, expectedResponse);
 
-		verify(wac);
-		verify(req);
 		assertEquals(AbstractView.DEFAULT_CONTENT_TYPE, expectedResponse.getContentType());
 	}
 

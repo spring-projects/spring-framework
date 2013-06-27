@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -497,37 +497,46 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
+			Class[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
+					new Class[] {typeToMatch} : new Class[] {FactoryBean.class, typeToMatch});
+
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
 			BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 			if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
 				RootBeanDefinition tbd = getMergedBeanDefinition(dbd.getBeanName(), dbd.getBeanDefinition(), mbd);
-				Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd, FactoryBean.class, typeToMatch);
+				Class<?> targetClass = predictBeanType(dbd.getBeanName(), tbd, typesToMatch);
 				if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
 					return typeToMatch.isAssignableFrom(targetClass);
 				}
 			}
 
-			Class<?> beanClass = predictBeanType(beanName, mbd, FactoryBean.class, typeToMatch);
-			if (beanClass == null) {
+			Class<?> beanType = predictBeanType(beanName, mbd, typesToMatch);
+			if (beanType == null) {
 				return false;
 			}
 
 			// Check bean class whether we're dealing with a FactoryBean.
-			if (FactoryBean.class.isAssignableFrom(beanClass)) {
+			if (FactoryBean.class.isAssignableFrom(beanType)) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					// If it's a FactoryBean, we want to look at what it creates, not the factory class.
-					Class<?> type = getTypeForFactoryBean(beanName, mbd);
-					return (type != null && typeToMatch.isAssignableFrom(type));
-				}
-				else {
-					return typeToMatch.isAssignableFrom(beanClass);
+					beanType = getTypeForFactoryBean(beanName, mbd);
+					if (beanType == null) {
+						return false;
+					}
 				}
 			}
-			else {
-				return !BeanFactoryUtils.isFactoryDereference(name) &&
-						typeToMatch.isAssignableFrom(beanClass);
+			else if (BeanFactoryUtils.isFactoryDereference(name)) {
+				// Special case: A SmartInstantiationAwareBeanPostProcessor returned a non-FactoryBean
+				// type but we nevertheless are being asked to dereference a FactoryBean...
+				// Let's check the original bean class and proceed with it if it is a FactoryBean.
+				beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+				if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
+					return false;
+				}
 			}
+
+			return typeToMatch.isAssignableFrom(beanType);
 		}
 	}
 
@@ -746,6 +755,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public String resolveEmbeddedValue(String value) {
 		String result = value;
 		for (StringValueResolver resolver : this.embeddedValueResolvers) {
+			if (result == null) {
+				return null;
+			}
 			result = resolver.resolveStringValue(result);
 		}
 		return result;
@@ -1329,9 +1341,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the corresponding bean definition
 	 */
 	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
-		Class<?> predictedType = predictBeanType(beanName, mbd, FactoryBean.class);
-		return (predictedType != null && FactoryBean.class.isAssignableFrom(predictedType)) ||
-				(mbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(mbd.getBeanClass()));
+		Class<?> beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+		return (beanType != null && FactoryBean.class.isAssignableFrom(beanType));
 	}
 
 	/**

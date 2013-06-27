@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ import org.springframework.util.MultiValueMap;
  * @since 3.1
  * @see UriComponentsBuilder
  */
-public abstract class UriComponents {
+public abstract class UriComponents implements Serializable {
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -63,7 +64,7 @@ public abstract class UriComponents {
 	 * Returns the scheme. Can be {@code null}.
 	 */
 	public final String getScheme() {
-		return scheme;
+		return this.scheme;
 	}
 
 	/**
@@ -114,11 +115,9 @@ public abstract class UriComponents {
 	}
 
 
-	// encoding
-
 	/**
-	 * Encode all URI components using their specific encoding rules, and returns the result
-	 * as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
+	 * Encode all URI components using their specific encoding rules, and returns the
+	 * result as a new {@code UriComponents} instance. This method uses UTF-8 to encode.
 	 * @return the encoded uri components
 	 */
 	public final UriComponents encode() {
@@ -138,9 +137,6 @@ public abstract class UriComponents {
 	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
 	public abstract UriComponents encode(String encoding) throws UnsupportedEncodingException;
-
-
-	// expanding
 
 	/**
 	 * Replaces all URI template variables with the values from a given map. The map keys
@@ -173,6 +169,30 @@ public abstract class UriComponents {
 	 */
 	abstract UriComponents expandInternal(UriTemplateVariables uriVariables);
 
+	/**
+	 * Normalize the path removing sequences like "path/..".
+	 * @see org.springframework.util.StringUtils#cleanPath(String)
+	 */
+	public abstract UriComponents normalize();
+
+	/**
+	 * Returns a URI string from this {@code UriComponents} instance.
+	 */
+	public abstract String toUriString();
+
+	/**
+	 * Returns a {@code URI} from this {@code UriComponents} instance.
+	 */
+	public abstract URI toUri();
+
+	@Override
+	public final String toString() {
+		return toUriString();
+	}
+
+
+	// static expansion helpers
+
 	static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
 		if (source == null) {
 			return null;
@@ -196,33 +216,12 @@ public abstract class UriComponents {
 
 	private static String getVariableName(String match) {
 		int colonIdx = match.indexOf(':');
-		return colonIdx == -1 ? match : match.substring(0, colonIdx);
+		return (colonIdx != -1 ? match.substring(0, colonIdx) : match);
 	}
 
 	private static String getVariableValueAsString(Object variableValue) {
-		return variableValue != null ? variableValue.toString() : "";
+		return (variableValue != null ? variableValue.toString() : "");
 	}
-
-	/**
-	 * Returns a URI string from this {@code UriComponents} instance.
-	 */
-	public abstract String toUriString();
-
-	/**
-	 * Returns a {@code URI} from this {@code UriComponents} instance.
-	 */
-	public abstract URI toUri();
-
-	@Override
-	public final String toString() {
-		return toUriString();
-	}
-
-	/**
-	 * Normalize the path removing sequences like "path/..".
-	 * @see org.springframework.util.StringUtils#cleanPath(String)
-	 */
-	public abstract UriComponents normalize();
 
 
 	/**
@@ -232,8 +231,8 @@ public abstract class UriComponents {
 	interface UriTemplateVariables {
 
 		Object getValue(String name);
-
 	}
+
 
 	/**
 	 * URI template variables backed by a map.
@@ -267,11 +266,11 @@ public abstract class UriComponents {
 		}
 
 		public Object getValue(String name) {
-			if (!valueIterator.hasNext()) {
+			if (!this.valueIterator.hasNext()) {
 				throw new IllegalArgumentException(
 						"Not enough variable values available to expand '" + name + "'");
 			}
-			return valueIterator.next();
+			return this.valueIterator.next();
 		}
 	}
 

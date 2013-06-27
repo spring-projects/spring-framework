@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@ import org.springframework.context.ApplicationContext;
  * context that it loads (see {@link MergedContextConfiguration#getActiveProfiles()}
  * and {@link #loadContext(MergedContextConfiguration)}).
  *
- * <p>See the Javadoc for
- * {@link ContextConfiguration @ContextConfiguration}
+ * <p>See the Javadoc for {@link ContextConfiguration @ContextConfiguration}
  * for a definition of <em>annotated class</em>.
  *
  * <p>Clients of a {@code SmartContextLoader} should call
@@ -48,8 +47,8 @@ import org.springframework.context.ApplicationContext;
  * <p>Even though {@code SmartContextLoader} extends {@code ContextLoader},
  * clients should favor {@code SmartContextLoader}-specific methods over those
  * defined in {@code ContextLoader}, particularly because a
- * {@code SmartContextLoader} may choose not to support methods defined in
- * the {@code ContextLoader} SPI.
+ * {@code SmartContextLoader} may choose not to support methods defined in the
+ * {@code ContextLoader} SPI.
  *
  * <p>Concrete implementations must provide a {@code public} no-args constructor.
  *
@@ -59,6 +58,9 @@ import org.springframework.context.ApplicationContext;
  * <li>{@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.GenericPropertiesContextLoader GenericPropertiesContextLoader}</li>
+ * <li>{@link org.springframework.test.context.web.WebDelegatingSmartContextLoader WebDelegatingSmartContextLoader}</li>
+ * <li>{@link org.springframework.test.context.web.AnnotationConfigWebContextLoader AnnotationConfigWebContextLoader}</li>
+ * <li>{@link org.springframework.test.context.web.GenericXmlWebContextLoader GenericXmlWebContextLoader}</li>
  * </ul>
  *
  * @author Sam Brannen

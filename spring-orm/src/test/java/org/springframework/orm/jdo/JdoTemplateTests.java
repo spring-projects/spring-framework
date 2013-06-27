@@ -16,13 +16,6 @@
 
 package org.springframework.orm.jdo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,11 +34,13 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller

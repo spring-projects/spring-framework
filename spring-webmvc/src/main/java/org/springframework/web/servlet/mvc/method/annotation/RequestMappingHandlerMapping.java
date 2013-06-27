@@ -157,10 +157,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
 		if (this.useRegisteredSuffixPatternMatch) {
 			this.fileExtensions.addAll(contentNegotiationManager.getAllFileExtensions());
 		}
+		super.afterPropertiesSet();
 	}
 
 	/**

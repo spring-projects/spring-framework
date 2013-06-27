@@ -115,11 +115,12 @@ public class EnableTransactionManagementIntegrationTests {
 		ctx.register(Config.class, AspectJTxConfig.class);
 		try {
 			ctx.refresh();
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// this test is a bit fragile, but gets the job done, proving that an
 			// attempt was made to look up the AJ aspect. It's due to classpath issues
 			// in .integration-tests that it's not found.
-			assertTrue(ex.getMessage().endsWith("AspectJTransactionManagementConfiguration.class] cannot be opened because it does not exist"));
+			assertTrue(ex.getMessage().contains("AspectJTransactionManagementConfiguration"));
 		}
 	}
 

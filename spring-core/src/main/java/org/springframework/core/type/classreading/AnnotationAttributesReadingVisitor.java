@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
@@ -50,13 +51,11 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
 	protected final ClassLoader classLoader;
 
-
 	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader, AnnotationAttributes attributes) {
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.attributes = attributes;
 	}
-
 
 	public void visit(String attributeName, Object attributeValue) {
 		this.attributes.put(attributeName, attributeValue);
@@ -74,6 +73,11 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 	}
 
 	public void visitEnum(String attributeName, String asmTypeDescriptor, String attributeValue) {
+		Object newValue = getEnumValue(asmTypeDescriptor, attributeValue);
+		visit(attributeName, newValue);
+	}
+
+	protected Object getEnumValue(String asmTypeDescriptor, String attributeValue) {
 		Object valueToUse = attributeValue;
 		try {
 			Class<?> enumType = this.classLoader.loadClass(Type.getType(asmTypeDescriptor).getClassName());
@@ -88,7 +92,7 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 		catch (IllegalAccessException ex) {
 			this.logger.warn("Could not access enum value while reading annotation metadata", ex);
 		}
-		this.attributes.put(attributeName, valueToUse);
+		return valueToUse;
 	}
 }
 
@@ -103,7 +107,6 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 	private final String attributeName;
 
 	private final List<AnnotationAttributes> allNestedAttributes = new ArrayList<AnnotationAttributes>();
-
 
 	public RecursiveAnnotationArrayVisitor(
 			String attributeName, AnnotationAttributes attributes, ClassLoader classLoader) {
@@ -152,13 +155,11 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 
 	private final String annotationType;
 
-
 	public RecursiveAnnotationAttributesVisitor(
 			String annotationType, AnnotationAttributes attributes, ClassLoader classLoader) {
 		super(classLoader, attributes);
 		this.annotationType = annotationType;
 	}
-
 
 	public final void visitEnd() {
 		try {
@@ -223,7 +224,6 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 
 	private final Map<String, Set<String>> metaAnnotationMap;
 
-
 	public AnnotationAttributesReadingVisitor(
 			String annotationType, Map<String, AnnotationAttributes> attributesMap,
 			Map<String, Set<String>> metaAnnotationMap, ClassLoader classLoader) {
@@ -258,4 +258,5 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
+
 }

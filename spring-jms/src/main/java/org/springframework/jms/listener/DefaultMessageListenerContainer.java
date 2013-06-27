@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,6 +182,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private int activeInvokerCount = 0;
 
 	private int registeredWithDestination = 0;
+
+	private volatile boolean recovering = false;
 
 	private Runnable stopCallback;
 
@@ -758,6 +760,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			super.establishSharedConnection();
 		}
 		catch (Exception ex) {
+			if (ex instanceof JMSException) {
+				invokeExceptionListener((JMSException) ex);
+			}
 			logger.debug("Could not establish shared JMS Connection - " +
 					"leaving it up to asynchronous invokers to establish a Connection as soon as possible", ex);
 		}
@@ -796,7 +801,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Handle the given exception that arose during setup of a listener.
 	 * Called for every such exception in every concurrent listener.
-	 * <p>The default implementation logs the exception at info level
+	 * <p>The default implementation logs the exception at warn level
 	 * if not recovered yet, and at debug level if already recovered.
 	 * Can be overridden in subclasses.
 	 * @param ex the exception to handle
@@ -837,7 +842,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Recover this listener container after a listener failed to set itself up,
-	 * for example reestablishing the underlying Connection.
+	 * for example re-establishing the underlying Connection.
 	 * <p>The default implementation delegates to DefaultMessageListenerContainer's
 	 * recovery-capable {@link #refreshConnectionUntilSuccessful()} method, which will
 	 * try to re-establish a Connection to the JMS provider both for the shared
@@ -846,8 +851,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #refreshDestination()
 	 */
 	protected void recoverAfterListenerSetupFailure() {
-		refreshConnectionUntilSuccessful();
-		refreshDestination();
+		this.recovering = true;
+		try {
+			refreshConnectionUntilSuccessful();
+			refreshDestination();
+		}
+		finally {
+			this.recovering = false;
+		}
 	}
 
 	/**
@@ -856,9 +867,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Connection, so either needs to operate on the shared Connection or on a
 	 * temporary Connection that just gets established for validation purposes.
 	 * <p>The default implementation retries until it successfully established a
-	 * Connection, for as long as this message listener container is active.
+	 * Connection, for as long as this message listener container is running.
 	 * Applies the specified recovery interval between retries.
 	 * @see #setRecoveryInterval
+	 * @see #start()
+	 * @see #stop()
 	 */
 	protected void refreshConnectionUntilSuccessful() {
 		while (isRunning()) {
@@ -874,16 +887,19 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
+				if (ex instanceof JMSException) {
+					invokeExceptionListener((JMSException) ex);
+				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying in ");
 				msg.append(this.recoveryInterval).append(" ms. Cause: ");
 				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
 				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
+					logger.error(msg, ex);
 				}
 				else {
-					logger.warn(msg);
+					logger.error(msg);
 				}
 			}
 			sleepInbetweenRecoveryAttempts();
@@ -923,6 +939,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+
+	/**
+	 * Return whether this listener container is currently in a recovery attempt.
+	 * <p>May be used to detect recovery phases but also the end of a recovery phase,
+	 * with {@code isRecovering()} switching to {@code false} after having been found
+	 * to return {@code true} before.
+	 * @see #recoverAfterListenerSetupFailure()
+	 */
+	public final boolean isRecovering() {
+		return this.recovering;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 /**
- * JUnit 4 based integration test which verifies correct {@link ContextCache
+ * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
  * application context caching} in conjunction with the
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext
  * &#064;DirtiesContext} annotation at the class level.

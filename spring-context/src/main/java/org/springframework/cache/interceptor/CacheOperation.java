@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,10 +119,10 @@ public abstract class CacheOperation {
 		result.append(this.name);
 		result.append("] caches=");
 		result.append(this.cacheNames);
-		result.append(" | condition='");
-		result.append(this.condition);
-		result.append("' | key='");
+		result.append(" | key='");
 		result.append(this.key);
+		result.append("' | condition='");
+		result.append(this.condition);
 		result.append("'");
 		return result;
 	}

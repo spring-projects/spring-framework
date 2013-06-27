@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.support.AbstractContextLoader;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
@@ -71,6 +72,12 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 *
 	 * <ul>
 	 * <li>Creates a {@link GenericWebApplicationContext} instance.</li>
+	 * <li>If the supplied {@code MergedContextConfiguration} references a
+	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
+	 * the corresponding {@link MergedContextConfiguration#getParentApplicationContext()
+	 * ApplicationContext} will be retrieved and
+	 * {@linkplain GenericWebApplicationContext#setParent(ApplicationContext) set as the parent}
+	 * for the context created by this method.</li>
 	 * <li>Delegates to {@link #configureWebResources} to create the
 	 * {@link MockServletContext} and set it in the {@code WebApplicationContext}.</li>
 	 * <li>Calls {@link #prepareContext} to allow for customizing the context
@@ -107,6 +114,11 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		}
 
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
+
+		ApplicationContext parent = mergedConfig.getParentApplicationContext();
+		if (parent != null) {
+			context.setParent(parent);
+		}
 		configureWebResources(context, webMergedConfig);
 		prepareContext(context, webMergedConfig);
 		customizeBeanFactory(context.getDefaultListableBeanFactory(), webMergedConfig);
@@ -119,9 +131,20 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	}
 
 	/**
-	 * Configures web resources for the supplied web application context.
+	 * Configures web resources for the supplied web application context (WAC).
 	 *
-	 * <p>Implementation details:
+	 * <h4>Implementation Details</h4>
+	 *
+	 * <p>If the supplied WAC has no parent or its parent is not a WAC, the
+	 * supplied WAC will be configured as the Root WAC (see "<em>Root WAC
+	 * Configuration</em>" below).
+	 *
+	 * <p>Otherwise the context hierarchy of the supplied WAC will be traversed
+	 * to find the top-most WAC (i.e., the root); and the {@link ServletContext}
+	 * of the Root WAC will be set as the {@code ServletContext} for the supplied
+	 * WAC.
+	 *
+	 * <h4>Root WAC Configuration</h4>
 	 *
 	 * <ul>
 	 * <li>The resource base path is retrieved from the supplied
@@ -146,13 +169,33 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	protected void configureWebResources(GenericWebApplicationContext context,
 			WebMergedContextConfiguration webMergedConfig) {
 
-		String resourceBasePath = webMergedConfig.getResourceBasePath();
-		ResourceLoader resourceLoader = resourceBasePath.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX) ? new DefaultResourceLoader()
-				: new FileSystemResourceLoader();
+		ApplicationContext parent = context.getParent();
 
-		ServletContext servletContext = new MockServletContext(resourceBasePath, resourceLoader);
-		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
-		context.setServletContext(servletContext);
+		// if the WAC has no parent or the parent is not a WAC, set the WAC as
+		// the Root WAC:
+		if (parent == null || (!(parent instanceof WebApplicationContext))) {
+			String resourceBasePath = webMergedConfig.getResourceBasePath();
+			ResourceLoader resourceLoader = resourceBasePath.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX) ? new DefaultResourceLoader()
+					: new FileSystemResourceLoader();
+
+			ServletContext servletContext = new MockServletContext(resourceBasePath, resourceLoader);
+			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, context);
+			context.setServletContext(servletContext);
+		}
+		else {
+			ServletContext servletContext = null;
+
+			// find the Root WAC
+			while (parent != null) {
+				if (parent instanceof WebApplicationContext && !(parent.getParent() instanceof WebApplicationContext)) {
+					servletContext = ((WebApplicationContext) parent).getServletContext();
+					break;
+				}
+				parent = parent.getParent();
+			}
+			Assert.state(servletContext != null, "Failed to find Root WebApplicationContext in the context hierarchy");
+			context.setServletContext(servletContext);
+		}
 	}
 
 	/**

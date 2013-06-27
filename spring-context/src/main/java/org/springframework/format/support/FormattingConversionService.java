@@ -195,7 +195,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		private Class<? extends Annotation> annotationType;
 
-		private AnnotationFormatterFactory annotationFormatterFactory;
+        private AnnotationFormatterFactory annotationFormatterFactory;
 
 		private Class<?> fieldType;
 

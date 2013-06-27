@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,11 @@
 
 package org.springframework.web.context.request.async;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * DeferredResult tests.
@@ -35,23 +31,18 @@ public class DeferredResultTests {
 
 	@Test
 	public void setResult() {
-		DeferredResultHandler handler = createMock(DeferredResultHandler.class);
-		handler.handleResult("hello");
-		replay(handler);
+		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
 		DeferredResult<String> result = new DeferredResult<String>();
 		result.setResultHandler(handler);
 
 		assertTrue(result.setResult("hello"));
-
-		verify(handler);
+		verify(handler).handleResult("hello");
 	}
 
 	@Test
 	public void setResultTwice() {
-		DeferredResultHandler handler = createMock(DeferredResultHandler.class);
-		handler.handleResult("hello");
-		replay(handler);
+		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
 		DeferredResult<String> result = new DeferredResult<String>();
 		result.setResultHandler(handler);
@@ -59,14 +50,12 @@ public class DeferredResultTests {
 		assertTrue(result.setResult("hello"));
 		assertFalse(result.setResult("hi"));
 
-		verify(handler);
+		verify(handler).handleResult("hello");
 	}
 
 	@Test
 	public void isSetOrExpired() {
-		DeferredResultHandler handler = createMock(DeferredResultHandler.class);
-		handler.handleResult("hello");
-		replay(handler);
+		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
 		DeferredResult<String> result = new DeferredResult<String>();
 		result.setResultHandler(handler);
@@ -77,7 +66,7 @@ public class DeferredResultTests {
 
 		assertTrue(result.isSetOrExpired());
 
-		verify(handler);
+		verify(handler).handleResult("hello");
 	}
 
 	@Test
@@ -102,9 +91,7 @@ public class DeferredResultTests {
 	public void onTimeout() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 
-		DeferredResultHandler handler = createMock(DeferredResultHandler.class);
-		handler.handleResult("timeout result");
-		replay(handler);
+		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
 		DeferredResult<String> result = new DeferredResult<String>(null, "timeout result");
 		result.setResultHandler(handler);
@@ -119,7 +106,7 @@ public class DeferredResultTests {
 
 		assertEquals("timeout event", sb.toString());
 		assertFalse("Should not be able to set result a second time", result.setResult("hello"));
-		verify(handler);
+		verify(handler).handleResult("timeout result");
 	}
 
 }

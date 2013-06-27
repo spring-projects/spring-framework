@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 
 /**
  * Represents a URI template. A URI template is a URI-like String that contains variables enclosed
- * by braces ({@code {}, {@code }}), which can be expanded to produce an actual URI.
+ * by braces ({@code {}}), which can be expanded to produce an actual URI.
  *
  * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)} for example usages.
  *
@@ -71,6 +71,7 @@ public class UriTemplate implements Serializable {
 		this.uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).build();
 	}
 
+
 	/**
 	 * Return the names of the variables in the template, in order.
 	 * @return the template variable names
@@ -78,8 +79,6 @@ public class UriTemplate implements Serializable {
 	public List<String> getVariableNames() {
 		return this.variableNames;
 	}
-
-	// expanding
 
 	/**
 	 * Given the Map of variables, expands this template into a URI. The Map keys represent variable names,
@@ -123,8 +122,6 @@ public class UriTemplate implements Serializable {
 		UriComponents encodedComponents = expandedComponents.encode();
 		return encodedComponents.toUri();
 	}
-
-	// matching
 
 	/**
 	 * Indicate whether the given URI matches this template.
@@ -170,7 +167,7 @@ public class UriTemplate implements Serializable {
 	 * <p>Defaults to {@link UriUtils#encodeUri(String, String)}.
 	 * @param uri the URI to encode
 	 * @return the encoded URI
-	 * @deprecated No longer in use, with no direct replacement
+	 * @deprecated No longer in use; to be removed in Spring 4.0.
 	 */
 	@Deprecated
 	protected URI encodeUri(String uri) {
@@ -216,7 +213,8 @@ public class UriTemplate implements Serializable {
 				}
 				else {
 					if (colonIdx + 1 == match.length()) {
-						throw new IllegalArgumentException("No custom regular expression specified after ':' in \"" + match	+ "\"");
+						throw new IllegalArgumentException(
+								"No custom regular expression specified after ':' in \"" + match + "\"");
 					}
 					String variablePattern = match.substring(colonIdx + 1, match.length());
 					this.patternBuilder.append('(');
@@ -249,6 +247,5 @@ public class UriTemplate implements Serializable {
 			return Pattern.compile(this.patternBuilder.toString());
 		}
 	}
-
 
 }

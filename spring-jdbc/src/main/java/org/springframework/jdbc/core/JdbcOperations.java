@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,8 @@ public interface JdbcOperations {
 	 * object via a RowMapper.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
-	 * {@code queryForObject} method with {@code null} as argument array.
+	 * {@link #queryForObject(String, RowMapper, Object...)} method with
+	 * {@code null} as argument array.
 	 * @param sql SQL query to execute
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object
@@ -148,7 +149,8 @@ public interface JdbcOperations {
 	 * Execute a query for a result object, given static SQL.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
-	 * {@code queryForObject} method with {@code null} as argument array.
+	 * {@link #queryForObject(String, Class, Object...)} method with
+	 * {@code null} as argument array.
 	 * <p>This method is useful for running static SQL with a known outcome.
 	 * The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
@@ -166,7 +168,8 @@ public interface JdbcOperations {
 	 * Execute a query for a result Map, given static SQL.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
-	 * {@code queryForMap} method with {@code null} as argument array.
+	 * {@link #queryForMap(String, Object...)} method with {@code null}
+	 * as argument array.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql SQL query to execute
@@ -194,7 +197,9 @@ public interface JdbcOperations {
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForLong(String, Object[])
+	 * @deprecated in favor of {@link #queryForObject(String, Class)}
 	 */
+	@Deprecated
 	long queryForLong(String sql) throws DataAccessException;
 
 	/**
@@ -211,7 +216,9 @@ public interface JdbcOperations {
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
 	 * @see #queryForInt(String, Object[])
+	 * @deprecated in favor of {@link #queryForObject(String, Class)}
 	 */
+	@Deprecated
 	int queryForInt(String sql) throws DataAccessException;
 
 	/**
@@ -712,7 +719,9 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForLong(String)
 	 * @see java.sql.Types
+	 * @deprecated in favor of {@link #queryForObject(String, Object[], int[], Class)} )}
 	 */
+	@Deprecated
 	long queryForLong(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
@@ -730,7 +739,9 @@ public interface JdbcOperations {
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForLong(String)
+	 * @deprecated in favor of {@link #queryForObject(String, Class, Object[])} )}
 	 */
+	@Deprecated
 	long queryForLong(String sql, Object... args) throws DataAccessException;
 
 	/**
@@ -748,7 +759,9 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForInt(String)
 	 * @see java.sql.Types
+	 * @deprecated in favor of {@link #queryForObject(String, Object[], int[], Class)} )}
 	 */
+	@Deprecated
 	int queryForInt(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
@@ -766,7 +779,9 @@ public interface JdbcOperations {
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForInt(String)
+	 * @deprecated in favor of {@link #queryForObject(String, Class, Object[])} )}
 	 */
+	@Deprecated
 	int queryForInt(String sql, Object... args) throws DataAccessException;
 
 	/**

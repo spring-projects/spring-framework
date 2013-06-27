@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
@@ -55,7 +56,7 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  *         this.foo = foo;
  *         return this;
  *     }
- * }</pre>
+ * }}</pre>
  * The standard JavaBeans {@code Introspector} will discover the {@code getFoo} read
  * method, but will bypass the {@code #setFoo(Foo)} write method, because its non-void
  * returning signature does not comply with the JavaBeans specification.
@@ -116,6 +117,14 @@ class ExtendedBeanInfo implements BeanInfo {
 				matches.add(method);
 			}
 		}
+		// sort non-void returning write methods to guard against the ill effects of
+		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
+		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
+		Collections.sort(matches, new Comparator<Method>() {
+			public int compare(Method m1, Method m2) {
+				return m2.toString().compareTo(m1.toString());
+			}
+		});
 		return matches;
 	}
 
@@ -264,7 +273,7 @@ class SimpleNonIndexedPropertyDescriptor extends PropertyDescriptor {
 	public SimpleNonIndexedPropertyDescriptor(String propertyName,
 			Method readMethod, Method writeMethod) throws IntrospectionException {
 
-		super(propertyName, readMethod, writeMethod);
+		super(propertyName, null, null);
 		this.setReadMethod(readMethod);
 		this.setWriteMethod(writeMethod);
 		this.propertyType = findPropertyType(readMethod, writeMethod);
@@ -353,7 +362,7 @@ class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 				Method indexedReadMethod, Method indexedWriteMethod)
 			throws IntrospectionException {
 
-		super(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+		super(propertyName, null, null, null, null);
 		this.setReadMethod(readMethod);
 		this.setWriteMethod(writeMethod);
 		this.propertyType = findPropertyType(readMethod, writeMethod);

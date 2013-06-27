@@ -57,7 +57,6 @@ public class FlashAttributeResultMatchers {
 	 */
 	public <T> ResultMatcher attribute(final String name, final Object value) {
 		return new ResultMatcher() {
-			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Flash attribute", value, result.getFlashMap().get(name));
 			}

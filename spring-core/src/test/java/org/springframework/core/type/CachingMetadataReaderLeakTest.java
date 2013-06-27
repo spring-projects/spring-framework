@@ -31,7 +31,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 /**
- * Unit test checking the behaviour of {@link CachingMetadataReaderFactory under load.
+ * Unit test checking the behaviour of {@link CachingMetadataReaderFactory} under load.
  * If the cache is not controller, this test should fail with an out of memory exception around entry
  * 5k.
  *

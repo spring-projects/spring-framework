@@ -58,7 +58,7 @@ public class SpringModelMBean extends RequiredModelMBean {
 	 * Construct a new SpringModelMBean instance with the given {@link ModelMBeanInfo}.
 	 * @see javax.management.modelmbean.RequiredModelMBean#RequiredModelMBean(ModelMBeanInfo)
 	 */
-	public SpringModelMBean(ModelMBeanInfo mbi) throws MBeanException, RuntimeOperationsException  {
+	public SpringModelMBean(ModelMBeanInfo mbi) throws MBeanException, RuntimeOperationsException {
 		super(mbi);
 	}
 

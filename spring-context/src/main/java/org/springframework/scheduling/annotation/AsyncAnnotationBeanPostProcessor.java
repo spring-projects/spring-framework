@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,15 @@ import org.springframework.util.Assert;
  * processor will detect both Spring's {@link Async @Async} annotation as well
  * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation.
  *
+ * <p>Note: The underlying async advisor applies before existing advisors by default,
+ * in order to switch to async execution as early as possible in the invocation chain.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 3.0
  * @see Async
  * @see AsyncAnnotationAdvisor
+ * @see #setBeforeExistingAdvisors
  */
 @SuppressWarnings("serial")
 public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor
@@ -52,6 +56,10 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 
 	private Executor executor;
 
+
+	public AsyncAnnotationBeanPostProcessor() {
+		setBeforeExistingAdvisors(true);
+	}
 
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method

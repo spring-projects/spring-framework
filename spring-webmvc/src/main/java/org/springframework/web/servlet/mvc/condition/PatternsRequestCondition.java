@@ -44,7 +44,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private final Set<String> patterns;
 
-	private final UrlPathHelper urlPathHelper;
+	private final UrlPathHelper pathHelper;
 
 	private final PathMatcher pathMatcher;
 
@@ -105,7 +105,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			List<String> fileExtensions) {
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
-		this.urlPathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
+		this.pathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
 		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
@@ -161,6 +161,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
+	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
 		Set<String> result = new LinkedHashSet<String>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
@@ -179,7 +180,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this.urlPathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
 				this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
@@ -202,11 +203,14 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * 		or a new condition with sorted matching patterns;
 	 * 		or {@code null} if no patterns match.
 	 */
+	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
@@ -216,7 +220,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
 		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.urlPathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
 					this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
@@ -225,7 +229,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			return pattern;
 		}
 		if (this.useSuffixPatternMatch) {
-			if (useSmartSuffixPatternMatch(pattern, lookupPath)) {
+			if (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) {
 				for (String extension : this.fileExtensions) {
 					if (this.pathMatcher.match(pattern + extension, lookupPath)) {
 						return pattern + extension;
@@ -242,21 +246,12 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (this.pathMatcher.match(pattern, lookupPath)) {
 			return pattern;
 		}
-		boolean endsWithSlash = pattern.endsWith("/");
 		if (this.useTrailingSlashMatch) {
-			if (!endsWithSlash && this.pathMatcher.match(pattern + "/", lookupPath)) {
+			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
 				return pattern +"/";
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Whether to match by known file extensions. Return "true" if file extensions
-	 * are configured, and the lookup path has a suffix.
-	 */
-	private boolean useSmartSuffixPatternMatch(String pattern, String lookupPath) {
-		return (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) ;
 	}
 
 	/**
@@ -271,8 +266,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * contain only patterns that match the request and are sorted with
 	 * the best matches on top.
 	 */
+	@Override
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
 
 		Iterator<String> iterator = patterns.iterator();

@@ -84,15 +84,16 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		if (parent == null) {
 			return this;
 		}
-		if (!(parent instanceof MockMultipartHttpServletRequestBuilder)) {
+		if (parent instanceof MockHttpServletRequestBuilder) {
+			super.merge(parent);
+			if (parent instanceof MockMultipartHttpServletRequestBuilder) {
+				MockMultipartHttpServletRequestBuilder parentBuilder = (MockMultipartHttpServletRequestBuilder) parent;
+				this.files.addAll(parentBuilder.files);
+			}
+		}
+		else {
 			throw new IllegalArgumentException("Cannot merge with [" + parent.getClass().getName() + "]");
 		}
-
-		super.merge(parent);
-
-		MockMultipartHttpServletRequestBuilder parentBuilder = (MockMultipartHttpServletRequestBuilder) parent;
-		this.files.addAll(parentBuilder.files);
-
 		return this;
 	}
 

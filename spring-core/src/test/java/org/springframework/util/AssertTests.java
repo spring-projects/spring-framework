@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Unit tests for the {@link Assert} class.
@@ -36,11 +38,30 @@ import org.junit.Test;
  */
 public class AssertTests {
 
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 	@Test(expected = IllegalArgumentException.class)
 	public void instanceOf() {
 		final Set<?> set = new HashSet<Object>();
 		Assert.isInstanceOf(HashSet.class, set);
 		Assert.isInstanceOf(HashMap.class, set);
+	}
+
+	@Test
+	public void instanceOfNoMessage() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Object of class [java.lang.Object] must be an instance " +
+				"of interface java.util.Set");
+		Assert.isInstanceOf(Set.class, new Object(), null);
+	}
+
+	@Test
+	public void instanceOfMessage() throws Exception {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Custom message. Object of class [java.lang.Object] must " +
+				"be an instance of interface java.util.Set");
+		Assert.isInstanceOf(Set.class, new Object(), "Custom message.");
 	}
 
 	@Test

@@ -16,14 +16,13 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.AfterThrowingAdviceBindingCollaborator;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.sample.beans.ITestBean;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * Tests for various parameter binding scenarios with before advice.

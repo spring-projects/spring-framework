@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
 import java.util.Collections;
 
 import javax.servlet.jsp.PageContext;
@@ -28,12 +24,15 @@ import javax.servlet.jsp.tagext.Tag;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
+import static org.mockito.BDDMockito.*;
+
 /**
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  */
 public class FormTagTests extends AbstractHtmlElementTagTests {
 
@@ -166,6 +165,50 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertAttributeNotPresent(output, "name");
 	}
 
+	public void testPrependServletPath() throws Exception {
+
+		this.request.setContextPath("/myApp");
+		this.request.setServletPath("/main");
+		this.request.setPathInfo("/index.html");
+
+		String commandName = "myCommand";
+		String action = "/form.html";
+		String enctype = "my/enctype";
+		String method = "POST";
+		String onsubmit = "onsubmit";
+		String onreset = "onreset";
+
+		this.tag.setCommandName(commandName);
+		this.tag.setServletRelativeAction(action);
+		this.tag.setMethod(method);
+		this.tag.setEnctype(enctype);
+		this.tag.setOnsubmit(onsubmit);
+		this.tag.setOnreset(onreset);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
+		assertEquals("Form attribute not exposed", commandName,
+				getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		this.tag.doFinally();
+		assertNull("Form attribute not cleared after tag ends",
+				getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+
+		String output = getOutput();
+		assertFormTagOpened(output);
+		assertFormTagClosed(output);
+
+		assertContainsAttribute(output, "action", "/myApp/main/form.html");
+		assertContainsAttribute(output, "method", method);
+		assertContainsAttribute(output, "enctype", enctype);
+		assertContainsAttribute(output, "onsubmit", onsubmit);
+		assertContainsAttribute(output, "onreset", onreset);
+		assertAttributeNotPresent(output, "name");
+	}
+
 	public void testWithNullResolvedCommand() throws Exception {
 		try {
 			tag.setCommandName("${null}");
@@ -283,9 +326,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	public void testRequestDataValueProcessorHooks() throws Exception {
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
-		expect(processor.processAction(this.request, action)).andReturn(action);
-		expect(processor.getExtraHiddenFields(this.request)).andReturn(Collections.singletonMap("key", "value"));
-		replay(processor);
+		given(processor.processAction(this.request, action)).willReturn(action);
+		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key", "value"));
 
 		this.tag.doStartTag();
 		this.tag.doEndTag();
@@ -296,8 +338,6 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\" />", getInputTag(output));
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
-
-		verify(processor);
 	}
 
 	private String getFormTag(String output) {

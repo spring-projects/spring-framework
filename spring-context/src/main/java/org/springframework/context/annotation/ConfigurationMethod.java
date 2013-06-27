@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ abstract class ConfigurationMethod {
 		this.configurationClass = configurationClass;
 	}
 
+
 	public MethodMetadata getMetadata() {
 		return this.metadata;
 	}
@@ -48,13 +49,22 @@ abstract class ConfigurationMethod {
 		return new Location(this.configurationClass.getResource(), this.metadata);
 	}
 
+	String getFullyQualifiedMethodName() {
+		return this.metadata.getDeclaringClassName() + "#" + this.metadata.getMethodName();
+	}
+
+	static String getShortMethodName(String fullyQualifiedMethodName) {
+		return fullyQualifiedMethodName.substring(fullyQualifiedMethodName.indexOf('#') + 1);
+	}
+
 	public void validate(ProblemReporter problemReporter) {
 	}
+
 
 	@Override
 	public String toString() {
 		return String.format("[%s:name=%s,declaringClass=%s]",
-				this.getClass().getSimpleName(), this.getMetadata().getMethodName(), this.getMetadata().getDeclaringClassName());
+				getClass().getSimpleName(), getMetadata().getMethodName(), getMetadata().getDeclaringClassName());
 	}
 
 }

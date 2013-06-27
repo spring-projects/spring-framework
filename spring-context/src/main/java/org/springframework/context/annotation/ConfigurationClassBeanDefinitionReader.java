@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,8 +134,6 @@ class ConfigurationClassBeanDefinitionReader {
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
-		String className = metadata.getClassName();
-		configBeanDef.setBeanClassName(className);
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
 			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
@@ -146,7 +144,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		else {
 			this.problemReporter.error(
-					new InvalidConfigurationImportProblem(className, configClass.getResource(), metadata));
+					new InvalidConfigurationImportProblem(metadata.getClassName(), configClass.getResource(), metadata));
 		}
 	}
 
@@ -256,7 +254,8 @@ class ConfigurationClassBeanDefinitionReader {
 		if (proxyMode != ScopedProxyMode.NO) {
 			BeanDefinitionHolder proxyDef = ScopedProxyCreator.createScopedProxy(
 					new BeanDefinitionHolder(beanDef, beanName), this.registry, proxyMode == ScopedProxyMode.TARGET_CLASS);
-			beanDefToRegister = proxyDef.getBeanDefinition();
+			beanDefToRegister =
+					new ConfigurationClassBeanDefinition((RootBeanDefinition) proxyDef.getBeanDefinition(), configClass);
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -307,9 +306,14 @@ class ConfigurationClassBeanDefinitionReader {
 	@SuppressWarnings("serial")
 	private static class ConfigurationClassBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
 
-		private AnnotationMetadata annotationMetadata;
+		private final AnnotationMetadata annotationMetadata;
 
 		public ConfigurationClassBeanDefinition(ConfigurationClass configClass) {
+			this.annotationMetadata = configClass.getMetadata();
+		}
+
+		public ConfigurationClassBeanDefinition(RootBeanDefinition original, ConfigurationClass configClass) {
+			super(original);
 			this.annotationMetadata = configClass.getMetadata();
 		}
 

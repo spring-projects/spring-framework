@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ package org.springframework.beans.factory.aspectj;
  * @since 3.0.0
  */
 public abstract aspect GenericInterfaceDrivenDependencyInjectionAspect<I> extends AbstractInterfaceDrivenDependencyInjectionAspect {
-	declare parents: I implements ConfigurableObject;
+    declare parents: I implements ConfigurableObject;
 
 	public pointcut inConfigurableBean() : within(I+);
 

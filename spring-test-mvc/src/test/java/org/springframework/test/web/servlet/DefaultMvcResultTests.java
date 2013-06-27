@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,16 @@
  */
 package org.springframework.test.web.servlet;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.AsyncContext;
 
-import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link DefaultMvcResult}.
@@ -48,7 +45,7 @@ public class DefaultMvcResultTests {
 		ExtendedMockHttpServletRequest request = new ExtendedMockHttpServletRequest();
 		request.setAsyncStarted(true);
 
-		this.countDownLatch = EasyMock.createMock(CountDownLatch.class);
+		this.countDownLatch = mock(CountDownLatch.class);
 
 		this.mvcResult = new DefaultMvcResult(request, null);
 		this.mvcResult.setAsyncResultLatch(this.countDownLatch);
@@ -57,50 +54,35 @@ public class DefaultMvcResultTests {
 	@Test
 	public void getAsyncResultWithTimeout() throws Exception {
 		long timeout = 1234L;
-
-		expect(this.countDownLatch.await(timeout, TimeUnit.MILLISECONDS)).andReturn(true);
-		replay(this.countDownLatch);
-
+		given(this.countDownLatch.await(timeout, TimeUnit.MILLISECONDS)).willReturn(true);
 		this.mvcResult.getAsyncResult(timeout);
-
-		verify(this.countDownLatch);
+		verify(this.countDownLatch).await(timeout, TimeUnit.MILLISECONDS);
 	}
 
 	@Test
 	public void getAsyncResultWithTimeoutNegativeOne() throws Exception {
-		expect(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).andReturn(true);
-		replay(this.countDownLatch);
-
+		given(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).willReturn(true);
 		this.mvcResult.getAsyncResult(-1);
-
-		verify(this.countDownLatch);
+		verify(this.countDownLatch).await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 	@Test
 	public void getAsyncResultWithoutTimeout() throws Exception {
-		expect(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).andReturn(true);
-		replay(this.countDownLatch);
-
+		given(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).willReturn(true);
 		this.mvcResult.getAsyncResult();
-
-		verify(this.countDownLatch);
+		verify(this.countDownLatch).await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 	@Test
 	public void getAsyncResultWithTimeoutZero() throws Exception {
-		replay(this.countDownLatch);
-
 		this.mvcResult.getAsyncResult(0);
-
-		verify(this.countDownLatch);
+		verifyZeroInteractions(this.countDownLatch);
 	}
 
 	@Test(expected=IllegalStateException.class)
 	public void getAsyncResultAndTimeOut() throws Exception {
-		expect(this.countDownLatch.await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS)).andReturn(false);
-		replay(this.countDownLatch);
-
 		this.mvcResult.getAsyncResult(-1);
+		verify(this.countDownLatch).await(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 
@@ -111,9 +93,8 @@ public class DefaultMvcResultTests {
 
 		public ExtendedMockHttpServletRequest() {
 			super();
-			this.asyncContext = EasyMock.createMock(AsyncContext.class);
-			expect(this.asyncContext.getTimeout()).andReturn(new Long(DEFAULT_TIMEOUT));
-			replay(this.asyncContext);
+			this.asyncContext = mock(AsyncContext.class);
+			given(this.asyncContext.getTimeout()).willReturn(new Long(DEFAULT_TIMEOUT));
 		}
 
 		public void setAsyncStarted(boolean asyncStarted) {

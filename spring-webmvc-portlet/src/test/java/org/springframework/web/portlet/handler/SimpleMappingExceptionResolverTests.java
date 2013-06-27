@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.portlet.handler;
 
 import java.util.Collections;
 import java.util.Properties;
-
 import javax.portlet.WindowState;
 
 import junit.framework.TestCase;
@@ -206,7 +205,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
-		assertEquals("error", mav.getViewName());
+		assertEquals("another-error", mav.getViewName());
 	}
 
 	public void testTwoMappingsThrowOddExceptionUseLongExceptionMapping() {

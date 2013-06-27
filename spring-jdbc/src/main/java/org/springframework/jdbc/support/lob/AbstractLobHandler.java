@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Abstract base class for LobHandler implementations.
+ * Abstract base class for {@link LobHandler} implementations.
  *
  * <p>Implements all accessor methods for column names through a column lookup
  * and delegating to the corresponding accessor that takes a column index.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj.annotation;
 
 import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 
 /**
@@ -59,7 +60,7 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	 */
 	@Override
 	protected int getOrderForAspectClass(Class<?> aspectClass) {
-		Order order = aspectClass.getAnnotation(Order.class);
+		Order order = AnnotationUtils.findAnnotation(aspectClass, Order.class);
 		if (order != null) {
 			return order.value();
 		}

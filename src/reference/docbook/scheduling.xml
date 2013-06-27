@@ -380,7 +380,7 @@ public class TaskExecutorExample {
 
       <programlisting language="java">@Configuration
 @EnableAsync
-@EnableSCheduling
+@EnableScheduling
 public class AppConfig {
 }</programlisting>
 
@@ -840,9 +840,9 @@ public class ExampleJob extends QuartzJobBean {
       object. Of course, we still need to schedule the jobs themselves. This
       is done using triggers and a
       <classname>SchedulerFactoryBean</classname>. Several triggers are
-      available within Quartz. Spring offers two subclassed triggers with
-      convenient defaults: <classname>CronTriggerBean</classname> and
-      <classname>SimpleTriggerBean</classname>.</para>
+      available within Quartz and Spring offers two Quartz <interfacename>FactoryBean</interfacename>
+      implementations with convenient defaults: <classname>CronTriggerFactoryBean</classname> and
+      <classname>SimpleTriggerFactoryBean</classname>.</para>
 
       <para>Triggers need to be scheduled. Spring offers a
       <classname>SchedulerFactoryBean</classname> that exposes triggers to be
@@ -851,7 +851,7 @@ public class ExampleJob extends QuartzJobBean {
 
       <para>Find below a couple of examples:</para>
 
-      <programlisting language="xml">&lt;bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean"&gt;
+      <programlisting language="xml">&lt;bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean"&gt;
     &lt;!-- see the example of method invoking job above --&gt;
     &lt;property name="jobDetail" ref="jobDetail" /&gt;
     &lt;!-- 10 seconds --&gt;
@@ -860,7 +860,7 @@ public class ExampleJob extends QuartzJobBean {
     &lt;property name="repeatInterval" value="50000" /&gt;
 &lt;/bean&gt;
 
-&lt;bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean"&gt;
+&lt;bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"&gt;
     &lt;property name="jobDetail" ref="exampleJob" /&gt;
     &lt;!-- run every morning at 6 AM --&gt;
     &lt;property name="cronExpression" value="0 0 6 * * ?" /&gt;

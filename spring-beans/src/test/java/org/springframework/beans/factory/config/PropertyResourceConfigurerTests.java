@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -644,6 +645,7 @@ public final class PropertyResourceConfigurerTests {
 		ppc.postProcessBeanFactory(factory);
 
 		TestBean tb = (TestBean) factory.getBean("tb");
+		assertNotNull(tb);
 		assertEquals(0, factory.getAliases("tb").length);
 	}
 
