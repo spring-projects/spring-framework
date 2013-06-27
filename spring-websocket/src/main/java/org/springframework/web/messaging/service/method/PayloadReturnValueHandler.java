@@ -28,21 +28,19 @@ import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageReturnValueHandler implements ReturnValueHandler {
+public class PayloadReturnValueHandler implements ReturnValueHandler {
 
 	private MessageChannel clientChannel;
 
 
-	public MessageReturnValueHandler(MessageChannel clientChannel) {
+	public PayloadReturnValueHandler(MessageChannel clientChannel) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		this.clientChannel = clientChannel;
 	}
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		// TODO: List<Message> return value
-		Class<?> paramType = returnType.getParameterType();
-		return Message.class.isAssignableFrom(paramType);
+		return true;
 	}
 
 	@Override
@@ -51,24 +49,19 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 
 		Assert.notNull(this.clientChannel, "No clientChannel to send messages to");
 
-		Message<?> returnMessage = (Message<?>) returnValue;
-		if (message == null) {
+		if (returnValue == null) {
 			return;
 		}
 
 		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
-		Assert.notNull(headers.getSubscriptionId(), "No subscription id: " + message);
 
-		WebMessageHeaderAccesssor returnHeaders = WebMessageHeaderAccesssor.wrap(returnMessage);
+		WebMessageHeaderAccesssor returnHeaders = WebMessageHeaderAccesssor.create();
+		returnHeaders.setDestination(headers.getDestination());
 		returnHeaders.setSessionId(headers.getSessionId());
 		returnHeaders.setSubscriptionId(headers.getSubscriptionId());
 
-		if (returnHeaders.getDestination() == null) {
-			returnHeaders.setDestination(headers.getDestination());
-		}
-
-		returnMessage = MessageBuilder.withPayload(
-				returnMessage.getPayload()).copyHeaders(returnHeaders.toMap()).build();
+		Message<?> returnMessage = MessageBuilder.withPayload(
+				returnValue).copyHeaders(returnHeaders.toMap()).build();
 
 		this.clientChannel.send(returnMessage);
  	}

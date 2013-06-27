@@ -109,6 +109,7 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
 
 		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.clientChannel));
+		this.returnValueHandlers.addHandler(new PayloadReturnValueHandler(this.clientChannel));
 	}
 
 	protected void initHandlerMethods() {
