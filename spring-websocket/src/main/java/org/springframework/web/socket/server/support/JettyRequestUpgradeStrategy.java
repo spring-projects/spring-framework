@@ -24,8 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
-import org.eclipse.jetty.websocket.server.ServletWebSocketRequest;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -67,8 +67,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		this.factory.setCreator(new WebSocketCreator() {
 			@Override
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
-				Assert.isInstanceOf(ServletWebSocketRequest.class, request);
-				return ((ServletWebSocketRequest) request).getServletAttributes().get(WEBSOCKET_LISTENER_ATTR_NAME);
+				Assert.isInstanceOf(ServletUpgradeRequest.class, request);
+				return ((ServletUpgradeRequest) request).getServletAttributes().get(WEBSOCKET_LISTENER_ATTR_NAME);
 			}
 		});
 		try {
