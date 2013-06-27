@@ -33,14 +33,12 @@ import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link WebSocketConnectionManager}.
  *
  * @author Rossen Stoyanchev
  */
 public class WebSocketConnectionManagerTests {
-
 
 	@Test
 	public void openConnection() throws Exception {

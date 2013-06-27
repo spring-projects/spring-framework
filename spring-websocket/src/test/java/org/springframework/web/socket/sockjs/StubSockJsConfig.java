@@ -19,7 +19,6 @@ package org.springframework.web.socket.sockjs;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-
 /**
  * @author Rossen Stoyanchev
  */
@@ -34,7 +33,7 @@ public class StubSockJsConfig implements SockJsConfiguration {
 
 	@Override
 	public int getStreamBytesLimit() {
-		return streamBytesLimit;
+		return this.streamBytesLimit;
 	}
 
 	public void setStreamBytesLimit(int streamBytesLimit) {
@@ -43,7 +42,7 @@ public class StubSockJsConfig implements SockJsConfiguration {
 
 	@Override
 	public long getHeartbeatTime() {
-		return heartbeatTime;
+		return this.heartbeatTime;
 	}
 
 	public void setHeartbeatTime(long heartbeatTime) {
@@ -52,7 +51,7 @@ public class StubSockJsConfig implements SockJsConfiguration {
 
 	@Override
 	public TaskScheduler getTaskScheduler() {
-		return taskScheduler;
+		return this.taskScheduler;
 	}
 
 	public void setTaskScheduler(TaskScheduler taskScheduler) {

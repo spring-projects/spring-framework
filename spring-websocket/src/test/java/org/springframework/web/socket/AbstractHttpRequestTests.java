@@ -24,7 +24,6 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-
 /**
  * @author Rossen Stoyanchev
  */

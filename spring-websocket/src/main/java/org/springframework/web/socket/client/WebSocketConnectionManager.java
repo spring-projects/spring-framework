@@ -57,10 +57,11 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		this.syncClientLifecycle = ((client instanceof SmartLifecycle) && !((SmartLifecycle) client).isRunning());
 	}
 
+
 	/**
 	 * Decorate the WebSocketHandler provided to the class constructor.
-	 * <p>
-	 * By default {@link LoggingWebSocketHandlerDecorator} is added.
+	 *
+	 * <p>By default {@link LoggingWebSocketHandlerDecorator} is added.
 	 */
 	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
 		return new LoggingWebSocketHandlerDecorator(handler);
@@ -88,7 +89,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	@Override
 	public void stopInternal() throws Exception {
 		if (this.syncClientLifecycle) {
-			((SmartLifecycle) client).stop();
+			((SmartLifecycle) this.client).stop();
 		}
 		super.stopInternal();
 	}

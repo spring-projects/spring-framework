@@ -29,7 +29,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link AbstractSockJsSession}.
  *

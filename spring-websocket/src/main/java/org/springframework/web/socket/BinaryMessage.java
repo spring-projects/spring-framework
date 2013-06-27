@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket;
 
 import java.nio.ByteBuffer;
-
 
 /**
  * A {@link WebSocketMessage} that contains a binary {@link ByteBuffer} payload.
@@ -78,6 +78,7 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 			this.bytes = payload;
 		}
 	}
+
 
 	/**
 	 * Returns access to the message payload as a byte array. NOTE: the returned array

@@ -48,7 +48,6 @@ import static org.mockito.Mockito.*;
  */
 public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
-
 	@Override
 	@Before
 	public void setUp() {

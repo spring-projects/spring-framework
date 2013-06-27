@@ -29,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * A {@link javax.websocket.server.ServerEndpointConfig.Configurator} for initializing
  * {@link ServerEndpoint}-annotated classes through Spring.
+ *
  * <p>
  * <pre class="code">
  * &#064;ServerEndpoint(value = "/echo", configurator = SpringConfigurator.class)

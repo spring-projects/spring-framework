@@ -24,7 +24,6 @@ import org.springframework.web.socket.WebSocketHandler;
 
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link JettyWebSocketListenerAdapter}.
  *

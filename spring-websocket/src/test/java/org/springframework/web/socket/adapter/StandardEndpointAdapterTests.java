@@ -30,7 +30,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link StandardEndpointAdapter}.
  *
@@ -52,30 +51,30 @@ public class StandardEndpointAdapterTests {
 		this.session = mock(Session.class);
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.webSocketSession = new StandardWebSocketSessionAdapter();
-		this.adapter = new StandardEndpointAdapter(webSocketHandler, webSocketSession);
+		this.adapter = new StandardEndpointAdapter(this.webSocketHandler, this.webSocketSession);
 	}
 
 	@Test
 	public void onOpen() throws Throwable {
-		this.adapter.onOpen(session, null);
+		this.adapter.onOpen(this.session, null);
 
 		verify(this.webSocketHandler).afterConnectionEstablished(this.webSocketSession);
-		verify(session, atLeast(2)).addMessageHandler(any(MessageHandler.Whole.class));
+		verify(this.session, atLeast(2)).addMessageHandler(any(MessageHandler.Whole.class));
 
-		when(session.getId()).thenReturn("123");
+		when(this.session.getId()).thenReturn("123");
 		assertEquals("123", this.webSocketSession.getId());
 	}
 
 	@Test
 	public void onClose() throws Throwable {
-		this.adapter.onClose(session, new CloseReason(CloseCodes.NORMAL_CLOSURE, "reason"));
+		this.adapter.onClose(this.session, new CloseReason(CloseCodes.NORMAL_CLOSURE, "reason"));
 		verify(this.webSocketHandler).afterConnectionClosed(this.webSocketSession, CloseStatus.NORMAL.withReason("reason"));
 	}
 
 	@Test
 	public void onError() throws Throwable {
 		Exception exception = new Exception();
-		this.adapter.onError(session, exception);
+		this.adapter.onError(this.session, exception);
 		verify(this.webSocketHandler).handleTransportError(this.webSocketSession, exception);
 	}
 

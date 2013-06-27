@@ -48,18 +48,21 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 
 	private int phase = Integer.MAX_VALUE;
 
-	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
+	private final TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
 
 	private final Object lifecycleMonitor = new Object();
 
 
 	public ConnectionManagerSupport(String uriTemplate, Object... uriVariables) {
-		this.uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode().toUri();
+		this.uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(
+				uriVariables).encode().toUri();
 	}
+
 
 	/**
 	 * Set whether to auto-connect to the remote endpoint after this connection manager
 	 * has been initialized and the Spring context has been refreshed.
+	 *
 	 * <p>Default is "false".
 	 */
 	public void setAutoStartup(boolean autoStartup) {
@@ -111,8 +114,7 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 	/**
-	 * Connect to the configured {@link #setDefaultUri(URI) default URI}. If already
-	 * connected, the method has no impact.
+	 * Start the websocket connection. If already connected, the method has no impact.
 	 */
 	@Override
 	public final void start() {

@@ -23,7 +23,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A {@link WebSocketHandlerDecorator} that adds logging to WebSocket lifecycle events.
  *
@@ -32,7 +31,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
-	private Log logger = LogFactory.getLog(LoggingWebSocketHandlerDecorator.class);
+	private final Log logger = LogFactory.getLog(LoggingWebSocketHandlerDecorator.class);
 
 
 	public LoggingWebSocketHandlerDecorator(WebSocketHandler delegate) {

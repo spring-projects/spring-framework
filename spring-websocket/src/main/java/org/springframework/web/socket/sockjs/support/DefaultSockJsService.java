@@ -120,6 +120,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		}
 	}
 
+
 	protected final Set<TransportHandler> getDefaultTransportHandlers() {
 		Set<TransportHandler> result = new HashSet<TransportHandler>();
 		result.add(new XhrPollingTransportHandler());

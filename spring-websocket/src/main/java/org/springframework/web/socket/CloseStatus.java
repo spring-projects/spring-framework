@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket;
 
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -148,14 +149,15 @@ public final class CloseStatus {
 
 	/**
 	 * Create a new {@link CloseStatus} instance.
-	 * @param code
-	 * @param reason
+	 * @param code the status code
+	 * @param reason the reason
 	 */
 	public CloseStatus(int code, String reason) {
 		Assert.isTrue((code >= 1000 && code < 5000), "Invalid code");
 		this.code = code;
 		this.reason = reason;
 	}
+
 
 	/**
 	 * Returns the status code.

@@ -26,13 +26,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 
-
 /**
  * An implementation of {@link WebSocketHandler} that adds SockJS messages frames, sends
  * SockJS heartbeat messages, and delegates lifecycle events and messages to a target
  * {@link WebSocketHandler}.
- * <p>
- * Methods in this class allow exceptions from the wrapped {@link WebSocketHandler} to
+ *
+ * <p>Methods in this class allow exceptions from the wrapped {@link WebSocketHandler} to
  * propagate. However, any exceptions resulting from SockJS message handling (e.g. while
  * sending SockJS frames or heartbeat messages) are caught and treated as transport
  * errors, i.e. routed to the
@@ -46,7 +45,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private WebSocketServerSockJsSession session;
+	private final WebSocketServerSockJsSession session;
 
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
@@ -54,9 +53,9 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	public SockJsWebSocketHandler(SockJsConfiguration config,
 			WebSocketHandler webSocketHandler, WebSocketServerSockJsSession session) {
 
-		Assert.notNull(config, "sockJsConfig is required");
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		Assert.notNull(session, "session is required");
+		Assert.notNull(config, "config must not be null");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(session, "session must not be null");
 
 		this.sockJsConfig = config;
 		this.session = session;

@@ -35,14 +35,13 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.support.BeanCreatingHandlerProvider;
 
-
 /**
  * An implementation of {@link javax.websocket.server.ServerEndpointConfig} that also
  * contains the target {@link javax.websocket.Endpoint}, provided either as a reference or
  * as a bean name.
- * <p>
- * {@link ServerEndpointRegistration} beans are detected by {@link ServerEndpointExporter}
- * and registered with a Java WebSocket runtime at startup.
+ *
+ * <p>{@link ServerEndpointRegistration} beans are detected by
+ * {@link ServerEndpointExporter} and registered with a Java WebSocket runtime at startup.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -67,26 +66,32 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 
 	private final Map<String, Object> userProperties = new HashMap<String, Object>();
 
-	private Configurator configurator = new EndpointRegistrationConfigurator();
+	private final Configurator configurator = new EndpointRegistrationConfigurator();
 
 
 	/**
-	 * Class constructor with the {@code javax.webscoket.Endpoint} class.
-	 *
-	 * @param path
-	 * @param endpointClass
+	 * Create a new {@link ServerEndpointRegistration} instance from an
+	 * {@code javax.webscoket.Endpoint} class.
+	 * @param path the endpoint path
+	 * @param endpointClass the endpoint class
 	 */
 	public ServerEndpointRegistration(String path, Class<? extends Endpoint> endpointClass) {
 		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(endpointClass, "endpointClass is required");
+		Assert.notNull(endpointClass, "endpointClass must not be null");
 		this.path = path;
 		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
 		this.endpoint = null;
 	}
 
+	/**
+	 * Create a new {@link ServerEndpointRegistration} instance from an
+	 * {@code javax.webscoket.Endpoint} instance.
+	 * @param path the endpoint path
+	 * @param endpoint the endpoint instance
+	 */
 	public ServerEndpointRegistration(String path, Endpoint endpoint) {
 		Assert.hasText(path, "path must not be empty");
-		Assert.notNull(endpoint, "endpoint is required");
+		Assert.notNull(endpoint, "endpoint must not be null");
 		this.path = path;
 		this.endpointProvider = null;
 		this.endpoint = endpoint;
@@ -188,7 +193,7 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
-			return (T) ServerEndpointRegistration.this.getEndpoint();
+			return (T) getEndpoint();
 		}
 
 		@Override

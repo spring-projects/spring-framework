@@ -23,7 +23,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A convenient base class for {@link WebSocketHandler} implementation with empty methods.
  *

@@ -27,7 +27,6 @@ import org.springframework.core.NestedRuntimeException;
 @SuppressWarnings("serial")
 public class WebSocketConnectFailureException extends NestedRuntimeException {
 
-
 	public WebSocketConnectFailureException(String msg, Throwable cause) {
 		super(msg, cause);
 	}

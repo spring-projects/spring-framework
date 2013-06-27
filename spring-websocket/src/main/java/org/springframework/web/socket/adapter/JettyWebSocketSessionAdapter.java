@@ -29,7 +29,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * Adapts a Jetty {@link org.eclipse.jetty.websocket.api.Session} to
  * {@link WebSocketSession}.
@@ -48,7 +47,7 @@ public class JettyWebSocketSessionAdapter
 
 	@Override
 	public void initSession(Session session) {
-		Assert.notNull(session, "session is required");
+		Assert.notNull(session, "session must not be null");
 		this.session = session;
 	}
 

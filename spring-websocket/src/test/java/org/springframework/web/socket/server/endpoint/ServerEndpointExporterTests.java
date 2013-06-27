@@ -31,7 +31,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link ServerEndpointExporter}.
  *
@@ -51,7 +50,7 @@ public class ServerEndpointExporterTests {
 		this.serverContainer = mock(ServerContainer.class);
 
 		MockServletContext servletContext = new MockServletContext();
-		servletContext.setAttribute("javax.websocket.server.ServerContainer", serverContainer);
+		servletContext.setAttribute("javax.websocket.server.ServerContainer", this.serverContainer);
 
 		this.webAppContext = new AnnotationConfigWebApplicationContext();
 		this.webAppContext.register(Config.class);

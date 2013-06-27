@@ -34,14 +34,13 @@ import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 
 /**
- * An {@link HttpRequestHandler} for processing SockJS requests.
- * <p>
- * This is the main class to use when configuring a SockJS service at a specific URL. It
- * is a very thin wrapper around a {@link SockJsService} and a {@link WebSocketHandler}
- * instance also adapting the {@link HttpServletRequest} and {@link HttpServletResponse}
- * to {@link ServerHttpRequest} and {@link ServerHttpResponse} respectively.
- * <p>
- * The {@link #decorateWebSocketHandler(WebSocketHandler)} method decorates the given
+ * An {@link HttpRequestHandler} for processing SockJS requests. This is the main class
+ * to use when configuring a SockJS service at a specific URL. It is a very thin wrapper
+ * around a {@link SockJsService} and a {@link WebSocketHandler} instance also adapting
+ * the {@link HttpServletRequest} and {@link HttpServletResponse} to
+ * {@link ServerHttpRequest} and {@link ServerHttpResponse} respectively.
+ *
+ * <p>The {@link #decorateWebSocketHandler(WebSocketHandler)} method decorates the given
  * WebSocketHandler with a logging and exception handling decorators. This method can be
  * overridden to change that.
  *
@@ -56,19 +55,22 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 
 	/**
-	 * Class constructor with {@link SockJsHandler} instance ...
+	 * Create a new {@link SockJsHttpRequestHandler}.
+	 * @param sockJsService the SockJS service
+	 * @param webSocketHandler the websocket handler
 	 */
 	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
-		Assert.notNull(sockJsService, "sockJsService is required");
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+		Assert.notNull(sockJsService, "sockJsService must not be null");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		this.sockJsService = sockJsService;
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
 	}
 
+
 	/**
 	 * Decorate the WebSocketHandler provided to the class constructor.
-	 * <p>
-	 * By default {@link ExceptionWebSocketHandlerDecorator} and
+	 *
+	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
 	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
 	 */
 	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {

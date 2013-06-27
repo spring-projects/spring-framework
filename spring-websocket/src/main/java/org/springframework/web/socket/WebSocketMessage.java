@@ -44,6 +44,7 @@ public abstract class WebSocketMessage<T> {
 		this.last = isLast;
 	}
 
+
 	/**
 	 * Returns the message payload. This will never be {@code null}.
 	 */

@@ -23,7 +23,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-
 /**
  * Base class for {@link AbstractSockJsSession} classes.
  *

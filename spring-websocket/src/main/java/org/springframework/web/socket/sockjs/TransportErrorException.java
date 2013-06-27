@@ -19,15 +19,14 @@ package org.springframework.web.socket.sockjs;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.web.socket.WebSocketHandler;
 
-
 /**
- * Raised when a TransportHandler fails during request processing.
- * <p>
- * If the underlying exception occurs while sending messages to the client, the session is
- * closed and the {@link WebSocketHandler} notified.
- * <p>
- * If the underlying exception occurs while processing an incoming HTTP request, including
- * over HTTP POST, the session will remain open. Only the incoming request is rejected.
+ * Raised when a TransportHandler fails during request processing. If the underlying
+ * exception occurs while sending messages to the client, the session is closed and the
+ * {@link WebSocketHandler} notified.
+ *
+ * <p>If the underlying exception occurs while processing an incoming HTTP request,
+ * including over HTTP POST, the session will remain open. Only the incoming request is
+ * rejected.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -43,7 +42,7 @@ public class TransportErrorException extends NestedRuntimeException {
 	}
 
 	public String getSockJsSessionId() {
-		return sockJsSessionId;
+		return this.sockJsSessionId;
 	}
 
 	@Override

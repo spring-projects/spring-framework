@@ -23,7 +23,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A convenient base class for {@link WebSocketHandler} implementation that process text
  * messages only. Binary messages are rejected with {@link CloseStatus#NOT_ACCEPTABLE}. All
@@ -34,7 +33,6 @@ import org.springframework.web.socket.WebSocketSession;
  * @since 4.0
  */
 public class TextWebSocketHandlerAdapter extends WebSocketHandlerAdapter {
-
 
 	@Override
 	protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {

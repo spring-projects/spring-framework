@@ -21,7 +21,6 @@ import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for {@link WebSocketHandlerDecorator}.
  *

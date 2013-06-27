@@ -32,7 +32,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
-
 /**
  * Adapts a {@link WebSocketHandler} to a standard {@link Endpoint}.
  *
@@ -49,8 +48,8 @@ public class StandardEndpointAdapter extends Endpoint {
 
 
 	public StandardEndpointAdapter(WebSocketHandler handler, StandardWebSocketSessionAdapter wsSession) {
-		Assert.notNull(handler, "handler is required");
-		Assert.notNull(wsSession, "wsSession is required");
+		Assert.notNull(handler, "handler must not be null");
+		Assert.notNull(wsSession, "wsSession must not be null");
 		this.handler = handler;
 		this.wsSession = wsSession;
 	}

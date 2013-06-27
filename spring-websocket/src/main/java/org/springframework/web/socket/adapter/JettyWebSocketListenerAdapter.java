@@ -39,12 +39,12 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	private final WebSocketHandler webSocketHandler;
 
-	private JettyWebSocketSessionAdapter wsSession;
+	private final JettyWebSocketSessionAdapter wsSession;
 
 
 	public JettyWebSocketListenerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSessionAdapter wsSession) {
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		Assert.notNull(wsSession, "wsSession is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(wsSession, "wsSession must not be null");
 		this.webSocketHandler = webSocketHandler;
 		this.wsSession = wsSession;
 	}

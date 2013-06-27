@@ -38,14 +38,12 @@ import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-
 /**
  * Test fixture for {@link StandardWebSocketClient}.
  *
  * @author Rossen Stoyanchev
  */
 public class StandardWebSocketClientTests {
-
 
 	@Test
 	public void doHandshake() throws Exception {

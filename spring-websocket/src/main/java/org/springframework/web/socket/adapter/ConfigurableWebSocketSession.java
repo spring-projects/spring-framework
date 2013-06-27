@@ -21,7 +21,6 @@ import java.security.Principal;
 
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A WebSocketSession with configurable properties.
  *

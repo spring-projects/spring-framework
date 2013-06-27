@@ -22,7 +22,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -33,7 +32,7 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 
 
 	public WebSocketHandlerDecorator(WebSocketHandler delegate) {
-		Assert.notNull(delegate, "delegate is required");
+		Assert.notNull(delegate, "delegate must not be null");
 		this.delegate = delegate;
 	}
 
@@ -43,7 +42,7 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 	}
 
 	public WebSocketHandler getLastHandler() {
-		WebSocketHandler result = delegate;
+		WebSocketHandler result = this.delegate;
 		while (result instanceof WebSocketHandlerDecorator) {
 			result = ((WebSocketHandlerDecorator) result).getDelegate();
 		}
@@ -74,7 +73,6 @@ public class WebSocketHandlerDecorator implements WebSocketHandler {
 	public boolean supportsPartialMessages() {
 		return this.delegate.supportsPartialMessages();
 	}
-
 
 	@Override
 	public String toString() {

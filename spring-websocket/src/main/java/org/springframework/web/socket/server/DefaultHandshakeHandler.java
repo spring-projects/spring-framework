@@ -41,8 +41,8 @@ import org.springframework.web.socket.WebSocketHandler;
 
 /**
  * A default implemnetation of {@link HandshakeHandler}.
- * <p>
- * A container-specific {@link RequestUpgradeStrategy} is required since standard Java
+ *
+ * <p>A container-specific {@link RequestUpgradeStrategy} is required since standard Java
  * WebSocket currently does not provide a way to initiate a WebSocket handshake.
  * Currently available are implementations for Tomcat and GlassFish.
  *
@@ -57,7 +57,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	private List<String> supportedProtocols = new ArrayList<String>();
 
-	private RequestUpgradeStrategy requestUpgradeStrategy;
+	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
 
 	/**

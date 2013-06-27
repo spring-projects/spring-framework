@@ -32,9 +32,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import static org.junit.Assert.*;
 
-
 public class SpringConfiguratorTests {
-
 
 	private MockServletContext servletContext;
 
@@ -50,7 +48,7 @@ public class SpringConfiguratorTests {
 		this.webAppContext = new AnnotationConfigWebApplicationContext();
 		this.webAppContext.register(Config.class);
 
-		this.contextLoader = new ContextLoader(webAppContext);
+		this.contextLoader = new ContextLoader(this.webAppContext);
 		this.contextLoader.initWebApplicationContext(this.servletContext);
 	}
 

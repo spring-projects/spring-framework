@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.sockjs.transport;
 
 import java.nio.charset.Charset;
@@ -26,7 +27,6 @@ import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
 
-
 /**
  * A {@link TransportHandler} based on XHR (long) polling.
  *
@@ -34,7 +34,6 @@ import org.springframework.web.socket.sockjs.TransportType;
  * @since 4.0
  */
 public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHandler {
-
 
 	@Override
 	public TransportType getTransportType() {
@@ -53,7 +52,7 @@ public class XhrPollingTransportHandler extends AbstractHttpSendingTransportHand
 
 	@Override
 	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
+		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
 		return new PollingSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 

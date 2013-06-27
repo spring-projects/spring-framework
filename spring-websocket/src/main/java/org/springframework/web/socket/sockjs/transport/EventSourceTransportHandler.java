@@ -48,7 +48,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 	@Override
 	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
+		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
 		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
 			@Override
 			protected void writePrelude() throws IOException {

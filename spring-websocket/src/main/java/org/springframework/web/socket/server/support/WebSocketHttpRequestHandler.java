@@ -35,14 +35,15 @@ import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 
 /**
- * An {@link HttpRequestHandler} for processing WebSocket handshake requests.
- * <p>
- * This is the main class to use when configuring a server WebSocket at a specific URL. It
- * is a very thin wrapper around a {@link HandshakeHandler} and a {@link WebSocketHandler}
- * instance also adapting the {@link HttpServletRequest} and {@link HttpServletResponse}
- * to {@link ServerHttpRequest} and {@link ServerHttpResponse} respectively.
- * <p>
- * The {@link #decorateWebSocketHandler(WebSocketHandler)} method decorates the given
+ * A {@link HttpRequestHandler} for processing WebSocket handshake requests.
+ *
+ * <p>This is the main class to use when configuring a server WebSocket at a specific URL.
+ * It is a very thin wrapper around a {@link HandshakeHandler} and a
+ * {@link WebSocketHandler} instance also adapting the {@link HttpServletRequest} and
+ * {@link HttpServletResponse} to {@link ServerHttpRequest} and {@link ServerHttpResponse}
+ * respectively.
+ *
+ * <p>The {@link #decorateWebSocketHandler(WebSocketHandler)} method decorates the given
  * WebSocketHandler with a logging and exception handling decorators. This method can
  * be overridden to change that.
  *
@@ -61,16 +62,17 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	}
 
 	public WebSocketHttpRequestHandler(	WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler) {
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		Assert.notNull(handshakeHandler, "handshakeHandler is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(handshakeHandler, "handshakeHandler must not be null");
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
 		this.handshakeHandler = new DefaultHandshakeHandler();
 	}
 
+
 	/**
 	 * Decorate the WebSocketHandler provided to the class constructor.
-	 * <p>
-	 * By default {@link ExceptionWebSocketHandlerDecorator} and
+	 *
+	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
 	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
 	 */
 	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {

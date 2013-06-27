@@ -180,7 +180,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		assertTrue(this.servletResponse.getContentAsString().startsWith("<!DOCTYPE html>\n"));
 		assertEquals(496, this.servletResponse.getContentLength());
 		assertEquals("public, max-age=31536000", this.response.getHeaders().getCacheControl());
-		assertEquals("\"0da1ed070012f304e47b83c81c48ad620\"", response.getHeaders().getETag());
+		assertEquals("\"0da1ed070012f304e47b83c81c48ad620\"", this.response.getHeaders().getETag());
 	}
 
 	@Test

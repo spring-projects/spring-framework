@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket;
 
-
 /**
  * A {@link WebSocketMessage} that contains a textual {@link String} payload.
  *
@@ -25,11 +24,9 @@ package org.springframework.web.socket;
  */
 public final class TextMessage extends WebSocketMessage<String> {
 
-
 	/**
 	 * Create a new {@link TextMessage} instance.
 	 * @param payload the payload
-	 * @param isLast whether this the last part of a message received or transmitted in parts
 	 */
 	public TextMessage(CharSequence payload) {
 		super(payload.toString(), true);
@@ -43,6 +40,7 @@ public final class TextMessage extends WebSocketMessage<String> {
 	public TextMessage(CharSequence payload, boolean isLast) {
 		super(payload.toString(), isLast);
 	}
+
 
 	@Override
 	protected int getPayloadSize() {

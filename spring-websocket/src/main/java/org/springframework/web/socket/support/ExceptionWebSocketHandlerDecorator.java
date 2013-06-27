@@ -23,7 +23,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * An exception handling {@link WebSocketHandlerDecorator}. Traps all {@link Throwable}
  * instances that escape from the decorated handler and closes the session with
@@ -34,12 +33,13 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class ExceptionWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
-	private Log logger = LogFactory.getLog(ExceptionWebSocketHandlerDecorator.class);
+	private final Log logger = LogFactory.getLog(ExceptionWebSocketHandlerDecorator.class);
 
 
 	public ExceptionWebSocketHandlerDecorator(WebSocketHandler delegate) {
 		super(delegate);
 	}
+
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {

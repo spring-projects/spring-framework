@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.sockjs;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,8 +50,8 @@ import org.springframework.web.socket.WebSocketHandler;
  * support, SockJS path resolution, and processing for static SockJS requests (e.g.
  * "/info", "/iframe.html", etc). Sub-classes are responsible for handling transport
  * requests.
- * <p>
- * It is expected that this service is mapped correctly to one or more prefixes such as
+ *
+ * <p>It is expected that this service is mapped correctly to one or more prefixes such as
  * "/echo" including all sub-URLs (e.g. "/echo/**"). A SockJS service itself is generally
  * unaware of request mapping details but nevertheless must be able to extract the SockJS
  * path, which is the portion of the request path following the prefix. In most cases,
@@ -63,7 +65,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private static final int ONE_YEAR = 365 * 24 * 60 * 60;
+	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
 
 
 	private String name = "SockJSService@" + ObjectUtils.getIdentityHexString(this);
@@ -88,9 +90,10 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
-		Assert.notNull(scheduler, "scheduler is required");
+		Assert.notNull(scheduler, "scheduler must not be null");
 		this.taskScheduler = scheduler;
 	}
+
 
 	/**
 	 * A unique name for the service mainly for logging purposes.
@@ -107,8 +110,8 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 * Use this property to configure one or more prefixes that this SockJS service is
 	 * allowed to serve. The prefix (e.g. "/echo") is needed to extract the SockJS
 	 * specific portion of the URL (e.g. "${prefix}/info", "${prefix}/iframe.html", etc).
-	 * <p>
-	 * This property is not strictly required. In most cases, the SockJS path can be
+	 *
+	 * <p>This property is not strictly required. In most cases, the SockJS path can be
 	 * auto-detected since the initial request from the SockJS client is of the form
 	 * "{prefix}/info". Assuming the SockJS service is mapped correctly (e.g. using
 	 * Ant-style pattern "/echo/**") this should work fine. This property can be used
@@ -144,8 +147,8 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 * a domain local to the SockJS server. The iframe does need to load the
 	 * SockJS javascript client library and this option allows configuring its
 	 * url.
-	 * <p>
-	 * By default this is set to point to
+	 *
+	 * <p>By default this is set to point to
 	 * "https://d1fxtkz8shb9d2.cloudfront.net/sockjs-0.3.4.min.js".
 	 */
 	public AbstractSockJsService setSockJsClientLibraryUrl(String clientLibraryUrl) {
@@ -168,15 +171,15 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	@Override
 	public int getStreamBytesLimit() {
-		return streamBytesLimit;
+		return this.streamBytesLimit;
 	}
 
 	/**
 	 * Some load balancers do sticky sessions, but only if there is a JSESSIONID
 	 * cookie. Even if it is set to a dummy value, it doesn't matter since
 	 * session information is added by the load balancer.
-	 * <p>
-	 * Set this option to indicate if a JSESSIONID cookie should be created. The
+	 *
+	 * <p>Set this option to indicate if a JSESSIONID cookie should be created. The
 	 * default value is "true".
 	 */
 	public AbstractSockJsService setJsessionIdCookieRequired(boolean jsessionIdCookieRequired) {
@@ -211,8 +214,8 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	 * The amount of time in milliseconds before a client is considered
 	 * disconnected after not having a receiving connection, i.e. an active
 	 * connection over which the server can send data to the client.
-	 * <p>
-	 * The default value is 5000.
+	 *
+	 * <p>The default value is 5000.
 	 */
 	public void setDisconnectDelay(long disconnectDelay) {
 		this.disconnectDelay = disconnectDelay;
@@ -228,8 +231,8 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 	/**
 	 * Some load balancers don't support websockets. This option can be used to
 	 * disable the WebSocket transport on the server side.
-	 * <p>
-	 * The default value is "true".
+	 *
+	 * <p>The default value is "true".
 	 */
 	public void setWebSocketsEnabled(boolean webSocketsEnabled) {
 		this.webSocketsEnabled = webSocketsEnabled;
@@ -245,12 +248,6 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 	/**
 	 * TODO
-	 *
-	 * @param request
-	 * @param response
-	 * @param sockJsPath
-	 *
-	 * @throws Exception
 	 */
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
@@ -440,6 +437,7 @@ public abstract class AbstractSockJsService implements SockJsService, SockJsConf
 
 		void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException;
 	}
+
 
 	private static final Random random = new Random();
 
