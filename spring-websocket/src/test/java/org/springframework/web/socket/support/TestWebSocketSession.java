@@ -26,7 +26,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * A {@link WebSocketSession} for use in tests.
  *
@@ -58,7 +57,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	/**
@@ -73,7 +72,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public URI getUri() {
-		return uri;
+		return this.uri;
 	}
 
 	/**
@@ -88,7 +87,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public boolean isSecure() {
-		return secure;
+		return this.secure;
 	}
 
 	/**
@@ -103,7 +102,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public Principal getPrincipal() {
-		return principal;
+		return this.principal;
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public String getRemoteHostName() {
-		return remoteHostName;
+		return this.remoteHostName;
 	}
 
 	/**
@@ -133,7 +132,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public String getRemoteAddress() {
-		return remoteAddress;
+		return this.remoteAddress;
 	}
 
 	/**
@@ -148,7 +147,7 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	@Override
 	public boolean isOpen() {
-		return open;
+		return this.open;
 	}
 
 	/**

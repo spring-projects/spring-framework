@@ -42,8 +42,10 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	 */
 	protected static final Log logger = LogFactory.getLog(NameMatchCacheOperationSource.class);
 
+
 	/** Keys are method names; values are TransactionAttributes */
 	private Map<String, Collection<CacheOperation>> nameMap = new LinkedHashMap<String, Collection<CacheOperation>>();
+
 
 	/**
 	 * Set a name/attribute map, consisting of method names

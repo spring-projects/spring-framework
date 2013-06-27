@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.expression;
 
 /**
- * Instances of a type comparator should be able to compare pairs of objects for equality, the specification of the
- * return value is the same as for {@link Comparable}.
+ * Instances of a type comparator should be able to compare pairs of objects for equality,
+ * the specification of the return value is the same as for {@link Comparable}.
  *
  * @author Andy Clement
  * @since 3.0
@@ -29,9 +29,10 @@ public interface TypeComparator {
 	 * Compare two objects.
 	 * @param firstObject the first object
 	 * @param secondObject the second object
-	 * @return 0 if they are equal, <0 if the first is smaller than the second, or >0 if the first is larger than the
-	 * second
-	 * @throws EvaluationException if a problem occurs during comparison (or they are not comparable)
+	 * @return 0 if they are equal, <0 if the first is smaller than the second, or >0 if
+	 *         the first is larger than the second
+	 * @throws EvaluationException if a problem occurs during comparison (or they are not
+	 *         comparable)
 	 */
 	int compare(Object firstObject, Object secondObject) throws EvaluationException;
 

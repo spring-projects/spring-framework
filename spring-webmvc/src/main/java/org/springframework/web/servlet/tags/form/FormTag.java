@@ -346,8 +346,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		tagWriter.startTag(FORM_TAG);
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE,
-				isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
+		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, getHttpMethod());
 		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
@@ -380,6 +379,10 @@ public class FormTag extends AbstractHtmlElementTag {
 				modelAttribute + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
+	}
+
+	private String getHttpMethod() {
+		return isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD;
 	}
 
 	private void assertHttpMethod(String method) {
@@ -465,7 +468,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
 		if ((processor != null) && (request instanceof HttpServletRequest)) {
-			action = processor.processAction((HttpServletRequest) request, action);
+			action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
 		}
 		return action;
 	}

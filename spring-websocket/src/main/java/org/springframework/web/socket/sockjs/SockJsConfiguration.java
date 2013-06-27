@@ -35,8 +35,8 @@ public interface SockJsConfiguration {
 	 * closed. After that client will open a new request. Setting this value to
 	 * one effectively disables streaming and will make streaming transports to
 	 * behave like polling transports.
-	 * <p>
-	 * The default value is 128K (i.e. 128 * 1024).
+	 *
+	 * <p>The default value is 128K (i.e. 128 * 1024).
 	 */
 	public int getStreamBytesLimit();
 
@@ -44,8 +44,8 @@ public interface SockJsConfiguration {
 	 * The amount of time in milliseconds when the server has not sent any
 	 * messages and after which the server should send a heartbeat frame to the
 	 * client in order to keep the connection from breaking.
-	 * <p>
-	 * The default value is 25,000 (25 seconds).
+	 *
+	 * <p>The default value is 25,000 (25 seconds).
 	 */
 	public long getHeartbeatTime();
 

@@ -42,8 +42,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
- * Reflection-based {@link MethodResolver} used by default in {@link StandardEvaluationContext}
- * unless explicit method resolvers have been specified.
+ * Reflection-based {@link MethodResolver} used by default in
+ * {@link StandardEvaluationContext} unless explicit method resolvers have been specified.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -52,8 +52,6 @@ import org.springframework.expression.spel.SpelMessage;
  * @see StandardEvaluationContext#addMethodResolver(MethodResolver)
  */
 public class ReflectiveMethodResolver implements MethodResolver {
-
-	private static Method[] NO_METHODS = new Method[0];
 
 	private Map<Class<?>, MethodFilter> filters = null;
 
@@ -77,6 +75,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
 	}
+
 
 	/**
 	 * Locate a method on a type. There are three kinds of match that might occur:

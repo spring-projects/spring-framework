@@ -154,7 +154,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
    * The DataSource should match the one used by the JDO PersistenceManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the PersistenceManagerFactory uses a DataSource as connection factory,
-	 * the DataSource will be autodetected: You can still explictly specify the
+	 * the DataSource will be autodetected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils

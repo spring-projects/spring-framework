@@ -26,8 +26,6 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.junit.Assert.*;
 
-
-
 /**
  * Test fixture for {@link BeanCreatingHandlerProvider}.
  *

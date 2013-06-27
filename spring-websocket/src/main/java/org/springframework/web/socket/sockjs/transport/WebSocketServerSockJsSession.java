@@ -29,7 +29,6 @@ import org.springframework.web.socket.sockjs.SockJsFrame;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 /**
  * A SockJS session for use with the WebSocket transport.
  *
@@ -47,6 +46,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 	public WebSocketServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
+
 
 	public void initWebSocketSession(WebSocketSession session) throws Exception {
 		this.webSocketSession = session;
@@ -75,7 +75,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 		}
 		String[] messages;
 		try {
-			messages = objectMapper.readValue(payload, String[].class);
+			messages = this.objectMapper.readValue(payload, String[].class);
 		}
 		catch (IOException ex) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);

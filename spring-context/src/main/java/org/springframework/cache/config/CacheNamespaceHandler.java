@@ -35,6 +35,7 @@ import org.w3c.dom.Element;
 public class CacheNamespaceHandler extends NamespaceHandlerSupport {
 
 	static final String CACHE_MANAGER_ATTRIBUTE = "cache-manager";
+
 	static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
 
 	static String extractCacheManager(Element element) {

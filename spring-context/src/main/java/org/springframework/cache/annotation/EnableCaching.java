@@ -120,9 +120,9 @@ import org.springframework.core.Ordered;
  * customizing the strategy for cache key generation, per Spring's {@link
  * org.springframework.cache.interceptor.KeyGenerator KeyGenerator} SPI. Normally,
  * {@code @EnableCaching} will configure Spring's
- * {@link org.springframework.cache.interceptor.DefaultKeyGenerator DefaultKeyGenerator}
+ * {@link org.springframework.cache.interceptor.SimpleKeyGenerator SimpleKeyGenerator}
  * for this purpose, but when implementing {@code CachingConfigurer}, a key generator
- * must be provided explicitly. Return {@code new DefaultKeyGenerator()} from this method
+ * must be provided explicitly. Return {@code new SimpleKeyGenerator()} from this method
  * if no customization is necessary. See {@link CachingConfigurer} Javadoc for further
  * details.
  *

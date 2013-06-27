@@ -85,14 +85,14 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 			return;
 		}
 
-		String mKey = toString(this.method);
-		Method targetMethod = this.methodCache.get(mKey);
+		String methodKey = toString(this.method);
+		Method targetMethod = this.methodCache.get(methodKey);
 		if (targetMethod == null) {
 			targetMethod = AopUtils.getMostSpecificMethod(this.method, this.targetClass);
 			if (targetMethod == null) {
 				targetMethod = this.method;
 			}
-			this.methodCache.put(mKey, targetMethod);
+			this.methodCache.put(methodKey, targetMethod);
 		}
 
 		// save arguments as indexed variables

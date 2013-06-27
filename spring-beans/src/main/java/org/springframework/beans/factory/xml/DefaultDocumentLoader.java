@@ -91,8 +91,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		factory.setNamespaceAware(namespaceAware);
 
 		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {
+			factory.setFeature("http://apache.org/xml/features/validation/schema", false);
 			factory.setValidating(true);
-
 			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
 				// Enforce namespace aware for XSD...
 				factory.setNamespaceAware(true);

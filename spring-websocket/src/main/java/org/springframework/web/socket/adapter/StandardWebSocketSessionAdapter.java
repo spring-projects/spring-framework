@@ -48,7 +48,7 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 
 	@Override
 	public void initSession(javax.websocket.Session session) {
-		Assert.notNull(session, "session is required");
+		Assert.notNull(session, "session must not be null");
 		this.session = session;
 	}
 

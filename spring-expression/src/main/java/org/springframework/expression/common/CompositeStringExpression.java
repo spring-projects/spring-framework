@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,21 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
+import org.springframework.expression.TypedValue;
 
 /**
- * Represents a template expression broken into pieces. Each piece will be an Expression but pure text parts to the
- * template will be represented as LiteralExpression objects. An example of a template expression might be:
- *
+ * Represents a template expression broken into pieces. Each piece will be an Expression
+ * but pure text parts to the template will be represented as LiteralExpression objects.
+ * An example of a template expression might be:
+ * 
  * <pre class="code">
- * &quot;Hello ${getName()}&quot;</pre>
- *
- * which will be represented as a CompositeStringExpression of two parts. The first part being a
- * LiteralExpression representing 'Hello ' and the second part being a real expression that will
- * call {@code getName()} when invoked.
- *
+ * &quot;Hello ${getName()}&quot;
+ * </pre>
+ * 
+ * which will be represented as a CompositeStringExpression of two parts. The first part
+ * being a LiteralExpression representing 'Hello ' and the second part being a real
+ * expression that will call {@code getName()} when invoked.
+ * 
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -131,13 +134,13 @@ public class CompositeStringExpression implements Expression {
 	@Override
 	public <T> T getValue(EvaluationContext context, Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue(context);
-		return ExpressionUtils.convert(context, value, expectedResultType);
+		return ExpressionUtils.convertTypedValue(context, new TypedValue(value), expectedResultType);
 	}
 
 	@Override
 	public <T> T getValue(Class<T> expectedResultType) throws EvaluationException {
 		Object value = getValue();
-		return ExpressionUtils.convert(null, value, expectedResultType);
+		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), expectedResultType);
 	}
 
 	@Override
@@ -146,21 +149,21 @@ public class CompositeStringExpression implements Expression {
 	}
 
 	public Expression[] getExpressions() {
-		return expressions;
+		return this.expressions;
 	}
 
 
 	@Override
 	public <T> T getValue(Object rootObject, Class<T> desiredResultType) throws EvaluationException {
 		Object value = getValue(rootObject);
-		return ExpressionUtils.convert(null, value, desiredResultType);
+		return ExpressionUtils.convertTypedValue(null, new TypedValue(value), desiredResultType);
 	}
 
 	@Override
 	public <T> T getValue(EvaluationContext context, Object rootObject, Class<T> desiredResultType)
 			throws EvaluationException {
 		Object value = getValue(context,rootObject);
-		return ExpressionUtils.convert(context, value, desiredResultType);
+		return ExpressionUtils.convertTypedValue(context, new TypedValue(value), desiredResultType);
 	}
 
 	@Override

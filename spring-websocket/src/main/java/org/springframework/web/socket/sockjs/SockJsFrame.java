@@ -44,7 +44,7 @@ public class SockJsFrame {
 
 
 	private SockJsFrame(String content) {
-		Assert.notNull("content is required");
+		Assert.notNull("content must not be null");
 		this.content = content;
 	}
 
@@ -144,7 +144,7 @@ public class SockJsFrame {
 		}
 
 		public static String prepareContent(String... messages) {
-			Assert.notNull(messages, "messages required");
+			Assert.notNull(messages, "messages must not be null");
 			StringBuilder sb = new StringBuilder();
 			sb.append("a[");
 			for (int i=0; i < messages.length; i++) {
@@ -172,14 +172,12 @@ public class SockJsFrame {
 		private final String format;
 
 		public DefaultFrameFormat(String format) {
-			Assert.notNull(format, "format is required");
+			Assert.notNull(format, "format must not be null");
 			this.format = format;
 		}
 
 		/**
-		 *
-		 * @param format a String with a single %s formatting character where the
-		 * frame content is to be inserted; e.g. "data: %s\r\n\r\n"
+		 * @param frame the SockJs frame.
 		 * @return new SockJsFrame instance with the formatted content
 		 */
 		@Override

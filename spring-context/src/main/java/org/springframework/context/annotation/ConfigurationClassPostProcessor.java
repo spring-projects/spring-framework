@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -26,17 +27,19 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
@@ -47,8 +50,11 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
 import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -86,13 +92,17 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
+		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware, ApplicationContextAware,
+		Ordered {
 
 	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
 
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
+
+	private static final String ENHANCED_CONFIGURATION_PROCESSOR_BEAN_NAME =
+			ConfigurationClassPostProcessor.class.getName() + ".enhancedConfigurationProcessor";
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -102,6 +112,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
 	private Environment environment;
+
+	private ApplicationContext applicationContext;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
@@ -129,6 +141,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return definition.getBeanClassName();
 		}
 	};
+
 
 
 	/**
@@ -191,6 +204,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
@@ -213,6 +232,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		RootBeanDefinition iabpp = new RootBeanDefinition(ImportAwareBeanPostProcessor.class);
 		iabpp.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(IMPORT_AWARE_PROCESSOR_BEAN_NAME, iabpp);
+
+		RootBeanDefinition ecbpp = new RootBeanDefinition(EnhancedConfigurationBeanPostProcessor.class);
+		ecbpp.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		registry.registerBeanDefinition(ENHANCED_CONFIGURATION_PROCESSOR_BEAN_NAME, ecbpp);
 
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
@@ -280,7 +303,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		// Parse each @Configuration class
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
-				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
+				this.resourceLoader, this.componentScanBeanNameGenerator, registry,
+				this.applicationContext);
 		parser.parse(configCandidates);
 		parser.validate();
 
@@ -302,15 +326,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		// Read the model and create bean definitions based on its content
 		if (this.reader == null) {
 			this.reader = new ConfigurationClassBeanDefinitionReader(
-					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory,
+					registry, this.applicationContext, this.sourceExtractor,
+					this.problemReporter, this.metadataReaderFactory,
 					this.resourceLoader, this.environment, this.importBeanNameGenerator);
 		}
-		for (ConfigurationClass configurationClass : parser.getConfigurationClasses()) {
-			if (!ConditionalAnnotationHelper.shouldSkip(configurationClass, registry,
-					this.environment, this.importBeanNameGenerator)) {
-				reader.loadBeanDefinitionsForConfigurationClass(configurationClass);
-			}
-		}
+
+		reader.loadBeanDefinitions(parser.getConfigurationClasses());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {
@@ -366,6 +387,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+	@Override
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
+
 
 	private static class ImportAwareBeanPostProcessor implements PriorityOrdered, BeanFactoryAware, BeanPostProcessor {
 
@@ -410,4 +436,40 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+
+	/**
+	 * {@link InstantiationAwareBeanPostProcessorAdapter} that ensures
+	 * {@link EnhancedConfiguration} beans are injected with the {@link BeanFactory}
+	 * before the {@link AutowiredAnnotationBeanPostProcessor} runs (SPR-10668).
+	 */
+	private static class EnhancedConfigurationBeanPostProcessor extends
+			InstantiationAwareBeanPostProcessorAdapter implements PriorityOrdered,
+			BeanFactoryAware {
+
+		private BeanFactory beanFactory;
+
+		@Override
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+
+		@Override
+		public PropertyValues postProcessPropertyValues(PropertyValues pvs,
+				PropertyDescriptor[] pds, Object bean, String beanName)
+				throws BeansException {
+			// Inject the BeanFactory before AutowiredAnnotationBeanPostProcessor's
+			// postProcessPropertyValues method attempts to auto-wire other configuration
+			// beans.
+			if (bean instanceof EnhancedConfiguration) {
+				((EnhancedConfiguration) bean).setBeanFactory(this.beanFactory);
+			}
+			return pvs;
+		}
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.beanFactory = beanFactory;
+		}
+
+	}
 }

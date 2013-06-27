@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents projection, where a given operation is performed on all elements in some input sequence, returning
- * a new sequence of the same size. For example:
+ * Represents projection, where a given operation is performed on all elements in some
+ * input sequence, returning a new sequence of the same size. For example:
  * "{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}" returns "[n, y, n, y, n, y, n, y, n, y]"
  *
  * @author Andy Clement
@@ -48,6 +48,7 @@ public class Projection extends SpelNodeImpl {
 		super(pos, expression);
 		this.nullSafe = nullSafe;
 	}
+
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
@@ -81,7 +82,8 @@ public class Projection extends SpelNodeImpl {
 			}
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this); // TODO unable to build correct type descriptor
 		}
-		else if (operand instanceof Collection || operandIsArray) {
+
+		if (operand instanceof Collection || operandIsArray) {
 			Collection<?> data = (operand instanceof Collection ? (Collection<?>) operand :
 					Arrays.asList(ObjectUtils.toObjectArray(operand)));
 			List<Object> result = new ArrayList<Object>();
@@ -91,7 +93,7 @@ public class Projection extends SpelNodeImpl {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope("index", idx);
-					Object value = children[0].getValueInternal(state).getValue();
+					Object value = this.children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
 						arrayElementType = determineCommonType(arrayElementType, value.getClass());
 					}
@@ -113,21 +115,17 @@ public class Projection extends SpelNodeImpl {
 			}
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 		}
-		else {
-			if (operand==null) {
-				if (this.nullSafe) {
-					return ValueRef.NullValueRef.instance;
-				}
-				else {
-					throw new SpelEvaluationException(getStartPosition(),
-							SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
-				}
+
+		if (operand==null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.instance;
 			}
-			else {
-				throw new SpelEvaluationException(getStartPosition(),
-						SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
-			}
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, "null");
 		}
+
+		throw new SpelEvaluationException(getStartPosition(),
+				SpelMessage.PROJECTION_NOT_SUPPORTED_ON_TYPE, operand.getClass().getName());
 	}
 
 	@Override

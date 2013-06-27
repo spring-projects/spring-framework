@@ -32,6 +32,7 @@ import static org.springframework.test.context.SpringRunnerContextCacheTests.*;
  * conjunction with cache keys used in {@link TestContext}.
  *
  * @author Sam Brannen
+ * @author Michail Nikolaev
  * @since 3.1
  * @see SpringRunnerContextCacheTests
  */
@@ -84,6 +85,7 @@ public class ContextCacheTests {
 		loadCtxAndAssertStats(FooBarProfilesTestCase.class, 1, 3, 1);
 		loadCtxAndAssertStats(FooBarProfilesTestCase.class, 1, 4, 1);
 		loadCtxAndAssertStats(BarFooProfilesTestCase.class, 1, 5, 1);
+		loadCtxAndAssertStats(FooBarActiveProfilesResolverTestCase.class, 1, 6, 1);
 	}
 
 	@Test
@@ -285,6 +287,19 @@ public class ContextCacheTests {
 	@ActiveProfiles({ "bar", "foo" })
 	@ContextConfiguration(classes = Config.class, loader = AnnotationConfigContextLoader.class)
 	private static class BarFooProfilesTestCase {
+	}
+
+	private static class FooBarActiveProfilesResolver implements ActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			return new String[] { "foo", "bar" };
+		}
+	}
+
+	@ActiveProfiles(resolver = FooBarActiveProfilesResolver.class)
+	@ContextConfiguration(classes = Config.class, loader = AnnotationConfigContextLoader.class)
+	private static class FooBarActiveProfilesResolverTestCase {
 	}
 
 	@ContextHierarchy({ @ContextConfiguration })

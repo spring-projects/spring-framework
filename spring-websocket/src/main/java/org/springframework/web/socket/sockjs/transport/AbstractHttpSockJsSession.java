@@ -54,6 +54,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		super(sessionId, config, handler);
 	}
 
+
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			FrameFormat frameFormat) throws TransportErrorException {
 

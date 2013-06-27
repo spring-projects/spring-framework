@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * Instantiates a target handler through a Spring {@link BeanFactory} and also provides
  * an equivalent destroy method. Mainly for internal use to assist with initializing and
  * destroying handlers with per-connection lifecycle.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -43,7 +43,7 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 
 	public BeanCreatingHandlerProvider(Class<? extends T> handlerType) {
-		Assert.notNull(handlerType, "handlerType is required");
+		Assert.notNull(handlerType, "handlerType must not be null");
 		this.handlerType = handlerType;
 	}
 
@@ -83,7 +83,7 @@ public class BeanCreatingHandlerProvider<T> implements BeanFactoryAware {
 
 	@Override
 	public String toString() {
-		return "BeanCreatingHandlerProvider [handlerClass=" + handlerType + "]";
+		return "BeanCreatingHandlerProvider [handlerClass=" + this.handlerType + "]";
 	}
 
 }

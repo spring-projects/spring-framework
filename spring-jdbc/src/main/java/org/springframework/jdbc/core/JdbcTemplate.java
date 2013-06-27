@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -49,6 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -544,21 +547,42 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Override
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
+
 		Assert.notEmpty(sql, "SQL array must not be empty");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
+
 		class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
+
 			private String currSql;
+
 			@Override
 			public int[] doInStatement(Statement stmt) throws SQLException, DataAccessException {
+
 				int[] rowsAffected = new int[sql.length];
+
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
 					for (String sqlStmt : sql) {
-						this.currSql = sqlStmt;
+						this.currSql = appendSql(this.currSql, sqlStmt);
 						stmt.addBatch(sqlStmt);
 					}
-					rowsAffected = stmt.executeBatch();
+					try {
+						rowsAffected = stmt.executeBatch();
+					}
+					catch (BatchUpdateException ex) {
+						String batchExceptionSql = null;
+						for (int i = 0; i < ex.getUpdateCounts().length; i++) {
+							if (ex.getUpdateCounts()[i] == Statement.EXECUTE_FAILED) {
+								batchExceptionSql = appendSql(batchExceptionSql, sql[i]);
+							}
+						}
+						if (StringUtils.hasLength(batchExceptionSql)) {
+							this.currSql = batchExceptionSql;
+						}
+						throw ex;
+					}
 				}
 				else {
 					for (int i = 0; i < sql.length; i++) {
@@ -573,6 +597,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				return rowsAffected;
 			}
+
+			private String appendSql(String sql, String statement) {
+				return (StringUtils.isEmpty(sql) ? statement : sql + "; " + statement);
+			}
+
 			@Override
 			public String getSql() {
 				return this.currSql;

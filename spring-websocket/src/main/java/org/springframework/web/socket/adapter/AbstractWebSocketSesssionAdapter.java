@@ -26,7 +26,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * An abstract base class for implementations of {@link WebSocketSession}.
  *

@@ -7,7 +7,7 @@
 ##############################################################################
 
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-GRADLE_OPTS="-XX:MaxPermSize=1024m -Xmx1024m $GRADLE_OPTS"
+GRADLE_OPTS="-XX:MaxMetaspaceSize=1024m -Xmx1024m $GRADLE_OPTS"
 DEFAULT_JVM_OPTS=""
 
 APP_NAME="Gradle"

@@ -16,14 +16,6 @@
 
 package org.springframework.web.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -63,10 +55,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.tests.web.FreePortScanner;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.SocketUtils;
+
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class RestTemplateIntegrationTests {
@@ -83,7 +77,7 @@ public class RestTemplateIntegrationTests {
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		int port = FreePortScanner.getFreePort();
+		int port = SocketUtils.findAvailableTcpPort();
 		jettyServer = new Server(port);
 		baseUrl = "http://localhost:" + port;
 		ServletContextHandler handler = new ServletContextHandler();
@@ -243,6 +237,7 @@ public class RestTemplateIntegrationTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void exchangeGet() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("MyHeader", "MyValue");

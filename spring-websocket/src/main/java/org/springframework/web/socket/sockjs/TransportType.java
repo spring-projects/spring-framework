@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +55,13 @@ public enum TransportType {
 
 	private final List<String> headerHints;
 
-	private static final Map<String, TransportType> transportTypes = new HashMap<String, TransportType>();
-
+	private static final Map<String, TransportType> TRANSPORT_TYPES;
 	static {
+		Map<String, TransportType> transportTypes = new HashMap<String, TransportType>();
 		for (TransportType type : values()) {
 			transportTypes.put(type.value, type);
 		}
+		TRANSPORT_TYPES = Collections.unmodifiableMap(transportTypes);
 	}
 
 
@@ -94,7 +96,7 @@ public enum TransportType {
 	}
 
 	public static TransportType fromValue(String value) {
-		return transportTypes.get(value);
+		return TRANSPORT_TYPES.get(value);
 	}
 
 	@Override

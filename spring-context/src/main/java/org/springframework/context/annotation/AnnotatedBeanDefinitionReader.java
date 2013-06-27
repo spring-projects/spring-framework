@@ -45,11 +45,11 @@ public class AnnotatedBeanDefinitionReader {
 
 	private final BeanDefinitionRegistry registry;
 
-	private Environment environment;
-
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+
+	private ConditionEvaluator conditionEvaluator;
 
 
 	/**
@@ -79,7 +79,8 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
-		this.environment = environment;
+		this.conditionEvaluator = new ConditionEvaluator(registry, environment,
+				null, null, null);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -92,12 +93,13 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Set the Environment to use when evaluating whether
-	 * {@link Profile @Profile}-annotated component classes should be registered.
+	 * {@link Conditional @Conditional}-annotated component classes should be registered.
 	 * <p>The default is a {@link StandardEnvironment}.
 	 * @see #registerBean(Class, String, Class...)
 	 */
 	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+		this.conditionEvaluator = new ConditionEvaluator(this.registry, environment,
+				null, null, null);
 	}
 
 	/**
@@ -133,8 +135,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
-		if (ConditionalAnnotationHelper.shouldSkip(abd, this.registry,
-				this.environment, this.beanNameGenerator)) {
+		if (conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);

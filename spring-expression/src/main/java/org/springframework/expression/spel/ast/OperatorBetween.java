@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Represents the between operator. The left operand to between must be a single value and the right operand must be a
- * list - this operator returns true if the left operand is between (using the registered comparator) the two elements
- * in the list. The definition of between being inclusive follows the SQL BETWEEN definition.
+ * Represents the between operator. The left operand to between must be a single value and
+ * the right operand must be a list - this operator returns true if the left operand is
+ * between (using the registered comparator) the two elements in the list. The definition
+ * of between being inclusive follows the SQL BETWEEN definition.
  *
  * @author Andy Clement
  * @since 3.0
@@ -40,8 +41,9 @@ public class OperatorBetween extends Operator {
 	}
 
 	/**
-	 * Returns a boolean based on whether a value is in the range expressed. The first operand is any value whilst the
-	 * second is a list of two values - those two values being the bounds allowed for the first operand (inclusive).
+	 * Returns a boolean based on whether a value is in the range expressed. The first
+	 * operand is any value whilst the second is a list of two values - those two values
+	 * being the bounds allowed for the first operand (inclusive).
 	 * @param state the expression state
 	 * @return true if the left operand is in the range specified, false otherwise
 	 * @throws EvaluationException if there is a problem evaluating the expression
@@ -59,8 +61,10 @@ public class OperatorBetween extends Operator {
 		Object high = l.get(1);
 		TypeComparator comparator = state.getTypeComparator();
 		try {
-			return BooleanTypedValue.forValue((comparator.compare(left, low) >= 0 && comparator.compare(left, high) <= 0));
-		} catch (SpelEvaluationException ex) {
+			return BooleanTypedValue.forValue((comparator.compare(left, low) >= 0 &&
+					comparator.compare(left, high) <= 0));
+		}
+		catch (SpelEvaluationException ex) {
 			ex.setPosition(getStartPosition());
 			throw ex;
 		}

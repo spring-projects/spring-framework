@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,32 +39,35 @@ public class CompoundExpression extends SpelNodeImpl {
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		if (getChildCount()==1) {
-			return children[0].getValueRef(state);
+		if (getChildCount() == 1) {
+			return this.children[0].getValueRef(state);
 		}
 		TypedValue result = null;
 		SpelNodeImpl nextNode = null;
 		try {
-			nextNode = children[0];
+			nextNode = this.children[0];
 			result = nextNode.getValueInternal(state);
 			int cc = getChildCount();
-			for (int i = 1; i < cc-1; i++) {
+			for (int i = 1; i < cc - 1; i++) {
 				try {
 					state.pushActiveContextObject(result);
-					nextNode = children[i];
+					nextNode = this.children[i];
 					result = nextNode.getValueInternal(state);
-				} finally {
+				}
+				finally {
 					state.popActiveContextObject();
 				}
 			}
 			try {
 				state.pushActiveContextObject(result);
-				nextNode = children[cc-1];
+				nextNode = this.children[cc-1];
 				return nextNode.getValueRef(state);
-			} finally {
+			}
+			finally {
 				state.popActiveContextObject();
 			}
-		} catch (SpelEvaluationException ee) {
+		}
+		catch (SpelEvaluationException ee) {
 			// Correct the position for the error before re-throwing
 			ee.setPosition(nextNode.getStartPosition());
 			throw ee;
@@ -96,7 +99,9 @@ public class CompoundExpression extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i>0) { sb.append("."); }
+			if (i > 0) {
+				sb.append(".");
+			}
 			sb.append(getChild(i).toStringAST());
 		}
 		return sb.toString();

@@ -45,6 +45,10 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	private static final String PARTIAL_HTML_CONTENT;
 
+	// Safari needs at least 1024 bytes to parse the website.
+	// http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
+	private static final int MINIMUM_PARTIAL_HTML_CONTENT_LENGTH = 1024;
+
 	static {
 		StringBuilder sb = new StringBuilder(
 				"<!doctype html>\n" +
@@ -61,11 +65,8 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 				"  </script>"
 				);
 
-        // Safari needs at least 1024 bytes to parse the website.
-        // http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
-		int spaces = 1024 - sb.length();
-		for (int i=0; i < spaces; i++) {
-			sb.append(' ');
+		while(sb.length() < MINIMUM_PARTIAL_HTML_CONTENT_LENGTH) {
+			sb.append(" ");
 		}
 
 		PARTIAL_HTML_CONTENT = sb.toString();
@@ -84,7 +85,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	@Override
 	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
+		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
 
 		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
 

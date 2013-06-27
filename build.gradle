@@ -11,7 +11,7 @@ buildscript {
 configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
-	
+
 	// The following is a work-around until the Gradle build uses
 	// Ant 1.9.x by default. This is necessary to avoid the
 	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
@@ -304,6 +304,9 @@ project("spring-context") {
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:javax.inject-tck:1")
 	}
+
+	// pick up RmiInvocationWrapperRTD.xml in src/main
+	sourceSets.main.resources.srcDirs += "src/main/java"
 
 	test {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
@@ -658,7 +661,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"), )
 		optional("junit:junit:${junitVersion}")
-		optional("org.testng:testng:6.5.2")
+		optional("org.testng:testng:6.8.5")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.servlet.jsp:jsp-api:2.1")
 		optional("javax.portlet:portlet-api:2.0")
@@ -965,7 +968,7 @@ configure(rootProject) {
 		gradleVersion = "1.6"
 
 		doLast() {
-			def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
+			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
 			def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
 			File wrapperFile = file("gradlew")
 			wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",

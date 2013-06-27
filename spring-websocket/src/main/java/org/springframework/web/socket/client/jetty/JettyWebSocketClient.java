@@ -32,8 +32,10 @@ import org.springframework.web.socket.client.WebSocketConnectFailureException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-
 /**
+ * Initiates WebSocket requests to a WebSocket server programatically through the Jetty
+ * WebSocket API.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
@@ -134,8 +136,8 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
 			throws WebSocketConnectFailureException {
 
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		Assert.notNull(uri, "uri is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(uri, "uri must not be null");
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Connecting to " + uri);

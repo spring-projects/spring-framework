@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ public class OperatorPower extends Operator {
 		super("^", pos, operands);
 	}
 
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
@@ -44,18 +45,22 @@ public class OperatorPower extends Operator {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(Math.pow(op1.doubleValue(),op2.doubleValue()));
-			} else if (op1 instanceof Float || op2 instanceof Float) {
+				return new TypedValue(Math.pow(op1.doubleValue(), op2.doubleValue()));
+			}
+			else if (op1 instanceof Float || op2 instanceof Float) {
 				return new TypedValue(Math.pow(op1.floatValue(), op2.floatValue()));
-			} else if (op1 instanceof Long || op2 instanceof Long) {
-				double d= Math.pow(op1.longValue(), op2.longValue());
-				return new TypedValue((long)d);
-			} else {
-				double d= Math.pow(op1.longValue(), op2.longValue());
+			}
+			else if (op1 instanceof Long || op2 instanceof Long) {
+				double d = Math.pow(op1.longValue(), op2.longValue());
+				return new TypedValue((long) d);
+			}
+			else {
+				double d = Math.pow(op1.longValue(), op2.longValue());
 				if (d > Integer.MAX_VALUE) {
-					return new TypedValue((long)d);
-				} else {
-					return new TypedValue((int)d);
+					return new TypedValue((long) d);
+				}
+				else {
+					return new TypedValue((int) d);
 				}
 			}
 		}

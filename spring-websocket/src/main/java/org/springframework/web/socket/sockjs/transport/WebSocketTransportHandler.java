@@ -31,12 +31,11 @@ import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
 
-
 /**
  * A WebSocket {@link TransportHandler}. Uses {@link SockJsWebSocketHandler} and
  * {@link WebSocketServerSockJsSession} to add SockJS processing.
- * <p>
- * Also implements {@link HandshakeHandler} to support raw WebSocket communication at
+ *
+ * <p>Also implements {@link HandshakeHandler} to support raw WebSocket communication at
  * SockJS URL "/websocket".
  *
  * @author Rossen Stoyanchev
@@ -51,9 +50,10 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler,
 
 
 	public WebSocketTransportHandler(HandshakeHandler handshakeHandler) {
-		Assert.notNull(handshakeHandler, "handshakeHandler is required");
+		Assert.notNull(handshakeHandler, "handshakeHandler must not be null");
 		this.handshakeHandler = handshakeHandler;
 	}
+
 
 	@Override
 	public TransportType getTransportType() {

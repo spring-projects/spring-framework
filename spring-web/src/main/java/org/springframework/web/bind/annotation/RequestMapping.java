@@ -144,15 +144,15 @@ import java.util.concurrent.Callable;
  * Such command objects along with their validation results will be exposed
  * as model attributes, by default using the non-qualified command class name
  * in property notation (e.g. "orderAddress" for type "mypackage.OrderAddress").
- * Specify a parameter-level {@link ModelAttribute} annotation for declaring
- * a specific model attribute name.
+ * Specify a parameter-level {@link ModelAttribute @ModelAttribute} annotation for
+ * declaring a specific model attribute name.
  * <li>{@link org.springframework.validation.Errors} /
  * {@link org.springframework.validation.BindingResult} validation results
  * for a preceding command/form object (the immediate preceding argument).
  * <li>{@link org.springframework.web.bind.support.SessionStatus} status handle
  * for marking form processing as complete (triggering the cleanup of session
- * attributes that have been indicated by the {@link SessionAttributes} annotation
- * at the handler type level).
+ * attributes that have been indicated by the {@link SessionAttributes @SessionAttributes}
+ * annotation at the handler type level).
  * <li>{@link org.springframework.web.util.UriComponentsBuilder}
  * (Servlet-only, {@literal @MVC 3.1-only})
  * for preparing a URL relative to the current request's host, port, scheme,
@@ -161,26 +161,26 @@ import java.util.concurrent.Callable;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
+ * <li>A {@link ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute} annotated reference data accessor methods.
+ * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link org.springframework.ui.Model Model} object, with the view name
  * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute} annotated reference data accessor methods.
+ * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
- * of {@link ModelAttribute} annotated reference data accessor methods.
+ * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link org.springframework.web.servlet.View} object, with the
  * model implicitly determined through command objects and
- * {@link ModelAttribute} annotated reference data accessor methods.
+ * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.Model} argument (see above).
  * <li>A {@link String} value which is interpreted as view name,
  * with the model implicitly determined through command objects and
- * {@link ModelAttribute} annotated reference data accessor methods.
+ * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
@@ -198,7 +198,7 @@ import java.util.concurrent.Callable;
  * <li>A {@link Callable} which is used by Spring MVC to obtain the return
  * value asynchronously in a separate thread transparently managed by Spring MVC
  * on behalf of the application.
- * <li>A {@code org.springframework.web.context.request.async.DeferredResult}
+ * <li>A {@link org.springframework.web.context.request.async.DeferredResult}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
  * <li>{@code void} if the method handles the response itself (by
@@ -211,10 +211,10 @@ import java.util.concurrent.Callable;
  * only applicable in a Servlet environment).
  * <li>Any other return type will be considered as single model attribute
  * to be exposed to the view, using the attribute name specified through
- * {@link ModelAttribute} at the method level (or the default attribute name
- * based on the return type's class name otherwise). The model will be
+ * {@link ModelAttribute @ModelAttribute} at the method level (or the default attribute
+ * name based on the return type's class name otherwise). The model will be
  * implicitly enriched with command objects and the results of
- * {@link ModelAttribute} annotated reference data accessor methods.
+ * {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * </ul>
  *
  * <p><b>NOTE:</b> {@code @RequestMapping} will only be processed if an

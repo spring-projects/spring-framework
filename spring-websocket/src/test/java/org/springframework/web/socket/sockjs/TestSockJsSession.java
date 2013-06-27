@@ -23,7 +23,6 @@ import java.util.List;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 
-
 /**
  * @author Rossen Stoyanchev
  */
@@ -95,7 +94,7 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	protected void writeFrameInternal(SockJsFrame frame) throws Exception {
 		this.sockJsFramesWritten.add(frame);
 		if (this.exceptionOnWriteFrame != null) {
-			throw exceptionOnWriteFrame;
+			throw this.exceptionOnWriteFrame;
 		}
 	}
 

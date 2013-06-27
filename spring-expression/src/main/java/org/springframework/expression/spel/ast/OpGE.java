@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class OpGE extends Operator {
 		super(">=", pos, operands);
 	}
 
+
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();
@@ -40,11 +41,14 @@ public class OpGE extends Operator {
 			Number rightNumber = (Number) right;
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return BooleanTypedValue.forValue(leftNumber.doubleValue() >= rightNumber.doubleValue());
-			} else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+			}
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
 				return BooleanTypedValue.forValue(leftNumber.floatValue() >= rightNumber.floatValue());
-			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
-				return BooleanTypedValue.forValue( leftNumber.longValue() >= rightNumber.longValue());
-			} else {
+			}
+			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				return BooleanTypedValue.forValue(leftNumber.longValue() >= rightNumber.longValue());
+			}
+			else {
 				return BooleanTypedValue.forValue(leftNumber.intValue() >= rightNumber.intValue());
 			}
 		}

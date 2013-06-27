@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 	public PollingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
+
 
 	@Override
 	protected void flushCache() throws IOException {

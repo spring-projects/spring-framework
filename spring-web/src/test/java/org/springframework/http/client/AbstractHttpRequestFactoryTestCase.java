@@ -16,9 +16,6 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -43,8 +40,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.tests.web.FreePortScanner;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.SocketUtils;
+
+import static org.junit.Assert.*;
 
 public abstract class AbstractHttpRequestFactoryTestCase {
 
@@ -56,7 +55,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		int port = FreePortScanner.getFreePort();
+		int port = SocketUtils.findAvailableTcpPort();
 		jettyServer = new Server(port);
 		baseUrl = "http://localhost:" + port;
 

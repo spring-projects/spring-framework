@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.expression;
 
-
 /**
  * Super class for exceptions that can occur whilst processing expressions
  *
@@ -27,7 +26,9 @@ package org.springframework.expression;
 public class ExpressionException extends RuntimeException {
 
 	protected String expressionString;
+
 	protected int position; // -1 if not known - but should be known in all reasonable cases
+
 
 	/**
 	 * Creates a new expression exception.
@@ -85,15 +86,16 @@ public class ExpressionException extends RuntimeException {
 		super(message,cause);
 	}
 
+
 	public String toDetailedString() {
 		StringBuilder output = new StringBuilder();
-		if (expressionString!=null) {
+		if (this.expressionString!=null) {
 			output.append("Expression '");
-			output.append(expressionString);
+			output.append(this.expressionString);
 			output.append("'");
-			if (position!=-1) {
+			if (this.position!=-1) {
 				output.append(" @ ");
-				output.append(position);
+				output.append(this.position);
 			}
 			output.append(": ");
 		}
@@ -106,7 +108,7 @@ public class ExpressionException extends RuntimeException {
 	}
 
 	public final int getPosition() {
-		return position;
+		return this.position;
 	}
 
 }

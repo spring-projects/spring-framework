@@ -21,7 +21,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
 
-
 /**
  * Copies information from the handshake HTTP request and response to a given
  * {@link WebSocketSession}.
@@ -30,7 +29,6 @@ import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
  * @since 4.0
  */
 public class ServerWebSocketSessionInitializer {
-
 
 	public void initialize(ServerHttpRequest request, ServerHttpResponse response, ConfigurableWebSocketSession session) {
 		session.setUri(request.getURI());

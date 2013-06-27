@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -456,6 +457,24 @@ public class JdbcTemplateTests {
 		verify(this.statement).addBatch(sql[1]);
 		verify(this.statement).close();
 		verify(this.connection, atLeastOnce()).close();
+	}
+
+	@Test
+	public void testBatchUpdateWithBatchFailure() throws Exception {
+		final String[] sql = {"A", "B", "C", "D"};
+		given(this.statement.executeBatch()).willThrow(
+				new BatchUpdateException(new int[] { 1, Statement.EXECUTE_FAILED, 1,
+					Statement.EXECUTE_FAILED }));
+		mockDatabaseMetaData(true);
+		given(this.connection.createStatement()).willReturn(this.statement);
+
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
+		try {
+			template.batchUpdate(sql);
+		}
+		catch (UncategorizedSQLException ex) {
+			assertThat(ex.getSql(), equalTo("B; D"));
+		}
 	}
 
 	@Test

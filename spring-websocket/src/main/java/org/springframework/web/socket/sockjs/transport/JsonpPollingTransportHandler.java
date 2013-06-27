@@ -51,7 +51,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.notNull(getSockJsConfig(), "This transport requires SockJsConfiguration");
+		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
 		return new PollingSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 

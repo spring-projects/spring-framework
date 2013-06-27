@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,15 +97,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			arg = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
-		boolean emptyArgValue = "".equals(arg);
-
 		if (binderFactory != null) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 			arg = binder.convertIfNecessary(arg, paramType, parameter);
-		}
-
-		if (emptyArgValue && (arg == null)) {
-			handleMissingValue(namedValueInfo.name, parameter);
 		}
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);

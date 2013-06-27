@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,27 @@ import org.springframework.expression.spel.SpelMessage;
 public interface ValueRef {
 
 	/**
+	 * Returns the value this ValueRef points to, it should not require expression
+	 * component re-evaluation.
+	 * @return the value
+	 */
+	TypedValue getValue();
+
+	/**
+	 * Sets the value this ValueRef points to, it should not require expression component
+	 * re-evaluation.
+	 * @param newValue the new value
+	 */
+	void setValue(Object newValue);
+
+	/**
+	 * Indicates whether calling setValue(Object) is supported.
+	 * @return true if setValue() is supported for this value reference.
+	 */
+	boolean isWritable();
+
+
+	/**
 	 * A ValueRef for the null value.
 	 */
 	static class NullValueRef implements ValueRef {
@@ -60,13 +81,14 @@ public interface ValueRef {
 
 	}
 
+
 	/**
 	 * A ValueRef holder for a single value, which cannot be set.
 	 */
 	static class TypedValueHolderValueRef implements ValueRef {
 
-		private TypedValue typedValue;
-		private SpelNodeImpl node; // used only for error reporting
+		private final TypedValue typedValue;
+		private final SpelNodeImpl node; // used only for error reporting
 
 		public TypedValueHolderValueRef(TypedValue typedValue,SpelNodeImpl node) {
 			this.typedValue = typedValue;
@@ -91,23 +113,4 @@ public interface ValueRef {
 
 	}
 
-	/**
-	 * Returns the value this ValueRef points to, it should not require expression
-	 * component re-evaluation.
-	 * @return the value
-	 */
-	TypedValue getValue();
-
-	/**
-	 * Sets the value this ValueRef points to, it should not require expression component
-	 * re-evaluation.
-	 * @param newValue the new value
-	 */
-	void setValue(Object newValue);
-
-	/**
-	 * Indicates whether calling setValue(Object) is supported.
-	 * @return true if setValue() is supported for this value reference.
-	 */
-	boolean isWritable();
 }

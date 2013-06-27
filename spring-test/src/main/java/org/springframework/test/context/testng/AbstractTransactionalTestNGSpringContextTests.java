@@ -77,8 +77,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 
 	/**
 	 * Set the {@code DataSource}, typically provided via Dependency Injection.
-	 * <p>This method also instantiates the {@link #jdbcTemplate} instance
-     * variable.
+	 * <p>This method also instantiates the {@link #jdbcTemplate} instance variable.
 	 */
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
@@ -94,49 +93,75 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	}
 
 	/**
-	 * Count the rows in the given table.
+	 * Convenience method for counting the rows in the given table.
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
+	 * @see JdbcTestUtils#countRowsInTable
 	 */
 	protected int countRowsInTable(String tableName) {
 		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
 	}
 
 	/**
-	 * Count the rows in the given table, using the provided {@code WHERE} clause.
+	 * Convenience method for counting the rows in the given table, using the
+	 * provided {@code WHERE} clause.
 	 * <p>See the Javadoc for {@link JdbcTestUtils#countRowsInTableWhere} for details.
 	 * @param tableName the name of the table to count rows in
 	 * @param whereClause the {@code WHERE} clause to append to the query
 	 * @return the number of rows in the table that match the provided
 	 * {@code WHERE} clause
 	 * @since 3.2
+	 * @see JdbcTestUtils#countRowsInTableWhere
 	 */
 	protected int countRowsInTableWhere(String tableName, String whereClause) {
 		return JdbcTestUtils.countRowsInTableWhere(this.jdbcTemplate, tableName, whereClause);
 	}
 
 	/**
-	 * Convenience method for deleting all rows from the specified tables. Use
-	 * with caution outside of a transaction!
+	 * Convenience method for deleting all rows from the specified tables.
+	 * <p>Use with caution outside of a transaction!
 	 * @param names the names of the tables from which to delete
 	 * @return the total number of rows deleted from all specified tables
+	 * @see JdbcTestUtils#deleteFromTables
 	 */
 	protected int deleteFromTables(String... names) {
 		return JdbcTestUtils.deleteFromTables(this.jdbcTemplate, names);
 	}
 
 	/**
-	 * Convenience method for dropping all of the specified tables. Use
-	 * with caution outside of a transaction!
+	 * Convenience method for deleting all rows from the given table, using the
+	 * provided {@code WHERE} clause.
+	 * <p>Use with caution outside of a transaction!
+	 * <p>See the Javadoc for {@link JdbcTestUtils#deleteFromTableWhere} for details.
+	 * @param tableName the name of the table to delete rows from
+	 * @param whereClause the {@code WHERE} clause to append to the query
+	 * @param args arguments to bind to the query (leaving it to the {@code
+	 * PreparedStatement} to guess the corresponding SQL type); may also contain
+	 * {@link org.springframework.jdbc.core.SqlParameterValue SqlParameterValue}
+	 * objects which indicate not only the argument value but also the SQL type
+	 * and optionally the scale.
+	 * @return the number of rows deleted from the table
+	 * @since 4.0
+	 * @see JdbcTestUtils#deleteFromTableWhere
+	 */
+	protected int deleteFromTableWhere(String tableName, String whereClause, Object... args) {
+		return JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, tableName, whereClause, args);
+	}
+
+	/**
+	 * Convenience method for dropping all of the specified tables.
+	 * <p>Use with caution outside of a transaction!
 	 * @param names the names of the tables to drop
 	 * @since 3.2
+	 * @see JdbcTestUtils#dropTables
 	 */
 	protected void dropTables(String... names) {
 		JdbcTestUtils.dropTables(this.jdbcTemplate, names);
 	}
 
 	/**
-	 * Execute the given SQL script. Use with caution outside of a transaction!
+	 * Execute the given SQL script.
+	 * <p>Use with caution outside of a transaction!
 	 * <p>The script will normally be loaded by classpath. There should be one
 	 * statement per line. Any semicolons will be removed. <b>Do not use this
 	 * method to execute DDL if you expect rollback.</b>
@@ -145,11 +170,13 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and continueOnError was {@code false}
+	 * @see JdbcTestUtils#executeSqlScript(JdbcTemplate, EncodedResource, boolean)
+	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		JdbcTestUtils.executeSqlScript(this.jdbcTemplate, new EncodedResource(resource,
-			this.sqlScriptEncoding), continueOnError);
+		JdbcTestUtils.executeSqlScript(this.jdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding),
+			continueOnError);
 	}
 
 }

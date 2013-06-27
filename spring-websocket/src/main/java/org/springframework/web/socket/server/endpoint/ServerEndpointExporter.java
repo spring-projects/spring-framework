@@ -43,10 +43,10 @@ import org.springframework.util.ReflectionUtils;
  * {@link ServerEndpoint} and registers them as well. Although not required, it is likely
  * annotated endpoints should have their {@code configurator} property set to
  * {@link SpringConfigurator}.
- * <p>
- * When this class is used, by declaring it in Spring configuration, it should be possible
- * to turn off a Servlet container's scan for WebSocket endpoints. This can be done with
- * the help of the {@code <absolute-ordering>} element in web.xml.
+ *
+ * <p>When this class is used, by declaring it in Spring configuration, it should be
+ * possible to turn off a Servlet container's scan for WebSocket endpoints. This can be
+ * done with the help of the {@code <absolute-ordering>} element in web.xml.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -123,7 +123,7 @@ public class ServerEndpointExporter implements InitializingBean, BeanPostProcess
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		Assert.notNull(serverContainer, "javax.websocket.server.ServerContainer not available");
+		Assert.state(this.serverContainer != null, "javax.websocket.server.ServerContainer not available");
 
 		List<Class<?>> allClasses = new ArrayList<Class<?>>(this.annotatedEndpointClasses);
 		allClasses.addAll(this.annotatedEndpointBeanTypes);

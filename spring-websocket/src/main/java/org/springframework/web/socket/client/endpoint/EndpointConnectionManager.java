@@ -61,14 +61,14 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 
 	public EndpointConnectionManager(Endpoint endpoint, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		Assert.notNull(endpoint, "endpoint is required");
+		Assert.notNull(endpoint, "endpoint must not be null");
 		this.endpointProvider = null;
 		this.endpoint = endpoint;
 	}
 
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
 		super(uriTemplate, uriVars);
-		Assert.notNull(endpointClass, "endpointClass is required");
+		Assert.notNull(endpointClass, "endpointClass must not be null");
 		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
 		this.endpoint = null;
 	}

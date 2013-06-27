@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
@@ -22,14 +23,12 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
 
-
 /**
  * A {@link TransportHandler} that receives messages over HTTP.
  *
  * @author Rossen Stoyanchev
  */
 public class XhrTransportHandler extends AbstractHttpReceivingTransportHandler {
-
 
 	@Override
 	public TransportType getTransportType() {

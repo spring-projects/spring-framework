@@ -22,11 +22,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a component is is only eligible for registration when all
+ * Indicates that a component is only eligible for registration when all
  * {@linkplain #value() specified conditions} match.
  *
  * <p>A <em>condition</em> is any state that can be determined programmatically
- * immediately before the bean is due to be created (see {@link Condition} for details).
+ * before the bean definition is due to be registered (see {@link Condition} for details).
  *
  * <p>The {@code @Conditional} annotation may be used in any of the following ways:
  * <ul>

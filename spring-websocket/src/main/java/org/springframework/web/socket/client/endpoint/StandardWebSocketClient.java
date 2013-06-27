@@ -45,7 +45,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programatically through the standard
- * Java WebSocket API .
+ * Java WebSocket API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -62,15 +62,16 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	public StandardWebSocketClient(WebSocketContainer webSocketContainer) {
-		Assert.notNull(webSocketContainer, "webSocketContainer is required");
+		Assert.notNull(webSocketContainer, "webSocketContainer must not be null");
 		this.webSocketContainer = webSocketContainer;
 	}
+
 
 	@Override
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
 			throws WebSocketConnectFailureException {
 
-		Assert.notNull(uriTemplate, "uriTemplate is required");
+		Assert.notNull(uriTemplate, "uriTemplate must not be null");
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
 		return doHandshake(webSocketHandler, null, uriComponents.toUri());
 	}
@@ -79,8 +80,8 @@ public class StandardWebSocketClient implements WebSocketClient {
 	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders httpHeaders, URI uri)
 			throws WebSocketConnectFailureException {
 
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
-		Assert.notNull(uri, "uri is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(uri, "uri must not be null");
 
 		httpHeaders = (httpHeaders != null) ? httpHeaders : new HttpHeaders();
 

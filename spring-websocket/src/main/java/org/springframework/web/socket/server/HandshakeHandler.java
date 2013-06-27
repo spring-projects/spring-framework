@@ -33,7 +33,6 @@ import org.springframework.web.socket.support.PerConnectionWebSocketHandler;
  */
 public interface HandshakeHandler {
 
-
 	/**
 	 * Initiate the handshake.
 	 *

@@ -34,7 +34,6 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
 
-
 /**
  * An abstract base class SockJS sessions implementing {@link WebSocketSession}.
  *
@@ -58,24 +57,26 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 
 	private final SockJsConfiguration sockJsConfig;
 
-	private WebSocketHandler handler;
+	private final WebSocketHandler handler;
 
 	private State state = State.NEW;
 
-	private long timeCreated = System.currentTimeMillis();
+	private final long timeCreated = System.currentTimeMillis();
 
-	private long timeLastActive = timeCreated;
+	private long timeLastActive = this.timeCreated;
 
 	private ScheduledFuture<?> heartbeatTask;
 
 
 	/**
-	 * @param sessionId
+	 * @param sessionId the session ID
+	 * @param config the sockJS configuration
 	 * @param webSocketHandler the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler webSocketHandler) {
-		Assert.notNull(sessionId, "sessionId is required");
-		Assert.notNull(webSocketHandler, "webSocketHandler is required");
+	public AbstractSockJsSession(String sessionId, SockJsConfiguration config,
+			WebSocketHandler webSocketHandler) {
+		Assert.notNull(sessionId, "sessionId must not be null");
+		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		this.id = sessionId;
 		this.handler = webSocketHandler;
 		this.sockJsConfig = config;
@@ -191,7 +192,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	/**
 	 * Invoked in reaction to the underlying connection being closed by the remote side
 	 * (or the WebSocket container) in order to perform cleanup and notify the
-	 * {@link TextMessageHandler}. This is in contrast to {@link #close()} that pro-actively
+	 * {@link WebSocketHandler}. This is in contrast to {@link #close()} that pro-actively
 	 * closes the connection.
 	 */
 	public final void delegateConnectionClosed(CloseStatus status) throws Exception {
@@ -224,7 +225,8 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
+	 *
+	 * <p>Performs cleanup and notifies the {@link WebSocketHandler}.
 	 */
 	@Override
 	public final void close() throws IOException {
@@ -233,7 +235,8 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Performs cleanup and notifies the {@link SockJsHandler}.
+	 *
+	 * <p>Performs cleanup and notifies the {@link WebSocketHandler}.
 	 */
 	@Override
 	public final void close(CloseStatus status) throws IOException {
@@ -329,7 +332,7 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	}
 
 	protected void scheduleHeartbeat() {
-		Assert.notNull(this.sockJsConfig.getTaskScheduler(), "heartbeatScheduler not configured");
+		Assert.state(this.sockJsConfig.getTaskScheduler() != null, "heartbeatScheduler not configured");
 		cancelHeartbeat();
 		if (!isActive()) {
 			return;

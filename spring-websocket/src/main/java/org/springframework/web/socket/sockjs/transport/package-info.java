@@ -18,9 +18,8 @@
  * Server-side support for SockJS transports including
  * {@link org.springframework.web.socket.sockjs.TransportHandler} implementations
  * for processing incoming requests and their
- * {@link org.springframework.sockjs.SockJsSession} counterparts for
+ * {@link org.springframework.web.socket.sockjs.AbstractSockJsSession session} counterparts for
  * sending messages over the various transports.
- *
  */
 package org.springframework.web.socket.sockjs.transport;
 

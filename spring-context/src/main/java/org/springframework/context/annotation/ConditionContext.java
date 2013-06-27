@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 
@@ -31,8 +32,8 @@ public interface ConditionContext {
 
 	/**
 	 * Returns the {@link BeanDefinitionRegistry} that will hold the bean definition
-	 * should the condition match.
-	 * @return the registry (never {@code null})
+	 * should the condition match or {@code null} if the registry is not available.
+	 * @return the registry or {@code null}
 	 */
 	BeanDefinitionRegistry getRegistry();
 
@@ -45,13 +46,11 @@ public interface ConditionContext {
 
 	/**
 	 * Returns the {@link ConfigurableListableBeanFactory} that will hold the bean
-	 * definition should the condition match. If a
-	 * {@link ConfigurableListableBeanFactory} is unavailable an
-	 * {@link IllegalStateException} will be thrown.
-	 * @return the bean factory
-	 * @throws IllegalStateException if the bean factory could not be obtained
+	 * definition should the condition match or {@code null} if the bean factory is
+	 * not available.
+	 * @return the bean factory or {@code null}
 	 */
-	ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
+	ConfigurableListableBeanFactory getBeanFactory();
 
 	/**
 	 * Returns the {@link ResourceLoader} currently being used or {@code null} if the
@@ -66,5 +65,7 @@ public interface ConditionContext {
 	 * @return the classloader or {@code null}
 	 */
 	ClassLoader getClassLoader();
+
+	ApplicationContext getApplicationContext();
 
 }

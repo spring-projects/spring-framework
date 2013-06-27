@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,8 +242,8 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 */
 	public void registerMethodFilter(Class<?> type, MethodFilter filter) throws IllegalStateException {
 		ensureMethodResolversInitialized();
-		if (reflectiveMethodResolver != null) {
-			reflectiveMethodResolver.registerMethodFilter(type, filter);
+		if (this.reflectiveMethodResolver != null) {
+			this.reflectiveMethodResolver.registerMethodFilter(type, filter);
 		} else {
 			throw new IllegalStateException("Method filter cannot be set as the reflective method resolver is not in use");
 		}
@@ -272,7 +272,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private synchronized void initializeMethodResolvers() {
 		if (this.methodResolvers == null) {
 			List<MethodResolver> defaultResolvers = new ArrayList<MethodResolver>();
-			defaultResolvers.add(reflectiveMethodResolver = new ReflectiveMethodResolver());
+			defaultResolvers.add(this.reflectiveMethodResolver = new ReflectiveMethodResolver());
 			this.methodResolvers = defaultResolvers;
 		}
 	}

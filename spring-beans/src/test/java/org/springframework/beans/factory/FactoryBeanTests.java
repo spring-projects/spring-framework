@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
@@ -38,6 +39,7 @@ public final class FactoryBeanTests {
 	private static final Class<?> CLASS = FactoryBeanTests.class;
 	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml");
 	private static final Resource WITH_AUTOWIRING_CONTEXT = qualifiedResource(CLASS, "withAutowiring.xml");
+	private static final Resource ABSTRACT_CONTEXT = qualifiedResource(CLASS, "abstract.xml");
 
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
@@ -78,6 +80,20 @@ public final class FactoryBeanTests {
 		Gamma gamma = (Gamma) factory.getBean("gamma");
 		assertSame(beta, alpha.getBeta());
 		assertSame(gamma, beta.getGamma());
+	}
+
+	@Test
+	public void testAbstractFactoryBeanViaAnnotation() throws Exception {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(ABSTRACT_CONTEXT);
+		factory.getBeansWithAnnotation(Component.class);
+	}
+
+	@Test
+	public void testAbstractFactoryBeanViaType() throws Exception {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(ABSTRACT_CONTEXT);
+		factory.getBeansOfType(AbstractFactoryBean.class);
 	}
 
 
@@ -152,6 +168,7 @@ public final class FactoryBeanTests {
 	}
 
 
+	@Component
 	public static class BetaFactoryBean implements FactoryBean<Object> {
 
 		private Beta beta;
@@ -174,6 +191,9 @@ public final class FactoryBeanTests {
 		public boolean isSingleton() {
 			return true;
 		}
+	}
+
+	public abstract static class AbstractFactoryBean implements FactoryBean<Object> {
 	}
 
 }
