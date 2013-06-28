@@ -19,8 +19,7 @@ package org.springframework.web.messaging.support;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-
-import reactor.util.Assert;
+import org.springframework.util.Assert;
 
 
 /**
