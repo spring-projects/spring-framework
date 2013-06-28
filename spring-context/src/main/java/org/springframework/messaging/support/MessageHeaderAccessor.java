@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * A base class for read/write access to {@link MessageHeaders}. Supports creation of new
  * headers or modification of existing message headers.
  * <p>
- * Sub-classes can provide additinoal typed getters and setters for convenient access to
+ * Sub-classes can provide additional typed getters and setters for convenient access to
  * specific headers. Getters and setters should delegate to {@link #getHeader(String)} or
  * {@link #setHeader(String, Object)} respectively. At the end {@link #toMap()} can be
  * used to obtain the resulting headers.
@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageHeaderAccesssor {
+public class MessageHeaderAccessor {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
@@ -60,14 +60,14 @@ public class MessageHeaderAccesssor {
 	/**
 	 * A constructor for creating new message headers.
 	 */
-	public MessageHeaderAccesssor() {
+	public MessageHeaderAccessor() {
 		this.originalHeaders = null;
 	}
 
 	/**
 	 * A constructor for accessing and modifying existing message headers.
 	 */
-	public MessageHeaderAccesssor(Message<?> message) {
+	public MessageHeaderAccessor(Message<?> message) {
 		this.originalHeaders = (message != null) ? message.getHeaders() : null;
 	}
 

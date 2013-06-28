@@ -34,7 +34,7 @@ public final class MessageBuilder<T> {
 
 	private final T payload;
 
-	private final MessageHeaderAccesssor headerAccessor;
+	private final MessageHeaderAccessor headerAccessor;
 
 	private final Message<T> originalMessage;
 
@@ -46,7 +46,7 @@ public final class MessageBuilder<T> {
 		Assert.notNull(payload, "payload must not be null");
 		this.payload = payload;
 		this.originalMessage = originalMessage;
-		this.headerAccessor = new MessageHeaderAccesssor(originalMessage);
+		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
 	}
 
 	/**

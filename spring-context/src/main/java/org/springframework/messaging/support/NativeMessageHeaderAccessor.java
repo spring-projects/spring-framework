@@ -28,14 +28,14 @@ import org.springframework.util.ObjectUtils;
 
 
 /**
- * An extension of {@link MessageHeaderAccesssor} that also provides read/write access to
+ * An extension of {@link MessageHeaderAccessor} that also provides read/write access to
  * message headers from an external message source. Native message headers are kept
  * in a {@link MultiValueMap} under the key {@link #NATIVE_HEADERS}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class NativeMessageHeaderAccessor extends MessageHeaderAccesssor {
+public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 
 	public static final String NATIVE_HEADERS = "nativeHeaders";
