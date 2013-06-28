@@ -48,13 +48,11 @@ public class MethodReference extends SpelNodeImpl {
 
 	private volatile CachedMethodExecutor cachedExecutor;
 
-
 	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
 		super(pos, arguments);
 		this.name = methodName;
 		this.nullSafe = nullSafe;
 	}
-
 
 	public final String getName() {
 		return this.name;
@@ -102,6 +100,9 @@ public class MethodReference extends SpelNodeImpl {
 				state.popActiveContextObject();
 			}
 		}
+		TypedValue activeContextObject = state.getActiveContextObject();
+		TypeDescriptor target = (activeContextObject == null ? null
+				: activeContextObject.getTypeDescriptor());
 		List<TypeDescriptor> argumentTypes = getTypes(arguments);
 		if (currentContext.getValue() == null) {
 			if (this.nullSafe) {
@@ -113,7 +114,7 @@ public class MethodReference extends SpelNodeImpl {
 			}
 		}
 
-		MethodExecutor executorToUse = getCachedExecutor(argumentTypes);
+		MethodExecutor executorToUse = getCachedExecutor(target, argumentTypes);
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(state.getEvaluationContext(),
@@ -139,7 +140,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		// either there was no accessor or it no longer existed
 		executorToUse = findAccessorForMethod(this.name, argumentTypes, state);
-		this.cachedExecutor = new CachedMethodExecutor(executorToUse, argumentTypes);
+		this.cachedExecutor = new CachedMethodExecutor(executorToUse, target, argumentTypes);
 		try {
 			return executorToUse.execute(state.getEvaluationContext(),
 					state.getActiveContextObject().getValue(), arguments);
@@ -227,14 +228,14 @@ public class MethodReference extends SpelNodeImpl {
 						: contextObject.getClass()));
 	}
 
-	private MethodExecutor getCachedExecutor(List<TypeDescriptor> argumentTypes) {
-		if (this.cachedExecutor == null || !this.cachedExecutor.isSuitable(argumentTypes)) {
+	private MethodExecutor getCachedExecutor(TypeDescriptor target,
+			List<TypeDescriptor> argumentTypes) {
+		if (this.cachedExecutor == null || !this.cachedExecutor.isSuitable(target, argumentTypes)) {
 			this.cachedExecutor = null;
 			return null;
 		}
 		return this.cachedExecutor.get();
 	}
-
 
 	private class MethodValueRef implements ValueRef {
 
@@ -244,15 +245,19 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final Object target;
 
+		private TypeDescriptor targetType;
+
 		private final Object[] arguments;
 
 		private List<TypeDescriptor> argumentTypes;
 
 
-		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext, Object object, Object[] arguments) {
+		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext,
+				Object object, Object[] arguments) {
 			this.state = state;
 			this.evaluationContext = evaluationContext;
 			this.target = object;
+			this.targetType = TypeDescriptor.valueOf(target.getClass());
 			this.arguments = arguments;
 			this.argumentTypes = getTypes(this.arguments);
 		}
@@ -260,7 +265,8 @@ public class MethodReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			MethodExecutor executorToUse = getCachedExecutor(this.argumentTypes);
+			MethodExecutor executorToUse = getCachedExecutor(this.targetType,
+					this.argumentTypes);
 			if (executorToUse != null) {
 				try {
 					return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
@@ -285,7 +291,7 @@ public class MethodReference extends SpelNodeImpl {
 
 			// either there was no accessor or it no longer existed
 			executorToUse = findAccessorForMethod(MethodReference.this.name, argumentTypes, this.target, this.evaluationContext);
-			MethodReference.this.cachedExecutor = new CachedMethodExecutor(executorToUse, this.argumentTypes);
+			MethodReference.this.cachedExecutor = new CachedMethodExecutor(executorToUse, this.targetType, this.argumentTypes);
 			try {
 				return executorToUse.execute(this.evaluationContext, this.target, this.arguments);
 			}
@@ -310,23 +316,24 @@ public class MethodReference extends SpelNodeImpl {
 		}
 	}
 
-
 	private static class CachedMethodExecutor {
 
 		private final MethodExecutor methodExecutor;
 
+		private final TypeDescriptor target;
+
 		private final List<TypeDescriptor> argumentTypes;
 
-
-		public CachedMethodExecutor(MethodExecutor methodExecutor,
+		public CachedMethodExecutor(MethodExecutor methodExecutor, TypeDescriptor target,
 				List<TypeDescriptor> argumentTypes) {
 			this.methodExecutor = methodExecutor;
+			this.target = target;
 			this.argumentTypes = argumentTypes;
 		}
 
-
-		public boolean isSuitable(List<TypeDescriptor> argumentTypes) {
-			return (this.methodExecutor != null && this.argumentTypes.equals(argumentTypes));
+		public boolean isSuitable(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+			return (this.methodExecutor != null && this.target != null
+					&& this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
 		}
 
 		public MethodExecutor get() {
