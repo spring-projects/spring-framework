@@ -73,6 +73,8 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 
 	private MessageConverter payloadConverter;
 
+	private Environment environment;
+
 	private TcpClient<String, String> tcpClient;
 
 	private final Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
@@ -181,9 +183,9 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
-
+			this.environment = new Environment();
 			this.tcpClient = new TcpClient.Spec<String, String>(NettyTcpClient.class)
-					.using(new Environment())
+					.using(this.environment)
 					.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
 					.connect(this.relayHost, this.relayPort)
 					.get();
@@ -214,6 +216,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 			this.running = false;
 			try {
 				this.tcpClient.close().await(5000, TimeUnit.MILLISECONDS);
+				this.environment.shutdown();
 			}
 			catch (InterruptedException e) {
 				// ignore
