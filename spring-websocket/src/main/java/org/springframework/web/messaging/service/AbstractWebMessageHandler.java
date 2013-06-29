@@ -37,7 +37,7 @@ import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractPubSubMessageHandler implements MessageHandler {
+public abstract class AbstractWebMessageHandler implements MessageHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

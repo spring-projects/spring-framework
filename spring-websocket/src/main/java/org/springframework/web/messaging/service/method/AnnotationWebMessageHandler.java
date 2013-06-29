@@ -43,7 +43,7 @@ import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
+import org.springframework.web.messaging.service.AbstractWebMessageHandler;
 import org.springframework.web.messaging.support.MessageHolder;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 import org.springframework.web.method.HandlerMethod;
@@ -54,7 +54,7 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
+public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 		implements ApplicationContextAware, InitializingBean {
 
 	private final MessageChannel clientChannel;
@@ -79,7 +79,7 @@ public class AnnotationPubSubMessageHandler extends AbstractPubSubMessageHandler
 	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
 
-	public AnnotationPubSubMessageHandler(MessageChannel clientChannel, MessageChannel brokerChannel) {
+	public AnnotationWebMessageHandler(MessageChannel clientChannel, MessageChannel brokerChannel) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		Assert.notNull(brokerChannel, "brokerChannel is required");
 		this.clientChannel = clientChannel;

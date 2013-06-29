@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.service.AbstractPubSubMessageHandler;
+import org.springframework.web.messaging.service.AbstractWebMessageHandler;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
@@ -54,7 +54,7 @@ import reactor.tcp.netty.NettyTcpClient;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler implements SmartLifecycle {
+public class StompRelayWebMessageHandler extends AbstractWebMessageHandler implements SmartLifecycle {
 
 	private static final String STOMP_RELAY_SYSTEM_SESSION_ID = "stompRelaySystemSessionId";
 
@@ -87,7 +87,7 @@ public class StompRelayPubSubMessageHandler extends AbstractPubSubMessageHandler
 	/**
 	 * @param clientChannel the channel to which messages for clients should be sent.
 	 */
-	public StompRelayPubSubMessageHandler(MessageChannel clientChannel) {
+	public StompRelayWebMessageHandler(MessageChannel clientChannel) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		this.clientChannel = clientChannel;
 		this.payloadConverter = new CompositeMessageConverter(null);

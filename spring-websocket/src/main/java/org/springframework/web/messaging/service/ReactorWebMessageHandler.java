@@ -43,7 +43,7 @@ import reactor.fn.selector.ObjectSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
+public class ReactorWebMessageHandler extends AbstractWebMessageHandler {
 
 	private MessageChannel clientChannel;
 
@@ -57,7 +57,7 @@ public class ReactorPubSubMessageHandler extends AbstractPubSubMessageHandler {
 	/**
 	 * @param clientChannel the channel to which messages for clients should be sent.
 	 */
-	public ReactorPubSubMessageHandler(MessageChannel clientChannel, Reactor reactor) {
+	public ReactorWebMessageHandler(MessageChannel clientChannel, Reactor reactor) {
 		Assert.notNull(clientChannel, "clientChannel is required");
 		this.clientChannel = clientChannel;
 		this.reactor = reactor;
