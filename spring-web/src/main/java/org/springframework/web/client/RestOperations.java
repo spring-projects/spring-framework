@@ -35,6 +35,7 @@ import org.springframework.http.ResponseEntity;
  * @author Juergen Hoeller
  * @since 3.0
  * @see RestTemplate
+ * @see AsyncRestOperations
  */
 public interface RestOperations {
 

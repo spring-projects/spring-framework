@@ -108,6 +108,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 		private final StreamingHttpOutputMessage.Body body;
 
+
 		private StreamingHttpEntity(HttpHeaders headers,
 				StreamingHttpOutputMessage.Body body) {
 			this.headers = headers;

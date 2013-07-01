@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,31 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpRequest;
 
 /**
- * Represents a client-side HTTP request. Created via an implementation of the {@link ClientHttpRequestFactory}.
- *
- * <p>A {@code ClientHttpRequest} can be {@linkplain #execute() executed}, getting a
- * {@link ClientHttpResponse} which can be read from.
+ * Factory for {@link AsyncClientHttpRequest} objects. Requests are created by the
+ * {@link #createAsyncRequest(URI, HttpMethod)} method.
  *
  * @author Arjen Poutsma
- * @since 3.0
- * @see ClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
+ * @since 4.0
  */
-public interface ClientHttpRequest extends HttpRequest, HttpOutputMessage {
+public interface AsyncClientHttpRequestFactory {
 
 	/**
-	 * Execute this request, resulting in a {@link ClientHttpResponse} that can be read.
-	 * @return the response result of the execution
+	 * Create a new asynchronous {@link AsyncClientHttpRequest} for the specified URI and
+	 * HTTP method.
+	 * <p>The returned request can be written to, and then executed by calling
+	 * {@link AsyncClientHttpRequest#executeAsync()}.
+	 *
+	 * @param uri the URI to create a request for
+	 * @param httpMethod the HTTP method to execute
+	 * @return the created request
 	 * @throws IOException in case of I/O errors
 	 */
-	ClientHttpResponse execute() throws IOException;
+	AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod)
+			throws IOException;
 
 }
