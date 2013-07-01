@@ -142,11 +142,8 @@ public class MessageHeaderAccessor {
 		for (String pattern : headerPatterns) {
 			if (StringUtils.hasLength(pattern)){
 				if (pattern.contains("*")){
-					for (String headerName : this.headers.keySet()) {
-						if (PatternMatchUtils.simpleMatch(pattern, headerName)){
-							headersToRemove.add(headerName);
-						}
-					}
+					headersToRemove.addAll(getMatchingHeaderNames(pattern, this.headers));
+					headersToRemove.addAll(getMatchingHeaderNames(pattern, this.originalHeaders));
 				}
 				else {
 					headersToRemove.add(pattern);
@@ -156,6 +153,18 @@ public class MessageHeaderAccessor {
 		for (String headerToRemove : headersToRemove) {
 			removeHeader(headerToRemove);
 		}
+	}
+
+	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
+		List<String> matchingHeaderNames = new ArrayList<String>();
+		if (headers != null) {
+			for (Map.Entry<String, Object> header: headers.entrySet()) {
+				if (PatternMatchUtils.simpleMatch(pattern,  header.getKey())) {
+					matchingHeaderNames.add(header.getKey());
+				}
+			}
+		}
+		return matchingHeaderNames;
 	}
 
 	/**
