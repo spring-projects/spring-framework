@@ -29,12 +29,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HttpContext;
 
@@ -43,9 +38,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
- * <a href="http://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
- * to create requests.
+ * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
+ * uses <a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HttpComponents
+ * HttpClient</a> to create requests.
  *
  * <p>Allows to use a pre-configured {@link HttpClient} instance -
  * potentially with authentication, HTTP connection pooling, etc.
@@ -54,56 +49,43 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
-
-	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
-
-	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 5;
-
-	private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS = (60 * 1000);
+public class HttpComponentsClientHttpRequestFactory
+		implements ClientHttpRequestFactory, DisposableBean {
 
 	private HttpClient httpClient;
 
 	private boolean bufferRequestBody = true;
 
+
 	/**
-	 * Create a new instance of the HttpComponentsClientHttpRequestFactory with a default
-	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.PoolingClientConnectionManager}.
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory} with
+	 * a default {@link HttpClient}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
-
-		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(schemeRegistry);
-		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
-		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
-
-		this.httpClient = new DefaultHttpClient(connectionManager);
-		setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
+		this(HttpClients.createDefault());
 	}
 
-
 	/**
-	 * Create a new instance of the HttpComponentsClientHttpRequestFactory
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
 	 * with the given {@link HttpClient} instance.
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
-		Assert.notNull(httpClient, "HttpClient must not be null");
+		Assert.notNull(httpClient, "'httpClient' must not be null");
 		this.httpClient = httpClient;
 	}
 
-
 	/**
-	 * Set the {@code HttpClient} used by this factory.
+	 * Set the {@code HttpClient} used for
+	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
 	public void setHttpClient(HttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 
 	/**
-	 * Return the {@code HttpClient} used by this factory.
+	 * Return the {@code HttpClient} used for
+	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
 	public HttpClient getHttpClient() {
 		return this.httpClient;
@@ -113,7 +95,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
+	 * @deprecated With no direct replacement
 	 */
+	@Deprecated
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
 		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
@@ -123,7 +107,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
+	 * @deprecated With no direct replacement
 	 */
+	@Deprecated
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
 		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
@@ -139,16 +125,28 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.bufferRequestBody = bufferRequestBody;
 	}
 
+	/**
+	 * Indicates whether this request factory should buffer the request body internally.
+	 */
+	public boolean isBufferRequestBody() {
+		return bufferRequestBody;
+	}
+
+
+
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		HttpClient client = getHttpClient();
+		Assert.state(client != null,
+				"Synchronous execution requires an HttpClient to be set");
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
 		if (bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest,
+			return new HttpComponentsClientHttpRequest(client, httpRequest,
 					createHttpContext(httpMethod, uri));
 		}
 		else {
-			return new HttpComponentsStreamingClientHttpRequest(getHttpClient(),
+			return new HttpComponentsStreamingClientHttpRequest(client,
 					httpRequest, createHttpContext(httpMethod, uri));
 		}
 	}
@@ -208,7 +206,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * connection pool, if any.
 	 */
 	@Override
-	public void destroy() {
+	public void destroy() throws Exception {
 		getHttpClient().getConnectionManager().shutdown();
 	}
 

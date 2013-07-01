@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
@@ -33,9 +34,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.0
  * @see java.net.HttpURLConnection
- * @see CommonsClientHttpRequestFactory
+ * @see HttpComponentsClientHttpRequestFactory
  */
-public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
+public class SimpleClientHttpRequestFactory
+		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 
 	private static final int DEFAULT_CHUNK_SIZE = 4096;
 
@@ -51,6 +53,8 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	private int readTimeout = -1;
 
 	private boolean outputStreaming = true;
+
+	private AsyncTaskExecutor taskExecutor;
 
 
 	/**
@@ -121,6 +125,15 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		this.outputStreaming = outputStreaming;
 	}
 
+	/**
+	 * Sets the task executor for this request factory. Setting this property is required
+	 * for {@linkplain #createAsyncRequest(URI, HttpMethod) creating asynchronous
+	 * request}.
+	 * @param taskExecutor the task executor
+	 */
+	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -132,6 +145,27 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		else {
 			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize,
 					this.outputStreaming);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>Setting the {@link #setTaskExecutor(AsyncTaskExecutor) taskExecutor} property
+	 * is required before calling this method.
+	 */
+	@Override
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod)
+			throws IOException {
+		Assert.state(taskExecutor != null, "Asynchronous execution requires an " +
+				"AsyncTaskExecutor to be set");
+		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
+		prepareConnection(connection, httpMethod.name());
+		if (this.bufferRequestBody) {
+			return new SimpleBufferingAsyncClientHttpRequest(connection, this.outputStreaming, taskExecutor);
+		}
+		else {
+			return new SimpleStreamingAsyncClientHttpRequest(connection, this.chunkSize,
+					this.outputStreaming, taskExecutor);
 		}
 	}
 
