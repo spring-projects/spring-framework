@@ -113,6 +113,7 @@ public class MessageHeaderAccessor {
 	 */
 	public void setHeader(String name, Object value) {
 		Assert.isTrue(!isReadOnly(name), "The '" + name + "' header is read-only.");
+		verifyType(name, value);
 		if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
 			this.headers.put(name, value);
 		}
@@ -209,11 +210,19 @@ public class MessageHeaderAccessor {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);
 	}
 
-
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [originalHeaders=" + this.originalHeaders
 				+ ", updated headers=" + this.headers + "]";
 	}
 
+	protected void verifyType(String headerName, Object headerValue) {
+        if (headerName != null && headerValue != null) {
+        	if (MessageHeaders.ERROR_CHANNEL.equals(headerName)
+                    || MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+                Assert.isTrue(headerValue instanceof MessageChannel || headerValue instanceof String, "The '"
+                        + headerName + "' header value must be a MessageChannel or String.");
+            }
+        }
+    }
 }
