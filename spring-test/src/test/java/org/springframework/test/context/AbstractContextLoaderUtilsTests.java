@@ -16,6 +16,10 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Set;
 
@@ -81,6 +85,17 @@ abstract class AbstractContextLoaderUtilsTests {
 
 	@Configuration
 	static class BarConfig {
+	}
+
+	@ContextConfiguration("/foo.xml")
+	@ActiveProfiles(profiles = "foo")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface MetaLocationsFooTest {
+	}
+
+	@MetaLocationsFooTest
+	static class MetaLocationsFoo {
 	}
 
 	@ContextConfiguration(locations = "/foo.xml", inheritLocations = false)

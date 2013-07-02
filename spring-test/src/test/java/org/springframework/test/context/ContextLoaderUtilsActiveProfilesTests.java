@@ -72,6 +72,13 @@ public class ContextLoaderUtilsActiveProfilesTests extends AbstractContextLoader
 	}
 
 	@Test
+	public void resolveActiveProfilesWithMetaAnnotation() {
+		String[] profiles = resolveActiveProfiles(MetaLocationsFoo.class);
+		assertNotNull(profiles);
+		assertArrayEquals(new String[] { "foo" }, profiles);
+	}
+
+	@Test
 	public void resolveActiveProfilesWithInheritedAnnotationAndLocations() {
 		String[] profiles = resolveActiveProfiles(InheritedLocationsFoo.class);
 		assertNotNull(profiles);

@@ -16,10 +16,13 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,7 +36,7 @@ import static org.springframework.test.context.ContextLoaderUtils.*;
  * Unit tests for {@link ContextLoaderUtils} involving context hierarchies.
  *
  * @author Sam Brannen
- * @since 3.1
+ * @since 3.2.2
  */
 public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoaderUtilsTests {
 
@@ -67,6 +70,15 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 	}
 
 	@Test
+	public void resolveContextHierarchyAttributesForSingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation() {
+		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation.class);
+		assertEquals(1, hierarchyAttributes.size());
+		List<ContextConfigurationAttributes> configAttributesList = hierarchyAttributes.get(0);
+		assertEquals(1, configAttributesList.size());
+		debugConfigAttributes(configAttributesList);
+	}
+
+	@Test
 	public void resolveContextHierarchyAttributesForSingleTestClassWithTripleLevelContextHierarchy() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(SingleTestClassWithTripleLevelContextHierarchy.class);
 		assertEquals(1, hierarchyAttributes.size());
@@ -78,6 +90,29 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 	@Test
 	public void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchies() {
 		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass3WithSingleLevelContextHierarchy.class);
+		assertEquals(3, hierarchyAttributes.size());
+
+		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
+		debugConfigAttributes(configAttributesListClassLevel1);
+		assertEquals(1, configAttributesListClassLevel1.size());
+		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("one.xml"));
+
+		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
+		debugConfigAttributes(configAttributesListClassLevel2);
+		assertEquals(1, configAttributesListClassLevel2.size());
+		assertArrayEquals(new String[] { "two-A.xml", "two-B.xml" },
+			configAttributesListClassLevel2.get(0).getLocations());
+
+		List<ContextConfigurationAttributes> configAttributesListClassLevel3 = hierarchyAttributes.get(2);
+		debugConfigAttributes(configAttributesListClassLevel3);
+		assertEquals(1, configAttributesListClassLevel3.size());
+		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0], equalTo("three.xml"));
+	}
+
+	@Ignore("Work in Progress")
+	@Test
+	public void resolveContextHierarchyAttributesForTestClassHierarchyWithSingleLevelContextHierarchiesAndMetaAnnotations() {
+		List<List<ContextConfigurationAttributes>> hierarchyAttributes = resolveContextHierarchyAttributes(TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation.class);
 		assertEquals(3, hierarchyAttributes.size());
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
@@ -465,7 +500,37 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextLoad
 		public void initialize(ConfigurableApplicationContext applicationContext) {
 			/* no-op */
 		}
+	}
 
+	// -------------------------------------------------------------------------
+
+	@ContextHierarchy(@ContextConfiguration("A.xml"))
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaA {
+	}
+
+	@ContextHierarchy(@ContextConfiguration({ "B-one.xml", "B-two.xml" }))
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaB {
+	}
+
+	@ContextHierarchy(@ContextConfiguration("C.xml"))
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaC {
+	}
+
+	@MetaA
+	private static class SingleTestClassWithSingleLevelContextHierarchyFromMetaAnnotation {
+	}
+
+	@MetaB
+	private static class TestClass2WithSingleLevelContextHierarchyFromMetaAnnotation extends
+			TestClass1WithSingleLevelContextHierarchy {
+	}
+
+	@MetaC
+	private static class TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation extends
+			TestClass2WithSingleLevelContextHierarchyFromMetaAnnotation {
 	}
 
 }

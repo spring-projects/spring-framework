@@ -16,16 +16,20 @@
 
 package org.springframework.test.context;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.util.Assert;
+
+import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * Default implementation of the {@link TestContext} interface.
@@ -98,8 +102,11 @@ class DefaultTestContext extends AttributeAccessorSupport implements TestContext
 
 		MergedContextConfiguration mergedContextConfiguration;
 
-		if (testClass.isAnnotationPresent(ContextConfiguration.class)
-				|| testClass.isAnnotationPresent(ContextHierarchy.class)) {
+		final Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
+		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
+		final List<Class<? extends Annotation>> annotationTypes = Arrays.asList(contextConfigType, contextHierarchyType);
+
+		if (findAnnotationDeclaringClassForTypes(annotationTypes, testClass) != null) {
 			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
 				defaultContextLoaderClassName, cacheAwareContextLoaderDelegate);
 		}

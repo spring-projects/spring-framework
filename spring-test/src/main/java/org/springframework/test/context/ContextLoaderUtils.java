@@ -108,7 +108,7 @@ abstract class ContextLoaderUtils {
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
 			Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
 			defaultContextLoaderClassName = webAppConfigClass != null
-					&& testClass.isAnnotationPresent(webAppConfigClass) ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
+					&& findAnnotation(testClass, webAppConfigClass) != null ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
 					: DEFAULT_CONTEXT_LOADER_CLASS_NAME;
 		}
 
@@ -275,12 +275,12 @@ abstract class ContextLoaderUtils {
 			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = declaringClass.getAnnotation(contextConfigType);
+				ContextConfiguration contextConfiguration = getAnnotation(declaringClass, contextConfigType);
 				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
 					configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
-				ContextHierarchy contextHierarchy = declaringClass.getAnnotation(contextHierarchyType);
+				ContextHierarchy contextHierarchy = getAnnotation(declaringClass, contextHierarchyType);
 				for (ContextConfiguration contextConfiguration : contextHierarchy.value()) {
 					convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
 						configAttributesList);
@@ -397,7 +397,7 @@ abstract class ContextLoaderUtils {
 			annotationType.getName(), testClass.getName()));
 
 		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+			ContextConfiguration contextConfiguration = getAnnotation(declaringClass, annotationType);
 			convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass, attributesList);
 			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
@@ -476,7 +476,7 @@ abstract class ContextLoaderUtils {
 		final Set<String> activeProfiles = new HashSet<String>();
 
 		while (declaringClass != null) {
-			ActiveProfiles annotation = declaringClass.getAnnotation(annotationType);
+			ActiveProfiles annotation = getAnnotation(declaringClass, annotationType);
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
 					declaringClass.getName()));
@@ -586,7 +586,7 @@ abstract class ContextLoaderUtils {
 	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
 			String defaultContextLoaderClassName, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
-		if (testClass.isAnnotationPresent(ContextHierarchy.class)) {
+		if (findAnnotation(testClass, ContextHierarchy.class) != null) {
 			Map<String, List<ContextConfigurationAttributes>> hierarchyMap = buildContextHierarchyMap(testClass);
 
 			MergedContextConfiguration parentConfig = null;
@@ -729,28 +729,32 @@ abstract class ContextLoaderUtils {
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig) {
 
 		Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
+		if (webAppConfigClass != null) {
 
-		if (webAppConfigClass != null && testClass.isAnnotationPresent(webAppConfigClass)) {
-			Annotation annotation = testClass.getAnnotation(webAppConfigClass);
-			String resourceBasePath = (String) AnnotationUtils.getValue(annotation);
+			Annotation annotation = findAnnotation(testClass, webAppConfigClass);
+			if (annotation != null) {
 
-			try {
-				Class<? extends MergedContextConfiguration> webMergedConfigClass = (Class<? extends MergedContextConfiguration>) ClassUtils.forName(
-					WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME, ContextLoaderUtils.class.getClassLoader());
+				String resourceBasePath = (String) AnnotationUtils.getValue(annotation);
 
-				Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
-					webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
-					String.class, ContextLoader.class, CacheAwareContextLoaderDelegate.class,
-					MergedContextConfiguration.class);
+				try {
+					Class<? extends MergedContextConfiguration> webMergedConfigClass = (Class<? extends MergedContextConfiguration>) ClassUtils.forName(
+						WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME, ContextLoaderUtils.class.getClassLoader());
 
-				if (constructor != null) {
-					return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
-						activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+					Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
+						webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
+						String.class, ContextLoader.class, CacheAwareContextLoaderDelegate.class,
+						MergedContextConfiguration.class);
+
+					if (constructor != null) {
+						return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
+							activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate,
+							parentConfig);
+					}
 				}
-			}
-			catch (Throwable t) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not instantiate [" + WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME + "].", t);
+				catch (Throwable t) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not instantiate [" + WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME + "].", t);
+					}
 				}
 			}
 		}

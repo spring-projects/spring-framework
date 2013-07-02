@@ -58,6 +58,15 @@ public class ContextLoaderUtilsMergedConfigTests extends AbstractContextLoaderUt
 	}
 
 	@Test
+	public void buildMergedConfigWithMetaAnnotationAndLocations() {
+		Class<?> testClass = MetaLocationsFoo.class;
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
+
+		assertMergedConfig(mergedConfig, testClass, new String[] { "classpath:/foo.xml" }, EMPTY_CLASS_ARRAY,
+			DelegatingSmartContextLoader.class);
+	}
+
+	@Test
 	public void buildMergedConfigWithLocalAnnotationAndClasses() {
 		Class<?> testClass = ClassesFoo.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass, null, null);
