@@ -97,6 +97,18 @@ public class AnnotationUtilsTests {
 	// }
 
 	@Test
+	public void findAnnotationPrefersInteracesOverLocalMetaAnnotations() {
+		Component component = AnnotationUtils.findAnnotation(
+			ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class, Component.class);
+
+		// By inspecting ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface, one
+		// might expect that "meta2" should be found; however, with the current
+		// implementation "meta1" will be found.
+		assertNotNull(component);
+		assertEquals("meta1", component.value());
+	}
+
+	@Test
 	public void testFindAnnotationDeclaringClass() throws Exception {
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedInterface.class));
@@ -133,7 +145,7 @@ public class AnnotationUtilsTests {
 		assertEquals(InheritedAnnotationInterface.class,
 			findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClassForTypes(transactionalCandidateList,
-			SubInheritedAnnotationInterface.class));
+				SubInheritedAnnotationInterface.class));
 		assertEquals(InheritedAnnotationClass.class,
 			findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationClass.class));
 		assertEquals(InheritedAnnotationClass.class,
@@ -288,19 +300,23 @@ public class AnnotationUtilsTests {
 
 
 	@Component(value = "meta1")
+	@Order
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Meta1 {
 	}
 
 	@Component(value = "meta2")
+	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Meta2 {
 	}
 
 	@Meta1
-	@Component(value = "local")
+	static interface InterfaceWithMetaAnnotation {
+	}
+
 	@Meta2
-	static class HasLocalAndMetaComponentAnnotation {
+	static class ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface implements InterfaceWithMetaAnnotation {
 	}
 
 	public static interface AnnotatedInterface {

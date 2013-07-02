@@ -285,9 +285,8 @@ public abstract class AnnotationUtils {
 	 * <p>The standard {@link Class} API does not provide a mechanism for determining which class
 	 * in an inheritance hierarchy actually declares an {@link Annotation}, so we need to handle
 	 * this explicitly.
-	 * @param annotationType the Class object corresponding to the annotation type
-	 * @param clazz the Class object corresponding to the class on which to check for the annotation,
-	 * or {@code null}
+	 * @param annotationType the annotation class to look for, both locally and as a meta-annotation
+	 * @param clazz the class on which to check for the annotation, or {@code null}
 	 * @return the first {@link Class} in the inheritance hierarchy of the specified {@code clazz}
 	 * which declares an annotation for the specified {@code annotationType}, or {@code null}
 	 * if not found
@@ -301,8 +300,24 @@ public abstract class AnnotationUtils {
 		if (clazz == null || clazz.equals(Object.class)) {
 			return null;
 		}
-		return (isAnnotationDeclaredLocally(annotationType, clazz)) ? clazz : findAnnotationDeclaringClass(
-			annotationType, clazz.getSuperclass());
+
+		// Declared locally?
+		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+			return clazz;
+		}
+
+		// Declared on a stereotype annotation (i.e., as a meta-annotation)?
+		if (!Annotation.class.isAssignableFrom(clazz)) {
+			for (Annotation stereotype : clazz.getAnnotations()) {
+				Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, stereotype.annotationType());
+				if (declaringClass != null) {
+					return declaringClass;
+				}
+			}
+		}
+
+		// Declared on a superclass?
+		return findAnnotationDeclaringClass(annotationType, clazz.getSuperclass());
 	}
 
 	/**

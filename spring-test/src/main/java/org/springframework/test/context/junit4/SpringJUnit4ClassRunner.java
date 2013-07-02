@@ -34,6 +34,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
@@ -410,7 +411,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @return the timeout, or {@code 0} if none was specified.
 	 */
 	protected long getSpringTimeout(FrameworkMethod frameworkMethod) {
-		Timed timedAnnotation = frameworkMethod.getAnnotation(Timed.class);
+		Timed timedAnnotation = AnnotationUtils.getAnnotation(frameworkMethod.getMethod(), Timed.class);
 		return (timedAnnotation != null && timedAnnotation.millis() > 0 ? timedAnnotation.millis() : 0);
 	}
 
@@ -449,7 +450,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see SpringRepeat
 	 */
 	protected Statement withPotentialRepeat(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
-		Repeat repeatAnnotation = frameworkMethod.getAnnotation(Repeat.class);
+		Repeat repeatAnnotation = AnnotationUtils.getAnnotation(frameworkMethod.getMethod(), Repeat.class);
 		int repeat = (repeatAnnotation != null ? repeatAnnotation.value() : 1);
 		return new SpringRepeat(next, frameworkMethod.getMethod(), repeat);
 	}

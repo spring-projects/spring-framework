@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,22 @@
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+
 /**
- * <p>
  * Test-specific annotation to indicate that a test method has to finish
  * execution in a {@link #millis() specified time period}.
- * </p>
- * <p>
- * If the text execution takes longer than the specified time period, then the
- * test is to be considered failed.
- * </p>
- * <p>
- * Note that the time period includes execution of the test method itself, any
- * {@link Repeat repetitions} of the test, and any <em>set up</em> or
+ *
+ * <p>If the text execution takes longer than the specified time period, then
+ * the test is to be considered failed.
+ *
+ * <p>Note that the time period includes execution of the test method itself,
+ * any {@link Repeat repetitions} of the test, and any <em>set up</em> or
  * <em>tear down</em> of the test fixture.
- * </p>
  *
  * @author Rod Johnson
  * @author Sam Brannen
@@ -43,8 +40,8 @@ import java.lang.annotation.Target;
  * @see Repeat
  */
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Target({ METHOD, ANNOTATION_TYPE })
 public @interface Timed {
 
 	/**

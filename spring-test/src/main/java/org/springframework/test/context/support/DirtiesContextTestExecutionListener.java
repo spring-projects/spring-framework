@@ -20,13 +20,14 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
+
+import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * {@code TestExecutionListener} which provides support for marking the
@@ -82,9 +83,11 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 		final Class<DirtiesContext> annotationType = DirtiesContext.class;
 
-		boolean methodDirtiesContext = testMethod.isAnnotationPresent(annotationType);
-		boolean classDirtiesContext = testClass.isAnnotationPresent(annotationType);
-		DirtiesContext classDirtiesContextAnnotation = testClass.getAnnotation(annotationType);
+		DirtiesContext methodDirtiesContextAnnotation = findAnnotation(testMethod, annotationType);
+		boolean methodDirtiesContext = methodDirtiesContextAnnotation != null;
+
+		DirtiesContext classDirtiesContextAnnotation = findAnnotation(testClass, annotationType);
+		boolean classDirtiesContext = classDirtiesContextAnnotation != null;
 		ClassMode classMode = classDirtiesContext ? classDirtiesContextAnnotation.classMode() : null;
 
 		if (logger.isDebugEnabled()) {
@@ -93,8 +96,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 					+ methodDirtiesContext + "].");
 		}
 
-		if (methodDirtiesContext || (classDirtiesContext && classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
-			HierarchyMode hierarchyMode = methodDirtiesContext ? testMethod.getAnnotation(annotationType).hierarchyMode()
+		if (methodDirtiesContext || (classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
+			HierarchyMode hierarchyMode = methodDirtiesContext ? methodDirtiesContextAnnotation.hierarchyMode()
 					: classDirtiesContextAnnotation.hierarchyMode();
 			dirtyContext(testContext, hierarchyMode);
 		}
@@ -117,12 +120,13 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 		final Class<DirtiesContext> annotationType = DirtiesContext.class;
 
-		boolean dirtiesContext = testClass.isAnnotationPresent(annotationType);
+		DirtiesContext dirtiesContextAnnotation = findAnnotation(testClass, annotationType);
+		boolean dirtiesContext = dirtiesContextAnnotation != null;
 		if (logger.isDebugEnabled()) {
 			logger.debug("After test class: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
 		if (dirtiesContext) {
-			HierarchyMode hierarchyMode = testClass.getAnnotation(annotationType).hierarchyMode();
+			HierarchyMode hierarchyMode = dirtiesContextAnnotation.hierarchyMode();
 			dirtyContext(testContext, hierarchyMode);
 		}
 	}

@@ -18,6 +18,9 @@ package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.*;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,11 +54,11 @@ public class TimedSpringRunnerTests {
 		notifier.addListener(listener);
 
 		new SpringJUnit4ClassRunner(testClass).run(notifier);
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", 3,
-			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 5,
+		assertEquals("Verifying number of tests started for test class [" + testClass + "].", 6,
 			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 5,
+		assertEquals("Verifying number of failures for test class [" + testClass + "].", 4,
+			listener.getTestFailureCount());
+		assertEquals("Verifying number of tests finished for test class [" + testClass + "].", 6,
 			listener.getTestFinishedCount());
 	}
 
@@ -91,12 +94,24 @@ public class TimedSpringRunnerTests {
 			Thread.sleep(20);
 		}
 
+		// Should Fail due to timeout.
+		@Test
+		@MetaTimed
+		public void springTimeoutWithSleepAndMetaAnnotation() throws Exception {
+			Thread.sleep(20);
+		}
+
 		// Should Fail due to duplicate configuration.
 		@Test(timeout = 200)
 		@Timed(millis = 200)
 		public void springAndJUnitTimeouts() {
 			/* no-op */
 		}
+	}
+
+	@Timed(millis = 10)
+	@Retention(RetentionPolicy.RUNTIME)
+	private static @interface MetaTimed {
 	}
 
 }
