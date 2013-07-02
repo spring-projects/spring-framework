@@ -22,11 +22,18 @@ package org.springframework.messaging;
  * @author Mark Fisher
  * @author Arjen Poutsma
  * @since 4.0
+ * @see org.springframework.messaging.support.MessageBuilder
  */
 public interface Message<T> {
 
+	/**
+	 * Returns message headers for the message (never {@code null}).
+	 */
 	MessageHeaders getHeaders();
 
+	/**
+	 * Returns the message payload.
+	 */
 	T getPayload();
 
 }

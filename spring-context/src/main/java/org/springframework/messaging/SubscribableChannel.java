@@ -29,11 +29,15 @@ public interface SubscribableChannel extends MessageChannel {
 
 	/**
 	 * Register a {@link MessageHandler} as a subscriber to this channel.
+	 * @return {@code true} if the channel was not already subscribed to the specified
+	 *         handler
 	 */
 	boolean subscribe(MessageHandler handler);
 
 	/**
 	 * Remove a {@link MessageHandler} from the subscribers of this channel.
+	 * @return {@code true} if the channel was previously subscribed to the specified
+	 *         handler
 	 */
 	boolean unsubscribe(MessageHandler handler);
 

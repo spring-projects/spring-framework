@@ -59,6 +59,7 @@ public class MessagingException extends RuntimeException {
 		this.failedMessage = message;
 	}
 
+
 	public Message<?> getFailedMessage() {
 		return this.failedMessage;
 	}

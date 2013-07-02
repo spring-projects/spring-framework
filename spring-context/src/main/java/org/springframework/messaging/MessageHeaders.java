@@ -34,16 +34,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * The headers for a {@link Message}.<br>
- * IMPORTANT: This class is immutable. Any mutating operation (e.g., put(..), putAll(..) etc.)
- * will throw {@link UnsupportedOperationException}
+ * The headers for a {@link Message}
  *
- * <p>To create MessageHeaders instance use fluent MessageBuilder API
- * <pre>
+ * <p><b>IMPORTANT</b>: This class is immutable. Any mutating operation
+ * (e.g., put(..), putAll(..) etc.) will throw {@link UnsupportedOperationException}.
+ *
+ * <p>To create MessageHeaders instance use fluent
+ * {@link org.springframework.messaging.support.MessageBuilder MessageBuilder} API
+ * <pre class="code">
  * MessageBuilder.withPayload("foo").setHeader("key1", "value1").setHeader("key2", "value2");
  * </pre>
  * or create an instance of GenericMessage passing payload as {@link Object} and headers as a regular {@link Map}
- * <pre>
+ * <pre class="code">
  * Map headers = new HashMap();
  * headers.put("key1", "value1");
  * headers.put("key2", "value2");
@@ -54,12 +56,14 @@ import org.apache.commons.logging.LogFactory;
  * @author Mark Fisher
  * @author Gary Russell
  * @since 4.0
+ * @see org.springframework.messaging.support.MessageBuilder
  */
 public final class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final long serialVersionUID = -4615750558355702881L;
 
 	private static final Log logger = LogFactory.getLog(MessageHeaders.class);
+
 
 	private static volatile IdGenerator idGenerator = null;
 
@@ -78,7 +82,6 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 	public static final String ERROR_CHANNEL = "errorChannel";
 
 	public static final String CONTENT_TYPE = "contentType";
-
 
 	public static final List<String> HEADER_NAMES = Arrays.asList(ID, TIMESTAMP);
 

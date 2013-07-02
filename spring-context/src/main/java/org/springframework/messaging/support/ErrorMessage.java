@@ -25,10 +25,12 @@ import java.util.Map;
  * @author Mark Fisher
  * @author Oleg Zhurakousky
  * @since 4.0
+ * @see MessageBuilder
  */
 public class ErrorMessage extends GenericMessage<Throwable> {
 
 	private static final long serialVersionUID = -5470210965279837728L;
+
 
 	public ErrorMessage(Throwable payload) {
 		super(payload);

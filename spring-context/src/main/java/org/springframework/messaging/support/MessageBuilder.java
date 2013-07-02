@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @since 4.0
+ * @see GenericMessage
+ * @see ErrorMessage
  */
 public final class MessageBuilder<T> {
 
@@ -48,6 +50,7 @@ public final class MessageBuilder<T> {
 		this.originalMessage = originalMessage;
 		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
 	}
+
 
 	/**
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
@@ -73,8 +76,8 @@ public final class MessageBuilder<T> {
 	}
 
 	/**
-	 * Set the value for the given header name. If the provided value is <code>null</code>
-	 * , the header will be removed.
+	 * Set the value for the given header name. If the provided value is {@code null},
+	 * the header will be removed.
 	 */
 	public MessageBuilder<T> setHeader(String headerName, Object headerValue) {
 		this.headerAccessor.setHeader(headerName, headerValue);

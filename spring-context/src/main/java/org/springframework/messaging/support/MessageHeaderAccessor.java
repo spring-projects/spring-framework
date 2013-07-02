@@ -32,14 +32,13 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
-
 /**
  * A base class for read/write access to {@link MessageHeaders}. Supports creation of new
  * headers or modification of existing message headers.
- * <p>
- * Sub-classes can provide additional typed getters and setters for convenient access to
- * specific headers. Getters and setters should delegate to {@link #getHeader(String)} or
- * {@link #setHeader(String, Object)} respectively. At the end {@link #toMap()} can be
+ *
+ * <p>Sub-classes can provide additional typed getters and setters for convenient access
+ * to specific headers. Getters and setters should delegate to {@link #getHeader(String)}
+ * or {@link #setHeader(String, Object)} respectively. At the end {@link #toMap()} can be
  * used to obtain the resulting headers.
  *
  * @author Rossen Stoyanchev

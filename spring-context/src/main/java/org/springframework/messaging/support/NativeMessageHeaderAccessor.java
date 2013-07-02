@@ -26,7 +26,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * An extension of {@link MessageHeaderAccessor} that also provides read/write access to
  * message headers from an external message source. Native message headers are kept
@@ -37,8 +36,8 @@ import org.springframework.util.ObjectUtils;
  */
 public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
-
 	public static final String NATIVE_HEADERS = "nativeHeaders";
+
 
 	// wrapped native headers
 	private final Map<String, List<String>> originalNativeHeaders;
@@ -62,6 +61,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		super(message);
 		this.originalNativeHeaders = initNativeHeaders(message);
 	}
+
 
 	private static Map<String, List<String>> initNativeHeaders(Message<?> message) {
 		if (message != null) {

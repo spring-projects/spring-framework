@@ -16,7 +16,6 @@
 
 package org.springframework.messaging;
 
-
 /**
  * Base interface for any component that handles Messages.
  *
@@ -27,25 +26,27 @@ package org.springframework.messaging;
 public interface MessageHandler {
 
 	/**
-	 * TODO: exceptions
-	 *
 	 * Handles the message if possible. If the handler cannot deal with the
-	 * message this will result in a <code>MessageRejectedException</code> e.g.
+	 * message this will result in a {@code MessageRejectedException} e.g.
 	 * in case of a Selective Consumer. When a consumer tries to handle a
-	 * message, but fails to do so, a <code>MessageHandlingException</code> is
+	 * message, but fails to do so, a {@code MessageHandlingException} is
 	 * thrown. In the last case it is recommended to treat the message as tainted
 	 * and go into an error scenario.
 	 * <p>
 	 * When the handling results in a failure of another message being sent
 	 * (e.g. a "reply" message), that failure  will trigger a
-	 * <code>MessageDeliveryException</code>.
+	 * {@code MessageDeliveryException}.
 	 *
 	 * @param message the message to be handled
-	 * @throws org.springframework.integration.MessageRejectedException if the handler doesn't accept the message
-	 * @throws org.springframework.integration.MessageHandlingException when something fails during the handling
-	 * @throws org.springframework.integration.MessageDeliveryException when this handler failed to deliver the
 	 * reply related to the handling of the message
 	 */
 	void handleMessage(Message<?> message) throws MessagingException;
+
+	/*
+	 * TODO: exceptions
+	 * @throws org.springframework.integration.MessageRejectedException if the handler doesn't accept the message
+	 * @throws org.springframework.integration.MessageHandlingException when something fails during the handling
+	 * @throws org.springframework.integration.MessageDeliveryException when this handler failed to deliver the
+	 */
 
 }
