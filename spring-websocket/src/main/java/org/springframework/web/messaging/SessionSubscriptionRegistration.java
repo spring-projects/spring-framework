@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.support;
+package org.springframework.web.messaging;
 
-import org.springframework.core.NamedThreadLocal;
-import org.springframework.messaging.Message;
-
-
-// TODO: remove?
+import java.util.Set;
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageHolder {
-
-    private static final NamedThreadLocal<Message<?>> messageHolder =
-    		new NamedThreadLocal<Message<?>>("Current message");
+public interface SessionSubscriptionRegistration {
 
 
-    public static void setMessage(Message<?> message) {
-    	messageHolder.set(message);
-    }
+	String getSessionId();
 
-    public static Message<?> getMessage() {
-    	return messageHolder.get();
-    }
+	void addSubscription(String destination, String subscriptionId);
 
-    public static void reset() {
-    	messageHolder.remove();
-    }
+	/**
+	 * @param subscriptionId the subscription to remove
+	 * @return the destination to which the subscriptionId was registered, or {@code null}
+	 *         if no matching subscriptionId was found
+	 */
+	String removeSubscription(String subscriptionId);
+
+	Set<String> getSubscriptionsByDestination(String destination);
+
+	Set<String> getDestinations();
 
 }

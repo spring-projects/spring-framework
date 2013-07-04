@@ -17,7 +17,6 @@ package org.springframework.web.messaging.stomp.support;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,13 +29,15 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.SessionSubscriptionRegistration;
+import org.springframework.web.messaging.SessionSubscriptionRegistry;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
+import org.springframework.web.messaging.support.DefaultSessionSubscriptionRegistry;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -60,7 +61,9 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
-	private final Map<String, SessionInfo> sessionInfos = new ConcurrentHashMap<String, SessionInfo>();
+	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
+
+	private SessionSubscriptionRegistry subscriptionRegistry = new DefaultSessionSubscriptionRegistry();
 
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
@@ -74,6 +77,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		this.outputChannel = outputChannel;
 	}
 
+
 	public void setMessageConverters(List<MessageConverter> converters) {
 		this.payloadConverter = new CompositeMessageConverter(converters);
 	}
@@ -82,11 +86,15 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		return this.stompMessageConverter;
 	}
 
+	public void setSubscriptionRegistry(SessionSubscriptionRegistry subscriptionRegistry) {
+		this.subscriptionRegistry = subscriptionRegistry;
+	}
+
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Assert.notNull(this.outputChannel, "No output channel for STOMP messages.");
-		this.sessionInfos.put(session.getId(), new SessionInfo(session));
+		this.sessions.put(session.getId(), session);
 	}
 
 	/**
@@ -180,17 +188,26 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		String sessionId = headers.getSessionId();
 		String destination = headers.getDestination();
 
-		SessionInfo sessionInfo = this.sessionInfos.get(sessionId);
-		sessionInfo.addSubscription(destination, headers.getSubscriptionId());
+		SessionSubscriptionRegistration registration = this.subscriptionRegistry.getOrCreateRegistration(sessionId);
+		registration.addSubscription(destination, headers.getSubscriptionId());
 	}
 
 	protected void handleUnsubscribe(Message<?> message) {
 
-		// TODO: remove subscription
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+		String sessionId = headers.getSessionId();
+		String subscriptionId = headers.getSubscriptionId();
 
+		SessionSubscriptionRegistration registration = this.subscriptionRegistry.getRegistration(sessionId);
+		if (registration == null) {
+			logger.warn("Subscripton=" + subscriptionId + " for session=" + sessionId + " not found");
+			return;
+		}
+		registration.removeSubscription(subscriptionId);
 	}
 
-	protected void handleDisconnect(Message<?> stompMessage) {
+	protected void handleDisconnect(Message<?> message) {
+
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
@@ -211,7 +228,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		this.sessionInfos.remove(session.getId());
+
+		this.sessions.remove(session.getId());
+		this.subscriptionRegistry.removeRegistration(session.getId());
+
 		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.create(MessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
@@ -237,17 +257,16 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 			logger.error("No \"sessionId\" header in message: " + message);
 		}
 
-		SessionInfo sessionInfo = this.sessionInfos.get(sessionId);
-		WebSocketSession session = sessionInfo.getWebSocketSession();
+		WebSocketSession session = this.sessions.get(sessionId);
 		if (session == null) {
 			logger.error("Session not found: " + message);
 		}
 
 		if (headers.getSubscriptionId() == null) {
 			String destination = headers.getDestination();
-			Set<String> subs = sessionInfo.getSubscriptionsForDestination(destination);
-			if (subs != null) {
-				// TODO: send to all sub ids
+			Set<String> subs = this.subscriptionRegistry.getSessionSubscriptions(sessionId, destination);
+			if (!CollectionUtils.isEmpty(subs)) {
+				// TODO: send to all subscriptions ids
 				headers.setSubscriptionId(subs.iterator().next());
 			}
 			else {
@@ -282,32 +301,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 				catch (IOException e) {
 				}
 			}
-		}
-	}
-
-
-	private static class SessionInfo {
-
-		private final WebSocketSession session;
-
-		private final MultiValueMap<String, String> subscriptions = new LinkedMultiValueMap<String, String>(4);
-
-
-		public SessionInfo(WebSocketSession session) {
-			this.session = session;
-		}
-
-		public WebSocketSession getWebSocketSession() {
-			return this.session;
-		}
-
-		public void addSubscription(String destination, String subscriptionId) {
-			this.subscriptions.add(destination, subscriptionId);
-		}
-
-		public Set<String> getSubscriptionsForDestination(String destination) {
-			List<String> ids = this.subscriptions.get(destination);
-			return (ids != null) ? new HashSet<String>(ids) : null;
 		}
 	}
 
