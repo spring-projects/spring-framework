@@ -183,6 +183,7 @@ public abstract class StatementCreatorUtils {
 
 		String typeNameToUse = typeName;
 		int sqlTypeToUse = sqlType;
+		Integer scaleToUse= scale;
 		Object inValueToUse = inValue;
 
 		// override type info?
@@ -191,6 +192,7 @@ public abstract class StatementCreatorUtils {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() +
+						", Scale " + parameterValue.getScale() +
 						", Type name " + parameterValue.getTypeName());
 			}
 			if (parameterValue.getSqlType() != SqlTypeValue.TYPE_UNKNOWN) {
@@ -198,6 +200,9 @@ public abstract class StatementCreatorUtils {
 			}
 			if (parameterValue.getTypeName() != null) {
 				typeNameToUse = parameterValue.getTypeName();
+			}
+			if (parameterValue.getScale() != null) {
+				scaleToUse = parameterValue.getScale();
 			}
 			inValueToUse = parameterValue.getValue();
 		}
@@ -213,7 +218,7 @@ public abstract class StatementCreatorUtils {
 			setNull(ps, paramIndex, sqlTypeToUse, typeNameToUse);
 		}
 		else {
-			setValue(ps, paramIndex, sqlTypeToUse, typeNameToUse, scale, inValueToUse);
+			setValue(ps, paramIndex, sqlTypeToUse, typeNameToUse, scaleToUse, inValueToUse);
 		}
 	}
 
