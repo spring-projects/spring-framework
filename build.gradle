@@ -301,6 +301,7 @@ project("spring-context") {
 		optional("org.hibernate:hibernate-validator:4.3.0.Final")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+		optional("reactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:javax.inject-tck:1")
 	}
@@ -310,6 +311,10 @@ project("spring-context") {
 
 	test {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
+	}
+	repositories {
+		mavenLocal() // temporary workaround for locally installed (latest) reactor
+		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
 }
 

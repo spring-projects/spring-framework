@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.support;
+package org.springframework.messaging.channel;
 
 import java.util.HashMap;
 import java.util.Map;
