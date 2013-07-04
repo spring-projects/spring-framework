@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @since 4.0
  */
-public class IntegrationTemplate extends AbstractDestinationResolvingMessagingTemplate<MessageChannel>
+public class DefaultMessagingTemplate extends AbstractDestinationResolvingMessagingTemplate<MessageChannel>
 		implements BeanFactoryAware {
 
 	private volatile long sendTimeout = -1;

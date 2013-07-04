@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @since 4.0
  */
-public abstract class AbstractMessagingTemplate<D> implements MessageReceivingOperations<D> {
+public abstract class AbstractMessagingTemplate<D> implements MessageSendingOperations<D> {
 
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
@@ -57,7 +57,7 @@ public abstract class AbstractMessagingTemplate<D> implements MessageReceivingOp
 		this.send(getRequiredDefaultDestination(), message);
 	}
 
-	private D getRequiredDefaultDestination() {
+	protected final D getRequiredDefaultDestination() {
 		Assert.state(this.defaultDestination != null,
 				"No 'defaultDestination' specified for MessagingTemplate. "
 				+ "Unable to invoke method without an explicit destination argument.");
@@ -96,70 +96,6 @@ public abstract class AbstractMessagingTemplate<D> implements MessageReceivingOp
 			message = postProcessor.postProcessMessage(message);
 		}
 		this.send(destination, message);
-	}
-
-
-	@Override
-	public <P> Message<P> receive() {
-		return this.receive(getRequiredDefaultDestination());
-	}
-
-	@Override
-	public <P> Message<P> receive(D destination) {
-		return this.doReceive(destination);
-	}
-
-	protected abstract <P> Message<P> doReceive(D destination);
-
-
-	@Override
-	public Object receiveAndConvert() {
-		return this.receiveAndConvert(getRequiredDefaultDestination());
-	}
-
-	@Override
-	public Object receiveAndConvert(D destination) {
-		Message<Object> message = this.doReceive(destination);
-		return (message != null) ? this.converter.fromMessage(message) : null;
-	}
-
-
-	@Override
-	public Message<?> sendAndReceive(Message<?> requestMessage) {
-		return this.sendAndReceive(getRequiredDefaultDestination(), requestMessage);
-	}
-
-	@Override
-	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
-		return this.doSendAndReceive(destination, requestMessage);
-	}
-
-	protected abstract <S, R> Message<R> doSendAndReceive(D destination, Message<S> requestMessage);
-
-
-	@Override
-	public Object convertSendAndReceive(Object request) {
-		return this.convertSendAndReceive(getRequiredDefaultDestination(), request);
-	}
-
-	@Override
-	public Object convertSendAndReceive(D destination, Object request) {
-		return this.convertSendAndReceive(destination, request, null);
-	}
-
-	@Override
-	public Object convertSendAndReceive(Object request, MessagePostProcessor postProcessor) {
-		return this.convertSendAndReceive(getRequiredDefaultDestination(), request, postProcessor);
-	}
-
-	@Override
-	public Object convertSendAndReceive(D destination, Object request, MessagePostProcessor postProcessor) {
-		Message<?> requestMessage = this.converter.toMessage(request);
-		if (postProcessor != null) {
-			requestMessage = postProcessor.postProcessMessage(requestMessage);
-		}
-		Message<?> replyMessage = this.sendAndReceive(destination, requestMessage);
-		return this.converter.fromMessage(replyMessage);
 	}
 
 }
