@@ -47,10 +47,8 @@ public class CachingSessionSubscriptionRegistryTests {
 
 		SessionSubscriptionRegistration reg1 = this.registry.getOrCreateRegistration("sess1");
 		reg1.addSubscription("/foo", "sub1");
-		reg1.addSubscription("/foo", "sub1");
 
 		SessionSubscriptionRegistration reg2 = this.registry.getOrCreateRegistration("sess2");
-		reg2.addSubscription("/foo", "sub1");
 		reg2.addSubscription("/foo", "sub1");
 
 		Set<SessionSubscriptionRegistration> actual = this.registry.getRegistrationsByDestination("/foo");
@@ -59,14 +57,12 @@ public class CachingSessionSubscriptionRegistryTests {
 		assertTrue(actual.contains(reg2));
 
 		reg1.removeSubscription("sub1");
-		reg1.removeSubscription("sub2");
 
 		actual = this.registry.getRegistrationsByDestination("/foo");
 		assertEquals("Invalid set of registrations " + actual, 1, actual.size());
 		assertTrue(actual.contains(reg2));
 
 		reg2.removeSubscription("sub1");
-		reg2.removeSubscription("sub2");
 
 		actual = this.registry.getRegistrationsByDestination("/foo");
 		assertNull("Unexpected registrations " + actual, actual);

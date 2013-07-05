@@ -78,12 +78,12 @@ public class SimpleBrokerWebMessageHandlerTests {
 		this.messageHandler.handlePublish(createMessage("/bar", "message2"));
 
 		verify(this.clientChannel, times(6)).send(this.messageCaptor.capture());
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(0), "sess1", "sub1", "/foo");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(1), "sess1", "sub2", "/foo");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(2), "sess2", "sub1", "/foo");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(3), "sess2", "sub2", "/foo");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(4), "sess1", "sub3", "/bar");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(5), "sess2", "sub3", "/bar");
+		assertCapturedMessage("sess1", "sub1", "/foo");
+		assertCapturedMessage("sess1", "sub2", "/foo");
+		assertCapturedMessage("sess2", "sub1", "/foo");
+		assertCapturedMessage("sess2", "sub2", "/foo");
+		assertCapturedMessage("sess1", "sub3", "/bar");
+		assertCapturedMessage("sess2", "sub3", "/bar");
 	}
 
 	@Test
@@ -105,10 +105,13 @@ public class SimpleBrokerWebMessageHandlerTests {
 		this.messageHandler.handlePublish(createMessage("/foo", "message1"));
 		this.messageHandler.handlePublish(createMessage("/bar", "message2"));
 
-		verify(this.clientChannel, times(3)).send(this.messageCaptor.capture());
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(0), "sess2", "sub1", "/foo");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(1), "sess2", "sub2", "/foo");
-		assertCapturedMessage(this.messageCaptor.getAllValues().get(2), "sess2", "sub3", "/bar");
+		verify(this.clientChannel, times(6)).send(this.messageCaptor.capture());
+		assertCapturedMessage("sess1", "sub1", "/foo");
+		assertCapturedMessage("sess1", "sub2", "/foo");
+		assertCapturedMessage("sess2", "sub1", "/foo");
+		assertCapturedMessage("sess2", "sub2", "/foo");
+		assertCapturedMessage("sess1", "sub3", "/bar");
+		assertCapturedMessage("sess2", "sub3", "/bar");
 	}
 
 
@@ -130,13 +133,18 @@ public class SimpleBrokerWebMessageHandlerTests {
 		return MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
 	}
 
-	protected void assertCapturedMessage(Message<?> message, String sessionId,
-			String subcriptionId, String destination) {
-
-		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
-		assertEquals(sessionId, headers.getSessionId());
-		assertEquals(subcriptionId, headers.getSubscriptionId());
-		assertEquals(destination, headers.getDestination());
+	protected boolean assertCapturedMessage(String sessionId, String subcriptionId, String destination) {
+		for (Message<?> message : this.messageCaptor.getAllValues()) {
+			WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
+			if (sessionId.equals(headers.getSessionId())) {
+				if (subcriptionId.equals(headers.getSubscriptionId())) {
+					if (destination.equals(headers.getDestination())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 }

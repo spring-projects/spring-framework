@@ -16,6 +16,7 @@
 package org.springframework.web.messaging.stomp.support;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.stomp.StompCommand;
+import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 import static org.junit.Assert.*;
 
@@ -53,7 +55,14 @@ public class StompMessageConverterTests {
 
 		MessageHeaders headers = message.getHeaders();
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
-		assertEquals(7, stompHeaders.toMap().size());
+		Map<String, Object> map = stompHeaders.toMap();
+		assertEquals(6, map.size());
+		assertNotNull(map.get(MessageHeaders.ID));
+		assertNotNull(map.get(MessageHeaders.TIMESTAMP));
+		assertNotNull(map.get(WebMessageHeaderAccesssor.SESSION_ID));
+		assertNotNull(map.get(WebMessageHeaderAccesssor.NATIVE_HEADERS));
+		assertNotNull(map.get(WebMessageHeaderAccesssor.MESSAGE_TYPE));
+		assertNotNull(map.get(WebMessageHeaderAccesssor.PROTOCOL_MESSAGE_TYPE));
 
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
 		assertEquals("github.org", stompHeaders.getHost());

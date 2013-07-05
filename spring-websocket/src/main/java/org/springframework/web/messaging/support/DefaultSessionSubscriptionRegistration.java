@@ -89,6 +89,22 @@ public class DefaultSessionSubscriptionRegistration implements SessionSubscripti
 		return this.subscriptions.get(destination);
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof DefaultSessionSubscriptionRegistration)) {
+			return false;
+		}
+		DefaultSessionSubscriptionRegistration otherType = (DefaultSessionSubscriptionRegistration) other;
+		return this.sessionId.equals(otherType.sessionId);
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 + this.sessionId.hashCode();
+	}
 
 	@Override
 	public String toString() {

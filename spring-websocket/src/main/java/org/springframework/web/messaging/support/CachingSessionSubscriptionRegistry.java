@@ -140,7 +140,7 @@ public class CachingSessionSubscriptionRegistry implements SessionSubscriptionRe
 
 		@Override
 		public void addSubscription(String destination, String subscriptionId) {
-			CachingSessionSubscriptionRegistry.this.destinationCache.mapRegistration(destination, this.delegate);
+			destinationCache.mapRegistration(destination, this);
 			this.delegate.addSubscription(destination, subscriptionId);
 		}
 
@@ -148,7 +148,7 @@ public class CachingSessionSubscriptionRegistry implements SessionSubscriptionRe
 		public String removeSubscription(String subscriptionId) {
 			String destination = this.delegate.removeSubscription(subscriptionId);
 			if (destination != null && this.delegate.getSubscriptionsByDestination(destination) == null) {
-				CachingSessionSubscriptionRegistry.this.destinationCache.unmapRegistration(destination, this);
+				destinationCache.unmapRegistration(destination, this);
 			}
 			return destination;
 		}
@@ -161,6 +161,23 @@ public class CachingSessionSubscriptionRegistry implements SessionSubscriptionRe
 		@Override
 		public Set<String> getDestinations() {
 			return this.delegate.getDestinations();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof CachingSessionSubscriptionRegistration)) {
+				return false;
+			}
+			CachingSessionSubscriptionRegistration otherType = (CachingSessionSubscriptionRegistration) other;
+			return this.delegate.equals(otherType.delegate);
+		}
+
+		@Override
+		public int hashCode() {
+			return this.delegate.hashCode();
 		}
 
 		@Override
