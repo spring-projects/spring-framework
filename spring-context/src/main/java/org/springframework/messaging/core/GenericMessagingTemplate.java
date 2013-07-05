@@ -28,7 +28,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.PollableChannel;
-import org.springframework.messaging.channel.BeanFactoryChannelResolver;
+import org.springframework.messaging.channel.BeanFactoryMessageChannelDestinationResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
@@ -79,7 +79,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		super.setDestinationResolver(new BeanFactoryChannelResolver(beanFactory));
+		super.setDestinationResolver(new BeanFactoryMessageChannelDestinationResolver(beanFactory));
 	}
 
 

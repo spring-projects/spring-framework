@@ -15,8 +15,10 @@
  */
 package org.springframework.messaging.channel;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.DestinationResolver;
 import org.springframework.util.Assert;
 
@@ -25,12 +27,12 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @since 4.0
  */
-public class BeanFactoryChannelResolver implements DestinationResolver<MessageChannel> {
+public class BeanFactoryMessageChannelDestinationResolver implements DestinationResolver<MessageChannel> {
 
 	private final BeanFactory beanFactory;
 
 
-	public BeanFactoryChannelResolver(BeanFactory beanFactory) {
+	public BeanFactoryMessageChannelDestinationResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "beanFactory must not be null");
 		this.beanFactory = beanFactory;
 	}
@@ -38,7 +40,14 @@ public class BeanFactoryChannelResolver implements DestinationResolver<MessageCh
 
 	@Override
 	public MessageChannel resolveDestination(String name) {
-		return this.beanFactory.getBean(name, MessageChannel.class);
+		Assert.state(this.beanFactory != null, "BeanFactory is required");
+		try {
+			return this.beanFactory.getBean(name, MessageChannel.class);
+		}
+		catch (BeansException e) {
+			throw new DestinationResolutionException(
+					"failed to look up MessageChannel bean with name '" + name + "'", e);
+		}
 	}
 
 }

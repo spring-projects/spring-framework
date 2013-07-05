@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.channel;
+package org.springframework.messaging.core;
 
 import org.springframework.messaging.MessagingException;
 
@@ -25,13 +25,13 @@ import org.springframework.messaging.MessagingException;
  * @since 4.0
  */
 @SuppressWarnings("serial")
-public class ChannelResolutionException extends MessagingException {
+public class DestinationResolutionException extends MessagingException {
 
 	/**
 	 * Create a new ChannelResolutionException.
 	 * @param description the description
 	 */
-	public ChannelResolutionException(String description) {
+	public DestinationResolutionException(String description) {
 		super(description);
 	}
 
@@ -40,7 +40,7 @@ public class ChannelResolutionException extends MessagingException {
 	 * @param description the description
 	 * @param cause the root cause (if any)
 	 */
-	public ChannelResolutionException(String description, Throwable cause) {
+	public DestinationResolutionException(String description, Throwable cause) {
 		super(description, cause);
 	}
 

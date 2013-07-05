@@ -22,6 +22,12 @@ package org.springframework.messaging.core;
  */
 public interface DestinationResolver<D> {
 
-	D resolveDestination(String name);
+
+	/**
+	 * @param name
+	 * @return
+	 * @throws DestinationResolutionException
+	 */
+	D resolveDestination(String name) throws DestinationResolutionException;
 
 }
