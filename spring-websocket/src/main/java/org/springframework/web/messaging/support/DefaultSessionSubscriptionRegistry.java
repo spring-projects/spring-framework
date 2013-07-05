@@ -16,6 +16,7 @@
 
 package org.springframework.web.messaging.support;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +62,22 @@ public class DefaultSessionSubscriptionRegistry implements SessionSubscriptionRe
 	public Set<String> getSessionSubscriptions(String sessionId, String destination) {
 		SessionSubscriptionRegistration registration = this.registrations.get(sessionId);
 		return (registration != null) ? registration.getSubscriptionsByDestination(destination) : null;
+	}
+
+	/**
+	 * The default implementation performs a lookup by destination on each registration.
+	 * For a more efficient algorithm consider decorating an instance of this class with
+	 * {@link CachingSessionSubscriptionRegistry}.
+	 */
+	@Override
+	public Set<SessionSubscriptionRegistration> getRegistrationsByDestination(String destination) {
+		Set<SessionSubscriptionRegistration> result = new HashSet<SessionSubscriptionRegistration>();
+		for (SessionSubscriptionRegistration r : this.registrations.values()) {
+			if (r.getSubscriptionsByDestination(destination) != null) {
+				result.add(r);
+			}
+		}
+		return result.isEmpty() ? null : result;
 	}
 
 }

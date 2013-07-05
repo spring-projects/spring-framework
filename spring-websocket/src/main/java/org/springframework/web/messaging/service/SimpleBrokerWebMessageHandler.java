@@ -40,7 +40,7 @@ public class SimpleBrokerWebMessageHandler extends AbstractWebMessageHandler {
 
 	private final MessageChannel clientChannel;
 
-	private CachingSessionSubscriptionRegistry subscriptionRegistry=
+	private SessionSubscriptionRegistry subscriptionRegistry=
 			new CachingSessionSubscriptionRegistry(new DefaultSessionSubscriptionRegistry());
 
 
@@ -56,7 +56,7 @@ public class SimpleBrokerWebMessageHandler extends AbstractWebMessageHandler {
 
 	public void setSubscriptionRegistry(SessionSubscriptionRegistry subscriptionRegistry) {
 		Assert.notNull(subscriptionRegistry, "subscriptionRegistry is required");
-		this.subscriptionRegistry = new CachingSessionSubscriptionRegistry(subscriptionRegistry);
+		this.subscriptionRegistry = subscriptionRegistry;
 	}
 
 	@Override

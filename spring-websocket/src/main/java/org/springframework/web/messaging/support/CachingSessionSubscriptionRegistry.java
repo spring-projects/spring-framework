@@ -28,8 +28,7 @@ import org.springframework.web.messaging.SessionSubscriptionRegistry;
 
 /**
  * A decorator for a {@link SessionSubscriptionRegistry} that intercepts subscriptions
- * being added and removed, and maintains a cache that tracks registrations for a
- * given destination.
+ * being added and removed and maintains a lookup cache of registrations by destination.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -49,7 +48,8 @@ public class CachingSessionSubscriptionRegistry implements SessionSubscriptionRe
 
 	@Override
 	public SessionSubscriptionRegistration getRegistration(String sessionId) {
-		return new CachingSessionSubscriptionRegistration(this.delegate.getRegistration(sessionId));
+		SessionSubscriptionRegistration reg = this.delegate.getRegistration(sessionId);
+		return (reg != null) ? new CachingSessionSubscriptionRegistration(reg) : null;
 	}
 
 	@Override
@@ -71,6 +71,7 @@ public class CachingSessionSubscriptionRegistry implements SessionSubscriptionRe
 		return this.delegate.getSessionSubscriptions(sessionId, destination);
 	}
 
+	@Override
 	public Set<SessionSubscriptionRegistration> getRegistrationsByDestination(String destination) {
 		return this.destinationCache.getRegistrations(destination);
 	}

@@ -33,4 +33,6 @@ public interface SessionSubscriptionRegistry {
 
 	Set<String> getSessionSubscriptions(String sessionId, String destination);
 
+	Set<SessionSubscriptionRegistration> getRegistrationsByDestination(String destination);
+
 }

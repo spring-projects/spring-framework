@@ -16,14 +16,7 @@
 
 package org.springframework.web.messaging.support;
 
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.web.messaging.SessionSubscriptionRegistration;
 import org.springframework.web.messaging.SessionSubscriptionRegistry;
-
-import static org.junit.Assert.*;
 
 
 /**
@@ -31,41 +24,12 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
-public class CachingSessionSubscriptionRegistryTests {
-
-	private CachingSessionSubscriptionRegistry registry;
+public class CachingSessionSubscriptionRegistryTests extends AbstractSessionSubscriptionRegistryTests {
 
 
-	@Before
-	public void setup() {
-		SessionSubscriptionRegistry delegate = new DefaultSessionSubscriptionRegistry();
-		this.registry = new CachingSessionSubscriptionRegistry(delegate);
-	}
-
-	@Test
-	public void getRegistrationsByDestination() {
-
-		SessionSubscriptionRegistration reg1 = this.registry.getOrCreateRegistration("sess1");
-		reg1.addSubscription("/foo", "sub1");
-
-		SessionSubscriptionRegistration reg2 = this.registry.getOrCreateRegistration("sess2");
-		reg2.addSubscription("/foo", "sub1");
-
-		Set<SessionSubscriptionRegistration> actual = this.registry.getRegistrationsByDestination("/foo");
-		assertEquals(2, actual.size());
-		assertTrue(actual.contains(reg1));
-		assertTrue(actual.contains(reg2));
-
-		reg1.removeSubscription("sub1");
-
-		actual = this.registry.getRegistrationsByDestination("/foo");
-		assertEquals("Invalid set of registrations " + actual, 1, actual.size());
-		assertTrue(actual.contains(reg2));
-
-		reg2.removeSubscription("sub1");
-
-		actual = this.registry.getRegistrationsByDestination("/foo");
-		assertNull("Unexpected registrations " + actual, actual);
+	@Override
+	protected SessionSubscriptionRegistry createSessionSubscriptionRegistry() {
+		return new CachingSessionSubscriptionRegistry(new DefaultSessionSubscriptionRegistry());
 	}
 
 }
