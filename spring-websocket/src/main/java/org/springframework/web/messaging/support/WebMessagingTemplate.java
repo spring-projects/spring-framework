@@ -3,13 +3,13 @@ package org.springframework.web.messaging.support;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.messaging.core.AbstractMessagingTemplate;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.MessageType;
 
 
-public class WebMessagingTemplate extends AbstractMessagingTemplate<String> {
+public class WebMessagingTemplate extends AbstractMessageSendingTemplate<String> {
 
 	private final MessageChannel outputChannel;
 

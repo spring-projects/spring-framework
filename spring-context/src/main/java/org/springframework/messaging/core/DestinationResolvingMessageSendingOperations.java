@@ -23,14 +23,13 @@ import org.springframework.messaging.MessagingException;
  * @author Mark Fisher
  * @since 4.0
  */
-public interface MessageReceivingOperations<D> {
+public interface DestinationResolvingMessageSendingOperations<D> extends MessageSendingOperations<D> {
 
-	<P> Message<P> receive() throws MessagingException;
+	<P> void send(String destinationName, Message<P> message) throws MessagingException;
 
-	<P> Message<P> receive(D destination) throws MessagingException;
+	<T> void convertAndSend(String destinationName, T message) throws MessagingException;
 
-	Object receiveAndConvert() throws MessagingException;
-
-	Object receiveAndConvert(D destination) throws MessagingException;
+	<T> void convertAndSend(String destinationName, T message, MessagePostProcessor postProcessor)
+			throws MessagingException;
 
 }

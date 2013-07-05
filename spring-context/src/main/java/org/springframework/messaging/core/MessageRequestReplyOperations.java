@@ -16,20 +16,24 @@
 package org.springframework.messaging.core;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 
 
 /**
  * @author Mark Fisher
  * @since 4.0
  */
-public interface ResolvableDestinationMessageSendingOperations<D> extends MessageSendingOperations<D> {
+public interface MessageRequestReplyOperations<D> {
 
-	<P> void send(String destinationName, Message<P> message) throws MessagingException;
+	Message<?> sendAndReceive(Message<?> requestMessage);
 
-	<T> void convertAndSend(String destinationName, T message) throws MessagingException;
+	Message<?> sendAndReceive(D destination, Message<?> requestMessage);
 
-	<T> void convertAndSend(String destinationName, T message, MessagePostProcessor postProcessor)
-			throws MessagingException;
+	Object convertSendAndReceive(Object request);
+
+	Object convertSendAndReceive(D destination, Object request);
+
+	Object convertSendAndReceive(Object request, MessagePostProcessor requestPostProcessor);
+
+	Object convertSendAndReceive(D destination, Object request, MessagePostProcessor requestPostProcessor);
 
 }
