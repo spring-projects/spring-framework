@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  * <p>This interface is not intended for application developers. It is available
  * to handlers who want to develop their own web workflow.
  *
- * <p>Note: HandlerAdaptger implementators may implement the
+ * <p>Note: HandlerAdapter implementators may implement the
  * {@link org.springframework.core.Ordered} interface to be able to specify a
  * sorting order (and thus a priority) for getting applied by DispatcherServlet.
  * Non-Ordered instances get treated as lowest priority.
