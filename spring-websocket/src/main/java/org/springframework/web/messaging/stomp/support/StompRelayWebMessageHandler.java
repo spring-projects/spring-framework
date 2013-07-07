@@ -59,7 +59,7 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 	private static final String STOMP_RELAY_SYSTEM_SESSION_ID = "stompRelaySystemSessionId";
 
 
-	private MessageChannel clientChannel;
+	private MessageChannel outboundChannel;
 
 	private String relayHost = "127.0.0.1";
 
@@ -85,11 +85,11 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 
 
 	/**
-	 * @param clientChannel the channel to which messages for clients should be sent.
+	 * @param outboundChannel a channel for messages going out to clients
 	 */
-	public StompRelayWebMessageHandler(MessageChannel clientChannel) {
-		Assert.notNull(clientChannel, "clientChannel is required");
-		this.clientChannel = clientChannel;
+	public StompRelayWebMessageHandler(MessageChannel outboundChannel) {
+		Assert.notNull(outboundChannel, "outboundChannel is required");
+		this.outboundChannel = outboundChannel;
 		this.payloadConverter = new CompositeMessageConverter(null);
 	}
 
@@ -387,7 +387,7 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 		}
 
 		protected void sendMessageToClient(Message<?> message) {
-			clientChannel.send(message);
+			outboundChannel.send(message);
 		}
 
 		private void sendError(String sessionId, String errorText) {

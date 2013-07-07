@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.service;
+package org.springframework.web.messaging.service.broker;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.SessionSubscriptionRegistration;
-import org.springframework.web.messaging.SessionSubscriptionRegistry;
-import org.springframework.web.messaging.support.CachingSessionSubscriptionRegistry;
-import org.springframework.web.messaging.support.DefaultSessionSubscriptionRegistry;
+import org.springframework.web.messaging.service.AbstractWebMessageHandler;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 
@@ -38,23 +35,22 @@ import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
  */
 public class SimpleBrokerWebMessageHandler extends AbstractWebMessageHandler {
 
-	private final MessageChannel clientChannel;
+	private final MessageChannel outboundChannel;
 
-	private SessionSubscriptionRegistry subscriptionRegistry=
-			new CachingSessionSubscriptionRegistry(new DefaultSessionSubscriptionRegistry());
+	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
 
 
 	/**
-	 * @param clientChannel the channel to which messages for clients should be sent
+	 * @param outboundChannel the channel to which messages for clients should be sent
 	 * @param observable an Observable to use to manage subscriptions
 	 */
-	public SimpleBrokerWebMessageHandler(MessageChannel clientChannel) {
-		Assert.notNull(clientChannel, "clientChannel is required");
-		this.clientChannel = clientChannel;
+	public SimpleBrokerWebMessageHandler(MessageChannel outboundChannel) {
+		Assert.notNull(outboundChannel, "outboundChannel is required");
+		this.outboundChannel = outboundChannel;
 	}
 
 
-	public void setSubscriptionRegistry(SessionSubscriptionRegistry subscriptionRegistry) {
+	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
 		Assert.notNull(subscriptionRegistry, "subscriptionRegistry is required");
 		this.subscriptionRegistry = subscriptionRegistry;
 	}
@@ -71,13 +67,16 @@ public class SimpleBrokerWebMessageHandler extends AbstractWebMessageHandler {
 			logger.debug("Subscribe " + message);
 		}
 
-		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
-		String sessionId = headers.getSessionId();
-		String subscriptionId = headers.getSubscriptionId();
-		String destination = headers.getDestination();
+		this.subscriptionRegistry.addSubscription(message);
 
-		SessionSubscriptionRegistration registration = this.subscriptionRegistry.getOrCreateRegistration(sessionId);
-		registration.addSubscription(destination, subscriptionId);
+		// TODO: need a way to communicate back if subscription was successfully created or
+		// not in which case an ERROR should be sent back and close the connection
+		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
+	}
+
+	@Override
+	protected void handleUnsubscribe(Message<?> message) {
+		this.subscriptionRegistry.removeSubscription(message);
 	}
 
 	@Override
@@ -89,29 +88,24 @@ public class SimpleBrokerWebMessageHandler extends AbstractWebMessageHandler {
 
 		String destination = WebMessageHeaderAccesssor.wrap(message).getDestination();
 
-		Set<SessionSubscriptionRegistration> registrations =
-				this.subscriptionRegistry.getRegistrationsByDestination(destination);
+		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
 
-		if (registrations == null) {
-			return;
-		}
-
-		for (SessionSubscriptionRegistration registration : registrations) {
-			for (String subscriptionId : registration.getSubscriptionsByDestination(destination)) {
+		for (String sessionId : subscriptions.keySet()) {
+			for (String subscriptionId : subscriptions.get(sessionId)) {
 
 				WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
-				headers.setSessionId(registration.getSessionId());
+				headers.setSessionId(sessionId);
 				headers.setSubscriptionId(subscriptionId);
 
 				Message<?> clientMessage = MessageBuilder.withPayload(
 						message.getPayload()).copyHeaders(headers.toMap()).build();
 
 				try {
-					this.clientChannel.send(clientMessage);
+					this.outboundChannel.send(clientMessage);
 				}
 				catch (Throwable ex) {
 					logger.error("Failed to send message to destination=" + destination +
-							", sessionId=" + registration.getSessionId() + ", subscriptionId=" + subscriptionId, ex);
+							", sessionId=" + sessionId + ", subscriptionId=" + subscriptionId, ex);
 				}
 			}
 		}
@@ -120,7 +114,7 @@ public class SimpleBrokerWebMessageHandler extends AbstractWebMessageHandler {
 	@Override
 	public void handleDisconnect(Message<?> message) {
 		String sessionId = WebMessageHeaderAccesssor.wrap(message).getSessionId();
-		this.subscriptionRegistry.removeRegistration(sessionId);
+		this.subscriptionRegistry.removeSessionSubscriptions(sessionId);
 	}
 
 }

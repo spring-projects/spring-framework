@@ -29,15 +29,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.SessionSubscriptionRegistration;
-import org.springframework.web.messaging.SessionSubscriptionRegistry;
 import org.springframework.web.messaging.converter.CompositeMessageConverter;
 import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
-import org.springframework.web.messaging.support.DefaultSessionSubscriptionRegistry;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -63,8 +59,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
-	private SessionSubscriptionRegistry subscriptionRegistry = new DefaultSessionSubscriptionRegistry();
-
 	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
 
 
@@ -84,10 +78,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	public StompMessageConverter getStompMessageConverter() {
 		return this.stompMessageConverter;
-	}
-
-	public void setSubscriptionRegistry(SessionSubscriptionRegistry subscriptionRegistry) {
-		this.subscriptionRegistry = subscriptionRegistry;
 	}
 
 
@@ -179,35 +169,12 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	}
 
 	protected void handleSubscribe(Message<?> message) {
-
-		// TODO: need a way to communicate back if subscription was successfully created or
-		// not in which case an ERROR should be sent back and close the connection
-		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
-
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		String sessionId = headers.getSessionId();
-		String destination = headers.getDestination();
-
-		SessionSubscriptionRegistration registration = this.subscriptionRegistry.getOrCreateRegistration(sessionId);
-		registration.addSubscription(destination, headers.getSubscriptionId());
 	}
 
 	protected void handleUnsubscribe(Message<?> message) {
-
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		String sessionId = headers.getSessionId();
-		String subscriptionId = headers.getSubscriptionId();
-
-		SessionSubscriptionRegistration registration = this.subscriptionRegistry.getRegistration(sessionId);
-		if (registration == null) {
-			logger.warn("Subscripton=" + subscriptionId + " for session=" + sessionId + " not found");
-			return;
-		}
-		registration.removeSubscription(subscriptionId);
 	}
 
 	protected void handleDisconnect(Message<?> message) {
-
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
@@ -230,7 +197,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 
 		this.sessions.remove(session.getId());
-		this.subscriptionRegistry.removeRegistration(session.getId());
 
 		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.create(MessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
@@ -254,25 +220,22 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 		String sessionId = headers.getSessionId();
 		if (sessionId == null) {
+			// TODO: failed message delivery mechanism
 			logger.error("No \"sessionId\" header in message: " + message);
+			return;
 		}
 
 		WebSocketSession session = this.sessions.get(sessionId);
 		if (session == null) {
-			logger.error("Session not found: " + message);
+			// TODO: failed message delivery mechanism
+			logger.error("WebSocketSession not found for sessionId=" + sessionId);
+			return;
 		}
 
 		if (headers.getSubscriptionId() == null) {
-			String destination = headers.getDestination();
-			Set<String> subs = this.subscriptionRegistry.getSessionSubscriptions(sessionId, destination);
-			if (!CollectionUtils.isEmpty(subs)) {
-				// TODO: send to all subscriptions ids
-				headers.setSubscriptionId(subs.iterator().next());
-			}
-			else {
-				logger.error("No subscription id: " + message);
-				return;
-			}
+			// TODO: failed message delivery mechanism
+			logger.error("No subscription id: " + message);
+			return;
 		}
 
 		byte[] payload;

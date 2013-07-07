@@ -28,6 +28,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.messaging.MessageType;
+import org.springframework.web.messaging.service.broker.SimpleBrokerWebMessageHandler;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 import static org.junit.Assert.*;
@@ -89,29 +90,29 @@ public class SimpleBrokerWebMessageHandlerTests {
 	@Test
 	public void subcribeDisconnectPublish() {
 
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess1", "sub1", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess1", "sub2", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess1", "sub3", "/bar"));
+		String sess1 = "sess1";
+		String sess2 = "sess2";
 
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess2", "sub1", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess2", "sub2", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess2", "sub3", "/bar"));
+		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess1, "sub1", "/foo"));
+		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess1, "sub2", "/foo"));
+		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess1, "sub3", "/bar"));
+
+		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess2, "sub1", "/foo"));
+		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess2, "sub2", "/foo"));
+		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess2, "sub3", "/bar"));
 
 		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.create(MessageType.DISCONNECT);
-		headers.setSessionId("sess1");
+		headers.setSessionId(sess1);
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
 		this.messageHandler.handleDisconnect(message);
 
 		this.messageHandler.handlePublish(createMessage("/foo", "message1"));
 		this.messageHandler.handlePublish(createMessage("/bar", "message2"));
 
-		verify(this.clientChannel, times(6)).send(this.messageCaptor.capture());
-		assertCapturedMessage("sess1", "sub1", "/foo");
-		assertCapturedMessage("sess1", "sub2", "/foo");
-		assertCapturedMessage("sess2", "sub1", "/foo");
-		assertCapturedMessage("sess2", "sub2", "/foo");
-		assertCapturedMessage("sess1", "sub3", "/bar");
-		assertCapturedMessage("sess2", "sub3", "/bar");
+		verify(this.clientChannel, times(3)).send(this.messageCaptor.capture());
+		assertCapturedMessage(sess2, "sub1", "/foo");
+		assertCapturedMessage(sess2, "sub2", "/foo");
+		assertCapturedMessage(sess2, "sub3", "/bar");
 	}
 
 

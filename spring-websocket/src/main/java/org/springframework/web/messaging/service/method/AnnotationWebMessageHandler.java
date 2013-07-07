@@ -57,9 +57,9 @@ import org.springframework.web.method.HandlerMethodSelector;
 public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 		implements ApplicationContextAware, InitializingBean {
 
-	private final MessageChannel clientChannel;
+	private final MessageChannel inboundChannel;
 
-	private final MessageChannel brokerChannel;
+	private final MessageChannel outboundChannel;
 
 	private List<MessageConverter> messageConverters;
 
@@ -79,11 +79,15 @@ public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 	private ReturnValueHandlerComposite returnValueHandlers = new ReturnValueHandlerComposite();
 
 
-	public AnnotationWebMessageHandler(MessageChannel clientChannel, MessageChannel brokerChannel) {
-		Assert.notNull(clientChannel, "clientChannel is required");
-		Assert.notNull(brokerChannel, "brokerChannel is required");
-		this.clientChannel = clientChannel;
-		this.brokerChannel = brokerChannel;
+	/**
+	 * @param inboundChannel a channel for processing incoming messages from clients
+	 * @param outboundChannel a channel for messages going out to clients
+	 */
+	public AnnotationWebMessageHandler(MessageChannel inboundChannel, MessageChannel outboundChannel) {
+		Assert.notNull(inboundChannel, "inboundChannel is required");
+		Assert.notNull(outboundChannel, "outboundChannel is required");
+		this.inboundChannel = inboundChannel;
+		this.outboundChannel = outboundChannel;
 	}
 
 	public void setMessageConverters(List<MessageConverter> converters) {
@@ -105,11 +109,11 @@ public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.brokerChannel));
+		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.inboundChannel));
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
 
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.clientChannel));
-		this.returnValueHandlers.addHandler(new PayloadReturnValueHandler(this.clientChannel));
+		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.outboundChannel));
+		this.returnValueHandlers.addHandler(new PayloadReturnValueHandler(this.outboundChannel));
 	}
 
 	protected void initHandlerMethods() {

@@ -30,12 +30,12 @@ import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
  */
 public class MessageReturnValueHandler implements ReturnValueHandler {
 
-	private MessageChannel clientChannel;
+	private MessageChannel outboundChannel;
 
 
-	public MessageReturnValueHandler(MessageChannel clientChannel) {
-		Assert.notNull(clientChannel, "clientChannel is required");
-		this.clientChannel = clientChannel;
+	public MessageReturnValueHandler(MessageChannel outboundChannel) {
+		Assert.notNull(outboundChannel, "outboundChannel is required");
+		this.outboundChannel = outboundChannel;
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
-		Assert.notNull(this.clientChannel, "No clientChannel to send messages to");
+		Assert.notNull(this.outboundChannel, "No clientChannel to send messages to");
 
 		Message<?> returnMessage = (Message<?>) returnValue;
 		if (message == null) {
@@ -70,7 +70,7 @@ public class MessageReturnValueHandler implements ReturnValueHandler {
 		returnMessage = MessageBuilder.withPayload(
 				returnMessage.getPayload()).copyHeaders(returnHeaders.toMap()).build();
 
-		this.clientChannel.send(returnMessage);
+		this.outboundChannel.send(returnMessage);
  	}
 
 }

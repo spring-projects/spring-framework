@@ -28,12 +28,12 @@ import org.springframework.util.Assert;
  */
 public class MessageChannelArgumentResolver implements ArgumentResolver {
 
-	private MessageChannel messageBrokerChannel;
+	private MessageChannel inboundChannel;
 
 
-	public MessageChannelArgumentResolver(MessageChannel messageBrokerChannel) {
-		Assert.notNull(messageBrokerChannel, "messageBrokerChannel is required");
-		this.messageBrokerChannel = messageBrokerChannel;
+	public MessageChannelArgumentResolver(MessageChannel inboundChannel) {
+		Assert.notNull(inboundChannel, "inboundChannel is required");
+		this.inboundChannel = inboundChannel;
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class MessageChannelArgumentResolver implements ArgumentResolver {
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		return this.messageBrokerChannel;
+		return this.inboundChannel;
 	}
 
 }

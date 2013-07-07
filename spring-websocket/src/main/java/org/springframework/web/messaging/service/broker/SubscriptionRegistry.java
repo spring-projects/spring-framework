@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging;
+package org.springframework.web.messaging.service.broker;
 
-import java.util.Set;
+import org.springframework.messaging.Message;
+import org.springframework.util.MultiValueMap;
+
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface SessionSubscriptionRegistration {
+public interface SubscriptionRegistry {
 
+	  void addSubscription(Message<?> subscribeMessage);
 
-	String getSessionId();
+	  void removeSubscription(Message<?> unsubscribeMessage);
 
-	void addSubscription(String destination, String subscriptionId);
+	  void removeSessionSubscriptions(String sessionId);
 
-	/**
-	 * @param subscriptionId the subscription to remove
-	 * @return the destination to which the subscriptionId was registered, or {@code null}
-	 *         if no matching subscriptionId was found
-	 */
-	String removeSubscription(String subscriptionId);
-
-	Set<String> getSubscriptionsByDestination(String destination);
-
-	Set<String> getDestinations();
+	  MultiValueMap<String, String> findSubscriptions(Message<?> message);
 
 }

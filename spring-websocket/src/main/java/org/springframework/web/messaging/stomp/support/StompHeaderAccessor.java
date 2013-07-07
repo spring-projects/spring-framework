@@ -97,7 +97,7 @@ public class StompHeaderAccessor extends WebMessageHeaderAccesssor {
 		if (contentType != null) {
 			super.setContentType(MediaType.parseMediaType(contentType));
 		}
-		if (StompCommand.SUBSCRIBE.equals(getStompCommand())) {
+		if (StompCommand.SUBSCRIBE.equals(getStompCommand()) || StompCommand.UNSUBSCRIBE.equals(getStompCommand())) {
 			if (getFirstNativeHeader(STOMP_ID) != null) {
 				super.setSubscriptionId(getFirstNativeHeader(STOMP_ID));
 			}
