@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.aop.support.AopUtils;
@@ -36,6 +37,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -166,7 +168,14 @@ public class ScheduledAnnotationBeanPostProcessor
 							if (embeddedValueResolver != null) {
 								cron = embeddedValueResolver.resolveStringValue(cron);
 							}
-							registrar.addCronTask(new CronTask(runnable, cron));
+							String timezoneId = annotation.timezone();
+							if (!"".equals(timezoneId)) {
+								TimeZone timezone = TimeZone.getTimeZone(timezoneId);
+								Assert.isTrue(timezoneId.equals(timezone.getID()), "Invalid timezone \"" + timezoneId + "\" - given timezone ID could not be understood.");
+								registrar.addCronTask(new CronTask(runnable, new CronTrigger(cron, timezone)));
+							} else {
+								registrar.addCronTask(new CronTask(runnable, cron));
+							}
 						}
 						// At this point we don't need to differentiate between initial delay set or not anymore
 						if (initialDelay < 0) {
