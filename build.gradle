@@ -313,7 +313,6 @@ project("spring-context") {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
 	}
 	repositories {
-		mavenLocal() // temporary workaround for locally installed (latest) reactor
 		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
 }
@@ -498,7 +497,6 @@ project("spring-websocket") {
 	repositories {
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
-		mavenLocal() // temporary workaround for locally installed (latest) reactor
 		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
 }
