@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,10 +26,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 
 /**
@@ -163,10 +166,10 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * on the output message. It then calls {@link #writeInternal}.
 	 */
 	@Override
-	public final void write(T t, MediaType contentType, HttpOutputMessage outputMessage)
+	public final void write(final T t, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		HttpHeaders headers = outputMessage.getHeaders();
+		final HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 				contentType = getDefaultContentType(t);
@@ -181,8 +184,36 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				headers.setContentLength(contentLength);
 			}
 		}
-		writeInternal(t, outputMessage);
-		outputMessage.getBody().flush();
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage =
+					(StreamingHttpOutputMessage) outputMessage;
+
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(final OutputStream outputStream) throws IOException {
+					writeInternal(t, new HttpOutputMessage() {
+						@Override
+						public OutputStream getBody() throws IOException {
+							return outputStream;
+						}
+
+						@Override
+						public HttpHeaders getHeaders() {
+							return headers;
+						}
+
+						@Override
+						public Cookies getCookies() {
+							return null;
+						}
+					});
+				}
+			});
+		}
+		else {
+			writeInternal(t, outputMessage);
+			outputMessage.getBody().flush();
+		}
 	}
 
 	/**
