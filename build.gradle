@@ -266,6 +266,9 @@ project("spring-instrument") {
 	jar {
 		manifest.attributes["Premain-Class"] =
 			"org.springframework.instrument.InstrumentationSavingAgent"
+		manifest.attributes["Can-Redefine-Classes"] = "true"
+		manifest.attributes["Can-Retransform-Classes"] = "true"
+		manifest.attributes["Can-Set-Native-Method-Prefix"] = "false"
 	}
 }
 
