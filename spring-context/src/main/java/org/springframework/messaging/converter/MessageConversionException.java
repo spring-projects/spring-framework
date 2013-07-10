@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.messaging.converter;
+package org.springframework.messaging.converter;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;

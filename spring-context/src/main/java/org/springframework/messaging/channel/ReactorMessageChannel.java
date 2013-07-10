@@ -26,10 +26,10 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
 import reactor.core.Reactor;
-import reactor.fn.Consumer;
-import reactor.fn.Event;
-import reactor.fn.registry.Registration;
-import reactor.fn.selector.ObjectSelector;
+import reactor.event.Event;
+import reactor.event.registry.Registration;
+import reactor.event.selector.ObjectSelector;
+import reactor.function.Consumer;
 
 
 /**

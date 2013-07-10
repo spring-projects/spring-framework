@@ -17,21 +17,17 @@ package org.springframework.web.messaging.stomp.support;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.converter.CompositeMessageConverter;
-import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.stomp.StompConversionException;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
@@ -59,8 +55,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
 
-	private MessageConverter payloadConverter = new CompositeMessageConverter(null);
-
 
 	/**
 	 * @param outputChannel the channel to which incoming STOMP/WebSocket messages should
@@ -72,14 +66,9 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	}
 
 
-	public void setMessageConverters(List<MessageConverter> converters) {
-		this.payloadConverter = new CompositeMessageConverter(converters);
-	}
-
 	public StompMessageConverter getStompMessageConverter() {
 		return this.stompMessageConverter;
 	}
-
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -161,7 +150,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 		Message<?> connectedMessage = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(
 				connectedHeaders.toMap()).build();
-		byte[] bytes = getStompMessageConverter().fromMessage(connectedMessage);
+		byte[] bytes = this.stompMessageConverter.fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
@@ -221,36 +210,32 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		String sessionId = headers.getSessionId();
 		if (sessionId == null) {
 			// TODO: failed message delivery mechanism
-			logger.error("No \"sessionId\" header in message: " + message);
+			logger.error("Ignoring message, no sessionId header: " + message);
 			return;
 		}
 
 		WebSocketSession session = this.sessions.get(sessionId);
 		if (session == null) {
 			// TODO: failed message delivery mechanism
-			logger.error("WebSocketSession not found for sessionId=" + sessionId);
+			logger.error("Ignoring message, session not found: " + sessionId);
 			return;
 		}
 
 		if (headers.getSubscriptionId() == null) {
 			// TODO: failed message delivery mechanism
-			logger.error("No subscription id: " + message);
+			logger.error("Ignoring message, no subscriptionId header: " + message);
 			return;
 		}
 
-		byte[] payload;
-		try {
-			MediaType contentType = headers.getContentType();
-			payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
-		}
-		catch (Throwable t) {
-			logger.error("Failed to send " + message, t);
+		if (!(message.getPayload() instanceof byte[])) {
+			// TODO: failed message delivery mechanism
+			logger.error("Ignoring message, expected byte[] content: " + message);
 			return;
 		}
 
 		try {
-			Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
-			byte[] bytes = getStompMessageConverter().fromMessage(byteMessage);
+			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+			byte[] bytes = this.stompMessageConverter.fromMessage(message);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
 		catch (Throwable t) {

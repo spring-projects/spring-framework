@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.converter;
 
+import java.lang.reflect.Type;
+
 import org.springframework.messaging.Message;
 
 
@@ -23,10 +25,10 @@ import org.springframework.messaging.Message;
  * @author Mark Fisher
  * @since 4.0
  */
-public interface MessageConverter {
+public interface MessageConverter<T> {
 
-	<T> Message<?> toMessage(T object);
+	<P> Message<P> toMessage(T object);
 
-	<T> T fromMessage(Message<?> message);
+	T fromMessage(Message<?> message, Type targetClass);
 
 }

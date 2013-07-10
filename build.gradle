@@ -301,7 +301,9 @@ project("spring-context") {
 		optional("org.hibernate:hibernate-validator:4.3.0.Final")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
-		optional("reactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
+		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("com.lmax:disruptor:3.1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:javax.inject-tck:1")
 	}
@@ -490,8 +492,9 @@ project("spring-websocket") {
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.4.v20130625")
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.4.v20130625")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // required for SockJS support currently
-		optional("reactor:reactor-core:1.0.0.BUILD-SNAPSHOT") // STOMP message processing
-		optional("reactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")  // STOMP relay to message broker
+		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("org.projectreactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")
+		optional("com.lmax:disruptor:3.1.1")
 	}
 
 	repositories {

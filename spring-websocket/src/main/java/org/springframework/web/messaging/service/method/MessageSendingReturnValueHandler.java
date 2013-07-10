@@ -19,6 +19,7 @@ package org.springframework.web.messaging.service.method;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
@@ -28,47 +29,50 @@ import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageReturnValueHandler implements ReturnValueHandler {
+public class MessageSendingReturnValueHandler implements ReturnValueHandler {
 
 	private MessageChannel outboundChannel;
 
+	private final MessageConverter converter;
 
-	public MessageReturnValueHandler(MessageChannel outboundChannel) {
+
+	public MessageSendingReturnValueHandler(MessageChannel outboundChannel, MessageConverter<?> converter) {
 		Assert.notNull(outboundChannel, "outboundChannel is required");
+		Assert.notNull(converter, "converter is required");
 		this.outboundChannel = outboundChannel;
+		this.converter = converter;
 	}
+
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		// TODO: List<Message> return value
-		Class<?> paramType = returnType.getParameterType();
-		return Message.class.isAssignableFrom(paramType);
+		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
-		Assert.notNull(this.outboundChannel, "No clientChannel to send messages to");
-
-		Message<?> returnMessage = (Message<?>) returnValue;
-		if (message == null) {
+		if (returnValue == null) {
 			return;
 		}
 
-		WebMessageHeaderAccesssor headers = WebMessageHeaderAccesssor.wrap(message);
-		Assert.notNull(headers.getSubscriptionId(), "No subscription id: " + message);
+		WebMessageHeaderAccesssor inputHeaders = WebMessageHeaderAccesssor.wrap(message);
+		Message<?> returnMessage = (returnValue instanceof Message) ? (Message<?>) returnValue : null;
+		Object returnPayload = (returnMessage != null) ? returnMessage.getPayload() : returnValue;
 
-		WebMessageHeaderAccesssor returnHeaders = WebMessageHeaderAccesssor.wrap(returnMessage);
-		returnHeaders.setSessionId(headers.getSessionId());
-		returnHeaders.setSubscriptionId(headers.getSubscriptionId());
+		WebMessageHeaderAccesssor returnHeaders = (returnMessage != null) ?
+				WebMessageHeaderAccesssor.wrap(returnMessage) : WebMessageHeaderAccesssor.create();
 
+		returnHeaders.setSessionId(inputHeaders.getSessionId());
+		returnHeaders.setSubscriptionId(inputHeaders.getSubscriptionId());
 		if (returnHeaders.getDestination() == null) {
-			returnHeaders.setDestination(headers.getDestination());
+			returnHeaders.setDestination(inputHeaders.getDestination());
 		}
 
-		returnMessage = MessageBuilder.withPayload(
-				returnMessage.getPayload()).copyHeaders(returnHeaders.toMap()).build();
+		returnMessage = this.converter.toMessage(returnPayload);
+		returnMessage = MessageBuilder.fromMessage(returnMessage).copyHeaders(returnHeaders.toMap()).build();
 
 		this.outboundChannel.send(returnMessage);
  	}

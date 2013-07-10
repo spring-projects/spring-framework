@@ -46,8 +46,8 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 
 	@Override
 	public Object receiveAndConvert(D destination) {
-		Message<Object> message = this.doReceive(destination);
-		return (message != null) ? this.converter.fromMessage(message) : null;
+		Message<?> message = this.doReceive(destination);
+		return (message != null) ? this.converter.fromMessage(message, null) : null;
 	}
 
 
@@ -86,7 +86,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageSendin
 			requestMessage = postProcessor.postProcessMessage(requestMessage);
 		}
 		Message<?> replyMessage = this.sendAndReceive(destination, requestMessage);
-		return this.converter.fromMessage(replyMessage);
+		return this.converter.fromMessage(replyMessage, null);
 	}
 
 }

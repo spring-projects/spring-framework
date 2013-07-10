@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.converter.DefaultMessageConverter;
+import org.springframework.messaging.converter.SimplePayloadMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.Assert;
 
@@ -34,7 +34,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	private volatile D defaultDestination;
 
-	protected volatile MessageConverter converter = new DefaultMessageConverter();
+	protected volatile MessageConverter converter = new SimplePayloadMessageConverter();
 
 
 	public void setDefaultDestination(D defaultDestination) {
@@ -44,7 +44,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	/**
 	 * Set the {@link MessageConverter} that is to be used to convert
 	 * between Messages and objects for this template.
-	 * <p>The default is {@link DefaultMessageConverter}.
+	 * <p>The default is {@link SimplePayloadMessageConverter}.
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		Assert.notNull(messageConverter, "'messageConverter' must not be null");

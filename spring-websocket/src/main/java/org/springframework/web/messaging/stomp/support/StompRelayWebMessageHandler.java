@@ -27,27 +27,25 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.SmartLifecycle;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.messaging.MessageType;
-import org.springframework.web.messaging.converter.CompositeMessageConverter;
-import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractWebMessageHandler;
 import org.springframework.web.messaging.stomp.StompCommand;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 import reactor.core.Environment;
-import reactor.core.Promise;
-import reactor.fn.Consumer;
+import reactor.core.composable.Promise;
+import reactor.function.Consumer;
 import reactor.tcp.TcpClient;
 import reactor.tcp.TcpConnection;
 import reactor.tcp.encoding.DelimitedCodec;
 import reactor.tcp.encoding.StandardCodecs;
 import reactor.tcp.netty.NettyTcpClient;
+import reactor.tcp.spec.TcpClientSpec;
 
 
 /**
@@ -71,8 +69,6 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
-	private MessageConverter payloadConverter;
-
 	private Environment environment;
 
 	private TcpClient<String, String> tcpClient;
@@ -90,7 +86,6 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 	public StompRelayWebMessageHandler(MessageChannel outboundChannel) {
 		Assert.notNull(outboundChannel, "outboundChannel is required");
 		this.outboundChannel = outboundChannel;
-		this.payloadConverter = new CompositeMessageConverter(null);
 	}
 
 
@@ -154,10 +149,6 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 		return this.systemPasscode;
 	}
 
-	public void setMessageConverters(List<MessageConverter> converters) {
-		this.payloadConverter = new CompositeMessageConverter(converters);
-	}
-
 	@Override
 	protected Collection<MessageType> getSupportedMessageTypes() {
 		return null;
@@ -183,9 +174,10 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
+
 			this.environment = new Environment();
-			this.tcpClient = new TcpClient.Spec<String, String>(NettyTcpClient.class)
-					.using(this.environment)
+			this.tcpClient = new TcpClientSpec<String, String>(NettyTcpClient.class)
+					.env(this.environment)
 					.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
 					.connect(this.relayHost, this.relayPort)
 					.get();
@@ -284,10 +276,6 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 		headers.setStompCommandIfNotSet(command);
 
-		if (headers.getSessionId() == null && (StompCommand.SEND.equals(command))) {
-
-		}
-
 		String sessionId = headers.getSessionId();
 		if (sessionId == null) {
 			if (StompCommand.SEND.equals(command)) {
@@ -301,8 +289,7 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 
 		RelaySession session = this.relaySessions.get(sessionId);
 		if (session == null) {
-			// TODO: default (non-user) session for sending messages?
-			logger.warn("No relay session for " + sessionId + ". Message '" + message + "' cannot be forwarded");
+			logger.warn("Session id=" + sessionId + " not found. Message cannot be forwarded: " + message);
 			return;
 		}
 
@@ -438,16 +425,12 @@ public class StompRelayWebMessageHandler extends AbstractWebMessageHandler imple
 			try {
 				headers.setStompCommandIfNotSet(StompCommand.SEND);
 
-				MediaType contentType = headers.getContentType();
-				byte[] payload = payloadConverter.convertToPayload(message.getPayload(), contentType);
-				Message<?> byteMessage = MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
-
 				if (logger.isTraceEnabled()) {
-					logger.trace("Forwarding message " + byteMessage);
+					logger.trace("Forwarding message " + message);
 				}
 
-				byte[] bytesToWrite = stompMessageConverter.fromMessage(byteMessage);
-				connection.send(new String(bytesToWrite, Charset.forName("UTF-8")));
+				byte[] bytes = stompMessageConverter.fromMessage(message);
+				connection.send(new String(bytes, Charset.forName("UTF-8")));
 			}
 			catch (Throwable ex) {
 				logger.error("Failed to forward message " + message, ex);

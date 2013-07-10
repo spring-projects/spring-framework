@@ -16,16 +16,11 @@
 
 package org.springframework.web.messaging.service.method;
 
-import java.util.List;
-
 import org.springframework.core.MethodParameter;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.util.Assert;
 import org.springframework.web.messaging.annotation.MessageBody;
-import org.springframework.web.messaging.converter.CompositeMessageConverter;
-import org.springframework.web.messaging.converter.MessageConversionException;
-import org.springframework.web.messaging.converter.MessageConverter;
-import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
 
 
 /**
@@ -34,11 +29,12 @@ import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
  */
 public class MessageBodyArgumentResolver implements ArgumentResolver {
 
-	private final MessageConverter converter;
+	private final MessageConverter<?> converter;
 
 
-	public MessageBodyArgumentResolver(List<MessageConverter> converters) {
-		this.converter = new CompositeMessageConverter(converters);
+	public MessageBodyArgumentResolver(MessageConverter<?> converter) {
+		Assert.notNull(converter, "converter is required");
+		this.converter = converter;
 	}
 
 	@Override
@@ -52,19 +48,16 @@ public class MessageBodyArgumentResolver implements ArgumentResolver {
 		Object arg = null;
 
 		MessageBody annot = parameter.getParameterAnnotation(MessageBody.class);
-		MediaType contentType = (MediaType) message.getHeaders().get(WebMessageHeaderAccesssor.CONTENT_TYPE);
 
 		if (annot == null || annot.required()) {
-			Class<?> sourceType = message.getPayload().getClass();
-			Class<?> parameterType = parameter.getParameterType();
-			if (parameterType.isAssignableFrom(sourceType)) {
+			Class<?> sourceClass = message.getPayload().getClass();
+			Class<?> targetClass = parameter.getParameterType();
+			if (targetClass.isAssignableFrom(sourceClass)) {
 				return message.getPayload();
 			}
-			else if (byte[].class.equals(sourceType)) {
-				return this.converter.convertFromPayload(parameterType, contentType, (byte[]) message.getPayload());
-			}
 			else {
-				throw new MessageConversionException(message, "Unexpected payload type", null);
+				// TODO: use content-type header
+				return this.converter.fromMessage(message, targetClass);
 			}
 		}
 

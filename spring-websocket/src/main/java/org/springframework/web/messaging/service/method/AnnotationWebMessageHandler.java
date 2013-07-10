@@ -35,6 +35,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.annotation.MessageMapping;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -42,7 +43,6 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.messaging.MessageType;
 import org.springframework.web.messaging.annotation.SubscribeEvent;
 import org.springframework.web.messaging.annotation.UnsubscribeEvent;
-import org.springframework.web.messaging.converter.MessageConverter;
 import org.springframework.web.messaging.service.AbstractWebMessageHandler;
 import org.springframework.web.messaging.support.MessageHolder;
 import org.springframework.web.messaging.support.WebMessageHeaderAccesssor;
@@ -61,7 +61,7 @@ public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 
 	private final MessageChannel outboundChannel;
 
-	private List<MessageConverter> messageConverters;
+	private MessageConverter<?> messageConverter;
 
 	private ApplicationContext applicationContext;
 
@@ -90,8 +90,11 @@ public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 		this.outboundChannel = outboundChannel;
 	}
 
-	public void setMessageConverters(List<MessageConverter> converters) {
-		this.messageConverters = converters;
+	/**
+	 * TODO: multiple converters with 'content-type' header
+	 */
+	public void setMessageConverter(MessageConverter<?> converter) {
+		this.messageConverter = converter;
 	}
 
 	@Override
@@ -109,11 +112,10 @@ public class AnnotationWebMessageHandler extends AbstractWebMessageHandler
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new MessageChannelArgumentResolver(this.inboundChannel));
-		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
+		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverter));
 
-		this.returnValueHandlers.addHandler(new MessageReturnValueHandler(this.outboundChannel));
-		this.returnValueHandlers.addHandler(new PayloadReturnValueHandler(this.outboundChannel));
+		this.returnValueHandlers.addHandler(
+				new MessageSendingReturnValueHandler(this.outboundChannel, this.messageConverter));
 	}
 
 	protected void initHandlerMethods() {

@@ -15,6 +15,8 @@
  */
 package org.springframework.messaging.converter;
 
+import java.lang.reflect.Type;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -23,19 +25,16 @@ import org.springframework.messaging.support.MessageBuilder;
  * @author Mark Fisher
  * @since 4.0
  */
-public class DefaultMessageConverter implements MessageConverter {
+public class SimplePayloadMessageConverter implements MessageConverter<Object> {
 
 	@Override
-	public <T> Message<?> toMessage(T object) {
-		System.out.println("converting " + object + " to message");
+	public Message<Object> toMessage(Object object) {
 		return MessageBuilder.withPayload(object).build();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T fromMessage(Message<?> message) {
-		System.out.println("converting " + message + " to object");
-		return (T) message.getPayload();
+	public Object fromMessage(Message<?> message, Type targetClass) {
+		return message.getPayload();
 	}
 
 }
