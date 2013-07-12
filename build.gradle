@@ -301,9 +301,6 @@ project("spring-context") {
 		optional("org.hibernate:hibernate-validator:4.3.0.Final")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
-		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
-		optional("com.lmax:disruptor:3.1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:javax.inject-tck:1")
 	}
@@ -314,6 +311,25 @@ project("spring-context") {
 	test {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
 	}
+}
+
+project("spring-messaging") {
+	description = "Spring Messaging"
+
+	dependencies {
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		compile(project(":spring-context"))
+		optional(project(":spring-web")) // TODO: MediaType/HandlerMethod/EHMR
+		optional(project(":spring-websocket"))
+		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
+		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("org.projectreactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")
+		optional("com.lmax:disruptor:3.1.1")
+		testCompile("commons-dbcp:commons-dbcp:1.2.2")
+		testCompile("javax.inject:javax.inject-tck:1")
+	}
+
 	repositories {
 		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
@@ -472,7 +488,7 @@ project("spring-web") {
 }
 
 project("spring-websocket") {
-	description = "Spring WebSocket support"
+	description = "Spring WebSocket"
 
 	dependencies {
 		compile(project(":spring-core"))
@@ -492,15 +508,11 @@ project("spring-websocket") {
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.4.v20130625")
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.4.v20130625")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // required for SockJS support currently
-		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
-		optional("org.projectreactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")
-		optional("com.lmax:disruptor:3.1.1")
 	}
 
 	repositories {
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
-		maven { url 'http://repo.springsource.org/snapshot' } // reactor
 	}
 }
 
