@@ -81,7 +81,11 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 		try {
 			String payload = textMessage.getPayload();
-			Message<?> message = this.stompMessageConverter.toMessage(payload, session.getId());
+			Message<?> message = this.stompMessageConverter.toMessage(payload);
+
+			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			headers.setSessionId(session.getId());
+			headers.setUser(session.getPrincipal());
 
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
@@ -96,18 +100,8 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 				if (SimpMessageType.CONNECT.equals(messageType)) {
 					handleConnect(session, message);
 				}
-				else if (SimpMessageType.MESSAGE.equals(messageType)) {
-					handlePublish(message);
-				}
-				else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-					handleSubscribe(message);
-				}
-				else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-					handleUnsubscribe(message);
-				}
-				else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-					handleDisconnect(message);
-				}
+
+				message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
 				this.outputChannel.send(message);
 			}
 			catch (Throwable t) {
@@ -124,7 +118,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		}
 	}
 
-	protected void handleConnect(final WebSocketSession session, Message<?> message) throws IOException {
+	protected void handleConnect(WebSocketSession session, Message<?> message) throws IOException {
 
 		StompHeaderAccessor connectHeaders = StompHeaderAccessor.wrap(message);
 		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
@@ -150,18 +144,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 				connectedHeaders.toMap()).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
-	}
-
-	protected void handlePublish(Message<?> stompMessage) {
-	}
-
-	protected void handleSubscribe(Message<?> message) {
-	}
-
-	protected void handleUnsubscribe(Message<?> message) {
-	}
-
-	protected void handleDisconnect(Message<?> message) {
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {

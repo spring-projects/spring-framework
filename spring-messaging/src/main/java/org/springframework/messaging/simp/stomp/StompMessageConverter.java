@@ -46,7 +46,7 @@ public class StompMessageConverter {
 	/**
 	 * @param stompContent a complete STOMP message (without the trailing 0x00) as byte[] or String.
 	 */
-	public Message<?> toMessage(Object stompContent, String sessionId) {
+	public Message<?> toMessage(Object stompContent) {
 
 		byte[] byteContent = null;
 		if (stompContent instanceof String) {
@@ -91,12 +91,10 @@ public class StompMessageConverter {
 			}
 		}
 
-		StompHeaderAccessor stompHeaders = StompHeaderAccessor.create(command, headers);
-		stompHeaders.setSessionId(sessionId);
-
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
 
+		StompHeaderAccessor stompHeaders = StompHeaderAccessor.create(command, headers);
 		return MessageBuilder.withPayload(payload).copyHeaders(stompHeaders.toMap()).build();
 	}
 

@@ -37,15 +37,16 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.support.MessageBodyArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageExceptionHandlerMethodResolver;
-import org.springframework.messaging.handler.method.MessageArgumentResolverComposite;
 import org.springframework.messaging.handler.method.InvocableMessageHandlerMethod;
+import org.springframework.messaging.handler.method.MessageArgumentResolverComposite;
 import org.springframework.messaging.handler.method.MessageReturnValueHandlerComposite;
-import org.springframework.messaging.simp.annotation.SubscribeEvent;
-import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
-import org.springframework.messaging.simp.annotation.support.MessageSendingReturnValueHandler;
 import org.springframework.messaging.simp.MessageHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.annotation.SubscribeEvent;
+import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
+import org.springframework.messaging.simp.annotation.support.MessageSendingReturnValueHandler;
+import org.springframework.messaging.simp.annotation.support.PrincipalMessageArgumentResolver;
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -113,6 +114,7 @@ public class AnnotationSimpMessageHandler extends AbstractSimpMessageHandler
 
 		initHandlerMethods();
 
+		this.argumentResolvers.addResolver(new PrincipalMessageArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverter));
 
 		this.returnValueHandlers.addHandler(

@@ -24,9 +24,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.stomp.StompMessageConverter;
 
 import static org.junit.Assert.*;
 
@@ -51,17 +48,16 @@ public class StompMessageConverterTests {
 		String accept = "accept-version:1.1\n";
 		String host = "host:github.org\n";
 		String frame = "\n\n\nCONNECT\n" + accept + host + "\n";
-		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"));
 
 		assertEquals(0, message.getPayload().length);
 
 		MessageHeaders headers = message.getHeaders();
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		Map<String, Object> map = stompHeaders.toMap();
-		assertEquals(6, map.size());
+		assertEquals(5, map.size());
 		assertNotNull(map.get(MessageHeaders.ID));
 		assertNotNull(map.get(MessageHeaders.TIMESTAMP));
-		assertNotNull(map.get(SimpMessageHeaderAccessor.SESSION_ID));
 		assertNotNull(map.get(SimpMessageHeaderAccessor.NATIVE_HEADERS));
 		assertNotNull(map.get(SimpMessageHeaderAccessor.MESSAGE_TYPE));
 		assertNotNull(map.get(SimpMessageHeaderAccessor.PROTOCOL_MESSAGE_TYPE));
@@ -71,7 +67,6 @@ public class StompMessageConverterTests {
 
 		assertEquals(SimpMessageType.CONNECT, stompHeaders.getMessageType());
 		assertEquals(StompCommand.CONNECT, stompHeaders.getStompCommand());
-		assertEquals("session-123", stompHeaders.getSessionId());
 		assertNotNull(headers.get(MessageHeaders.ID));
 		assertNotNull(headers.get(MessageHeaders.TIMESTAMP));
 
@@ -89,7 +84,7 @@ public class StompMessageConverterTests {
 		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
 		String frame = "CONNECT\n" + accept + host + "\n";
 		@SuppressWarnings("unchecked")
-		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"), "session-123");
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"));
 
 		assertEquals(0, message.getPayload().length);
 
@@ -111,7 +106,7 @@ public class StompMessageConverterTests {
 		String host = "host:github.org\n";
 		String test = "CONNECT\r\n" + accept.replaceAll("\n", "\r\n") + host.replaceAll("\n", "\r\n") + "\r\n";
 		@SuppressWarnings("unchecked")
-		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(test.getBytes("UTF-8"));
 
 		assertEquals(0, message.getPayload().length);
 
@@ -133,7 +128,7 @@ public class StompMessageConverterTests {
 		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
 		String test = "\n\n\nCONNECT\r\n" + accept.replaceAll("\n", "\r\n") + host.replaceAll("\n", "\r\n") + "\r\n";
 		@SuppressWarnings("unchecked")
-		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(test.getBytes("UTF-8"), "session-123");
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(test.getBytes("UTF-8"));
 
 		assertEquals(0, message.getPayload().length);
 

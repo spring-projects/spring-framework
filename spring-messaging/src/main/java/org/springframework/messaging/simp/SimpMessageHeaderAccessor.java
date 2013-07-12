@@ -16,12 +16,14 @@
 
 package org.springframework.messaging.simp;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -43,9 +45,6 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static final String DESTINATIONS = "destinations";
 
-	// TODO
-	public static final String CONTENT_TYPE = "contentType";
-
 	public static final String MESSAGE_TYPE = "messageType";
 
 	public static final String PROTOCOL_MESSAGE_TYPE = "protocolMessageType";
@@ -53,6 +52,8 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	public static final String SESSION_ID = "sessionId";
 
 	public static final String SUBSCRIPTION_ID = "subscriptionId";
+
+	public static final String USER = "user";
 
 
 	/**
@@ -140,12 +141,11 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	}
 
 	public MediaType getContentType() {
-		return (MediaType) getHeader(CONTENT_TYPE);
+		return (MediaType) getHeader(MessageHeaders.CONTENT_TYPE);
 	}
 
 	public void setContentType(MediaType contentType) {
-		Assert.notNull(contentType, "contentType is required");
-		setHeader(CONTENT_TYPE, contentType);
+		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
 	}
 
 	public String getSubscriptionId() {
@@ -162,6 +162,14 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public void setSessionId(String sessionId) {
 		setHeader(SESSION_ID, sessionId);
+	}
+
+	public Principal getUser() {
+		return (Principal) getHeader(USER);
+	}
+
+	public void setUser(Principal principal) {
+		setHeader(USER, principal);
 	}
 
 }

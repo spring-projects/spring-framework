@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.handler.AbstractSimpMessageHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.handler.AbstractSimpMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -350,7 +350,7 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 				return;
 			}
 
-			Message<?> message = stompMessageConverter.toMessage(stompFrame, this.sessionId);
+			Message<?> message = stompMessageConverter.toMessage(stompFrame);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Reading message " + message);
 			}
@@ -369,6 +369,10 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 				}
 				relaySessions.remove(this.sessionId);
 			}
+
+			headers.setSessionId(this.sessionId);
+			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+
 			sendMessageToClient(message);
 		}
 
