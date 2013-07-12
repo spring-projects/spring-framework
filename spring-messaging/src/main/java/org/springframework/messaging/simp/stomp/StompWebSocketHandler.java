@@ -47,7 +47,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
-	private MessageChannel outputChannel;
+	private MessageChannel clientInputChannel;
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
@@ -55,12 +55,12 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 
 	/**
-	 * @param outputChannel the channel to which incoming STOMP/WebSocket messages should
+	 * @param clientInputChannel the channel to which incoming STOMP/WebSocket messages should
 	 *        be sent to
 	 */
-	public StompWebSocketHandler(MessageChannel outputChannel) {
-		Assert.notNull(outputChannel, "clientInputChannel is required");
-		this.outputChannel = outputChannel;
+	public StompWebSocketHandler(MessageChannel clientInputChannel) {
+		Assert.notNull(clientInputChannel, "clientInputChannel is required");
+		this.clientInputChannel = clientInputChannel;
 	}
 
 
@@ -70,7 +70,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		Assert.notNull(this.outputChannel, "No output channel for STOMP messages.");
+		Assert.notNull(this.clientInputChannel, "No output channel for STOMP messages.");
 		this.sessions.put(session.getId(), session);
 	}
 
@@ -102,7 +102,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 				}
 
 				message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
-				this.outputChannel.send(message);
+				this.clientInputChannel.send(message);
 			}
 			catch (Throwable t) {
 				logger.error("Terminating STOMP session due to failure to send message: ", t);
@@ -170,7 +170,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
 		headers.setSessionId(session.getId());
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
-		this.outputChannel.send(message);
+		this.clientInputChannel.send(message);
 	}
 
 	/**

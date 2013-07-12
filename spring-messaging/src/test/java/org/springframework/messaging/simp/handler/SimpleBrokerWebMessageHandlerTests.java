@@ -28,7 +28,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.SimpleBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
@@ -60,7 +59,8 @@ public class SimpleBrokerWebMessageHandlerTests {
 
 	@Test
 	public void getSupportedMessageTypes() {
-		assertEquals(Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE, SimpMessageType.UNSUBSCRIBE),
+		assertEquals(Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE,
+				SimpMessageType.UNSUBSCRIBE, SimpMessageType.DISCONNECT),
 				this.messageHandler.getSupportedMessageTypes());
 	}
 

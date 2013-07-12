@@ -56,7 +56,8 @@ public class SimpleBrokerMessageHandler extends AbstractSimpMessageHandler {
 
 	@Override
 	protected Collection<SimpMessageType> getSupportedMessageTypes() {
-		return Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
+		return Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE,
+				SimpMessageType.UNSUBSCRIBE, SimpMessageType.DISCONNECT);
 	}
 
 	@Override
