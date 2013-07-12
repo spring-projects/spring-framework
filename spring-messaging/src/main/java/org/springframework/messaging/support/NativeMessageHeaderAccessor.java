@@ -118,7 +118,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		return null;
 	}
 
-	protected String getFirstNativeHeader(String headerName) {
+	public String getFirstNativeHeader(String headerName) {
 		List<String> values = getNativeHeader(headerName);
 		return CollectionUtils.isEmpty(values) ? null : values.get(0);
 	}
@@ -133,7 +133,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 	}
 
-	protected void setNativeHeader(String name, String value) {
+	public void setNativeHeader(String name, String value) {
 		this.nativeHeaders.set(name, value);
 	}
 

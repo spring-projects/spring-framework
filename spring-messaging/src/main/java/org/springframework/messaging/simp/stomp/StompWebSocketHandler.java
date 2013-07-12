@@ -43,6 +43,13 @@ import reactor.util.Assert;
  */
 public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implements MessageHandler {
 
+	/**
+	 * The name of the header set on the CONNECTED frame indicating the name of the user
+	 * connected authenticated on the WebSocket session.
+	 */
+	public static final String CONNECTED_USER_HEADER = "user-name";
+
+
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
@@ -137,6 +144,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
 		}
 		connectedHeaders.setHeartbeat(0,0); // TODO
+
+		if (session.getPrincipal() != null) {
+			connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER, session.getPrincipal().getName());
+		}
 
 		// TODO: security
 
