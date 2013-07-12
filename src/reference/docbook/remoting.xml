@@ -63,6 +63,11 @@
           <classname>JmsInvokerServiceExporter</classname> and
           <classname>JmsInvokerProxyFactoryBean</classname> classes.</para>
         </listitem>
+
+        <listitem>
+          <para><emphasis>AMQP</emphasis>. Remoting using AMQP as the underlying
+          protocol is supported by the Spring AMQP project.</para>
+        </listitem>
       </itemizedlist></para>
 
     <para>While discussing the remoting capabilities of Spring, we'll use the
@@ -857,6 +862,13 @@ public class Client {
         extends it to support JMS.</emphasis>
       </quote></para>
     </section>
+  </section>
+
+  <section xml:id="remoting-amqp">
+    <title>AMQP</title>
+    <para>Refer to the <link
+       xl:href="http://static.springsource.org/spring-amqp/reference/html/amqp.html#remoting">Spring AMQP Reference Document
+    'Spring Remoting with AMQP' section</link> for more information.</para>
   </section>
 
   <section xml:id="remoting-autodection-remote-interfaces">
