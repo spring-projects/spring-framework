@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -202,9 +203,21 @@ public class MessageHeaderAccessor {
 		}
 	}
 
+	public UUID getId() {
+		return (UUID) getHeader(MessageHeaders.ID);
+	}
+
+	public Long getTimestamp() {
+		return (Long) getHeader(MessageHeaders.TIMESTAMP);
+	}
+
 	public void setReplyChannel(MessageChannel replyChannel) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel);
 	}
+
+	public Object getReplyChannel() {
+        return getHeader(MessageHeaders.REPLY_CHANNEL);
+    }
 
 	public void setReplyChannelName(String replyChannelName) {
 		setHeader(MessageHeaders.REPLY_CHANNEL, replyChannelName);
@@ -213,6 +226,10 @@ public class MessageHeaderAccessor {
 	public void setErrorChannel(MessageChannel errorChannel) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannel);
 	}
+
+    public Object getErrorChannel() {
+        return getHeader(MessageHeaders.ERROR_CHANNEL);
+    }
 
 	public void setErrorChannelName(String errorChannelName) {
 		setHeader(MessageHeaders.ERROR_CHANNEL, errorChannelName);

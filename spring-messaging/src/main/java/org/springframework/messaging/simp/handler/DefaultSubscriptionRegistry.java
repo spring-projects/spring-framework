@@ -74,9 +74,14 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	}
 
 	@Override
-	public void removeSessionSubscriptions(String sessionId) {
+	public void unregisterAllSubscriptions(String sessionId) {
 		SessionSubscriptionInfo info = this.subscriptionRegistry.removeSubscriptions(sessionId);
-		this.destinationCache.removeSessionSubscriptions(info);
+		if (info != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unregistering subscriptions for sessionId=" + sessionId);
+			}
+			this.destinationCache.removeSessionSubscriptions(info);
+		}
 	}
 
 	@Override

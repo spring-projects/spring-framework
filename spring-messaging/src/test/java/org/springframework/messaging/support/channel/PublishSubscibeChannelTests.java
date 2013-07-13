@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.support.channel;
 
-import java.util.concurrent.Executor;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,18 +24,19 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.channel.PublishSubscribeChannel;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
- * Tests for {@link PublishSubscribeChannel}.
+ * Tests for {@link TaskExecutorSubscribableChannel}.
  *
  * @author Phillip Webb
  */
@@ -47,7 +46,7 @@ public class PublishSubscibeChannelTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 
-	private PublishSubscribeChannel channel = new PublishSubscribeChannel();
+	private TaskExecutorSubscribableChannel channel = new TaskExecutorSubscribableChannel();
 
 	@Mock
 	private MessageHandler handler;
@@ -89,8 +88,8 @@ public class PublishSubscibeChannelTests {
 
 	@Test
 	public void sendWithExecutor() throws Exception {
-		Executor executor = mock(Executor.class);
-		this.channel = new PublishSubscribeChannel(executor);
+		TaskExecutor executor = mock(TaskExecutor.class);
+		this.channel = new TaskExecutorSubscribableChannel(executor);
 		this.channel.subscribe(this.handler);
 		this.channel.send(this.message);
 		verify(executor).execute(this.runnableCaptor.capture());

@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
@@ -176,10 +175,11 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 
-		this.sessions.remove(session.getId());
+		String sessionId = session.getId();
+		this.sessions.remove(sessionId);
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
-		headers.setSessionId(session.getId());
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
+		headers.setSessionId(sessionId);
 		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
 		this.clientInputChannel.send(message);
 	}

@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.simp.handler;
 
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +28,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 
@@ -58,25 +55,18 @@ public class SimpleBrokerWebMessageHandlerTests {
 
 
 	@Test
-	public void getSupportedMessageTypes() {
-		assertEquals(Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE,
-				SimpMessageType.UNSUBSCRIBE, SimpMessageType.DISCONNECT),
-				this.messageHandler.getSupportedMessageTypes());
-	}
-
-	@Test
 	public void subcribePublish() {
 
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess1", "sub1", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess1", "sub2", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess1", "sub3", "/bar"));
+		this.messageHandler.handleMessage(createSubscriptionMessage("sess1", "sub1", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage("sess1", "sub2", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage("sess1", "sub3", "/bar"));
 
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess2", "sub1", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess2", "sub2", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage("sess2", "sub3", "/bar"));
+		this.messageHandler.handleMessage(createSubscriptionMessage("sess2", "sub1", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage("sess2", "sub2", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage("sess2", "sub3", "/bar"));
 
-		this.messageHandler.handlePublish(createMessage("/foo", "message1"));
-		this.messageHandler.handlePublish(createMessage("/bar", "message2"));
+		this.messageHandler.handleMessage(createMessage("/foo", "message1"));
+		this.messageHandler.handleMessage(createMessage("/bar", "message2"));
 
 		verify(this.clientChannel, times(6)).send(this.messageCaptor.capture());
 		assertCapturedMessage("sess1", "sub1", "/foo");
@@ -93,21 +83,21 @@ public class SimpleBrokerWebMessageHandlerTests {
 		String sess1 = "sess1";
 		String sess2 = "sess2";
 
-		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess1, "sub1", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess1, "sub2", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess1, "sub3", "/bar"));
+		this.messageHandler.handleMessage(createSubscriptionMessage(sess1, "sub1", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage(sess1, "sub2", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage(sess1, "sub3", "/bar"));
 
-		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess2, "sub1", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess2, "sub2", "/foo"));
-		this.messageHandler.handleSubscribe(createSubscriptionMessage(sess2, "sub3", "/bar"));
+		this.messageHandler.handleMessage(createSubscriptionMessage(sess2, "sub1", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage(sess2, "sub2", "/foo"));
+		this.messageHandler.handleMessage(createSubscriptionMessage(sess2, "sub3", "/bar"));
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
 		headers.setSessionId(sess1);
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
-		this.messageHandler.handleDisconnect(message);
+		this.messageHandler.handleMessage(message);
 
-		this.messageHandler.handlePublish(createMessage("/foo", "message1"));
-		this.messageHandler.handlePublish(createMessage("/bar", "message2"));
+		this.messageHandler.handleMessage(createMessage("/foo", "message1"));
+		this.messageHandler.handleMessage(createMessage("/bar", "message2"));
 
 		verify(this.clientChannel, times(3)).send(this.messageCaptor.capture());
 		assertCapturedMessage(sess2, "sub1", "/foo");

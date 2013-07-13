@@ -19,13 +19,14 @@ package org.springframework.messaging.simp.handler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +35,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.support.MessageBodyArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageExceptionHandlerMethodResolver;
@@ -60,8 +63,9 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotationSimpMessageHandler extends AbstractSimpMessageHandler
-		implements ApplicationContextAware, InitializingBean {
+public class AnnotationSimpMessageHandler implements MessageHandler, ApplicationContextAware, InitializingBean {
+
+	private static final Log logger = LogFactory.getLog(AnnotationSimpMessageHandler.class);
 
 	private final MessageChannel outboundChannel;
 
@@ -102,11 +106,6 @@ public class AnnotationSimpMessageHandler extends AbstractSimpMessageHandler
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
-	}
-
-	@Override
-	protected Collection<SimpMessageType> getSupportedMessageTypes() {
-		return Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
 	}
 
 	@Override
@@ -183,18 +182,20 @@ public class AnnotationSimpMessageHandler extends AbstractSimpMessageHandler
 	}
 
 	@Override
-	public void handlePublish(Message<?> message) {
-		handleMessageInternal(message, this.messageMethods);
-	}
+	public void handleMessage(Message<?> message) throws MessagingException {
 
-	@Override
-	public void handleSubscribe(Message<?> message) {
-		handleMessageInternal(message, this.subscribeMethods);
-	}
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		SimpMessageType messageType = headers.getMessageType();
 
-	@Override
-	public void handleUnsubscribe(Message<?> message) {
-		handleMessageInternal(message, this.unsubscribeMethods);
+		if (SimpMessageType.MESSAGE.equals(messageType)) {
+			handleMessageInternal(message, this.messageMethods);
+		}
+		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+			handleMessageInternal(message, this.subscribeMethods);
+		}
+		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+			handleMessageInternal(message, this.unsubscribeMethods);
+		}
 	}
 
 	private void handleMessageInternal(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {

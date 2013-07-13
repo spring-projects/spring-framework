@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 
@@ -84,21 +85,31 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	 */
 	private StompHeaderAccessor(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
 		super(command.getMessageType(), command, externalSourceHeaders);
-		initSimpMessageHeaders();
+		if (externalSourceHeaders != null) {
+			setSimpMessageHeaders(externalSourceHeaders);
+		}
 	}
 
-	private void initSimpMessageHeaders() {
-		String destination = getFirstNativeHeader(DESTINATION);
-		if (destination != null) {
-			super.setDestination(destination);
+	private void setSimpMessageHeaders(Map<String, List<String>> extHeaders) {
+		List<String> values = extHeaders.get(StompHeaderAccessor.DESTINATION);
+		if (!CollectionUtils.isEmpty(values)) {
+			super.setDestination(values.get(0));
 		}
-		String contentType = getFirstNativeHeader(CONTENT_TYPE);
-		if (contentType != null) {
-			super.setContentType(MediaType.parseMediaType(contentType));
+		values = extHeaders.get(StompHeaderAccessor.CONTENT_TYPE);
+		if (!CollectionUtils.isEmpty(values)) {
+			super.setContentType(MediaType.parseMediaType(values.get(0)));
 		}
-		if (StompCommand.SUBSCRIBE.equals(getStompCommand()) || StompCommand.UNSUBSCRIBE.equals(getStompCommand())) {
-			if (getFirstNativeHeader(STOMP_ID) != null) {
-				super.setSubscriptionId(getFirstNativeHeader(STOMP_ID));
+		StompCommand command = getStompCommand();
+		if (StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command)) {
+			values = extHeaders.get(StompHeaderAccessor.STOMP_ID);
+			if (!CollectionUtils.isEmpty(values)) {
+				super.setSubscriptionId(values.get(0));
+			}
+		}
+		else if (StompCommand.MESSAGE.equals(command)) {
+			values = extHeaders.get(StompHeaderAccessor.SUBSCRIPTION);
+			if (!CollectionUtils.isEmpty(values)) {
+				super.setSubscriptionId(values.get(0));
 			}
 		}
 	}

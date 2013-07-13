@@ -19,19 +19,37 @@ package org.springframework.messaging.simp.handler;
 import org.springframework.messaging.Message;
 import org.springframework.util.MultiValueMap;
 
-
 /**
+ * A registry of subscription by session that allows looking up subscriptions.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SubscriptionRegistry {
 
-	  void addSubscription(Message<?> subscribeMessage);
+	/**
+	 * Register a subscription represented by the given message.
+	 * @param subscribeMessage the subscription request
+	 */
+	void registerSubscription(Message<?> subscribeMessage);
 
-	  void removeSubscription(Message<?> unsubscribeMessage);
+	/**
+	 * Unregister a subscription.
+	 * @param unsubscribeMessage the request to unsubscribe
+	 */
+	void unregisterSubscription(Message<?> unsubscribeMessage);
 
-	  void removeSessionSubscriptions(String sessionId);
+	/**
+	 * Remove all subscriptions associated with the given sessionId.
+	 */
+	void unregisterAllSubscriptions(String sessionId);
 
-	  MultiValueMap<String, String> findSubscriptions(Message<?> message);
+	/**
+	 * Find all subscriptions that should receive the given message.
+	 *
+	 * @param message the message
+	 * @return a {@link MultiValueMap} from sessionId to subscriptionId's, possibly empty.
+	 */
+	MultiValueMap<String, String> findSubscriptions(Message<?> message);
 
 }

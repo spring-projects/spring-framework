@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.DefaultSubscriptionRegistry;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MultiValueMap;
 
@@ -49,30 +48,30 @@ public class DefaultSubscriptionRegistryTests {
 
 
 	@Test
-	public void addSubscriptionInvalidInput() {
+	public void registerSubscriptionInvalidInput() {
 
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String dest = "/foo";
 
-		this.registry.addSubscription(subscribeMessage(null, subsId, dest));
+		this.registry.registerSubscription(subscribeMessage(null, subsId, dest));
 		assertEquals(0, this.registry.findSubscriptions(message(dest)).size());
 
-		this.registry.addSubscription(subscribeMessage(sessId, null, dest));
+		this.registry.registerSubscription(subscribeMessage(sessId, null, dest));
 		assertEquals(0, this.registry.findSubscriptions(message(dest)).size());
 
-		this.registry.addSubscription(subscribeMessage(sessId, subsId, null));
+		this.registry.registerSubscription(subscribeMessage(sessId, subsId, null));
 		assertEquals(0, this.registry.findSubscriptions(message(dest)).size());
 	}
 
 	@Test
-	public void addSubscription() {
+	public void registerSubscription() {
 
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String dest = "/foo";
 
-		this.registry.addSubscription(subscribeMessage(sessId, subsId, dest));
+		this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
 		assertEquals("Expected one element " + actual, 1, actual.size());
@@ -80,14 +79,14 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void addSubscriptionOneSession() {
+	public void registerSubscriptionOneSession() {
 
 		String sessId = "sess01";
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
 		String dest = "/foo";
 
 		for (String subId : subscriptionIds) {
-			this.registry.addSubscription(subscribeMessage(sessId, subId, dest));
+			this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
 		}
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
@@ -97,7 +96,7 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void addSubscriptionMultipleSessions() {
+	public void registerSubscriptionMultipleSessions() {
 
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
@@ -105,7 +104,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		for (String sessId : sessIds) {
 			for (String subsId : subscriptionIds) {
-				this.registry.addSubscription(subscribeMessage(sessId, subsId, dest));
+				this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
 			}
 		}
 
@@ -118,14 +117,14 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void addSubscriptionWithDestinationPattern() {
+	public void registerSubscriptionWithDestinationPattern() {
 
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String destPattern = "/topic/PRICE.STOCK.*.IBM";
 		String dest = "/topic/PRICE.STOCK.NASDAQ.IBM";
 
-		this.registry.addSubscription(subscribeMessage(sessId, subsId, destPattern));
+		this.registry.registerSubscription(subscribeMessage(sessId, subsId, destPattern));
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
 		assertEquals("Expected one element " + actual, 1, actual.size());
@@ -133,13 +132,13 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void addSubscriptionWithDestinationPatternRegex() {
+	public void registerSubscriptionWithDestinationPatternRegex() {
 
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String destPattern = "/topic/PRICE.STOCK.*.{ticker:(IBM|MSFT)}";
 
-		this.registry.addSubscription(subscribeMessage(sessId, subsId, destPattern));
+		this.registry.registerSubscription(subscribeMessage(sessId, subsId, destPattern));
 		Message<?> message = message("/topic/PRICE.STOCK.NASDAQ.IBM");
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message);
 
@@ -159,7 +158,7 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void removeSubscription() {
+	public void unregisterSubscription() {
 
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
@@ -167,13 +166,13 @@ public class DefaultSubscriptionRegistryTests {
 
 		for (String sessId : sessIds) {
 			for (String subsId : subscriptionIds) {
-				this.registry.addSubscription(subscribeMessage(sessId, subsId, dest));
+				this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
 			}
 		}
 
-		this.registry.removeSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(0)));
-		this.registry.removeSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(1)));
-		this.registry.removeSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(2)));
+		this.registry.unregisterSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(0)));
+		this.registry.unregisterSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(1)));
+		this.registry.unregisterSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(2)));
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
@@ -183,7 +182,7 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void removeSessionSubscriptions() {
+	public void unregisterAllSubscriptions() {
 
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
@@ -191,17 +190,23 @@ public class DefaultSubscriptionRegistryTests {
 
 		for (String sessId : sessIds) {
 			for (String subsId : subscriptionIds) {
-				this.registry.addSubscription(subscribeMessage(sessId, subsId, dest));
+				this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
 			}
 		}
 
-		this.registry.removeSessionSubscriptions(sessIds.get(0));
-		this.registry.removeSessionSubscriptions(sessIds.get(1));
+		this.registry.unregisterAllSubscriptions(sessIds.get(0));
+		this.registry.unregisterAllSubscriptions(sessIds.get(1));
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
 		assertEquals("Expected three elements " + actual, 1, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
+	}
+
+	@Test
+	public void unregisterAllSubscriptionsNoMatch() {
+		this.registry.unregisterAllSubscriptions("bogus");
+		// no exceptions
 	}
 
 	@Test

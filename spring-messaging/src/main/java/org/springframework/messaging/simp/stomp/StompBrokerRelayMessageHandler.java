@@ -26,12 +26,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.AbstractSimpMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -51,12 +52,15 @@ import reactor.tcp.spec.TcpClientSpec;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompRelayMessageHandler extends AbstractSimpMessageHandler implements SmartLifecycle {
+public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLifecycle {
+
+	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandler.class);
 
 	private static final String STOMP_RELAY_SYSTEM_SESSION_ID = "stompRelaySystemSessionId";
 
+	private final MessageChannel outboundChannel;
 
-	private MessageChannel outboundChannel;
+	private final String[] destinationPrefixes;
 
 	private String relayHost = "127.0.0.1";
 
@@ -81,12 +85,15 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 
 	/**
 	 * @param outboundChannel a channel for messages going out to clients
+	 * @param destinationPrefixes the broker supported destination prefixes; destinations
+	 *        that do not match the given prefix are ignored.
 	 */
-	public StompRelayMessageHandler(MessageChannel outboundChannel) {
+	public StompBrokerRelayMessageHandler(MessageChannel outboundChannel, Collection<String> destinationPrefixes) {
 		Assert.notNull(outboundChannel, "outboundChannel is required");
+		Assert.notNull(destinationPrefixes, "destinationPrefixes is required");
 		this.outboundChannel = outboundChannel;
+		this.destinationPrefixes = destinationPrefixes.toArray(new String[destinationPrefixes.size()]);
 	}
-
 
 	/**
 	 * Set the STOMP message broker host.
@@ -148,9 +155,11 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 		return this.systemPasscode;
 	}
 
-	@Override
-	protected Collection<SimpMessageType> getSupportedMessageTypes() {
-		return null;
+	/**
+	 * @return the configured STOMP broker supported destination prefixes.
+	 */
+	public String[] getDestinationPrefixes() {
+		return destinationPrefixes;
 	}
 
 	@Override
@@ -173,44 +182,66 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
-
+			if (logger.isDebugEnabled()) {
+				logger.debug("Starting STOMP broker relay");
+			}
 			this.environment = new Environment();
 			this.tcpClient = new TcpClientSpec<String, String>(NettyTcpClient.class)
 					.env(this.environment)
 					.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
 					.connect(this.relayHost, this.relayPort)
 					.get();
-
-			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-			headers.setAcceptVersion("1.1,1.2");
-			headers.setLogin(this.systemLogin);
-			headers.setPasscode(this.systemPasscode);
-			headers.setHeartbeat(0,0); // TODO
-			Message<?> message = MessageBuilder.withPayload(
-					new byte[0]).copyHeaders(headers.toNativeHeaderMap()).build();
-
-			RelaySession session = new RelaySession(message, headers) {
-				@Override
-				protected void sendMessageToClient(Message<?> message) {
-					// TODO: check for ERROR frame (reconnect?)
-				}
-			};
-			this.relaySessions.put(STOMP_RELAY_SYSTEM_SESSION_ID, session);
-
+			openSystemSession();
 			this.running = true;
 		}
+	}
+
+	/**
+	 * Open a "system" session for sending messages from parts of the application
+	 * not assoicated with a client STOMP session.
+	 */
+	private void openSystemSession() {
+
+		RelaySession session = new RelaySession(STOMP_RELAY_SYSTEM_SESSION_ID) {
+			@Override
+			protected void sendMessageToClient(Message<?> message) {
+				// ignore, only used to send messages
+				// TODO: ERROR frame/reconnect
+			}
+		};
+		this.relaySessions.put(STOMP_RELAY_SYSTEM_SESSION_ID, session);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		headers.setAcceptVersion("1.1,1.2");
+		headers.setLogin(this.systemLogin);
+		headers.setPasscode(this.systemPasscode);
+		headers.setHeartbeat(0,0); // TODO
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Sending STOMP CONNECT frame to initialize \"system\" TCP connection");
+		}
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+		session.open(message);
 	}
 
 	@Override
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Stopping STOMP broker relay");
+			}
 			this.running = false;
 			try {
 				this.tcpClient.close().await(5000, TimeUnit.MILLISECONDS);
+			}
+			catch (Throwable t) {
+				logger.error("Failed to close reactor TCP client", t);
+			}
+			try {
 				this.environment.shutdown();
 			}
-			catch (InterruptedException e) {
-				// ignore
+			catch (Throwable t) {
+				logger.error("Failed to shut down reactor Environment", t);
 			}
 		}
 	}
@@ -224,75 +255,87 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 	}
 
 	@Override
-	public void handleConnect(Message<?> message) {
-		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
-		String sessionId = stompHeaders.getSessionId();
-		if (sessionId == null) {
-			logger.error("No sessionId in message " + message);
-			return;
-		}
-		RelaySession relaySession = new RelaySession(message, stompHeaders);
-		this.relaySessions.put(sessionId, relaySession);
-	}
-
-	@Override
-	public void handlePublish(Message<?> message) {
-		forwardMessage(message, StompCommand.SEND);
-	}
-
-	@Override
-	public void handleSubscribe(Message<?> message) {
-		forwardMessage(message, StompCommand.SUBSCRIBE);
-	}
-
-	@Override
-	public void handleUnsubscribe(Message<?> message) {
-		forwardMessage(message, StompCommand.UNSUBSCRIBE);
-	}
-
-	@Override
-	public void handleDisconnect(Message<?> message) {
-		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
-		if (stompHeaders.getStompCommand() != null) {
-			forwardMessage(message, StompCommand.DISCONNECT);
-		}
-		String sessionId = stompHeaders.getSessionId();
-		if (sessionId == null) {
-			logger.error("No sessionId in message " + message);
-			return;
-		}
-	}
-
-	@Override
-	public void handleOther(Message<?> message) {
-		StompCommand command = (StompCommand) message.getHeaders().get(SimpMessageHeaderAccessor.PROTOCOL_MESSAGE_TYPE);
-		Assert.notNull(command, "Expected STOMP command: " + message.getHeaders());
-		forwardMessage(message, command);
-	}
-
-	private void forwardMessage(Message<?> message, StompCommand command) {
+	public void handleMessage(Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		headers.setStompCommandIfNotSet(command);
-
 		String sessionId = headers.getSessionId();
-		if (sessionId == null) {
-			if (StompCommand.SEND.equals(command)) {
-				sessionId = STOMP_RELAY_SYSTEM_SESSION_ID;
-			}
-			else {
-				logger.error("No sessionId in message " + message);
-				return;
-			}
-		}
+		String destination = headers.getDestination();
+		StompCommand command = headers.getStompCommand();
+		SimpMessageType messageType = headers.getMessageType();
 
-		RelaySession session = this.relaySessions.get(sessionId);
-		if (session == null) {
-			logger.warn("Session id=" + sessionId + " not found. Message cannot be forwarded: " + message);
+		if (!this.running) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("STOMP broker relay not running. Ignoring message id=" + headers.getId());
+			}
 			return;
 		}
 
-		session.forward(message, headers);
+		if (SimpMessageType.MESSAGE.equals(messageType)) {
+			sessionId = (sessionId == null) ? STOMP_RELAY_SYSTEM_SESSION_ID : sessionId;
+			headers.setSessionId(sessionId);
+			command = (command == null) ? StompCommand.SEND : command;
+			headers.setStompCommandIfNotSet(command);
+			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+		}
+
+		if (headers.getStompCommand() == null) {
+			logger.error("Ignoring message, no STOMP command: " + message);
+			return;
+		}
+		if (sessionId == null) {
+			logger.error("Ignoring message, no sessionId: " + message);
+			return;
+		}
+		if (command.requiresDestination() && (destination == null)) {
+			logger.error("Ignoring " + command + " message, no destination: " + message);
+			return;
+		}
+
+		try {
+			if ((destination == null) || supportsDestination(destination)) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Processing message: " + message);
+				}
+				handleInternal(message, messageType, sessionId);
+			}
+		}
+		catch (Throwable t) {
+			logger.error("Failed to handle message " + message, t);
+		}
+	}
+
+	protected boolean supportsDestination(String destination) {
+		for (String prefix : this.destinationPrefixes) {
+			if (destination.startsWith(prefix)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected void handleInternal(Message<?> message, SimpMessageType messageType, String sessionId) {
+		if (SimpMessageType.CONNECT.equals(messageType)) {
+			RelaySession session = new RelaySession(sessionId);
+			this.relaySessions.put(sessionId, session);
+			session.open(message);
+		}
+		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+			RelaySession session = this.relaySessions.remove(sessionId);
+			if (session != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Session already removed, sessionId=" + sessionId);
+				}
+				session.forward(message);
+			}
+		}
+		else {
+			RelaySession session = this.relaySessions.get(sessionId);
+			if (session == null) {
+				logger.warn("Session id=" + sessionId + " not found. Ignoring message: " + message);
+				return;
+			}
+			session.forward(message);
+		}
 	}
 
 
@@ -300,21 +343,23 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 
 		private final String sessionId;
 
-		private final Promise<TcpConnection<String, String>> promise;
-
 		private final BlockingQueue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>(50);
 
-		private final Object monitor = new Object();
+		private Promise<TcpConnection<String, String>> promise;
 
 		private volatile boolean isConnected = false;
 
+		private final Object monitor = new Object();
 
-		public RelaySession(final Message<?> message, final StompHeaderAccessor stompHeaders) {
 
+		public RelaySession(String sessionId) {
+			Assert.notNull(sessionId, "sessionId is required");
+			this.sessionId = sessionId;
+		}
+
+		public void open(final Message<?> message) {
 			Assert.notNull(message, "message is required");
-			Assert.notNull(stompHeaders, "stompHeaders is required");
 
-			this.sessionId = stompHeaders.getSessionId();
 			this.promise = tcpClient.open();
 
 			this.promise.consume(new Consumer<TcpConnection<String,String>>() {
@@ -326,11 +371,9 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 							readStompFrame(stompFrame);
 						}
 					});
-					stompHeaders.setHeartbeat(0,0); // TODO
-					forwardInternal(message, stompHeaders, connection);
+					forwardInternal(message, connection);
 				}
 			});
-
 			this.promise.onError(new Consumer<Throwable>() {
 				@Override
 				public void accept(Throwable ex) {
@@ -339,14 +382,12 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 					sendError(sessionId, "Failed to connect to message broker " + ex.toString());
 				}
 			});
-
-			// TODO: ATM no way to detect closed socket
 		}
 
 		private void readStompFrame(String stompFrame) {
 
+			// heartbeat
 			if (StringUtils.isEmpty(stompFrame)) {
-				// heartbeat?
 				return;
 			}
 
@@ -359,13 +400,13 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 			if (StompCommand.CONNECTED == headers.getStompCommand()) {
 				synchronized(this.monitor) {
 					this.isConnected = true;
-					flushMessages(promise.get());
+					flushMessages(this.promise.get());
 				}
 				return;
 			}
 			if (StompCommand.ERROR == headers.getStompCommand()) {
 				if (logger.isDebugEnabled()) {
-					logger.warn("STOMP ERROR: " + headers.getMessage() + ". Removing session: " + this.sessionId);
+					logger.warn("STOMP ERROR: " + headers.getMessage() + ". Removing session id=" + this.sessionId);
 				}
 				relaySessions.remove(this.sessionId);
 			}
@@ -388,14 +429,14 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 			sendMessageToClient(errorMessage);
 		}
 
-		public void forward(Message<?> message, StompHeaderAccessor headers) {
+		public void forward(Message<?> message) {
 
 			if (!this.isConnected) {
 				synchronized(this.monitor) {
 					if (!this.isConnected) {
 						this.messageQueue.add(message);
 						if (logger.isTraceEnabled()) {
-							logger.trace("Queued message " + message + ", queue size=" + this.messageQueue.size());
+							logger.trace("Not connected yet, message queued, queue size=" + this.messageQueue.size());
 						}
 						return;
 					}
@@ -405,7 +446,7 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 			TcpConnection<String, String> connection = this.promise.get();
 
 			if (this.messageQueue.isEmpty()) {
-				forwardInternal(message, headers, connection);
+				forwardInternal(message, connection);
 			}
 			else {
 				this.messageQueue.add(message);
@@ -413,36 +454,37 @@ public class StompRelayMessageHandler extends AbstractSimpMessageHandler impleme
 			}
 		}
 
-		private void flushMessages(TcpConnection<String, String> connection) {
-			List<Message<?>> messages = new ArrayList<Message<?>>();
-			this.messageQueue.drainTo(messages);
-			for (Message<?> message : messages) {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				if (!forwardInternal(message, headers, connection)) {
-					return;
-				}
-			}
-		}
+		private boolean forwardInternal(Message<?> message, TcpConnection<String, String> connection) {
 
-		private boolean forwardInternal(Message<?> message, StompHeaderAccessor headers, TcpConnection<String, String> connection) {
 			try {
-				headers.setStompCommandIfNotSet(StompCommand.SEND);
-
 				if (logger.isTraceEnabled()) {
-					logger.trace("Forwarding message " + message);
+					logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
 				}
-
 				byte[] bytes = stompMessageConverter.fromMessage(message);
 				connection.send(new String(bytes, Charset.forName("UTF-8")));
 			}
 			catch (Throwable ex) {
-				logger.error("Failed to forward message " + message, ex);
-				connection.close();
+				logger.error("Forward failed message id=" + message.getHeaders().getId(), ex);
+				try {
+					connection.close();
+				}
+				catch (Throwable t) {
+					// ignore
+				}
 				sendError(this.sessionId, "Failed to forward message " + message + ": " + ex.getMessage());
 				return false;
 			}
 			return true;
 		}
-	}
 
+		private void flushMessages(TcpConnection<String, String> connection) {
+			List<Message<?>> messages = new ArrayList<Message<?>>();
+			this.messageQueue.drainTo(messages);
+			for (Message<?> message : messages) {
+				if (!forwardInternal(message, connection)) {
+					return;
+				}
+			}
+		}
+	}
 }

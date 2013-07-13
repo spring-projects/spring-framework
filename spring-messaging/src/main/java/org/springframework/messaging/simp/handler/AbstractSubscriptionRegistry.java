@@ -34,7 +34,7 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 
 
 	@Override
-	public void addSubscription(Message<?> message) {
+	public final void registerSubscription(Message<?> message) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		if (!SimpMessageType.SUBSCRIBE.equals(headers.getMessageType())) {
 			logger.error("Expected SUBSCRIBE message: " + message);
@@ -55,6 +55,9 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 			logger.error("Ignoring destination. No destination in message: " + message);
 			return;
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Subscribe request: " + message);
+		}
 		addSubscriptionInternal(sessionId, subscriptionId, destination, message);
 	}
 
@@ -62,7 +65,7 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 			String destination, Message<?> message);
 
 	@Override
-	public void removeSubscription(Message<?> message) {
+	public final void unregisterSubscription(Message<?> message) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		if (!SimpMessageType.UNSUBSCRIBE.equals(headers.getMessageType())) {
 			logger.error("Expected UNSUBSCRIBE message: " + message);
@@ -78,17 +81,19 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 			logger.error("Ignoring subscription. No subscriptionId in message: " + message);
 			return;
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unubscribe request: " + message);
+		}
 		removeSubscriptionInternal(sessionId, subscriptionId, message);
 	}
 
 	protected abstract void removeSubscriptionInternal(String sessionId, String subscriptionId, Message<?> message);
 
 	@Override
-	public void removeSessionSubscriptions(String sessionId) {
-	}
+	public abstract void unregisterAllSubscriptions(String sessionId);
 
 	@Override
-	public MultiValueMap<String, String> findSubscriptions(Message<?> message) {
+	public final MultiValueMap<String, String> findSubscriptions(Message<?> message) {
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		if (!SimpMessageType.MESSAGE.equals(headers.getMessageType())) {
 			logger.error("Unexpected message type: " + message);
@@ -98,6 +103,9 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 		if (destination == null) {
 			logger.error("Ignoring destination. No destination in message: " + message);
 			return null;
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Find subscriptions, destination=" + headers.getDestination());
 		}
 		return findSubscriptionsInternal(destination, message);
 	}

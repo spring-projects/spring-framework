@@ -16,11 +16,12 @@
 
 package org.springframework.messaging.simp.handler;
 
-import java.util.Arrays;
-import java.util.Collection;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
@@ -32,7 +33,9 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleBrokerMessageHandler extends AbstractSimpMessageHandler {
+public class SimpleBrokerMessageHandler implements MessageHandler {
+
+	private static final Log logger = LogFactory.getLog(SimpleBrokerMessageHandler.class);
 
 	private final MessageChannel outboundChannel;
 
@@ -54,42 +57,36 @@ public class SimpleBrokerMessageHandler extends AbstractSimpMessageHandler {
 		this.subscriptionRegistry = subscriptionRegistry;
 	}
 
-	@Override
-	protected Collection<SimpMessageType> getSupportedMessageTypes() {
-		return Arrays.asList(SimpMessageType.MESSAGE, SimpMessageType.SUBSCRIBE,
-				SimpMessageType.UNSUBSCRIBE, SimpMessageType.DISCONNECT);
+	public SubscriptionRegistry getSubscriptionRegistry() {
+		return this.subscriptionRegistry;
 	}
 
 	@Override
-	public void handleSubscribe(Message<?> message) {
+	public void handleMessage(Message<?> message) throws MessagingException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Subscribe " + message);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		SimpMessageType messageType = headers.getMessageType();
+
+		if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+			// TODO: need a way to communicate back if subscription was successfully created or
+			// not in which case an ERROR should be sent back and close the connection
+			// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
+			this.subscriptionRegistry.registerSubscription(message);
 		}
-
-		this.subscriptionRegistry.addSubscription(message);
-
-		// TODO: need a way to communicate back if subscription was successfully created or
-		// not in which case an ERROR should be sent back and close the connection
-		// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
-	}
-
-	@Override
-	protected void handleUnsubscribe(Message<?> message) {
-		this.subscriptionRegistry.removeSubscription(message);
-	}
-
-	@Override
-	public void handlePublish(Message<?> message) {
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Message received: " + message);
+		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+			this.subscriptionRegistry.unregisterSubscription(message);
 		}
+		else if (SimpMessageType.MESSAGE.equals(messageType)) {
+			sendMessageToSubscribers(headers.getDestination(), message);
+		}
+		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+			String sessionId = SimpMessageHeaderAccessor.wrap(message).getSessionId();
+			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+		}
+	}
 
-		String destination = SimpMessageHeaderAccessor.wrap(message).getDestination();
-
+	protected void sendMessageToSubscribers(String destination, Message<?> message) {
 		MultiValueMap<String,String> subscriptions = this.subscriptionRegistry.findSubscriptions(message);
-
 		for (String sessionId : subscriptions.keySet()) {
 			for (String subscriptionId : subscriptions.get(sessionId)) {
 
@@ -99,7 +96,6 @@ public class SimpleBrokerMessageHandler extends AbstractSimpMessageHandler {
 
 				Message<?> clientMessage = MessageBuilder.withPayload(
 						message.getPayload()).copyHeaders(headers.toMap()).build();
-
 				try {
 					this.outboundChannel.send(clientMessage);
 				}
@@ -110,11 +106,4 @@ public class SimpleBrokerMessageHandler extends AbstractSimpMessageHandler {
 			}
 		}
 	}
-
-	@Override
-	public void handleDisconnect(Message<?> message) {
-		String sessionId = SimpMessageHeaderAccessor.wrap(message).getSessionId();
-		this.subscriptionRegistry.removeSessionSubscriptions(sessionId);
-	}
-
 }

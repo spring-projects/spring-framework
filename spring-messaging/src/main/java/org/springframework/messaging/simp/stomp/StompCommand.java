@@ -16,8 +16,11 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessageType;
 
@@ -49,21 +52,28 @@ public enum StompCommand {
 	ERROR;
 
 
-	private static Map<StompCommand, SimpMessageType> commandToMessageType = new HashMap<StompCommand, SimpMessageType>();
+	private static Map<StompCommand, SimpMessageType> messageTypeLookup = new HashMap<StompCommand, SimpMessageType>();
+
+	private static Set<StompCommand> destinationRequiredLookup =
+			new HashSet<StompCommand>(Arrays.asList(SEND, SUBSCRIBE, MESSAGE));
 
 	static {
-		commandToMessageType.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
-		commandToMessageType.put(StompCommand.STOMP, SimpMessageType.CONNECT);
-		commandToMessageType.put(StompCommand.SEND, SimpMessageType.MESSAGE);
-		commandToMessageType.put(StompCommand.MESSAGE, SimpMessageType.MESSAGE);
-		commandToMessageType.put(StompCommand.SUBSCRIBE, SimpMessageType.SUBSCRIBE);
-		commandToMessageType.put(StompCommand.UNSUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
-		commandToMessageType.put(StompCommand.DISCONNECT, SimpMessageType.DISCONNECT);
+		messageTypeLookup.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
+		messageTypeLookup.put(StompCommand.STOMP, SimpMessageType.CONNECT);
+		messageTypeLookup.put(StompCommand.SEND, SimpMessageType.MESSAGE);
+		messageTypeLookup.put(StompCommand.MESSAGE, SimpMessageType.MESSAGE);
+		messageTypeLookup.put(StompCommand.SUBSCRIBE, SimpMessageType.SUBSCRIBE);
+		messageTypeLookup.put(StompCommand.UNSUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
+		messageTypeLookup.put(StompCommand.DISCONNECT, SimpMessageType.DISCONNECT);
 	}
 
 	public SimpMessageType getMessageType() {
-		SimpMessageType messageType = commandToMessageType.get(this);
-		return (messageType != null) ? messageType : SimpMessageType.OTHER;
+		SimpMessageType type = messageTypeLookup.get(this);
+		return (type != null) ? type : SimpMessageType.OTHER;
+	}
+
+	public boolean requiresDestination() {
+		return destinationRequiredLookup.contains(this);
 	}
 
 }

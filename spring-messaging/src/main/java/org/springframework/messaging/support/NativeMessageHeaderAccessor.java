@@ -50,7 +50,6 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * A constructor for creating new headers, accepting an optional native header map.
 	 */
 	public NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
-		super();
 		this.originalNativeHeaders = nativeHeaders;
 	}
 
