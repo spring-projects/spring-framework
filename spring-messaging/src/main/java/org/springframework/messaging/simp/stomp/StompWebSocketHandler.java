@@ -27,6 +27,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.handler.UserSessionStore;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -48,12 +50,20 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	 */
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
+	/**
+	 * A suffix unique to the current session that a client can append to a destination.
+	 * @see UserDestinationMessageHandler
+	 */
+	public static final String QUEUE_SUFFIX_HEADER = "queue-suffix";
+
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
 	private MessageChannel clientInputChannel;
+
+	private UserSessionStore userSessionStore;
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
@@ -70,14 +80,35 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	}
 
 
+	/**
+	 * Configure a store for saving user session information.
+	 * @param userSessionStore the userSessionStore to use to store user session id's
+	 * @see UserDestinationMessageHandler
+	 */
+	public void setUserSessionResolver(UserSessionStore userSessionStore) {
+		this.userSessionStore = userSessionStore;
+	}
+
+	/**
+	 * @return the userSessionResolver
+	 */
+	public UserSessionStore getUserSessionResolver() {
+		return this.userSessionStore;
+	}
+
 	public StompMessageConverter getStompMessageConverter() {
 		return this.stompMessageConverter;
 	}
+
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Assert.notNull(this.clientInputChannel, "No output channel for STOMP messages.");
 		this.sessions.put(session.getId(), session);
+
+		if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
+			this.userSessionStore.storeUserSessionId(session.getPrincipal().getName(), session.getId());
+		}
 	}
 
 	/**
@@ -146,6 +177,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 		if (session.getPrincipal() != null) {
 			connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER, session.getPrincipal().getName());
+			connectedHeaders.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
 		}
 
 		// TODO: security
@@ -177,6 +209,10 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 		String sessionId = session.getId();
 		this.sessions.remove(sessionId);
+
+		if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
+			this.userSessionStore.deleteUserSessionId(session.getPrincipal().getName(), sessionId);
+		}
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(sessionId);

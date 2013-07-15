@@ -63,9 +63,9 @@ import org.springframework.web.method.HandlerMethodSelector;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class AnnotationSimpMessageHandler implements MessageHandler, ApplicationContextAware, InitializingBean {
+public class AnnotationMethodMessageHandler implements MessageHandler, ApplicationContextAware, InitializingBean {
 
-	private static final Log logger = LogFactory.getLog(AnnotationSimpMessageHandler.class);
+	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
 
 	private final MessageChannel outboundChannel;
 
@@ -91,7 +91,7 @@ public class AnnotationSimpMessageHandler implements MessageHandler, Application
 	 * @param inboundChannel a channel for processing incoming messages from clients
 	 * @param outboundChannel a channel for messages going out to clients
 	 */
-	public AnnotationSimpMessageHandler(MessageChannel outboundChannel) {
+	public AnnotationMethodMessageHandler(MessageChannel outboundChannel) {
 		Assert.notNull(outboundChannel, "outboundChannel is required");
 		this.outboundChannel = outboundChannel;
 	}
