@@ -244,11 +244,11 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		WebSocketSession session = this.sessions.get(sessionId);
 		if (session == null) {
 			// TODO: failed message delivery mechanism
-			logger.error("Ignoring message, session not found: " + sessionId);
+			logger.error("Ignoring message, sessionId not found: " + message);
 			return;
 		}
 
-		if (headers.getSubscriptionId() == null) {
+		if (StompCommand.MESSAGE.equals(headers.getStompCommand()) && (headers.getSubscriptionId() == null)) {
 			// TODO: failed message delivery mechanism
 			logger.error("Ignoring message, no subscriptionId header: " + message);
 			return;

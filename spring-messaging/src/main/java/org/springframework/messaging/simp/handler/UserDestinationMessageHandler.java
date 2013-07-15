@@ -180,7 +180,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 		}
 
 		public String getTargetDestination(String sessionId) {
-			return (this.targetDestination != null) ? this.targetDestination + "/" + sessionId : null;
+			return (this.targetDestination != null) ? this.targetDestination + sessionId : null;
 		}
 	}
 

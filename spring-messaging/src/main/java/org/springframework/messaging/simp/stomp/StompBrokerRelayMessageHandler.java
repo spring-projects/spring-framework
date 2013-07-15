@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -232,7 +231,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			}
 			this.running = false;
 			try {
-				this.tcpClient.close().await(5000, TimeUnit.MILLISECONDS);
+				this.tcpClient.close().await();
 			}
 			catch (Throwable t) {
 				logger.error("Failed to close reactor TCP client", t);
@@ -321,12 +320,13 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			RelaySession session = this.relaySessions.remove(sessionId);
-			if (session != null) {
+			if (session == null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Session already removed, sessionId=" + sessionId);
 				}
-				session.forward(message);
+				return;
 			}
+			session.forward(message);
 		}
 		else {
 			RelaySession session = this.relaySessions.get(sessionId);
@@ -404,16 +404,9 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 				}
 				return;
 			}
-			if (StompCommand.ERROR == headers.getStompCommand()) {
-				if (logger.isDebugEnabled()) {
-					logger.warn("STOMP ERROR: " + headers.getMessage() + ". Removing session id=" + this.sessionId);
-				}
-				relaySessions.remove(this.sessionId);
-			}
 
 			headers.setSessionId(this.sessionId);
 			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
-
 			sendMessageToClient(message);
 		}
 
@@ -455,25 +448,13 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 
 		private boolean forwardInternal(Message<?> message, TcpConnection<String, String> connection) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
+			}
+			byte[] bytes = stompMessageConverter.fromMessage(message);
+			connection.send(new String(bytes, Charset.forName("UTF-8")));
 
-			try {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
-				}
-				byte[] bytes = stompMessageConverter.fromMessage(message);
-				connection.send(new String(bytes, Charset.forName("UTF-8")));
-			}
-			catch (Throwable ex) {
-				logger.error("Forward failed message id=" + message.getHeaders().getId(), ex);
-				try {
-					connection.close();
-				}
-				catch (Throwable t) {
-					// ignore
-				}
-				sendError(this.sessionId, "Failed to forward message " + message + ": " + ex.getMessage());
-				return false;
-			}
+			// TODO: detect if send fails and send ERROR downstream (except on DISCONNECT)
 			return true;
 		}
 
