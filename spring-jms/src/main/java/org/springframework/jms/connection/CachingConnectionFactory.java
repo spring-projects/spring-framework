@@ -182,6 +182,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	/**
 	 * Resets the Session cache as well.
 	 */
+	@Override
 	public void resetConnection() {
 		this.active = false;
 		synchronized (this.cachedSessions) {
@@ -208,6 +209,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	/**
 	 * Checks for a cached Session for the given mode.
 	 */
+	@Override
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
 		LinkedList<Session> sessionList;
 		synchronized (this.cachedSessions) {
@@ -285,6 +287,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			this.sessionList = sessionList;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (methodName.equals("equals")) {
@@ -509,12 +512,14 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 							getDestinationString().equals(otherKey.getDestinationString())));
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
 			return (other == this || destinationEquals((DestinationCacheKey) other));
 		}
 
+		@Override
 		public int hashCode() {
 			// Can't use a more specific hashCode since we can't rely on
 			// this.destination.hashCode() actually being the same value
@@ -543,6 +548,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			this.subscription = subscription;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			if (other == this) {
 				return true;

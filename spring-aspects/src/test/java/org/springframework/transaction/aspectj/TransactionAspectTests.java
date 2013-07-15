@@ -125,6 +125,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		final Exception ex = new Exception();
 		try {
 			testRollback(new TransactionOperationCallback() {
+				@Override
 				public Object performTransactionalOperation() throws Throwable {
 					return annotationOnlyOnClassWithNoInterface.echo(ex);
 				}
@@ -140,6 +141,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		final RuntimeException ex = new RuntimeException();
 		try {
 			testRollback(new TransactionOperationCallback() {
+				@Override
 				public Object performTransactionalOperation() throws Throwable {
 					return annotationOnlyOnClassWithNoInterface.echo(ex);
 				}
@@ -156,6 +158,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		final Exception ex = new Exception();
 		try {
 				testRollback(new TransactionOperationCallback() {
+				@Override
 				public Object performTransactionalOperation() throws Throwable {
 					return new SubclassOfClassWithTransactionalAnnotation().echo(ex);
 				}
@@ -171,6 +174,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		final Exception ex = new Exception();
 		try {
 			testRollback(new TransactionOperationCallback() {
+				@Override
 				public Object performTransactionalOperation() throws Throwable {
 					return new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex);
 				}
@@ -191,6 +195,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 
 		final Exception ex = new Exception();
 		testNotTransactional(new TransactionOperationCallback() {
+			@Override
 			public Object performTransactionalOperation() throws Throwable {
 				return new ImplementsAnnotatedInterface().echo(ex);
 			}
@@ -221,6 +226,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 
 		final Exception rollbackProvokingException = new RuntimeException();
 		testNotTransactional(new TransactionOperationCallback() {
+			@Override
 			public Object performTransactionalOperation() throws Throwable {
 				return new ImplementsAnnotatedInterface().echo(rollbackProvokingException);
 			}
@@ -275,6 +281,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 
 	public static class ImplementsAnnotatedInterface implements ITransactional {
 
+		@Override
 		public Object echo(Throwable t) throws Throwable {
 			if (t != null) {
 				throw t;

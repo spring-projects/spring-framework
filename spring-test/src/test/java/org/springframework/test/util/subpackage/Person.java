@@ -79,6 +79,7 @@ public class Person extends PersistentEntity {
 		this.favoriteNumber = favoriteNumber;
 	}
 
+	@Override
 	public String toString() {
 		return new ToStringCreator(this)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package org.springframework.core.type;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link MethodMetadata} implementation that uses standard reflection
@@ -31,6 +30,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Mark Pollack
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.0
  */
 public class StandardMethodMetadata implements MethodMetadata {
@@ -68,56 +68,57 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 
+	@Override
 	public String getMethodName() {
 		return this.introspectedMethod.getName();
 	}
 
+	@Override
 	public String getDeclaringClassName() {
 		return this.introspectedMethod.getDeclaringClass().getName();
 	}
 
+	@Override
 	public boolean isStatic() {
 		return Modifier.isStatic(this.introspectedMethod.getModifiers());
 	}
 
+	@Override
 	public boolean isFinal() {
 		return Modifier.isFinal(this.introspectedMethod.getModifiers());
 	}
 
+	@Override
 	public boolean isOverridable() {
 		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
-		Annotation[] anns = this.introspectedMethod.getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				return true;
-			}
-			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return AnnotatedElementUtils.isAnnotated(this.introspectedMethod, annotationType);
 	}
 
+	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		Annotation[] anns = this.introspectedMethod.getAnnotations();
-		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
-				return AnnotationUtils.getAnnotationAttributes(
-						ann, true, nestedAnnotationsAsMap);
-			}
-			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return AnnotationUtils.getAnnotationAttributes(
-							metaAnn, true, this.nestedAnnotationsAsMap);
-				}
-			}
-		}
-		return null;
+		return getAnnotationAttributes(annotationType, false);
+	}
+
+	@Override
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+		return AnnotatedElementUtils.getAnnotationAttributes(this.introspectedMethod,
+				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
+	}
+
+	@Override
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
+		return getAllAnnotationAttributes(annotationType, false);
+	}
+
+	@Override
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(
+			String annotationType, boolean classValuesAsString) {
+		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
+				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 }

@@ -191,6 +191,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * creating a new SimpleNamingContext instance.
 	 * @see SimpleNamingContext
 	 */
+	@Override
 	public InitialContextFactory createInitialContextFactory(Hashtable<?,?> environment) {
 		if (activated == null && environment != null) {
 			Object icf = environment.get(Context.INITIAL_CONTEXT_FACTORY);
@@ -224,6 +225,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 		// Default case...
 		return new InitialContextFactory() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public Context getInitialContext(Hashtable<?,?> environment) {
 				return new SimpleNamingContext("", boundObjects, (Hashtable<String, Object>) environment);

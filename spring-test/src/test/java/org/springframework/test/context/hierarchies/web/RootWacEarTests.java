@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.hierarchies.web;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -58,6 +59,7 @@ public class RootWacEarTests extends EarTests {
 	private String root;
 
 
+	@Ignore("Superseded by verifyRootWacConfig()")
 	@Test
 	@Override
 	public void verifyEarConfig() {

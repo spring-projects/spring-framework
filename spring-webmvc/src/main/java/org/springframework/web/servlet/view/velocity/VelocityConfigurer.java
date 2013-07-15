@@ -104,6 +104,7 @@ public class VelocityConfigurer extends VelocityEngineFactory
 		this.velocityEngine = velocityEngine;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -114,6 +115,7 @@ public class VelocityConfigurer extends VelocityEngineFactory
 	 * @see #createVelocityEngine
 	 * @see #setVelocityEngine
 	 */
+	@Override
 	public void afterPropertiesSet() throws IOException, VelocityException {
 		if (this.velocityEngine == null) {
 			this.velocityEngine = createVelocityEngine();
@@ -141,6 +143,7 @@ public class VelocityConfigurer extends VelocityEngineFactory
 		}
 	}
 
+	@Override
 	public VelocityEngine getVelocityEngine() {
 		return this.velocityEngine;
 	}

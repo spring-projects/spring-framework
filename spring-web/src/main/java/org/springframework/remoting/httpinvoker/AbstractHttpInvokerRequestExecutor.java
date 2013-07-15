@@ -113,6 +113,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 		return this.acceptGzipEncoding;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -125,6 +126,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	}
 
 
+	@Override
 	public final RemoteInvocationResult executeRequest(
 			HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws Exception {
 

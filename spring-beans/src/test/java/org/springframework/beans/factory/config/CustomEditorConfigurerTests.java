@@ -38,8 +38,6 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.tests.sample.beans.TestBean;
 
 /**
- * Unit tests for {@link CustomEditorConfigurer}.
- *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 31.07.2004
@@ -78,58 +76,11 @@ public final class CustomEditorConfigurerTests {
 	}
 
 	@Test
-	public void testCustomEditorConfigurerWithEditorInstance() throws ParseException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<String, PropertyEditor> editors = new HashMap<String, PropertyEditor>();
-		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
-		editors.put(Date.class.getName(), new CustomDateEditor(df, true));
-		cec.setCustomEditors(editors);
-		cec.postProcessBeanFactory(bf);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("date", "2.12.1975");
-		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
-		bd1.setPropertyValues(pvs);
-		bf.registerBeanDefinition("tb1", bd1);
-		pvs = new MutablePropertyValues();
-		pvs.add("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
-		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
-		bd2.setPropertyValues(pvs);
-		bf.registerBeanDefinition("tb2", bd2);
-
-		TestBean tb1 = (TestBean) bf.getBean("tb1");
-		assertEquals(df.parse("2.12.1975"), tb1.getDate());
-		TestBean tb2 = (TestBean) bf.getBean("tb2");
-		assertEquals(df.parse("2.12.1975"), tb2.getSomeMap().get("myKey"));
-	}
-
-	@Test
-	public void testCustomEditorConfigurerWithEditorClassName() throws ParseException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<String, String> editors = new HashMap<String, String>();
-		editors.put(Date.class.getName(), MyDateEditor.class.getName());
-		cec.setCustomEditors(editors);
-		cec.postProcessBeanFactory(bf);
-
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("date", "2.12.1975");
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		bd.setPropertyValues(pvs);
-		bf.registerBeanDefinition("tb", bd);
-
-		TestBean tb = (TestBean) bf.getBean("tb");
-		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
-		assertEquals(df.parse("2.12.1975"), tb.getDate());
-	}
-
-	@Test
 	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<String, Class> editors = new HashMap<String, Class>();
-		editors.put(Date.class.getName(), MyDateEditor.class);
+		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<Class<?>, Class<? extends PropertyEditor>>();
+		editors.put(Date.class, MyDateEditor.class);
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);
 
@@ -148,8 +99,8 @@ public final class CustomEditorConfigurerTests {
 	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<String, String> editors = new HashMap<String, String>();
-		editors.put("java.lang.String[]", MyTestEditor.class.getName());
+		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<Class<?>, Class<? extends PropertyEditor>>();
+		editors.put(String[].class, MyTestEditor.class);
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);
 
@@ -162,35 +113,6 @@ public final class CustomEditorConfigurerTests {
 		TestBean tb = (TestBean) bf.getBean("tb");
 		assertTrue(tb.getStringArray() != null && tb.getStringArray().length == 1);
 		assertEquals("test", tb.getStringArray()[0]);
-	}
-
-	@Test
-	public void testCustomEditorConfigurerWithUnresolvableEditor() throws ParseException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<String, String> editors = new HashMap<String, String>();
-		editors.put(Date.class.getName(), "MyNonExistingEditor");
-		editors.put("MyNonExistingType", "MyNonExistingEditor");
-		cec.setCustomEditors(editors);
-		try {
-			cec.postProcessBeanFactory(bf);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			assertTrue(ex.getCause() instanceof ClassNotFoundException);
-		}
-	}
-
-	@Test
-	public void testCustomEditorConfigurerWithIgnoredUnresolvableEditor() throws ParseException {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<String, String> editors = new HashMap<String, String>();
-		editors.put(Date.class.getName(), "MyNonExistingEditor");
-		editors.put("MyNonExistingType", "MyNonExistingEditor");
-		cec.setCustomEditors(editors);
-		cec.setIgnoreUnresolvableEditors(true);
-		cec.postProcessBeanFactory(bf);
 	}
 
 

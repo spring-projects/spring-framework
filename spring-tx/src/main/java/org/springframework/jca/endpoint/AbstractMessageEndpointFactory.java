@@ -123,6 +123,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * @see #setTransactionManager
 	 * @see #setTransactionFactory
 	 */
+	@Override
 	public boolean isDeliveryTransacted(Method method) throws NoSuchMethodException {
 		return (this.transactionFactory != null);
 	}
@@ -132,6 +133,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * <p>This implementation delegates to {@link #createEndpointInternal()},
 	 * initializing the endpoint's XAResource before the endpoint gets invoked.
 	 */
+	@Override
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
 		AbstractMessageEndpoint endpoint = createEndpointInternal();
 		endpoint.initXAResource(xaResource);
@@ -189,6 +191,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * concrete endpoint method should call {@code beforeDelivery} and its
 		 * sibling {@link #afterDelivery()} explicitly, as part of its own processing.
 		 */
+		@Override
 		public void beforeDelivery(Method method) throws ResourceException {
 			this.beforeDeliveryCalled = true;
 			try {
@@ -236,6 +239,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * to call this method after invoking the concrete endpoint. See the
 		 * explanation in {@link #beforeDelivery}'s javadoc.
 		 */
+		@Override
 		public void afterDelivery() throws ResourceException {
 			this.beforeDeliveryCalled = false;
 			Thread.currentThread().setContextClassLoader(this.previousContextClassLoader);
@@ -248,6 +252,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 			}
 		}
 
+		@Override
 		public void release() {
 			try {
 				this.transactionDelegate.setRollbackOnly();

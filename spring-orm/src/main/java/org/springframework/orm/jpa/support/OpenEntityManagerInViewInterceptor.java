@@ -68,6 +68,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	public static final String PARTICIPATE_SUFFIX = ".PARTICIPATE";
 
 
+	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();
@@ -101,9 +102,11 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 		}
 	}
 
+	@Override
 	public void postHandle(WebRequest request, ModelMap model) {
 	}
 
+	@Override
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		if (!decrementParticipateCount(request)) {
 			EntityManagerHolder emHolder = (EntityManagerHolder)
@@ -129,6 +132,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 		return true;
 	}
 
+	@Override
 	public void afterConcurrentHandlingStarted(WebRequest request) {
 		if (!decrementParticipateCount(request)) {
 			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());

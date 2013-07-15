@@ -266,6 +266,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		this.resourceFactory = resourceFactory;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
@@ -284,14 +285,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
+	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
+	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;
 	}
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 

@@ -334,6 +334,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the order in which this {@link org.springframework.web.servlet.ViewResolver}
 	 * is evaluated.
 	 */
+	@Override
 	public int getOrder() {
 		return this.order;
 	}

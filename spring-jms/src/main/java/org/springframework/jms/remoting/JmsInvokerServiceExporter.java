@@ -89,11 +89,13 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 		this.ignoreInvalidRequests = ignoreInvalidRequests;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		this.proxy = getProxyForService();
 	}
 
 
+	@Override
 	public void onMessage(Message requestMessage, Session session) throws JMSException {
 		RemoteInvocation invocation = readRemoteInvocation(requestMessage);
 		if (invocation != null) {

@@ -52,6 +52,7 @@ public class CompositeFilter implements Filter {
 	 *
 	 * @see Filter#init(FilterConfig)
 	 */
+	@Override
 	public void destroy() {
 		for (int i = filters.size(); i-- > 0;) {
 			Filter filter = filters.get(i);
@@ -64,6 +65,7 @@ public class CompositeFilter implements Filter {
 	 *
 	 * @see Filter#init(FilterConfig)
 	 */
+	@Override
 	public void init(FilterConfig config) throws ServletException {
 		for (Filter filter : filters) {
 			filter.init(config);
@@ -77,6 +79,7 @@ public class CompositeFilter implements Filter {
 	 *
 	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
 	 */
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 			ServletException {
 		new VirtualFilterChain(chain, filters).doFilter(request, response);
@@ -92,6 +95,7 @@ public class CompositeFilter implements Filter {
 			this.additionalFilters = additionalFilters;
 		}
 
+		@Override
 		public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
 				ServletException {
 			if (currentPosition == additionalFilters.size()) {

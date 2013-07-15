@@ -52,6 +52,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 	}
 
 
+	@Override
 	public void setValues(PreparedStatement ps) throws SQLException {
 		int parameterPosition = 1;
 		if (this.args != null) {
@@ -96,6 +97,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 		StatementCreatorUtils.setParameterValue(ps, parameterPosition, argType, argValue);
 	}
 
+	@Override
 	public void cleanupParameters() {
 		StatementCreatorUtils.cleanupParameters(this.args);
 	}

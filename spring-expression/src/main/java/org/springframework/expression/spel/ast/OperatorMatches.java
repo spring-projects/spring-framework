@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
- * Implements the matches operator. Matches takes two operands. The first is a string and the second is a java regex. It
- * will return true when getValue() is called if the first operand matches the regex.
+ * Implements the matches operator. Matches takes two operands. The first is a string and
+ * the second is a java regex. It will return true when getValue() is called if the first
+ * operand matches the regex.
  *
  * @author Andy Clement
  * @since 3.0
@@ -39,11 +40,14 @@ public class OperatorMatches extends Operator {
 		super("matches", pos, operands);
 	}
 
+
 	/**
 	 * Check the first operand matches the regex specified as the second operand.
 	 * @param state the expression state
-	 * @return true if the first operand matches the regex specified as the second operand, otherwise false
-	 * @throws EvaluationException if there is a problem evaluating the expression (e.g. the regex is invalid)
+	 * @return true if the first operand matches the regex specified as the second
+	 *         operand, otherwise false
+	 * @throws EvaluationException if there is a problem evaluating the expression (e.g.
+	 *         the regex is invalid)
 	 */
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {

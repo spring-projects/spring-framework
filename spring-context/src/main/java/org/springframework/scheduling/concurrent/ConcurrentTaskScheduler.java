@@ -157,6 +157,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		try {
 			if (this.enterpriseConcurrentScheduler) {
@@ -172,6 +173,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -182,6 +184,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -192,6 +195,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), 0, period, TimeUnit.MILLISECONDS);
@@ -201,6 +205,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -211,6 +216,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), 0, delay, TimeUnit.MILLISECONDS);
@@ -238,11 +244,13 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		public ScheduledFuture schedule(Runnable task, final Trigger trigger) {
 			ManagedScheduledExecutorService executor = (ManagedScheduledExecutorService) scheduledExecutor;
 			return executor.schedule(task, new javax.enterprise.concurrent.Trigger() {
+				@Override
 				public Date getNextRunTime(LastExecution le, Date taskScheduledTime) {
 					return trigger.nextExecutionTime(le != null ?
 							new SimpleTriggerContext(le.getScheduledStart(), le.getRunStart(), le.getRunEnd()) :
 							new SimpleTriggerContext());
 				}
+				@Override
 				public boolean skipRun(LastExecution lastExecution, Date scheduledRunTime) {
 					return false;
 				}

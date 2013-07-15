@@ -48,6 +48,7 @@ public class CompositeIterator<E> implements Iterator<E> {
 		iterators.add(iterator);
 	}
 
+	@Override
 	public boolean hasNext() {
 		inUse = true;
 		for (Iterator<Iterator<E>> it = iterators.iterator(); it.hasNext();) {
@@ -58,6 +59,7 @@ public class CompositeIterator<E> implements Iterator<E> {
 		return false;
 	}
 
+	@Override
 	public E next() {
 		inUse = true;
 		for (Iterator<Iterator<E>> it = iterators.iterator(); it.hasNext();) {
@@ -69,6 +71,7 @@ public class CompositeIterator<E> implements Iterator<E> {
 		throw new NoSuchElementException("Exhaused all iterators");
 	}
 
+	@Override
 	public void remove() {
 		throw new UnsupportedOperationException("Remove is not supported");
 	}

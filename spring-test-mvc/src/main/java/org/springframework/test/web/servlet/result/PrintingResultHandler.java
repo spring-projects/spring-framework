@@ -71,6 +71,7 @@ public class PrintingResultHandler implements ResultHandler {
 	/**
 	 * Print {@link MvcResult} details to the "standard" output stream.
 	 */
+	@Override
 	public final void handle(MvcResult result) throws Exception {
 
 		this.printer.printHeading("MockHttpServletRequest");

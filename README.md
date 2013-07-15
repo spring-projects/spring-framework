@@ -10,8 +10,6 @@ The framework also serves as the foundation for [Spring Integration][], [Spring
 Batch][] and the rest of the Spring [family of projects][]. Browse the
 repositories under the [SpringSource organization][] on GitHub for a full list.
 
-[.NET][] and [Python][] variants are available as well.
-
 ## Downloading artifacts
 See [downloading Spring artifacts][] for Maven repository information. Unable to
 use Maven or other transitive dependency management tools? See [building a
@@ -35,20 +33,31 @@ simple step-by-step instructions.
 ## Building from source
 The Spring Framework uses a [Gradle][]-based build system. In the instructions
 below, [`./gradlew`][] is invoked from the root of the source tree and serves as
-a cross-platform, self-contained bootstrap mechanism for the build. The only
-prerequisites are [Git][] and JDK 1.7+.
+a cross-platform, self-contained bootstrap mechanism for the build.
+
+### prerequisites
+
+[Git][] and [Early Access build of OpenJDK 1.8 build 88][JDK18 build 88]
+> **Note:** Do not use the "lambda" edition of JDK b88 when building the
+framework, as it still causes some errors. It should be fine, however, to
+*run* against various versions of OpenJDK 1.8, lambda or otherwise.
+
+Be sure that your `JAVA_HOME` environment variable points to the `jdk1.8.0` folder
+extracted from the JDK download.
 
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
 
-### compile and test, build all jars, distribution zips and docs
-`./gradlew build`
+### import sources into your IDE
+Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
+> **Note:** Per the prerequisites above, ensure that you have JDK 8 configured
+properly in your IDE.
 
 ### install all spring-\* jars into your local Maven cache
 `./gradlew install`
 
-### import sources into your IDE
-Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
+### compile and test, build all jars, distribution zips and docs
+`./gradlew build`
 
 ... and discover more commands with `./gradlew tasks`. See also the [Gradle
 build and release FAQ][].
@@ -68,8 +77,6 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Spring Batch]: https://github.com/SpringSource/spring-batch
 [family of projects]: http://springsource.org/projects
 [SpringSource organization]: https://github.com/SpringSource
-[.NET]: https://github.com/SpringSource/spring-net
-[Python]: https://github.com/SpringSource/spring-python
 [downloading Spring artifacts]: https://github.com/SpringSource/spring-framework/wiki/Downloading-Spring-artifacts
 [building a distribution with dependencies]: https://github.com/SpringSource/spring-framework/wiki/Building-a-distribution-with-dependencies
 [Javadoc]: http://static.springsource.org/spring-framework/docs/current/javadoc-api
@@ -86,6 +93,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Gradle]: http://gradle.org
 [`./gradlew`]: http://vimeo.com/34436402
 [Git]: http://help.github.com/set-up-git-redirect
+[JDK18 build 88]: https://jdk8.java.net/archive/8-b88.html
 [Gradle build and release FAQ]: https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ
 [Pull requests]: http://help.github.com/send-pull-requests
 [contributor guidelines]: https://github.com/SpringSource/spring-framework/blob/master/CONTRIBUTING.md

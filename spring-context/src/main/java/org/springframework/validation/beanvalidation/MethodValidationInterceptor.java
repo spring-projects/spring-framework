@@ -50,8 +50,8 @@ import org.springframework.validation.annotation.Validated;
  * of that class. By default, JSR-303 will validate against its default group only.
  *
  * <p>As of Spring 4.0, this functionality requires either a Bean Validation 1.1 provider
- * or Bean Validation 1.0 with Hibernate Validator 4.2 or higher. The actual provider
- * will be autodetected and automatically adapted.
+ * (such as Hibernate Validator 5.0) or the Bean Validation 1.0 API with Hibernate Validator
+ * 4.2 or 4.3. The actual provider will be autodetected and automatically adapted.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -110,6 +110,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Class[] groups = determineValidationGroups(invocation);
@@ -149,7 +150,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 
 	/**
-	 * Inner class to avoid a hard-coded Hibernate Validator dependency.
+	 * Inner class to avoid a hard-coded Hibernate Validator 4.2/4.3 dependency.
 	 */
 	private static class HibernateValidatorDelegate {
 

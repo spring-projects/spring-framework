@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,18 @@ package org.springframework.test.context.junit4;
 
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Abstract base class for verifying support of Spring's {@link Transactional
- * &#64;Transactional} and {@link NotTransactional &#64;NotTransactional}
- * annotations.
+ * &#64;Transactional} annotation.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests
  * @see MethodLevelTransactionalSpringRunnerTests
  * @see Transactional
- * @see NotTransactional
  */
 @SuppressWarnings("deprecation")
 @ContextConfiguration("transactionalTests-context.xml")

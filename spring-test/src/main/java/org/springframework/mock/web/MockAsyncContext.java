@@ -56,26 +56,32 @@ public class MockAsyncContext implements AsyncContext {
 	}
 
 
+	@Override
 	public ServletRequest getRequest() {
 		return this.request;
 	}
 
+	@Override
 	public ServletResponse getResponse() {
 		return this.response;
 	}
 
+	@Override
 	public boolean hasOriginalRequestAndResponse() {
 		return (this.request instanceof MockHttpServletRequest) && (this.response instanceof MockHttpServletResponse);
 	}
 
+	@Override
 	public void dispatch() {
 		dispatch(this.request.getRequestURI());
  	}
 
+	@Override
 	public void dispatch(String path) {
 		dispatch(null, path);
 	}
 
+	@Override
 	public void dispatch(ServletContext context, String path) {
 		this.dispatchedPath = path;
 	}
@@ -84,6 +90,7 @@ public class MockAsyncContext implements AsyncContext {
 		return this.dispatchedPath;
 	}
 
+	@Override
 	public void complete() {
 		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
 		if (mockRequest != null) {
@@ -99,14 +106,17 @@ public class MockAsyncContext implements AsyncContext {
 		}
 	}
 
+	@Override
 	public void start(Runnable runnable) {
 		runnable.run();
 	}
 
+	@Override
 	public void addListener(AsyncListener listener) {
 		this.listeners.add(listener);
 	}
 
+	@Override
 	public void addListener(AsyncListener listener, ServletRequest request, ServletResponse response) {
 		this.listeners.add(listener);
 	}
@@ -115,14 +125,17 @@ public class MockAsyncContext implements AsyncContext {
 		return this.listeners;
 	}
 
+	@Override
 	public <T extends AsyncListener> T createListener(Class<T> clazz) throws ServletException {
 		return BeanUtils.instantiateClass(clazz);
 	}
 
+	@Override
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;
 	}
 
+	@Override
 	public long getTimeout() {
 		return this.timeout;
 	}

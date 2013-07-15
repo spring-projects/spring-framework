@@ -56,6 +56,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -614,8 +615,8 @@ public class DataBinderTests extends TestCase {
 		assertNull(rod.getSomeMap().get("key4"));
 		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertEquals(2, disallowedFields.length);
-		assertEquals("someMap[key3]", disallowedFields[0]);
-		assertEquals("someMap[key4]", disallowedFields[1]);
+		assertTrue(ObjectUtils.containsElement(disallowedFields, "someMap[key3]"));
+		assertTrue(ObjectUtils.containsElement(disallowedFields, "someMap[key4]"));
 	}
 
 	/**

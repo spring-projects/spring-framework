@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,28 +78,6 @@ public abstract class AopNamespaceUtils {
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
-
-	/**
-	 * @deprecated since Spring 2.5, in favor of
-	 * {@link #registerAutoProxyCreatorIfNecessary(ParserContext, Element)} and
-	 * {@link AopConfigUtils#registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry, Object)}
-	 */
-	@Deprecated
-	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext, Object source) {
-		BeanDefinition beanDefinition = AopConfigUtils.registerAutoProxyCreatorIfNecessary(
-				parserContext.getRegistry(), source);
-		registerComponentIfNecessary(beanDefinition, parserContext);
-	}
-
-	/**
-	 * @deprecated since Spring 2.5, in favor of
-	 * {@link AopConfigUtils#forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry)}
-	 */
-	@Deprecated
-	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
-		AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-	}
-
 
 	private static void useClassProxyingIfNecessary(BeanDefinitionRegistry registry, Element sourceElement) {
 		if (sourceElement != null) {

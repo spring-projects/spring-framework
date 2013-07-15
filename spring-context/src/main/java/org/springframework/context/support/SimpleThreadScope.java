@@ -55,6 +55,7 @@ public class SimpleThreadScope implements Scope {
 				}
 			};
 
+	@Override
 	public Object get(String name, ObjectFactory objectFactory) {
 		Map<String, Object> scope = threadScope.get();
 		Object object = scope.get(name);
@@ -65,20 +66,24 @@ public class SimpleThreadScope implements Scope {
 		return object;
 	}
 
+	@Override
 	public Object remove(String name) {
 		Map<String, Object> scope = threadScope.get();
 		return scope.remove(name);
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		logger.warn("SimpleThreadScope does not support descruction callbacks. " +
 				"Consider using a RequestScope in a Web environment.");
 	}
 
+	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
+	@Override
 	public String getConversationId() {
 		return Thread.currentThread().getName();
 	}

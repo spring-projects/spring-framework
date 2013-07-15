@@ -51,6 +51,7 @@ abstract class AutowireUtils {
 	 */
 	public static void sortConstructors(Constructor[] constructors) {
 		Arrays.sort(constructors, new Comparator<Constructor>() {
+			@Override
 			public int compare(Constructor c1, Constructor c2) {
 				boolean p1 = Modifier.isPublic(c1.getModifiers());
 				boolean p2 = Modifier.isPublic(c2.getModifiers());
@@ -73,6 +74,7 @@ abstract class AutowireUtils {
 	 */
 	public static void sortFactoryMethods(Method[] factoryMethods) {
 		Arrays.sort(factoryMethods, new Comparator<Method>() {
+			@Override
 			public int compare(Method fm1, Method fm2) {
 				boolean p1 = Modifier.isPublic(fm1.getModifiers());
 				boolean p2 = Modifier.isPublic(fm2.getModifiers());
@@ -162,6 +164,7 @@ abstract class AutowireUtils {
 			this.objectFactory = objectFactory;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (methodName.equals("equals")) {

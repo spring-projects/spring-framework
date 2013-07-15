@@ -60,6 +60,7 @@ public class DelegatingConnectionFactory implements ConnectionFactory, Initializ
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'targetConnectionFactory' is required");
@@ -67,26 +68,32 @@ public class DelegatingConnectionFactory implements ConnectionFactory, Initializ
 	}
 
 
+	@Override
 	public Connection getConnection() throws ResourceException {
 		return getTargetConnectionFactory().getConnection();
 	}
 
+	@Override
 	public Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException {
 		return getTargetConnectionFactory().getConnection(connectionSpec);
 	}
 
+	@Override
 	public RecordFactory getRecordFactory() throws ResourceException {
 		return getTargetConnectionFactory().getRecordFactory();
 	}
 
+	@Override
 	public ResourceAdapterMetaData getMetaData() throws ResourceException {
 		return getTargetConnectionFactory().getMetaData();
 	}
 
+	@Override
 	public Reference getReference() throws NamingException {
 		return getTargetConnectionFactory().getReference();
 	}
 
+	@Override
 	public void setReference(Reference reference) {
 		getTargetConnectionFactory().setReference(reference);
 	}

@@ -98,6 +98,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 
+	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		// look for direct name match
 		String methodName = method.getName();

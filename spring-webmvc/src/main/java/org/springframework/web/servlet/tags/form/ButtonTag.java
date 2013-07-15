@@ -55,6 +55,7 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	/**
 	 * Set the value of the '{@code name}' attribute.
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}

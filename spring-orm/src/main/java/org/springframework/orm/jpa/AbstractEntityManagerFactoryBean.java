@@ -140,6 +140,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.persistenceProvider = persistenceProvider;
 	}
 
+	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}
@@ -155,6 +156,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
+	@Override
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -221,6 +223,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.entityManagerInterface = emInterface;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return this.entityManagerInterface;
 	}
@@ -236,6 +239,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.jpaDialect = jpaDialect;
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
@@ -258,23 +262,28 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		return this.jpaVendorAdapter;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
+	@Override
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
 			if (this.persistenceProvider == null) {
@@ -402,19 +411,23 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaDialect#translateExceptionIfPossible
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return (this.jpaDialect != null ? this.jpaDialect.translateExceptionIfPossible(ex) :
 				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
 	}
 
+	@Override
 	public EntityManagerFactory getNativeEntityManagerFactory() {
 		return this.nativeEntityManagerFactory;
 	}
 
+	@Override
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return null;
 	}
 
+	@Override
 	public DataSource getDataSource() {
 		return null;
 	}
@@ -423,14 +436,17 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/**
 	 * Return the singleton EntityManagerFactory.
 	 */
+	@Override
 	public EntityManagerFactory getObject() {
 		return this.entityManagerFactory;
 	}
 
+	@Override
 	public Class<? extends EntityManagerFactory> getObjectType() {
 		return (this.entityManagerFactory != null ? this.entityManagerFactory.getClass() : EntityManagerFactory.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -439,6 +455,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/**
 	 * Close the EntityManagerFactory on bean factory shutdown.
 	 */
+	@Override
 	public void destroy() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Closing JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
@@ -502,6 +519,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			this.entityManagerFactoryBean = emfb;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
 				if (method.getName().equals("equals")) {

@@ -40,6 +40,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	 * This implementation calls {@link #setValuesIfAvailable}
 	 * and sets this instance's exhaustion flag accordingly.
 	 */
+	@Override
 	public final void setValues(PreparedStatement ps, int i) throws SQLException {
 		this.exhausted = !setValuesIfAvailable(ps, i);
 	}
@@ -47,6 +48,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	/**
 	 * This implementation return this instance's current exhaustion flag.
 	 */
+	@Override
 	public final boolean isBatchExhausted(int i) {
 		return this.exhausted;
 	}
@@ -55,6 +57,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	 * This implementation returns {@code Integer.MAX_VALUE}.
 	 * Can be overridden in subclasses to lower the maximum batch size.
 	 */
+	@Override
 	public int getBatchSize() {
 		return Integer.MAX_VALUE;
 	}

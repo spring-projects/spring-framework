@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,6 @@ import javax.servlet.ServletContextListener;
  * @see org.springframework.web.util.Log4jConfigListener
  */
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
-
-	private ContextLoader contextLoader;
-
 
 	/**
 	 * Create a new {@code ContextLoaderListener} that will create a web application
@@ -104,44 +101,18 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Initialize the root web application context.
 	 */
+	@Override
 	public void contextInitialized(ServletContextEvent event) {
-		this.contextLoader = createContextLoader();
-		if (this.contextLoader == null) {
-			this.contextLoader = this;
-		}
-		this.contextLoader.initWebApplicationContext(event.getServletContext());
-	}
-
-	/**
-	 * Create the ContextLoader to use. Can be overridden in subclasses.
-	 * @return the new ContextLoader
-	 * @deprecated in favor of simply subclassing ContextLoaderListener itself
-	 * (which extends ContextLoader, as of Spring 3.0)
-	 */
-	@Deprecated
-	protected ContextLoader createContextLoader() {
-		return null;
-	}
-
-	/**
-	 * Return the ContextLoader used by this listener.
-	 * @return the current ContextLoader
-	 * @deprecated in favor of simply subclassing ContextLoaderListener itself
-	 * (which extends ContextLoader, as of Spring 3.0)
-	 */
-	@Deprecated
-	public ContextLoader getContextLoader() {
-		return this.contextLoader;
+		initWebApplicationContext(event.getServletContext());
 	}
 
 
 	/**
 	 * Close the root web application context.
 	 */
+	@Override
 	public void contextDestroyed(ServletContextEvent event) {
-		if (this.contextLoader != null) {
-			this.contextLoader.closeWebApplicationContext(event.getServletContext());
-		}
+		closeWebApplicationContext(event.getServletContext());
 		ContextCleanupListener.cleanupAttributes(event.getServletContext());
 	}
 

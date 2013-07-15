@@ -36,6 +36,7 @@ public abstract class PortletApplicationObjectSupport extends ApplicationObjectS
 	private PortletContext portletContext;
 
 
+	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}

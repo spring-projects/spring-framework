@@ -44,11 +44,11 @@ public abstract class AssertionErrors {
 	 * values to be added to the message.
 	 *
 	 * <p>For example given:
-	 * <pre>
+	 * <pre class="code">
 	 * assertEquals("Response header [" + name + "]", actual, expected);
 	 * </pre>
 	 * <p>The resulting message is:
-	 * <pre>
+	 * <pre class="code">
 	 * Response header [Accept] expected:&lt;application/json&gt; but was:&lt;text/plain&gt;
 	 * </pre>
 	 *
@@ -76,7 +76,7 @@ public abstract class AssertionErrors {
 	/**
 	 * Assert two objects are equal raise an {@link AssertionError} if not.
 	 * <p>For example:
-	 * <pre>
+	 * <pre class="code">
 	 * assertEquals("Response header [" + name + "]", actual, expected);
 	 * </pre>
 	 *

@@ -165,7 +165,8 @@ public class SpelReproTests extends ExpressionTestCase {
 			 return sb.toString();
 		 }
 
-		 public String toString() {
+		 @Override
+		public String toString() {
 			 return "instance";
 		 }
 	}
@@ -790,6 +791,7 @@ public class SpelReproTests extends ExpressionTestCase {
 			a=s;
 		}
 
+		@Override
 		public String toString() {
 			return "D("+a+")";
 		}

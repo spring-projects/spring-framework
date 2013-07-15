@@ -66,11 +66,13 @@ public class TaskExecutorFactoryBean implements
 		this.keepAliveSeconds = keepAliveSeconds;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(ThreadPoolTaskExecutor.class);
 		determinePoolSizeRange(bw);
@@ -136,19 +138,23 @@ public class TaskExecutorFactoryBean implements
 	}
 
 
+	@Override
 	public TaskExecutor getObject() {
 		return this.target;
 	}
 
+	@Override
 	public Class<? extends TaskExecutor> getObjectType() {
 		return (this.target != null ? this.target.getClass() : ThreadPoolTaskExecutor.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() throws Exception {
 		if (this.target instanceof DisposableBean) {
 			((DisposableBean) this.target).destroy();

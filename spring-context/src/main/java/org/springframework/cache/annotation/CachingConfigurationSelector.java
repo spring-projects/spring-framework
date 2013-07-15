@@ -39,6 +39,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * @return {@link ProxyCachingConfiguration} or {@code AspectJCacheConfiguration} for
 	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableCaching#mode()}, respectively
 	 */
+	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:

@@ -55,14 +55,17 @@ public class StandardPersistenceManagerProxyBean implements FactoryBean<Persiste
 	}
 
 
+	@Override
 	public PersistenceManager getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<? extends PersistenceManager> getObjectType() {
 		return (this.proxy != null ? this.proxy.getClass() : PersistenceManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Utilities for processing @{@link Configuration} classes.
@@ -101,9 +100,11 @@ abstract class ConfigurationClassUtils {
 	}
 
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
-		return !metadata.isInterface() && // not an interface or an annotation
-				(metadata.isAnnotated(Component.class.getName()) ||
-				metadata.hasAnnotatedMethods(Bean.class.getName()));
+		if(metadata.isInterface()) {
+			return false; // do not consider an interface or an annotation
+		}
+		return metadata.isAnnotated(Import.class.getName()) ||
+				metadata.hasAnnotatedMethods(Bean.class.getName());
 	}
 
 

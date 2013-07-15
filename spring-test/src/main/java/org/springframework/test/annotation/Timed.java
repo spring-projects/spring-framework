@@ -41,7 +41,6 @@ import java.lang.annotation.Target;
  * @author Sam Brannen
  * @since 2.0
  * @see Repeat
- * @see AbstractAnnotationAwareTransactionalTests
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

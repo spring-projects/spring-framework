@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
@@ -39,7 +38,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -88,9 +86,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
 
+	private ConditionEvaluator conditionEvaluator;
+
 
 	/**
-	 * Create a ClassPathScanningCandidateComponentProvider.
+	 * Create a ClassPathScanningCandidateComponentProvider with a {@link StandardEnvironment}.
 	 * @param useDefaultFilters whether to register the default filters for the
 	 * {@link Component @Component}, {@link Repository @Repository},
 	 * {@link Service @Service}, and {@link Controller @Controller}
@@ -101,6 +101,15 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		this(useDefaultFilters, new StandardEnvironment());
 	}
 
+	/**
+	 * Create a ClassPathScanningCandidateComponentProvider with the given {@link Environment}.
+	 * @param useDefaultFilters whether to register the default filters for the
+	 * {@link Component @Component}, {@link Repository @Repository},
+	 * {@link Service @Service}, and {@link Controller @Controller}
+	 * stereotype annotations
+	 * @param environment the Environment to use
+	 * @see #registerDefaultFilters()
+	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment) {
 		if (useDefaultFilters) {
 			registerDefaultFilters();
@@ -117,6 +126,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
@@ -149,16 +159,25 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Set the Environment to use when resolving placeholders and evaluating
-	 * {@link Profile @Profile}-annotated component classes.
+	 * {@link Conditional @Conditional}-annotated component classes.
 	 * <p>The default is a {@link StandardEnvironment}
 	 * @param environment the Environment to use
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
+		this.conditionEvaluator = null;
 	}
 
+	@Override
 	public final Environment getEnvironment() {
 		return this.environment;
+	}
+
+	/**
+	 * Returns the {@link BeanDefinitionRegistry} used by this scanner or {@code null}.
+	 */
+	protected BeanDefinitionRegistry getRegistry() {
+		return null;
 	}
 
 	/**
@@ -322,15 +341,24 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
-				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-				if (!metadata.isAnnotated(Profile.class.getName())) {
-					return true;
-				}
-				AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
-				return this.environment.acceptsProfiles(profile.getStringArray("value"));
+				return isConditionMatch(metadataReader);
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determine whether the given class is a candidate component based on any
+	 * {@code @Conditional} annotations.
+	 * @param metadataReader the ASM ClassReader for the class
+	 * @return whether the class qualifies as a candidate component
+	 */
+	private boolean isConditionMatch(MetadataReader metadataReader) {
+		if (this.conditionEvaluator == null) {
+			this.conditionEvaluator = new ConditionEvaluator(getRegistry(),
+					getEnvironment(), null, null, getResourceLoader());
+		}
+		return !conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
 	}
 
 	/**

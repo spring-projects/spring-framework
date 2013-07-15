@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,10 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 
 	static class AccessorLValue implements ValueRef {
-		private PropertyOrFieldReference ref;
-		private TypedValue contextObject;
-		private EvaluationContext eContext;
-		private boolean isAutoGrowNullReferences;
+		private final PropertyOrFieldReference ref;
+		private final TypedValue contextObject;
+		private final EvaluationContext eContext;
+		private final boolean isAutoGrowNullReferences;
 
 		public AccessorLValue(
 				PropertyOrFieldReference propertyOrFieldReference,
@@ -83,14 +83,17 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			this.isAutoGrowNullReferences = isAutoGrowNullReferences;
 		}
 
+		@Override
 		public TypedValue getValue() {
-			return ref.getValueInternal(contextObject,eContext,isAutoGrowNullReferences);
+			return this.ref.getValueInternal(this.contextObject,this.eContext,this.isAutoGrowNullReferences);
 		}
 
+		@Override
 		public void setValue(Object newValue) {
-			ref.writeProperty(contextObject,eContext, ref.name, newValue);
+			this.ref.writeProperty(this.contextObject,this.eContext, this.ref.name, newValue);
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -139,7 +142,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					try {
 						if (isWritableProperty(this.name,contextObject,eContext)) {
 							Map<?,?> newMap = HashMap.class.newInstance();
-							writeProperty(contextObject, eContext, name, newMap);
+							writeProperty(contextObject, eContext, this.name, newMap);
 							result = readProperty(contextObject, eContext, this.name);
 						}
 					}
@@ -158,7 +161,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				try {
 					if (isWritableProperty(this.name,contextObject,eContext)) {
 						Object newObject  = result.getTypeDescriptor().getType().newInstance();
-						writeProperty(contextObject, eContext, name, newObject);
+						writeProperty(contextObject, eContext, this.name, newObject);
 						result = readProperty(contextObject, eContext, this.name);
 					}
 				}
@@ -250,7 +253,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	private void writeProperty(TypedValue contextObject, EvaluationContext eContext, String name, Object newValue) throws SpelEvaluationException {
 
-		if (contextObject.getValue() == null && nullSafe) {
+		if (contextObject.getValue() == null && this.nullSafe) {
 			return;
 		}
 

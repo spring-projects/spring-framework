@@ -35,6 +35,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 @SuppressWarnings("serial")
 public class JtaTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
+	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
 		javax.transaction.Transactional ann = AnnotationUtils.getAnnotation(ae, javax.transaction.Transactional.class);
 		if (ann != null) {

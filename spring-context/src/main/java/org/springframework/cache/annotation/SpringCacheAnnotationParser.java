@@ -41,6 +41,7 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class SpringCacheAnnotationParser implements CacheAnnotationParser, Serializable {
 
+	@Override
 	public Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae) {
 		Collection<CacheOperation> ops = null;
 

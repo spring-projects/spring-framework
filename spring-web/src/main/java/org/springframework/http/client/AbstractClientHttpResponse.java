@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 
+import org.springframework.http.Cookies;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -28,8 +29,15 @@ import org.springframework.http.HttpStatus;
  */
 public abstract class AbstractClientHttpResponse implements ClientHttpResponse {
 
+	@Override
 	public HttpStatus getStatusCode() throws IOException {
 		return HttpStatus.valueOf(getRawStatusCode());
+	}
+
+	@Override
+	public Cookies getCookies() {
+		// TODO
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -53,6 +53,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	}
 
 
+	@Override
 	public Advisor wrap(Object adviceObject) throws UnknownAdviceTypeException {
 		if (adviceObject instanceof Advisor) {
 			return (Advisor) adviceObject;
@@ -74,6 +75,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		throw new UnknownAdviceTypeException(advice);
 	}
 
+	@Override
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<MethodInterceptor>(3);
 		Advice advice = advisor.getAdvice();
@@ -91,6 +93,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		return interceptors.toArray(new MethodInterceptor[interceptors.size()]);
 	}
 
+	@Override
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {
 		this.adapters.add(adapter);
 	}

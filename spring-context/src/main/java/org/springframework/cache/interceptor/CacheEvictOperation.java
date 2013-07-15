@@ -25,6 +25,7 @@ package org.springframework.cache.interceptor;
 public class CacheEvictOperation extends CacheOperation {
 
 	private boolean cacheWide = false;
+
 	private boolean beforeInvocation = false;
 
 

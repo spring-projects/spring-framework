@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -40,6 +37,8 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestMappingHandlerAdapter}.
@@ -72,9 +71,9 @@ public class RequestMappingHandlerAdapterTests {
 		adapter.setApplicationContext(new StaticWebApplicationContext());
 		adapter.afterPropertiesSet();
 
-		RESOLVER_COUNT = adapter.getArgumentResolvers().getResolvers().size();
-		INIT_BINDER_RESOLVER_COUNT = adapter.getInitBinderArgumentResolvers().getResolvers().size();
-		HANDLER_COUNT = adapter.getReturnValueHandlers().getHandlers().size();
+		RESOLVER_COUNT = adapter.getArgumentResolvers().size();
+		INIT_BINDER_RESOLVER_COUNT = adapter.getInitBinderArgumentResolvers().size();
+		HANDLER_COUNT = adapter.getReturnValueHandlers().size();
 	}
 
 	@Before
@@ -131,7 +130,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
 		this.handlerAdapter.afterPropertiesSet();
 
-		assertTrue(this.handlerAdapter.getArgumentResolvers().getResolvers().contains(resolver));
+		assertTrue(this.handlerAdapter.getArgumentResolvers().contains(resolver));
 		assertMethodProcessorCount(RESOLVER_COUNT + 1, INIT_BINDER_RESOLVER_COUNT + 1, HANDLER_COUNT);
 	}
 
@@ -159,7 +158,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
 		this.handlerAdapter.afterPropertiesSet();
 
-		assertTrue(this.handlerAdapter.getReturnValueHandlers().getHandlers().contains(handler));
+		assertTrue(this.handlerAdapter.getReturnValueHandlers().contains(handler));
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT + 1);
 	}
 
@@ -181,7 +180,8 @@ public class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 		ModelAndView mav = this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
-		assertEquals("globalAttrValue", mav.getModel().get("globalAttr"));
+		assertEquals("lAttr1", mav.getModel().get("attr1"));
+		assertEquals("gAttr2", mav.getModel().get("attr2"));
 	}
 
 
@@ -191,14 +191,19 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
-		assertEquals(resolverCount, this.handlerAdapter.getArgumentResolvers().getResolvers().size());
-		assertEquals(initBinderResolverCount, this.handlerAdapter.getInitBinderArgumentResolvers().getResolvers().size());
-		assertEquals(handlerCount, this.handlerAdapter.getReturnValueHandlers().getHandlers().size());
+		assertEquals(resolverCount, this.handlerAdapter.getArgumentResolvers().size());
+		assertEquals(initBinderResolverCount, this.handlerAdapter.getInitBinderArgumentResolvers().size());
+		assertEquals(handlerCount, this.handlerAdapter.getReturnValueHandlers().size());
 	}
 
 
 	@SuppressWarnings("unused")
 	private static class SimpleController {
+
+		@ModelAttribute
+		public void addAttributes(Model model) {
+			model.addAttribute("attr1", "lAttr1");
+		}
 
 		public String handle() {
 			return null;
@@ -227,7 +232,8 @@ public class RequestMappingHandlerAdapterTests {
 
 		@ModelAttribute
 		public void addAttributes(Model model) {
-			model.addAttribute("globalAttr", "globalAttrValue");
+			model.addAttribute("attr1", "gAttr1");
+			model.addAttribute("attr2", "gAttr2");
 		}
 	}
 

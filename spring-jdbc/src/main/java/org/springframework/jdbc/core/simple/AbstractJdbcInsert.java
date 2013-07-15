@@ -435,6 +435,7 @@ public abstract class AbstractJdbcInsert {
 		if (this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
 			getJdbcTemplate().update(
 					new PreparedStatementCreator() {
+						@Override
 						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
 							setParameterValues(ps, values, getInsertTypes());
@@ -472,6 +473,7 @@ public abstract class AbstractJdbcInsert {
 			}
 			else {
 				getJdbcTemplate().execute(new ConnectionCallback<Object>() {
+					@Override
 					public Object doInConnection(Connection con) throws SQLException, DataAccessException {
 						// Do the insert
 						PreparedStatement ps = null;
@@ -580,10 +582,12 @@ public abstract class AbstractJdbcInsert {
 		}
 		return getJdbcTemplate().batchUpdate(getInsertString(),
 				new BatchPreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						List<Object> values = batchValues[i];
 						setParameterValues(ps, values, getInsertTypes());
 					}
+					@Override
 					public int getBatchSize() {
 						return batchValues.length;
 					}

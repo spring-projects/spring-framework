@@ -89,7 +89,8 @@ public abstract class ServletContextPropertyUtils {
             this.servletContext = servletContext;
         }
 
-        public String resolvePlaceholder(String placeholderName) {
+        @Override
+		public String resolvePlaceholder(String placeholderName) {
             try {
                 String propVal = this.servletContext.getInitParameter(placeholderName);
 				if (propVal == null) {

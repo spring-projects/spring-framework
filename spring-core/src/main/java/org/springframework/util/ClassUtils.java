@@ -190,25 +190,6 @@ public abstract class ClassUtils {
 
 	/**
 	 * Replacement for {@code Class.forName()} that also returns Class instances
-	 * for primitives (like "int") and array class names (like "String[]").
-	 * <p>Always uses the default class loader: that is, preferably the thread context
-	 * class loader, or the ClassLoader that loaded the ClassUtils class as fallback.
-	 * @param name the name of the Class
-	 * @return Class instance for the supplied name
-	 * @throws ClassNotFoundException if the class was not found
-	 * @throws LinkageError if the class file could not be loaded
-	 * @see Class#forName(String, boolean, ClassLoader)
-	 * @see #getDefaultClassLoader()
-	 * @deprecated as of Spring 3.0, in favor of specifying a ClassLoader explicitly:
-	 * see {@link #forName(String, ClassLoader)}
-	 */
-	@Deprecated
-	public static Class<?> forName(String name) throws ClassNotFoundException, LinkageError {
-		return forName(name, getDefaultClassLoader());
-	}
-
-	/**
-	 * Replacement for {@code Class.forName()} that also returns Class instances
 	 * for primitives (e.g."int") and array class names (e.g. "String[]").
 	 * Furthermore, it is also capable of resolving inner class names in Java source
 	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
@@ -320,19 +301,6 @@ public abstract class ClassUtils {
 			result = primitiveTypeNameMap.get(name);
 		}
 		return result;
-	}
-
-	/**
-	 * Determine whether the {@link Class} identified by the supplied name is present
-	 * and can be loaded. Will return {@code false} if either the class or
-	 * one of its dependencies is not present or cannot be loaded.
-	 * @param className the name of the class to check
-	 * @return whether the specified class is present
-	 * @deprecated as of Spring 2.5, in favor of {@link #isPresent(String, ClassLoader)}
-	 */
-	@Deprecated
-	public static boolean isPresent(String className) {
-		return isPresent(className, getDefaultClassLoader());
 	}
 
 	/**

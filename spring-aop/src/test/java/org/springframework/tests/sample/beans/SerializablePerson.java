@@ -59,6 +59,7 @@ public class SerializablePerson implements Person, Serializable {
 		return o;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof SerializablePerson)) {
 			return false;

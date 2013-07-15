@@ -99,6 +99,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 *
 	 * @param applicationContext the applicationContext to set
 	 */
+	@Override
 	public final void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -151,6 +152,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * @see org.testng.IHookable#run(org.testng.IHookCallBack,
 	 * org.testng.ITestResult)
 	 */
+	@Override
 	public void run(IHookCallBack callBack, ITestResult testResult) {
 		callBack.runTestMethod(testResult);
 

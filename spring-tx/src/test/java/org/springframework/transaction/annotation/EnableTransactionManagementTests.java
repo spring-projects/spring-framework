@@ -16,13 +16,10 @@
 
 package org.springframework.transaction.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -32,6 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.AnnotationTransactionNamespaceHandlerTests.TransactionalTestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.
@@ -84,9 +84,9 @@ public class EnableTransactionManagementTests {
 			new AnnotationConfigApplicationContext(EnableAspectJTxConfig.class, TxManagerConfig.class);
 			fail("should have thrown CNFE when trying to load AnnotationTransactionAspect. " +
 					"Do you actually have org.springframework.aspects on the classpath?");
-		} catch (Exception ex) {
-			System.out.println(ex);
-			assertThat(ex.getMessage().endsWith("AspectJTransactionManagementConfiguration.class] cannot be opened because it does not exist"), is(true));
+		}
+		catch (Exception ex) {
+			assertThat(ex.getMessage().contains("AspectJTransactionManagementConfiguration"), is(true));
 		}
 	}
 

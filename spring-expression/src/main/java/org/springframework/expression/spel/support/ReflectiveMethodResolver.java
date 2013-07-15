@@ -53,8 +53,6 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class ReflectiveMethodResolver implements MethodResolver {
 
-	private static Method[] NO_METHODS = new Method[0];
-
 	private Map<Class<?>, MethodFilter> filters = null;
 
 	// Using distance will ensure a more accurate match is discovered,
@@ -63,7 +61,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 
 	public ReflectiveMethodResolver() {
-
 	}
 
 	/**
@@ -79,6 +76,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		this.useDistance = useDistance;
 	}
 
+
 	/**
 	 * Locate a method on a type. There are three kinds of match that might occur:
 	 * <ol>
@@ -88,6 +86,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * according to the registered type converter.
 	 * </ol>
 	 */
+	@Override
 	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 			List<TypeDescriptor> argumentTypes) throws AccessException {
 
@@ -99,12 +98,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
-				methods = filter.filter(methods);
+				List<Method> filtered = filter.filter(methods);
+				methods = (filtered instanceof ArrayList ? filtered : new ArrayList<Method>(filtered));
 			}
 
 			// Sort methods into a sensible order
 			if (methods.size() > 1) {
 				Collections.sort(methods, new Comparator<Method>() {
+					@Override
 					public int compare(Method m1, Method m2) {
 						int m1pl = m1.getParameterTypes().length;
 						int m2pl = m2.getParameterTypes().length;
@@ -119,7 +120,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 
 			// Remove duplicate methods (possible due to resolved bridge methods)
-			methods = new ArrayList<Method>(new LinkedHashSet<Method>(methods));
+			Set<Method> methodsToIterate = new LinkedHashSet<Method>(methods);
 
 			Method closeMatch = null;
 			int closeMatchDistance = Integer.MAX_VALUE;
@@ -127,7 +128,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			Method matchRequiringConversion = null;
 			boolean multipleOptions = false;
 
-			for (Method method : methods) {
+			for (Method method : methodsToIterate) {
 				if (method.getName().equals(name)) {
 					Class<?>[] paramTypes = method.getParameterTypes();
 					List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
@@ -148,9 +149,10 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							return new ReflectiveMethodExecutor(method, null);
 						}
 						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
-							if (!useDistance) {
+							if (!this.useDistance) {
 								closeMatch = method;
-							} else {
+							}
+							else {
 								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
 								if (matchDistance<closeMatchDistance) {
 									// this is a better match
@@ -200,7 +202,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	private Method[] getMethods(Class<?> type, Object targetObject) {
-		if(targetObject instanceof Class) {
+		if (targetObject instanceof Class) {
 			Set<Method> methods = new HashSet<Method>();
 			methods.addAll(Arrays.asList(getMethods(type)));
 			methods.addAll(Arrays.asList(getMethods(targetObject.getClass())));
@@ -211,9 +213,9 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	/**
 	 * Return the set of methods for this type. The default implementation returns the
-	 * result of Class#getMethods for the given {@code type}, but subclasses may override
-	 * in order to alter the results, e.g. specifying static methods declared elsewhere.
-	 *
+	 * result of {@link Class#getMethods()} for the given {@code type}, but subclasses
+	 * may override in order to alter the results, e.g. specifying static methods
+	 * declared elsewhere.
 	 * @param type the class for which to return the methods
 	 * @since 3.1.1
 	 */

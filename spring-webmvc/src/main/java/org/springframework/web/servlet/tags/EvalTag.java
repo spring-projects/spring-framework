@@ -162,15 +162,18 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			this.variableResolver = pageContext.getVariableResolver();
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (target == null &&
 					(resolveImplicitVariable(name) != null || this.pageContext.findAttribute(name) != null));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			Object implicitVar = resolveImplicitVariable(name);
 			if (implicitVar != null) {
@@ -179,10 +182,12 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			return new TypedValue(this.pageContext.findAttribute(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException();
 		}

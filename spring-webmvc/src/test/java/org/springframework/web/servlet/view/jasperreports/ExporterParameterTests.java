@@ -27,15 +27,19 @@ import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 
+import org.junit.Test;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  */
 public class ExporterParameterTests extends AbstractJasperReportsTests {
 
+	@Test
 	public void testParameterParsing() throws Exception {
 		Map params = new HashMap();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo/bar");
@@ -84,6 +88,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		view.render(getModel(), request, response);
 	}
 
+	@Test
 	public void testInvalidClass() throws Exception {
 		Map params = new HashMap();
 		params.put("foo.net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo");
@@ -101,6 +106,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		}
 	}
 
+	@Test
 	public void testInvalidField() {
 		Map params = new HashMap();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI_FOO", "/foo");
@@ -118,6 +124,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		}
 	}
 
+	@Test
 	public void testInvalidType() {
 		Map params = new HashMap();
 		params.put("java.lang.Boolean.TRUE", "/foo");
@@ -136,6 +143,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 	}
 
 
+	@Test
 	public void testTypeConversion() {
 		Map params = new HashMap();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN", "true");

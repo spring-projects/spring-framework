@@ -187,6 +187,7 @@ public class CciTemplate implements CciOperations {
 	}
 
 
+	@Override
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		Connection con = ConnectionFactoryUtils.getConnection(getConnectionFactory(), getConnectionSpec());
@@ -207,9 +208,11 @@ public class CciTemplate implements CciOperations {
 		}
 	}
 
+	@Override
 	public <T> T execute(final InteractionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(new ConnectionCallback<T>() {
+			@Override
 			public T doInConnection(Connection connection, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
 				Interaction interaction = connection.createInteraction();
@@ -223,24 +226,29 @@ public class CciTemplate implements CciOperations {
 		});
 	}
 
+	@Override
 	public Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException {
 		return doExecute(spec, inputRecord, null, new SimpleRecordExtractor());
 	}
 
+	@Override
 	public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord) throws DataAccessException {
 		doExecute(spec, inputRecord, outputRecord, null);
 	}
 
+	@Override
 	public Record execute(InteractionSpec spec, RecordCreator inputCreator) throws DataAccessException {
 		return doExecute(spec, createRecord(inputCreator), null, new SimpleRecordExtractor());
 	}
 
+	@Override
 	public <T> T execute(InteractionSpec spec, Record inputRecord, RecordExtractor<T> outputExtractor)
 			throws DataAccessException {
 
 		return doExecute(spec, inputRecord, null, outputExtractor);
 	}
 
+	@Override
 	public <T> T execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor<T> outputExtractor)
 			throws DataAccessException {
 
@@ -263,6 +271,7 @@ public class CciTemplate implements CciOperations {
 			final RecordExtractor<T> outputExtractor) throws DataAccessException {
 
 		return execute(new InteractionCallback<T>() {
+			@Override
 			public T doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
 				Record outputRecordToUse = outputRecord;
@@ -421,6 +430,7 @@ public class CciTemplate implements CciOperations {
 
 	private static class SimpleRecordExtractor implements RecordExtractor<Record> {
 
+		@Override
 		public Record extractData(Record record) {
 			return record;
 		}

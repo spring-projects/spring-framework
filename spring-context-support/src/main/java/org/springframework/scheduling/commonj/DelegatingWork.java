@@ -57,6 +57,7 @@ public class DelegatingWork implements Work {
 	/**
 	 * Delegates execution to the underlying Runnable.
 	 */
+	@Override
 	public void run() {
 		this.delegate.run();
 	}
@@ -66,6 +67,7 @@ public class DelegatingWork implements Work {
 	 * {@link org.springframework.scheduling.SchedulingAwareRunnable#isLongLived()},
 	 * if available.
 	 */
+	@Override
 	public boolean isDaemon() {
 		return (this.delegate instanceof SchedulingAwareRunnable &&
 				((SchedulingAwareRunnable) this.delegate).isLongLived());
@@ -75,6 +77,7 @@ public class DelegatingWork implements Work {
 	 * This implementation is empty, since we expect the Runnable
 	 * to terminate based on some specific shutdown signal.
 	 */
+	@Override
 	public void release() {
 	}
 

@@ -119,6 +119,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 
 		LexicalHandler actualLexicalHandler = mockLexicalHandler();
 		willAnswer(new Answer<Object>() {
+			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
 				return invocation.getArguments()[0] = "element";
 			}
@@ -147,6 +148,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).characters(any(char[].class), anyInt(), anyInt());
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).ignorableWhitespace(any(char[].class), anyInt(), anyInt());
 		willAnswer(new Answer<Object>() {
+			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
 				invocation.getArguments()[3] = new AttributesImpl((Attributes) invocation.getArguments()[3]);
 				return null;
@@ -161,6 +163,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	private static class SkipLocatorArgumentsAdapter implements InvocationArgumentsAdapter {
+		@Override
 		public Object[] adaptArguments(Object[] arguments) {
 			for(int i=0; i<arguments.length; i++) {
 				if(arguments[i] instanceof Locator) {
@@ -172,6 +175,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	private static class CharArrayToStringAdapter implements InvocationArgumentsAdapter {
+		@Override
 		public Object[] adaptArguments(Object[] arguments) {
 			if(arguments.length == 3 && arguments[0] instanceof char[]
 					&& arguments[1] instanceof Integer && arguments[2] instanceof Integer) {
@@ -182,6 +186,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	private static class PartialAttributesAdapter implements InvocationArgumentsAdapter {
+		@Override
 		public Object[] adaptArguments(Object[] arguments) {
 			for (int i = 0; i < arguments.length; i++) {
 				if(arguments[i] instanceof Attributes) {
@@ -193,6 +198,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	}
 
 	private static class CopyCharsAnswer implements Answer<Object> {
+		@Override
 		public Object answer(InvocationOnMock invocation) throws Throwable {
 			char[] chars = (char[]) invocation.getArguments()[0];
 			char[] copy = new char[chars.length];

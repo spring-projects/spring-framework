@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -185,6 +186,21 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	public MockHttpServletRequestBuilder accept(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
 		this.headers.set("Accept", MediaType.toString(Arrays.asList(mediaTypes)));
+		return this;
+	}
+
+	/**
+	 * Set the 'Accept' header to the given media type(s).
+	 *
+	 * @param mediaTypes one or more media types
+	 */
+	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
+		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
+		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
+		for (String mediaType : mediaTypes) {
+			result.add(MediaType.parseMediaType(mediaType));
+		}
+		this.headers.set("Accept", MediaType.toString(result));
 		return this;
 	}
 
@@ -426,6 +442,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * {@inheritDoc}
 	 * @return always returns {@code true}.
 	 */
+	@Override
 	public boolean isMergeEnabled() {
 		return true;
 	}
@@ -437,6 +454,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * @param parent the parent {@code RequestBuilder} to inherit properties from
 	 * @return the result of the merge
 	 */
+	@Override
 	public Object merge(Object parent) {
 		if (parent == null) {
 			return this;
@@ -540,6 +558,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	/**
 	 * Build a {@link MockHttpServletRequest}.
 	 */
+	@Override
 	public final MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		MockHttpServletRequest request = createServletRequest(servletContext);
 

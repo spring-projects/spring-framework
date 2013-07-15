@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj.annotation;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.ClassUtils;
 
@@ -72,10 +73,12 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 
+	@Override
 	public Object getAspectInstance() {
 		return this.beanFactory.getBean(this.name);
 	}
 
+	@Override
 	public ClassLoader getAspectClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
@@ -85,6 +88,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 		}
 	}
 
+	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.aspectMetadata;
 	}
@@ -99,13 +103,14 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.annotation.Order
 	 */
+	@Override
 	public int getOrder() {
 		Class<?> type = this.beanFactory.getType(this.name);
 		if (type != null) {
 			if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
 				return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
 			}
-			Order order = type.getAnnotation(Order.class);
+			Order order = AnnotationUtils.findAnnotation(type, Order.class);
 			if (order != null) {
 				return order.value();
 			}

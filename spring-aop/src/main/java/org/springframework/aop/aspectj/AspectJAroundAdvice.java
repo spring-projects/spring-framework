@@ -41,10 +41,12 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 		super(aspectJAroundAdviceMethod, pointcut, aif);
 	}
 
+	@Override
 	public boolean isBeforeAdvice() {
 		return false;
 	}
 
+	@Override
 	public boolean isAfterAdvice() {
 		return false;
 	}
@@ -55,6 +57,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		if (!(mi instanceof ProxyMethodInvocation)) {
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);

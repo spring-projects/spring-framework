@@ -445,7 +445,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * This configuration setting corresponds to the &lt;class-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
-	 * <pre>
+	 * <pre class="code">
 	 * &lt;property name="entityCacheStrategies"&gt;
 	 *   &lt;props&gt;
 	 *     &lt;prop key="com.mycompany.Customer"&gt;read-write&lt;/prop&gt;
@@ -465,7 +465,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * This configuration setting corresponds to the &lt;collection-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
 	 * <p>For example:
-	 * <pre>
+	 * <pre class="code">
 	 * &lt;property name="collectionCacheStrategies"&gt;
 	 *   &lt;props&gt;
 	 *     &lt;prop key="com.mycompany.Order.items">read-write&lt;/prop&gt;
@@ -506,6 +506,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		this.schemaUpdate = schemaUpdate;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -882,6 +883,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
+					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
@@ -927,6 +929,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
+					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
@@ -964,6 +967,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
+				@Override
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					@SuppressWarnings("deprecation")
 					Connection con = session.connection();
@@ -1001,6 +1005,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
+					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection con = session.connection();

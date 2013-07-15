@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-
 import java.net.URI;
 import java.util.Arrays;
 
@@ -42,9 +40,9 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.web.FreePortScanner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.SocketUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -57,6 +55,8 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import static org.junit.Assert.*;
 
 /**
  * Test access to parts of a multipart request with {@link RequestPart}.
@@ -74,8 +74,7 @@ public class RequestPartIntegrationTests {
 
 	@BeforeClass
 	public static void startServer() throws Exception {
-
-		int port = FreePortScanner.getFreePort();
+		int port = SocketUtils.findAvailableTcpPort();
 		baseUrl = "http://localhost:" + port;
 
 		server = new Server(port);

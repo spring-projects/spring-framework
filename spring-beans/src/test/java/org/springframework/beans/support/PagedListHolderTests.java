@@ -197,6 +197,7 @@ public class PagedListHolderTests {
 			this.extendedInfo = extendedInfo;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (!(o instanceof MockFilter)) return false;
@@ -210,6 +211,7 @@ public class PagedListHolderTests {
 			return true;
 		}
 
+		@Override
 		public int hashCode() {
 			int result;
 			result = name.hashCode();

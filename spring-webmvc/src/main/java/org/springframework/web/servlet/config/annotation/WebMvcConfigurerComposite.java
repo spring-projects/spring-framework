@@ -43,72 +43,84 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		}
 	}
 
+	@Override
 	public void addFormatters(FormatterRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addFormatters(registry);
 		}
 	}
 
+	@Override
 	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureContentNegotiation(configurer);
 		}
 	}
 
+	@Override
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureAsyncSupport(configurer);
 		}
 	}
 
+	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(converters);
 		}
 	}
 
+	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addArgumentResolvers(argumentResolvers);
 		}
 	}
 
+	@Override
 	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addReturnValueHandlers(returnValueHandlers);
 		}
 	}
 
+	@Override
 	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
 		}
 	}
 
+	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addInterceptors(registry);
 		}
 	}
 
+	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addViewControllers(registry);
 		}
 	}
 
+	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addResourceHandlers(registry);
 		}
 	}
 
+	@Override
 	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureDefaultServletHandling(configurer);
 		}
 	}
 
+	@Override
 	public Validator getValidator() {
 		List<Validator> candidates = new ArrayList<Validator>();
 		for (WebMvcConfigurer configurer : this.delegates) {
@@ -133,6 +145,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		}
 	}
 
+	@Override
 	public MessageCodesResolver getMessageCodesResolver() {
 		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
 		for (WebMvcConfigurer configurer : this.delegates) {

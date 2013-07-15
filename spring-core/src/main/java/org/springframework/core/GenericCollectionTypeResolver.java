@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -446,8 +447,13 @@ public abstract class GenericCollectionTypeResolver {
 			return null;
 		}
 		if (clazz.getSuperclass() != null && isIntrospectionCandidate(clazz.getSuperclass())) {
-			return extractType(clazz.getGenericSuperclass(), source, typeIndex, typeVariableMap, typeIndexesPerLevel,
-					nestingLevel, currentLevel);
+			try {
+				return extractType(clazz.getGenericSuperclass(), source, typeIndex, typeVariableMap,
+						typeIndexesPerLevel, nestingLevel, currentLevel);
+			}
+			catch (MalformedParameterizedTypeException ex) {
+				// from getGenericSuperclass() - ignore and continue with interface introspection
+			}
 		}
 		Type[] ifcs = clazz.getGenericInterfaces();
 		if (ifcs != null) {

@@ -54,7 +54,12 @@ public enum TestGroup {
 	 * Tests requiring the presence of jmxremote_optional.jar in jre/lib/ext in order to
 	 * avoid "Unsupported protocol: jmxmp" errors.
 	 */
-	JMXMP;
+	JMXMP,
+
+	/**
+	 * Tests that should only be run on the continuous integration server.
+	 */
+	CI;
 
 
 	/**

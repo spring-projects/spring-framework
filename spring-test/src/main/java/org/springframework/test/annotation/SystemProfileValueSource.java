@@ -50,6 +50,7 @@ public class SystemProfileValueSource implements ProfileValueSource {
 	 * system properties.
 	 * @see System#getProperty(String)
 	 */
+	@Override
 	public String get(String key) {
 		Assert.hasText(key, "'key' must not be empty");
 		return System.getProperty(key);

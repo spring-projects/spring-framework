@@ -63,6 +63,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher node(final Matcher<? super Node> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertNode(content, matcher);
@@ -75,6 +76,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher exists() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.exists(content);
@@ -87,6 +89,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher doesNotExist() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.doesNotExist(content);
@@ -100,6 +103,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher nodeCount(final Matcher<Integer> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertNodeCount(content, matcher);
@@ -112,6 +116,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher nodeCount(final int expectedCount) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertNodeCount(content, expectedCount);
@@ -125,6 +130,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher string(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertString(content, matcher);
@@ -137,6 +143,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher string(final String expectedValue) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertString(content, expectedValue);
@@ -150,6 +157,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher number(final Matcher<? super Double> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertNumber(content, matcher);
@@ -162,6 +170,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher number(final Double expectedValue) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertNumber(content, expectedValue);
@@ -174,6 +183,7 @@ public class XpathResultMatchers {
 	 */
 	public ResultMatcher booleanValue(final Boolean value) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				xpathHelper.assertBoolean(content, value);

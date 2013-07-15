@@ -116,14 +116,17 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	}
 
 
+	@Override
 	public PersistenceManagerFactory getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<? extends PersistenceManagerFactory> getObjectType() {
 		return PersistenceManagerFactory.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -136,6 +139,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 */
 	private class PersistenceManagerFactoryInvocationHandler implements InvocationHandler {
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on PersistenceManagerFactory interface coming in...
 
@@ -182,6 +186,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 			this.persistenceManagerFactory = pmf;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on PersistenceManager interface coming in...
 

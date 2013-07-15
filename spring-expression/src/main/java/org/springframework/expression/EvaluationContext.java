@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.expression;
 import java.util.List;
 
 /**
- * Expressions are executed in an evaluation context. It is in this context that references
- * are resolved when encountered during expression evaluation.
+ * Expressions are executed in an evaluation context. It is in this context that
+ * references are resolved when encountered during expression evaluation.
  *
  * <p>There is a default implementation of the EvaluationContext,
- * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
- * that can be extended, rather than having to implement everything.
+ * {@link org.springframework.expression.spel.support.StandardEvaluationContext} that can
+ * be extended, rather than having to implement everything.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -33,8 +33,9 @@ import java.util.List;
 public interface EvaluationContext {
 
 	/**
-	 * @return the default root context object against which unqualified properties/methods/etc
-	 * should be resolved. This can be overridden when evaluating an expression.
+	 * @return the default root context object against which unqualified
+	 *         properties/methods/etc should be resolved. This can be overridden when
+	 *         evaluating an expression.
 	 */
 	TypedValue getRootObject();
 
@@ -54,7 +55,8 @@ public interface EvaluationContext {
 	List<PropertyAccessor> getPropertyAccessors();
 
 	/**
-	 * @return a type locator that can be used to find types, either by short or fully qualified name.
+	 * @return a type locator that can be used to find types, either by short or fully
+	 *         qualified name.
 	 */
 	TypeLocator getTypeLocator();
 

@@ -16,12 +16,15 @@
 
 package org.springframework.tests;
 
-import static org.junit.Assume.assumeFalse;
-
+import java.awt.GraphicsEnvironment;
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.junit.internal.AssumptionViolatedException;
+import org.springframework.util.ClassUtils;
+
+import static org.junit.Assume.*;
 
 /**
  * Provides utility methods that allow JUnit tests to {@link org.junit.Assume} certain
@@ -29,14 +32,14 @@ import org.junit.internal.AssumptionViolatedException;
  * skipped.
  *
  * <p>For example, if a set of tests require at least JDK 1.7 it can use
- * {@code Assume#atLeast(JdkVersion.JAVA_17)} as shown below:
+ * {@code Assume#atLeast(JavaVersion.JAVA_17)} as shown below:
  *
  * <pre class="code">
  * public void MyTests {
  *
  *   &#064;BeforeClass
- *   public static assumptions() {
- *       Assume.atLeast(JdkVersion.JAVA_17);
+ *   public static void assumptions() {
+ *       Assume.atLeast(JavaVersion.JAVA_17);
  *   }
  *
  *   // ... all the test methods that require at least JDK 1.7
@@ -44,14 +47,14 @@ import org.junit.internal.AssumptionViolatedException;
  * </pre>
  *
  * If only a single test requires at least JDK 1.7 it can use the
- * {@code Assume#atLeast(JdkVersion.JAVA_17)} as shown below:
+ * {@code Assume#atLeast(JavaVersion.JAVA_17)} as shown below:
  *
  * <pre class="code">
  * public void MyTests {
  *
  *   &#064;Test
  *   public void requiresJdk17 {
- *       Assume.atLeast(JdkVersion.JAVA_17);
+ *       Assume.atLeast(JavaVersion.JAVA_17);
  *       // ... perform the actual test
  *   }
  * }
@@ -108,5 +111,21 @@ public abstract class Assume {
 	public static void notLogging(Log log) {
 		assumeFalse(log.isTraceEnabled());
 		assumeFalse(log.isDebugEnabled());
+	}
+
+	/**
+	 * Assume that we can load fonts (https://java.net/jira/browse/MACOSX_PORT-355)
+	 */
+	public static void canLoadNativeDirFonts() {
+		try {
+			GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+			Class<?> parserClass = ClassUtils.forName("net.sf.jasperreports.engine.util.JRStyledTextParser", null);
+			Method method = parserClass.getMethod("getInstance");
+			method.setAccessible(true);
+			method.invoke(null);
+		} catch(Throwable ex) {
+			throw new AssumptionViolatedException(
+					"Requires GraphicsEnvironment that can load fonts.", ex);
+		}
 	}
 }

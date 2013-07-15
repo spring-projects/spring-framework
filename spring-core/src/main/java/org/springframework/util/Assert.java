@@ -184,7 +184,7 @@ public abstract class Assert {
 	 */
 	public static void doesNotContain(String textToSearch, String substring, String message) {
 		if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
-				textToSearch.indexOf(substring) != -1) {
+				textToSearch.contains(substring)) {
 			throw new IllegalArgumentException(message);
 		}
 	}
@@ -236,8 +236,8 @@ public abstract class Assert {
 	 */
 	public static void noNullElements(Object[] array, String message) {
 		if (array != null) {
-			for (int i = 0; i < array.length; i++) {
-				if (array[i] == null) {
+			for (Object element : array) {
+				if (element == null) {
 					throw new IllegalArgumentException(message);
 				}
 			}
@@ -315,7 +315,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not an instance of clazz
 	 * @see Class#isInstance
 	 */
-	public static void isInstanceOf(Class clazz, Object obj) {
+	public static void isInstanceOf(Class<?> clazz, Object obj) {
 		isInstanceOf(clazz, obj, "");
 	}
 
@@ -331,7 +331,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not an instance of clazz
 	 * @see Class#isInstance
 	 */
-	public static void isInstanceOf(Class type, Object obj, String message) {
+	public static void isInstanceOf(Class<?> type, Object obj, String message) {
 		notNull(type, "Type to check against must not be null");
 		if (!type.isInstance(obj)) {
 			throw new IllegalArgumentException(
@@ -348,7 +348,7 @@ public abstract class Assert {
 	 * @param subType the sub type to check
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
-	public static void isAssignable(Class superType, Class subType) {
+	public static void isAssignable(Class<?> superType, Class<?> subType) {
 		isAssignable(superType, subType, "");
 	}
 
@@ -363,7 +363,7 @@ public abstract class Assert {
 	 * ok when prepended to it.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
-	public static void isAssignable(Class superType, Class subType, String message) {
+	public static void isAssignable(Class<?> superType, Class<?> subType, String message) {
 		notNull(superType, "Type to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
 			throw new IllegalArgumentException(message + subType + " is not assignable to " + superType);

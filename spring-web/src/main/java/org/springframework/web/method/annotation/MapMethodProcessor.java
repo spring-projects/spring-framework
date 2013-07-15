@@ -38,10 +38,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class MapMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return Map.class.isAssignableFrom(parameter.getParameterType());
 	}
 
+	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
@@ -50,10 +52,12 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 		return mavContainer.getModel();
 	}
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return Map.class.isAssignableFrom(returnType.getParameterType());
 	}
 
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,

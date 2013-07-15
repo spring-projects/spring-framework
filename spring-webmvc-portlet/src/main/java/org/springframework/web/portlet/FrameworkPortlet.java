@@ -421,6 +421,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * triggering a refresh of this servlet's context-dependent state.
 	 * @param event the incoming ApplicationContext event
 	 */
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.refreshEventReceived = true;
 		onRefresh(event.getApplicationContext());

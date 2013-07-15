@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.FileCopyUtils;
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>.
- * <b>Note: As of Spring 3.0, this exporter requires Hessian 3.2 or above.</b>
+ * <b>Note: As of Spring 4.0, this exporter requires Hessian 4.0 or above.</b>
  *
  * <p>Hessian services exported with this class can be accessed by
  * any Hessian client, as there isn't any special handling involved.
@@ -42,7 +42,6 @@ import org.springframework.util.FileCopyUtils;
  * @since 2.5.1
  * @see org.springframework.remoting.caucho.HessianClientInterceptor
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
- * @see SimpleBurlapServiceExporter
  * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter
  */
 public class SimpleHessianServiceExporter extends HessianExporter implements HttpHandler {
@@ -50,6 +49,7 @@ public class SimpleHessianServiceExporter extends HessianExporter implements Htt
 	/**
 	 * Processes the incoming Hessian request and creates a Hessian response.
 	 */
+	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		if (!"POST".equals(exchange.getRequestMethod())) {
 			exchange.getResponseHeaders().set("Allow", "POST");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar;
+import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringValueResolver;
@@ -34,12 +35,17 @@ import org.springframework.util.StringValueResolver;
  * {@link DefaultConversionService#addDefaultConverters addDefaultConverters} method.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
+	private static final boolean jsr310Present = ClassUtils.isPresent(
+			"java.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+
 	private static final boolean jodaTimePresent = ClassUtils.isPresent(
 			"org.joda.time.LocalDate", DefaultFormattingConversionService.class.getClassLoader());
+
 
 	/**
 	 * Create a new {@code DefaultFormattingConversionService} with the set of
@@ -71,12 +77,13 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 * @param registerDefaultFormatters whether to register default formatters
 	 */
 	public DefaultFormattingConversionService(StringValueResolver embeddedValueResolver, boolean registerDefaultFormatters) {
-		this.setEmbeddedValueResolver(embeddedValueResolver);
+		setEmbeddedValueResolver(embeddedValueResolver);
 		DefaultConversionService.addDefaultConverters(this);
 		if (registerDefaultFormatters) {
 			addDefaultFormatters(this);
 		}
 	}
+
 
 	/**
 	 * Add formatters appropriate for most environments, including number formatters and a Joda-Time
@@ -85,10 +92,16 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	 */
 	public static void addDefaultFormatters(FormatterRegistry formatterRegistry) {
 		formatterRegistry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+		if (jsr310Present) {
+			// just handling JSR-310 specific date and time types
+			new DateTimeFormatterRegistrar().registerFormatters(formatterRegistry);
+		}
 		if (jodaTimePresent) {
+			// handles Joda-specific types as well as Date, Calendar, Long
 			new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 		}
 		else {
+			// regular DateFormat-based Date, Calendar, Long converters
 			new DateFormatterRegistrar().registerFormatters(formatterRegistry);
 		}
 	}

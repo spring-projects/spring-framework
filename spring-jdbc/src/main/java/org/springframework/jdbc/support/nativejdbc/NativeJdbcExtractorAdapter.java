@@ -61,6 +61,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Return {@code false} by default.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return false;
 	}
@@ -68,6 +69,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Return {@code false} by default.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return false;
 	}
@@ -75,6 +77,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Return {@code false} by default.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return false;
 	}
@@ -91,6 +94,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
+	@Override
 	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (con == null) {
 			return null;
@@ -128,6 +132,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see #getNativeConnection
 	 * @see Statement#getConnection
 	 */
+	@Override
 	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
 		if (stmt == null) {
 			return null;
@@ -138,6 +143,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in Statement.
 	 */
+	@Override
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		return stmt;
 	}
@@ -145,6 +151,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in PreparedStatement.
 	 */
+	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		return ps;
 	}
@@ -152,6 +159,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in CallableStatement.
 	 */
+	@Override
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		return cs;
 	}
@@ -159,6 +167,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in ResultSet.
 	 */
+	@Override
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		return rs;
 	}

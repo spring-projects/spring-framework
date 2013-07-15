@@ -56,6 +56,7 @@ public class MockResourceURL extends MockBaseURL implements ResourceURL {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(encodeParameter("resourceID", this.resourceID));

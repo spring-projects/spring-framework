@@ -176,6 +176,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	}
 
 
+	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -236,6 +237,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	}
 
 
+	@Override
 	public void execute(Runnable task) {
 		Executor executor = getThreadPoolExecutor();
 		try {
@@ -246,10 +248,12 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
@@ -260,6 +264,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		}
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
@@ -273,6 +278,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}

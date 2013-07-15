@@ -43,14 +43,17 @@ public class SimpleTransformErrorListener implements ErrorListener {
 	}
 
 
+	@Override
 	public void warning(TransformerException ex) throws TransformerException {
 		logger.warn("XSLT transformation warning", ex);
 	}
 
+	@Override
 	public void error(TransformerException ex) throws TransformerException {
 		logger.error("XSLT transformation error", ex);
 	}
 
+	@Override
 	public void fatalError(TransformerException ex) throws TransformerException {
 		throw ex;
 	}

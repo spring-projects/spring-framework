@@ -40,13 +40,16 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 	private Executor taskExecutor;
 
 
+	@Override
 	public void setInstanceId(String schedInstId) {
 	}
 
+	@Override
 	public void setInstanceName(String schedName) {
 	}
 
 
+	@Override
 	public void initialize() throws SchedulerConfigException {
 		// Absolutely needs thread-bound TaskExecutor to initialize.
 		this.taskExecutor = SchedulerFactoryBean.getConfigTimeTaskExecutor();
@@ -57,14 +60,17 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 		}
 	}
 
+	@Override
 	public void shutdown(boolean waitForJobsToComplete) {
 	}
 
+	@Override
 	public int getPoolSize() {
 		return -1;
 	}
 
 
+	@Override
 	public boolean runInThread(Runnable runnable) {
 		if (runnable == null) {
 			return false;
@@ -79,6 +85,7 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 		}
 	}
 
+	@Override
 	public int blockForAvailableThreads() {
 		// The present implementation always returns 1, making Quartz (1.6)
 		// always schedule any tasks that it feels like scheduling.

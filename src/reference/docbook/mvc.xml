@@ -1173,9 +1173,7 @@ public void findPet(
         <para>Note that to enable the use of matrix variables, you must set the
         <classname>removeSemicolonContent</classname> property of
         <classname>RequestMappingHandlerMapping</classname> to <code>false</code>.
-        By default it is set to <code>true</code> with the exception of the
-        MVC namespace and the MVC Java config both of which automatically enable
-        the use of matrix variables.</para>
+        By default it is set to <code>false</code>.</para>
 
       </section>
 
@@ -5074,12 +5072,12 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" /&gt;
     &lt;mvc:interceptor&gt;
-        &lt;mapping path="/**"/&gt;
-        &lt;exclude-mapping path="/admin/**"/&gt;
+        &lt;mvc:mapping path="/**"/&gt;
+        &lt;mvc:exclude-mapping path="/admin/**"/&gt;
         &lt;bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" /&gt;
     &lt;/mvc:interceptor&gt;
     &lt;mvc:interceptor&gt;
-        &lt;mapping path="/secure/*"/&gt;
+        &lt;mvc:mapping path="/secure/*"/&gt;
         &lt;bean class="org.example.SecurityInterceptor" /&gt;
     &lt;/mvc:interceptor&gt;
 &lt;/mvc:interceptors&gt;

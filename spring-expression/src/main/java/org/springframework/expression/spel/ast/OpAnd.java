@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class OpAnd extends Operator {
 		super("and", pos, operands);
 	}
 
+
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		if (getBooleanValue(state, getLeftOperand()) == false) {
@@ -52,9 +53,9 @@ public class OpAnd extends Operator {
 			assertValueNotNull(value);
 			return value;
 		}
-		catch (SpelEvaluationException ee) {
-			ee.setPosition(operand.getStartPosition());
-			throw ee;
+		catch (SpelEvaluationException ex) {
+			ex.setPosition(operand.getStartPosition());
+			throw ex;
 		}
 	}
 

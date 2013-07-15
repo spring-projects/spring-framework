@@ -154,7 +154,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
    * The DataSource should match the one used by the JDO PersistenceManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the PersistenceManagerFactory uses a DataSource as connection factory,
-	 * the DataSource will be autodetected: You can still explictly specify the
+	 * the DataSource will be autodetected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -231,6 +231,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	 * for the specified PersistenceManagerFactory if none set.
 	 * Auto-detect the PersistenceManagerFactory's DataSource, if any.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
@@ -255,6 +256,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getPersistenceManagerFactory();
 	}
@@ -570,11 +572,13 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
 			return tx.getRollbackOnly();
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.persistenceManagerHolder.getPersistenceManager().flush();

@@ -79,10 +79,12 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	}
 
 
+	@Override
 	public Advice getAdvice() {
 		return this.transactionInterceptor;
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

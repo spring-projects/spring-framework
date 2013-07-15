@@ -305,10 +305,12 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * bean names. It does not need to be set for any other mode of operation.
 	 * @see #setEntityInterceptorBeanName
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");

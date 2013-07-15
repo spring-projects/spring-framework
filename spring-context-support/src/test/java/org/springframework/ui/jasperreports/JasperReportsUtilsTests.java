@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import junit.framework.TestCase;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JRParameter;
@@ -42,20 +41,31 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.util.JRLoader;
+
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.Assume;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 18.11.2004
  */
-public class JasperReportsUtilsTests extends TestCase {
+public class JasperReportsUtilsTests {
 
+	@BeforeClass
+	public static void assumptions() {
+		Assume.canLoadNativeDirFonts();
+	}
+
+	@Test
 	public void testRenderAsCsvWithDataSource() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getDataSource(), writer);
@@ -63,6 +73,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertCsvOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsCsvWithCollection() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer);
@@ -70,6 +81,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertCsvOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsCsvWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
@@ -80,6 +92,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertTrue("Delimiter is incorrect", output.contains("~"));
 	}
 
+	@Test
 	public void testRenderAsHtmlWithDataSource() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getDataSource(), writer);
@@ -87,6 +100,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertHtmlOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsHtmlWithCollection() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer);
@@ -94,6 +108,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertHtmlOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsHtmlWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
@@ -105,6 +120,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertTrue("URI not included", output.contains(uri));
 	}
 
+	@Test
 	public void testRenderAsPdfWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getDataSource(), os);
@@ -112,6 +128,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertPdfOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsPdfWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os);
@@ -119,6 +136,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertPdfOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
@@ -129,6 +147,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertTrue(new String(output).contains("PDF-1.6"));
 	}
 
+	@Test
 	public void testRenderAsXlsWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getDataSource(), os);
@@ -136,6 +155,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertXlsOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsXlsWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getData(), os);
@@ -143,6 +163,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertXlsOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderAsXlsWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
@@ -156,6 +177,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertTrue(monitor.isInvoked());
 	}
 
+	@Test
 	public void testRenderWithWriter() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());
@@ -164,6 +186,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		assertHtmlOutputCorrect(output);
 	}
 
+	@Test
 	public void testRenderWithOutputStream() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());

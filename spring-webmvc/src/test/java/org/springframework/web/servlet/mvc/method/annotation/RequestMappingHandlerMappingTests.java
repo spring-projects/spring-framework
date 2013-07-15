@@ -119,6 +119,7 @@ public class RequestMappingHandlerMappingTests {
 	@Test
 	public void resolveEmbeddedValuesInPatterns() {
 		this.handlerMapping.setEmbeddedValueResolver(new StringValueResolver() {
+			@Override
 			public String resolveStringValue(String value) {
 				return "/${pattern}/bar".equals(value) ? "/foo/bar" : value;
 			}

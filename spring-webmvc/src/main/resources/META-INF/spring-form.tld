@@ -143,6 +143,12 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>HTML Required Attribute</description>
+			<name>servletRelativeAction</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description>HTML Optional Attribute</description>
 			<name>method</name>
 			<required>false</required>

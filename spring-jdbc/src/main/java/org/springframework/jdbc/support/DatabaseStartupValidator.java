@@ -93,6 +93,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 	 * from the specified DataSource, with the specified interval between
 	 * checks, until the specified timeout.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("dataSource is required");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,21 @@
 
 package org.springframework.context.annotation;
 
-import example.scannable.DefaultNamedComponent;
-import org.junit.Test;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import example.scannable.DefaultNamedComponent;
 import static org.junit.Assert.*;
 
 /**
@@ -81,6 +86,22 @@ public class AnnotationBeanNameGeneratorTests {
 		assertEquals(expectedGeneratedBeanName, beanName);
 	}
 
+	@Test
+	public void testGenerateBeanNameFromMetaComponentWithStringValue() {
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromStringMeta.class);
+		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+		assertEquals("henry", beanName);
+	}
+
+	@Test
+	public void testGenerateBeanNameFromMetaComponentWithNonStringValue() {
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentFromNonStringMeta.class);
+		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
+		assertEquals("annotationBeanNameGeneratorTests.ComponentFromNonStringMeta", beanName);
+	}
+
 
 	@Component("walden")
 	private static class ComponentWithName {
@@ -94,6 +115,21 @@ public class AnnotationBeanNameGeneratorTests {
 
 	@Component
 	private static class AnonymousComponent {
+	}
+
+	@Service("henry")
+	private static class ComponentFromStringMeta {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	@Component
+	public @interface NonStringMetaComponent {
+		long value();
+	}
+
+	@NonStringMetaComponent(123)
+	private static class ComponentFromNonStringMeta {
 	}
 
 }

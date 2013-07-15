@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 	private ClassLoader beanClassLoader;
 
-	private Environment environment = new StandardEnvironment();
+	private Environment environment;
 
 	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
@@ -90,7 +90,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 		// Inherit Environment if possible
 		if (this.registry instanceof EnvironmentCapable) {
-			this.environment = ((EnvironmentCapable)this.registry).getEnvironment();
+			this.environment = ((EnvironmentCapable) this.registry).getEnvironment();
 		}
 		else {
 			this.environment = new StandardEnvironment();
@@ -102,6 +102,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		return this.registry;
 	}
 
+	@Override
 	public final BeanDefinitionRegistry getRegistry() {
 		return this.registry;
 	}
@@ -121,6 +122,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.resourceLoader = resourceLoader;
 	}
 
+	@Override
 	public ResourceLoader getResourceLoader() {
 		return this.resourceLoader;
 	}
@@ -136,6 +138,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.beanClassLoader = beanClassLoader;
 	}
 
+	@Override
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
@@ -149,6 +152,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.environment = environment;
 	}
 
+	@Override
 	public Environment getEnvironment() {
 		return this.environment;
 	}
@@ -162,11 +166,13 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
 	}
 
+	@Override
 	public BeanNameGenerator getBeanNameGenerator() {
 		return this.beanNameGenerator;
 	}
 
 
+	@Override
 	public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
@@ -176,6 +182,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		return counter;
 	}
 
+	@Override
 	public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(location, null);
 	}
@@ -236,6 +243,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		}
 	}
 
+	@Override
 	public int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException {
 		Assert.notNull(locations, "Location array must not be null");
 		int counter = 0;

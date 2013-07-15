@@ -122,6 +122,12 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+
+		// SPR-10513
+
+		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
+
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
 	}
 
 }

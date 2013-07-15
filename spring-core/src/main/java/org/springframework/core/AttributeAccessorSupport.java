@@ -39,6 +39,7 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>(0);
 
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Name must not be null");
 		if (value != null) {
@@ -49,21 +50,25 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		}
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);
 	}
 
+	@Override
 	public boolean hasAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.containsKey(name);
 	}
 
+	@Override
 	public String[] attributeNames() {
 		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
 	}

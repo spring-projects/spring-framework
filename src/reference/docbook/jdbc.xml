@@ -304,12 +304,12 @@
           <para>Here is a simple query for getting the number of rows in a
           relation:</para>
 
-          <programlisting language="java">int rowCount = this.jdbcTemplate.queryForInt("select count(*) from t_actor");</programlisting>
+          <programlisting language="java">int rowCount = this.jdbcTemplate.queryForObject("select count(*) from t_actor", Integer.class);</programlisting>
 
           <para>A simple query using a bind variable:</para>
 
-          <programlisting language="java">int countOfActorsNamedJoe = this.jdbcTemplate.queryForInt(
-        "select count(*) from t_actor where first_name = ?", "Joe");</programlisting>
+          <programlisting language="java">int countOfActorsNamedJoe = this.jdbcTemplate.queryForObject(
+        "select count(*) from t_actor where first_name = ?", Integer.class, "Joe");</programlisting>
 
           <para>Querying for a <classname>String</classname>:</para>
 
@@ -383,7 +383,7 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
         "Leonor", "Watling");</programlisting>
 
           <programlisting language="java">this.jdbcTemplate.update(
-        "update t_actor set = ? where id = ?",
+        "update t_actor set last_name = ? where id = ?",
         "Banjo", 5276L);</programlisting>
 
           <programlisting language="java">this.jdbcTemplate.update(
@@ -567,7 +567,7 @@ public int countOfActorsByFirstName(String firstName) {
 
     SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
 
-    return namedParameterJdbcTemplate.queryForInt(sql, namedParameters);
+    return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
 }</programlisting>
 
       <para>Notice the use of the named parameter notation in the value
@@ -598,9 +598,9 @@ public int countOfActorsByFirstName(String firstName) {
 
     String sql = "select count(*) from T_ACTOR where first_name = :first_name";
 
-    Map namedParameters = Collections.singletonMap("first_name", firstName);
+    Map&lt;String, String&gt; namedParameters = Collections.singletonMap("first_name", firstName);
 
-    return this.namedParameterJdbcTemplate.queryForInt(sql, namedParameters);
+    return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
 }</programlisting>
 
       <para>One nice feature related to the
@@ -664,7 +664,7 @@ public int countOfActors(Actor exampleActor) {
 
     SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
 
-    return this.namedParameterJdbcTemplate.queryForInt(sql, namedParameters);
+    return this.namedParameterJdbcTemplate.queryForObject(sql, Integer.class, namedParameters);
 }</programlisting>
 
       <para>Remember that the
@@ -838,10 +838,8 @@ public class ExecuteAStatement {
     <section xml:id="jdbc-statements-querying">
       <title>Running queries</title>
 
-      <para>Some query methods return a single value. To retrieve a count or a
-      specific value from one row, use
-      <methodname>queryForInt(..)</methodname>,
-      <methodname>queryForLong(..)</methodname> or
+      <para>Some query methods return a single value. To retrieve a count or
+      a specific value from one row, use
       <methodname>queryForObject(..)</methodname>. The latter converts the
       returned JDBC <classname>Type</classname> to the Java class that is
       passed in as an argument. If the type conversion is invalid, then an
@@ -862,11 +860,11 @@ public class RunAQuery {
     }
 
     public int getCount() {
-        return this.jdbcTemplate.queryForInt("select count(*) from mytable");
+        return this.jdbcTemplate.queryForObject("select count(*) from mytable", Integer.class);
     }
 
     public String getName() {
-        return (String) this.jdbcTemplate.queryForObject("select name from mytable", String.class);
+        return this.jdbcTemplate.queryForObject("select name from mytable", String.class);
     }
 
     public void setDataSource(DataSource dataSource) {

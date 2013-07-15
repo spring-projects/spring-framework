@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ package org.springframework.expression;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
- * An expression capable of evaluating itself against context objects.
- * Encapsulates the details of a previously parsed expression string.
- * Provides a common abstraction for expression evaluation independent
- * of any language like OGNL or the Unified EL.
+ * An expression capable of evaluating itself against context objects. Encapsulates the
+ * details of a previously parsed expression string. Provides a common abstraction for
+ * expression evaluation independent of any language like OGNL or the Unified EL.
  *
  * @author Keith Donald
  * @author Andy Clement

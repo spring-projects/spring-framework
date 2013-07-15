@@ -40,10 +40,12 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
+	@Override
 	public boolean isBeforeAdvice() {
 		return false;
 	}
 
+	@Override
 	public boolean isAfterAdvice() {
 		return true;
 	}
@@ -53,6 +55,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		setReturningNameNoCheck(name);
 	}
 
+	@Override
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 		if (shouldInvokeOnReturnValueOf(method, returnValue)) {
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);

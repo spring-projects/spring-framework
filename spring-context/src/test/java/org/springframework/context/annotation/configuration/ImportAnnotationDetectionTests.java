@@ -25,11 +25,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
+import org.springframework.stereotype.Service;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests that @Import may be used both as a locally declared and meta-declared
@@ -68,6 +71,16 @@ public class ImportAnnotationDetectionTests {
 		assertThat(ctx.containsBean("testBean1"), is(true));
 		assertThat(ctx.containsBean("testBean2"), is(true));
 		assertThat(ctx.getBean("testBean2", TestBean.class).getName(), is("2a"));
+	}
+
+	@Test
+	public void importFromBean() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportFromBean.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean("importAnnotationDetectionTests.ImportFromBean"), is(true));
+		assertThat(ctx.containsBean("testBean1"), is(true));
+		assertThat(ctx.getBean("testBean1", TestBean.class).getName(), is("1"));
 	}
 
 	@Configuration
@@ -135,5 +148,10 @@ public class ImportAnnotationDetectionTests {
 		TestBean testBean3() {
 			return new TestBean("3");
 		}
+	}
+
+	@MetaImport1
+	static class ImportFromBean {
+
 	}
 }

@@ -255,10 +255,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.stringArray = stringArray;
 	}
 
+	@Override
 	public Integer[] getSomeIntegerArray() {
 		return someIntegerArray;
 	}
 
+	@Override
 	public void setSomeIntegerArray(Integer[] someIntegerArray) {
 		this.someIntegerArray = someIntegerArray;
 	}
@@ -461,6 +463,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -472,6 +475,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.age;
 	}
@@ -486,6 +490,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		}
 	}
 
+	@Override
 	public String toString() {
 		return this.name;
 	}

@@ -55,6 +55,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	/** Constant for the name attribute */
 	public static final String NAME_ATTRIBUTE = "name";
 
+	@Override
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (definition != null && !parserContext.isNested()) {

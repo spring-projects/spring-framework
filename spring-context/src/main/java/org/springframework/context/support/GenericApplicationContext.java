@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  *
  * <p>Usage example:
  *
- * <pre>
+ * <pre class="code">
  * GenericApplicationContext ctx = new GenericApplicationContext();
  * XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
  * xmlReader.loadBeanDefinitions(new ClassPathResource("applicationContext.xml"));
@@ -286,32 +286,39 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	// Implementation of BeanDefinitionRegistry
 	//---------------------------------------------------------------------
 
+	@Override
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 
 		this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
 	}
 
+	@Override
 	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		this.beanFactory.removeBeanDefinition(beanName);
 	}
 
+	@Override
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		return this.beanFactory.getBeanDefinition(beanName);
 	}
 
+	@Override
 	public boolean isBeanNameInUse(String beanName) {
 		return this.beanFactory.isBeanNameInUse(beanName);
 	}
 
+	@Override
 	public void registerAlias(String beanName, String alias) {
 		this.beanFactory.registerAlias(beanName, alias);
 	}
 
+	@Override
 	public void removeAlias(String alias) {
 		this.beanFactory.removeAlias(alias);
 	}
 
+	@Override
 	public boolean isAlias(String beanName) {
 		return this.beanFactory.isAlias(beanName);
 	}

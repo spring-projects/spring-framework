@@ -43,9 +43,11 @@ public class ContextCleanupListener implements ServletContextListener {
 	private static final Log logger = LogFactory.getLog(ContextCleanupListener.class);
 
 
+	@Override
 	public void contextInitialized(ServletContextEvent event) {
 	}
 
+	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		cleanupAttributes(event.getServletContext());
 	}

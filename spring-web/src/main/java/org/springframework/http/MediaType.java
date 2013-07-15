@@ -584,6 +584,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @param other media type to compare to
 	 * @see #sortBySpecificity(List)
 	 */
+	@Override
 	public int compareTo(MediaType other) {
 		int comp = this.type.compareToIgnoreCase(other.type);
 		if (comp != 0) {
@@ -850,6 +851,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
 
+		@Override
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
 			if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
 				return 1;
@@ -893,6 +895,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
 
+		@Override
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
 			double quality1 = mediaType1.getQualityValue();
 			double quality2 = mediaType2.getQualityValue();

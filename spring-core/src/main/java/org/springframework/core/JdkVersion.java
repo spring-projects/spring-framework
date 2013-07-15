@@ -17,15 +17,16 @@
 package org.springframework.core;
 
 /**
- * Internal helper class used to find the Java/JVM version
- * that Spring is operating on, to allow for automatically
- * adapting to the present platform's capabilities.
+ * Internal helper class used to find the Java/JVM version that Spring is
+ * operating on, to allow for automatically adapting to the present platform's
+ * capabilities.
  *
  * <p>Note that Spring requires JVM 1.6 or higher, as of Spring 4.0.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 public abstract class JdkVersion {
 
@@ -59,6 +60,11 @@ public abstract class JdkVersion {
 	 */
 	public static final int JAVA_18 = 5;
 
+	/**
+	 * Constant identifying the 1.9 JVM (Java 9).
+	 */
+	public static final int JAVA_19 = 6;
+
 
 	private static final String javaVersion;
 
@@ -67,7 +73,10 @@ public abstract class JdkVersion {
 	static {
 		javaVersion = System.getProperty("java.version");
 		// version String should look like "1.4.2_10"
-		if (javaVersion.contains("1.8.")) {
+		if (javaVersion.contains("1.9.")) {
+			majorJavaVersion = JAVA_19;
+		}
+		else if (javaVersion.contains("1.8.")) {
 			majorJavaVersion = JAVA_18;
 		}
 		else if (javaVersion.contains("1.7.")) {
@@ -93,12 +102,11 @@ public abstract class JdkVersion {
 	/**
 	 * Get the major version code. This means we can do things like
 	 * {@code if (getMajorJavaVersion() >= JAVA_17)}.
-	 * @return a code comparable to the JAVA_XX codes in this class
-	 * @see #JAVA_13
-	 * @see #JAVA_14
-	 * @see #JAVA_15
+	 * @return a code comparable to the {@code JAVA_XX} codes in this class
 	 * @see #JAVA_16
-	 * @see #JAVA_17
+     * @see #JAVA_17
+     * @see #JAVA_18
+     * @see #JAVA_19
 	 */
 	public static int getMajorJavaVersion() {
 		return majorJavaVersion;

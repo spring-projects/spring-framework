@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,8 @@ public class ConstructorReference extends SpelNodeImpl {
 					Throwable rootCause = ae.getCause().getCause();
 					if (rootCause instanceof RuntimeException) {
 						throw (RuntimeException) rootCause;
-					} else {
+					}
+					else {
 						String typename = (String) this.children[0].getValueInternal(state).getValue();
 						throw new SpelEvaluationException(getStartPosition(), rootCause,
 								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename, FormatHelper
@@ -153,9 +154,9 @@ public class ConstructorReference extends SpelNodeImpl {
 			return executorToUse.execute(state.getEvaluationContext(), arguments);
 		}
 		catch (AccessException ae) {
-			throw new SpelEvaluationException(getStartPosition(), ae, SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,
-					typename, FormatHelper.formatMethodForMessage("", argumentTypes));
-
+			throw new SpelEvaluationException(getStartPosition(), ae,
+					SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename,
+					FormatHelper.formatMethodForMessage("", argumentTypes));
 		}
 	}
 
@@ -168,8 +169,9 @@ public class ConstructorReference extends SpelNodeImpl {
 	 * @return a reusable ConstructorExecutor that can be invoked to run the constructor or null
 	 * @throws SpelEvaluationException if there is a problem locating the constructor
 	 */
-	private ConstructorExecutor findExecutorForConstructor(String typename, List<TypeDescriptor> argumentTypes,
-			ExpressionState state) throws SpelEvaluationException {
+	private ConstructorExecutor findExecutorForConstructor(String typename,
+			List<TypeDescriptor> argumentTypes, ExpressionState state)
+			throws SpelEvaluationException {
 
 		EvaluationContext eContext = state.getEvaluationContext();
 		List<ConstructorResolver> cResolvers = eContext.getConstructorResolvers();
@@ -202,8 +204,9 @@ public class ConstructorReference extends SpelNodeImpl {
 		sb.append(getChild(index++).toStringAST());
 		sb.append("(");
 		for (int i = index; i < getChildCount(); i++) {
-			if (i > index)
+			if (i > index) {
 				sb.append(",");
+			}
 			sb.append(getChild(i).toStringAST());
 		}
 		sb.append(")");
@@ -221,8 +224,8 @@ public class ConstructorReference extends SpelNodeImpl {
 		Object intendedArrayType = getChild(0).getValue(state);
 		if (!(intendedArrayType instanceof String)) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
-					SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION, FormatHelper
-							.formatClassNameForMessage(intendedArrayType.getClass()));
+					SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,
+					FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
 		}
 		String type = (String) intendedArrayType;
 		Class<?> componentType;

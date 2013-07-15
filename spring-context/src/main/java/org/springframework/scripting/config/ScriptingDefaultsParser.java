@@ -35,6 +35,7 @@ public class ScriptingDefaultsParser implements BeanDefinitionParser {
 	private static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
 
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinition bd =
 				LangNamespaceUtils.registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());

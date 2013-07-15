@@ -94,6 +94,7 @@ public abstract class RemoteInvocationSerializingExporter extends RemoteInvocati
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		prepare();
 	}

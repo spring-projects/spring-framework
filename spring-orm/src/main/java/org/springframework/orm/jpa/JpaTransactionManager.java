@@ -216,7 +216,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * The DataSource should match the one used by the JPA EntityManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the EntityManagerFactory uses a known DataSource as connection factory,
-	 * the DataSource will be autodetected: You can still explictly specify the
+	 * the DataSource will be autodetected: You can still explicitly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
 	 * application code accessing this DataSource directly via DataSourceUtils
@@ -258,7 +258,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Set the JPA dialect to use for this transaction manager.
 	 * Used for vendor-specific transaction management and JDBC connection exposure.
 	 * <p>If the EntityManagerFactory uses a known JpaDialect, it will be autodetected:
-	 * You can still explictly specify the DataSource, but you don't need to in this case.
+	 * You can still explicitly specify the DataSource, but you don't need to in this case.
 	 * <p>The dialect object can be used to retrieve the underlying JDBC connection
 	 * and thus allows for exposing JPA transactions as JDBC transactions.
 	 * @see EntityManagerFactoryInfo#getJpaDialect()
@@ -281,6 +281,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * Falls back to a default EntityManagerFactory bean if no persistence unit specified.
 	 * @see #setPersistenceUnitName
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (getEntityManagerFactory() == null) {
 			if (!(beanFactory instanceof ListableBeanFactory)) {
@@ -297,6 +298,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * for the specified EntityManagerFactory if none set.
 	 * Auto-detect the EntityManagerFactory's DataSource, if any.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
@@ -315,6 +317,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getEntityManagerFactory();
 	}
@@ -654,11 +657,13 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.entityManagerHolder.getEntityManager().flush();

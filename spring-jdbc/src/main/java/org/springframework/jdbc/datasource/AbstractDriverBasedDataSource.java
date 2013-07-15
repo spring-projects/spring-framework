@@ -115,6 +115,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @see #setUsername
 	 * @see #setPassword
 	 */
+	@Override
 	public Connection getConnection() throws SQLException {
 		return getConnectionFromDriver(getUsername(), getPassword());
 	}
@@ -124,6 +125,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * using the given username and password.
 	 * @see #getConnectionFromDriver(String, String)
 	 */
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return getConnectionFromDriver(username, password);
 	}

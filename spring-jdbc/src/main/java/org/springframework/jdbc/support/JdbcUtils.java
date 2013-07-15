@@ -319,6 +319,7 @@ public abstract class JdbcUtils {
 
 		return extractDatabaseMetaData(dataSource,
 				new DatabaseMetaDataCallback() {
+					@Override
 					public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException {
 						try {
 							Method method = DatabaseMetaData.class.getMethod(metaDataMethodName, (Class[]) null);

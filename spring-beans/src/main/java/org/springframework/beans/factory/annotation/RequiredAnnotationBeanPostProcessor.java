@@ -117,6 +117,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		return this.requiredAnnotationType;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
 			this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
@@ -127,11 +128,13 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
 
+	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 	}
 

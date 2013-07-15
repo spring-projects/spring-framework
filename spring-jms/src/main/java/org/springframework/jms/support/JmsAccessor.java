@@ -147,6 +147,7 @@ public abstract class JmsAccessor implements InitializingBean {
 		return this.sessionAcknowledgeMode;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");

@@ -224,6 +224,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 				return MethodMatcher.TRUE;
 			}
 
+			@Override
 			public boolean equals(Object obj) {
 				return true;
 			}

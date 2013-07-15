@@ -184,6 +184,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		TimeStamped ts = new SerializableTimeStamped(0);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts) {
+			@Override
 			public String toString() {
 				throw new UnsupportedOperationException("Shouldn't be invoked");
 			}

@@ -63,11 +63,13 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 	}
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
+	@Override
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 

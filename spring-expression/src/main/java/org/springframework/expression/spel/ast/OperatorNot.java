@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,19 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 		super(pos, operand);
 	}
 
+
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
-			Boolean value = children[0].getValue(state, Boolean.class);
+			Boolean value = this.children[0].getValue(state, Boolean.class);
 			if (value == null) {
 				throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 			}
 			return BooleanTypedValue.forValue(!value);
 		}
-		catch (SpelEvaluationException see) {
-			see.setPosition(getChild(0).getStartPosition());
-			throw see;
+		catch (SpelEvaluationException ex) {
+			ex.setPosition(getChild(0).getStartPosition());
+			throw ex;
 		}
 	}
 

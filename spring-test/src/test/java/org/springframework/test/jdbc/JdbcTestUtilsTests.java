@@ -48,6 +48,7 @@ public class JdbcTestUtilsTests {
 	@Mock
 	private JdbcTemplate jdbcTemplate;
 
+
 	@Test
 	public void containsDelimiters() {
 		assertTrue("test with ';' is wrong", !JdbcTestUtils.containsSqlScriptDelimiters("select 1\n select ';'", ';'));
@@ -117,26 +118,52 @@ public class JdbcTestUtilsTests {
 		assertEquals("statement 4 not split correctly", statement4, statements.get(3));
 	}
 
+	/**
+	 * See <a href="https://jira.springsource.org/browse/SPR-10330">SPR-10330</a>
+	 * @since 4.0
+	 */
 	@Test
-	public void testDeleteNoWhere() throws Exception {
+	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
+
+		EncodedResource resource = new EncodedResource(new ClassPathResource(
+			"test-data-with-comments-and-leading-tabs.sql", getClass()));
+		LineNumberReader lineNumberReader = new LineNumberReader(resource.getReader());
+
+		String script = JdbcTestUtils.readScript(lineNumberReader);
+
+		char delim = ';';
+		List<String> statements = new ArrayList<String>();
+		JdbcTestUtils.splitSqlScript(script, delim, statements);
+
+		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
+		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
+		String statement3 = "insert into orders(id, order_date, customer_id) values (2, '2013-06-08', 1)";
+
+		assertEquals("wrong number of statements", 3, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+		assertEquals("statement 3 not split correctly", statement3, statements.get(2));
+	}
+
+	@Test
+	public void deleteWithoutWhereClause() throws Exception {
 		given(jdbcTemplate.update("DELETE FROM person")).willReturn(10);
 		int deleted = JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, "person", null);
 		assertThat(deleted, equalTo(10));
 	}
 
 	@Test
-	public void testDeleteWhere() throws Exception {
+	public void deleteWithWhereClause() throws Exception {
 		given(jdbcTemplate.update("DELETE FROM person WHERE name = 'Bob' and age > 25")).willReturn(10);
 		int deleted = JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, "person", "name = 'Bob' and age > 25");
 		assertThat(deleted, equalTo(10));
 	}
 
 	@Test
-	public void deleteWhereAndArguments() throws Exception {
+	public void deleteWithWhereClauseAndArguments() throws Exception {
 		given(jdbcTemplate.update("DELETE FROM person WHERE name = ? and age > ?", "Bob", 25)).willReturn(10);
 		int deleted = JdbcTestUtils.deleteFromTableWhere(jdbcTemplate, "person", "name = ? and age > ?", "Bob", 25);
 		assertThat(deleted, equalTo(10));
 	}
-
 
 }

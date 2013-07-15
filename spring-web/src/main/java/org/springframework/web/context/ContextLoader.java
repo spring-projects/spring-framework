@@ -470,7 +470,6 @@ public class ContextLoader {
 	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
 		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses =
 				determineContextInitializerClasses(servletContext);
-
 		if (initializerClasses.size() == 0) {
 			// no ApplicationContextInitializers have been declared -> nothing to do
 			return;
@@ -483,11 +482,13 @@ public class ContextLoader {
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
-			Assert.isAssignable(initializerContextClass, contextClass, String.format(
-					"Could not add context initializer [%s] as its generic parameter [%s] " +
-					"is not assignable from the type of application context used by this " +
-					"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
-					contextClass.getName()));
+			if (initializerContextClass != null) {
+				Assert.isAssignable(initializerContextClass, contextClass, String.format(
+						"Could not add context initializer [%s] as its generic parameter [%s] " +
+						"is not assignable from the type of application context used by this " +
+						"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						contextClass.getName()));
+			}
 			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
 		}
 

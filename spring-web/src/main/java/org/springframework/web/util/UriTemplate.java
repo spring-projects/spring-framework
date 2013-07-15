@@ -71,6 +71,7 @@ public class UriTemplate implements Serializable {
 		this.uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).build();
 	}
 
+
 	/**
 	 * Return the names of the variables in the template, in order.
 	 * @return the template variable names
@@ -78,8 +79,6 @@ public class UriTemplate implements Serializable {
 	public List<String> getVariableNames() {
 		return this.variableNames;
 	}
-
-	// expanding
 
 	/**
 	 * Given the Map of variables, expands this template into a URI. The Map keys represent variable names,
@@ -124,8 +123,6 @@ public class UriTemplate implements Serializable {
 		return encodedComponents.toUri();
 	}
 
-	// matching
-
 	/**
 	 * Indicate whether the given URI matches this template.
 	 * @param uri the URI to match to
@@ -165,28 +162,6 @@ public class UriTemplate implements Serializable {
 		return result;
 	}
 
-	/**
-	 * Encodes the given String as URL.
-	 * <p>Defaults to {@link UriUtils#encodeUri(String, String)}.
-	 * @param uri the URI to encode
-	 * @return the encoded URI
-	 * @deprecated No longer in use, with no direct replacement
-	 */
-	@Deprecated
-	protected URI encodeUri(String uri) {
-		try {
-			String encoded = UriUtils.encodeUri(uri, "UTF-8");
-			return new URI(encoded);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not happen, UTF-8 is always supported
-			throw new IllegalStateException(ex);
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
-		}
-	}
-
 	@Override
 	public String toString() {
 		return this.uriTemplate;
@@ -216,7 +191,8 @@ public class UriTemplate implements Serializable {
 				}
 				else {
 					if (colonIdx + 1 == match.length()) {
-						throw new IllegalArgumentException("No custom regular expression specified after ':' in \"" + match	+ "\"");
+						throw new IllegalArgumentException(
+								"No custom regular expression specified after ':' in \"" + match + "\"");
 					}
 					String variablePattern = match.substring(colonIdx + 1, match.length());
 					this.patternBuilder.append('(');
@@ -249,6 +225,5 @@ public class UriTemplate implements Serializable {
 			return Pattern.compile(this.patternBuilder.toString());
 		}
 	}
-
 
 }

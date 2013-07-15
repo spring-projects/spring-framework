@@ -132,6 +132,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		return (T) value;
 	}
 
+	@Override
 	public String toString() {
 		Iterator<Map.Entry<String, Object>> entries = entrySet().iterator();
 		StringBuilder sb = new StringBuilder("{");

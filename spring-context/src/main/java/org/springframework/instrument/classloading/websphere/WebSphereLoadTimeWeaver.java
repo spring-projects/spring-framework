@@ -55,14 +55,17 @@ public class WebSphereLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.classLoader.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader.getClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return this.classLoader.getThrowawayClassLoader();
 	}

@@ -67,44 +67,53 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 	}
 
 
+	@Override
 	public void start(Settings settings, Properties properties) throws CacheException {
 		this.regionFactory.start(settings, properties);
 	}
 
+	@Override
 	public void stop() {
 		this.regionFactory.stop();
 	}
 
+	@Override
 	public boolean isMinimalPutsEnabledByDefault() {
 		return this.regionFactory.isMinimalPutsEnabledByDefault();
 	}
 
+	@Override
 	public AccessType getDefaultAccessType() {
 		return this.regionFactory.getDefaultAccessType();
 	}
 
+	@Override
 	public long nextTimestamp() {
 		return this.regionFactory.nextTimestamp();
 	}
 
+	@Override
 	public EntityRegion buildEntityRegion(String regionName, Properties properties, CacheDataDescription metadata)
 			throws CacheException {
 
 		return this.regionFactory.buildEntityRegion(regionName, properties, metadata);
 	}
 
+	@Override
 	public CollectionRegion buildCollectionRegion(String regionName, Properties properties,
 			CacheDataDescription metadata) throws CacheException {
 
 		return this.regionFactory.buildCollectionRegion(regionName, properties, metadata);
 	}
 
+	@Override
 	public QueryResultsRegion buildQueryResultsRegion(String regionName, Properties properties)
 			throws CacheException {
 
 		return this.regionFactory.buildQueryResultsRegion(regionName, properties);
 	}
 
+	@Override
 	public TimestampsRegion buildTimestampsRegion(String regionName, Properties properties)
 			throws CacheException {
 

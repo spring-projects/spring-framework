@@ -43,14 +43,17 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 	}
 
 
+	@Override
 	public int getRawStatusCode() throws IOException {
 		return this.connection.getResponseCode();
 	}
 
+	@Override
 	public String getStatusText() throws IOException {
 		return this.connection.getResponseMessage();
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -72,11 +75,13 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 		return this.headers;
 	}
 
+	@Override
 	public InputStream getBody() throws IOException {
 		InputStream errorStream = this.connection.getErrorStream();
 		return (errorStream != null ? errorStream : this.connection.getInputStream());
 	}
 
+	@Override
 	public void close() {
 		this.connection.disconnect();
 	}

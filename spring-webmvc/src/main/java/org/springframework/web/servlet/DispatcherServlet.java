@@ -893,7 +893,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = processedRequest != request;
 
 				// Determine handler for the current request.
-				mappedHandler = getHandler(processedRequest, false);
+				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null || mappedHandler.getHandler() == null) {
 					noHandlerFound(processedRequest, response);
 					return;
@@ -1021,9 +1021,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
 		return new LocaleContext() {
+			@Override
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
 			}
+			@Override
 			public String toString() {
 				return getLocale().toString();
 			}
@@ -1061,19 +1063,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (req != null) {
 			this.multipartResolver.cleanupMultipart(req);
 		}
-	}
-
-	/**
-	 * Return the HandlerExecutionChain for this request. Try all handler mappings in order.
-	 * @param request current HTTP request
-	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
-	 * @return the HandlerExecutionChain, or {@code null} if no handler could be found
-	 * @deprecated as of Spring 3.0.4, in favor of {@link #getHandler(javax.servlet.http.HttpServletRequest)},
-	 * with this method's cache attribute now effectively getting ignored
-	 */
-	@Deprecated
-	protected HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
-		return getHandler(request);
 	}
 
 	/**

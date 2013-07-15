@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,8 +136,6 @@ public class BeanDefinitionParserDelegate {
 	public static final String ABSTRACT_ATTRIBUTE = "abstract";
 
 	public static final String SCOPE_ATTRIBUTE = "scope";
-
-	public static final String SINGLETON_ATTRIBUTE = "singleton";
 
 	public static final String LAZY_INIT_ATTRIBUTE = "lazy-init";
 
@@ -598,16 +596,7 @@ public class BeanDefinitionParserDelegate {
 			BeanDefinition containingBean, AbstractBeanDefinition bd) {
 
 		if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
-			// Spring 2.x "scope" attribute
 			bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
-			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
-				error("Specify either 'scope' or 'singleton', not both", ele);
-			}
-		}
-		else if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
-			// Spring 1.x "singleton" attribute
-			bd.setScope(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)) ?
-					BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
 		}
 		else if (containingBean != null) {
 			// Take default from containing bean in case of an inner bean definition.

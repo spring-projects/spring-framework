@@ -109,6 +109,7 @@ public class ServletContextPropertyPlaceholderConfigurer extends PropertyPlaceho
 	 * against the ServletContext: It will effectively behave like a plain
 	 * PropertyPlaceholderConfigurer in such a scenario.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}

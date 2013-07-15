@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * class is usually accessed via {@link MockMvcResultMatchers#header()}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class HeaderResultMatchers {
@@ -41,33 +43,45 @@ public class HeaderResultMatchers {
 	}
 
 	/**
-	 * Assert a response header with the given Hamcrest {@link Matcher}.
+	 * Assert the primary value of the named response header with the given
+	 * Hamcrest {@link Matcher}.
 	 */
 	public ResultMatcher string(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
+
+			@Override
 			public void match(MvcResult result) {
-				assertThat("Response header", result.getResponse().getHeader(name), matcher);
+				assertThat("Response header " + name, result.getResponse().getHeader(name), matcher);
 			}
 		};
 	}
 
 	/**
-	 * Assert the primary value of a response header as a {@link String}.
+	 * Assert the primary value of the named response header as a {@link String}.
 	 */
 	public ResultMatcher string(final String name, final String value) {
 		return new ResultMatcher() {
+
+			@Override
 			public void match(MvcResult result) {
-				assertEquals("Response header", value, result.getResponse().getHeader(name));
+				assertEquals("Response header " + name, value, result.getResponse().getHeader(name));
 			}
 		};
 	}
 
 	/**
-	 * Assert the primary value of a response header as a {@link Long}.
+	 * Assert the primary value of the named response header as a {@code long}.
+	 *
+	 * <p>The {@link ResultMatcher} returned by this method throws an {@link AssertionError}
+	 * if the response does not contain the specified header, or if the supplied
+	 * {@code value} does not match the primary value.
 	 */
 	public ResultMatcher longValue(final String name, final long value) {
 		return new ResultMatcher() {
+
+			@Override
 			public void match(MvcResult result) {
+				assertTrue("Response does not contain header " + name, result.getResponse().containsHeader(name));
 				assertEquals("Response header " + name, value, Long.parseLong(result.getResponse().getHeader(name)));
 			}
 		};

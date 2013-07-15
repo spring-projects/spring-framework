@@ -108,6 +108,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * used for {@code ObjectName} resolution.
 	 * @throws IOException
 	 */
+	@Override
 	public void afterPropertiesSet() throws IOException {
 		this.mergedMappings = new Properties();
 
@@ -129,6 +130,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	 * Attempts to retrieve the {@code ObjectName} via the given key, trying to
 	 * find a mapped value in the mappings first.
 	 */
+	@Override
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		String objectName = null;
 		if (this.mergedMappings != null) {

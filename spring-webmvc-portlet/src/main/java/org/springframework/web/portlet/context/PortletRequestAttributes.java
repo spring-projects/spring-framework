@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.portlet.context;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
@@ -59,9 +59,9 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	private volatile PortletSession session;
 
-	private final Map<String, Object> sessionAttributesToUpdate = new HashMap<String, Object>();
+	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
 
-	private final Map<String, Object> globalSessionAttributesToUpdate = new HashMap<String, Object>();
+	private final Map<String, Object> globalSessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
 
 
 	/**
@@ -100,6 +100,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
+	@Override
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -114,18 +115,14 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					Object value = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
 					if (value != null) {
-						synchronized (this.globalSessionAttributesToUpdate) {
-							this.globalSessionAttributesToUpdate.put(name, value);
-						}
+						this.globalSessionAttributesToUpdate.put(name, value);
 					}
 					return value;
 				}
 				else {
 					Object value = session.getAttribute(name);
 					if (value != null) {
-						synchronized (this.sessionAttributesToUpdate) {
-							this.sessionAttributesToUpdate.put(name, value);
-						}
+						this.sessionAttributesToUpdate.put(name, value);
 					}
 					return value;
 				}
@@ -136,6 +133,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -148,19 +146,16 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 			PortletSession session = getSession(true);
 			if (scope == SCOPE_GLOBAL_SESSION) {
 				session.setAttribute(name, value, PortletSession.APPLICATION_SCOPE);
-				synchronized (this.globalSessionAttributesToUpdate) {
-					this.globalSessionAttributesToUpdate.remove(name);
-				}
+				this.globalSessionAttributesToUpdate.remove(name);
 			}
 			else {
 				session.setAttribute(name, value);
-				synchronized (this.sessionAttributesToUpdate) {
-					this.sessionAttributesToUpdate.remove(name);
-				}
+				this.sessionAttributesToUpdate.remove(name);
 			}
 		}
 	}
 
+	@Override
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (isRequestActive()) {
@@ -173,20 +168,17 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 			if (session != null) {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					session.removeAttribute(name, PortletSession.APPLICATION_SCOPE);
-					synchronized (this.globalSessionAttributesToUpdate) {
-						this.globalSessionAttributesToUpdate.remove(name);
-					}
+					this.globalSessionAttributesToUpdate.remove(name);
 				}
 				else {
 					session.removeAttribute(name);
-					synchronized (this.sessionAttributesToUpdate) {
-						this.sessionAttributesToUpdate.remove(name);
-					}
+					this.sessionAttributesToUpdate.remove(name);
 				}
 			}
 		}
 	}
 
+	@Override
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -211,6 +203,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			registerRequestDestructionCallback(name, callback);
@@ -220,6 +213,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public Object resolveReference(String key) {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return this.request;
@@ -232,10 +226,12 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public String getSessionId() {
 		return getSession(true).getId();
 	}
 
+	@Override
 	public Object getSessionMutex() {
 		return PortletUtils.getSessionMutex(getSession(true));
 	}
@@ -248,8 +244,8 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	@Override
 	protected void updateAccessedSessionAttributes() {
 		this.session = this.request.getPortletSession(false);
-		synchronized (this.sessionAttributesToUpdate) {
-			if (this.session != null) {
+		if (this.session != null) {
+			try {
 				for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
 					String name = entry.getKey();
 					Object newValue = entry.getValue();
@@ -258,11 +254,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 						this.session.setAttribute(name, newValue);
 					}
 				}
-			}
-			this.sessionAttributesToUpdate.clear();
-		}
-		synchronized (this.globalSessionAttributesToUpdate) {
-			if (this.session != null) {
 				for (Map.Entry<String, Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
 					String name = entry.getKey();
 					Object newValue = entry.getValue();
@@ -272,8 +263,12 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 					}
 				}
 			}
-			this.globalSessionAttributesToUpdate.clear();
+			catch (IllegalStateException ex) {
+				// Session invalidated - shouldn't usually happen.
+			}
 		}
+		this.sessionAttributesToUpdate.clear();
+		this.globalSessionAttributesToUpdate.clear();
 	}
 
 	/**

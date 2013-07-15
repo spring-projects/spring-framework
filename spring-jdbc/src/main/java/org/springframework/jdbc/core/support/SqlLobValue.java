@@ -168,6 +168,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	/**
 	 * Set the specified content via the LobCreator.
 	 */
+	@Override
 	public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
 			throws SQLException {
 		if (sqlType == Types.BLOB) {
@@ -208,6 +209,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	/**
 	 * Close the LobCreator, if any.
 	 */
+	@Override
 	public void cleanup() {
 		this.lobCreator.close();
 	}

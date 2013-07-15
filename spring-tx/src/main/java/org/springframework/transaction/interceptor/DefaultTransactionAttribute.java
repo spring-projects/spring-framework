@@ -82,6 +82,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	/**
 	 * Return a qualifier value associated with this transaction attribute.
 	 */
+	@Override
 	public String getQualifier() {
 		return this.qualifier;
 	}
@@ -91,6 +92,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * Additionally attempt to rollback on Error.
 	 * <p>This is consistent with TransactionTemplate's default behavior.
 	 */
+	@Override
 	public boolean rollbackOn(Throwable ex) {
 		return (ex instanceof RuntimeException || ex instanceof Error);
 	}

@@ -231,6 +231,17 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="enableMatrixVariables" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Matrix variables can appear in any path segment, each matrix variable separated with a ";" (semicolon).
+	For example "/cars;color=red;year=2012". By default they're removed from the URL. If this property
+	is set to true, matrix variables are not removed from the URL, and the request mapping pattern
+	must use URI variable in path segments where matrix variables are expected. For example "/{cars}".
+	Matrix variables can then be injected into a controller method with @MatrixVariable.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="ignoreDefaultModelOnRedirect" type="xsd:boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

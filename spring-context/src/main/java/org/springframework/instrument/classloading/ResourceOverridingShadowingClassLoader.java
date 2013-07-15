@@ -36,9 +36,11 @@ import org.springframework.util.Assert;
 public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader {
 
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
+		@Override
 		public boolean hasMoreElements() {
 			return false;
 		}
+		@Override
 		public URL nextElement() {
 			throw new UnsupportedOperationException("Should not be called. I am empty.");
 		}

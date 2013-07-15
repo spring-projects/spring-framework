@@ -42,6 +42,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	private Set<String> cacheNames = new LinkedHashSet<String>(16);
 
 
+	@Override
 	public void afterPropertiesSet() {
 		Collection<? extends Cache> caches = loadCaches();
 
@@ -70,10 +71,12 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	}
 
 
+	@Override
 	public Cache getCache(String name) {
 		return this.cacheMap.get(name);
 	}
 
+	@Override
 	public Collection<String> getCacheNames() {
 		return Collections.unmodifiableSet(this.cacheNames);
 	}

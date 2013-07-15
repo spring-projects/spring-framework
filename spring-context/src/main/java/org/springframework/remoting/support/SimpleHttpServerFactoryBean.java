@@ -143,6 +143,7 @@ public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, Ini
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws IOException {
 		InetSocketAddress address = (this.hostname != null ?
 				new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
@@ -167,18 +168,22 @@ public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, Ini
 		this.server.start();
 	}
 
+	@Override
 	public HttpServer getObject() {
 		return this.server;
 	}
 
+	@Override
 	public Class<? extends HttpServer> getObjectType() {
 		return (this.server != null ? this.server.getClass() : HttpServer.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
+	@Override
 	public void destroy() {
 		logger.info("Stopping HttpServer");
 		this.server.stop(this.shutdownDelay);

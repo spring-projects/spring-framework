@@ -62,11 +62,13 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 	}
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
+	@Override
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {

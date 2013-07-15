@@ -39,18 +39,17 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson's</a> {@link ObjectMapper}.
+ * using <a href="http://jackson.codehaus.org/">Jackson 1.x's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
- * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
- * alone via  {@link #setExtractValueFromSingleKeyModel}.
+ * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as
+ * JSON alone via {@link #setExtractValueFromSingleKeyModel}.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.http.converter.json.MappingJacksonHttpMessageConverter
  */
 public class MappingJacksonJsonView extends AbstractView {
 
@@ -65,7 +64,7 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	private JsonEncoding encoding = JsonEncoding.UTF8;
 
-	private boolean prefixJson = false;
+	private String jsonPrefix;
 
 	private Boolean prettyPrint;
 
@@ -124,21 +123,31 @@ public class MappingJacksonJsonView extends AbstractView {
 	}
 
 	/**
+	 * Specify a custom prefix to use for this view's JSON output.
+	 * Default is none.
+	 * @see #setPrefixJson
+	 */
+	public void setJsonPrefix(String jsonPrefix) {
+		this.jsonPrefix = jsonPrefix;
+	}
+
+	/**
 	 * Indicates whether the JSON output by this view should be prefixed with <tt>"{} && "</tt>.
 	 * Default is {@code false}.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed
 	 * on the string, the prefix would need to be ignored.
+	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.prefixJson = prefixJson;
+		this.jsonPrefix = "{} && ";
 	}
 
 	/**
 	 * Whether to use the default pretty printer when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre>
+	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 	 * </pre>
@@ -244,7 +253,7 @@ public class MappingJacksonJsonView extends AbstractView {
 
 		OutputStream stream = (this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
 		Object value = filterModel(model);
-		writeContent(stream, value, this.prefixJson);
+		writeContent(stream, value, this.jsonPrefix);
 		if (this.updateContentLength) {
 			writeToResponse(response, (ByteArrayOutputStream) stream);
 		}
@@ -273,11 +282,11 @@ public class MappingJacksonJsonView extends AbstractView {
 	 * Write the actual JSON content to the stream.
 	 * @param stream the output stream to use
 	 * @param value the value to be rendered, as returned from {@link #filterModel}
-	 * @param prefixJson whether the JSON output by this view should be prefixed
-	 * with <tt>"{} && "</tt> (as indicated through {@link #setPrefixJson})
+	 * @param jsonPrefix the prefix for this view's JSON output
+	 * (as indicated through {@link #setJsonPrefix}/{@link #setPrefixJson})
 	 * @throws IOException if writing failed
 	 */
-	protected void writeContent(OutputStream stream, Object value, boolean prefixJson) throws IOException {
+	protected void writeContent(OutputStream stream, Object value, String jsonPrefix) throws IOException {
 		JsonGenerator generator = this.objectMapper.getJsonFactory().createJsonGenerator(stream, this.encoding);
 
 		// A workaround for JsonGenerators not applying serialization features
@@ -286,8 +295,8 @@ public class MappingJacksonJsonView extends AbstractView {
 			generator.useDefaultPrettyPrinter();
 		}
 
-		if (prefixJson) {
-			generator.writeRaw("{} && ");
+		if (jsonPrefix != null) {
+			generator.writeRaw(jsonPrefix);
 		}
 		this.objectMapper.writeValue(generator, value);
 	}

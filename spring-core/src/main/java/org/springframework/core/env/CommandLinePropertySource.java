@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ import org.springframework.util.StringUtils;
  * @see SimpleCommandLinePropertySource
  * @see JOptCommandLinePropertySource
  */
-public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
+public abstract class CommandLinePropertySource<T> extends EnumerablePropertySource<T> {
 
 	/** The default name given to {@link CommandLinePropertySource} instances: {@value} */
 	public static final String COMMAND_LINE_PROPERTY_SOURCE_NAME = "commandLineArgs";

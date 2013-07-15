@@ -713,6 +713,20 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetTypeWorksAfterParentChildMerging() {
+		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
+		ChildBeanDefinition childDefinition = new ChildBeanDefinition("parent", DerivedTestBean.class, null, null);
+
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parentDefinition);
+		factory.registerBeanDefinition("child", childDefinition);
+		factory.freezeConfiguration();
+
+		assertEquals(TestBean.class, factory.getType("parent"));
+		assertEquals(DerivedTestBean.class, factory.getType("child"));
+	}
+
+	@Test
 	public void testNameAlreadyBound() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
@@ -2632,6 +2646,7 @@ public class DefaultListableBeanFactoryTests {
 			return this.name;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (obj == this) {
 				return true;
@@ -2643,6 +2658,7 @@ public class DefaultListableBeanFactoryTests {
 			return this.name.equals(p.name);
 		}
 
+		@Override
 		public int hashCode() {
 			return this.name.hashCode();
 		}
