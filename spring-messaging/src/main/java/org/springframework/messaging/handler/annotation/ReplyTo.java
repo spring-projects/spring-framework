@@ -14,34 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp;
+package org.springframework.messaging.handler.annotation;
 
-import org.springframework.core.NamedThreadLocal;
-import org.springframework.messaging.Message;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-
-// TODO: remove?
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageHolder {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface ReplyTo {
 
-    private static final NamedThreadLocal<Message<?>> messageHolder =
-    		new NamedThreadLocal<Message<?>>("Current message");
 
-
-    public static void setMessage(Message<?> message) {
-    	messageHolder.set(message);
-    }
-
-    public static Message<?> getMessage() {
-    	return messageHolder.get();
-    }
-
-    public static void reset() {
-    	messageHolder.remove();
-    }
+	/**
+	 * The destination value for the reply.
+	 */
+	String value();
 
 }

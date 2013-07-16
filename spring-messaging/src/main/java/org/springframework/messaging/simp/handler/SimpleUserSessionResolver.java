@@ -27,7 +27,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class InMemoryUserSessionResolver implements UserSessionResolver, UserSessionStore {
+public class SimpleUserSessionResolver implements UserSessionResolver, UserSessionStore {
 
 	// userId -> sessionId's
 	private final Map<String, Set<String>> userSessionIds = new ConcurrentHashMap<String, Set<String>>();

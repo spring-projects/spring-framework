@@ -20,8 +20,8 @@ import java.security.Principal;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.method.InvalidMessageMethodParameterException;
 import org.springframework.messaging.handler.method.MessageArgumentResolver;
+import org.springframework.messaging.handler.method.MissingSessionUserException;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 
@@ -43,7 +43,7 @@ public class PrincipalMessageArgumentResolver implements MessageArgumentResolver
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		Principal user = headers.getUser();
 		if (user == null) {
-			throw new InvalidMessageMethodParameterException(message, "User not available", parameter);
+			throw new MissingSessionUserException(message);
 		}
 		return user;
 	}

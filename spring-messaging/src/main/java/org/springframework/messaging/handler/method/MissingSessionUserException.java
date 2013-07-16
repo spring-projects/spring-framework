@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.handler.method;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
@@ -26,29 +25,13 @@ import org.springframework.messaging.MessagingException;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class InvalidMessageMethodParameterException extends MessagingException {
+public class MissingSessionUserException extends MessagingException {
 
 	private static final long serialVersionUID = -6905878930083523161L;
 
-	private final MethodParameter parameter;
 
-
-	public InvalidMessageMethodParameterException(Message<?> message, String description,
-			MethodParameter parameter, Throwable cause) {
-		super(message, description, cause);
-		this.parameter = parameter;
-	}
-
-	public InvalidMessageMethodParameterException(Message<?> message, String description,
-			MethodParameter parameter) {
-
-		super(message, description);
-		this.parameter = parameter;
-	}
-
-
-	public MethodParameter getParameter() {
-		return this.parameter;
+	public MissingSessionUserException(Message<?> message) {
+		super(message, "No \"user\" header in message");
 	}
 
 }

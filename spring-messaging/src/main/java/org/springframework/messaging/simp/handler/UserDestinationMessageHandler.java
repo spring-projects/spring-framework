@@ -47,7 +47,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 	private String prefix = "/user/";
 
-	private UserSessionResolver userSessionResolver = new InMemoryUserSessionResolver();
+	private UserSessionResolver userSessionResolver = new SimpleUserSessionResolver();
 
 
 	public UserDestinationMessageHandler(MessageSendingOperations<String> messagingTemplate) {

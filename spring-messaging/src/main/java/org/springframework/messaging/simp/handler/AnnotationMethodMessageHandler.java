@@ -43,12 +43,11 @@ import org.springframework.messaging.handler.annotation.support.MessageException
 import org.springframework.messaging.handler.method.InvocableMessageHandlerMethod;
 import org.springframework.messaging.handler.method.MessageArgumentResolverComposite;
 import org.springframework.messaging.handler.method.MessageReturnValueHandlerComposite;
-import org.springframework.messaging.simp.MessageHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
-import org.springframework.messaging.simp.annotation.support.MessageSendingReturnValueHandler;
+import org.springframework.messaging.simp.annotation.support.DefaultMessageReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.PrincipalMessageArgumentResolver;
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.stereotype.Controller;
@@ -66,6 +65,8 @@ import org.springframework.web.method.HandlerMethodSelector;
 public class AnnotationMethodMessageHandler implements MessageHandler, ApplicationContextAware, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
+
+	private final MessageChannel inboundChannel;
 
 	private final MessageChannel outboundChannel;
 
@@ -91,8 +92,10 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	 * @param inboundChannel a channel for processing incoming messages from clients
 	 * @param outboundChannel a channel for messages going out to clients
 	 */
-	public AnnotationMethodMessageHandler(MessageChannel outboundChannel) {
+	public AnnotationMethodMessageHandler(MessageChannel inboundChannel, MessageChannel outboundChannel) {
+		Assert.notNull(inboundChannel, "inboundChannel is required");
 		Assert.notNull(outboundChannel, "outboundChannel is required");
+		this.inboundChannel = inboundChannel;
 		this.outboundChannel = outboundChannel;
 	}
 
@@ -116,8 +119,8 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolver(new PrincipalMessageArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverter));
 
-		this.returnValueHandlers.addHandler(
-				new MessageSendingReturnValueHandler(this.outboundChannel, this.messageConverter));
+		this.returnValueHandlers.addHandler(new DefaultMessageReturnValueHandler(
+				this.inboundChannel, this.outboundChannel, this.messageConverter));
 	}
 
 	protected void initHandlerMethods() {
@@ -215,16 +218,13 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
-			MessageHolder.setMessage(message);
-
-			Object value = invocableHandlerMethod.invoke(message);
+			Object returnValue = invocableHandlerMethod.invoke(message);
 
 			MethodParameter returnType = handlerMethod.getReturnType();
 			if (void.class.equals(returnType.getParameterType())) {
 				return;
 			}
-
-			this.returnValueHandlers.handleReturnValue(value, returnType, message);
+			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
 		}
 		catch (Exception ex) {
 			invokeExceptionHandler(message, handlerMethod, ex);
@@ -233,14 +233,11 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			// TODO
 			ex.printStackTrace();
 		}
-		finally {
-			MessageHolder.reset();
-		}
 	}
 
 	private void invokeExceptionHandler(Message<?> message, HandlerMethod handlerMethod, Exception ex) {
 
-		InvocableMessageHandlerMethod invocableHandlerMethod;
+		InvocableMessageHandlerMethod exceptionHandlerMethod;
 		Class<?> beanType = handlerMethod.getBeanType();
 		MessageExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
 		if (resolver == null) {
@@ -254,11 +251,17 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			return;
 		}
 
-		invocableHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod.getBean(), method);
-		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
+		exceptionHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod.getBean(), method);
+		exceptionHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
-			invocableHandlerMethod.invoke(message, ex);
+			Object returnValue = exceptionHandlerMethod.invoke(message, ex);
+
+			MethodParameter returnType = exceptionHandlerMethod.getReturnType();
+			if (void.class.equals(returnType.getParameterType())) {
+				return;
+			}
+			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
 		}
 		catch (Throwable t) {
 			logger.error("Error while handling exception", t);
