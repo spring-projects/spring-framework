@@ -28,25 +28,25 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageReturnValueHandlerComposite implements MessageReturnValueHandler {
+public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
 
-	private final List<MessageReturnValueHandler> returnValueHandlers = new ArrayList<MessageReturnValueHandler>();
+	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
 
 	/**
-	 * Add the given {@link MessageReturnValueHandler}.
+	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
-	public MessageReturnValueHandlerComposite addHandler(MessageReturnValueHandler returnValuehandler) {
+	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
 		this.returnValueHandlers.add(returnValuehandler);
 		return this;
 	}
 
 	/**
-	 * Add the given {@link MessageReturnValueHandler}s.
+	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
-	public MessageReturnValueHandlerComposite addHandlers(List<? extends MessageReturnValueHandler> handlers) {
+	public HandlerMethodReturnValueHandlerComposite addHandlers(List<? extends HandlerMethodReturnValueHandler> handlers) {
 		if (handlers != null) {
-			for (MessageReturnValueHandler handler : handlers) {
+			for (HandlerMethodReturnValueHandler handler : handlers) {
 				this.returnValueHandlers.add(handler);
 			}
 		}
@@ -58,8 +58,8 @@ public class MessageReturnValueHandlerComposite implements MessageReturnValueHan
 		return getReturnValueHandler(returnType) != null;
 	}
 
-	private MessageReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (MessageReturnValueHandler handler : this.returnValueHandlers) {
+	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
 			}
@@ -71,7 +71,7 @@ public class MessageReturnValueHandlerComposite implements MessageReturnValueHan
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
 			throws Exception {
 
-		MessageReturnValueHandler handler = getReturnValueHandler(returnType);
+		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
 		handler.handleReturnValue(returnValue, returnType, message);
 	}

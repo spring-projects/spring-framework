@@ -47,6 +47,7 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static final String MESSAGE_TYPE = "messageType";
 
+	// TODO
 	public static final String PROTOCOL_MESSAGE_TYPE = "protocolMessageType";
 
 	public static final String SESSION_ID = "sessionId";

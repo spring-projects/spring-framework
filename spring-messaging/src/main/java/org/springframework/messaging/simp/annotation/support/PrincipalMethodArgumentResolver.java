@@ -20,8 +20,7 @@ import java.security.Principal;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.method.MessageArgumentResolver;
-import org.springframework.messaging.handler.method.MissingSessionUserException;
+import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 
@@ -29,7 +28,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class PrincipalMessageArgumentResolver implements MessageArgumentResolver {
+public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 
 	@Override

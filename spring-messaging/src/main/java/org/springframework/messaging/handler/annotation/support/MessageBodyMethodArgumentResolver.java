@@ -19,21 +19,26 @@ package org.springframework.messaging.handler.annotation.support;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageBody;
-import org.springframework.messaging.handler.method.MessageArgumentResolver;
+import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.util.Assert;
 
 
 /**
+ * TODO
+ *
+ * <p>This {@link HandlerMethodArgumentResolver} should be ordered last as it supports all
+ * types and does not require the {@link MessageBody} annotation.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class MessageBodyArgumentResolver implements MessageArgumentResolver {
+public class MessageBodyMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final MessageConverter<?> converter;
 
 
-	public MessageBodyArgumentResolver(MessageConverter<?> converter) {
+	public MessageBodyMethodArgumentResolver(MessageConverter<?> converter) {
 		Assert.notNull(converter, "converter is required");
 		this.converter = converter;
 	}

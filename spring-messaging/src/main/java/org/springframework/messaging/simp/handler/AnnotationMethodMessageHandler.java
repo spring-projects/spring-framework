@@ -38,24 +38,26 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.support.MessageBodyArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.MessageExceptionHandlerMethodResolver;
-import org.springframework.messaging.handler.method.InvocableMessageHandlerMethod;
-import org.springframework.messaging.handler.method.MessageArgumentResolverComposite;
-import org.springframework.messaging.handler.method.MessageReturnValueHandlerComposite;
+import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
+import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
+import org.springframework.messaging.handler.method.HandlerMethod;
+import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
+import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandlerComposite;
+import org.springframework.messaging.handler.method.HandlerMethodSelector;
+import org.springframework.messaging.handler.method.InvocableHandlerMethod;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
-import org.springframework.messaging.simp.annotation.support.DefaultMessageReturnValueHandler;
-import org.springframework.messaging.simp.annotation.support.PrincipalMessageArgumentResolver;
+import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
+import org.springframework.messaging.simp.annotation.support.ReplyToMethodReturnValueHandler;
+import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.HandlerMethodSelector;
 
 
 /**
@@ -80,12 +82,12 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private Map<MappingInfo, HandlerMethod> unsubscribeMethods = new HashMap<MappingInfo, HandlerMethod>();
 
-	private final Map<Class<?>, MessageExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, MessageExceptionHandlerMethodResolver>(64);
+	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
+			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
 
-	private MessageArgumentResolverComposite argumentResolvers = new MessageArgumentResolverComposite();
+	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
-	private MessageReturnValueHandlerComposite returnValueHandlers = new MessageReturnValueHandlerComposite();
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
 
 
 	/**
@@ -116,11 +118,17 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		initHandlerMethods();
 
-		this.argumentResolvers.addResolver(new PrincipalMessageArgumentResolver());
-		this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverter));
+		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
+		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
-		this.returnValueHandlers.addHandler(new DefaultMessageReturnValueHandler(
-				this.inboundChannel, this.outboundChannel, this.messageConverter));
+		SimpMessagingTemplate inboundMessagingTemplate = new SimpMessagingTemplate(this.inboundChannel);
+		inboundMessagingTemplate.setConverter(this.messageConverter);
+
+		SimpMessagingTemplate outboundMessagingTemplate = new SimpMessagingTemplate(this.outboundChannel);
+		outboundMessagingTemplate.setConverter(this.messageConverter);
+
+		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(inboundMessagingTemplate));
+		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(outboundMessagingTemplate));
 	}
 
 	protected void initHandlerMethods() {
@@ -213,8 +221,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		HandlerMethod handlerMethod = match.createWithResolvedBean();
 
-		// TODO: avoid re-creating invocableHandlerMethod
-		InvocableMessageHandlerMethod invocableHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod);
+		InvocableHandlerMethod invocableHandlerMethod = new InvocableHandlerMethod(handlerMethod);
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
@@ -237,11 +244,11 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private void invokeExceptionHandler(Message<?> message, HandlerMethod handlerMethod, Exception ex) {
 
-		InvocableMessageHandlerMethod exceptionHandlerMethod;
+		InvocableHandlerMethod exceptionHandlerMethod;
 		Class<?> beanType = handlerMethod.getBeanType();
-		MessageExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
+		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
 		if (resolver == null) {
-			resolver = new MessageExceptionHandlerMethodResolver(beanType);
+			resolver = new ExceptionHandlerMethodResolver(beanType);
 			this.exceptionHandlerCache.put(beanType, resolver);
 		}
 
@@ -251,7 +258,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			return;
 		}
 
-		exceptionHandlerMethod = new InvocableMessageHandlerMethod(handlerMethod.getBean(), method);
+		exceptionHandlerMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
 		exceptionHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method;
+package org.springframework.messaging.handler.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
- * @since 3.1
+ * @since 4.0
  */
 public class HandlerMethod {
 

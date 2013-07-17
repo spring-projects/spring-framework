@@ -36,7 +36,7 @@ import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for {@link TaskExecutorSubscribableChannel}.
+ * Tests for {@link ExecutorSubscribableChannel}.
  *
  * @author Phillip Webb
  */
@@ -46,7 +46,7 @@ public class PublishSubscibeChannelTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 
-	private TaskExecutorSubscribableChannel channel = new TaskExecutorSubscribableChannel();
+	private ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 
 	@Mock
 	private MessageHandler handler;
@@ -72,14 +72,6 @@ public class PublishSubscibeChannelTests {
 	}
 
 	@Test
-	public void payloadMustNotBeNull() throws Exception {
-		Message<?> message = mock(Message.class);
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Message payload must not be null");
-		this.channel.send(message);
-	}
-
-	@Test
 	public void sendWithoutExecutor() {
 		this.channel.subscribe(this.handler);
 		this.channel.send(this.message);
@@ -89,7 +81,7 @@ public class PublishSubscibeChannelTests {
 	@Test
 	public void sendWithExecutor() throws Exception {
 		TaskExecutor executor = mock(TaskExecutor.class);
-		this.channel = new TaskExecutorSubscribableChannel(executor);
+		this.channel = new ExecutorSubscribableChannel(executor);
 		this.channel.subscribe(this.handler);
 		this.channel.send(this.message);
 		verify(executor).execute(this.runnableCaptor.capture());

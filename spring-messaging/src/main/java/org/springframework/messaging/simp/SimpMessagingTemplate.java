@@ -15,6 +15,8 @@
  */
 package org.springframework.messaging.simp;
 
+import java.util.Arrays;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -75,11 +77,9 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	protected <P> Message<P> addDestinationToMessage(Message<P> message, String destination) {
 		Assert.notNull(destination, "destination is required");
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-		headers.copyHeaders(message.getHeaders());
-		headers.setDestination(destination);
-		message = MessageBuilder.withPayload(message.getPayload()).copyHeaders(headers.toMap()).build();
-		return message;
+		return MessageBuilder.fromMessage(message)
+				.setHeader(SimpMessageHeaderAccessor.MESSAGE_TYPE, SimpMessageType.MESSAGE)
+				.setHeader(SimpMessageHeaderAccessor.DESTINATIONS, Arrays.asList(destination)).build();
 	}
 
 }

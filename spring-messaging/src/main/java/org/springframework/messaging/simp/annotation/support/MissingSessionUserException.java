@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.annotation;
+package org.springframework.messaging.simp.annotation.support;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
 
 /**
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface ReplyTo {
+public class MissingSessionUserException extends MessagingException {
 
-	/**
-	 * The destination for a message created from the return value of a method.
-	 */
-	String[] value() default {};
+	private static final long serialVersionUID = -6905878930083523161L;
+
+
+	public MissingSessionUserException(Message<?> message) {
+		super(message, "No \"user\" header in message");
+	}
 
 }

@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * Supports destinations prefixed with "/user/{username}" and resolves them into a
  * destination to which the user is currently subscribed by appending the user session id.
  * For example a destination such as "/user/john/queue/trade-confirmation" would resolve
- * to "/trade-confirmation/i9oqdfzo" if "i9oqdfzo" is the user's session id.
+ * to "/queue/trade-confirmation/i9oqdfzo" if "i9oqdfzo" is the user's session id.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

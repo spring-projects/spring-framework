@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method.annotation;
+package org.springframework.messaging.handler.annotation.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,11 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.messaging.handler.method.HandlerMethodSelector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.method.HandlerMethodSelector;
 
 
 /**
@@ -38,9 +38,9 @@ import org.springframework.web.method.HandlerMethodSelector;
  * super types, and helps to resolve an Exception to a method that can handle it. The
  * exception types supported by a given method can also be discovered from the method
  * signature.
-  *
+ *
  * @author Rossen Stoyanchev
- * @since 3.1
+ * @since 4.0
  */
 public class ExceptionHandlerMethodResolver {
 
@@ -52,12 +52,13 @@ public class ExceptionHandlerMethodResolver {
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
 			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
 
+
 	/**
-	 * A constructor that finds {@link ExceptionHandler} methods in the given type.
+	 * A constructor that finds {@link MessageExceptionHandler} methods in the given type.
 	 * @param handlerType the type to introspect
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
-		for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
+		for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
 				addExceptionMapping(exceptionType, method);
 			}
@@ -88,7 +89,7 @@ public class ExceptionHandlerMethodResolver {
 	}
 
 	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
-		ExceptionHandler annot = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		MessageExceptionHandler annot = AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class);
 		result.addAll(Arrays.asList(annot.value()));
 	}
 
@@ -145,11 +146,11 @@ public class ExceptionHandlerMethodResolver {
 
 
 	/** A filter for selecting annotated exception handling methods. */
-	public final static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
+	public final static MethodFilter EXCEPTION_HANDLER_METHOD_FILTER = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
-			return AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null;
+			return AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class) != null;
 		}
 	};
 

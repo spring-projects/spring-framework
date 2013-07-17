@@ -26,21 +26,20 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.messaging.Message;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.method.HandlerMethod;
 
 /**
  * Invokes the handler method for a given message after resolving
- * its method argument values through registered {@link MessageArgumentResolver}s.
+ * its method argument values through registered {@link HandlerMethodArgumentResolver}s.
  * <p>
- * Use {@link #setMessageMethodArgumentResolvers(MessageArgumentResolverComposite)}
+ * Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}
  * to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class InvocableMessageHandlerMethod extends HandlerMethod {
+public class InvocableHandlerMethod extends HandlerMethod {
 
-	private MessageArgumentResolverComposite argumentResolvers = new MessageArgumentResolverComposite();
+	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
@@ -48,14 +47,14 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	/**
 	 * Create an instance from a {@code HandlerMethod}.
 	 */
-	public InvocableMessageHandlerMethod(HandlerMethod handlerMethod) {
+	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
 	}
 
 	/**
 	 * Create an instance from a bean instance and a method.
 	 */
-	public InvocableMessageHandlerMethod(Object bean, Method method) {
+	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
 	}
 
@@ -68,17 +67,17 @@ public class InvocableMessageHandlerMethod extends HandlerMethod {
 	 * @param parameterTypes the method parameter types
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
-	public InvocableMessageHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
+	public InvocableHandlerMethod(Object bean, String methodName, Class<?>... parameterTypes)
 			throws NoSuchMethodException {
 
 		super(bean, methodName, parameterTypes);
 	}
 
 	/**
-	 * Set {@link MessageArgumentResolver}s to use to use for resolving method
+	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method
 	 * argument values.
 	 */
-	public void setMessageMethodArgumentResolvers(MessageArgumentResolverComposite argumentResolvers) {
+	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 

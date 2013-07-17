@@ -18,8 +18,8 @@ package org.springframework.messaging.support.channel;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executor;
 
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
@@ -31,28 +31,28 @@ import org.springframework.messaging.SubscribableChannel;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class TaskExecutorSubscribableChannel extends AbstractSubscribableChannel {
+public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
-	private final TaskExecutor executor;
+	private final Executor executor;
 
 	private final Set<MessageHandler> handlers = new CopyOnWriteArraySet<MessageHandler>();
 
 
 	/**
-	 * Create a new {@link TaskExecutorSubscribableChannel} instance where messages will be sent
+	 * Create a new {@link ExecutorSubscribableChannel} instance where messages will be sent
 	 * in the callers thread.
 	 */
-	public TaskExecutorSubscribableChannel() {
+	public ExecutorSubscribableChannel() {
 		this(null);
 	}
 
 	/**
-	 * Create a new {@link TaskExecutorSubscribableChannel} instance where messages will be sent
+	 * Create a new {@link ExecutorSubscribableChannel} instance where messages will be sent
 	 * via the specified executor.
 	 * @param executor the executor used to send the message or {@code null} to execute in
 	 *        the callers thread.
 	 */
-	public TaskExecutorSubscribableChannel(TaskExecutor executor) {
+	public ExecutorSubscribableChannel(Executor executor) {
 		this.executor = executor;
 	}
 

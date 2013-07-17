@@ -27,7 +27,7 @@ import org.springframework.messaging.Message;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface MessageArgumentResolver {
+public interface HandlerMethodArgumentResolver {
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is

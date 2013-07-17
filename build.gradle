@@ -320,7 +320,6 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional(project(":spring-web")) // TODO: MediaType/HandlerMethod/EHMR
 		optional(project(":spring-websocket"))
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
 		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
