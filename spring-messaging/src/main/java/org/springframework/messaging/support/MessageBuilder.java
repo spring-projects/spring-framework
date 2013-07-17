@@ -44,13 +44,13 @@ public final class MessageBuilder<T> {
 	/**
 	 * Private constructor to be invoked from the static factory methods only.
 	 */
-	private MessageBuilder(T payload, Message<T> originalMessage) {
+	private MessageBuilder(T payload, Message<T> originalMessage, MessageHeaderAccessor headerAccessor) {
 		Assert.notNull(payload, "payload must not be null");
 		this.payload = payload;
 		this.originalMessage = originalMessage;
-		this.headerAccessor = new MessageHeaderAccessor(originalMessage);
+		this.headerAccessor = (headerAccessor != null) ?
+				headerAccessor : new MessageHeaderAccessor(originalMessage);
 	}
-
 
 	/**
 	 * Create a builder for a new {@link Message} instance pre-populated with all of the
@@ -61,7 +61,7 @@ public final class MessageBuilder<T> {
 	 */
 	public static <T> MessageBuilder<T> fromMessage(Message<T> message) {
 		Assert.notNull(message, "message must not be null");
-		MessageBuilder<T> builder = new MessageBuilder<T>(message.getPayload(), message);
+		MessageBuilder<T> builder = new MessageBuilder<T>(message.getPayload(), message, null);
 		return builder;
 	}
 
@@ -71,7 +71,18 @@ public final class MessageBuilder<T> {
 	 * @param payload the payload for the new message
 	 */
 	public static <T> MessageBuilder<T> withPayload(T payload) {
-		MessageBuilder<T> builder = new MessageBuilder<T>(payload, null);
+		MessageBuilder<T> builder = new MessageBuilder<T>(payload, null, null);
+		return builder;
+	}
+
+	/**
+	 * Create a builder for a new {@link Message} instance with the provided payload and headers.
+	 *
+	 * @param payload the payload for the new message
+	 * @param headerAccessor the headers for the message
+	 */
+	public static <T> MessageBuilder<T> withPayloadAndHeaders(T payload, MessageHeaderAccessor headerAccessor) {
+		MessageBuilder<T> builder = new MessageBuilder<T>(payload, null, headerAccessor);
 		return builder;
 	}
 

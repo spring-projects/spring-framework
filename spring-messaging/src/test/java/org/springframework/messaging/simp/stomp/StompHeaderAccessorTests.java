@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp.stomp;
+
+import org.junit.Test;
+import org.springframework.util.LinkedMultiValueMap;
+
+import static org.junit.Assert.*;
 
 
 /**
+ * Test fixture for {@link StompHeaderAccessor}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface MutableUserSessionResolver extends UserSessionResolver {
+public class StompHeaderAccessorTests {
 
-	void addUserSessionId(String user, String sessionId);
 
-	void removeUserSessionId(String user, String sessionId);
+	@Test
+	public void testStompCommandSet() {
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		assertEquals(StompCommand.CONNECTED, accessor.getCommand());
+
+		accessor = StompHeaderAccessor.create(StompCommand.CONNECTED, new LinkedMultiValueMap<String, String>());
+		assertEquals(StompCommand.CONNECTED, accessor.getCommand());
+	}
 
 }

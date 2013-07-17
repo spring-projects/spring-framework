@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.security.Principal;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -69,7 +67,10 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 			return;
 		}
 
-		MessagePostProcessor postProcessor = new SessionHeaderPostProcessor(inputMessage);
+		SimpMessageHeaderAccessor inputHeaders = SimpMessageHeaderAccessor.wrap(inputMessage);
+
+		String sessionId = inputHeaders.getSessionId();
+		MessagePostProcessor postProcessor = new SessionHeaderPostProcessor(sessionId);
 
 		ReplyTo replyTo = returnType.getMethodAnnotation(ReplyTo.class);
 		if (replyTo != null) {
@@ -80,37 +81,30 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 
 		ReplyToUser replyToUser = returnType.getMethodAnnotation(ReplyToUser.class);
 		if (replyToUser != null) {
-			String user = getUser(inputMessage).getName();
+			if (inputHeaders.getUser() == null) {
+				throw new MissingSessionUserException(inputMessage);
+			}
+			String user = inputHeaders.getUser().getName();
 			for (String destination : replyToUser.value()) {
 				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, postProcessor);
 			}
 		}
 	}
 
-	private Principal getUser(Message<?> inputMessage) {
-		SimpMessageHeaderAccessor inputHeaders = SimpMessageHeaderAccessor.wrap(inputMessage);
-		Principal user = inputHeaders.getUser();
-		if (user == null) {
-			throw new MissingSessionUserException(inputMessage);
-		}
-		return user;
-	}
-
 
 	private final class SessionHeaderPostProcessor implements MessagePostProcessor {
 
-		private final Message<?> inputMessage;
+		private final String sessionId;
 
-
-		public SessionHeaderPostProcessor(Message<?> inputMessage) {
-			this.inputMessage = inputMessage;
+		public SessionHeaderPostProcessor(String sessionId) {
+			this.sessionId = sessionId;
 		}
 
 		@Override
 		public Message<?> postProcessMessage(Message<?> message) {
-			String headerName = SimpMessageHeaderAccessor.SESSION_ID;
-			String sessionId = (String) this.inputMessage.getHeaders().get(headerName);
-			return MessageBuilder.fromMessage(message).setHeader(headerName, sessionId).build();
+			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+			headers.setSessionId(this.sessionId);
+			return MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 	}
 }

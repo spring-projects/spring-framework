@@ -94,8 +94,8 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 				headers.setSessionId(sessionId);
 				headers.setSubscriptionId(subscriptionId);
 
-				Message<?> clientMessage = MessageBuilder.withPayload(
-						message.getPayload()).copyHeaders(headers.toMap()).build();
+				Object payload = message.getPayload();
+				Message<?> clientMessage = MessageBuilder.withPayloadAndHeaders(payload, headers).build();
 				try {
 					this.outboundChannel.send(clientMessage);
 				}

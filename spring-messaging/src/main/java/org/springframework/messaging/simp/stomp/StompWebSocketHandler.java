@@ -27,8 +27,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.handler.MutableUserSessionResolver;
+import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -56,8 +56,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	 */
 	public static final String QUEUE_SUFFIX_HEADER = "queue-suffix";
 
-
-	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
@@ -107,7 +105,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		this.sessions.put(session.getId(), session);
 
 		if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
-			this.userSessionStore.storeUserSessionId(session.getPrincipal().getName(), session.getId());
+			this.userSessionStore.addUserSessionId(session.getPrincipal().getName(), session.getId());
 		}
 	}
 
@@ -120,10 +118,6 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 			String payload = textMessage.getPayload();
 			Message<?> message = this.stompMessageConverter.toMessage(payload);
 
-			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			headers.setSessionId(session.getId());
-			headers.setUser(session.getPrincipal());
-
 			// TODO: validate size limits
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
 
@@ -132,14 +126,17 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 			}
 
 			try {
-				StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
-				SimpMessageType messageType = stompHeaders.getMessageType();
-				if (SimpMessageType.CONNECT.equals(messageType)) {
+				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+				headers.setSessionId(session.getId());
+				headers.setUser(session.getPrincipal());
+				message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+
+				if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
 					handleConnect(session, message);
 				}
 
-				message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
 				this.clientInputChannel.send(message);
+
 			}
 			catch (Throwable t) {
 				logger.error("Terminating STOMP session due to failure to send message: ", t);
@@ -182,8 +179,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 		// TODO: security
 
-		Message<?> connectedMessage = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(
-				connectedHeaders.toMap()).build();
+		Message<?> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(connectedMessage);
 		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 	}
@@ -192,10 +188,8 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
-
-		Message<?> message = MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(headers.toMap()).build();
+		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(message);
-
 		try {
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
@@ -211,12 +205,12 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		this.sessions.remove(sessionId);
 
 		if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
-			this.userSessionStore.deleteUserSessionId(session.getPrincipal().getName(), sessionId);
+			this.userSessionStore.removeUserSessionId(session.getPrincipal().getName(), sessionId);
 		}
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(sessionId);
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 		this.clientInputChannel.send(message);
 	}
 
@@ -227,9 +221,9 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	public void handleMessage(Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
+		headers.setCommandIfNotSet(StompCommand.MESSAGE);
 
-		if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
+		if (StompCommand.CONNECTED.equals(headers.getCommand())) {
 			// Ignore for now since we already sent it
 			return;
 		}
@@ -248,7 +242,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 			return;
 		}
 
-		if (StompCommand.MESSAGE.equals(headers.getStompCommand()) && (headers.getSubscriptionId() == null)) {
+		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
 			// TODO: failed message delivery mechanism
 			logger.error("Ignoring message, no subscriptionId header: " + message);
 			return;
@@ -261,7 +255,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		}
 
 		try {
-			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 			byte[] bytes = this.stompMessageConverter.fromMessage(message);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
@@ -269,7 +263,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 			sendErrorMessage(session, t);
 		}
 		finally {
-			if (StompCommand.ERROR.equals(headers.getStompCommand())) {
+			if (StompCommand.ERROR.equals(headers.getCommand())) {
 				try {
 					session.close(CloseStatus.PROTOCOL_ERROR);
 				}

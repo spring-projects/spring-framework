@@ -120,7 +120,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 			String targetDestination = destinationParser.getTargetDestination(sessionId);
 			headers.setDestination(targetDestination);
-			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Sending message to resolved target destination " + targetDestination);

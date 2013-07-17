@@ -34,7 +34,7 @@ public class SimpleUserSessionResolver implements MutableUserSessionResolver {
 
 
 	@Override
-	public void storeUserSessionId(String user, String sessionId) {
+	public void addUserSessionId(String user, String sessionId) {
 		Set<String> sessionIds = this.userSessionIds.get(user);
 		if (sessionIds == null) {
 			sessionIds = new CopyOnWriteArraySet<String>();
@@ -44,7 +44,7 @@ public class SimpleUserSessionResolver implements MutableUserSessionResolver {
 	}
 
 	@Override
-	public void deleteUserSessionId(String user, String sessionId) {
+	public void removeUserSessionId(String user, String sessionId) {
 		Set<String> sessionIds = this.userSessionIds.get(user);
 		if (sessionIds != null) {
 			if (sessionIds.remove(sessionId) && sessionIds.isEmpty()) {

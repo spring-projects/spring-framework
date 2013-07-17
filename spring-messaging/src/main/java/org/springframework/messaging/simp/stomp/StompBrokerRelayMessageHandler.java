@@ -219,7 +219,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		if (logger.isDebugEnabled()) {
 			logger.debug("Sending STOMP CONNECT frame to initialize \"system\" TCP connection");
 		}
-		Message<?> message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 		session.open(message);
 	}
 
@@ -259,7 +259,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 		String sessionId = headers.getSessionId();
 		String destination = headers.getDestination();
-		StompCommand command = headers.getStompCommand();
+		StompCommand command = headers.getCommand();
 		SimpMessageType messageType = headers.getMessageType();
 
 		if (!this.running) {
@@ -273,11 +273,11 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			sessionId = (sessionId == null) ? STOMP_RELAY_SYSTEM_SESSION_ID : sessionId;
 			headers.setSessionId(sessionId);
 			command = (command == null) ? StompCommand.SEND : command;
-			headers.setStompCommandIfNotSet(command);
-			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+			headers.setCommandIfNotSet(command);
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 
-		if (headers.getStompCommand() == null) {
+		if (headers.getCommand() == null) {
 			logger.error("Ignoring message, no STOMP command: " + message);
 			return;
 		}
@@ -397,7 +397,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			}
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-			if (StompCommand.CONNECTED == headers.getStompCommand()) {
+			if (StompCommand.CONNECTED == headers.getCommand()) {
 				synchronized(this.monitor) {
 					this.isConnected = true;
 					flushMessages(this.promise.get());
@@ -406,7 +406,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			}
 
 			headers.setSessionId(this.sessionId);
-			message = MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 			sendMessageToClient(message);
 		}
 
@@ -418,7 +418,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 			headers.setSessionId(sessionId);
 			headers.setMessage(errorText);
-			Message<?> errorMessage = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+			Message<?> errorMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 			sendMessageToClient(errorMessage);
 		}
 

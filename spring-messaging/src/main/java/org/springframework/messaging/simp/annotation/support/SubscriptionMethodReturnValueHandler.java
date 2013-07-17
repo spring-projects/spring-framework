@@ -68,32 +68,37 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		}
 
 		SimpMessageHeaderAccessor inputHeaders = SimpMessageHeaderAccessor.wrap(message);
+		String sessionId = inputHeaders.getSessionId();
+		String subscriptionId = inputHeaders.getSubscriptionId();
 		String destination = inputHeaders.getDestination();
 
 		Assert.state(inputHeaders.getSubscriptionId() != null,
 				"No subsriptiondId in input message. Add @ReplyTo or @ReplyToUser to method: "
 						+ returnType.getMethod());
 
-		MessagePostProcessor postProcessor = new SubscriptionHeaderPostProcessor(inputHeaders);
+		MessagePostProcessor postProcessor = new SubscriptionHeaderPostProcessor(sessionId, subscriptionId);
 		this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 	}
 
 
 	private final class SubscriptionHeaderPostProcessor implements MessagePostProcessor {
 
-		private final SimpMessageHeaderAccessor inputHeaders;
+		private final String sessionId;
+
+		private final String subscriptionId;
 
 
-		public SubscriptionHeaderPostProcessor(SimpMessageHeaderAccessor inputHeaders) {
-			this.inputHeaders = inputHeaders;
+		public SubscriptionHeaderPostProcessor(String sessionId, String subscriptionId) {
+			this.sessionId = sessionId;
+			this.subscriptionId = subscriptionId;
 		}
 
 		@Override
 		public Message<?> postProcessMessage(Message<?> message) {
-			return MessageBuilder.fromMessage(message)
-					.setHeader(SimpMessageHeaderAccessor.SESSION_ID, this.inputHeaders.getSessionId())
-					.setHeader(SimpMessageHeaderAccessor.SUBSCRIPTION_ID, this.inputHeaders.getSubscriptionId())
-					.build();
+			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+			headers.setSessionId(this.sessionId);
+			headers.setSubscriptionId(this.subscriptionId);
+			return MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 	}
 }

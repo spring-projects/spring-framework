@@ -15,8 +15,6 @@
  */
 package org.springframework.messaging.simp;
 
-import java.util.Arrays;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -56,6 +54,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
 	 */
 	public void setUserDestinationPrefix(String prefix) {
+		Assert.notNull(prefix, "userDestinationPrefix is required");
 		this.userDestinationPrefix = prefix;
 	}
 
@@ -92,29 +91,30 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 	@Override
 	public <P> void send(Message<P> message) {
-		// TODO: maybe look up destination of current message (via ThreadLocal)
-		this.send(getRequiredDefaultDestination(), message);
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		String destination = headers.getDestination();
+		destination = (destination != null) ? destination : getRequiredDefaultDestination();
+		doSend(getRequiredDefaultDestination(), message);
 	}
 
 	@Override
 	protected void doSend(String destination, Message<?> message) {
 		Assert.notNull(destination, "destination is required");
-		message = updateMessageHeaders(message, destination);
+
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		headers.setDestination(destination);
+		headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+		message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0)
 				? this.messageChannel.send(message, timeout)
 				: this.messageChannel.send(message);
+
 		if (!sent) {
 			throw new MessageDeliveryException(message,
 					"failed to send message to destination '" + destination + "' within timeout: " + timeout);
 		}
-	}
-
-	protected <P> Message<P> updateMessageHeaders(Message<P> message, String destination) {
-		Assert.notNull(destination, "destination is required");
-		return MessageBuilder.fromMessage(message)
-				.setHeader(SimpMessageHeaderAccessor.MESSAGE_TYPE, SimpMessageType.MESSAGE)
-				.setHeader(SimpMessageHeaderAccessor.DESTINATIONS, Arrays.asList(destination)).build();
 	}
 
 	@Override

@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp;
 
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 
 /**
@@ -43,35 +41,25 @@ import org.springframework.util.CollectionUtils;
  */
 public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
-	public static final String DESTINATIONS = "destinations";
+	public static final String DESTINATION_HEADER = "destination";
 
-	public static final String MESSAGE_TYPE = "messageType";
+	public static final String MESSAGE_TYPE_HEADER = "messageType";
 
-	// TODO
-	public static final String PROTOCOL_MESSAGE_TYPE = "protocolMessageType";
+	public static final String SESSION_ID_HEADER = "sessionId";
 
-	public static final String SESSION_ID = "sessionId";
+	public static final String SUBSCRIPTION_ID_HEADER = "subscriptionId";
 
-	public static final String SUBSCRIPTION_ID = "subscriptionId";
-
-	public static final String USER = "user";
+	public static final String USER_HEADER = "user";
 
 
 	/**
 	 * A constructor for creating new message headers.
 	 * This constructor is protected. See factory methods in this and sub-classes.
 	 */
-	protected SimpMessageHeaderAccessor(SimpMessageType messageType, Object protocolMessageType,
-			Map<String, List<String>> externalSourceHeaders) {
-
+	protected SimpMessageHeaderAccessor(SimpMessageType messageType, Map<String, List<String>> externalSourceHeaders) {
 		super(externalSourceHeaders);
-
 		Assert.notNull(messageType, "messageType is required");
-		setHeader(MESSAGE_TYPE, messageType);
-
-		if (protocolMessageType != null) {
-			setHeader(PROTOCOL_MESSAGE_TYPE, protocolMessageType);
-		}
+		setHeader(MESSAGE_TYPE_HEADER, messageType);
 	}
 
 	/**
@@ -89,14 +77,14 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * {@link SimpMessageType#MESSAGE}.
 	 */
 	public static SimpMessageHeaderAccessor create() {
-		return new SimpMessageHeaderAccessor(SimpMessageType.MESSAGE, null, null);
+		return new SimpMessageHeaderAccessor(SimpMessageType.MESSAGE, null);
 	}
 
 	/**
 	 * Create {@link SimpMessageHeaderAccessor} for a new {@link Message} of a specific type.
 	 */
 	public static SimpMessageHeaderAccessor create(SimpMessageType messageType) {
-		return new SimpMessageHeaderAccessor(messageType, null, null);
+		return new SimpMessageHeaderAccessor(messageType, null);
 	}
 
 	/**
@@ -106,39 +94,23 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 		return new SimpMessageHeaderAccessor(message);
 	}
 
+	public void setMessageTypeIfNotSet(SimpMessageType messageType) {
+		if (getMessageType() == null) {
+			setHeader(MESSAGE_TYPE_HEADER, messageType);
+		}
+	}
 
 	public SimpMessageType getMessageType() {
-		return (SimpMessageType) getHeader(MESSAGE_TYPE);
-	}
-
-	protected void setProtocolMessageType(Object protocolMessageType) {
-		setHeader(PROTOCOL_MESSAGE_TYPE, protocolMessageType);
-	}
-
-	protected Object getProtocolMessageType() {
-		return getHeader(PROTOCOL_MESSAGE_TYPE);
+		return (SimpMessageType) getHeader(MESSAGE_TYPE_HEADER);
 	}
 
 	public void setDestination(String destination) {
 		Assert.notNull(destination, "destination is required");
-		setHeader(DESTINATIONS, Arrays.asList(destination));
+		setHeader(DESTINATION_HEADER, destination);
 	}
 
-	@SuppressWarnings("unchecked")
 	public String getDestination() {
-		List<String> destinations = (List<String>) getHeader(DESTINATIONS);
-		return CollectionUtils.isEmpty(destinations) ? null : destinations.get(0);
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<String> getDestinations() {
-		List<String> destinations = (List<String>) getHeader(DESTINATIONS);
-		return CollectionUtils.isEmpty(destinations) ? null : destinations;
-	}
-
-	public void setDestinations(List<String> destinations) {
-		Assert.notNull(destinations, "destinations are required");
-		setHeader(DESTINATIONS, destinations);
+		return (String) getHeader(DESTINATION_HEADER);
 	}
 
 	public MediaType getContentType() {
@@ -150,27 +122,27 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	}
 
 	public String getSubscriptionId() {
-		return (String) getHeader(SUBSCRIPTION_ID);
+		return (String) getHeader(SUBSCRIPTION_ID_HEADER);
 	}
 
 	public void setSubscriptionId(String subscriptionId) {
-		setHeader(SUBSCRIPTION_ID, subscriptionId);
+		setHeader(SUBSCRIPTION_ID_HEADER, subscriptionId);
 	}
 
 	public String getSessionId() {
-		return (String) getHeader(SESSION_ID);
+		return (String) getHeader(SESSION_ID_HEADER);
 	}
 
 	public void setSessionId(String sessionId) {
-		setHeader(SESSION_ID, sessionId);
+		setHeader(SESSION_ID_HEADER, sessionId);
 	}
 
 	public Principal getUser() {
-		return (Principal) getHeader(USER);
+		return (Principal) getHeader(USER_HEADER);
 	}
 
 	public void setUser(Principal principal) {
-		setHeader(USER, principal);
+		setHeader(USER_HEADER, principal);
 	}
 
 }

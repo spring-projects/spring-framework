@@ -41,6 +41,10 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 		this.defaultDestination = defaultDestination;
 	}
 
+	public D getDefaultDestination() {
+		return this.defaultDestination;
+	}
+
 	/**
 	 * Set the {@link MessageConverter} that is to be used to convert
 	 * between Messages and objects for this template.
@@ -82,7 +86,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 		this.doSend(destination, message);
 	}
 
-	protected abstract void doSend(D destination, Message<?> message) ;
+	protected abstract void doSend(D destination, Message<?> message);
 
 
 	@Override

@@ -22,13 +22,31 @@ import org.springframework.messaging.core.MessageSendingOperations;
 
 
 /**
+ * A specialization of {@link MessageSendingOperations} with methods for use with
+ * the Spring Framework support for simple messaging protocols (like STOMP).
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface SimpMessageSendingOperations extends MessageSendingOperations<String> {
 
+	/**
+	 * Send a message to a specific user.
+	 *
+	 * @param user the user that should receive the message.
+	 * @param destination the destination to send the message to.
+	 * @param message the message to send
+	 */
 	<T> void convertAndSendToUser(String user, String destination, T message) throws MessagingException;
 
+	/**
+	 * Send a message to a specific user.
+	 *
+	 * @param user the user that should receive the message.
+	 * @param destination the destination to send the message to.
+	 * @param message the message to send
+	 * @param postProcessor a postProcessor to post-process or modify the created message
+	 */
 	<T> void convertAndSendToUser(String user, String destination, T message, MessagePostProcessor postProcessor)
 			throws MessagingException;
 

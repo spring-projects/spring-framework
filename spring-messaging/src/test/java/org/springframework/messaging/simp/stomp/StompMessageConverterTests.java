@@ -56,17 +56,17 @@ public class StompMessageConverterTests {
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 		Map<String, Object> map = stompHeaders.toMap();
 		assertEquals(5, map.size());
-		assertNotNull(map.get(MessageHeaders.ID));
-		assertNotNull(map.get(MessageHeaders.TIMESTAMP));
+		assertNotNull(stompHeaders.getId());
+		assertNotNull(stompHeaders.getTimestamp());
+		assertEquals(SimpMessageType.CONNECT, stompHeaders.getMessageType());
+		assertEquals(StompCommand.CONNECT, stompHeaders.getCommand());
 		assertNotNull(map.get(SimpMessageHeaderAccessor.NATIVE_HEADERS));
-		assertNotNull(map.get(SimpMessageHeaderAccessor.MESSAGE_TYPE));
-		assertNotNull(map.get(SimpMessageHeaderAccessor.PROTOCOL_MESSAGE_TYPE));
 
 		assertEquals(Collections.singleton("1.1"), stompHeaders.getAcceptVersion());
 		assertEquals("github.org", stompHeaders.getHost());
 
 		assertEquals(SimpMessageType.CONNECT, stompHeaders.getMessageType());
-		assertEquals(StompCommand.CONNECT, stompHeaders.getStompCommand());
+		assertEquals(StompCommand.CONNECT, stompHeaders.getCommand());
 		assertNotNull(headers.get(MessageHeaders.ID));
 		assertNotNull(headers.get(MessageHeaders.TIMESTAMP));
 

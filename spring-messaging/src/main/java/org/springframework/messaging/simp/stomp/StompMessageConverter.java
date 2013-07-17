@@ -93,9 +93,8 @@ public class StompMessageConverter {
 
 		byte[] payload = new byte[totalLength - payloadIndex];
 		System.arraycopy(byteContent, payloadIndex, payload, 0, totalLength - payloadIndex);
-
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.create(command, headers);
-		return MessageBuilder.withPayload(payload).copyHeaders(stompHeaders.toMap()).build();
+		return MessageBuilder.withPayloadAndHeaders(payload, stompHeaders).build();
 	}
 
 	private int findIndexOfPayload(byte[] bytes) {
@@ -140,7 +139,7 @@ public class StompMessageConverter {
 		StompHeaderAccessor stompHeaders = StompHeaderAccessor.wrap(message);
 
 		try {
-			out.write(stompHeaders.getStompCommand().toString().getBytes("UTF-8"));
+			out.write(stompHeaders.getCommand().toString().getBytes("UTF-8"));
 			out.write(LF);
 			for (Entry<String, List<String>> entry : stompHeaders.toNativeHeaderMap().entrySet()) {
 				String key = entry.getKey();

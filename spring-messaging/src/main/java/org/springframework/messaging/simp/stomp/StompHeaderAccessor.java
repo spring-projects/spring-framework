@@ -44,37 +44,44 @@ import org.springframework.util.StringUtils;
  */
 public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
-	public static final String STOMP_ID = "id";
+	// STOMP header names
 
-	public static final String HOST = "host";
+	public static final String STOMP_ID_HEADER = "id";
 
-	public static final String ACCEPT_VERSION = "accept-version";
+	public static final String STOMP_HOST_HEADER = "host";
 
-	public static final String MESSAGE_ID = "message-id";
+	public static final String STOMP_ACCEPT_VERSION_HEADER = "accept-version";
 
-	public static final String RECEIPT_ID = "receipt-id";
+	public static final String STOMP_MESSAGE_ID_HEADER = "message-id";
 
-	public static final String SUBSCRIPTION = "subscription";
+	public static final String STOMP_RECEIPT_ID_HEADER = "receipt-id";
 
-	public static final String VERSION = "version";
+	public static final String STOMP_SUBSCRIPTION_HEADER = "subscription";
 
-	public static final String MESSAGE = "message";
+	public static final String STOMP_VERSION_HEADER = "version";
 
-	public static final String ACK = "ack";
+	public static final String STOMP_MESSAGE_HEADER = "message";
 
-	public static final String NACK = "nack";
+	public static final String STOMP_ACK_HEADER = "ack";
 
-	public static final String LOGIN = "login";
+	public static final String STOMP_NACK_HEADER = "nack";
 
-	public static final String PASSCODE = "passcode";
+	public static final String STOMP_LOGIN_HEADER = "login";
 
-	public static final String DESTINATION = "destination";
+	public static final String STOMP_PASSCODE_HEADER = "passcode";
 
-	public static final String CONTENT_TYPE = "content-type";
+	public static final String STOMP_DESTINATION_HEADER = "destination";
 
-	public static final String CONTENT_LENGTH = "content-length";
+	public static final String STOMP_CONTENT_TYPE_HEADER = "content-type";
 
-	public static final String HEARTBEAT = "heart-beat";
+	public static final String STOMP_CONTENT_LENGTH_HEADER = "content-length";
+
+	public static final String STOMP_HEARTBEAT_HEADER = "heart-beat";
+
+
+	// Other header names
+
+	public static final String COMMAND_HEADER = "stompCommand";
 
 
 	private static final AtomicLong messageIdCounter = new AtomicLong();
@@ -84,30 +91,37 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	 * A constructor for creating new STOMP message headers.
 	 */
 	private StompHeaderAccessor(StompCommand command, Map<String, List<String>> externalSourceHeaders) {
-		super(command.getMessageType(), command, externalSourceHeaders);
+
+		super(command.getMessageType(), externalSourceHeaders);
+
+		Assert.notNull(command, "command is required");
+		setHeader(COMMAND_HEADER, command);
+
 		if (externalSourceHeaders != null) {
-			setSimpMessageHeaders(externalSourceHeaders);
+			setSimpMessageHeaders(command, externalSourceHeaders);
 		}
 	}
 
-	private void setSimpMessageHeaders(Map<String, List<String>> extHeaders) {
-		List<String> values = extHeaders.get(StompHeaderAccessor.DESTINATION);
+	private void setSimpMessageHeaders(StompCommand command, Map<String, List<String>> extHeaders) {
+
+		List<String> values = extHeaders.get(StompHeaderAccessor.STOMP_DESTINATION_HEADER);
 		if (!CollectionUtils.isEmpty(values)) {
 			super.setDestination(values.get(0));
 		}
-		values = extHeaders.get(StompHeaderAccessor.CONTENT_TYPE);
+
+		values = extHeaders.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER);
 		if (!CollectionUtils.isEmpty(values)) {
 			super.setContentType(MediaType.parseMediaType(values.get(0)));
 		}
-		StompCommand command = getStompCommand();
+
 		if (StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command)) {
-			values = extHeaders.get(StompHeaderAccessor.STOMP_ID);
+			values = extHeaders.get(StompHeaderAccessor.STOMP_ID_HEADER);
 			if (!CollectionUtils.isEmpty(values)) {
 				super.setSubscriptionId(values.get(0));
 			}
 		}
 		else if (StompCommand.MESSAGE.equals(command)) {
-			values = extHeaders.get(StompHeaderAccessor.SUBSCRIPTION);
+			values = extHeaders.get(StompHeaderAccessor.STOMP_SUBSCRIPTION_HEADER);
 			if (!CollectionUtils.isEmpty(values)) {
 				super.setSubscriptionId(values.get(0));
 			}
@@ -154,73 +168,66 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 		String destination = super.getDestination();
 		if (destination != null) {
-			result.put(DESTINATION, Arrays.asList(destination));
+			result.put(STOMP_DESTINATION_HEADER, Arrays.asList(destination));
 		}
 
 		MediaType contentType = getContentType();
 		if (contentType != null) {
-			result.put(CONTENT_TYPE, Arrays.asList(contentType.toString()));
+			result.put(STOMP_CONTENT_TYPE_HEADER, Arrays.asList(contentType.toString()));
 		}
 
-		if (StompCommand.MESSAGE.equals(getStompCommand())) {
+		if (StompCommand.MESSAGE.equals(getCommand())) {
 			String subscriptionId = getSubscriptionId();
 			if (subscriptionId != null) {
-				result.put(SUBSCRIPTION, Arrays.asList(subscriptionId));
+				result.put(STOMP_SUBSCRIPTION_HEADER, Arrays.asList(subscriptionId));
 			}
 			else {
 				logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
 			}
 			if ((getMessageId() == null)) {
 				String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
-				result.put(MESSAGE_ID, Arrays.asList(messageId));
+				result.put(STOMP_MESSAGE_ID_HEADER, Arrays.asList(messageId));
 			}
 		}
 
 		return result;
 	}
 
-	public void setStompCommandIfNotSet(StompCommand command) {
-		if (getStompCommand() == null) {
-			setProtocolMessageType(command);
+	public void setCommandIfNotSet(StompCommand command) {
+		if (getCommand() == null) {
+			setHeader(COMMAND_HEADER, command);
 		}
 	}
 
-	public StompCommand getStompCommand() {
-		return (StompCommand) super.getProtocolMessageType();
+	public StompCommand getCommand() {
+		return (StompCommand) getHeader(COMMAND_HEADER);
 	}
 
 	public Set<String> getAcceptVersion() {
-		String rawValue = getFirstNativeHeader(ACCEPT_VERSION);
+		String rawValue = getFirstNativeHeader(STOMP_ACCEPT_VERSION_HEADER);
 		return (rawValue != null) ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet();
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
-		setNativeHeader(ACCEPT_VERSION, acceptVersion);
+		setNativeHeader(STOMP_ACCEPT_VERSION_HEADER, acceptVersion);
 	}
 
 	public void setHost(String host) {
-		setNativeHeader(HOST, host);
+		setNativeHeader(STOMP_HOST_HEADER, host);
 	}
 
 	public String getHost() {
-		return getFirstNativeHeader(HOST);
+		return getFirstNativeHeader(STOMP_HOST_HEADER);
 	}
 
 	@Override
 	public void setDestination(String destination) {
 		super.setDestination(destination);
-		setNativeHeader(DESTINATION, destination);
-	}
-
-	@Override
-	public void setDestinations(List<String> destinations) {
-		Assert.isTrue((destinations != null) && (destinations.size() == 1), "STOMP allows one destination per message");
-		super.setDestinations(destinations);
-		setNativeHeader(DESTINATION, destinations.get(0));
+		setNativeHeader(STOMP_DESTINATION_HEADER, destination);
 	}
 
 	public long[] getHeartbeat() {
-		String rawValue = getFirstNativeHeader(HEARTBEAT);
+		String rawValue = getFirstNativeHeader(STOMP_HEARTBEAT_HEADER);
 		if (!StringUtils.hasText(rawValue)) {
 			return null;
 		}
@@ -232,91 +239,91 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	public void setContentType(MediaType mediaType) {
 		if (mediaType != null) {
 			super.setContentType(mediaType);
-			setNativeHeader(CONTENT_TYPE, mediaType.toString());
+			setNativeHeader(STOMP_CONTENT_TYPE_HEADER, mediaType.toString());
 		}
 	}
 
 	public MediaType getContentType() {
-		String value = getFirstNativeHeader(CONTENT_TYPE);
+		String value = getFirstNativeHeader(STOMP_CONTENT_TYPE_HEADER);
 		return (value != null) ? MediaType.parseMediaType(value) : null;
 	}
 
 	public Integer getContentLength() {
-		String contentLength = getFirstNativeHeader(CONTENT_LENGTH);
+		String contentLength = getFirstNativeHeader(STOMP_CONTENT_LENGTH_HEADER);
 		return StringUtils.hasText(contentLength) ? new Integer(contentLength) : null;
 	}
 
 	public void setContentLength(int contentLength) {
-		setNativeHeader(CONTENT_LENGTH, String.valueOf(contentLength));
+		setNativeHeader(STOMP_CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
 	}
 
 	public void setHeartbeat(long cx, long cy) {
-		setNativeHeader(HEARTBEAT, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
+		setNativeHeader(STOMP_HEARTBEAT_HEADER, StringUtils.arrayToCommaDelimitedString(new Object[] {cx, cy}));
 	}
 
 	public void setAck(String ack) {
-		setNativeHeader(ACK, ack);
+		setNativeHeader(STOMP_ACK_HEADER, ack);
 	}
 
 	public String getAck() {
-		return getFirstNativeHeader(ACK);
+		return getFirstNativeHeader(STOMP_ACK_HEADER);
 	}
 
 	public void setNack(String nack) {
-		setNativeHeader(NACK, nack);
+		setNativeHeader(STOMP_NACK_HEADER, nack);
 	}
 
 	public String getNack() {
-		return getFirstNativeHeader(NACK);
+		return getFirstNativeHeader(STOMP_NACK_HEADER);
 	}
 
 	public void setLogin(String login) {
-		setNativeHeader(LOGIN, login);
+		setNativeHeader(STOMP_LOGIN_HEADER, login);
 	}
 
 	public String getLogin() {
-		return getFirstNativeHeader(LOGIN);
+		return getFirstNativeHeader(STOMP_LOGIN_HEADER);
 	}
 
 
 	public void setPasscode(String passcode) {
-		setNativeHeader(PASSCODE, passcode);
+		setNativeHeader(STOMP_PASSCODE_HEADER, passcode);
 	}
 
 	public String getPasscode() {
-		return getFirstNativeHeader(PASSCODE);
+		return getFirstNativeHeader(STOMP_PASSCODE_HEADER);
 	}
 
 	public void setReceiptId(String receiptId) {
-		setNativeHeader(RECEIPT_ID, receiptId);
+		setNativeHeader(STOMP_RECEIPT_ID_HEADER, receiptId);
 	}
 
 	public String getReceiptId() {
-		return getFirstNativeHeader(RECEIPT_ID);
+		return getFirstNativeHeader(STOMP_RECEIPT_ID_HEADER);
 	}
 
 	public String getMessage() {
-		return getFirstNativeHeader(MESSAGE);
+		return getFirstNativeHeader(STOMP_MESSAGE_HEADER);
 	}
 
 	public void setMessage(String content) {
-		setNativeHeader(MESSAGE, content);
+		setNativeHeader(STOMP_MESSAGE_HEADER, content);
 	}
 
 	public String getMessageId() {
-		return getFirstNativeHeader(MESSAGE_ID);
+		return getFirstNativeHeader(STOMP_MESSAGE_ID_HEADER);
 	}
 
 	public void setMessageId(String id) {
-		setNativeHeader(MESSAGE_ID, id);
+		setNativeHeader(STOMP_MESSAGE_ID_HEADER, id);
 	}
 
 	public String getVersion() {
-		return getFirstNativeHeader(VERSION);
+		return getFirstNativeHeader(STOMP_VERSION_HEADER);
 	}
 
 	public void setVersion(String version) {
-		setNativeHeader(VERSION, version);
+		setNativeHeader(STOMP_VERSION_HEADER, version);
 	}
 
 }
