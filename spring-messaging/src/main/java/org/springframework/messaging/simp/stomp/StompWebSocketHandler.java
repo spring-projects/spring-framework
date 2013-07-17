@@ -28,7 +28,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
-import org.springframework.messaging.simp.handler.UserSessionStore;
+import org.springframework.messaging.simp.handler.MutableUserSessionResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -63,7 +63,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	private MessageChannel clientInputChannel;
 
-	private UserSessionStore userSessionStore;
+	private MutableUserSessionResolver userSessionStore;
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
@@ -85,14 +85,14 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	 * @param userSessionStore the userSessionStore to use to store user session id's
 	 * @see UserDestinationMessageHandler
 	 */
-	public void setUserSessionResolver(UserSessionStore userSessionStore) {
+	public void setUserSessionResolver(MutableUserSessionResolver userSessionStore) {
 		this.userSessionStore = userSessionStore;
 	}
 
 	/**
 	 * @return the userSessionResolver
 	 */
-	public UserSessionStore getUserSessionResolver() {
+	public MutableUserSessionResolver getUserSessionResolver() {
 		return this.userSessionStore;
 	}
 

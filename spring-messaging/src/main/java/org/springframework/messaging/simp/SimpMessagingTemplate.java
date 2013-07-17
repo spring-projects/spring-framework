@@ -20,7 +20,9 @@ import java.util.Arrays;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
+import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
@@ -32,18 +34,44 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @since 4.0
  */
-public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String> {
+public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String>
+		implements SimpMessageSendingOperations {
 
-	private final MessageChannel outputChannel;
+	private final MessageChannel messageChannel;
+
+	private String userDestinationPrefix = "/user/";
 
 	private volatile long sendTimeout = -1;
 
 
-	public SimpMessagingTemplate(MessageChannel outputChannel) {
-		Assert.notNull(outputChannel, "outputChannel is required");
-		this.outputChannel = outputChannel;
+	public SimpMessagingTemplate(MessageChannel messageChannel) {
+		Assert.notNull(messageChannel, "outputChannel is required");
+		this.messageChannel = messageChannel;
 	}
 
+
+	/**
+	 * Configure the prefix to use for destinations targeting a specific user.
+	 * <p>The default value is "/user/".
+	 * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
+	 */
+	public void setUserDestinationPrefix(String prefix) {
+		this.userDestinationPrefix = prefix;
+	}
+
+	/**
+	 * @return the userDestinationPrefix
+	 */
+	public String getUserDestinationPrefix() {
+		return this.userDestinationPrefix;
+	}
+
+	/**
+	 * @return the messageChannel
+	 */
+	public MessageChannel getMessageChannel() {
+		return this.messageChannel;
+	}
 
 	/**
 	 * Specify the timeout value to use for send operations.
@@ -52,6 +80,13 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	 */
 	public void setSendTimeout(long sendTimeout) {
 		this.sendTimeout = sendTimeout;
+	}
+
+	/**
+	 * @return the sendTimeout
+	 */
+	public long getSendTimeout() {
+		return this.sendTimeout;
 	}
 
 
@@ -64,22 +99,35 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 	@Override
 	protected void doSend(String destination, Message<?> message) {
 		Assert.notNull(destination, "destination is required");
-		message = addDestinationToMessage(message, destination);
+		message = updateMessageHeaders(message, destination);
 		long timeout = this.sendTimeout;
 		boolean sent = (timeout >= 0)
-				? this.outputChannel.send(message, timeout)
-				: this.outputChannel.send(message);
+				? this.messageChannel.send(message, timeout)
+				: this.messageChannel.send(message);
 		if (!sent) {
 			throw new MessageDeliveryException(message,
 					"failed to send message to destination '" + destination + "' within timeout: " + timeout);
 		}
 	}
 
-	protected <P> Message<P> addDestinationToMessage(Message<P> message, String destination) {
+	protected <P> Message<P> updateMessageHeaders(Message<P> message, String destination) {
 		Assert.notNull(destination, "destination is required");
 		return MessageBuilder.fromMessage(message)
 				.setHeader(SimpMessageHeaderAccessor.MESSAGE_TYPE, SimpMessageType.MESSAGE)
 				.setHeader(SimpMessageHeaderAccessor.DESTINATIONS, Arrays.asList(destination)).build();
+	}
+
+	@Override
+	public <T> void convertAndSendToUser(String user, String destination, T message) throws MessagingException {
+		convertAndSendToUser(user, destination, message, null);
+	}
+
+	@Override
+	public <T> void convertAndSendToUser(String user, String destination, T message,
+			MessagePostProcessor postProcessor) throws MessagingException {
+
+		Assert.notNull(user, "user is required");
+		convertAndSend(this.userDestinationPrefix + user + destination, message, postProcessor);
 	}
 
 }

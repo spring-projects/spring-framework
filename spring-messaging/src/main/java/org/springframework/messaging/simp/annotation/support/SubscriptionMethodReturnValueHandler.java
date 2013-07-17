@@ -74,27 +74,26 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 				"No subsriptiondId in input message. Add @ReplyTo or @ReplyToUser to method: "
 						+ returnType.getMethod());
 
-		MessagePostProcessor postProcessor = new InputHeaderCopyingPostProcessor(inputHeaders);
+		MessagePostProcessor postProcessor = new SubscriptionHeaderPostProcessor(inputHeaders);
 		this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 	}
 
 
-	private final class InputHeaderCopyingPostProcessor implements MessagePostProcessor {
+	private final class SubscriptionHeaderPostProcessor implements MessagePostProcessor {
 
 		private final SimpMessageHeaderAccessor inputHeaders;
 
 
-		public InputHeaderCopyingPostProcessor(SimpMessageHeaderAccessor inputHeaders) {
+		public SubscriptionHeaderPostProcessor(SimpMessageHeaderAccessor inputHeaders) {
 			this.inputHeaders = inputHeaders;
 		}
 
 		@Override
 		public Message<?> postProcessMessage(Message<?> message) {
-			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			return MessageBuilder.fromMessage(message)
 					.setHeader(SimpMessageHeaderAccessor.SESSION_ID, this.inputHeaders.getSessionId())
 					.setHeader(SimpMessageHeaderAccessor.SUBSCRIPTION_ID, this.inputHeaders.getSubscriptionId())
-					.copyHeaders(headers.toMap()).build();
+					.build();
 		}
 	}
 }

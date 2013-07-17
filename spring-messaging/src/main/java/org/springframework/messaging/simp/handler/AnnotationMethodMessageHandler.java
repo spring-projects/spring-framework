@@ -34,10 +34,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.ReplyTo;
 import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethod;
@@ -46,8 +46,8 @@ import org.springframework.messaging.handler.method.HandlerMethodReturnValueHand
 import org.springframework.messaging.handler.method.HandlerMethodSelector;
 import org.springframework.messaging.handler.method.InvocableHandlerMethod;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
 import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
@@ -68,9 +68,9 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
 
-	private final MessageChannel inboundChannel;
+	private final SimpMessageSendingOperations inboundMessagingTemplate;
 
-	private final MessageChannel outboundChannel;
+	private final SimpMessageSendingOperations outboundMessagingTemplate;
 
 	private MessageConverter<?> messageConverter;
 
@@ -91,14 +91,24 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 
 	/**
-	 * @param inboundChannel a channel for processing incoming messages from clients
-	 * @param outboundChannel a channel for messages going out to clients
+	 * @param inboundMessagingTemplate a template for sending messages on the channel
+	 *        where incoming messages from clients are sent; essentially messages sent
+	 *        through this template will be re-processed by the application. One example
+	 *        is the use of {@link ReplyTo} annotation on a method to send a broadcast
+	 *        message.
+	 * @param outboundMessagingTemplate a template for sending messages on the client used
+	 *        to send messages back out to connected clients; such messages must have all
+	 *        necessary information to reach the client such as session and subscription
+	 *        id's. One example is returning a value from an {@link SubscribeEvent}
+	 *        method.
 	 */
-	public AnnotationMethodMessageHandler(MessageChannel inboundChannel, MessageChannel outboundChannel) {
-		Assert.notNull(inboundChannel, "inboundChannel is required");
-		Assert.notNull(outboundChannel, "outboundChannel is required");
-		this.inboundChannel = inboundChannel;
-		this.outboundChannel = outboundChannel;
+	public AnnotationMethodMessageHandler(SimpMessageSendingOperations inboundMessagingTemplate,
+			SimpMessageSendingOperations outboundMessagingTemplate) {
+
+		Assert.notNull(inboundMessagingTemplate, "inboundMessagingTemplate is required");
+		Assert.notNull(outboundMessagingTemplate, "outboundMessagingTemplate is required");
+		this.inboundMessagingTemplate = inboundMessagingTemplate;
+		this.outboundMessagingTemplate = outboundMessagingTemplate;
 	}
 
 	/**
@@ -121,14 +131,8 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
-		SimpMessagingTemplate inboundMessagingTemplate = new SimpMessagingTemplate(this.inboundChannel);
-		inboundMessagingTemplate.setConverter(this.messageConverter);
-
-		SimpMessagingTemplate outboundMessagingTemplate = new SimpMessagingTemplate(this.outboundChannel);
-		outboundMessagingTemplate.setConverter(this.messageConverter);
-
-		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(inboundMessagingTemplate));
-		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(outboundMessagingTemplate));
+		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.inboundMessagingTemplate));
+		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.outboundMessagingTemplate));
 	}
 
 	protected void initHandlerMethods() {

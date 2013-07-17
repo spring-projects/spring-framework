@@ -17,18 +17,15 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.MessagePostProcessor;
-import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.ReplyTo;
 import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.ReplyToUser;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
@@ -49,10 +46,10 @@ import org.springframework.util.Assert;
  */
 public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	private final MessageSendingOperations<String> messagingTemplate;
+	private final SimpMessageSendingOperations messagingTemplate;
 
 
-	public ReplyToMethodReturnValueHandler(MessageSendingOperations<String> messagingTemplate) {
+	public ReplyToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate) {
 		Assert.notNull(messagingTemplate, "messagingTemplate is required");
 		this.messagingTemplate = messagingTemplate;
 	}
@@ -72,24 +69,21 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 			return;
 		}
 
-		ReplyTo replyTo = returnType.getMethodAnnotation(ReplyTo.class);
-		ReplyToUser replyToUser = returnType.getMethodAnnotation(ReplyToUser.class);
+		MessagePostProcessor postProcessor = new SessionHeaderPostProcessor(inputMessage);
 
-		List<String> destinations = new ArrayList<String>();
+		ReplyTo replyTo = returnType.getMethodAnnotation(ReplyTo.class);
 		if (replyTo != null) {
-			destinations.addAll(Arrays.asList(replyTo.value()));
-		}
-		if (replyToUser != null) {
-			Principal user = getUser(inputMessage);
-			for (String destination : replyToUser.value()) {
-				destinations.add("/user/" + user.getName() + destination);
+			for (String destination : replyTo.value()) {
+				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 			}
 		}
 
-		MessagePostProcessor postProcessor = new SessionIdHeaderPostProcessor(inputMessage);
-
-		for (String destination : destinations) {
-			this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
+		ReplyToUser replyToUser = returnType.getMethodAnnotation(ReplyToUser.class);
+		if (replyToUser != null) {
+			String user = getUser(inputMessage).getName();
+			for (String destination : replyToUser.value()) {
+				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, postProcessor);
+			}
 		}
 	}
 
@@ -103,12 +97,12 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 	}
 
 
-	private final class SessionIdHeaderPostProcessor implements MessagePostProcessor {
+	private final class SessionHeaderPostProcessor implements MessagePostProcessor {
 
 		private final Message<?> inputMessage;
 
 
-		public SessionIdHeaderPostProcessor(Message<?> inputMessage) {
+		public SessionHeaderPostProcessor(Message<?> inputMessage) {
 			this.inputMessage = inputMessage;
 		}
 

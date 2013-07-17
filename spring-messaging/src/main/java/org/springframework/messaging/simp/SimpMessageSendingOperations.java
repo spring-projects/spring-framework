@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.handler;
+package org.springframework.messaging.simp;
+
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.core.MessagePostProcessor;
+import org.springframework.messaging.core.MessageSendingOperations;
 
 
 /**
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface UserSessionStore {
+public interface SimpMessageSendingOperations extends MessageSendingOperations<String> {
 
-	void storeUserSessionId(String user, String sessionId);
+	<T> void convertAndSendToUser(String user, String destination, T message) throws MessagingException;
 
-	void deleteUserSessionId(String user, String sessionId);
+	<T> void convertAndSendToUser(String user, String destination, T message, MessagePostProcessor postProcessor)
+			throws MessagingException;
 
 }
