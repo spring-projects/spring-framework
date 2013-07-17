@@ -68,20 +68,27 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 		SimpMessageType messageType = headers.getMessageType();
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-			// TODO: need a way to communicate back if subscription was successfully created or
-			// not in which case an ERROR should be sent back and close the connection
-			// http://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE
+			preProcessMessage(message);
 			this.subscriptionRegistry.registerSubscription(message);
 		}
 		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+			preProcessMessage(message);
 			this.subscriptionRegistry.unregisterSubscription(message);
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
+			preProcessMessage(message);
 			sendMessageToSubscribers(headers.getDestination(), message);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+			preProcessMessage(message);
 			String sessionId = SimpMessageHeaderAccessor.wrap(message).getSessionId();
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+		}
+	}
+
+	private void preProcessMessage(Message<?> message) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Processing " + message);
 		}
 	}
 

@@ -34,8 +34,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.ReplyTo;
 import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
@@ -48,6 +50,7 @@ import org.springframework.messaging.handler.method.InvocableHandlerMethod;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
 import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
@@ -68,9 +71,9 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
 
-	private final SimpMessageSendingOperations inboundMessagingTemplate;
+	private final SimpMessageSendingOperations dispatchMessagingTemplate;
 
-	private final SimpMessageSendingOperations outboundMessagingTemplate;
+	private final SimpMessageSendingOperations webSocketSessionMessagingTemplate;
 
 	private MessageConverter<?> messageConverter;
 
@@ -91,24 +94,20 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 
 	/**
-	 * @param inboundMessagingTemplate a template for sending messages on the channel
-	 *        where incoming messages from clients are sent; essentially messages sent
-	 *        through this template will be re-processed by the application. One example
-	 *        is the use of {@link ReplyTo} annotation on a method to send a broadcast
-	 *        message.
-	 * @param outboundMessagingTemplate a template for sending messages on the client used
-	 *        to send messages back out to connected clients; such messages must have all
-	 *        necessary information to reach the client such as session and subscription
-	 *        id's. One example is returning a value from an {@link SubscribeEvent}
-	 *        method.
+	 * @param dispatchMessagingTemplate a messaging template to dispatch messages to for
+	 *        further processing, e.g. the use of an {@link ReplyTo} annotation on a
+	 *        message handling method, causes a new (broadcast) message to be sent.
+	 * @param webSocketSessionChannel the channel to send messages to WebSocket sessions
+	 *        on this application server. This is used primarily for processing the return
+	 *        values from {@link SubscribeEvent}-annotated methods.
 	 */
-	public AnnotationMethodMessageHandler(SimpMessageSendingOperations inboundMessagingTemplate,
-			SimpMessageSendingOperations outboundMessagingTemplate) {
+	public AnnotationMethodMessageHandler(SimpMessageSendingOperations dispatchMessagingTemplate,
+			MessageChannel webSocketSessionChannel) {
 
-		Assert.notNull(inboundMessagingTemplate, "inboundMessagingTemplate is required");
-		Assert.notNull(outboundMessagingTemplate, "outboundMessagingTemplate is required");
-		this.inboundMessagingTemplate = inboundMessagingTemplate;
-		this.outboundMessagingTemplate = outboundMessagingTemplate;
+		Assert.notNull(dispatchMessagingTemplate, "dispatchMessagingTemplate is required");
+		Assert.notNull(webSocketSessionChannel, "webSocketSessionChannel is required");
+		this.dispatchMessagingTemplate = dispatchMessagingTemplate;
+		this.webSocketSessionMessagingTemplate = new SimpMessagingTemplate(webSocketSessionChannel);
 	}
 
 	/**
@@ -116,6 +115,9 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	 */
 	public void setMessageConverter(MessageConverter<?> converter) {
 		this.messageConverter = converter;
+		if (converter != null) {
+			((AbstractMessageSendingTemplate<?>) this.webSocketSessionMessagingTemplate).setMessageConverter(converter);
+		}
 	}
 
 	@Override
@@ -131,8 +133,8 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
-		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.inboundMessagingTemplate));
-		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.outboundMessagingTemplate));
+		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.dispatchMessagingTemplate));
+		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketSessionMessagingTemplate));
 	}
 
 	protected void initHandlerMethods() {

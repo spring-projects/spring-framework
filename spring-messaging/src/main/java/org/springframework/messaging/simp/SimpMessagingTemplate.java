@@ -43,7 +43,7 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 
 
 	public SimpMessagingTemplate(MessageChannel messageChannel) {
-		Assert.notNull(messageChannel, "outputChannel is required");
+		Assert.notNull(messageChannel, "messageChannel is required");
 		this.messageChannel = messageChannel;
 	}
 
@@ -116,6 +116,8 @@ public class SimpMessagingTemplate extends AbstractMessageSendingTemplate<String
 					"failed to send message to destination '" + destination + "' within timeout: " + timeout);
 		}
 	}
+
+
 
 	@Override
 	public <T> void convertAndSendToUser(String user, String destination, T message) throws MessagingException {

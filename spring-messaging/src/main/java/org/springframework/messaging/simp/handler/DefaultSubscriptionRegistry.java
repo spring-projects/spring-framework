@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.handler;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +27,8 @@ import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import reactor.util.Assert;
 
 
 /**
@@ -102,6 +103,14 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return "[destinationCache=" + this.destinationCache + ", subscriptionRegistry="
+				+ this.subscriptionRegistry + "]";
+	}
+
+
+
 
 	/**
 	 * Provide direct lookup of session subscriptions by destination (for non-pattern destinations).
@@ -116,7 +125,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 
 		public void mapToDestination(String destination, SessionSubscriptionInfo info) {
-			synchronized (monitor) {
+			synchronized(this.monitor) {
 				Set<SessionSubscriptionInfo> registrations = this.subscriptionsByDestination.get(destination);
 				if (registrations == null) {
 					registrations = new CopyOnWriteArraySet<SessionSubscriptionInfo>();
@@ -127,7 +136,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		public void unmapFromDestination(String destination, SessionSubscriptionInfo info) {
-			synchronized (monitor) {
+			synchronized(this.monitor) {
 				Set<SessionSubscriptionInfo> infos = this.subscriptionsByDestination.get(destination);
 				if (infos != null) {
 					infos.remove(info);
@@ -159,6 +168,11 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			}
 			return result;
 		}
+
+		@Override
+		public String toString() {
+			return "[subscriptionsByDestination=" + this.subscriptionsByDestination + "]";
+		}
 	}
 
 	/**
@@ -168,6 +182,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		private final Map<String, SessionSubscriptionInfo> sessions =
 				new ConcurrentHashMap<String, SessionSubscriptionInfo>();
+
+		private final Object monitor = new Object();
 
 
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
@@ -181,15 +197,25 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public SessionSubscriptionInfo addSubscription(String sessionId, String subscriptionId, String destination) {
 			SessionSubscriptionInfo info = this.sessions.get(sessionId);
 			if (info == null) {
-				info = new SessionSubscriptionInfo(sessionId);
-				this.sessions.put(sessionId, info);
+				synchronized(this.monitor) {
+					info = this.sessions.get(sessionId);
+					if (info == null) {
+						info = new SessionSubscriptionInfo(sessionId);
+						this.sessions.put(sessionId, info);
+					}
+				}
 			}
-			info.addSubscription(subscriptionId, destination);
+			info.addSubscription(destination, subscriptionId);
 			return info;
 		}
 
 		public SessionSubscriptionInfo removeSubscriptions(String sessionId) {
 			return this.sessions.remove(sessionId);
+		}
+
+		@Override
+		public String toString() {
+			return "[sessions=" + sessions + "]";
 		}
 	}
 
@@ -200,10 +226,13 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		private final String sessionId;
 
-		private final Map<String, Set<String>> subscriptions = new HashMap<String, Set<String>>(4);
+		private final Map<String, Set<String>> subscriptions = new ConcurrentHashMap<String, Set<String>>(4);
+
+		private final Object monitor = new Object();
 
 
 		public SessionSubscriptionInfo(String sessionId) {
+			Assert.notNull(sessionId, "sessionId is required");
 			this.sessionId = sessionId;
 		}
 
@@ -219,26 +248,35 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return this.subscriptions.get(destination);
 		}
 
-		public void addSubscription(String subscriptionId, String destination) {
-			Set<String> subs = this.subscriptions.get(destination);
-			if (subs == null) {
-				subs = new HashSet<String>(4);
-				this.subscriptions.put(destination, subs);
+		public void addSubscription(String destination, String subscriptionId) {
+			synchronized(this.monitor) {
+				Set<String> subs = this.subscriptions.get(destination);
+				if (subs == null) {
+					subs = new HashSet<String>(4);
+					this.subscriptions.put(destination, subs);
+				}
+				subs.add(subscriptionId);
 			}
-			subs.add(subscriptionId);
 		}
 
 		public String removeSubscription(String subscriptionId) {
 			for (String destination : this.subscriptions.keySet()) {
 				Set<String> subscriptionIds = this.subscriptions.get(destination);
 				if (subscriptionIds.remove(subscriptionId)) {
-					if (subscriptionIds.isEmpty()) {
-						this.subscriptions.remove(destination);
+					synchronized(this.monitor) {
+						if (subscriptionIds.isEmpty()) {
+							this.subscriptions.remove(destination);
+						}
 					}
 					return destination;
 				}
 			}
 			return null;
+		}
+
+		@Override
+		public String toString() {
+			return "[sessionId=" + this.sessionId + ", subscriptions=" + this.subscriptions + "]";
 		}
 	}
 
