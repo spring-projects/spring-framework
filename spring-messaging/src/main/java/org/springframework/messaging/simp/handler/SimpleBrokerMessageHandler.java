@@ -37,18 +37,17 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 
 	private static final Log logger = LogFactory.getLog(SimpleBrokerMessageHandler.class);
 
-	private final MessageChannel outboundChannel;
+	private final MessageChannel messageChannel;
 
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
 
 
 	/**
-	 * @param outboundChannel the channel to which messages for clients should be sent
-	 * @param observable an Observable to use to manage subscriptions
+	 * @param messageChannel the channel to broadcast messages to
 	 */
-	public SimpleBrokerMessageHandler(MessageChannel outboundChannel) {
-		Assert.notNull(outboundChannel, "outboundChannel is required");
-		this.outboundChannel = outboundChannel;
+	public SimpleBrokerMessageHandler(MessageChannel messageChannel) {
+		Assert.notNull(messageChannel, "messageChannel is required");
+		this.messageChannel = messageChannel;
 	}
 
 
@@ -104,7 +103,7 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 				Object payload = message.getPayload();
 				Message<?> clientMessage = MessageBuilder.withPayloadAndHeaders(payload, headers).build();
 				try {
-					this.outboundChannel.send(clientMessage);
+					this.messageChannel.send(clientMessage);
 				}
 				catch (Throwable ex) {
 					logger.error("Failed to send message to destination=" + destination +

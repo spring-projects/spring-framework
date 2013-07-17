@@ -57,7 +57,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 	private static final String STOMP_RELAY_SYSTEM_SESSION_ID = "stompRelaySystemSessionId";
 
-	private final MessageChannel outboundChannel;
+	private final MessageChannel messageChannel;
 
 	private final String[] destinationPrefixes;
 
@@ -83,14 +83,14 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 
 	/**
-	 * @param outboundChannel a channel for messages going out to clients
+	 * @param messageChannel the channel to send messages from the STOMP broker to
 	 * @param destinationPrefixes the broker supported destination prefixes; destinations
 	 *        that do not match the given prefix are ignored.
 	 */
-	public StompBrokerRelayMessageHandler(MessageChannel outboundChannel, Collection<String> destinationPrefixes) {
-		Assert.notNull(outboundChannel, "outboundChannel is required");
+	public StompBrokerRelayMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
+		Assert.notNull(messageChannel, "messageChannel is required");
 		Assert.notNull(destinationPrefixes, "destinationPrefixes is required");
-		this.outboundChannel = outboundChannel;
+		this.messageChannel = messageChannel;
 		this.destinationPrefixes = destinationPrefixes.toArray(new String[destinationPrefixes.size()]);
 	}
 
@@ -411,7 +411,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 
 		protected void sendMessageToClient(Message<?> message) {
-			outboundChannel.send(message);
+			messageChannel.send(message);
 		}
 
 		private void sendError(String sessionId, String errorText) {
