@@ -61,7 +61,8 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 
 	@Override
 	protected String[] readMessages(ServerHttpRequest request) throws IOException {
-		if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {
+		MediaType contentType = request.getHeaders().getContentType();
+		if ((contentType != null) && MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
 			MultiValueMap<String, String> map = this.formConverter.read(null, request);
 			String d = map.getFirst("d");
 			return (StringUtils.hasText(d)) ? getObjectMapper().readValue(d, String[].class) : null;

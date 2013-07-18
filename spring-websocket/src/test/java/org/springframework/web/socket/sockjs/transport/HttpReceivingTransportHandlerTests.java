@@ -73,6 +73,18 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		assertEquals("ok", this.servletResponse.getContentAsString());
 	}
 
+	// SPR-10621
+
+	@Test
+	public void readMessagesJsonpFormEncodedWithEncoding() throws Exception {
+		this.servletRequest.setContent("d=[\"x\"]".getBytes("UTF-8"));
+		this.servletRequest.setContentType("application/x-www-form-urlencoded;charset=UTF-8");
+		handleRequest(new JsonpTransportHandler());
+
+		assertEquals(200, this.servletResponse.getStatus());
+		assertEquals("ok", this.servletResponse.getContentAsString());
+	}
+
 	@Test
 	public void readMessagesBadContent() throws Exception {
 		this.servletRequest.setContent("".getBytes("UTF-8"));
