@@ -47,6 +47,7 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -106,6 +107,8 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	private boolean useSuffixPatternMatch = true;
 
 	private boolean useTrailingSlashPatternMatch = true;
+
+	private Boolean removeSemicolonContent;
 
 
 	/**
@@ -274,6 +277,15 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 		return this;
 	}
 
+	/**
+	 * Set if ";" (semicolon) content should be stripped from the request URI. The value,
+	 * if provided, is in turn set on
+	 * {@link AbstractHandlerMapping#setRemoveSemicolonContent(boolean)}.
+	 */
+	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		this.removeSemicolonContent = removeSemicolonContent;
+	}
+
 	@Override
 	protected void initWebAppContext(WebApplicationContext cxt) {
 		StubWebApplicationContext mockCxt = (StubWebApplicationContext) cxt;
@@ -335,6 +347,10 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
 			handlerMapping.setInterceptors(getInterceptors());
+
+			if (removeSemicolonContent != null) {
+				handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
+			}
 
 			return handlerMapping;
 		}

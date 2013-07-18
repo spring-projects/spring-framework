@@ -653,6 +653,8 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 			Assert.notNull(request, "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
 		}
 
+		request.setAsyncSupported(true);
+
 		return request;
 	}
 
