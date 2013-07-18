@@ -206,7 +206,7 @@ public class HandlerMethod {
 	 * @return the annotation, or {@code null} if none found
 	 */
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.bridgedMethod, annotationType);
+		return AnnotationUtils.findAnnotation(this.method, annotationType);
 	}
 
 	/**
