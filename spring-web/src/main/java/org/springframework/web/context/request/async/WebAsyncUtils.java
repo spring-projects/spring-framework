@@ -36,6 +36,9 @@ public abstract class WebAsyncUtils {
 
 	public static final String WEB_ASYNC_MANAGER_ATTRIBUTE = WebAsyncManager.class.getName() + ".WEB_ASYNC_MANAGER";
 
+	private static Constructor<?> standardAsyncRequestConstructor;
+
+
 	/**
 	 * Obtain the {@link WebAsyncManager} for the current request, or if not
 	 * found, create and associate it with the request.
@@ -80,10 +83,12 @@ public abstract class WebAsyncUtils {
 
 	private static AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
-			Class<?> clazz = ClassUtils.forName(className, WebAsyncUtils.class.getClassLoader());
-			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
-			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor, request, response);
+			if (standardAsyncRequestConstructor == null) {
+				String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
+				Class<?> clazz = ClassUtils.forName(className, WebAsyncUtils.class.getClassLoader());
+				standardAsyncRequestConstructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
+			}
+			return (AsyncWebRequest) BeanUtils.instantiateClass(standardAsyncRequestConstructor, request, response);
 		}
 		catch (Throwable t) {
 			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
