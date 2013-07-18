@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -40,8 +41,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
+import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 
@@ -111,9 +114,21 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		request.getHeaders().add(headerName, headerValue1);
 		String headerValue2 = "value2";
 		request.getHeaders().add(headerName, headerValue2);
-		byte[] body = "Hello World".getBytes("UTF-8");
+		final byte[] body = "Hello World".getBytes("UTF-8");
 		request.getHeaders().setContentLength(body.length);
-		FileCopyUtils.copy(body, request.getBody());
+		if (request instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingRequest =
+					(StreamingHttpOutputMessage) request;
+			streamingRequest.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					StreamUtils.copy(body, outputStream);
+				}
+			});
+		}
+		else {
+			StreamUtils.copy(body, request.getBody());
+		}
 		ClientHttpResponse response = request.execute();
 		try {
 			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
@@ -131,8 +146,21 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 	@Test(expected = IllegalStateException.class)
 	public void multipleWrites() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
-		byte[] body = "Hello World".getBytes("UTF-8");
-		FileCopyUtils.copy(body, request.getBody());
+		final byte[] body = "Hello World".getBytes("UTF-8");
+		if (request instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingRequest =
+					(StreamingHttpOutputMessage) request;
+			streamingRequest.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					StreamUtils.copy(body, outputStream);
+				}
+			});
+		}
+		else {
+			StreamUtils.copy(body, request.getBody());
+		}
+
 		ClientHttpResponse response = request.execute();
 		try {
 			FileCopyUtils.copy(body, request.getBody());
