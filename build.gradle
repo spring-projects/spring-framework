@@ -493,7 +493,7 @@ project("spring-websocket") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		compile(project(":spring-web"))
-		optional("javax.servlet:javax.servlet-api:3.1-b09")
+		optional("javax.servlet:javax.servlet-api:3.1.0")
 		optional("javax.websocket:javax.websocket-api:1.0")
 		optional("org.apache.tomcat:tomcat-websocket:8.0-SNAPSHOT") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"

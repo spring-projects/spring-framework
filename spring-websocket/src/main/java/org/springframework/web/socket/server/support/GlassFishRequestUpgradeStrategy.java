@@ -37,6 +37,7 @@ import org.glassfish.tyrus.server.TyrusEndpoint;
 import org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler;
 import org.glassfish.tyrus.websockets.Connection;
 import org.glassfish.tyrus.websockets.Version;
+import org.glassfish.tyrus.websockets.WebSocketApplication;
 import org.glassfish.tyrus.websockets.WebSocketEngine;
 import org.glassfish.tyrus.websockets.WebSocketEngine.WebSocketHolderListener;
 import org.springframework.http.HttpHeaders;
@@ -80,28 +81,28 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 		servletResponse = new AlreadyUpgradedResponseWrapper(servletResponse);
 
-		TyrusEndpoint tyrusEndpoint = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
+		WebSocketApplication wsApp = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
 		WebSocketEngine engine = WebSocketEngine.getEngine();
 
 		try {
-			engine.register(tyrusEndpoint);
+			engine.register(wsApp);
 		}
 		catch (DeploymentException ex) {
 			throw new HandshakeFailureException("Failed to deploy endpoint in GlassFish", ex);
 		}
 
 		try {
-			if (!performUpgrade(servletRequest, servletResponse, request.getHeaders(), tyrusEndpoint)) {
+			if (!performUpgrade(servletRequest, servletResponse, request.getHeaders(), wsApp)) {
 				throw new HandshakeFailureException("Failed to upgrade HttpServletRequest");
 			}
 		}
 		finally {
-			engine.unregister(tyrusEndpoint);
+			engine.unregister(wsApp);
 		}
 	}
 
 	private boolean performUpgrade(HttpServletRequest request, HttpServletResponse response,
-			HttpHeaders headers, TyrusEndpoint tyrusEndpoint) throws IOException {
+			HttpHeaders headers, WebSocketApplication wsApp) throws IOException {
 
 		final TyrusHttpUpgradeHandler upgradeHandler;
 		try {
@@ -114,7 +115,7 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 		Connection connection = createConnection(upgradeHandler, response);
 
 		RequestContext wsRequest = RequestContext.Builder.create()
-				.requestURI(URI.create(tyrusEndpoint.getPath())).requestPath(tyrusEndpoint.getPath())
+				.requestURI(URI.create(wsApp.getPath())).requestPath(wsApp.getPath())
 				.connection(connection).secure(request.isSecure()).build();
 
 		for (String header : headers.keySet()) {
@@ -129,7 +130,8 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 		});
 	}
 
-	private TyrusEndpoint createTyrusEndpoint(HttpServletRequest request, Endpoint endpoint, String selectedProtocol) {
+	private WebSocketApplication createTyrusEndpoint(HttpServletRequest request,
+			Endpoint endpoint, String selectedProtocol) {
 
 		// Use randomized path
 		String requestUri = request.getRequestURI();
