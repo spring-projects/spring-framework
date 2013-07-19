@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.activation.FileTypeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.OrderComparator;
@@ -307,7 +307,11 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
 		try {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
+
 			List<MediaType> acceptableMediaTypes = this.contentNegotiationManager.resolveMediaTypes(webRequest);
+			acceptableMediaTypes = acceptableMediaTypes.isEmpty() ?
+					Collections.singletonList(MediaType.ALL) : acceptableMediaTypes;
+
 			List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request);
 			Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
 			for (MediaType acceptable : acceptableMediaTypes) {
