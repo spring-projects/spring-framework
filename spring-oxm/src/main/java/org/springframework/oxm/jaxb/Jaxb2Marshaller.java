@@ -61,7 +61,9 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -172,6 +174,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private volatile JAXBContext jaxbContext;
 
 	private Schema schema;
+
+	private boolean processExternalEntities = false;
 
 
 	/**
@@ -383,6 +387,18 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 */
 	public void setMappedClass(Class<?> mappedClass) {
 		this.mappedClass = mappedClass;
+	}
+
+	/**
+	 * Indicates whether external XML entities are processed when unmarshalling.
+	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * Note that processing of external entities will only be enabled/disabled when the
+	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
+	 * {@link StreamSource}. It has no effect for {@link DOMSource} or {@link StAXSource}
+	 * instances.
+	 */
+	public void setProcessExternalEntities(boolean processExternalEntities) {
+		this.processExternalEntities = processExternalEntities;
 	}
 
 	@Override
@@ -712,6 +728,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	@Override
 	public Object unmarshal(Source source, MimeContainer mimeContainer) throws XmlMappingException {
+		source = processSource(source);
+
 		try {
 			Unmarshaller unmarshaller = createUnmarshaller();
 			if (this.mtomEnabled && mimeContainer != null) {
@@ -749,6 +767,44 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			else {
 				throw new IllegalArgumentException("StaxSource contains neither XMLStreamReader nor XMLEventReader");
 			}
+		}
+	}
+
+	private Source processSource(Source source) {
+		if (StaxUtils.isStaxSource(source) || source instanceof DOMSource) {
+			return source;
+		}
+
+		XMLReader xmlReader = null;
+		InputSource inputSource = null;
+
+		if (source instanceof SAXSource) {
+			SAXSource saxSource = (SAXSource) source;
+			xmlReader = saxSource.getXMLReader();
+			inputSource = saxSource.getInputSource();
+		}
+		else if (source instanceof StreamSource) {
+			StreamSource streamSource = (StreamSource) source;
+			if (streamSource.getInputStream() != null) {
+				inputSource = new InputSource(streamSource.getInputStream());
+			}
+			else if (streamSource.getReader() != null) {
+				inputSource = new InputSource(streamSource.getReader());
+			}
+		}
+
+		try {
+			if (xmlReader == null) {
+				xmlReader = XMLReaderFactory.createXMLReader();
+			}
+			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities",
+					this.processExternalEntities);
+
+			return new SAXSource(xmlReader, inputSource);
+		}
+		catch (SAXException ex) {
+			logger.warn("Processing of external entities could not be disabled", ex);
+			return source;
 		}
 	}
 
