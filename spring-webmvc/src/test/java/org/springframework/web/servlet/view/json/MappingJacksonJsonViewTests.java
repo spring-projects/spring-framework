@@ -39,14 +39,13 @@ import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Jeremy Grelle
@@ -158,6 +157,14 @@ public class MappingJacksonJsonViewTests {
 	public void renderSimpleBeanPrefixed() throws Exception {
 		view.setPrefixJson(true);
 		renderSimpleBean();
+		assertTrue(response.getContentAsString().startsWith("{} && "));
+	}
+
+	@Test
+	public void renderSimpleBeanNotPrefixed() throws Exception {
+		view.setPrefixJson(false);
+		renderSimpleBean();
+		assertFalse(response.getContentAsString().startsWith("{} && "));
 	}
 
 	@Test
