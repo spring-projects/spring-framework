@@ -24,13 +24,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -46,11 +46,15 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Oliver Gierke
  * @since 2.0
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
 public abstract class SharedEntityManagerCreator {
+
+	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
+
 
 	/**
 	 * Create a transactional EntityManager proxy for the given EntityManagerFactory,
@@ -84,10 +88,11 @@ public abstract class SharedEntityManagerCreator {
 	 */
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) {
-
-		Class emIfc = (emf instanceof EntityManagerFactoryInfo ?
+		Class<?> entityManagerInterface = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
-		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, emIfc);
+		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, 
+				(entityManagerInterface == null ? NO_ENTITY_MANAGER_INTERFACES : 
+					new Class<?>[] { entityManagerInterface }));
 	}
 
 	/**
