@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.messaging.Message;
@@ -180,10 +181,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	 */
 	private static class SessionSubscriptionRegistry {
 
-		private final Map<String, SessionSubscriptionInfo> sessions =
+		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions =
 				new ConcurrentHashMap<String, SessionSubscriptionInfo>();
-
-		private final Object monitor = new Object();
 
 
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
@@ -197,12 +196,10 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public SessionSubscriptionInfo addSubscription(String sessionId, String subscriptionId, String destination) {
 			SessionSubscriptionInfo info = this.sessions.get(sessionId);
 			if (info == null) {
-				synchronized(this.monitor) {
-					info = this.sessions.get(sessionId);
-					if (info == null) {
-						info = new SessionSubscriptionInfo(sessionId);
-						this.sessions.put(sessionId, info);
-					}
+				info = new SessionSubscriptionInfo(sessionId);
+				SessionSubscriptionInfo value = this.sessions.putIfAbsent(sessionId, info);
+				if (value != null) {
+					info = value;
 				}
 			}
 			info.addSubscription(destination, subscriptionId);
@@ -249,14 +246,17 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 
 		public void addSubscription(String destination, String subscriptionId) {
-			synchronized(this.monitor) {
-				Set<String> subs = this.subscriptions.get(destination);
-				if (subs == null) {
-					subs = new HashSet<String>(4);
-					this.subscriptions.put(destination, subs);
+			Set<String> subs = this.subscriptions.get(destination);
+			if (subs == null) {
+				synchronized(this.monitor) {
+					subs = this.subscriptions.get(destination);
+					if (subs == null) {
+						subs = new HashSet<String>(4);
+						this.subscriptions.put(destination, subs);
+					}
 				}
-				subs.add(subscriptionId);
 			}
+			subs.add(subscriptionId);
 		}
 
 		public String removeSubscription(String subscriptionId) {

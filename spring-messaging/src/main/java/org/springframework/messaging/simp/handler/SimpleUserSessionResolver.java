@@ -17,9 +17,9 @@
 package org.springframework.messaging.simp.handler;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 
@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class SimpleUserSessionResolver implements MutableUserSessionResolver {
 
 	// userId -> sessionId's
-	private final Map<String, Set<String>> userSessionIds = new ConcurrentHashMap<String, Set<String>>();
+	private final ConcurrentMap<String, Set<String>> userSessionIds = new ConcurrentHashMap<String, Set<String>>();
 
 
 	@Override
@@ -38,7 +38,10 @@ public class SimpleUserSessionResolver implements MutableUserSessionResolver {
 		Set<String> sessionIds = this.userSessionIds.get(user);
 		if (sessionIds == null) {
 			sessionIds = new CopyOnWriteArraySet<String>();
-			this.userSessionIds.put(user, sessionIds);
+			Set<String> value = this.userSessionIds.putIfAbsent(user, sessionIds);
+			if (value != null) {
+				sessionIds = value;
+			}
 		}
 		sessionIds.add(sessionId);
 	}
@@ -47,8 +50,8 @@ public class SimpleUserSessionResolver implements MutableUserSessionResolver {
 	public void removeUserSessionId(String user, String sessionId) {
 		Set<String> sessionIds = this.userSessionIds.get(user);
 		if (sessionIds != null) {
-			if (sessionIds.remove(sessionId) && sessionIds.isEmpty()) {
-				this.userSessionIds.remove(user);
+			if (sessionIds.remove(sessionId)) {
+				this.userSessionIds.remove(user, Collections.<String>emptySet());
 			}
 		}
 	}
