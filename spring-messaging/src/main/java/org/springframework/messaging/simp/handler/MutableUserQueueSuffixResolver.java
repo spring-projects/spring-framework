@@ -21,10 +21,10 @@ package org.springframework.messaging.simp.handler;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface MutableUserSessionResolver extends UserSessionResolver {
+public interface MutableUserQueueSuffixResolver extends UserQueueSuffixResolver {
 
-	void addUserSessionId(String user, String sessionId);
+	void addQueueSuffix(String user, String sessionId, String suffix);
 
-	void removeUserSessionId(String user, String sessionId);
+	void removeQueueSuffix(String user, String sessionId);
 
 }

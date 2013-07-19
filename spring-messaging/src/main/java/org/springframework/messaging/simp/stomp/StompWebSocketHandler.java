@@ -17,6 +17,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,8 +28,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.handler.MutableUserSessionResolver;
-import org.springframework.messaging.simp.handler.UserDestinationMessageHandler;
+import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -51,17 +51,19 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	public static final String CONNECTED_USER_HEADER = "user-name";
 
 	/**
-	 * A suffix unique to the current session that a client can append to a destination.
-	 * @see UserDestinationMessageHandler
+	 * A suffix unique to the current session that a client can use to append to
+	 * a destination to make it unique.
+	 *
+	 * @see {@link org.springframework.messaging.simp.handler.UserDestinationMessageHandler}
 	 */
 	public static final String QUEUE_SUFFIX_HEADER = "queue-suffix";
 
 
 	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
 
-	private MessageChannel clientInputChannel;
+	private MessageChannel dispatchChannel;
 
-	private MutableUserSessionResolver userSessionStore;
+	private MutableUserQueueSuffixResolver queueSuffixResolver;
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
@@ -69,29 +71,27 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 
 	/**
-	 * @param clientInputChannel the channel to which incoming STOMP/WebSocket messages should
-	 *        be sent to
+	 * @param dispatchChannel the channel to send client STOMP/WebSocket messages to
 	 */
-	public StompWebSocketHandler(MessageChannel clientInputChannel) {
-		Assert.notNull(clientInputChannel, "clientInputChannel is required");
-		this.clientInputChannel = clientInputChannel;
+	public StompWebSocketHandler(MessageChannel dispatchChannel) {
+		Assert.notNull(dispatchChannel, "dispatchChannel is required");
+		this.dispatchChannel = dispatchChannel;
 	}
 
 
 	/**
-	 * Configure a store for saving user session information.
-	 * @param userSessionStore the userSessionStore to use to store user session id's
-	 * @see UserDestinationMessageHandler
+	 * Configure a resolver to use to maintain queue suffixes for user
+	 * @see {@link org.springframework.messaging.simp.handler.UserDestinationMessageHandler}
 	 */
-	public void setUserSessionResolver(MutableUserSessionResolver userSessionStore) {
-		this.userSessionStore = userSessionStore;
+	public void setUserQueueSuffixResolver(MutableUserQueueSuffixResolver resolver) {
+		this.queueSuffixResolver = resolver;
 	}
 
 	/**
-	 * @return the userSessionResolver
+	 * @return the resolver for queue suffixes for a user
 	 */
-	public MutableUserSessionResolver getUserSessionResolver() {
-		return this.userSessionStore;
+	public MutableUserQueueSuffixResolver getUserQueueSuffixResolver() {
+		return this.queueSuffixResolver;
 	}
 
 	public StompMessageConverter getStompMessageConverter() {
@@ -101,12 +101,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		Assert.notNull(this.clientInputChannel, "No output channel for STOMP messages.");
 		this.sessions.put(session.getId(), session);
-
-		if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
-			this.userSessionStore.addUserSessionId(session.getPrincipal().getName(), session.getId());
-		}
 	}
 
 	/**
@@ -135,7 +130,7 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 					handleConnect(session, message);
 				}
 
-				this.clientInputChannel.send(message);
+				this.dispatchChannel.send(message);
 
 			}
 			catch (Throwable t) {
@@ -172,9 +167,15 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		}
 		connectedHeaders.setHeartbeat(0,0); // TODO
 
-		if (session.getPrincipal() != null) {
-			connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER, session.getPrincipal().getName());
+		Principal principal = session.getPrincipal();
+		if (principal != null) {
+			connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
 			connectedHeaders.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
+
+			if (this.queueSuffixResolver != null) {
+				String suffix = session.getId();
+				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
+			}
 		}
 
 		// TODO: security
@@ -204,14 +205,14 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		String sessionId = session.getId();
 		this.sessions.remove(sessionId);
 
-		if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
-			this.userSessionStore.removeUserSessionId(session.getPrincipal().getName(), sessionId);
+		if ((this.queueSuffixResolver != null) && (session.getPrincipal() != null)) {
+			this.queueSuffixResolver.removeQueueSuffix(session.getPrincipal().getName(), sessionId);
 		}
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		headers.setSessionId(sessionId);
 		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		this.clientInputChannel.send(message);
+		this.dispatchChannel.send(message);
 	}
 
 	/**

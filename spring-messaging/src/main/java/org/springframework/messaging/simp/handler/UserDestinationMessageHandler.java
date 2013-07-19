@@ -30,11 +30,14 @@ import org.springframework.util.StringUtils;
 
 
 /**
+ * Supports destinations prefixed with "/user/{username}", transforms the
+ * destination to a unique queue to which the user is subscribed, and then sends
+ * the message for further processing.
  *
- * Supports destinations prefixed with "/user/{username}" and resolves them into a
- * destination to which the user is currently subscribed by appending the user session id.
- * For example a destination such as "/user/john/queue/trade-confirmation" would resolve
- * to "/queue/trade-confirmation/i9oqdfzo" if "i9oqdfzo" is the user's session id.
+ * <p>The target destination has the prefix removed and a unique queue suffix,
+ * resolved via {@link #setUserQueueSuffixResolver(UserQueueSuffixResolver)}, appended.
+ * For example a destination such as "/user/john/queue/trade-confirmation" could
+ * be transformed to "/queue/trade-confirmation/i9oqdfzo".
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -47,11 +50,22 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 	private String prefix = "/user/";
 
-	private UserSessionResolver userSessionResolver = new SimpleUserSessionResolver();
+	private UserQueueSuffixResolver userQueueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
 
-	public UserDestinationMessageHandler(MessageSendingOperations<String> messagingTemplate) {
+	/**
+	 *
+	 * @param messagingTemplate
+	 * @param resolver the resolver to use to find queue suffixes for a user
+	 */
+	public UserDestinationMessageHandler(MessageSendingOperations<String> messagingTemplate,
+			UserQueueSuffixResolver userQueueSuffixResolver) {
+
+		Assert.notNull(messagingTemplate, "messagingTemplate is required");
+		Assert.notNull(userQueueSuffixResolver, "userQueueSuffixResolver is required");
+
 		this.messagingTemplate = messagingTemplate;
+		this.userQueueSuffixResolver = userQueueSuffixResolver;
 	}
 
 	/**
@@ -71,17 +85,10 @@ public class UserDestinationMessageHandler implements MessageHandler {
 	}
 
 	/**
-	 * @param userSessionResolver the userSessionResolver to set
+	 * @return the resolver for queue suffixes for a user
 	 */
-	public void setUserSessionResolver(UserSessionResolver userSessionResolver) {
-		this.userSessionResolver = userSessionResolver;
-	}
-
-	/**
-	 * @return the userSessionResolver
-	 */
-	public UserSessionResolver getUserSessionResolver() {
-		return this.userSessionResolver;
+	public UserQueueSuffixResolver getUserQueueSuffixResolver() {
+		return this.userQueueSuffixResolver;
 	}
 
 	/**
@@ -116,7 +123,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 			return;
 		}
 
-		for (String sessionId : this.userSessionResolver.resolveUserSessionIds(user)) {
+		for (String sessionId : this.userQueueSuffixResolver.getUserQueueSuffixes(user)) {
 
 			String targetDestination = destinationParser.getTargetDestination(sessionId);
 			headers.setDestination(targetDestination);

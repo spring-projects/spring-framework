@@ -20,19 +20,29 @@ import java.util.Set;
 
 
 /**
- * A strategy for resolving a user name to one or more session id's.
+ * A strategy for resolving unique queue suffixes for a connected user.
+ * There can be only one suffix per user per session.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface UserSessionResolver {
+public interface UserQueueSuffixResolver {
 
 	/**
-	 * Retrieve the sessionId(s) associated with the given user.
+	 * Retrieve the suffixes for all sessions associated with this user.
 	 *
 	 * @param user the user name
-	 * @return a Set with zero, one, or more, current session id's.
+	 * @return a Set with zero, one, or more, queue suffixes
 	 */
-	Set<String> resolveUserSessionIds(String user);
+	Set<String> getUserQueueSuffixes(String user);
+
+	/**
+	 * Retrieve the queue suffix associated with the given user session.
+	 *
+	 * @param user the user name
+	 * @param sessionId the session id
+	 * @return a queue suffix or {@code null}
+	 */
+	String getUserQueueSuffix(String user, String sessionId);
 
 }
