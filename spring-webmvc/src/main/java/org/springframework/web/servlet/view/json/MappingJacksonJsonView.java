@@ -141,7 +141,7 @@ public class MappingJacksonJsonView extends AbstractView {
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = prefixJson ? "{} && " : "";
+		this.jsonPrefix = prefixJson ? "{} && " : null;
 	}
 
 	/**

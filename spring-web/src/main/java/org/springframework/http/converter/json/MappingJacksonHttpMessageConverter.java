@@ -26,7 +26,6 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.type.JavaType;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -59,7 +58,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
-	private boolean prefixJson = false;
+	private String jsonPrefix;
 
 	private Boolean prettyPrint;
 
@@ -96,14 +95,24 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	/**
+	 * Specify a custom prefix to use for this view's JSON output.
+	 * Default is none.
+	 * @see #setPrefixJson
+	 */
+	public void setJsonPrefix(String jsonPrefix) {
+		this.jsonPrefix = jsonPrefix;
+	}
+
+	/**
 	 * Indicate whether the JSON output by this view should be prefixed with "{} &&". Default is false.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed on the
 	 * string, the prefix would need to be ignored.
+	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.prefixJson = prefixJson;
+		this.jsonPrefix = prefixJson ? "{} && " : null;
 	}
 
 	/**
@@ -190,7 +199,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		}
 
 		try {
-			if (this.prefixJson) {
+			if (this.jsonPrefix != null) {
 				jsonGenerator.writeRaw("{} && ");
 			}
 			this.objectMapper.writeValue(jsonGenerator, object);

@@ -20,14 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -36,6 +28,14 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
@@ -61,7 +61,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
-	private boolean prefixJson = false;
+	private String jsonPrefix;
 
 	private Boolean prettyPrint;
 
@@ -98,14 +98,24 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	}
 
 	/**
+	 * Specify a custom prefix to use for this view's JSON output.
+	 * Default is none.
+	 * @see #setPrefixJson
+	 */
+	public void setJsonPrefix(String jsonPrefix) {
+		this.jsonPrefix = jsonPrefix;
+	}
+
+	/**
 	 * Indicate whether the JSON output by this view should be prefixed with "{} &&". Default is false.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed on the
 	 * string, the prefix would need to be ignored.
+	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.prefixJson = prefixJson;
+		this.jsonPrefix = prefixJson ? "{} && " : null;
 	}
 
 	/**
@@ -194,7 +204,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 
 		try {
-			if (this.prefixJson) {
+			if (this.jsonPrefix != null) {
 				jsonGenerator.writeRaw("{} && ");
 			}
 			this.objectMapper.writeValue(jsonGenerator, object);
