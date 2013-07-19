@@ -228,6 +228,7 @@ project("spring-core") {
 		cglib("cglib:cglib:${cglibVersion}@jar")
 		jarjar("com.googlecode.jarjar:jarjar:1.3")
 
+		compile(files(cglibRepackJar))
 		compile(files(asmRepackJar))
 		compile("commons-logging:commons-logging:1.1.1")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
