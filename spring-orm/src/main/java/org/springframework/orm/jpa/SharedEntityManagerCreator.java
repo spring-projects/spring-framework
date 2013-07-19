@@ -46,6 +46,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Oliver Gierke
  * @since 2.0
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
@@ -87,7 +88,9 @@ public abstract class SharedEntityManagerCreator {
 
 		Class emIfc = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
-		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, emIfc);
+		Class[] interfaces = emIfc == null ? new Class[0] : new Class[] { emIfc };
+
+		return createSharedEntityManager(emf, properties, synchronizedWithTransaction, interfaces);
 	}
 
 	/**
