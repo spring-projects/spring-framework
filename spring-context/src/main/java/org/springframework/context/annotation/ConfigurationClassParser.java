@@ -257,7 +257,8 @@ class ConfigurationClassParser {
 			String[] resources = importResource.getStringArray("value");
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
-				configClass.addImportedResource(resource, readerClass);
+				String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
+				configClass.addImportedResource(resolvedResource, readerClass);
 			}
 		}
 
