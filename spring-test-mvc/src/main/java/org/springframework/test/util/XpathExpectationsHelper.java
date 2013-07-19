@@ -16,9 +16,6 @@
 
 package org.springframework.test.util;
 
-import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
-
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.Map;
@@ -33,11 +30,15 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.hamcrest.Matcher;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
  * A helper class for applying assertions via XPath expressions.
@@ -50,6 +51,8 @@ public class XpathExpectationsHelper {
 	private final String expression;
 
 	private final XPathExpression xpathExpression;
+
+	private final boolean hasNamespaces;
 
 
 	/**
@@ -66,6 +69,7 @@ public class XpathExpectationsHelper {
 
 		this.expression = String.format(expression, args);
 		this.xpathExpression = compileXpathExpression(this.expression, namespaces);
+		this.hasNamespaces = !CollectionUtils.isEmpty(namespaces);
 	}
 
 	private XPathExpression compileXpathExpression(String expression, Map<String, String> namespaces)
@@ -104,7 +108,7 @@ public class XpathExpectationsHelper {
 	 */
 	protected Document parseXmlString(String xml) throws Exception  {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
+		factory.setNamespaceAware(this.hasNamespaces);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 		InputSource inputSource = new InputSource(new StringReader(xml));
 		Document document = documentBuilder.parse(inputSource);
