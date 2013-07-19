@@ -19,12 +19,15 @@ package org.springframework.web.servlet.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -69,6 +72,8 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
 
+	private final static Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
+
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
 
@@ -90,7 +95,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notEmpty(locations, "Locations list must not be empty");
+		if (logger.isWarnEnabled()) {
+			logger.warn("Locations list is empty. No resources will be served");
+		}
 	}
 
 	/**
