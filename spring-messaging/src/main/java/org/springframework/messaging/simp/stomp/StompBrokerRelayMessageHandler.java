@@ -285,13 +285,9 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			logger.error("Ignoring message, no sessionId: " + message);
 			return;
 		}
-		if (command.requiresDestination() && (destination == null)) {
-			logger.error("Ignoring " + command + " message, no destination: " + message);
-			return;
-		}
 
 		try {
-			if ((destination == null) || supportsDestination(destination)) {
+			if (checkDestinationPrefix(command, destination)) {
 
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing message: " + message);
@@ -329,7 +325,13 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 	}
 
-	protected boolean supportsDestination(String destination) {
+	protected boolean checkDestinationPrefix(StompCommand command, String destination) {
+		if (!command.requiresDestination()) {
+			return true;
+		}
+		else if (destination == null) {
+			return false;
+		}
 		for (String prefix : this.destinationPrefixes) {
 			if (destination.startsWith(prefix)) {
 				return true;

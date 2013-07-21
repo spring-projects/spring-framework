@@ -26,7 +26,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 
 /**
@@ -48,7 +47,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 	private final MessageSendingOperations<String> messagingTemplate;
 
-	private String prefix = "/user/";
+	private String destinationPrefix = "/user/";
 
 	private UserQueueSuffixResolver userQueueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
@@ -72,16 +71,16 @@ public class UserDestinationMessageHandler implements MessageHandler {
 	 * <p>The default prefix is "/user".
 	 * @param prefix the prefix to set
 	 */
-	public void setPrefix(String prefix) {
+	public void setDestinationPrefix(String prefix) {
 		Assert.hasText(prefix, "prefix is required");
-		this.prefix = prefix.endsWith("/") ? prefix : prefix + "/";
+		this.destinationPrefix = prefix.endsWith("/") ? prefix : prefix + "/";
 	}
 
 	/**
 	 * @return the prefix
 	 */
-	public String getPrefix() {
-		return this.prefix;
+	public String getDestinationPrefix() {
+		return this.destinationPrefix;
 	}
 
 	/**
@@ -101,12 +100,17 @@ public class UserDestinationMessageHandler implements MessageHandler {
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
 
-		if (!shouldHandle(message)) {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		SimpMessageType messageType = headers.getMessageType();
+		String destination = headers.getDestination();
+
+		if (!SimpMessageType.MESSAGE.equals(messageType)) {
 			return;
 		}
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		String destination = headers.getDestination();
+		if (!checkDestination(destination)) {
+			return;
+		}
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Processing message to destination " + destination);
@@ -117,7 +121,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 		if (user == null) {
 			if (logger.isErrorEnabled()) {
-				logger.error("Ignoring message, expected destination \"" + this.prefix
+				logger.error("Ignoring message, expected destination pattern \"" + this.destinationPrefix
 						+ "{userId}/**\": " + destination);
 			}
 			return;
@@ -136,27 +140,13 @@ public class UserDestinationMessageHandler implements MessageHandler {
 		}
 	}
 
-	protected boolean shouldHandle(Message<?> message) {
-
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		SimpMessageType messageType = headers.getMessageType();
-		String destination = headers.getDestination();
-
-		if (!SimpMessageType.MESSAGE.equals(messageType)) {
-			return false;
-		}
-
-		if (!StringUtils.hasText(destination)) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Ignoring message, no destination: " + headers);
+	private boolean checkDestination(String destination) {
+		if (destination != null) {
+			if (destination.startsWith(this.destinationPrefix)) {
+				return true;
 			}
-			return false;
 		}
-		else if (!destination.startsWith(this.prefix)) {
-			return false;
-		}
-
-		return true;
+		return false;
 	}
 
 
@@ -169,7 +159,7 @@ public class UserDestinationMessageHandler implements MessageHandler {
 
 		public UserDestinationParser(String destination) {
 
-			int userStartIndex = prefix.length();
+			int userStartIndex = destinationPrefix.length();
 			int userEndIndex = destination.indexOf('/', userStartIndex);
 
 			if (userEndIndex > 0) {

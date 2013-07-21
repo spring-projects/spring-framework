@@ -42,6 +42,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.ReplyTo;
 import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethod;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
 import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandlerComposite;
@@ -74,6 +75,8 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	private final SimpMessageSendingOperations dispatchMessagingTemplate;
 
 	private final SimpMessageSendingOperations webSocketSessionMessagingTemplate;
+
+	private List<String> destinationPrefixes;
 
 	private MessageConverter<?> messageConverter;
 
@@ -110,14 +113,24 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.webSocketSessionMessagingTemplate = new SimpMessagingTemplate(webSocketSessionChannel);
 	}
 
-	/**
-	 * TODO: multiple converters with 'content-type' header
-	 */
+
+	public void setDestinationPrefixes(List<String> destinationPrefixes) {
+		this.destinationPrefixes = destinationPrefixes;
+	}
+
+	public List<String> getDestinationPrefixes() {
+		return this.destinationPrefixes;
+	}
+
 	public void setMessageConverter(MessageConverter<?> converter) {
 		this.messageConverter = converter;
 		if (converter != null) {
 			((AbstractMessageSendingTemplate<?>) this.webSocketSessionMessagingTemplate).setMessageConverter(converter);
 		}
+	}
+
+	public MessageConverter<?> getMessageConverter() {
+		return this.messageConverter;
 	}
 
 	@Override
@@ -131,6 +144,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		initHandlerMethods();
 
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
+		this.argumentResolvers.addResolver(new MessageMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
 		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.dispatchMessagingTemplate));
@@ -147,8 +161,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	}
 
 	protected boolean isHandler(Class<?> beanType) {
-		return ((AnnotationUtils.findAnnotation(beanType, Controller.class) != null) ||
-				(AnnotationUtils.findAnnotation(beanType, MessageMapping.class) != null));
+		return (AnnotationUtils.findAnnotation(beanType, Controller.class) != null);
 	}
 
 	protected void detectHandlerMethods(Object handler) {
@@ -220,9 +233,17 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		String destination = headers.getDestination();
 
+		if (!checkDestinationPrefix(destination)) {
+			return;
+		}
+
 		HandlerMethod match = getHandlerMethod(destination, handlerMethods);
 		if (match == null) {
 			return;
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Processing message: " + message);
 		}
 
 		HandlerMethod handlerMethod = match.createWithResolvedBean();
@@ -246,6 +267,17 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			// TODO
 			ex.printStackTrace();
 		}
+	}
+
+	private boolean checkDestinationPrefix(String destination) {
+		if ((destination != null) && (this.destinationPrefixes != null)) {
+			for (String prefix : this.destinationPrefixes) {
+				if (destination.startsWith(prefix)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void invokeExceptionHandler(Message<?> message, HandlerMethod handlerMethod, Exception ex) {

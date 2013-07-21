@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.handler;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
@@ -39,6 +41,8 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 
 	private final MessageChannel messageChannel;
 
+	private List<String> destinationPrefixes;
+
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
 
 
@@ -50,6 +54,14 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 		this.messageChannel = messageChannel;
 	}
 
+
+	public void setDestinationPrefixes(List<String> destinationPrefixes) {
+		this.destinationPrefixes = destinationPrefixes;
+	}
+
+	public List<String> getDestinationPrefixes() {
+		return this.destinationPrefixes;
+	}
 
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
 		Assert.notNull(subscriptionRegistry, "subscriptionRegistry is required");
@@ -65,6 +77,11 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		SimpMessageType messageType = headers.getMessageType();
+		String destination = headers.getDestination();
+
+		if (!checkDestinationPrefix(destination)) {
+			return;
+		}
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			preProcessMessage(message);
@@ -83,6 +100,17 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 			String sessionId = SimpMessageHeaderAccessor.wrap(message).getSessionId();
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		}
+	}
+
+	private boolean checkDestinationPrefix(String destination) {
+		if ((destination != null) && (this.destinationPrefixes != null)) {
+			for (String prefix : this.destinationPrefixes) {
+				if (destination.startsWith(prefix)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void preProcessMessage(Message<?> message) {

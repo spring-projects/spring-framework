@@ -83,7 +83,7 @@ public class MappingJackson2MessageConverter implements MessageConverter<Object>
 			}
 		}
 		catch (IOException ex) {
-			throw new MessageConversionException("Could not read JSON: " + ex.getMessage(), ex);
+			throw new MessageConversionException(message, "Could not read JSON: " + ex.getMessage(), ex);
 		}
 	}
 
