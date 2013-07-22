@@ -31,7 +31,7 @@ import org.springframework.context.NoSuchMessageException;
  * as default message.
  *
  * <p>Message arguments can be specified via the {@link #setArguments(Object) arguments}
- * attribute or by using nested {@code &lt;spring:argument&gt;} tags.
+ * attribute or by using nested {@code <spring:argument>} tags.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller

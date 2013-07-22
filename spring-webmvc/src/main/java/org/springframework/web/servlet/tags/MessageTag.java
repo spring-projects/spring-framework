@@ -44,7 +44,7 @@ import org.springframework.web.util.TagUtils;
  * message. Thus, this tag can also be used for HTML escaping of any texts.
  *
  * <p>Message arguments can be specified via the {@link #setArguments(Object) arguments}
- * attribute or by using nested {@code &lt;spring:argument&gt;} tags.
+ * attribute or by using nested {@code <spring:argument>} tags.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
