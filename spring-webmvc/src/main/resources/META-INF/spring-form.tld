@@ -5,7 +5,7 @@
 		version="2.0">
 
 	<description>Spring Framework JSP Form Tag Library</description>
-	<tlib-version>3.0</tlib-version>
+	<tlib-version>4.0</tlib-version>
 	<short-name>form</short-name>
 	<uri>http://www.springframework.org/tags/form</uri>
 
