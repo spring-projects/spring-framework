@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet.support;
 
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.TimeZone;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -32,13 +32,14 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.servlet.TimeZoneResolver;
 
 /**
  * Utility class for easy access to request-specific state which has been
  * set by the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * <p>Supports lookup of current WebApplicationContext, LocaleResolver,
- * Locale, ThemeResolver, Theme, and MultipartResolver.
+ * Locale, TimeZoneResolver, TimeZone, ThemeResolver, Theme, and MultipartResolver.
  *
  * @author Juergen Hoeller
  * @since 03.03.2003
@@ -114,6 +115,34 @@ public abstract class RequestContextUtils {
 		}
 		else {
 			return request.getLocale();
+		}
+	}
+
+	/**
+	 * Return the TimeZoneResolver that has been bound to the request by the
+	 * DispatcherServlet.
+	 * @param request current HTTP request
+	 * @return the current TimeZoneResolver, or {@code null} if not found
+	 */
+	public static TimeZoneResolver getTimeZoneResolver(HttpServletRequest request) {
+		return (TimeZoneResolver) request.getAttribute(DispatcherServlet.TIME_ZONE_RESOLVER_ATTRIBUTE);
+	}
+
+	/**
+	 * Retrieves the current time zone from the given request,
+	 * using the TimeZoneResolver bound to the request by the DispatcherServlet
+	 * (if available), or null if no resolver is found.
+	 * @param request current HTTP request
+	 * @return the current time zone from the TimeZoneResolver, or {@code null} if no resolver
+	 * @see #getTimeZoneResolver(javax.servlet.http.HttpServletRequest)
+	 */
+	public static TimeZone getTimeZone(HttpServletRequest request) {
+		TimeZoneResolver timeZoneResolver = getTimeZoneResolver(request);
+		if (timeZoneResolver != null) {
+			return timeZoneResolver.resolveTimeZone(request);
+		}
+		else {
+			return null;
 		}
 	}
 

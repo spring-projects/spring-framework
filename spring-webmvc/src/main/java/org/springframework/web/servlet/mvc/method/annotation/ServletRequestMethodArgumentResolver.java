@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ import java.io.Reader;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Locale;
-
+import java.util.TimeZone;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -45,6 +46,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <li>{@link HttpSession}
  * <li>{@link Principal}
  * <li>{@link Locale}
+ * <li>{@link TimeZone} (as of Spring 4.0)
+ * <li>{@link java.time.ZoneId} (as of Spring 4.0 and Java 8)</li>
  * <li>{@link InputStream}
  * <li>{@link Reader}
  * </ul>
@@ -55,6 +58,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	private static final boolean zoneIdPresent = ClassUtils.isPresent(
+			"java.time.ZoneId", ServletRequestMethodArgumentResolver.class.getClassLoader());
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
@@ -64,6 +70,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				HttpSession.class.isAssignableFrom(paramType) ||
 				Principal.class.isAssignableFrom(paramType) ||
 				Locale.class.equals(paramType) ||
+				TimeZone.class.equals(paramType) ||
+				(zoneIdPresent && "java.time.ZoneId".equals(paramType.getName())) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType);
 	}
@@ -96,6 +104,12 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		}
 		else if (Locale.class.equals(paramType)) {
 			return RequestContextUtils.getLocale(request);
+		}
+		else if (TimeZone.class.equals(paramType)) {
+			return RequestContextUtils.getTimeZone(request);
+		}
+		else if (zoneIdPresent && "java.time.ZoneId".equals(paramType.getName())) {
+			return RequestContextUtils.getTimeZone(request).toZoneId();
 		}
 		else if (InputStream.class.isAssignableFrom(paramType)) {
 			return request.getInputStream();

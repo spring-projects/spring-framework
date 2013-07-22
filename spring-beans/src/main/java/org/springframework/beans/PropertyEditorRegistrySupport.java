@@ -65,6 +65,7 @@ import org.springframework.beans.propertyeditors.TimeZoneEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.beans.propertyeditors.UUIDEditor;
+import org.springframework.beans.propertyeditors.ZoneIdEditor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
@@ -199,6 +200,17 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
 		this.defaultEditors.put(TimeZone.class, new TimeZoneEditor());
+		if (ClassUtils.isPresent("java.time.ZoneId", PropertyEditorRegistrySupport.class.getClassLoader())) {
+			try {
+				this.defaultEditors.put(
+						ClassUtils.forName("java.time.ZoneId", PropertyEditorRegistrySupport.class.getClassLoader()),
+						new ZoneIdEditor()
+				);
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("ZoneId present but unable to load.", e);
+			}
+		}
 		this.defaultEditors.put(URI.class, new URIEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 		this.defaultEditors.put(UUID.class, new UUIDEditor());

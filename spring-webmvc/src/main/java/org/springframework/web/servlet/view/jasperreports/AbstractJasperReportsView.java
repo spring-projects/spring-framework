@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -572,6 +572,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * MessageSourceResourceBundle adapter for the Spring ApplicationContext,
 	 * analogous to the {@code JstlUtils.exposeLocalizationContext} method.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZone
 	 * @see org.springframework.context.support.MessageSourceResourceBundle
 	 * @see #getApplicationContext()
 	 * @see net.sf.jasperreports.engine.JRParameter#REPORT_LOCALE
@@ -582,6 +583,9 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		RequestContext rc = new RequestContext(request, getServletContext());
 		if (!model.containsKey(JRParameter.REPORT_LOCALE)) {
 			model.put(JRParameter.REPORT_LOCALE, rc.getLocale());
+		}
+		if (!model.containsKey(JRParameter.REPORT_TIME_ZONE)) {
+			model.put(JRParameter.REPORT_TIME_ZONE, rc.getTimeZone());
 		}
 		JasperReport report = getReport();
 		if ((report == null || report.getResourceBundle() == null) &&

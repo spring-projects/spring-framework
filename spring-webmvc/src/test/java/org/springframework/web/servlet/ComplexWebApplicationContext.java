@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.i18n.TimeZoneContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
@@ -57,6 +59,8 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.i18n.SessionTimeZoneResolver;
+import org.springframework.web.servlet.i18n.TimeZoneChangeInterceptor;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -75,6 +79,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	@Override
 	public void refresh() throws BeansException {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
+		registerSingleton(DispatcherServlet.TIME_ZONE_RESOLVER_BEAN_NAME, SessionTimeZoneResolver.class);
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class);
 
 		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
@@ -83,22 +88,27 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		ThemeChangeInterceptor interceptor3 = new ThemeChangeInterceptor();
 		ThemeChangeInterceptor interceptor4 = new ThemeChangeInterceptor();
 		interceptor4.setParamName("theme2");
-		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
-		interceptor5.setAuthorizedRoles(new String[] {"role1", "role2"});
+		TimeZoneChangeInterceptor interceptor5 = new TimeZoneChangeInterceptor();
+		TimeZoneChangeInterceptor interceptor6 = new TimeZoneChangeInterceptor();
+		interceptor6.setParamName("timezone2");
+		UserRoleAuthorizationInterceptor interceptor7 = new UserRoleAuthorizationInterceptor();
+		interceptor7.setAuthorizedRoles(new String[] {"role1", "role2"});
 
 		List interceptors = new ArrayList();
-		interceptors.add(interceptor5);
+		interceptors.add(interceptor7);
 		interceptors.add(interceptor1);
 		interceptors.add(interceptor2);
 		interceptors.add(interceptor3);
 		interceptors.add(interceptor4);
+		interceptors.add(interceptor5);
+		interceptors.add(interceptor6);
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
 		interceptors.add(new MyWebRequestInterceptor());
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add(
-				"mappings", "/view.do=viewHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler");
+				"mappings", "/view.do=viewHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler\n/timezone.do=timeZoneHandler");
 		pvs.add("interceptors", interceptors);
 		registerSingleton("myUrlMapping1", SimpleUrlHandlerMapping.class, pvs);
 
@@ -135,6 +145,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		registerSingleton("localeHandler", ComplexLocaleChecker.class);
 		registerSingleton("anotherLocaleHandler", ComplexLocaleChecker.class);
+		registerSingleton("timeZoneHandler", ComplexTimeZoneChecker.class);
 		registerSingleton("unknownHandler", Object.class);
 
 		registerSingleton("headController", HeadController.class);
@@ -434,6 +445,36 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		@Override
 		public long lastModified() {
 			return 99;
+		}
+	}
+
+	public static class ComplexTimeZoneChecker implements MyHandler {
+
+		@Override
+		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
+			WebApplicationContext wac = RequestContextUtils.getWebApplicationContext(request);
+			if (!(wac instanceof ComplexWebApplicationContext)) {
+				throw new ServletException("Incorrect WebApplicationContext");
+			}
+			if (!(request instanceof MultipartHttpServletRequest)) {
+				throw new ServletException("Not in a MultipartHttpServletRequest");
+			}
+			if (!(RequestContextUtils.getTimeZoneResolver(request) instanceof SessionTimeZoneResolver)) {
+				throw new ServletException("Incorrect TimeZoneResolver");
+			}
+			String id = TimeZone.getDefault().getID().equals("America/Chicago") ?
+					"America/Los_Angeles" : "America/Chicago";
+			if (!id.equals(RequestContextUtils.getTimeZone(request).getID())) {
+				throw new ServletException("Incorrect TimeZone 1");
+			}
+			if (!id.equals(TimeZoneContextHolder.getTimeZone().getID())) {
+				throw new ServletException("Incorrect TimeZone 2");
+			}
+		}
+
+		@Override
+		public long lastModified() {
+			return 97;
 		}
 	}
 

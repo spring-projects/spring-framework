@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.velocity;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -139,6 +140,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * Spring uses a special locale-aware subclass of DateTool.
 	 * @see org.apache.velocity.tools.generic.DateTool
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZone
 	 * @see org.springframework.web.servlet.LocaleResolver
 	 */
 	public void setDateToolAttribute(String dateToolAttribute) {
@@ -410,7 +412,8 @@ public class VelocityView extends AbstractTemplateView {
 		if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
 			Locale locale = RequestContextUtils.getLocale(request);
 			if (this.dateToolAttribute != null) {
-				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(locale));
+				TimeZone timeZone = RequestContextUtils.getTimeZone(request);
+				velocityContext.put(this.dateToolAttribute, new LocaleAwareDateTool(locale, timeZone));
 			}
 			if (this.numberToolAttribute != null) {
 				velocityContext.put(this.numberToolAttribute, new LocaleAwareNumberTool(locale));
@@ -531,18 +534,30 @@ public class VelocityView extends AbstractTemplateView {
 	 * Subclass of DateTool from Velocity Tools, using a passed-in Locale
 	 * (usually the RequestContext Locale) instead of the default Locale.N
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTimeZone
 	 */
 	private static class LocaleAwareDateTool extends DateTool {
 
 		private final Locale locale;
 
-		private LocaleAwareDateTool(Locale locale) {
+		private final TimeZone timeZone;
+
+		private LocaleAwareDateTool(Locale locale, TimeZone timeZone) {
 			this.locale = locale;
+			this.timeZone = timeZone;
 		}
 
 		@Override
 		public Locale getLocale() {
 			return this.locale;
+		}
+
+		@Override
+		public TimeZone getTimeZone() {
+			if (this.timeZone != null) {
+				return this.timeZone;
+			}
+			return super.getTimeZone();
 		}
 	}
 

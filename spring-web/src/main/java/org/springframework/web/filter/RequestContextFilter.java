@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  *
  * <p>Alternatively, Spring's {@link org.springframework.web.context.request.RequestContextListener}
  * and Spring's {@link org.springframework.web.servlet.DispatcherServlet} also expose
- * the same request context to the current thread.
+ * the same request context to the current thread. Unlike {@code DispatcherServlet}, this
+ * filter cannot expose the time zone through
+ * {@link org.springframework.context.i18n.TimeZoneContextHolder}.
  *
  * <p>This filter is mainly for use with third-party servlets, e.g. the JSF FacesServlet.
  * Within Spring's own web support, DispatcherServlet's processing is perfectly sufficient.

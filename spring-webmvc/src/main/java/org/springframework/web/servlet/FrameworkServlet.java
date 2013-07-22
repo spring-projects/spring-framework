@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +41,9 @@ import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.context.i18n.SimpleTimeZoneContext;
+import org.springframework.context.i18n.TimeZoneContext;
+import org.springframework.context.i18n.TimeZoneContextHolder;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.ClassUtils;
@@ -933,6 +936,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
 		LocaleContext localeContext = buildLocaleContext(request);
+		TimeZoneContext timeZoneContext = buildTimeZoneContext(request);
 
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
@@ -940,7 +944,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
 
-		initContextHolders(request, localeContext, requestAttributes);
+		initContextHolders(request, localeContext, timeZoneContext, requestAttributes);
 
 		try {
 			doService(request, response);
@@ -994,6 +998,17 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
+	 * Build a TimeZoneContext for the given request, exposing the JVM's default time zone
+	 * as the current time zone.
+	 * @param request current HTTP request
+	 * @return the corresponding TimeZoneContext, or {@code null} if none to bind
+	 * @see org.springframework.context.i18n.TimeZoneContextHolder#setTimeZoneContext
+	 */
+	protected TimeZoneContext buildTimeZoneContext(HttpServletRequest request) {
+		return new SimpleTimeZoneContext(TimeZone.getDefault());
+	}
+
+	/**
 	 * Build ServletRequestAttributes for the given request (potentially also
 	 * holding a reference to the response), taking pre-bound attributes
 	 * (and their type) into consideration.
@@ -1015,11 +1030,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 	}
 
-	private void initContextHolders(
-			HttpServletRequest request, LocaleContext localeContext, RequestAttributes requestAttributes) {
+	private void initContextHolders(HttpServletRequest request, LocaleContext localeContext,
+									TimeZoneContext timeZoneContext,
+									RequestAttributes requestAttributes) {
 
 		if (localeContext != null) {
 			LocaleContextHolder.setLocaleContext(localeContext, this.threadContextInheritable);
+		}
+		if (timeZoneContext != null) {
+			TimeZoneContextHolder.setTimeZoneContext(timeZoneContext, this.threadContextInheritable);
 		}
 		if (requestAttributes != null) {
 			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
@@ -1132,7 +1151,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
 				HttpServletResponse response = webRequest.getNativeRequest(HttpServletResponse.class);
-				initContextHolders(request, buildLocaleContext(request), buildRequestAttributes(request, response, null));
+				initContextHolders(
+						request,
+						buildLocaleContext(request),
+						buildTimeZoneContext(request),
+						buildRequestAttributes(request, response, null)
+				);
 			}
 		}
 		@Override
