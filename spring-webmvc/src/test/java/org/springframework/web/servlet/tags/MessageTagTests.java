@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
@@ -27,14 +26,16 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
+ * Tests for {@link MessageTag}.
+ *
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @author Nicholas Williams
  */
 public class MessageTagTests extends AbstractTagTests {
 
@@ -51,6 +52,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setMessage(new DefaultMessageSourceResolvable("test"));
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test message", message.toString());
 	}
 
@@ -67,6 +69,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setCode("test");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test message", message.toString());
 	}
 
@@ -83,6 +86,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setCode(null);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "null", message.toString());
 	}
 
@@ -100,6 +104,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("testArgs");
 		tag.setArguments("arg1");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test arg1 message {1}", message.toString());
 	}
 
@@ -117,6 +122,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("testArgs");
 		tag.setArguments("arg1,arg2");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test arg1 message arg2", message.toString());
 	}
 
@@ -135,6 +141,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setArguments("arg1,1;arg2,2");
 		tag.setArgumentSeparator(";");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test arg1,1 message arg2,2", message.toString());
 	}
 
@@ -150,8 +157,9 @@ public class MessageTagTests extends AbstractTagTests {
 		};
 		tag.setPageContext(pc);
 		tag.setCode("testArgs");
-		tag.setArguments(new Object[] {"arg1", new Integer(5)});
+		tag.setArguments(new Object[] {"arg1", 5});
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test arg1 message 5", message.toString());
 	}
 
@@ -167,9 +175,66 @@ public class MessageTagTests extends AbstractTagTests {
 		};
 		tag.setPageContext(pc);
 		tag.setCode("testArgs");
-		tag.setArguments(new Integer(5));
+		tag.setArguments(5);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test 5 message {1}", message.toString());
+	}
+
+	@SuppressWarnings("serial")
+	public void testMessageTagWithCodeAndArgumentAndNestedArgument() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			@Override
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testArgs");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		tag.setArguments(5);
+		tag.addArgument(7);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
+		assertEquals("Correct message", "test 5 message 7", message.toString());
+	}
+
+	@SuppressWarnings("serial")
+	public void testMessageTagWithCodeAndNestedArgument() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			@Override
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testArgs");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		tag.addArgument(7);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
+		assertEquals("Correct message", "test 7 message {1}", message.toString());
+	}
+
+	@SuppressWarnings("serial")
+	public void testMessageTagWithCodeAndNestedArguments() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			@Override
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testArgs");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		tag.addArgument("arg1");
+		tag.addArgument(6);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
+		assertEquals("Correct message", "test arg1 message 6", message.toString());
 	}
 
 	@SuppressWarnings("serial")
@@ -186,6 +251,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setText("testtext");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test message", (message.toString()));
 	}
 
@@ -203,6 +269,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setText("test & text");
 		tag.setHtmlEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test &amp; text", message.toString());
 	}
 
@@ -220,6 +287,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setText("' test & text \\");
 		tag.setJavaScriptEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "\\' test & text \\\\", message.toString());
 	}
 
@@ -238,6 +306,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setHtmlEscape(true);
 		tag.setJavaScriptEscape(true);
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "&#39; test &amp; text \\\\", message.toString());
 	}
 
@@ -249,6 +318,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setVar("testvar");
 		tag.setScope("page");
 		tag.doStartTag();
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("text & text", pc.getAttribute("testvar"));
 		tag.release();
 
@@ -257,6 +327,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setVar("testvar2");
 		tag.doStartTag();
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test message", pc.getAttribute("testvar2"));
 		tag.release();
 	}
@@ -268,6 +339,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setText("text & text");
 		tag.setVar("testvar");
 		tag.doStartTag();
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("text & text", pc.getAttribute("testvar"));
 		tag.release();
 
@@ -277,6 +349,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setVar("testvar");
 
 		tag.doStartTag();
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("Correct message", "test message", pc.getAttribute("testvar"));
 	}
 
@@ -291,6 +364,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setCode("test");
 		tag.setVar("testvar2");
 		tag.doStartTag();
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 	}
 
 	public void testRequestContext() throws ServletException {

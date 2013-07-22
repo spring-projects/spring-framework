@@ -83,7 +83,8 @@
 			<description>Set optional message arguments for this tag, as a
 			(comma-)delimited String (each String argument can contain JSP EL),
 			an Object array (used as argument array), or a single Object (used
-			as single argument).</description>
+			as single argument). You can additionally use nested spring:argument
+			tags.</description>
 			<name>arguments</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -160,7 +161,8 @@
 			<description>Set optional message arguments for this tag, as a
 			(comma-)delimited String (each String argument can contain JSP EL),
 			an Object array (used as argument array), or a single Object (used
-			as single argument).</description>
+			as single argument). You can additionally use nested spring:argument
+			tags.</description>
 			<name>arguments</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -208,6 +210,22 @@
 			<name>javaScriptEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+
+	<tag>
+		<description>Argument tag based on the JSTL fmt:param tag.  The purpose is to
+			support arguments inside the spring:message and spring:theme
+			tags.</description>
+		<name>argument</name>
+		<tag-class>org.springframework.web.servlet.tags.ArgumentTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>The value of the argument.</description>
+			<name>value</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>java.lang.Object</type>
 		</attribute>
 	</tag>
 
