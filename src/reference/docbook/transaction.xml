@@ -1720,7 +1720,7 @@ public class DefaultFooService implements FooService {
                 </row>
 
                 <row>
-                  <entry><literal>rollbackForClassname</literal></entry>
+                  <entry><literal>rollbackForClassName</literal></entry>
 
                   <entry>Array of class names. Classes must be derived from
                   <classname>Throwable.</classname></entry>
@@ -1742,7 +1742,7 @@ public class DefaultFooService implements FooService {
                 </row>
 
                 <row>
-                  <entry><literal>noRollbackForClassname</literal></entry>
+                  <entry><literal>noRollbackForClassName</literal></entry>
 
                   <entry>Array of <classname>String</classname> class names,
                   which must be derived from
