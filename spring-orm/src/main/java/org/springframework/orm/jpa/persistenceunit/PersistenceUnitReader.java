@@ -267,9 +267,13 @@ class PersistenceUnitReader {
 		}
 
 		// exclude unlisted classes
+		unitInfo.setExcludeUnlistedClasses(!"1.0".equals(version));
 		Element excludeUnlistedClasses = DomUtils.getChildElementByTagName(persistenceUnit, EXCLUDE_UNLISTED_CLASSES);
 		if (excludeUnlistedClasses != null) {
-			unitInfo.setExcludeUnlistedClasses(true);
+			String excludeString = DomUtils.getTextValue(excludeUnlistedClasses);
+			unitInfo.setExcludeUnlistedClasses(
+					excludeString.trim().length() == 0 || "true".equalsIgnoreCase(excludeString)
+			);
 		}
 
 		// set JPA 2.0 shared cache mode
