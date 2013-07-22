@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,20 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
 /**
- * JSP tag for collecting name-value parameters and passing them to a
- * {@link ParamAware} ancestor in the tag hierarchy.
+ * JSP tag for collecting arguments and passing them to an
+ * {@link ArgumentAware} ancestor in the tag hierarchy.
  *
- * <p>This tag must be nested under a param aware tag.
+ * <p>This tag must be nested under an argument aware tag.
  *
- * @author Scott Andrews
- * @since 3.0
- * @see Param
- * @see UrlTag
+ * @author Nicholas Williams
+ * @since 4.0
+ * @see MessageTag
+ * @see ThemeTag
  */
 @SuppressWarnings("serial")
-public class ParamTag extends BodyTagSupport {
+public class ArgumentTag extends BodyTagSupport {
 
-	private String name;
-
-	private String value;
+	private Object value;
 
 	private boolean valueSet;
 
@@ -43,52 +41,39 @@ public class ParamTag extends BodyTagSupport {
 
 	@Override
 	public int doEndTag() throws JspException {
-		Param param = new Param();
-		param.setName(this.name);
+		Object argument = null;
 		if (this.valueSet) {
-			param.setValue(this.value);
+			argument = this.value;
 		}
 		else if (getBodyContent() != null) {
 			// get the value from the tag body
-			param.setValue(getBodyContent().getString().trim());
+			argument = getBodyContent().getString().trim();
 		}
 
 		// find a param aware ancestor
-		ParamAware paramAwareTag = (ParamAware) findAncestorWithClass(this,
-				ParamAware.class);
-		if (paramAwareTag == null) {
+		ArgumentAware argumentAwareTag = (ArgumentAware) findAncestorWithClass(this,
+				ArgumentAware.class);
+		if (argumentAwareTag == null) {
 			throw new JspException(
-					"The param tag must be a descendant of a tag that supports parameters");
+					"The argument tag must be a descendant of a tag that supports arguments");
 		}
 
-		paramAwareTag.addParam(param);
+		argumentAwareTag.addArgument(argument);
 
 		return EVAL_PAGE;
 	}
 
-	// tag attribute accessors
+	// tag attribute mutators
 
 	/**
-	 * Sets the name of the parameter
+	 * Sets the value of the argument
 	 *
 	 * <p>
-	 * Required
-	 *
-	 * @param name the parameter name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Sets the value of the parameter
-	 *
-	 * <p>
-	 * Optional. If not set, the tag's body content is evaluated
+	 * Optional. If not set, the tag's body content is evaluated.
 	 *
 	 * @param value the parameter value
 	 */
-	public void setValue(String value) {
+	public void setValue(Object value) {
 		this.value = value;
 		this.valueSet = true;
 	}
@@ -96,7 +81,6 @@ public class ParamTag extends BodyTagSupport {
 	@Override
 	public void release() {
 		super.release();
-		this.name = null;
 		this.value = null;
 		this.valueSet = false;
 	}

@@ -18,6 +18,8 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
@@ -40,6 +42,12 @@ import org.springframework.web.util.TagUtils;
  * <p>If "code" isn't set or cannot be resolved, "text" will be used as default
  * message. Thus, this tag can also be used for HTML escaping of any texts.
  *
+ * <p>Uses of this tag may contain arguments specified with nested spring:argument tags.
+ * The {@link #setArguments(Object) 'arguments'} attribute can be used instead of nested
+ * spring:argument tags, but they may never be used together. If using the arguments
+ * attribute, the {@link #setArgumentSeparator(String) 'argumentSeparator'} attribute can
+ * indicate an argument delimiter other than the default (a comma).
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setCode
@@ -48,9 +56,10 @@ import org.springframework.web.util.TagUtils;
  * @see #setJavaScriptEscape
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
+ * @see ArgumentTag
  */
 @SuppressWarnings("serial")
-public class MessageTag extends HtmlEscapingAwareTag {
+public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
 
 	/**
 	 * Default separator for splitting an arguments String: a comma (",")
@@ -64,7 +73,11 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 	private Object arguments;
 
+	private boolean argumentsSet;
+
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
+
+	private List<Object> nestedArguments;
 
 	private String text;
 
@@ -98,6 +111,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	 */
 	public void setArguments(Object arguments) {
 		this.arguments = arguments;
+		this.argumentsSet = true;
 	}
 
 	/**
@@ -107,6 +121,15 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	 */
 	public void setArgumentSeparator(String argumentSeparator) {
 		this.argumentSeparator = argumentSeparator;
+	}
+
+	@Override
+	public void addArgument(Object argument) throws JspTagException {
+		if (this.argumentsSet) {
+			throw new JspTagException(
+					"Illegal combined use of arguments attribute and spring:argument tags");
+		}
+		this.nestedArguments.add(argument);
 	}
 
 	/**
@@ -146,6 +169,12 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	}
 
 
+	@Override
+	protected final int doStartTagInternal() throws JspException, IOException {
+		this.nestedArguments = new LinkedList<Object>();
+		return EVAL_BODY_INCLUDE;
+	}
+
 	/**
 	 * Resolves the message, escapes it if demanded,
 	 * and writes it to the page (or exposes it as variable).
@@ -155,7 +184,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	 * @see #writeMessage(String)
 	 */
 	@Override
-	protected final int doStartTagInternal() throws JspException, IOException {
+	public int doEndTag() throws JspException {
 		try {
 			// Resolve the unescaped message.
 			String msg = resolveMessage();
@@ -169,14 +198,26 @@ public class MessageTag extends HtmlEscapingAwareTag {
 				pageContext.setAttribute(this.var, msg, TagUtils.getScope(this.scope));
 			}
 			else {
-				writeMessage(msg);
+				try {
+					writeMessage(msg);
+				}
+				catch (IOException e) {
+					throw new JspTagException(e.getMessage(), e);
+				}
 			}
 
-			return EVAL_BODY_INCLUDE;
+			return EVAL_PAGE;
 		}
 		catch (NoSuchMessageException ex) {
 			throw new JspTagException(getNoSuchMessageExceptionDescription(ex));
 		}
+	}
+
+	@Override
+	public void release() {
+		super.release();
+		this.arguments = null;
+		this.argumentsSet = false;
 	}
 
 	/**
@@ -197,7 +238,14 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 		if (this.code != null || this.text != null) {
 			// We have a code or default text that we need to resolve.
-			Object[] argumentsArray = resolveArguments(this.arguments);
+			Object[] argumentsArray = null;
+			if (this.argumentsSet) {
+				argumentsArray = resolveArguments(this.arguments);
+			}
+			else if (this.nestedArguments.size() > 0) {
+				argumentsArray = this.nestedArguments.toArray();
+			}
+
 			if (this.text != null) {
 				// We have a fallback text to consider.
 				return messageSource.getMessage(
