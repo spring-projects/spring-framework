@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,11 +29,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
@@ -41,6 +37,10 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
 
 /**
  * Internal helper class for reading JPA-compliant {@code persistence.xml} files.
@@ -80,6 +80,8 @@ class PersistenceUnitReader {
 	private static final String VALIDATION_MODE = "validation-mode";
 
 	private static final String META_INF = "META-INF";
+
+	private static final String VERSION_1 = "1.0";
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -266,8 +268,14 @@ class PersistenceUnitReader {
 
 		// exclude unlisted classes
 		Element excludeUnlistedClasses = DomUtils.getChildElementByTagName(persistenceUnit, EXCLUDE_UNLISTED_CLASSES);
-		if (excludeUnlistedClasses != null) {
-			unitInfo.setExcludeUnlistedClasses(true);
+		if (excludeUnlistedClasses == null) {
+			// element is not defined, use default appropriate for version
+			unitInfo.setExcludeUnlistedClasses(!VERSION_1.equals(version));
+		}
+		else {
+			String excludeText = DomUtils.getTextValue(excludeUnlistedClasses);
+			unitInfo.setExcludeUnlistedClasses(StringUtils.isEmpty(excludeText) ||
+					Boolean.valueOf(excludeText));
 		}
 
 		// set JPA 2.0 shared cache mode
