@@ -61,7 +61,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private List<String> managedClassNames = new LinkedList<String>();
 
-	private boolean excludeUnlistedClasses = false;
+	private boolean excludeUnlistedClasses = true;
 
 	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
 
