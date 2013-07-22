@@ -61,6 +61,7 @@ import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
 
@@ -270,11 +271,12 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	}
 
 	private boolean checkDestinationPrefix(String destination) {
-		if ((destination != null) && (this.destinationPrefixes != null)) {
-			for (String prefix : this.destinationPrefixes) {
-				if (destination.startsWith(prefix)) {
-					return true;
-				}
+		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
+			return true;
+		}
+		for (String prefix : this.destinationPrefixes) {
+			if (destination.startsWith(prefix)) {
+				return true;
 			}
 		}
 		return false;

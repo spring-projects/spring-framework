@@ -28,6 +28,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 
@@ -103,11 +104,12 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 	}
 
 	private boolean checkDestinationPrefix(String destination) {
-		if ((destination != null) && (this.destinationPrefixes != null)) {
-			for (String prefix : this.destinationPrefixes) {
-				if (destination.startsWith(prefix)) {
-					return true;
-				}
+		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
+			return true;
+		}
+		for (String prefix : this.destinationPrefixes) {
+			if (destination.startsWith(prefix)) {
+				return true;
 			}
 		}
 		return false;

@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleBrokerWebMessageHandlerTests {
+public class SimpleBrokerMessageHandlerTests {
 
 	private SimpleBrokerMessageHandler messageHandler;
 
