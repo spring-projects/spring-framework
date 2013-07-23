@@ -260,10 +260,6 @@ project("spring-expression") {
 project("spring-instrument") {
 	description = "Spring Instrument"
 
-	dependencies {
-		compile(project(":spring-core"))
-	}
-
 	jar {
 		manifest.attributes["Premain-Class"] =
 			"org.springframework.instrument.InstrumentationSavingAgent"
