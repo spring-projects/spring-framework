@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,14 +38,23 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Philippe Marschall
  * @author Phillip Webb
+ * @author Nicholas Williams
  */
 public class PathResourceTests {
 
-	private static final String TEST_DIR = "src/test/java/org/springframework/core/io";
+	private static final String TEST_DIR = platformPath("src/test/java/org/"
+			+ "springframework/core/io");
 
-	private static final String TEST_FILE = "src/test/java/org/springframework/core/io/example.properties";
+	private static final String TEST_FILE = platformPath("src/test/java/org/"
+			+ "springframework/core/io/example.properties");
 
-	private static final String NON_EXISTING_FILE = "src/test/java/org/springframework/core/io/doesnotexist.properties";
+	private static final String NON_EXISTING_FILE = platformPath("src/test/java/org/"
+			+ "springframework/core/io/doesnotexist.properties");
+
+
+	private static String platformPath(String string) {
+		return string.replace('/', File.separatorChar);
+	}
 
 
 	@Rule
@@ -167,13 +177,13 @@ public class PathResourceTests {
 	@Test
 	public void getUrl() throws Exception {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertTrue(resource.getURL().toString().endsWith(TEST_FILE));
+		assertThat(resource.getURL().toString(), Matchers.endsWith("core/io/example.properties"));
 	}
 
 	@Test
 	public void getUri() throws Exception {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertTrue(resource.getURI().toString().endsWith(TEST_FILE));
+		assertThat(resource.getURI().toString(), Matchers.endsWith("core/io/example.properties"));
 	}
 
 	@Test
