@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -38,7 +39,10 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.0
  */
-public class TypeDescriptor {
+public class TypeDescriptor implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
