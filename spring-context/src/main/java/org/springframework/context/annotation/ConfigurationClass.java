@@ -152,7 +152,7 @@ final class ConfigurationClass {
 	 * @see #getImportedBy()
 	 */
 	public boolean isImported() {
-		return this.importedBy != null;
+		return (this.importedBy != null);
 	}
 
 	/**
@@ -162,7 +162,7 @@ final class ConfigurationClass {
 	 * @see #isImported()
 	 */
 	public ConfigurationClass getImportedBy() {
-		return importedBy;
+		return this.importedBy;
 	}
 
 	public void addBeanMethod(BeanMethod method) {
@@ -203,7 +203,7 @@ final class ConfigurationClass {
 		for (BeanMethod beanMethod : this.beanMethods) {
 			String fqMethodName = beanMethod.getFullyQualifiedMethodName();
 			Integer currentCount = methodNameCounts.get(fqMethodName);
-			int newCount = currentCount != null ? currentCount + 1 : 1;
+			int newCount = (currentCount != null ? currentCount + 1 : 1);
 			methodNameCounts.put(fqMethodName, newCount);
 		}
 		for (String fqMethodName : methodNameCounts.keySet()) {

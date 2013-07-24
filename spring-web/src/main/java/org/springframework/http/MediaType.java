@@ -403,7 +403,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Indicates whether the {@linkplain #getType() type} is the wildcard character {@code &#42;} or not.
 	 */
 	public boolean isWildcardType() {
-		return WILDCARD_TYPE.equals(type);
+		return WILDCARD_TYPE.equals(this.type);
 	}
 
 	/**
@@ -419,7 +419,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @return whether the subtype is {@code &#42;}
 	 */
 	public boolean isWildcardSubtype() {
-		return WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+");
+		return WILDCARD_TYPE.equals(this.subtype) || this.subtype.startsWith("*+");
 	}
 
 	/**
