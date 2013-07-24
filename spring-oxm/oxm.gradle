@@ -39,7 +39,7 @@ task genCastor {
 			castor(types: "j2", warnings: false, file: orderSchema, todir: sourcesDir,
 					package: "org.springframework.oxm.castor", properties: castorBuilderProperties)
 
-			javac(destdir: classesDir, source: 1.5, target: 1.5, debug: true,
+			javac(destdir: classesDir, source: 1.6, target: 1.6, debug: true,
 					debugLevel: "lines,vars,source", classpath: configurations.castor.asPath) {
 				src(path: sourcesDir)
 				include(name: "**/*.java")
@@ -74,7 +74,7 @@ task genJaxb {
 				produces(dir: sourcesDir, includes: "**/*.java")
 			}
 
-			javac(destdir: classesDir, source: 1.5, target: 1.5, debug: true,
+			javac(destdir: classesDir, source: 1.6, target: 1.6, debug: true,
 					debugLevel: "lines,vars,source",
 					classpath: configurations.castor.asPath) {
 				src(path: sourcesDir)
@@ -111,20 +111,21 @@ task genXmlbeans {
 }
 
 // add jibx binding to the normal test compilation process
-compileTestJava {
-	def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
-
-	doLast() {
-		project.ant {
-			taskdef(name: "jibx",
-					classname: "org.jibx.binding.ant.CompileTask",
-					classpath: configurations.jibx.asPath)
-
-			jibx(verbose: true, load: true, binding: bindingXml) {
-				classpathset(dir: sourceSets.test.output.classesDir) {
-					include(name: "**/jibx/**/*")
-				}
-			}
-		}
-	}
-}
+// INCOMPATIBLE WITH OPENJDK 8 b89+
+// compileTestJava {
+//	def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+//
+//	doLast() {
+//		project.ant {
+//			taskdef(name: "jibx",
+//					classname: "org.jibx.binding.ant.CompileTask",
+//					classpath: configurations.jibx.asPath)
+//
+//			jibx(verbose: true, load: true, binding: bindingXml) {
+//				classpathset(dir: sourceSets.test.output.classesDir) {
+//					include(name: "**/jibx/**/*")
+//				}
+//			}
+//		}
+//	}
+// }

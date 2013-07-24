@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 
 import org.custommonkey.xmlunit.XMLUnit;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertTrue;
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
  * not occur by default. The Gradle build should succeed, however.
  */
+@Ignore("INCOMPATIBLE WITH OPENJDK 8 b89+")
 public class JibxMarshallerTests extends AbstractMarshallerTests {
 
 	@Override
