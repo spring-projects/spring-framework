@@ -112,20 +112,23 @@ task genXmlbeans {
 
 // add jibx binding to the normal test compilation process
 // INCOMPATIBLE WITH OPENJDK 8 b89+
-// compileTestJava {
-//	def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
-//
-//	doLast() {
-//		project.ant {
-//			taskdef(name: "jibx",
-//					classname: "org.jibx.binding.ant.CompileTask",
-//					classpath: configurations.jibx.asPath)
-//
-//			jibx(verbose: true, load: true, binding: bindingXml) {
-//				classpathset(dir: sourceSets.test.output.classesDir) {
-//					include(name: "**/jibx/**/*")
-//				}
-//			}
-//		}
-//	}
-// }
+def jibxEnabled = project.properties.get("testGroups")?.toLowerCase()?.split(",")?.contains("custom_compilation")
+if(jibxEnabled) {
+	compileTestJava {
+		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+
+		doLast() {
+			project.ant {
+				taskdef(name: "jibx",
+						classname: "org.jibx.binding.ant.CompileTask",
+						classpath: configurations.jibx.asPath)
+
+				jibx(verbose: true, load: true, binding: bindingXml) {
+					classpathset(dir: sourceSets.test.output.classesDir) {
+						include(name: "**/jibx/**/*")
+					}
+				}
+			}
+		}
+	}
+}
