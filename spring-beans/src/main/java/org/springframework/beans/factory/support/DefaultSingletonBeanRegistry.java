@@ -448,8 +448,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	public void destroySingletons() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Destroying singletons in " + this);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Destroying singletons in " + this);
 		}
 		synchronized (this.singletonObjects) {
 			this.singletonsCurrentlyInDestruction = true;
