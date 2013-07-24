@@ -20,11 +20,13 @@ import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertFalse;
@@ -36,8 +38,12 @@ import static org.junit.Assert.assertTrue;
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
  * not occur by default. The Gradle build should succeed, however.
  */
-@Ignore("INCOMPATIBLE WITH OPENJDK 8 b89+")
 public class JibxMarshallerTests extends AbstractMarshallerTests {
+
+	@BeforeClass
+	public static void compilerAssumptions() {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+	}
 
 	@Override
 	protected Marshaller createMarshaller() throws Exception {

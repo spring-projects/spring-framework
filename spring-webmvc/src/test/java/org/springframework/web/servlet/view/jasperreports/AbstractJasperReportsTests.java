@@ -29,6 +29,7 @@ import org.junit.BeforeClass;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.ui.jasperreports.ProductBean;
 import org.springframework.util.ClassUtils;
@@ -59,6 +60,7 @@ public abstract class AbstractJasperReportsTests {
 	@BeforeClass
 	public static void assumptions() {
 		Assume.canLoadNativeDirFonts();
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
 	}
 
 	@Before

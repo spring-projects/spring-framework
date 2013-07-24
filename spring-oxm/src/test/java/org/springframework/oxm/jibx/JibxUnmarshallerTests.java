@@ -20,10 +20,13 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -33,12 +36,16 @@ import static org.junit.Assert.*;
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
  * not occur by default. The Gradle build should succeed, however.
  */
-@Ignore("INCOMPATIBLE WITH OPENJDK 8 b89+")
 public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	protected static final String INPUT_STRING_WITH_SPECIAL_CHARACTERS =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 					"<tns:flight><tns:airline>Air Libert\u00e9</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
+
+	@BeforeClass
+	public static void compilerAssumptions() {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+	}
 
 	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
