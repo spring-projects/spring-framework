@@ -236,7 +236,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			}
 		}
 
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			DataSourceUtils.releaseConnection(con, this.dataSource);
 			throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction", ex);
 		}

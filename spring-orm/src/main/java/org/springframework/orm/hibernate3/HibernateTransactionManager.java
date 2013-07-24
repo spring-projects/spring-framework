@@ -580,7 +580,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 		}
 
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			if (txObject.isNewSession()) {
 				try {
 					if (session.getTransaction().isActive()) {
