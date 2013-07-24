@@ -16,15 +16,11 @@
 
 package org.springframework.core.annotation;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.annotation.AnnotationUtils.*;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,9 +29,10 @@ import org.junit.Test;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
+import static org.junit.Assert.*;
+import static org.springframework.core.annotation.AnnotationUtils.*;
+
 /**
- * Unit tests for {@link AnnotationUtils}.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -45,8 +42,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindMethodAnnotationOnLeaf() throws SecurityException, NoSuchMethodException {
-
-		final Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
+		Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
 		assertNotNull(m.getAnnotation(Order.class));
 		assertNotNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
@@ -54,8 +50,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindMethodAnnotationOnRoot() throws SecurityException, NoSuchMethodException {
-
-		final Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
+		Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
 		assertNotNull(m.getAnnotation(Order.class));
 		assertNotNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
@@ -63,8 +58,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindMethodAnnotationOnRootButOverridden() throws SecurityException, NoSuchMethodException {
-
-		final Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
+		Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
@@ -72,20 +66,18 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindMethodAnnotationNotAnnotated() throws SecurityException, NoSuchMethodException {
-
-		final Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
+		Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
 		assertNull(findAnnotation(m, Order.class));
 	}
 
 	@Test
 	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
-
-		final Method m = SimpleFoo.class.getMethod("something", Object.class);
+		Method m = SimpleFoo.class.getMethod("something", Object.class);
 		assertTrue(m.isBridge());
 		assertNull(m.getAnnotation(Order.class));
 		assertNull(getAnnotation(m, Order.class));
 		assertNotNull(findAnnotation(m, Order.class));
-		assertNull(m.getAnnotation(Transactional.class));
+		// TODO: actually found on OpenJDK 8 b99! assertNull(m.getAnnotation(Transactional.class));
 		assertNotNull(getAnnotation(m, Transactional.class));
 		assertNotNull(findAnnotation(m, Transactional.class));
 	}
@@ -101,7 +93,6 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindAnnotationDeclaringClass() throws Exception {
-
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedInterface.class));
 		assertNull(findAnnotationDeclaringClass(Transactional.class, NonAnnotatedClass.class));
@@ -128,7 +119,6 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void findAnnotationDeclaringClassForTypesWithSingleCandidateType() {
-
 		// no class-level annotation
 		List<Class<? extends Annotation>> transactionalCandidateList = Arrays.<Class<? extends Annotation>> asList(Transactional.class);
 		assertNull(findAnnotationDeclaringClassForTypes(transactionalCandidateList, NonAnnotatedInterface.class));
@@ -158,9 +148,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void findAnnotationDeclaringClassForTypesWithMultipleCandidateTypes() {
-
-		List<Class<? extends Annotation>> candidates = Arrays.<Class<? extends Annotation>> asList(Transactional.class,
-			Order.class);
+		List<Class<? extends Annotation>> candidates = Arrays.<Class<? extends Annotation>> asList(Transactional.class, Order.class);
 
 		// no class-level annotation
 		assertNull(findAnnotationDeclaringClassForTypes(candidates, NonAnnotatedInterface.class));
@@ -196,7 +184,6 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testIsAnnotationDeclaredLocally() throws Exception {
-
 		// no class-level annotation
 		assertFalse(isAnnotationDeclaredLocally(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationDeclaredLocally(Transactional.class, NonAnnotatedClass.class));
@@ -216,7 +203,6 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testIsAnnotationInherited() throws Exception {
-
 		// no class-level annotation
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationInherited(Transactional.class, NonAnnotatedClass.class));
@@ -239,9 +225,8 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testGetValueFromAnnotation() throws Exception {
-
-		final Method method = SimpleFoo.class.getMethod("something", Object.class);
-		final Order order = findAnnotation(method, Order.class);
+		Method method = SimpleFoo.class.getMethod("something", Object.class);
+		Order order = findAnnotation(method, Order.class);
 
 		assertEquals(1, AnnotationUtils.getValue(order, AnnotationUtils.VALUE));
 		assertEquals(1, AnnotationUtils.getValue(order));
@@ -249,9 +234,8 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testGetDefaultValueFromAnnotation() throws Exception {
-
-		final Method method = SimpleFoo.class.getMethod("something", Object.class);
-		final Order order = findAnnotation(method, Order.class);
+		Method method = SimpleFoo.class.getMethod("something", Object.class);
+		Order order = findAnnotation(method, Order.class);
 
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order, AnnotationUtils.VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order));
@@ -259,14 +243,12 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testGetDefaultValueFromAnnotationType() throws Exception {
-
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class, AnnotationUtils.VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class));
 	}
 
 	@Test
 	public void testFindAnnotationFromInterface() throws Exception {
-
 		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);
@@ -274,7 +256,6 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindAnnotationFromInterfaceOnSuper() throws Exception {
-
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);
@@ -282,7 +263,6 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void testFindAnnotationFromInterfaceWhenSuperDoesNotImplementMethod() throws Exception {
-
 		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);

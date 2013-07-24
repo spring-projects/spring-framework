@@ -141,9 +141,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
+			// TODO: on OpenJDK 8 b99, bridge methods seem to be discovered as annotated as well...
 			if (AnnotatedElementUtils.isAnnotated(method, annotationType)) {
-				annotatedMethods.add(new StandardMethodMetadata(method,
-						this.nestedAnnotationsAsMap));
+				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
 			}
 		}
 		return annotatedMethods;

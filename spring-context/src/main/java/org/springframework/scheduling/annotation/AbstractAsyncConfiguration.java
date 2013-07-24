@@ -50,13 +50,6 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	}
 
 	/**
-	 * The component that will apply async execution advice to beans annotated with
-	 * the async annotation. Subclasses will provide either a BeanPostProcessor in
-	 * the case of proxy-based advice, or an AspectJ aspect if weaving is preferred.
-	 */
-	public abstract Object asyncAdvisor();
-
-	/**
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
 	@Autowired(required = false)

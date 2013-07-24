@@ -36,7 +36,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Configuration
 public class AspectJAsyncConfiguration extends AbstractAsyncConfiguration {
 
-	@Override
 	@Bean(name=AnnotationConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationAsyncExecutionAspect asyncAdvisor() {
