@@ -1194,7 +1194,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'");
 		}
-		view.render(mv.getModelInternal(), request, response);
+		try {
+			view.render(mv.getModelInternal(), request, response);
+		} catch (Exception x) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Error rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'", x);
+			}
+			throw x;
+		}
 	}
 
 	/**
