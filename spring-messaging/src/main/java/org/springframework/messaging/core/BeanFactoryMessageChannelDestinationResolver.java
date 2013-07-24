@@ -17,6 +17,7 @@ package org.springframework.messaging.core;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.Assert;
 
@@ -25,11 +26,34 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @since 4.0
  */
-public class BeanFactoryMessageChannelDestinationResolver implements DestinationResolver<MessageChannel> {
+public class BeanFactoryMessageChannelDestinationResolver implements DestinationResolver<MessageChannel>, BeanFactoryAware {
 
-	private final BeanFactory beanFactory;
+	private volatile BeanFactory beanFactory;
 
+	/**
+	 * Create a new instance of the {@link
+	 * BeanFactoryMessageChannelDestinationResolver} class.
+	 * <p>The BeanFactory to access must be set via <code>setBeanFactory</code>.
+	 * This will happen automatically if this resolver is defined within an
+	 * ApplicationContext thereby receiving the callback upon initialization.
+	 *
+	 * @see #setBeanFactory
+	 */
+	public BeanFactoryMessageChannelDestinationResolver() {
 
+	}
+
+	/**
+	 * Create a new instance of the {@link
+	 * BeanFactoryMessageChannelDestinationResolver} class.
+	 * <p>Use of this constructor is redundant if this object is being created
+	 * by a Spring IoC container as the supplied {@link BeanFactory} will be
+	 * replaced by the {@link BeanFactory} that creates it (c.f. the
+	 * {@link BeanFactoryAware} contract). So only use this constructor if you
+	 * are instantiating this object explicitly rather than defining a bean.
+	 *
+	 * @param beanFactory the bean factory to be used to lookup {@link MessageChannel}s.
+	 */
 	public BeanFactoryMessageChannelDestinationResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "beanFactory must not be null");
 		this.beanFactory = beanFactory;
@@ -46,6 +70,11 @@ public class BeanFactoryMessageChannelDestinationResolver implements Destination
 			throw new DestinationResolutionException(
 					"failed to look up MessageChannel bean with name '" + name + "'", e);
 		}
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
 	}
 
 }
