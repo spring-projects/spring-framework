@@ -87,7 +87,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * @return the executor to use (never {@code null})
+	 * @return the executor to use (or {@code null}, but just if no default executor has been set)
 	 */
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
 		AsyncTaskExecutor executor = this.executors.get(method);
@@ -101,8 +101,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 						this.beanFactory, Executor.class, qualifier);
 			}
 			else if (executorToUse == null) {
-				throw new IllegalStateException("No executor qualifier specified and no default executor set on " +
-						getClass().getSimpleName() + " either");
+				return null;
 			}
 			executor = (executorToUse instanceof AsyncTaskExecutor ?
 					(AsyncTaskExecutor) executorToUse : new TaskExecutorAdapter(executorToUse));

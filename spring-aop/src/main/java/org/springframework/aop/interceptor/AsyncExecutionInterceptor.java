@@ -82,7 +82,13 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
 		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
-		Future<?> result = determineAsyncExecutor(specificMethod).submit(
+		AsyncTaskExecutor executor = determineAsyncExecutor(specificMethod);
+		if (executor == null) {
+			throw new IllegalStateException(
+					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
+		}
+
+		Future<?> result = executor.submit(
 				new Callable<Object>() {
 					public Object call() throws Exception {
 						try {
