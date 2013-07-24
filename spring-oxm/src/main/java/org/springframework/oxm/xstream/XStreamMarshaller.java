@@ -75,8 +75,15 @@ import org.springframework.util.xml.StaxUtils;
 /**
  * Implementation of the {@code Marshaller} interface for XStream.
  *
- * <p>By default, XStream does not require any further configuration,
- * though class aliases can be used to have more control over the behavior of XStream.
+ * <p>By default, XStream does not require any further configuration and can (un)marshal
+ * any class on the classpath. As such, it is <b>not recommended to use the
+ * {@code XStreamMarshaller} to unmarshal XML from external sources</b> (i.e. the Web), as
+ * this can result in <b>security vulnerabilities</b>. If you do use the
+ * {@code XStreamMarshaller} to unmarshal external XML, set the
+ * {@link #setConverters(ConverterMatcher[]) converters} and
+ * {@link #setSupportedClasses(Class[]) supportedClasses} properties or override the
+ * {@link #customizeXStream(XStream)} method to make sure it only accepts the classes
+ * you want it to support.
  *
  * <p>Due to XStream's API, it is required to set the encoding used for writing to OutputStreams.
  * It defaults to {@code UTF-8}.
