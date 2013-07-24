@@ -425,7 +425,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			closeEntityManagerAfterFailedBegin(txObject);
 			throw ex;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			closeEntityManagerAfterFailedBegin(txObject);
 			throw new CannotCreateTransactionException("Could not open JPA EntityManager for transaction", ex);
 		}
