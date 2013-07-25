@@ -471,12 +471,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Map<String, Object> results = new LinkedHashMap<String, Object>();
 		for (String beanName : getBeanDefinitionNames()) {
 			BeanDefinition beanDefinition = getBeanDefinition(beanName);
-			if (!beanDefinition.isAbstract() && (findAnnotationOnBean(beanName, annotationType) != null)) {
+			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
 				results.put(beanName, getBean(beanName));
 			}
 		}
 		for (String beanName : getSingletonNames()) {
-			if (findAnnotationOnBean(beanName, annotationType) != null) {
+			if (!results.containsKey(beanName) && findAnnotationOnBean(beanName, annotationType) != null) {
 				results.put(beanName, getBean(beanName));
 			}
 		}
