@@ -42,18 +42,17 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class MethodReference extends SpelNodeImpl {
 
-	private final boolean nullSafe;
-
 	private final String name;
+
+	private final boolean nullSafe;
 
 	private volatile CachedMethodExecutor cachedExecutor;
 
 
-	public MethodReference(boolean nullSafe, String methodName, int pos,
-			SpelNodeImpl... arguments) {
+	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
 		super(pos, arguments);
-		this.nullSafe = nullSafe;
 		this.name = methodName;
+		this.nullSafe = nullSafe;
 	}
 
 
@@ -82,15 +81,14 @@ public class MethodReference extends SpelNodeImpl {
 
 	private TypedValue getValueInternal(EvaluationContext evaluationContext,
 			Object value, Object[] arguments, TypeDescriptor targetType) {
-		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
 
+		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
 		if (value == null) {
 			throwIfNotNullSafe(argumentTypes);
 			return TypedValue.NULL;
 		}
 
 		MethodExecutor executorToUse = getCachedExecutor(targetType, argumentTypes);
-
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(evaluationContext, value, arguments);
@@ -118,8 +116,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		// either there was no accessor or it no longer existed
 		executorToUse = findAccessorForMethod(this.name, argumentTypes, value, evaluationContext);
-		this.cachedExecutor = new CachedMethodExecutor(executorToUse, targetType,
-				argumentTypes);
+		this.cachedExecutor = new CachedMethodExecutor(executorToUse, targetType, argumentTypes);
 		try {
 			return executorToUse.execute(evaluationContext,
 					value, arguments);
@@ -129,8 +126,7 @@ public class MethodReference extends SpelNodeImpl {
 			throwSimpleExceptionIfPossible(value, ex);
 			throw new SpelEvaluationException(getStartPosition(), ex,
 					SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION, this.name,
-					value.getClass().getName(),
-					ex.getMessage());
+					value.getClass().getName(), ex.getMessage());
 		}
 	}
 
@@ -166,8 +162,7 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
-	private MethodExecutor getCachedExecutor(TypeDescriptor target,
-			List<TypeDescriptor> argumentTypes) {
+	private MethodExecutor getCachedExecutor(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 		if (this.cachedExecutor != null && this.cachedExecutor.isSuitable(target, argumentTypes)) {
 			return this.cachedExecutor.get();
 		}
@@ -191,8 +186,7 @@ public class MethodReference extends SpelNodeImpl {
 				}
 				catch (AccessException ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.PROBLEM_LOCATING_METHOD, name,
-							contextObject.getClass());
+							SpelMessage.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
 				}
 			}
 		}
@@ -200,8 +194,7 @@ public class MethodReference extends SpelNodeImpl {
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_NOT_FOUND,
 				FormatHelper.formatMethodForMessage(name, argumentTypes),
 				FormatHelper.formatClassNameForMessage(
-						contextObject instanceof Class ? ((Class<?>) contextObject)
-								: contextObject.getClass()));
+						contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
 	}
 
 	/**
@@ -239,23 +232,20 @@ public class MethodReference extends SpelNodeImpl {
 
 	private class MethodValueRef implements ValueRef {
 
+		private final EvaluationContext evaluationContext;
 
-		private EvaluationContext evaluationContext;
+		private final Object value;
 
-		private Object value;
+		private final TypeDescriptor targetType;
 
-		private TypeDescriptor targetType;
+		private final Object[] arguments;
 
-		private Object[] arguments;
-
-
-		MethodValueRef(ExpressionState state) {
+		public MethodValueRef(ExpressionState state) {
 			this.evaluationContext = state.getEvaluationContext();
 			this.value = state.getActiveContextObject().getValue();
 			this.targetType = state.getActiveContextObject().getTypeDescriptor();
 			this.arguments = getArguments(state);
 		}
-
 
 		@Override
 		public TypedValue getValue() {
@@ -283,23 +273,20 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final List<TypeDescriptor> argumentTypes;
 
-
-		public CachedMethodExecutor(MethodExecutor methodExecutor, TypeDescriptor target,
-				List<TypeDescriptor> argumentTypes) {
+		public CachedMethodExecutor(MethodExecutor methodExecutor, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 			this.methodExecutor = methodExecutor;
 			this.target = target;
 			this.argumentTypes = argumentTypes;
 		}
 
-
-		public boolean isSuitable(TypeDescriptor target,
-				List<TypeDescriptor> argumentTypes) {
-			return (this.methodExecutor != null && this.target != null
-					&& this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
+		public boolean isSuitable(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+			return (this.methodExecutor != null && this.target != null &&
+					this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
 		}
 
 		public MethodExecutor get() {
 			return this.methodExecutor;
 		}
 	}
+
 }
