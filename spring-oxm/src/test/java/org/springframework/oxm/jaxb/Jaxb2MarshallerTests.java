@@ -51,10 +51,15 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+
 import static org.junit.Assert.*;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.mockito.BDDMockito.*;
 
+/**
+ * @author Arjen Poutsma
+ * @author Biju Kunjummen
+ */
 public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb.test";
@@ -279,6 +284,21 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
 		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
+	}
+
+	@Test
+	public void marshalAWrappedObjectHoldingAnXmlElementDeclElement() throws Exception {
+		// SPR-10714
+		marshaller = new Jaxb2Marshaller();
+		marshaller.setPackagesToScan(new String[] { "org.springframework.oxm.jaxb" });
+		marshaller.afterPropertiesSet();
+		Airplane airplane = new Airplane();
+		airplane.setName("test");
+		StringWriter writer = new StringWriter();
+		Result result = new StreamResult(writer);
+		marshaller.marshal(airplane, result);
+		assertXMLEqual("Marshalling should use root Element",
+				writer.toString(), "<airplane><name>test</name></airplane>");
 	}
 
 	@XmlRootElement
