@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Endpoint;
@@ -74,8 +75,9 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 			throw new HandshakeFailureException("Failed to upgrade HttpServletRequest", ex);
 		}
 
-		// TODO: use ServletContext attribute when Tomcat is updated
-		WsServerContainer serverContainer = WsServerContainer.getServerContainer();
+		String attribute = "javax.websocket.server.ServerContainer";
+		ServletContext servletContext = servletRequest.getServletContext();
+		WsServerContainer serverContainer = (WsServerContainer) servletContext.getAttribute(attribute);
 
 		ServerEndpointConfig endpointConfig = new ServerEndpointRegistration("/shouldntmatter", endpoint);
 

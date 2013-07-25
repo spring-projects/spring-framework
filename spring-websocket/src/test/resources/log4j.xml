@@ -10,20 +10,8 @@
 		</layout>
 	</appender>
 	
-	<logger name="org.springframework.samples">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="org.springframework.web">
-		<level value="debug" />
-	</logger>
-
 	<logger name="org.springframework.web.socket">
-		<level value="trace" />
-	</logger>
-
-	<logger name="org.springframework.web.stomp">
-		<level value="trace" />
+		<level value="debug" />
 	</logger>
 
 	<root>
