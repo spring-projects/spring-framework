@@ -79,7 +79,7 @@ import org.springframework.util.ObjectUtils;
  * @see DefaultAopProxyFactory
  */
 @SuppressWarnings("serial")
-final class CglibAopProxy implements AopProxy, Serializable {
+class CglibAopProxy implements AopProxy, Serializable {
 
 	// Constants for CGLIB callback array indices
 	private static final int AOP_PROXY = 0;
@@ -185,29 +185,20 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setSuperclass(proxySuperClass);
 			enhancer.setStrategy(new MemorySafeUndeclaredThrowableStrategy(UndeclaredThrowableException.class));
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
-			enhancer.setInterceptDuringConstruction(false);
 
 			Callback[] callbacks = getCallbacks(rootClass);
-			enhancer.setCallbacks(callbacks);
-			enhancer.setCallbackFilter(new ProxyCallbackFilter(
-					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
-
 			Class<?>[] types = new Class[callbacks.length];
+
 			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();
 			}
+
 			enhancer.setCallbackTypes(types);
+			enhancer.setCallbackFilter(new ProxyCallbackFilter(
+					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
 
 			// Generate the proxy class and create a proxy instance.
-			Object proxy;
-			if (this.constructorArgs != null) {
-				proxy = enhancer.create(this.constructorArgTypes, this.constructorArgs);
-			}
-			else {
-				proxy = enhancer.create();
-			}
-
-			return proxy;
+			return createProxyClassAndInstance(enhancer, callbacks);
 		}
 		catch (CodeGenerationException ex) {
 			throw new AopConfigException("Could not generate CGLIB subclass of class [" +
@@ -225,6 +216,15 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			// TargetSource.getTarget() failed
 			throw new AopConfigException("Unexpected AOP exception", ex);
 		}
+	}
+
+	protected Object createProxyClassAndInstance(Enhancer enhancer, Callback[] callbacks) {
+
+		enhancer.setInterceptDuringConstruction(false);
+		enhancer.setCallbacks(callbacks);
+
+		return this.constructorArgs == null ? enhancer.create() : enhancer.create(
+				this.constructorArgTypes, this.constructorArgs);
 	}
 
 	/**

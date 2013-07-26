@@ -59,7 +59,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 			if (targetClass.isInterface()) {
 				return new JdkDynamicAopProxy(config);
 			}
-			return CglibProxyFactory.createCglibProxy(config);
+			return new ObjenesisCglibAopProxy(config);
 		}
 		else {
 			return new JdkDynamicAopProxy(config);
@@ -75,17 +75,4 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		Class[] interfaces = config.getProxiedInterfaces();
 		return (interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class.equals(interfaces[0])));
 	}
-
-
-	/**
-	 * Inner factory class used to just introduce a CGLIB dependency
-	 * when actually creating a CGLIB proxy.
-	 */
-	private static class CglibProxyFactory {
-
-		public static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
-			return new CglibAopProxy(advisedSupport);
-		}
-	}
-
 }
