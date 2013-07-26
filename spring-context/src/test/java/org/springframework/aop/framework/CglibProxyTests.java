@@ -27,6 +27,7 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Assume;
 import org.junit.Test;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
@@ -41,6 +42,7 @@ import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.ClassUtils;
 
 import test.mixin.LockMixinAdvisor;
 
@@ -133,31 +135,6 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 		TestBean tb = (TestBean) proxy;
 		assertEquals(32, tb.getAge());
-	}
-
-	@Test
-	public void testCglibProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
-
-		@SuppressWarnings("unused")
-		class YouCantSeeThis {
-			void hidden() {
-			}
-		}
-
-		YouCantSeeThis mine = new YouCantSeeThis();
-		try {
-			ProxyFactory pf = new ProxyFactory(mine);
-			pf.getProxy();
-			fail("Shouldn't be able to proxy non-visible class with CGLIB");
-		}
-		catch (AopConfigException ex) {
-			// Check that stack trace is preserved
-			assertTrue(ex.getCause() instanceof CodeGenerationException ||
-					ex.getCause() instanceof IllegalArgumentException);
-			// Check that error message is helpful
-			assertTrue(ex.getMessage().indexOf("final") != -1);
-			assertTrue(ex.getMessage().indexOf("visible") != -1);
-		}
 	}
 
 	@Test
