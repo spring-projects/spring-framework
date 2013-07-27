@@ -45,6 +45,8 @@ public class TestWebSocketSession implements WebSocketSession {
 
 	private String remoteAddress;
 
+	private String protocol;
+
 	private boolean open;
 
 	private final List<WebSocketMessage<?>> messages = new ArrayList<>();
@@ -140,6 +142,20 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	public void setRemoteAddress(String remoteAddress) {
 		this.remoteAddress = remoteAddress;
+	}
+
+	/**
+	 * @return the subProtocol
+	 */
+	public String getAcceptedProtocol() {
+		return this.protocol;
+	}
+
+	/**
+	 * @param protocol the subProtocol to set
+	 */
+	public void setAcceptedProtocol(String protocol) {
+		this.protocol = protocol;
 	}
 
 	/**

@@ -48,7 +48,7 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 			String protocol, WebSocketHandler handler) throws IOException, HandshakeFailureException {
 
 		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
-		this.wsSessionInitializer.initialize(request, response, session);
+		this.wsSessionInitializer.initialize(request, response, protocol, session);
 		StandardEndpointAdapter endpoint = new StandardEndpointAdapter(handler, session);
 		upgradeInternal(request, response, protocol, endpoint);
 	}

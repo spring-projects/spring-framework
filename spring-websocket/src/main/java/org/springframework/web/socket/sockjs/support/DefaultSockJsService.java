@@ -245,7 +245,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 				}
 				logger.debug("Creating new session with session id \"" + sessionId + "\"");
 				session = sessionFactory.createSession(sessionId, handler);
-				this.sessionInitializer.initialize(request, response, session);
+				String protocol = null; // TODO: https://github.com/sockjs/sockjs-client/issues/130
+				this.sessionInitializer.initialize(request, response, protocol, session);
 				this.sessions.put(sessionId, session);
 				return session;
 			}

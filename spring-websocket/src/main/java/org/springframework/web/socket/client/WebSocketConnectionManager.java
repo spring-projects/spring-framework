@@ -43,7 +43,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private WebSocketSession webSocketSession;
 
-	private final List<String> subProtocols = new ArrayList<String>();
+	private final List<String> protocols = new ArrayList<String>();
 
 	private final boolean syncClientLifecycle;
 
@@ -67,15 +67,15 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
-	public void setSubProtocols(List<String> subProtocols) {
-		this.subProtocols.clear();
-		if (!CollectionUtils.isEmpty(subProtocols)) {
-			this.subProtocols.addAll(subProtocols);
+	public void setSupportedProtocols(List<String> protocols) {
+		this.protocols.clear();
+		if (!CollectionUtils.isEmpty(protocols)) {
+			this.protocols.addAll(protocols);
 		}
 	}
 
-	public List<String> getSubProtocols() {
-		return this.subProtocols;
+	public List<String> getSupportedProtocols() {
+		return this.protocols;
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	@Override
 	protected void openConnection() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setSecWebSocketProtocol(this.subProtocols);
+		headers.setSecWebSocketProtocol(this.protocols);
 		this.webSocketSession = this.client.doHandshake(this.webSocketHandler, headers, getUri());
 	}
 

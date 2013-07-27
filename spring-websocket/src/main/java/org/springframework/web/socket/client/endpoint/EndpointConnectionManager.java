@@ -74,8 +74,8 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 	}
 
 
-	public void setSubProtocols(String... subprotocols) {
-		this.configBuilder.preferredSubprotocols(Arrays.asList(subprotocols));
+	public void setSupportedProtocols(String... protocols) {
+		this.configBuilder.preferredSubprotocols(Arrays.asList(protocols));
 	}
 
 	public void setExtensions(Extension... extensions) {

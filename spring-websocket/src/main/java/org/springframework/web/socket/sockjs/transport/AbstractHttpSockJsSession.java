@@ -49,11 +49,31 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private ServerHttpResponse response;
 
+	private String protocol;
+
 
 	public AbstractHttpSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 
+
+	/**
+	 * Unlike WebSocket where sub-protocol negotiation is part of the
+	 * initial handshake, in HTTP transports the same negotiation must
+	 * be emulated and the selected protocol set through this setter.
+	 *
+	 * @param protocol the sub-protocol to set
+	 */
+	public void setAcceptedProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	/**
+	 * Return the selected sub-protocol to use.
+	 */
+	public String getAcceptedProtocol() {
+		return this.protocol;
+	}
 
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
 			FrameFormat frameFormat) throws TransportErrorException {

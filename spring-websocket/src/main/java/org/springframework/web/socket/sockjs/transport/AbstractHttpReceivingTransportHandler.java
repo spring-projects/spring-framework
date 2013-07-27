@@ -63,6 +63,9 @@ public abstract class AbstractHttpReceivingTransportHandler implements Transport
 			return;
 		}
 
+		// TODO: check "Sec-WebSocket-Protocol" header
+		// https://github.com/sockjs/sockjs-client/issues/130
+
 		handleRequestInternal(request, response, session);
 	}
 

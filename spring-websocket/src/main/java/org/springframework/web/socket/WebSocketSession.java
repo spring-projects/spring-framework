@@ -62,6 +62,11 @@ public interface WebSocketSession {
 	String getRemoteAddress();
 
 	/**
+	 * Return the negotiated sub-protocol or {@code null} if none was specified.
+	 */
+	String getAcceptedProtocol();
+
+	/**
 	 * Return whether the connection is still open.
 	 */
 	boolean isOpen();

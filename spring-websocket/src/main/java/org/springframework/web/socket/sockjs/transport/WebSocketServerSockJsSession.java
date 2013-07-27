@@ -48,6 +48,20 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 	}
 
 
+	@Override
+	public String getAcceptedProtocol() {
+		if (this.webSocketSession == null) {
+			logger.warn("getAcceptedProtocol() invoked before WebSocketSession has been initialized.");
+			return null;
+		}
+		return this.webSocketSession.getAcceptedProtocol();
+	}
+
+	@Override
+	public void setAcceptedProtocol(String protocol) {
+		// ignore, webSocketSession should have it
+	}
+
 	public void initWebSocketSession(WebSocketSession session) throws Exception {
 		this.webSocketSession = session;
 		try {

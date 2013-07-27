@@ -87,7 +87,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, WebSocketHandler webSocketHandler) throws IOException {
+			String protocol, WebSocketHandler webSocketHandler) throws IOException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -101,7 +101,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		}
 
 		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
-		this.wsSessionInitializer.initialize(request, response, session);
+		this.wsSessionInitializer.initialize(request, response, protocol, session);
 		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler, session);
 
 		servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME, listener);

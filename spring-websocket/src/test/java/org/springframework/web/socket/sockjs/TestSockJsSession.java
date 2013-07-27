@@ -40,9 +40,21 @@ public class TestSockJsSession extends AbstractSockJsSession {
 
 	private boolean cancelledHeartbeat;
 
+	private String subProtocol;
+
 
 	public TestSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
+	}
+
+	@Override
+	public String getAcceptedProtocol() {
+		return this.subProtocol;
+	}
+
+	@Override
+	public void setAcceptedProtocol(String protocol) {
+		this.subProtocol = protocol;
 	}
 
 	public CloseStatus getStatus() {

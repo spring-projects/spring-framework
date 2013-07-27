@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 
@@ -55,7 +53,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	protected Log logger = LogFactory.getLog(getClass());
 
-	private List<String> supportedProtocols = new ArrayList<String>();
+	private final List<String> supportedProtocols = new ArrayList<String>();
 
 	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
@@ -78,11 +76,22 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		this.requestUpgradeStrategy = upgradeStrategy;
 	}
 
-
+	/**
+	 * Use this property to configure a list of sub-protocols that are supported.
+	 * The first protocol that matches what the client requested is selected.
+	 * If no protocol matches or this property is not configured, then the
+	 * response will not contain a Sec-WebSocket-Protocol header.
+	 */
 	public void setSupportedProtocols(String... protocols) {
-		this.supportedProtocols = Arrays.asList(protocols);
+		this.supportedProtocols.clear();
+		for (String protocol : protocols) {
+			this.supportedProtocols.add(protocol.toLowerCase());
+		}
 	}
 
+	/**
+	 * Return the list of supported sub-protocols.
+	 */
 	public String[] getSupportedProtocols() {
 		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
 	}
@@ -191,9 +200,12 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	protected String selectProtocol(List<String> requestedProtocols) {
-		if (CollectionUtils.isEmpty(requestedProtocols)) {
+		if (requestedProtocols != null) {
 			for (String protocol : requestedProtocols) {
-				if (this.supportedProtocols.contains(protocol)) {
+				if (this.supportedProtocols.contains(protocol.toLowerCase())) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Selected sub-protocol '" + protocol + "'");
+					}
 					return protocol;
 				}
 			}

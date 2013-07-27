@@ -51,7 +51,7 @@ public class WebSocketConnectionManagerTests {
 		WebSocketHandler handler = new WebSocketHandlerAdapter();
 
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/path/{id}", "123");
-		manager.setSubProtocols(subprotocols);
+		manager.setSupportedProtocols(subprotocols);
 		manager.openConnection();
 
 		ArgumentCaptor<WebSocketHandlerDecorator> captor = ArgumentCaptor.forClass(WebSocketHandlerDecorator.class);

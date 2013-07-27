@@ -22,6 +22,7 @@ import java.net.URI;
 import java.security.Principal;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.BinaryMessage;
@@ -44,11 +45,20 @@ public class JettyWebSocketSessionAdapter
 
 	private Principal principal;
 
+	private String protocol;
+
 
 	@Override
 	public void initSession(Session session) {
 		Assert.notNull(session, "session must not be null");
 		this.session = session;
+
+		if (this.protocol == null) {
+			UpgradeResponse response = session.getUpgradeResponse();
+			if ((response != null) && response.getAcceptedSubProtocol() != null) {
+				this.protocol = response.getAcceptedSubProtocol();
+			}
+		}
 	}
 
 	@Override
@@ -99,6 +109,16 @@ public class JettyWebSocketSessionAdapter
 	@Override
 	public void setRemoteAddress(String address) {
 		// ignore
+	}
+
+	@Override
+	public String getAcceptedProtocol() {
+		return this.protocol;
+	}
+
+	@Override
+	public void setAcceptedProtocol(String protocol) {
+		this.protocol = protocol;
 	}
 
 	@Override

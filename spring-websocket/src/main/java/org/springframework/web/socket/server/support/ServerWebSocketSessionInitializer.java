@@ -30,11 +30,14 @@ import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
  */
 public class ServerWebSocketSessionInitializer {
 
-	public void initialize(ServerHttpRequest request, ServerHttpResponse response, ConfigurableWebSocketSession session) {
+	public void initialize(ServerHttpRequest request, ServerHttpResponse response,
+			String protocol, ConfigurableWebSocketSession session) {
+
 		session.setUri(request.getURI());
 		session.setRemoteHostName(request.getRemoteHostName());
 		session.setRemoteAddress(request.getRemoteAddress());
 		session.setPrincipal(request.getPrincipal());
+		session.setAcceptedProtocol(protocol);
 	}
 
 }

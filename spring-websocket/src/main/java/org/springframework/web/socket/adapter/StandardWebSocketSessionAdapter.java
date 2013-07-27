@@ -24,6 +24,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -45,11 +46,19 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 
 	private String remoteAddress;
 
+	private String protocol;
+
 
 	@Override
 	public void initSession(javax.websocket.Session session) {
 		Assert.notNull(session, "session must not be null");
 		this.session = session;
+
+		if (this.protocol == null) {
+			if (StringUtils.hasText(session.getNegotiatedSubprotocol())) {
+				this.protocol = session.getNegotiatedSubprotocol();
+			}
+		}
 	}
 
 	@Override
@@ -101,6 +110,16 @@ public class StandardWebSocketSessionAdapter extends AbstractWebSocketSesssionAd
 	@Override
 	public void setRemoteAddress(String address) {
 		this.remoteAddress = address;
+	}
+
+	@Override
+	public String getAcceptedProtocol() {
+		return this.protocol;
+	}
+
+	@Override
+	public void setAcceptedProtocol(String protocol) {
+		this.protocol = protocol;
 	}
 
 	@Override

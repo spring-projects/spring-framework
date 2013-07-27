@@ -60,7 +60,7 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 
     private List<Class<? extends Decoder>> decoders = new ArrayList<Class<? extends Decoder>>();
 
-	private List<String> subprotocols = new ArrayList<String>();
+	private List<String> protocols = new ArrayList<String>();
 
 	private List<Extension> extensions = new ArrayList<Extension>();
 
@@ -113,13 +113,13 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 		return (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
 	}
 
-	public void setSubprotocols(List<String> subprotocols) {
-		this.subprotocols = subprotocols;
+	public void setSubprotocols(List<String> protocols) {
+		this.protocols = protocols;
 	}
 
 	@Override
 	public List<String> getSubprotocols() {
-		return this.subprotocols;
+		return this.protocols;
 	}
 
 	public void setExtensions(List<Extension> extensions) {

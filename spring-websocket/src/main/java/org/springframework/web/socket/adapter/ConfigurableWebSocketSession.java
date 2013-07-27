@@ -20,6 +20,7 @@ import java.net.URI;
 import java.security.Principal;
 
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.server.DefaultHandshakeHandler;
 
 /**
  * A WebSocketSession with configurable properties.
@@ -36,5 +37,13 @@ public interface ConfigurableWebSocketSession extends WebSocketSession {
 	void setRemoteAddress(String address);
 
 	void setPrincipal(Principal principal);
+
+	/**
+	 * Set the protocol accepted as part of the WebSocket handshake. This property can be
+	 * used when the WebSocket handshake is performed through
+	 * {@link DefaultHandshakeHandler} rather than the underlying WebSocket runtime, or
+	 * when there is no WebSocket handshake (e.g. SockJS HTTP fallback options)
+	 */
+	void setAcceptedProtocol(String protocol);
 
 }
