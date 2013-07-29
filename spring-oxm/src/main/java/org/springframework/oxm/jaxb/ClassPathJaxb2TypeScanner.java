@@ -19,7 +19,9 @@ package org.springframework.oxm.jaxb;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
@@ -42,6 +44,7 @@ import org.springframework.util.ClassUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author David Harrigan
+ * @author Biju Kunjummen
  * @since 3.1.1
  * @see #scanPackages()
  */
@@ -51,7 +54,8 @@ class ClassPathJaxb2TypeScanner {
 
 	private static final TypeFilter[] JAXB2_TYPE_FILTERS = new TypeFilter[] {
 			new AnnotationTypeFilter(XmlRootElement.class, false), new AnnotationTypeFilter(XmlType.class, false),
-			new AnnotationTypeFilter(XmlSeeAlso.class, false), new AnnotationTypeFilter(XmlEnum.class, false)};
+			new AnnotationTypeFilter(XmlSeeAlso.class, false), new AnnotationTypeFilter(XmlEnum.class, false),
+			new AnnotationTypeFilter(XmlRegistry.class, false)};
 
 
 	private final ResourcePatternResolver resourcePatternResolver;
