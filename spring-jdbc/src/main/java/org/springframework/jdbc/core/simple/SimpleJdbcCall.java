@@ -36,13 +36,13 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * when the stored procedure was created.
  *
  * <p>The meta data processing is based on the DatabaseMetaData provided by
- * the JDBC driver. Since we rely on the JDBC driver this "auto-detection"
+ * the JDBC driver. Since we rely on the JDBC driver, this "auto-detection"
  * can only be used for databases that are known to provide accurate meta data.
  * These currently include Derby, MySQL, Microsoft SQL Server, Oracle, DB2,
  * Sybase and PostgreSQL. For any other databases you are required to declare all
  * parameters explicitly. You can of course declare all parameters explicitly even
  * if the database provides the necessary meta data. In that case your declared
- * parameters will take precedence. You can also turn off any mete data processing
+ * parameters will take precedence. You can also turn off any meta data processing
  * if you want to use parameter names that do not match what is declared during
  * the stored procedure compilation.
  *
@@ -50,7 +50,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * <p>Many of the configuration methods return the current instance of the SimpleJdbcCall
- * to provide the ability to string multiple ones together in a "fluid" interface style.
+ * to provide the ability to chain multiple ones together in a "fluent" interface style.
  *
  * @author Thomas Risberg
  * @since 2.5

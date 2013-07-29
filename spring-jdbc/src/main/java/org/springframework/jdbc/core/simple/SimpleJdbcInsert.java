@@ -41,7 +41,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * <p>Many of the configuration methods return the current instance of the SimpleJdbcInsert
- * to provide the ability to string multiple ones together in a "fluid" interface style.
+ * to provide the ability to chain multiple ones together in a "fluent" interface style.
  *
  * @author Thomas Risberg
  * @since 2.5
