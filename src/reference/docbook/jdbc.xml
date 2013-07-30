@@ -2601,19 +2601,19 @@ clobReader.close();]]></programlisting>
       that must be implemented. This interface is used as part of the
       declaration of an <classname>SqlOutParameter</classname>.</para>
 
-      <para><programlisting language="java">final TestItem - new TestItem(123L, "A test item",
-        new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"););
+      <para><programlisting language="java">final TestItem = new TestItem(123L, "A test item",
+        new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
 
 declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
     new SqlReturnType() {
       public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName)
           throws SQLException {
-        STRUCT struct = (STRUCT)cs.getObject(colIndx);
+        STRUCT struct = (STRUCT) cs.getObject(colIndx);
         Object[] attr = struct.getAttributes();
         TestItem item = new TestItem();
         item.setId(((Number) attr[0]).longValue());
-        item.setDescription((String)attr[1]);
-        item.setExpirationDate((java.util.Date)attr[2]);
+        item.setDescription((String) attr[1]);
+        item.setExpirationDate((java.util.Date) attr[2]);
         return item;
       }
     }));</programlisting>You use the <classname>SqlTypeValue</classname> to
@@ -2626,8 +2626,8 @@ declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
       <classname>StructDescriptor</classname>s, as shown in the following
       example, or <classname>ArrayDescriptor</classname>s.<!--Rewording of preceding ok? The example is showing human participation, I assume. ;-) TR: Yes :), OK.--></para>
 
-      <para><programlisting language="java">final TestItem - new TestItem(123L, "A test item",
-        new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"););
+      <para><programlisting language="java">final TestItem = new TestItem(123L, "A test item",
+        new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
 
 SqlTypeValue value = new AbstractSqlTypeValue() {
   protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
