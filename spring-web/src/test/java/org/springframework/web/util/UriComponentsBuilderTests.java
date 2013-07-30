@@ -161,6 +161,14 @@ public class UriComponentsBuilderTests {
 		assertEquals("1USD=?EUR", result.getQueryParams().getFirst("q"));
 	}
 
+	// SPR-10779
+
+	@Test
+	public void fromHttpUrlStringCaseInsesitiveScheme() {
+		assertEquals("http", UriComponentsBuilder.fromHttpUrl("HTTP://www.google.com").build().getScheme());
+		assertEquals("https", UriComponentsBuilder.fromHttpUrl("HTTPS://www.google.com").build().getScheme());
+	}
+
 	@Test
 	public void path() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar");

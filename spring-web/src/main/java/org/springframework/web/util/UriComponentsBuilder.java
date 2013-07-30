@@ -60,7 +60,7 @@ public class UriComponentsBuilder {
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
 
-	private static final String HTTP_PATTERN = "(http|https):";
+	private static final String HTTP_PATTERN = "(?i)(http|https):";
 
 	private static final String USERINFO_PATTERN = "([^@/]*)";
 
@@ -223,7 +223,8 @@ public class UriComponentsBuilder {
 		if (m.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
 
-			builder.scheme(m.group(1));
+			String scheme = m.group(1);
+			builder.scheme((scheme != null) ? scheme.toLowerCase() : scheme);
 			builder.userInfo(m.group(4));
 			builder.host(m.group(5));
 			String port = m.group(7);
