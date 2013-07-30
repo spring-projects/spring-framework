@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.core.Constants;
  * Use Quartz 2.0's native {@code JobDetailImpl} class or the new Quartz 2.0
  * builder API instead. Alternatively, switch to Spring's {@link SimpleTriggerFactoryBean}
  * which largely is a drop-in replacement for this class and its properties and
- * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.
+ * consistently works against Quartz 1.x as well as Quartz 2.x.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
