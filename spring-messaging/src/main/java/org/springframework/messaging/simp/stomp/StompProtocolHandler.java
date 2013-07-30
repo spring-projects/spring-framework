@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,36 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.Principal;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.handler.websocket.SubProtocolHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-
-import reactor.util.Assert;
-
 
 /**
+ * A {@link SubProtocolHandler} for STOMP that supports versions 1.0, 1.1, and 1.2 of the
+ * STOMP specification.
+ *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @author Andy Wilkinson
  */
-public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implements MessageHandler {
+public class StompProtocolHandler implements SubProtocolHandler {
 
 	/**
 	 * The name of the header set on the CONNECTED frame indicating the name of the user
@@ -58,25 +60,11 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	 */
 	public static final String QUEUE_SUFFIX_HEADER = "queue-suffix";
 
-
-	private static Log logger = LogFactory.getLog(StompWebSocketHandler.class);
-
-	private MessageChannel dispatchChannel;
-
-	private MutableUserQueueSuffixResolver queueSuffixResolver;
+	private final Log logger = LogFactory.getLog(StompProtocolHandler.class);
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
-	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<String, WebSocketSession>();
-
-
-	/**
-	 * @param dispatchChannel the channel to send client STOMP/WebSocket messages to
-	 */
-	public StompWebSocketHandler(MessageChannel dispatchChannel) {
-		Assert.notNull(dispatchChannel, "dispatchChannel is required");
-		this.dispatchChannel = dispatchChannel;
-	}
+	private MutableUserQueueSuffixResolver queueSuffixResolver;
 
 
 	/**
@@ -94,23 +82,20 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		return this.queueSuffixResolver;
 	}
 
-	public StompMessageConverter getStompMessageConverter() {
-		return this.stompMessageConverter;
-	}
-
-
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		this.sessions.put(session.getId(), session);
+	public List<String> getSupportedProtocols() {
+		return Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp");
 	}
 
 	/**
 	 * Handle incoming WebSocket messages from clients.
 	 */
-	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
+	public void handleMessageFromClient(WebSocketSession session, WebSocketMessage webSocketMessage,
+			MessageChannel outputChannel) {
+
 		try {
-			String payload = textMessage.getPayload();
+			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
+			String payload = ((TextMessage)webSocketMessage).getPayload();
 			Message<?> message = this.stompMessageConverter.toMessage(payload);
 
 			// TODO: validate size limits
@@ -124,13 +109,14 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 				headers.setSessionId(session.getId());
 				headers.setUser(session.getPrincipal());
+
 				message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 
 				if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
 					handleConnect(session, message);
 				}
 
-				this.dispatchChannel.send(message);
+				outputChannel.send(message);
 
 			}
 			catch (Throwable t) {
@@ -144,6 +130,51 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 		}
 		catch (Throwable error) {
 			sendErrorMessage(session, error);
+		}
+	}
+
+	/**
+	 * Handle STOMP messages going back out to WebSocket clients.
+	 */
+	@Override
+	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
+
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+		headers.setCommandIfNotSet(StompCommand.MESSAGE);
+
+		if (StompCommand.CONNECTED.equals(headers.getCommand())) {
+			// Ignore for now since we already sent it
+			return;
+		}
+
+		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
+			// TODO: failed message delivery mechanism
+			logger.error("Ignoring message, no subscriptionId header: " + message);
+			return;
+		}
+
+		if (!(message.getPayload() instanceof byte[])) {
+			// TODO: failed message delivery mechanism
+			logger.error("Ignoring message, expected byte[] content: " + message);
+			return;
+		}
+
+		try {
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+			byte[] bytes = this.stompMessageConverter.fromMessage(message);
+			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
+		}
+		catch (Throwable t) {
+			sendErrorMessage(session, t);
+		}
+		finally {
+			if (StompCommand.ERROR.equals(headers.getCommand())) {
+				try {
+					session.close(CloseStatus.PROTOCOL_ERROR);
+				}
+				catch (IOException e) {
+				}
+			}
 		}
 	}
 
@@ -200,78 +231,26 @@ public class StompWebSocketHandler extends TextWebSocketHandlerAdapter implement
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+	public String resolveSessionId(Message<?> message) {
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+		return headers.getSessionId();
+	}
 
-		String sessionId = session.getId();
-		this.sessions.remove(sessionId);
+	@Override
+	public void afterSessionStarted(WebSocketSession session, MessageChannel outputChannel) {
+	}
+
+	@Override
+	public void afterSessionEnded(WebSocketSession session, CloseStatus closeStatus, MessageChannel outputChannel) {
 
 		if ((this.queueSuffixResolver != null) && (session.getPrincipal() != null)) {
-			this.queueSuffixResolver.removeQueueSuffix(session.getPrincipal().getName(), sessionId);
+			this.queueSuffixResolver.removeQueueSuffix(session.getPrincipal().getName(), session.getId());
 		}
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		headers.setSessionId(sessionId);
+		headers.setSessionId(session.getId());
 		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		this.dispatchChannel.send(message);
-	}
-
-	/**
-	 * Handle STOMP messages going back out to WebSocket clients.
-	 */
-	@Override
-	public void handleMessage(Message<?> message) {
-
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		headers.setCommandIfNotSet(StompCommand.MESSAGE);
-
-		if (StompCommand.CONNECTED.equals(headers.getCommand())) {
-			// Ignore for now since we already sent it
-			return;
-		}
-
-		String sessionId = headers.getSessionId();
-		if (sessionId == null) {
-			// TODO: failed message delivery mechanism
-			logger.error("Ignoring message, no sessionId header: " + message);
-			return;
-		}
-
-		WebSocketSession session = this.sessions.get(sessionId);
-		if (session == null) {
-			// TODO: failed message delivery mechanism
-			logger.error("Ignoring message, sessionId not found: " + message);
-			return;
-		}
-
-		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
-			// TODO: failed message delivery mechanism
-			logger.error("Ignoring message, no subscriptionId header: " + message);
-			return;
-		}
-
-		if (!(message.getPayload() instanceof byte[])) {
-			// TODO: failed message delivery mechanism
-			logger.error("Ignoring message, expected byte[] content: " + message);
-			return;
-		}
-
-		try {
-			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-			byte[] bytes = this.stompMessageConverter.fromMessage(message);
-			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
-		}
-		catch (Throwable t) {
-			sendErrorMessage(session, t);
-		}
-		finally {
-			if (StompCommand.ERROR.equals(headers.getCommand())) {
-				try {
-					session.close(CloseStatus.PROTOCOL_ERROR);
-				}
-				catch (IOException e) {
-				}
-			}
-		}
+		outputChannel.send(message);
 	}
 
 }

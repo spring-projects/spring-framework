@@ -197,7 +197,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 	/**
 	 * Open a "system" session for sending messages from parts of the application
-	 * not assoicated with a client STOMP session.
+	 * not associated with a client STOMP session.
 	 */
 	private void openSystemSession() {
 
@@ -449,12 +449,21 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			}
 		}
 
-		private boolean forwardInternal(Message<?> message, TcpConnection<String, String> connection) {
+		private boolean forwardInternal(final Message<?> message, TcpConnection<String, String> connection) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
 			}
 			byte[] bytes = stompMessageConverter.fromMessage(message);
-			connection.send(new String(bytes, Charset.forName("UTF-8")));
+			connection.send(new String(bytes, Charset.forName("UTF-8")), new Consumer<Boolean>() {
+				@Override
+				public void accept(Boolean success) {
+					if (!success) {
+						String sessionId = StompHeaderAccessor.wrap(message).getSessionId();
+						relaySessions.remove(sessionId);
+						sendError(sessionId, "Failed to relay message to broker");
+					}
+				}
+			});
 
 			// TODO: detect if send fails and send ERROR downstream (except on DISCONNECT)
 			return true;
