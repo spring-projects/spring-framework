@@ -37,7 +37,7 @@ import org.springframework.util.ReflectionUtils;
  * as bean property values. If no matching bean property is found, the entry
  * is by default simply ignored. This is analogous to QuartzJobBean's behavior.
  *
- * <p>Compatible with Quartz 1.8 as well as Quartz 2.0/2.1, as of Spring 4.0.
+ * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 2.0

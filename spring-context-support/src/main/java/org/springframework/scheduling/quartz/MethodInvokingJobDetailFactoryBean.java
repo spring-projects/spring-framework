@@ -67,7 +67,7 @@ import org.springframework.util.ReflectionUtils;
  * You need to implement your own Quartz Job as a thin wrapper for each case
  * where you want a persistent job to delegate to a specific service method.
  *
- * <p>Compatible with Quartz 1.8 as well as Quartz 2.0/2.1, as of Spring 4.0.
+ * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
