@@ -94,9 +94,20 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
 		String scheme = request.getScheme();
 		int port = request.getServerPort();
+		String host = request.getServerName();
 
-		String header = request.getHeader("X-Forwarded-Host");
-		String host = StringUtils.hasText(header) ? header: request.getServerName();
+		String xForwardedHostHeader = request.getHeader("X-Forwarded-Host");
+
+		if (StringUtils.hasText(xForwardedHostHeader)) {
+			if (StringUtils.countOccurrencesOf(xForwardedHostHeader, ":") == 1) {
+				String[] hostAndPort = StringUtils.split(xForwardedHostHeader, ":");
+				host  = hostAndPort[0];
+				port = Integer.parseInt(hostAndPort[1]);
+			}
+			else {
+				host = xForwardedHostHeader;
+			}
+		}
 
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
