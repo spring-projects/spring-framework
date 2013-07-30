@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>For concrete usage, check out the {@link SchedulerFactoryBean} and
  * {@link SchedulerAccessorBean} classes.
  *
- * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0/2.1, as of Spring 3.1.
+ * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0-2.2, as of Spring 3.2.
  *
  * @author Juergen Hoeller
  * @since 2.5.6
@@ -397,7 +397,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		else {
 			try {
 				Map jobDataMap = (Map) ReflectionUtils.invokeMethod(Trigger.class.getMethod("getJobDataMap"), trigger);
-				return (JobDetail) jobDataMap.get(JobDetailAwareTrigger.JOB_DETAIL_KEY);
+				return (JobDetail) jobDataMap.remove(JobDetailAwareTrigger.JOB_DETAIL_KEY);
 			}
 			catch (NoSuchMethodException ex) {
 				throw new IllegalStateException("Inconsistent Quartz API: " + ex);
