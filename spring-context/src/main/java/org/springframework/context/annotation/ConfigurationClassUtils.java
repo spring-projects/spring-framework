@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.core.Conventions;
@@ -37,14 +38,14 @@ import org.springframework.stereotype.Component;
  */
 abstract class ConfigurationClassUtils {
 
-	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
-
 	private static final String CONFIGURATION_CLASS_FULL = "full";
 
 	private static final String CONFIGURATION_CLASS_LITE = "lite";
 
 	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
-		Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
+			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
+
+	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
 
 
 	/**
@@ -93,7 +94,7 @@ abstract class ConfigurationClassUtils {
 	}
 
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
-		return isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata);
+		return (isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata));
 	}
 
 	public static boolean isFullConfigurationCandidate(AnnotationMetadata metadata) {
@@ -101,11 +102,10 @@ abstract class ConfigurationClassUtils {
 	}
 
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
-		return !metadata.isInterface() && // not an interface or an annotation
-				(metadata.isAnnotated(Component.class.getName()) ||
-				metadata.hasAnnotatedMethods(Bean.class.getName()));
+		// Do not consider an interface or an annotation...
+		return (!metadata.isInterface() && (
+				metadata.isAnnotated(Component.class.getName()) || metadata.hasAnnotatedMethods(Bean.class.getName())));
 	}
-
 
 	/**
 	 * Determine whether the given bean definition indicates a full @Configuration class.
