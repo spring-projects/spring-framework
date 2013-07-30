@@ -16,13 +16,14 @@
 
 package org.springframework.web.servlet.support;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.util.UriComponents;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -91,6 +92,19 @@ public class ServletUriComponentsBuilderTests {
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
 
 		assertEquals("http://anotherHost/mvc-showcase/data/param?foo=123", result);
+	}
+
+	// SPR-10701
+
+	@Test
+	public void fromRequestWithForwardedHostAndPortHeader() {
+		request.addHeader("X-Forwarded-Host", "webtest.foo.bar.com:443");
+		request.setRequestURI("/mvc-showcase/data/param");
+		request.setQueryString("foo=123");
+		UriComponents result = ServletUriComponentsBuilder.fromRequest(request).build();
+
+		assertEquals("webtest.foo.bar.com", result.getHost());
+		assertEquals(443, result.getPort());
 	}
 
 	@Test
