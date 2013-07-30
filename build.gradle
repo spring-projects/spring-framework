@@ -12,12 +12,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	// The following is a work-around until the Gradle build uses
-	// Ant 1.9.x by default. This is necessary to avoid the
-	// "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
-	ant.properties["build.compiler"] = "javac1.7"
-
-	ext.aspectjVersion  = "1.7.2"
+	ext.aspectjVersion  = "1.8.0.M1"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
 	ext.slf4jVersion    = "1.6.1"
@@ -70,6 +65,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
+        maven { url "http://maven.springframework.org/milestone" }
 	}
 
 	dependencies {
@@ -356,7 +352,12 @@ project("spring-oxm") {
 	description = "Spring Object/XML Marshalling"
 	apply from: "oxm.gradle"
 
-	compileTestJava {
+    // The following is a work-around until the Gradle build uses
+    // Ant 1.9.x by default. This is necessary to avoid the genCastor
+    // "Class not found: javac1.8" issue with Ant versions prior to 1.9.x
+    ant.properties["build.compiler"] = "javac1.7"
+
+    compileTestJava {
 		// necessary to avoid java.lang.VerifyError on jibx compilation
 		// see http://jira.codehaus.org/browse/JIBX-465
 		sourceCompatibility=1.6
