@@ -52,6 +52,12 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private final Map<String, Object> sessionAttributesToUpdate = new ConcurrentHashMap<String, Object>(1);
 
+	/**
+	 * Define a zero argument constructor.
+	 */
+	public ServletRequestAttributes() {
+		this.request = null;
+	}
 
 	/**
 	 * Create a new ServletRequestAttributes instance for the given request.

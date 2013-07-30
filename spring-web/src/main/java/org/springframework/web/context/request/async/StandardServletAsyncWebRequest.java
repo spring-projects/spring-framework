@@ -53,6 +53,12 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
 
+	/**
+	 * Define a zero argument constructor.
+	 */
+	public StandardServletAsyncWebRequest() {
+		super();
+	}
 
 	/**
 	 * Create a new instance for the given request/response pair.

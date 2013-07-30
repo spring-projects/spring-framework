@@ -52,6 +52,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private boolean notModified = false;
 
+	/**
+	 * Define a zero argument constructor.
+	 */
+	public ServletWebRequest() {
+		super();
+	}
 
 	/**
 	 * Create a new ServletWebRequest instance for the given request.

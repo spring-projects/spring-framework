@@ -130,4 +130,10 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.setTimeout(25L);
 	}
 
+	@Test
+	public void zeroArgumentConstructor() throws Exception {
+		StandardServletAsyncWebRequest instance = new StandardServletAsyncWebRequest();
+		assertNotNull(instance);
+	}
+
 }
