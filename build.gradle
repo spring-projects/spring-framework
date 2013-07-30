@@ -63,6 +63,9 @@ configure(allprojects) { project ->
 	test {
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
+		scanForTestClasses = false
+		include '**/*Tests.*'
+		exclude '**/*Abstract*.*'
 	}
 
 	repositories {
@@ -157,7 +160,7 @@ project("spring-build-src") {
 
 	dependencies {
 		compile gradleApi()
-		groovy localGroovy()
+		compile localGroovy()
 	}
 
 	configurations.archives.artifacts.clear()
@@ -661,21 +664,6 @@ project("spring-webmvc-portlet") {
 project("spring-test") {
 	description = "Spring TestContext Framework"
 
-	task testNG(type: Test) {
-		useTestNG()
-		// "TestCase" classes are run by other test classes, not the build.
-		exclude "**/*TestCase.class"
-		// Generate TestNG reports alongside JUnit reports.
-		testReport true
-	}
-
-	test {
-		dependsOn testNG
-		useJUnit()
-		// "TestCase" classes are run by other test classes, not the build.
-		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
-	}
-
 	dependencies {
 		compile(project(":spring-core"))
 		optional(project(":spring-beans"))
@@ -699,6 +687,21 @@ project("spring-test") {
 		provided("javax.servlet:jstl:1.2")
 		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
+	}
+
+	task testNG(type: Test) {
+		useTestNG()
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude "**/*TestCase.class"
+		// Generate TestNG reports alongside JUnit reports.
+		testReport true
+	}
+
+	test {
+		dependsOn testNG
+		useJUnit()
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
 	}
 }
 
