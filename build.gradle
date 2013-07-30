@@ -806,7 +806,6 @@ configure(rootProject) {
 
 	dependencies { // for integration tests
 		testCompile(project(":spring-core"))
-		testCompile(project(":spring-core").sourceSets.test.output)
 		testCompile(project(":spring-beans"))
 		testCompile(project(":spring-aop"))
 		testCompile(project(":spring-expression"))
