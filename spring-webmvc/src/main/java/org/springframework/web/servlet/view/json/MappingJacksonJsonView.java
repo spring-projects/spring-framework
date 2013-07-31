@@ -142,13 +142,13 @@ public class MappingJacksonJsonView extends AbstractView {
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = (prefixJson ? "{} && " : "");
+		this.jsonPrefix = (prefixJson ? "{} && " : null);
 	}
 
 	/**
 	 * Whether to use the default pretty printer when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre>
+	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 	 * </pre>
