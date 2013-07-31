@@ -65,7 +65,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
-        maven { url "http://maven.springframework.org/milestone" }
+		maven { url "http://maven.springframework.org/milestone" }  // for AspectJ 1.8.0.M1
 	}
 
 	dependencies {
@@ -549,8 +549,8 @@ project("spring-orm-hibernate4") {
 	dependencies {
 		provided(project(":spring-tx"))
 		provided(project(":spring-jdbc"))
-		optional("org.hibernate:hibernate-core:4.2.1.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.2.1.Final")
+		optional("org.hibernate:hibernate-core:4.2.2.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.2.Final")
 		optional(project(":spring-web"))
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 	}
@@ -809,7 +809,7 @@ configure(rootProject) {
 		testCompile(project(":spring-web"))
 		testCompile(project(":spring-webmvc-portlet"))
 		testCompile(project(":spring-orm"))
-		testCompile("org.hibernate:hibernate-core:4.2.1.Final")
+		testCompile("org.hibernate:hibernate-core:4.2.2.Final")
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("javax.portlet:portlet-api:2.0")
 		testCompile("javax.inject:javax.inject:1")
