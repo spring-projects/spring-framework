@@ -68,7 +68,7 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramStringNotAnnot;
 	private MethodParameter paramMultipartFileNotAnnot;
 	private MethodParameter paramMultipartFileList;
-	private MethodParameter paramServlet30Part;
+	private MethodParameter paramPart;
 	private MethodParameter paramRequestPartAnnot;
 	private MethodParameter paramRequired;
 	private MethodParameter paramNotRequired;
@@ -99,8 +99,8 @@ public class RequestParamMethodArgumentResolverTests {
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
 		paramMultipartFileList = new MethodParameter(method, 7);
 		paramMultipartFileList.initParameterNameDiscovery(paramNameDiscoverer);
-		paramServlet30Part = new MethodParameter(method, 8);
-		paramServlet30Part.initParameterNameDiscovery(paramNameDiscoverer);
+		paramPart = new MethodParameter(method, 8);
+		paramPart.initParameterNameDiscovery(paramNameDiscoverer);
 		paramRequestPartAnnot = new MethodParameter(method, 9);
 		paramRequired = new MethodParameter(method, 10);
 		paramNotRequired = new MethodParameter(method, 11);
@@ -119,7 +119,7 @@ public class RequestParamMethodArgumentResolverTests {
 		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramMap));
 		assertTrue("Simple type params supported w/o annotations", resolver.supportsParameter(paramStringNotAnnot));
 		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultipartFileNotAnnot));
-		assertTrue("Part parameter not supported", resolver.supportsParameter(paramServlet30Part));
+		assertTrue("Part parameter not supported", resolver.supportsParameter(paramPart));
 
 		resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(resolver.supportsParameter(paramStringNotAnnot));
@@ -220,15 +220,15 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveServlet30Part() throws Exception {
-		MockPart expected = new MockPart("servlet30Part", "Hello World".getBytes());
+	public void resolvePart() throws Exception {
+		MockPart expected = new MockPart("part", "Hello World".getBytes());
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 
-		Object result = resolver.resolveArgument(paramServlet30Part, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramPart, null, webRequest, null);
 
 		assertTrue(result instanceof Part);
 		assertEquals("Invalid result", expected, result);
@@ -331,7 +331,7 @@ public class RequestParamMethodArgumentResolverTests {
 			String stringNotAnnot,
 			MultipartFile multipartFileNotAnnot,
 			List<MultipartFile> multipartFileList,
-			Part servlet30Part,
+			Part part,
 			@RequestPart MultipartFile requestPartAnnot,
 			@RequestParam(value = "name") String paramRequired,
 			@RequestParam(value = "name", required=false) String paramNotRequired) {
