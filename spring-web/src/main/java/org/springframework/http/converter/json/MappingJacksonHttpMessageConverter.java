@@ -26,6 +26,7 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.type.JavaType;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -112,7 +113,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = prefixJson ? "{} && " : null;
+		this.jsonPrefix = (prefixJson ? "{} && " : null);
 	}
 
 	/**

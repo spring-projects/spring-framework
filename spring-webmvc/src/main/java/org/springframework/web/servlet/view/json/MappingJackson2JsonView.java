@@ -23,9 +23,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -33,18 +37,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson 2.x's</a> {@link ObjectMapper}.
+ * using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
- * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as
- * JSON alone via {@link #setExtractValueFromSingleKeyModel}.
+ * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
+ * alone via  {@link #setExtractValueFromSingleKeyModel}.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
@@ -142,7 +141,7 @@ public class MappingJackson2JsonView extends AbstractView {
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = prefixJson ? "{} && " : null;
+		this.jsonPrefix = (prefixJson ? "{} && " : null);
 	}
 
 	/**

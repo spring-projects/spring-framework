@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,6 +30,7 @@ import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
@@ -39,11 +39,11 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson 1.x's</a> {@link ObjectMapper}.
+ * using <a href="http://jackson.codehaus.org/">Jackson's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
- * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as
- * JSON alone via {@link #setExtractValueFromSingleKeyModel}.
+ * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
+ * alone via  {@link #setExtractValueFromSingleKeyModel}.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
@@ -141,7 +141,7 @@ public class MappingJacksonJsonView extends AbstractView {
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = prefixJson ? "{} && " : null;
+		this.jsonPrefix = (prefixJson ? "{} && " : null);
 	}
 
 	/**
