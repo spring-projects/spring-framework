@@ -351,7 +351,7 @@ public class PersistenceXmlParsingTests {
 		PersistenceUnitInfo noExclude = info[0];
 		assertNotNull("noExclude should not be null.", noExclude);
 		assertEquals("noExclude name is not correct.", "NoExcludeElement", noExclude.getPersistenceUnitName());
-		assertTrue("Exclude unlisted should default true in 2.0.", noExclude.excludeUnlistedClasses());
+		assertFalse("Exclude unlisted still defaults to false in 2.0.", noExclude.excludeUnlistedClasses());
 
 		PersistenceUnitInfo emptyExclude = info[1];
 		assertNotNull("emptyExclude should not be null.", emptyExclude);
