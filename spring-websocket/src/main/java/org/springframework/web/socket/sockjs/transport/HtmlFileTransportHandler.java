@@ -23,9 +23,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.TransportErrorException;
@@ -85,20 +85,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	@Override
 	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
-
-		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
-
-			@Override
-			protected void writePrelude() throws IOException {
-				// we already validated the parameter..
-				String callback = getRequest().getQueryParams().getFirst("c");
-
-				String html = String.format(PARTIAL_HTML_CONTENT, callback);
-				getResponse().getBody().write(html.getBytes("UTF-8"));
-				getResponse().flush();
-			}
-		};
+		return new HtmlFileStreamingSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 
 	@Override
@@ -116,7 +103,6 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 		catch (Throwable t) {
 			throw new TransportErrorException("Failed to send error to client", t, session.getId());
 		}
-
 		super.handleRequestInternal(request, response, session);
 	}
 
@@ -128,6 +114,24 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 				return JavaScriptUtils.javaScriptEscape(content);
 			}
 		};
+	}
+
+
+	private final class HtmlFileStreamingSockJsSession extends StreamingSockJsSession {
+
+		private HtmlFileStreamingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
+			super(sessionId, config, handler);
+		}
+
+		@Override
+		protected void writePrelude() throws IOException {
+			// we already validated the parameter..
+			String callback = getRequest().getQueryParams().getFirst("c");
+
+			String html = String.format(PARTIAL_HTML_CONTENT, callback);
+			getResponse().getBody().write(html.getBytes("UTF-8"));
+			getResponse().flush();
+		}
 	}
 
 }

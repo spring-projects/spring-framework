@@ -26,8 +26,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.socket.sockjs.SockJsMessageCodec;
 
 /**
  * A SockJS session for use with the WebSocket transport.
@@ -38,9 +37,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 
 	private WebSocketSession webSocketSession;
-
-	// TODO: JSON library used must be configurable
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 
 	public WebSocketServerSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
@@ -89,7 +85,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 		}
 		String[] messages;
 		try {
-			messages = this.objectMapper.readValue(payload, String[].class);
+			messages = getSockJsConfig().getMessageCodecRequired().decode(payload);
 		}
 		catch (IOException ex) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);
@@ -102,7 +98,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 	@Override
 	public void sendMessageInternal(String message) throws IOException {
 		cancelHeartbeat();
-		writeFrame(SockJsFrame.messageFrame(message));
+		SockJsMessageCodec messageCodec = getSockJsConfig().getMessageCodecRequired();
+		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
+		writeFrame(frame);
 		scheduleHeartbeat();
 	}
 

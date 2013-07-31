@@ -20,8 +20,6 @@ import java.nio.charset.Charset;
 
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.core.io.JsonStringEncoder;
-
 /**
  * Represents a SockJS frames. Provides methods for access to commonly used message
  * frames.
@@ -31,42 +29,43 @@ import com.fasterxml.jackson.core.io.JsonStringEncoder;
  */
 public class SockJsFrame {
 
-	private static final SockJsFrame OPEN_FRAME = new SockJsFrame("o");
+	private static final SockJsFrame openFrame = new SockJsFrame("o");
 
-	private static final SockJsFrame HEARTBEAT_FRAME = new SockJsFrame("h");
+	private static final SockJsFrame heartbeatFrame = new SockJsFrame("h");
 
-	private static final SockJsFrame CLOSE_GO_AWAY_FRAME = closeFrame(3000, "Go away!");
+	private static final SockJsFrame closeGoAwayFrame = closeFrame(3000, "Go away!");
 
-	private static final SockJsFrame CLOSE_ANOTHER_CONNECTION_OPEN = closeFrame(2010, "Another connection still open");
+	private static final SockJsFrame closeAnotherConnectionOpenFrame = closeFrame(2010, "Another connection still open");
 
 
 	private final String content;
 
 
 	private SockJsFrame(String content) {
-		Assert.notNull("content must not be null");
+		Assert.notNull("content is required");
 		this.content = content;
 	}
 
 
 	public static SockJsFrame openFrame() {
-		return OPEN_FRAME;
+		return openFrame;
 	}
 
 	public static SockJsFrame heartbeatFrame() {
-		return HEARTBEAT_FRAME;
+		return heartbeatFrame;
 	}
 
-	public static SockJsFrame messageFrame(String... messages) {
-		return new MessageFrame(messages);
+	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
+		String encoded = codec.encode(messages);
+		return new SockJsFrame(encoded);
 	}
 
 	public static SockJsFrame closeFrameGoAway() {
-		return CLOSE_GO_AWAY_FRAME;
+		return closeGoAwayFrame;
 	}
 
 	public static SockJsFrame closeFrameAnotherConnectionOpen() {
-		return CLOSE_ANOTHER_CONNECTION_OPEN;
+		return closeAnotherConnectionOpenFrame;
 	}
 
 	public static SockJsFrame closeFrame(int code, String reason) {
@@ -80,35 +79,6 @@ public class SockJsFrame {
 
 	public byte[] getContentBytes() {
 		return this.content.getBytes(Charset.forName("UTF-8"));
-	}
-
-	/**
-	 * See "JSON Unicode Encoding" section of SockJS protocol.
-	 */
-	public static String escapeCharacters(char[] characters) {
-		StringBuilder result = new StringBuilder();
-		for (char c : characters) {
-			if (isSockJsEscapeCharacter(c)) {
-				result.append('\\').append('u');
-				String hex = Integer.toHexString(c).toLowerCase();
-				for (int i = 0; i < (4 - hex.length()); i++) {
-					result.append('0');
-				}
-				result.append(hex);
-			}
-			else {
-				result.append(c);
-			}
-		}
-		return result.toString();
-	}
-
-	// See `escapable_by_server` var in SockJS protocol (under "JSON Unicode Encoding")
-
-	private static boolean isSockJsEscapeCharacter(char ch) {
-		return (ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u200C' && ch <= '\u200F')
-				|| (ch >= '\u2028' && ch <= '\u202F') || (ch >= '\u2060' && ch <= '\u206F')
-				|| (ch >= '\uFFF0' && ch <= '\uFFFF') || (ch >= '\uD800' && ch <= '\uDFFF');
 	}
 
 	@Override
@@ -136,31 +106,6 @@ public class SockJsFrame {
 		return this.content.equals(((SockJsFrame) other).content);
 	}
 
-
-	private static class MessageFrame extends SockJsFrame {
-
-		public MessageFrame(String... messages) {
-			super(prepareContent(messages));
-		}
-
-		public static String prepareContent(String... messages) {
-			Assert.notNull(messages, "messages must not be null");
-			StringBuilder sb = new StringBuilder();
-			sb.append("a[");
-			for (int i=0; i < messages.length; i++) {
-				sb.append('"');
-				// TODO: dependency on Jackson
-				char[] quotedChars = JsonStringEncoder.getInstance().quoteAsString(messages[i]);
-				sb.append(escapeCharacters(quotedChars));
-				sb.append('"');
-	            if (i < messages.length - 1) {
-	                sb.append(',');
-	            }
-			}
-			sb.append(']');
-			return sb.toString();
-		}
-	}
 
 	public interface FrameFormat {
 

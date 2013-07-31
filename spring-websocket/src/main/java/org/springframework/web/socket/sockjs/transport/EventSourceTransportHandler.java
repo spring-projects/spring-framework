@@ -21,8 +21,8 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.TransportType;
@@ -36,6 +36,7 @@ import org.springframework.web.socket.sockjs.TransportType;
  */
 public class EventSourceTransportHandler extends AbstractHttpSendingTransportHandler {
 
+
 	@Override
 	public TransportType getTransportType() {
 		return TransportType.EVENT_SOURCE;
@@ -48,20 +49,27 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 	@Override
 	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
-		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
-			@Override
-			protected void writePrelude() throws IOException {
-				getResponse().getBody().write('\r');
-				getResponse().getBody().write('\n');
-				getResponse().flush();
-			}
-		};
+		return new EventSourceStreamingSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 
 	@Override
 	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
 		return new DefaultFrameFormat("data: %s\r\n\r\n");
+	}
+
+
+	private final class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
+
+		private EventSourceStreamingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
+			super(sessionId, config, handler);
+		}
+
+		@Override
+		protected void writePrelude() throws IOException {
+			getResponse().getBody().write('\r');
+			getResponse().getBody().write('\n');
+			getResponse().flush();
+		}
 	}
 
 }

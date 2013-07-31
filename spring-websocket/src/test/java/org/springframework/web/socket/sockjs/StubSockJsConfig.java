@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.web.socket.sockjs.support.Jackson2SockJsMessageCodec;
 
 /**
  * @author Rossen Stoyanchev
@@ -29,6 +30,8 @@ public class StubSockJsConfig implements SockJsConfiguration {
 	private long heartbeatTime = 25 * 1000;
 
 	private TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+
+	private SockJsMessageCodec messageCodec = new Jackson2SockJsMessageCodec();
 
 
 	@Override
@@ -56,6 +59,19 @@ public class StubSockJsConfig implements SockJsConfiguration {
 
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
+	}
+
+	@Override
+	public SockJsMessageCodec getMessageCodecRequired() {
+		return this.messageCodec;
+	}
+
+	public SockJsMessageCodec getMessageCodec() {
+		return messageCodec;
+	}
+
+	public void setMessageCodec(SockJsMessageCodec messageCodec) {
+		this.messageCodec = messageCodec;
 	}
 
 }

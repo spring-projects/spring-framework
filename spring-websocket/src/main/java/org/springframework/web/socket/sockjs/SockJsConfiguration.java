@@ -38,7 +38,7 @@ public interface SockJsConfiguration {
 	 *
 	 * <p>The default value is 128K (i.e. 128 * 1024).
 	 */
-	public int getStreamBytesLimit();
+	int getStreamBytesLimit();
 
 	/**
 	 * The amount of time in milliseconds when the server has not sent any
@@ -47,11 +47,17 @@ public interface SockJsConfiguration {
 	 *
 	 * <p>The default value is 25,000 (25 seconds).
 	 */
-	public long getHeartbeatTime();
+	long getHeartbeatTime();
 
 	/**
 	 * A scheduler instance to use for scheduling heart-beat messages.
 	 */
-	public TaskScheduler getTaskScheduler();
+	TaskScheduler getTaskScheduler();
+
+	/**
+	 * The codec to use for encoding and decoding SockJS messages.
+	 * @exception IllegalStateException if no {@link SockJsMessageCodec} is available
+	 */
+	SockJsMessageCodec getMessageCodecRequired();
 
 }

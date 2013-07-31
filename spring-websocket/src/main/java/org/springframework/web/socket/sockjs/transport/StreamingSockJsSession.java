@@ -24,6 +24,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 
 /**
@@ -60,7 +61,8 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 		do {
 			String message = getMessageCache().poll();
-			SockJsFrame frame = SockJsFrame.messageFrame(message);
+			SockJsMessageCodec messageCodec = getSockJsConfig().getMessageCodecRequired();
+			SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
 			writeFrame(frame);
 
 			this.byteCount += frame.getContentBytes().length + 1;

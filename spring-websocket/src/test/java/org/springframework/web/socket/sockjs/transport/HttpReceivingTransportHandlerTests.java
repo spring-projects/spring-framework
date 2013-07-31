@@ -105,16 +105,20 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	@Test
 	public void delegateMessageException() throws Exception {
 
+		StubSockJsConfig sockJsConfig = new StubSockJsConfig();
+
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
 
 		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
-		TestSockJsSession session = new TestSockJsSession("1", new StubSockJsConfig(), webSocketHandler);
+		TestSockJsSession session = new TestSockJsSession("1", sockJsConfig, webSocketHandler);
 		session.delegateConnectionEstablished();
 
 		doThrow(new Exception()).when(webSocketHandler).handleMessage(session, new TextMessage("x"));
 
 		try {
-			new XhrTransportHandler().handleRequest(this.request, this.response, webSocketHandler, session);
+			XhrTransportHandler transportHandler = new XhrTransportHandler();
+			transportHandler.setSockJsConfiguration(sockJsConfig);
+			transportHandler.handleRequest(this.request, this.response, webSocketHandler, session);
 			fail("Expected exception");
 		}
 		catch (TransportErrorException ex) {
@@ -129,6 +133,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
 		AbstractSockJsSession session = new TestSockJsSession("1", new StubSockJsConfig(), webSocketHandler);
 
+		transportHandler.setSockJsConfiguration(new StubSockJsConfig());
 		transportHandler.handleRequest(this.request, this.response, webSocketHandler, session);
 
 		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getContentType().toString());

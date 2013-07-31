@@ -225,6 +225,11 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		}
 
 		@Override
+		public SockJsMessageCodec getMessageCodecRequired() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		protected void handleRawWebSocketRequest(ServerHttpRequest request,
 				ServerHttpResponse response, WebSocketHandler handler) throws IOException {
 

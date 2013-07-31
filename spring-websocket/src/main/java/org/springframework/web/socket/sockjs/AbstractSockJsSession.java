@@ -73,13 +73,13 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	 * @param config the sockJS configuration
 	 * @param webSocketHandler the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, SockJsConfiguration config,
-			WebSocketHandler webSocketHandler) {
-		Assert.notNull(sessionId, "sessionId must not be null");
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+	public AbstractSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler webSocketHandler) {
+		Assert.notNull(sessionId, "sessionId is required");
+		Assert.notNull(config, "sockJsConfig is required");
+		Assert.notNull(webSocketHandler, "webSocketHandler is required");
 		this.id = sessionId;
-		this.handler = webSocketHandler;
 		this.sockJsConfig = config;
+		this.handler = webSocketHandler;
 	}
 
 	@Override

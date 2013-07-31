@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -33,7 +31,6 @@ import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base class for HTTP-based transports that read input messages from HTTP requests.
@@ -41,17 +38,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpReceivingTransportHandler implements TransportHandler {
+public abstract class AbstractHttpReceivingTransportHandler
+		extends TransportHandlerSupport implements TransportHandler {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
-
-	// TODO: the JSON library used must be configurable
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-
-	public ObjectMapper getObjectMapper() {
-		return this.objectMapper;
-	}
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,

@@ -18,19 +18,16 @@ package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.AbstractSockJsSession;
-import org.springframework.web.socket.sockjs.ConfigurableTransportHandler;
-import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
+import org.springframework.web.socket.sockjs.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.TransportErrorException;
+import org.springframework.web.socket.sockjs.TransportHandler;
 
 /**
  * Base class for HTTP-based transports that send messages over HTTP.
@@ -38,22 +35,9 @@ import org.springframework.web.socket.sockjs.TransportErrorException;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractHttpSendingTransportHandler
-		implements ConfigurableTransportHandler, SockJsSessionFactory {
+public abstract class AbstractHttpSendingTransportHandler extends TransportHandlerSupport
+		implements TransportHandler, SockJsSessionFactory {
 
-	protected final Log logger = LogFactory.getLog(this.getClass());
-
-	private SockJsConfiguration sockJsConfig;
-
-
-	@Override
-	public void setSockJsConfiguration(SockJsConfiguration sockJsConfig) {
-		this.sockJsConfig = sockJsConfig;
-	}
-
-	public SockJsConfiguration getSockJsConfig() {
-		return this.sockJsConfig;
-	}
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,

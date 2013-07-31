@@ -46,17 +46,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * An abstract class for {@link SockJsService} implementations. Provides configuration
- * support, SockJS path resolution, and processing for static SockJS requests (e.g.
- * "/info", "/iframe.html", etc). Sub-classes are responsible for handling transport
- * requests.
- *
- * <p>It is expected that this service is mapped correctly to one or more prefixes such as
- * "/echo" including all sub-URLs (e.g. "/echo/**"). A SockJS service itself is generally
- * unaware of request mapping details but nevertheless must be able to extract the SockJS
- * path, which is the portion of the request path following the prefix. In most cases,
- * this class can auto-detect the SockJS path but you can also explicitly configure the
- * list of valid prefixes with {@link #setValidSockJsPrefixes(String...)}.
+ * An abstract base class for {@link SockJsService} implementations that provides SockJS
+ * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
+ * etc). Transport-specific requests are left as abstract methods.
+ * <p>
+ * This service can be integrated into any HTTP request handling mechanism (e.g. plain
+ * Servlet, Spring MVC, or other). It is expected that it will be mapped correctly to a
+ * prefix (e.g. "/echo") and will also handle all sub-URLs (i.e. "/echo/**").
+ * <p>
+ * The service itself is unaware of the underlying mapping mechanism but nevertheless must
+ * be able to extract the SockJS path, i.e. the portion of the request path following the
+ * prefix. In most cases, this class can auto-detect the SockJS path but it is also
+ * possible to configure explicitly the prefixes via
+ * {@link #setValidSockJsPrefixes(String...)}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

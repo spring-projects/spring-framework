@@ -26,6 +26,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
+import org.springframework.web.socket.sockjs.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
@@ -61,14 +62,17 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 
 	@Override
 	protected String[] readMessages(ServerHttpRequest request) throws IOException {
+
+		SockJsMessageCodec messageCodec = getSockJsConfig().getMessageCodecRequired();
+
 		MediaType contentType = request.getHeaders().getContentType();
 		if ((contentType != null) && MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
 			MultiValueMap<String, String> map = this.formConverter.read(null, request);
 			String d = map.getFirst("d");
-			return (StringUtils.hasText(d)) ? getObjectMapper().readValue(d, String[].class) : null;
+			return (StringUtils.hasText(d)) ? messageCodec.decode(d) : null;
 		}
 		else {
-			return getObjectMapper().readValue(request.getBody(), String[].class);
+			return messageCodec.decodeInputStream(request.getBody());
 		}
 	}
 

@@ -36,6 +36,8 @@ public interface TransportHandler {
 
 	TransportType getTransportType();
 
+	void setSockJsConfiguration(SockJsConfiguration sockJsConfig);
+
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler handler, AbstractSockJsSession session) throws TransportErrorException;
 

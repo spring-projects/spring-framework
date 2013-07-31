@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame;
+import org.springframework.web.socket.sockjs.SockJsMessageCodec;
 
 /**
  * A SockJS session for use with polling HTTP transports.
@@ -36,10 +37,14 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 	@Override
 	protected void flushCache() throws IOException {
+
 		cancelHeartbeat();
 		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
 		getMessageCache().clear();
-		writeFrame(SockJsFrame.messageFrame(messages));
+
+		SockJsMessageCodec messageCodec = getSockJsConfig().getMessageCodecRequired();
+		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);
+		writeFrame(frame);
 	}
 
 	@Override

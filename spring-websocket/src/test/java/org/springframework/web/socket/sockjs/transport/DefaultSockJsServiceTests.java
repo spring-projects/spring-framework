@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.support;
+package org.springframework.web.socket.sockjs.transport;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,6 +30,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
+import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.StubSockJsConfig;
 import org.springframework.web.socket.sockjs.TestSockJsSession;
@@ -165,6 +166,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		}
 
 		@Override
+		public void setSockJsConfiguration(SockJsConfiguration sockJsConfig) {
+		}
+
+		@Override
 		public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 				WebSocketHandler handler, AbstractSockJsSession session) throws TransportErrorException {
 
@@ -176,6 +181,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		public AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
 			return new TestSockJsSession(sessionId, new StubSockJsConfig(), webSocketHandler);
 		}
+
 	}
 
 	private static class StubXhrSendTransportHandler implements TransportHandler {
@@ -183,6 +189,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		@Override
 		public TransportType getTransportType() {
 			return TransportType.XHR_SEND;
+		}
+
+		@Override
+		public void setSockJsConfiguration(SockJsConfiguration sockJsConfig) {
 		}
 
 		@Override

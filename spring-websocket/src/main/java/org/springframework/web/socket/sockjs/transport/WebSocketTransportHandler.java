@@ -24,8 +24,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
-import org.springframework.web.socket.sockjs.ConfigurableTransportHandler;
-import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportHandler;
@@ -41,12 +39,10 @@ import org.springframework.web.socket.sockjs.TransportType;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketTransportHandler implements ConfigurableTransportHandler,
-		HandshakeHandler, SockJsSessionFactory {
+public class WebSocketTransportHandler extends TransportHandlerSupport
+		implements TransportHandler, SockJsSessionFactory, HandshakeHandler {
 
 	private final HandshakeHandler handshakeHandler;
-
-	private SockJsConfiguration sockJsConfig;
 
 
 	public WebSocketTransportHandler(HandshakeHandler handshakeHandler) {
@@ -61,13 +57,8 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler,
 	}
 
 	@Override
-	public void setSockJsConfiguration(SockJsConfiguration sockJsConfig) {
-		this.sockJsConfig = sockJsConfig;
-	}
-
-	@Override
 	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
-		return new WebSocketServerSockJsSession(sessionId, this.sockJsConfig, webSocketHandler);
+		return new WebSocketServerSockJsSession(sessionId, getSockJsConfig(), webSocketHandler);
 	}
 
 	@Override
@@ -76,7 +67,7 @@ public class WebSocketTransportHandler implements ConfigurableTransportHandler,
 
 		try {
 			WebSocketServerSockJsSession wsSession = (WebSocketServerSockJsSession) session;
-			WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(this.sockJsConfig, webSocketHandler, wsSession);
+			WebSocketHandler sockJsWrapper = new SockJsWebSocketHandler(getSockJsConfig(), webSocketHandler, wsSession);
 			this.handshakeHandler.doHandshake(request, response, sockJsWrapper);
 		}
 		catch (Throwable t) {

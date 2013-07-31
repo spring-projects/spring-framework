@@ -21,8 +21,8 @@ import java.nio.charset.Charset;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsConfiguration;
 import org.springframework.web.socket.sockjs.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.TransportHandler;
@@ -36,6 +36,7 @@ import org.springframework.web.socket.sockjs.TransportType;
  */
 public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHandler {
 
+
 	@Override
 	public TransportType getTransportType() {
 		return TransportType.XHR_STREAMING;
@@ -48,19 +49,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		Assert.state(getSockJsConfig() != null, "This transport requires SockJsConfiguration");
-
-		return new StreamingSockJsSession(sessionId, getSockJsConfig(), handler) {
-
-			@Override
-			protected void writePrelude() throws IOException {
-				for (int i=0; i < 2048; i++) {
-					getResponse().getBody().write('h');
-				}
-				getResponse().getBody().write('\n');
-				getResponse().flush();
-			}
-		};
+		return new XhrStreamingSockJsSession(sessionId, getSockJsConfig(), handler);
 	}
 
 	@Override
@@ -68,4 +57,20 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 		return new DefaultFrameFormat("%s\n");
 	}
 
+
+	private final class XhrStreamingSockJsSession extends StreamingSockJsSession {
+
+		private XhrStreamingSockJsSession(String sessionId, SockJsConfiguration config, WebSocketHandler handler) {
+			super(sessionId, config, handler);
+		}
+
+		@Override
+		protected void writePrelude() throws IOException {
+			for (int i=0; i < 2048; i++) {
+				getResponse().getBody().write('h');
+			}
+			getResponse().getBody().write('\n');
+			getResponse().flush();
+		}
+	}
 }

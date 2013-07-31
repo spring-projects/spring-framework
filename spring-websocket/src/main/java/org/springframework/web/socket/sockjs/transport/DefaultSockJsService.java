@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs.support;
+package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,6 +34,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -42,20 +44,13 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.support.ServerWebSocketSessionInitializer;
 import org.springframework.web.socket.sockjs.AbstractSockJsService;
 import org.springframework.web.socket.sockjs.AbstractSockJsSession;
-import org.springframework.web.socket.sockjs.ConfigurableTransportHandler;
+import org.springframework.web.socket.sockjs.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.SockJsSessionFactory;
 import org.springframework.web.socket.sockjs.TransportErrorException;
 import org.springframework.web.socket.sockjs.TransportHandler;
 import org.springframework.web.socket.sockjs.TransportType;
-import org.springframework.web.socket.sockjs.transport.EventSourceTransportHandler;
-import org.springframework.web.socket.sockjs.transport.HtmlFileTransportHandler;
-import org.springframework.web.socket.sockjs.transport.JsonpPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.JsonpTransportHandler;
-import org.springframework.web.socket.sockjs.transport.WebSocketTransportHandler;
-import org.springframework.web.socket.sockjs.transport.XhrPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.XhrStreamingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.XhrTransportHandler;
+import org.springframework.web.socket.sockjs.support.Jackson2SockJsMessageCodec;
 
 
 /**
@@ -68,7 +63,16 @@ import org.springframework.web.socket.sockjs.transport.XhrTransportHandler;
  */
 public class DefaultSockJsService extends AbstractSockJsService {
 
+	private static final boolean jackson2Present = ClassUtils.isPresent(
+			"com.fasterxml.jackson.databind.ObjectMapper", DefaultSockJsService.class.getClassLoader());
+
+	private static final boolean jacksonPresent = ClassUtils.isPresent(
+			"org.codehaus.jackson.map.ObjectMapper", DefaultSockJsService.class.getClassLoader());
+
+
 	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
+
+	private SockJsMessageCodec messageCodec;
 
 	private final Map<String, AbstractSockJsSession> sessions = new ConcurrentHashMap<String, AbstractSockJsSession>();
 
@@ -88,6 +92,16 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	public DefaultSockJsService(TaskScheduler taskScheduler) {
 		super(taskScheduler);
 		addTransportHandlers(getDefaultTransportHandlers());
+		initMessageCodec();
+	}
+
+	protected void initMessageCodec() {
+		if (jackson2Present) {
+			this.messageCodec = new Jackson2SockJsMessageCodec();
+		}
+		else if (jacksonPresent) {
+			this.messageCodec = new Jackson2SockJsMessageCodec();
+		}
 	}
 
 	/**
@@ -107,6 +121,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			TransportHandler... transportHandlerOverrides) {
 
 		super(taskScheduler);
+
+		initMessageCodec();
 
 		if (!CollectionUtils.isEmpty(transportHandlers)) {
 			addTransportHandlers(transportHandlers);
@@ -143,11 +159,25 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	protected void addTransportHandlers(Collection<TransportHandler> handlers) {
 		for (TransportHandler handler : handlers) {
-			if (handler instanceof ConfigurableTransportHandler) {
-				((ConfigurableTransportHandler) handler).setSockJsConfiguration(this);
-			}
+			handler.setSockJsConfiguration(this);
 			this.transportHandlers.put(handler.getTransportType(), handler);
 		}
+	}
+
+
+	public void setMessageCodec(SockJsMessageCodec messageCodec) {
+		this.messageCodec = messageCodec;
+	}
+
+	public SockJsMessageCodec getMessageCodec() {
+		return this.messageCodec;
+	}
+
+	@Override
+	public SockJsMessageCodec getMessageCodecRequired() {
+		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available."
+				+ " Either add Jackson 2 or Jackson 1.x to the classpath, or configure a SockJsMessageCode");
+		return this.messageCodec;
 	}
 
 	public Map<TransportType, TransportHandler> getTransportHandlers() {

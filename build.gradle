@@ -507,7 +507,8 @@ project("spring-websocket") {
 		}
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.4.v20130625")
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.4.v20130625")
-		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0") // required for SockJS support currently
+		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
 	}
 
 	repositories {

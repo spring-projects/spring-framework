@@ -14,16 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs;
+package org.springframework.web.socket.sockjs.transport;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.web.socket.sockjs.SockJsConfiguration;
+
 
 /**
- * A {@link TransportHandler} that requires access to SockJS configuration options.
- *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @sicne 4.0
  */
-public interface ConfigurableTransportHandler extends TransportHandler {
+public abstract class TransportHandlerSupport {
 
-	void setSockJsConfiguration(SockJsConfiguration sockJsConfig);
+	protected final Log logger = LogFactory.getLog(this.getClass());
+
+	private SockJsConfiguration sockJsConfig;
+
+
+	public void setSockJsConfiguration(SockJsConfiguration sockJsConfig) {
+		this.sockJsConfig = sockJsConfig;
+	}
+
+	public SockJsConfiguration getSockJsConfig() {
+		return this.sockJsConfig;
+	}
+
 
 }

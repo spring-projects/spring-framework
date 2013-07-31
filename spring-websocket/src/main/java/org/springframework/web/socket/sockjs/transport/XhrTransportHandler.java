@@ -30,6 +30,7 @@ import org.springframework.web.socket.sockjs.TransportType;
  */
 public class XhrTransportHandler extends AbstractHttpReceivingTransportHandler {
 
+
 	@Override
 	public TransportType getTransportType() {
 		return TransportType.XHR_SEND;
@@ -37,7 +38,7 @@ public class XhrTransportHandler extends AbstractHttpReceivingTransportHandler {
 
 	@Override
 	protected String[] readMessages(ServerHttpRequest request) throws IOException {
-		return getObjectMapper().readValue(request.getBody(), String[].class);
+		return getSockJsConfig().getMessageCodecRequired().decodeInputStream(request.getBody());
 	}
 
 	@Override
