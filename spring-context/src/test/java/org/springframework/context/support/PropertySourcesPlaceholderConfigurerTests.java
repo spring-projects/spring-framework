@@ -39,8 +39,6 @@ import org.springframework.mock.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
 /**
- * Unit tests for {@link PropertySourcesPlaceholderConfigurer}.
- *
  * @author Chris Beams
  * @since 3.1
  */
@@ -139,7 +137,9 @@ public class PropertySourcesPlaceholderConfigurerTests {
 
 		PropertySourcesPlaceholderConfigurer pc = new PropertySourcesPlaceholderConfigurer();
 		pc.setPropertySources(propertySources);
-		pc.setProperties(new Properties() {{ put("my.name", "local"); }});
+		pc.setProperties(new Properties() {{
+			put("my.name", "local");
+		}});
 		pc.setIgnoreUnresolvablePlaceholders(true);
 		pc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
@@ -170,6 +170,38 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		pc.setIgnoreUnresolvablePlaceholders(true);
 		pc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
+	}
+
+	@Test(expected=BeanDefinitionStoreException.class)
+	public void nestedUnresolvablePlaceholder() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+						.addPropertyValue("name", "${my.name}")
+						.getBeanDefinition());
+
+		PropertySourcesPlaceholderConfigurer pc = new PropertySourcesPlaceholderConfigurer();
+		pc.setProperties(new Properties() {{
+			put("my.name", "${bogus}");
+		}});
+		pc.postProcessBeanFactory(bf); // should throw
+	}
+
+	@Test
+	public void ignoredNestedUnresolvablePlaceholder() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+						.addPropertyValue("name", "${my.name}")
+						.getBeanDefinition());
+
+		PropertySourcesPlaceholderConfigurer pc = new PropertySourcesPlaceholderConfigurer();
+		pc.setProperties(new Properties() {{
+			put("my.name", "${bogus}");
+		}});
+		pc.setIgnoreUnresolvablePlaceholders(true);
+		pc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${bogus}"));
 	}
 
 	@Test
@@ -213,7 +245,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.postProcessBeanFactory(bf);
 		if (override) {
 			assertThat(bf.getBean(TestBean.class).getName(), equalTo("local"));
-		} else {
+		}
+		else {
 			assertThat(bf.getBean(TestBean.class).getName(), equalTo("enclosing"));
 		}
 	}

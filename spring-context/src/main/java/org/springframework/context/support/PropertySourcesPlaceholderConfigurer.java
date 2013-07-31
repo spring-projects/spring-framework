@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,8 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * <p>Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
 	 * against this configurer's set of {@link PropertySources}, which includes:
 	 * <ul>
-	 * <li>all {@linkplain org.springframework.core.env.ConfigurableEnvironment#getPropertySources environment property sources}, if an
-	 * {@code Environment} {@linkplain #setEnvironment is present}
+	 * <li>all {@linkplain org.springframework.core.env.ConfigurableEnvironment#getPropertySources
+	 * environment property sources}, if an {@code Environment} {@linkplain #setEnvironment is present}
 	 * <li>{@linkplain #mergeProperties merged local properties}, if {@linkplain #setLocation any}
 	 * {@linkplain #setLocations have} {@linkplain #setProperties been}
 	 * {@linkplain #setPropertiesArray specified}
@@ -135,7 +135,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 			try {
 				PropertySource<?> localPropertySource =
-					new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, this.mergeProperties());
+					new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, mergeProperties());
 				if (this.localOverride) {
 					this.propertySources.addFirst(localPropertySource);
 				}
@@ -148,7 +148,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 		}
 
-		this.processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
+		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
 	}
 
 	/**
