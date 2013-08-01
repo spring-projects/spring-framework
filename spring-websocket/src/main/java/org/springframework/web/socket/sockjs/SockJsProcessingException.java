@@ -16,24 +16,32 @@
 
 package org.springframework.web.socket.sockjs;
 
-import java.io.IOException;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * A service for processing SockJS HTTP requests.
+ * Raised when SockJS request handling fails.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
- * @see SockJsHttpRequestHandler
  */
-public interface SockJsService {
+@SuppressWarnings("serial")
+public class SockJsProcessingException extends NestedRuntimeException {
+
+	private final String sessionId;
 
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws IOException, SockJsProcessingException;
+	public SockJsProcessingException(String msg, Throwable cause, String sessionId) {
+		super(msg, cause);
+		this.sessionId = sessionId;
+	}
+
+	public String getSockJsSessionId() {
+		return this.sessionId;
+	}
+
+	@Override
+	public String getMessage() {
+		return "Transport error for SockJS session id=" + this.sessionId + ", " + super.getMessage();
+	}
 
 }

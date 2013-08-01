@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs;
+package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.transport.TransportHandler;
+import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 
 /**
- * A service for processing SockJS HTTP requests.
+ * A factory for creating a SockJS session. {@link TransportHandler}s typically also serve
+ * as SockJS session factories.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- *
- * @see SockJsHttpRequestHandler
  */
-public interface SockJsService {
+public interface SockJsSessionFactory {
 
-
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws IOException, SockJsProcessingException;
+	/**
+	 * Create a new SockJS session.
+	 * @param sessionId the ID of the session
+	 * @param webSocketHandler the underlying {@link WebSocketHandler}
+	 * @return a new non-null session
+	 */
+	AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler);
 
 }

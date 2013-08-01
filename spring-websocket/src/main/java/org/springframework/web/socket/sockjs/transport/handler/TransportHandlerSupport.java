@@ -14,26 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.web.socket.sockjs;
+package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * A service for processing SockJS HTTP requests.
- *
  * @author Rossen Stoyanchev
- * @since 4.0
- *
- * @see SockJsHttpRequestHandler
+ * @sicne 4.0
  */
-public interface SockJsService {
+public abstract class TransportHandlerSupport {
+
+	protected final Log logger = LogFactory.getLog(this.getClass());
+
+	private SockJsServiceConfig sockJsServiceConfig;
 
 
-	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws IOException, SockJsProcessingException;
+	public void setSockJsServiceConfiguration(SockJsServiceConfig sockJsConfig) {
+		this.sockJsServiceConfig = sockJsConfig;
+	}
+
+	public SockJsServiceConfig getSockJsServiceConfig() {
+		return this.sockJsServiceConfig;
+	}
 
 }

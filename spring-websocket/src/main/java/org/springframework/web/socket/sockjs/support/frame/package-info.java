@@ -15,7 +15,8 @@
  */
 
 /**
- * Top-level SockJS types.
+ * Support classes for creating SockJS frames including the encoding and decoding
+ * of SockJS message frames.
  */
-package org.springframework.web.socket.sockjs;
+package org.springframework.web.socket.sockjs.support.frame;
 
