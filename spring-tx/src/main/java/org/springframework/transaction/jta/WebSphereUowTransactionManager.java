@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,11 @@ import org.springframework.util.ReflectionUtils;
  * If the location happens to differ according to your WebSphere documentation,
  * simply specify the actual location through this transaction manager's
  * "uowManagerName" bean property.
+ *
+ * <p><b>NOTE: This JtaTransactionManager is intended to refine specific transaction
+ * demarcation behavior on Spring's side. It will happily co-exist with independently
+ * configured WebSphere transaction strategies in your persistence provider, with no
+ * need to specifically connect those setups in any way.</b>
  *
  * @author Juergen Hoeller
  * @since 2.5
