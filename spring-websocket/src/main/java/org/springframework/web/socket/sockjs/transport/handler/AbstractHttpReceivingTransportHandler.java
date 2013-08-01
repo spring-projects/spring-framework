@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -45,12 +46,13 @@ public abstract class AbstractHttpReceivingTransportHandler
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, WebSocketSession webSocketSession) throws SockJsProcessingException {
+			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsProcessingException {
 
 		// TODO: check "Sec-WebSocket-Protocol" header
 		// https://github.com/sockjs/sockjs-client/issues/130
 
-		handleRequestInternal(request, response, webSocketHandler, webSocketSession);
+		Assert.notNull(wsSession, "No session");
+		handleRequestInternal(request, response, wsHandler, wsSession);
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,

@@ -24,9 +24,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsProcessingException;
-import org.springframework.web.socket.sockjs.transport.handler.AbstractHttpReceivingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.JsonpTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.XhrTransportHandler;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
@@ -97,12 +94,10 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		handleRequestAndExpectFailure();
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void readMessagesNoSession() throws Exception {
 		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
 		new XhrTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null);
-
-		assertEquals(404, this.servletResponse.getStatus());
 	}
 
 	@Test
