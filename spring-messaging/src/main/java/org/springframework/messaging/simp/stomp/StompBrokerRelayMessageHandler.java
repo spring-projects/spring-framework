@@ -37,7 +37,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import reactor.core.Environment;
+import reactor.core.composable.Deferred;
 import reactor.core.composable.Promise;
+import reactor.core.composable.spec.DeferredPromiseSpec;
 import reactor.function.Consumer;
 import reactor.tcp.TcpClient;
 import reactor.tcp.TcpConnection;
@@ -454,19 +456,42 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 				logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
 			}
 			byte[] bytes = stompMessageConverter.fromMessage(message);
+
+			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
+
 			connection.send(new String(bytes, Charset.forName("UTF-8")), new Consumer<Boolean>() {
+
 				@Override
 				public void accept(Boolean success) {
-					if (!success) {
-						String sessionId = StompHeaderAccessor.wrap(message).getSessionId();
-						relaySessions.remove(sessionId);
-						sendError(sessionId, "Failed to relay message to broker");
+					if (!success && StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
+						deferred.accept(false);
+					} else {
+						deferred.accept(true);
 					}
 				}
 			});
 
-			// TODO: detect if send fails and send ERROR downstream (except on DISCONNECT)
-			return true;
+			Boolean success = null;
+
+			try {
+				success = deferred.compose().await();
+
+				if (success == null) {
+					sendError(sessionId, "Timed out waiting for message to be forwarded to the broker");
+				}
+				else if (!success) {
+					sendError(sessionId, "Failed to forward message to the broker");
+				}
+			} catch (InterruptedException ie) {
+				Thread.currentThread().interrupt();
+				sendError(sessionId, "Interrupted while forwarding message to the broker");
+			}
+
+			if (success == null) {
+				success = false;
+			}
+
+			return success;
 		}
 
 		private void flushMessages(TcpConnection<String, String> connection) {
