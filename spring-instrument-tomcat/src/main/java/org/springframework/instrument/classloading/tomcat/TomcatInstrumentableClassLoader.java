@@ -30,11 +30,10 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * to loaded classes without the need to use a VM-wide agent.
  *
  * <p>To be registered using a
- * {@code <a href="http://tomcat.apache.org/tomcat-5.5-doc/config/loader.html">Loader</a>} tag
- * in Tomcat's {@code <a href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">Context</a>}
+ * {@code <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/loader.html">Loader</a>} tag
+ * in Tomcat's {@code <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">Context</a>}
  * definition in the {@code server.xml} file, with the Spring-provided "spring-instrument-tomcat.jar"
- * file deployed into Tomcat's "server/lib" (for Tomcat 5.x) or "lib" (for Tomcat 6.x) directory.
- * The required configuration tag looks as follows:
+ * file deployed into Tomcat's "lib" directory. The required configuration tag looks as follows:
  *
  * <pre class="code">&lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;</pre>
  *
@@ -44,10 +43,7 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * {@code getThrowawayClassLoader} methods mirror the corresponding methods
  * in the LoadTimeWeaver interface, as expected by ReflectiveLoadTimeWeaver.
  *
- * <p>See the PetClinic sample application for a full example of this
- * ClassLoader in action.
- *
- * <p><b>NOTE:</b> Requires Apache Tomcat version 5.0 or higher.
+ * <p><b>NOTE:</b> Requires Apache Tomcat version 6.0 or higher, as of Spring 4.0.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -103,7 +99,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	 */
 	public ClassLoader getThrowawayClassLoader() {
 		WebappClassLoader tempLoader = new WebappClassLoader();
-		// Use reflection to copy all the fields since most of them are private on pre-5.5 Tomcat.
+		// Use reflection to copy all the fields since they are not exposed any other way.
 		shallowCopyFieldState(this, tempLoader);
 		return tempLoader;
 	}
