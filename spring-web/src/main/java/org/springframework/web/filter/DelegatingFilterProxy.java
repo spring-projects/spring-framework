@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 
 	private boolean targetFilterLifecycle = false;
 
-	private Filter delegate;
+	private volatile Filter delegate;
 
 	private final Object delegateMonitor = new Object();
 
@@ -227,7 +227,6 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 				if (this.targetBeanName == null) {
 					this.targetBeanName = getFilterName();
 				}
-
 				// Fetch Spring root application context and initialize the delegate early,
 				// if possible. If the root application context will be started after this
 				// filter proxy, we'll have to resort to lazy initialization.
@@ -244,16 +243,18 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 			throws ServletException, IOException {
 
 		// Lazily initialize the delegate if necessary.
-		Filter delegateToUse = null;
-		synchronized (this.delegateMonitor) {
-			if (this.delegate == null) {
-				WebApplicationContext wac = findWebApplicationContext();
-				if (wac == null) {
-					throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+		Filter delegateToUse = this.delegate;
+		if (delegateToUse == null) {
+			synchronized (this.delegateMonitor) {
+				if (this.delegate == null) {
+					WebApplicationContext wac = findWebApplicationContext();
+					if (wac == null) {
+						throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+					}
+					this.delegate = initDelegate(wac);
 				}
-				this.delegate = initDelegate(wac);
+				delegateToUse = this.delegate;
 			}
-			delegateToUse = this.delegate;
 		}
 
 		// Let the delegate perform the actual doFilter operation.
@@ -262,10 +263,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 
 	@Override
 	public void destroy() {
-		Filter delegateToUse = null;
-		synchronized (this.delegateMonitor) {
-			delegateToUse = this.delegate;
-		}
+		Filter delegateToUse = this.delegate;
 		if (delegateToUse != null) {
 			destroyDelegate(delegateToUse);
 		}
@@ -282,8 +280,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * {@code ServletContext} before this filter gets initialized (or invoked).
 	 * <p>Subclasses may override this method to provide a different
 	 * {@code WebApplicationContext} retrieval strategy.
-	 * @return the {@code WebApplicationContext} for this proxy, or {@code null} if not
-	 * found
+	 * @return the {@code WebApplicationContext} for this proxy, or {@code null} if not found
 	 * @see #DelegatingFilterProxy(String, WebApplicationContext)
 	 * @see #getContextAttribute()
 	 * @see WebApplicationContextUtils#getWebApplicationContext(javax.servlet.ServletContext)
