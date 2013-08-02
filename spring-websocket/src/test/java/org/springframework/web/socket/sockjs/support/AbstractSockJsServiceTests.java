@@ -149,7 +149,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",
 				body.substring(body.indexOf(',')));
 
-		this.service.setJsessionIdCookieRequired(false);
+		this.service.setDummySessionCookieEnabled(false);
 		this.service.setWebSocketsEnabled(false);
 		handleRequest("GET", "/a/info", HttpStatus.OK);
 
@@ -213,6 +213,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		assertEquals(httpStatus.value(), this.servletResponse.getStatus());
 	}
+
 
 	private static class TestSockJsService extends AbstractSockJsService {
 

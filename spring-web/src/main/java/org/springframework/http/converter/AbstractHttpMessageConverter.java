@@ -25,8 +25,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -200,11 +198,6 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 						@Override
 						public HttpHeaders getHeaders() {
 							return headers;
-						}
-
-						@Override
-						public Cookies getCookies() {
-							return null;
 						}
 					});
 				}

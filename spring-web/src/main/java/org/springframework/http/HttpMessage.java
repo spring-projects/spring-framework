@@ -31,9 +31,4 @@ public interface HttpMessage {
 	 */
 	HttpHeaders getHeaders();
 
-	/**
-	 * TODO ..
-	 */
-	Cookies getCookies();
-
 }

@@ -28,16 +28,16 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.Cookies;
+import org.springframework.http.Cookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -63,7 +63,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers;
 
-	private Cookies cookies;
+	private Map<String, Cookie> cookies;
 
 	private MultiValueMap<String, String> queryParams;
 
@@ -151,14 +151,15 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Cookies getCookies() {
+	public Map<String, Cookie> getCookies() {
 		if (this.cookies == null) {
-			this.cookies = new Cookies();
+			this.cookies = new HashMap<String, Cookie>();
 			if (this.servletRequest.getCookies() != null) {
-				for (Cookie cookie : this.servletRequest.getCookies()) {
-					this.cookies.addCookie(cookie.getName(), cookie.getValue());
+				for (javax.servlet.http.Cookie cookie : this.servletRequest.getCookies()) {
+					this.cookies.put(cookie.getName(), new ServletServerCookie(cookie));
 				}
 			}
+			this.cookies = Collections.unmodifiableMap(this.cookies);
 		}
 		return this.cookies;
 	}

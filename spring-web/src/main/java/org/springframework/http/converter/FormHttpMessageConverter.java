@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.springframework.core.io.Resource;
-import org.springframework.http.Cookies;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -389,12 +388,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		public OutputStream getBody() throws IOException {
 			writeHeaders();
 			return this.os;
-		}
-
-		@Override
-		public Cookies getCookies() {
-			// TODO
-			throw new UnsupportedOperationException();
 		}
 
 		private void writeHeaders() throws IOException {

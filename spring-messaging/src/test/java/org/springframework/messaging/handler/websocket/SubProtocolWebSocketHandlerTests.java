@@ -40,17 +40,13 @@ public class SubProtocolWebSocketHandlerTests {
 
 	private TestWebSocketSession session;
 
-	@Mock
-	SubProtocolHandler stompHandler;
+	@Mock SubProtocolHandler stompHandler;
 
-	@Mock
-	SubProtocolHandler mqttHandler;
+	@Mock SubProtocolHandler mqttHandler;
 
-	@Mock
-	SubProtocolHandler defaultHandler;
+	@Mock SubProtocolHandler defaultHandler;
 
-	@Mock
-	MessageChannel channel;
+	@Mock MessageChannel channel;
 
 
 	@Before

@@ -31,8 +31,6 @@ public class MockHttpInputMessage implements HttpInputMessage {
 
 	private final InputStream body;
 
-	private final Cookies cookies = new Cookies();
-
 
 	public MockHttpInputMessage(byte[] contents) {
 		Assert.notNull(contents, "'contents' must not be null");
@@ -52,10 +50,5 @@ public class MockHttpInputMessage implements HttpInputMessage {
 	@Override
 	public InputStream getBody() throws IOException {
 		return body;
-	}
-
-	@Override
-	public Cookies getCookies() {
-		return this.cookies ;
 	}
 }

@@ -28,8 +28,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -254,8 +252,6 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 		private boolean executed = false;
 
-		private Cookies cookies = new Cookies();
-
 		private RequestMock() {
 		}
 
@@ -292,11 +288,6 @@ public class InterceptingClientHttpRequestFactoryTests {
 			executed = true;
 			return responseMock;
 		}
-
-		@Override
-		public Cookies getCookies() {
-			return this.cookies ;
-		}
 	}
 
 	private static class ResponseMock implements ClientHttpResponse {
@@ -306,8 +297,6 @@ public class InterceptingClientHttpRequestFactoryTests {
 		private String statusText = "";
 
 		private HttpHeaders headers = new HttpHeaders();
-
-		private Cookies cookies = new Cookies();
 
 		@Override
 		public HttpStatus getStatusCode() throws IOException {
@@ -336,11 +325,6 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 		@Override
 		public void close() {
-		}
-
-		@Override
-		public Cookies getCookies() {
-			return this.cookies ;
 		}
 	}
 }

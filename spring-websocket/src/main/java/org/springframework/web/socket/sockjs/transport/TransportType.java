@@ -91,7 +91,7 @@ public enum TransportType {
 		return this.headerHints.contains("cors");
 	}
 
-	public boolean setsJsessionId() {
+	public boolean sendsSessionCookie() {
 		return this.headerHints.contains("jsessionid");
 	}
 

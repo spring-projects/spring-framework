@@ -118,7 +118,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	 * @param transportHandlerOverrides zero or more overrides to the default transport
 	 *        handler types.
 	 */
-	public DefaultSockJsService(TaskScheduler taskScheduler, Set<TransportHandler> transportHandlers,
+	public DefaultSockJsService(TaskScheduler taskScheduler, Collection<TransportHandler> transportHandlers,
 			TransportHandler... transportHandlerOverrides) {
 
 		super(taskScheduler);
@@ -254,11 +254,10 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			addNoCacheHeaders(response);
 		}
 
-		if (transportType.setsJsessionId() && isJsessionIdCookieRequired()) {
-			Cookie cookie = request.getCookies().getCookie("JSESSIONID");
-			String jsid = (cookie != null) ? cookie.getValue() : "dummy";
-			// TODO: bypass use of Cookie object (causes Jetty to set Expires header)
-			response.getHeaders().set("Set-Cookie", "JSESSIONID=" + jsid + ";path=/");
+		if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
+			Cookie cookie = request.getCookies().get("JSESSIONID");
+			String value = (cookie != null) ? cookie.getValue() : "dummy";
+			response.getHeaders().set("Set-Cookie", "JSESSIONID=" + value + ";path=/");
 		}
 
 		if (transportType.supportsCors()) {

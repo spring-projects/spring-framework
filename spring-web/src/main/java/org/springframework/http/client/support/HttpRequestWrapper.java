@@ -18,7 +18,6 @@ package org.springframework.http.client.support;
 
 import java.net.URI;
 
-import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -75,14 +74,6 @@ public class HttpRequestWrapper implements HttpRequest {
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.request.getHeaders();
-	}
-
-	/**
-	 * Returns the cookies of the wrapped request.
-	 */
-	@Override
-	public Cookies getCookies() {
-		return this.request.getCookies();
 	}
 
 }

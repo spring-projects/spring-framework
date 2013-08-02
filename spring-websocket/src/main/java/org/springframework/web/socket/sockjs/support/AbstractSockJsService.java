@@ -78,7 +78,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private int streamBytesLimit = 128 * 1024;
 
-	private boolean jsessionIdCookieRequired = true;
+	private boolean sessionCookieEnabled = false;
 
 	private long heartbeatTime = 25 * 1000;
 
@@ -187,23 +187,22 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * Some load balancers do sticky sessions, but only if there is a JSESSIONID
+	 * Some load balancers do sticky sessions, but only if there is a "JSESSIONID"
 	 * cookie. Even if it is set to a dummy value, it doesn't matter since
 	 * session information is added by the load balancer.
 	 *
-	 * <p>Set this option to indicate if a JSESSIONID cookie should be created. The
-	 * default value is "true".
+	 * <p>The default value is "false" since Java servers set the session cookie.
 	 */
-	public void setJsessionIdCookieRequired(boolean jsessionIdCookieRequired) {
-		this.jsessionIdCookieRequired = jsessionIdCookieRequired;
+	public void setDummySessionCookieEnabled(boolean sessionCookieEnabled) {
+		this.sessionCookieEnabled = sessionCookieEnabled;
 	}
 
 	/**
 	 * Whether setting JSESSIONID cookie is necessary.
-	 * @see #setJsessionIdCookieRequired(boolean)
+	 * @see #setDummySessionCookieEnabled(boolean)
 	 */
-	public boolean isJsessionIdCookieRequired() {
-		return this.jsessionIdCookieRequired;
+	public boolean isDummySessionCookieEnabled() {
+		return this.sessionCookieEnabled;
 	}
 
 	/**
@@ -476,7 +475,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 				addCorsHeaders(request, response);
 				addNoCacheHeaders(response);
 
-				String content = String.format(INFO_CONTENT, random.nextInt(), isJsessionIdCookieRequired(), isWebSocketEnabled());
+				String content = String.format(INFO_CONTENT, random.nextInt(), isDummySessionCookieEnabled(), isWebSocketEnabled());
 				response.getBody().write(content.getBytes());
 			}
 			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {

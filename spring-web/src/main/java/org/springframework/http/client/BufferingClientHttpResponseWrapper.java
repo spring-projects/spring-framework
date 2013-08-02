@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StreamUtils;
@@ -70,11 +69,6 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 			this.body = StreamUtils.copyToByteArray(this.response.getBody());
 		}
 		return new ByteArrayInputStream(this.body);
-	}
-
-	@Override
-	public Cookies getCookies() {
-		return this.response.getCookies();
 	}
 
 	@Override

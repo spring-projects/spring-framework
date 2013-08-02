@@ -20,10 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.Cookie;
-import org.springframework.http.Cookies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -41,8 +40,6 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private boolean headersWritten = false;
-
-	private final Cookies cookies = new Cookies();
 
 
 	/**
@@ -73,27 +70,19 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Cookies getCookies() {
-		return (this.headersWritten ? Cookies.readOnlyCookies(this.cookies) : this.cookies);
-	}
-
-	@Override
 	public OutputStream getBody() throws IOException {
-		writeCookies();
 		writeHeaders();
 		return this.servletResponse.getOutputStream();
 	}
 
 	@Override
 	public void flush() throws IOException {
-		writeCookies();
 		writeHeaders();
 		this.servletResponse.flushBuffer();
 	}
 
 	@Override
 	public void close() {
-		writeCookies();
 		writeHeaders();
 	}
 
@@ -114,16 +103,6 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharSet().name());
 			}
 			this.headersWritten = true;
-		}
-	}
-
-	private void writeCookies() {
-		if (!this.headersWritten) {
-			for (Cookie source : this.cookies.getCookies()) {
-				javax.servlet.http.Cookie target = new javax.servlet.http.Cookie(source.getName(), source.getValue());
-				target.setPath("/");
-				this.servletResponse.addCookie(target);
-			}
 		}
 	}
 }

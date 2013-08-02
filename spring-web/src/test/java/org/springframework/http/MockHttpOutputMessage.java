@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -31,9 +31,6 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final ByteArrayOutputStream body = spy(new ByteArrayOutputStream());
-
-	private final Cookies cookies = new Cookies();
-
 
 	@Override
 	public HttpHeaders getHeaders() {
@@ -52,10 +49,5 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	public String getBodyAsString(Charset charset) {
 		byte[] bytes = getBodyAsBytes();
 		return new String(bytes, charset);
-	}
-
-	@Override
-	public Cookies getCookies() {
-		return this.cookies;
 	}
 }
