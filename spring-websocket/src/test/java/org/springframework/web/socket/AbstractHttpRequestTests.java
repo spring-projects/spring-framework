@@ -17,14 +17,18 @@
 package org.springframework.web.socket;
 
 import org.junit.Before;
-import org.springframework.http.server.AsyncServletServerHttpRequest;
+import org.springframework.http.server.ServerHttpAsyncResponseControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpAsyncRequestControl;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
+ * Base class for tests using {@link ServerHttpRequest} and {@link ServerHttpResponse}.
+ *
  * @author Rossen Stoyanchev
  */
 public class AbstractHttpRequestTests {
@@ -36,6 +40,8 @@ public class AbstractHttpRequestTests {
 	protected MockHttpServletRequest servletRequest;
 
 	protected MockHttpServletResponse servletResponse;
+
+	protected ServerHttpAsyncResponseControl asyncControl;
 
 
 	@Before
@@ -49,10 +55,15 @@ public class AbstractHttpRequestTests {
 	}
 
 	protected void resetRequestAndResponse() {
+		resetRequest();
 		resetResponse();
+		this.asyncControl = new ServletServerHttpAsyncRequestControl(this.request, this.response);
+	}
+
+	protected void resetRequest() {
 		this.servletRequest = new MockHttpServletRequest();
 		this.servletRequest.setAsyncSupported(true);
-		this.request = new AsyncServletServerHttpRequest(this.servletRequest, this.servletResponse);
+		this.request = new ServletServerHttpRequest(this.servletRequest);
 	}
 
 	protected void resetResponse() {

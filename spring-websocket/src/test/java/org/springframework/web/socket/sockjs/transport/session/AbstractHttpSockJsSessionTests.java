@@ -20,9 +20,9 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.server.AsyncServletServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -31,7 +31,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSessionTests.TestAbstractHttpSockJsSession;
 
 import static org.junit.Assert.*;
@@ -67,7 +66,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 
 		this.servletRequest = new MockHttpServletRequest();
 		this.servletRequest.setAsyncSupported(true);
-		this.request = new AsyncServletServerHttpRequest(this.servletRequest, this.servletResponse);
+		this.request = new ServletServerHttpRequest(this.servletRequest);
 	}
 
 	@Override

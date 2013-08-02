@@ -146,7 +146,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		String body = this.servletResponse.getContentAsString();
 		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
-		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",
+		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":true}",
 				body.substring(body.indexOf(',')));
 
 		this.service.setDummySessionCookieEnabled(false);

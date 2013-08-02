@@ -20,15 +20,16 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.springframework.http.server.AsyncServerHttpRequest;
+import org.springframework.http.server.ServerHttpAsyncResponseControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpAsyncRequestControl;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsProcessingException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
@@ -43,9 +44,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private final BlockingQueue<String> messageCache = new ArrayBlockingQueue<String>(100);
 
-	private AsyncServerHttpRequest asyncRequest;
+	private ServerHttpRequest request;
 
 	private ServerHttpResponse response;
+
+	private ServerHttpAsyncResponseControl asyncControl;
 
 	private String protocol;
 
@@ -113,8 +116,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				return;
 			}
 
-			this.asyncRequest.setTimeout(-1);
-			this.asyncRequest.startAsync();
+			this.asyncControl.start(-1);
 
 			scheduleHeartbeat();
 			tryFlushCache();
@@ -129,16 +131,16 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		Assert.notNull(request, "expected request");
 		Assert.notNull(response, "expected response");
 		Assert.notNull(frameFormat, "expected frameFormat");
-		Assert.isInstanceOf(AsyncServerHttpRequest.class, request, "Expected AsyncServerHttpRequest");
-		this.asyncRequest = (AsyncServerHttpRequest) request;
+		this.request = request;
 		this.response = response;
+		this.asyncControl = new ServletServerHttpAsyncRequestControl(this.request, this.response);
 		this.frameFormat = frameFormat;
 	}
 
 
 	@Override
 	public synchronized boolean isActive() {
-		return ((this.asyncRequest != null) && (!this.asyncRequest.isAsyncCompleted()));
+		return ((this.asyncControl != null) && (!this.asyncControl.isCompleted()));
 	}
 
 	protected BlockingQueue<String> getMessageCache() {
@@ -146,7 +148,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	protected ServerHttpRequest getRequest() {
-		return this.asyncRequest;
+		return this.request;
 	}
 
 	protected ServerHttpResponse getResponse() {
@@ -178,17 +180,18 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	protected synchronized void resetRequest() {
 		updateLastActiveTime();
-		if (isActive() && this.asyncRequest.isAsyncStarted()) {
+		if (isActive() && this.asyncControl.hasStarted()) {
 			try {
 				logger.debug("Completing async request");
-				this.asyncRequest.completeAsync();
+				this.asyncControl.complete();
 			}
 			catch (Throwable ex) {
 				logger.error("Failed to complete async request: " + ex.getMessage());
 			}
 		}
-		this.asyncRequest = null;
+		this.request = null;
 		this.response = null;
+		this.asyncControl = null;
 	}
 
 	@Override

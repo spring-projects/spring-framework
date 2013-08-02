@@ -22,9 +22,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.server.AsyncServletServerHttpRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
@@ -71,13 +71,13 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	}
 
 	@Override
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
 			throws ServletException, IOException {
 
-		ServerHttpRequest httpRequest = new AsyncServletServerHttpRequest(request, response);
-		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+		ServerHttpRequest serverRequest = new ServletServerHttpRequest(servletRequest);
+		ServerHttpResponse serverResponse = new ServletServerHttpResponse(servletResponse);
 
-		this.sockJsService.handleRequest(httpRequest, httpResponse, this.webSocketHandler);
+		this.sockJsService.handleRequest(serverRequest, serverResponse, this.webSocketHandler);
 	}
 
 }
