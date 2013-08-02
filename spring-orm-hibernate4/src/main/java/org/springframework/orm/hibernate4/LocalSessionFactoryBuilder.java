@@ -17,6 +17,9 @@
 package org.springframework.orm.hibernate4;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -70,10 +73,25 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	private static final String PACKAGE_INFO_SUFFIX = ".package-info";
 
-	private static final TypeFilter[] ENTITY_TYPE_FILTERS = new TypeFilter[] {
-			new AnnotationTypeFilter(Entity.class, false),
-			new AnnotationTypeFilter(Embeddable.class, false),
-			new AnnotationTypeFilter(MappedSuperclass.class, false)};
+
+	private static final Set<TypeFilter> entityTypeFilters;
+
+	static {
+		entityTypeFilters = new LinkedHashSet<TypeFilter>(4);
+		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
+					LocalSessionFactoryBuilder.class.getClassLoader().loadClass("javax.persistence.Converter");
+			entityTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
+		}
+		catch (ClassNotFoundException ex) {
+			// JPA 2.1 API not available - Hibernate <4.3
+		}
+	}
+
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -220,7 +238,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * the current class descriptor contained in the metadata reader.
 	 */
 	private boolean matchesEntityTypeFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
-		for (TypeFilter filter : ENTITY_TYPE_FILTERS) {
+		for (TypeFilter filter : entityTypeFilters) {
 			if (filter.match(reader, readerFactory)) {
 				return true;
 			}

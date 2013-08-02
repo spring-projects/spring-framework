@@ -17,9 +17,11 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -93,10 +95,24 @@ public class DefaultPersistenceUnitManager
 	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
 
 
-	private static final TypeFilter[] entityTypeFilters = new TypeFilter[] {
-			new AnnotationTypeFilter(Entity.class, false),
-			new AnnotationTypeFilter(Embeddable.class, false),
-			new AnnotationTypeFilter(MappedSuperclass.class, false)};
+	private static final Set<TypeFilter> entityTypeFilters;
+
+	static {
+		entityTypeFilters = new LinkedHashSet<TypeFilter>(4);
+		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
+		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
+					DefaultPersistenceUnitManager.class.getClassLoader().loadClass("javax.persistence.Converter");
+			entityTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
+		}
+		catch (ClassNotFoundException ex) {
+			// JPA 2.1 API not available
+		}
+	}
+
 
 	private String[] persistenceXmlLocations = new String[] {DEFAULT_PERSISTENCE_XML_LOCATION};
 
