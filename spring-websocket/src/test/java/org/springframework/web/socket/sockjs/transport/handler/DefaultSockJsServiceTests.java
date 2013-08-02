@@ -130,6 +130,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		setRequest("POST", sessionUrlPrefix + "xhr");
 		this.service.setDummySessionCookieEnabled(true);
 		this.service.handleRequest(this.request, this.response, this.wsHandler);
+		this.response.flush();
 
 		assertEquals(200, this.servletResponse.getStatus());
 		assertEquals("JSESSIONID=dummy;path=/", this.servletResponse.getHeader("Set-Cookie"));

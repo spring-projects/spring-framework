@@ -18,11 +18,11 @@ package org.springframework.http.server;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -104,6 +104,23 @@ public class ServletServerHttpRequestTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		byte[] content = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes("UTF-8");
 		assertArrayEquals("Invalid content returned", content, result);
+	}
+
+	@Test
+	public void getQueryParams() throws Exception {
+		mockRequest.setQueryString("foo=bar");
+		mockRequest.addParameter("foo", "bar");
+		mockRequest.addParameter("a", "b");
+		assertEquals(Arrays.asList("bar"), request.getQueryParams().get("foo"));
+		assertNull(request.getQueryParams().get("a"));
+	}
+
+	@Test
+	public void getQueryParamsTwoValues() throws Exception {
+		mockRequest.setQueryString("baz=qux&baz=42");
+		mockRequest.addParameter("baz", "qux");
+		mockRequest.addParameter("baz", "42");
+		assertEquals(Arrays.asList("qux", "42"), request.getQueryParams().get("baz"));
 	}
 
 }

@@ -25,12 +25,6 @@ import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.sockjs.transport.handler.AbstractHttpSendingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.EventSourceTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.HtmlFileTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.JsonpPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
@@ -106,6 +100,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
 
 		resetRequestAndResponse();
+		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
@@ -141,6 +136,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
 
 		resetRequestAndResponse();
+		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
@@ -166,6 +162,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 	@Test
 	public void frameFormats() throws Exception {
 
+		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 
 		SockJsFrame frame = SockJsFrame.openFrame();

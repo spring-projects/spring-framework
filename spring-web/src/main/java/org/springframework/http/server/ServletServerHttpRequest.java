@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +46,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReadOnlyMultiValueMap;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -58,6 +61,8 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	protected static final String FORM_CHARSET = "UTF-8";
 
 	private static final String METHOD_POST = "POST";
+
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 	private final HttpServletRequest servletRequest;
 
@@ -167,13 +172,19 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
 		if (this.queryParams == null) {
-			// TODO: extract from query string
-			this.queryParams = new LinkedMultiValueMap<String, String>(this.servletRequest.getParameterMap().size());
-			for (String name : this.servletRequest.getParameterMap().keySet()) {
-				for (String value : this.servletRequest.getParameterValues(name)) {
-					this.queryParams.add(name, value);
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
+			String queryString = this.servletRequest.getQueryString();
+			if (queryString != null) {
+				Matcher m = QUERY_PARAM_PATTERN.matcher(queryString);
+				while (m.find()) {
+					String name = m.group(1);
+					String[] values = this.servletRequest.getParameterValues(name);
+					if (values != null) {
+						result.put(name, Arrays.asList(values));
+					}
 				}
 			}
+			this.queryParams = new ReadOnlyMultiValueMap<String, String>(result);
 		}
 		return this.queryParams;
 	}

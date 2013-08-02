@@ -686,7 +686,9 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws InvalidMediaTypeException if the string cannot be parsed
 	 */
 	public static MediaType parseMediaType(String mediaType) {
-		Assert.hasLength(mediaType, "'mediaType' must not be empty");
+		if (!StringUtils.hasLength(mediaType)) {
+			throw new InvalidMediaTypeException(mediaType, "'mediaType' must not be empty");
+		}
 		String[] parts = StringUtils.tokenizeToStringArray(mediaType, ";");
 
 		String fullType = parts[0].trim();

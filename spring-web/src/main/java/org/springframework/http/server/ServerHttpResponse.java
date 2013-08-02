@@ -37,7 +37,9 @@ public interface ServerHttpResponse extends HttpOutputMessage, Closeable {
 	void setStatusCode(HttpStatus status);
 
 	/**
-	 * TODO
+	 * Ensure the headers and the content of the response are written out. After the first
+	 * flush, headers can no longer be changed, only further content writing and flushing
+	 * is possible.
 	 */
 	void flush() throws IOException;
 

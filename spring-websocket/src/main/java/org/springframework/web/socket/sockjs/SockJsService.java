@@ -33,6 +33,16 @@ import org.springframework.web.socket.WebSocketHandler;
 public interface SockJsService {
 
 
+	/**
+	 * Process a SockJS request.
+	 *
+	 * @param request the current request
+	 * @param response the current response
+	 * @param handler the handler to process messages with
+	 *
+	 * @throws IOException raised if writing the to response of the current request fails
+	 * @throws SockJsProcessingException
+	 */
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
 			throws IOException, SockJsProcessingException;
 

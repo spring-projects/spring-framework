@@ -164,6 +164,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		this.servletRequest.addHeader("Access-Control-Request-Headers", "Last-Modified");
 
 		handleRequest("OPTIONS", "/a/info", HttpStatus.NO_CONTENT);
+		this.response.flush();
 
 		assertEquals("*", this.servletResponse.getHeader("Access-Control-Allow-Origin"));
 		assertEquals("true", this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
@@ -214,6 +215,15 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(httpStatus.value(), this.servletResponse.getStatus());
 	}
 
+	@Test
+	public void handleEmptyContentType() throws Exception {
+
+		servletRequest.setContentType("");
+		handleRequest("GET", "/a/info", HttpStatus.OK);
+
+		assertEquals("Invalid/empty content should have been ignored", 200, this.servletResponse.getStatus());
+	}
+
 
 	private static class TestSockJsService extends AbstractSockJsService {
 
@@ -228,16 +238,15 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 		}
 
 		@Override
-		protected void handleRawWebSocketRequest(ServerHttpRequest request,
-				ServerHttpResponse response, WebSocketHandler handler) throws IOException {
+		protected void handleRawWebSocketRequest(ServerHttpRequest req, ServerHttpResponse res,
+				WebSocketHandler handler) throws IOException {
 
 			this.handler = handler;
 		}
 
 		@Override
-		protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-				WebSocketHandler handler, String sessionId, String transport)
-						throws IOException, SockJsProcessingException {
+		protected void handleTransportRequest(ServerHttpRequest req, ServerHttpResponse res, WebSocketHandler handler,
+				String sessionId, String transport) throws IOException, SockJsProcessingException {
 
 			this.sessionId = sessionId;
 			this.transport = transport;
