@@ -22,6 +22,7 @@ import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import org.springframework.beans.BeanUtils;
@@ -88,12 +89,17 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String SCHEMA_GENERATION_ACTION_PROPERTY =
+			"javax.persistence.schema-generation.database.action";
+
 	private PersistenceUnitManager persistenceUnitManager;
 
 	private final DefaultPersistenceUnitManager internalPersistenceUnitManager =
 			new DefaultPersistenceUnitManager();
 
 	private PersistenceUnitInfo persistenceUnitInfo;
+
+	private String schemaGenerationAction;
 
 
 	/**
@@ -232,6 +238,56 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
+	 * Specifies the transaction type that the JPA persistence provider is supposed
+	 * to use for accessing the database. Replaces the {@code transaction-type}
+	 * attribute in {@code <persistence-unit>} element from {@code persistence.xml}.
+	 *
+	 * @param transactionType The transaction type
+	 */
+	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
+		this.internalPersistenceUnitManager.setDefaultTransactionType(transactionType);
+	}
+
+	/**
+	 * Specifies the shared cache mode that the JPA persistence provider is supposed
+	 * to activate for this persistence unit. Replaces the
+	 * {@code <shared-cache-mode>} element from {@code persistence.xml}.
+	 *
+	 * @param sharedCacheMode The shared cache mode
+	 */
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.internalPersistenceUnitManager.setDefaultSharedCacheMode(sharedCacheMode);
+	}
+
+	/**
+	 * Specifies the validation mode that the JPA persistence provider is supposed
+	 * to use when persisting entities. Replaces the {@code <validation-mode>}
+	 * element from {@code persistence.xml}.
+	 *
+	 * @param validationMode The validation mode
+	 */
+	public void setValidationMode(ValidationMode validationMode) {
+		this.internalPersistenceUnitManager.setDefaultValidationMode(validationMode);
+	}
+
+	/**
+	 * A shortcut method for setting the persistence provider property
+	 * {@code javax.persistence.schema-generation.database.action} added in JPA 2.1.
+	 * Valid values are {@code "none"}, {@code "create"}, {@code "drop-and-create"},
+	 * and {@code "drop"}. There may be other, provider-specific valid values as
+	 * well. The default value is provider-specific. There are other properties
+	 * that may or may not be needed for the {@code "create"},
+	 * {@code "drop-and-create"}, and {@code "drop"} values, so this method is
+	 * primarily a convenience method for ensuring that schema generation is
+	 * disabled with {@code "none"}.
+	 *
+	 * @param schemaGenerationAction The schema generation action property value
+	 */
+	public void setSchemaGenerationAction(String schemaGenerationAction) {
+		this.schemaGenerationAction = schemaGenerationAction;
+	}
+
+	/**
 	 * Set the PersistenceUnitPostProcessors to be applied to the
 	 * PersistenceUnitInfo used for creating this EntityManagerFactory.
 	 * <p>Such post-processors can, for example, register further entity
@@ -313,6 +369,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		if (logger.isInfoEnabled()) {
 			logger.info("Building JPA container EntityManagerFactory for persistence unit '" +
 					this.persistenceUnitInfo.getPersistenceUnitName() + "'");
+		}
+		if (this.schemaGenerationAction != null) {
+			getJpaPropertyMap().put(SCHEMA_GENERATION_ACTION_PROPERTY, this.schemaGenerationAction);
 		}
 		this.nativeEntityManagerFactory =
 				provider.createContainerEntityManagerFactory(this.persistenceUnitInfo, getJpaPropertyMap());
