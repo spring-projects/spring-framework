@@ -43,12 +43,14 @@ public final class MethodMatchersTests {
 
 	private final Method IOTHER_ABSQUATULATE;
 
+
 	public MethodMatchersTests() throws Exception {
 		EXCEPTION_GETMESSAGE = Exception.class.getMethod("getMessage", (Class[]) null);
 		ITESTBEAN_GETAGE = ITestBean.class.getMethod("getAge", (Class[]) null);
 		ITESTBEAN_SETAGE = ITestBean.class.getMethod("setAge", new Class[] { int.class });
 		IOTHER_ABSQUATULATE = IOther.class.getMethod("absquatulate", (Class[]) null);
 	}
+
 
 	@Test
 	public void testDefaultMatchesAll() throws Exception {
@@ -99,23 +101,33 @@ public final class MethodMatchersTests {
 		assertTrue("Matched setAge method", union.matches(ITESTBEAN_SETAGE, TestBean.class));
 		assertTrue("Matched getAge method", union.matches(ITESTBEAN_GETAGE, TestBean.class));
 		assertFalse("Didn't matched absquatulate method", union.matches(IOTHER_ABSQUATULATE, TestBean.class));
+	}
 
+	@Test
+	public void testUnionEquals() {
+		MethodMatcher first = MethodMatchers.union(MethodMatcher.TRUE, MethodMatcher.TRUE);
+		MethodMatcher second = new ComposablePointcut(MethodMatcher.TRUE).union(new ComposablePointcut(MethodMatcher.TRUE)).getMethodMatcher();
+		assertTrue(first.equals(second));
+		assertTrue(second.equals(first));
 	}
 
 
 	public static class StartsWithMatcher extends StaticMethodMatcher {
-		private String prefix;
+
+		private final String prefix;
+
 		public StartsWithMatcher(String s) {
 			this.prefix = s;
 		}
+
 		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith(prefix);
 		}
 	}
 
-
 	private static class TestDynamicMethodMatcherWhichMatches extends DynamicMethodMatcher {
+
 		@Override
 		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return true;
@@ -123,6 +135,7 @@ public final class MethodMatchersTests {
 	}
 
 	private static class TestDynamicMethodMatcherWhichDoesNotMatch extends DynamicMethodMatcher {
+
 		@Override
 		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return false;

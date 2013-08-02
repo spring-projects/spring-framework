@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +102,9 @@ public abstract class MethodMatchers {
 	@SuppressWarnings("serial")
 	private static class UnionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
-		private MethodMatcher mm1;
-		private MethodMatcher mm2;
+		private final MethodMatcher mm1;
+
+		private final MethodMatcher mm2;
 
 		public UnionMethodMatcher(MethodMatcher mm1, MethodMatcher mm2) {
 			Assert.notNull(mm1, "First MethodMatcher must not be null");
@@ -168,6 +169,7 @@ public abstract class MethodMatchers {
 	private static class ClassFilterAwareUnionMethodMatcher extends UnionMethodMatcher {
 
 		private final ClassFilter cf1;
+
 		private final ClassFilter cf2;
 
 		public ClassFilterAwareUnionMethodMatcher(MethodMatcher mm1, ClassFilter cf1, MethodMatcher mm2, ClassFilter cf2) {
@@ -191,11 +193,17 @@ public abstract class MethodMatchers {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ClassFilterAwareUnionMethodMatcher)) {
+			if (!super.equals(other)) {
 				return false;
 			}
-			ClassFilterAwareUnionMethodMatcher that = (ClassFilterAwareUnionMethodMatcher) other;
-			return (this.cf1.equals(that.cf1) && this.cf2.equals(that.cf2) && super.equals(other));
+			ClassFilter otherCf1 = ClassFilter.TRUE;
+			ClassFilter otherCf2 = ClassFilter.TRUE;
+			if (other instanceof ClassFilterAwareUnionMethodMatcher) {
+				ClassFilterAwareUnionMethodMatcher cfa = (ClassFilterAwareUnionMethodMatcher) other;
+				otherCf1 = cfa.cf1;
+				otherCf2 = cfa.cf2;
+			}
+			return (this.cf1.equals(otherCf1) && this.cf2.equals(otherCf2));
 		}
 	}
 
@@ -206,8 +214,9 @@ public abstract class MethodMatchers {
 	@SuppressWarnings("serial")
 	private static class IntersectionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
-		private MethodMatcher mm1;
-		private MethodMatcher mm2;
+		private final MethodMatcher mm1;
+
+		private final MethodMatcher mm2;
 
 		public IntersectionMethodMatcher(MethodMatcher mm1, MethodMatcher mm2) {
 			Assert.notNull(mm1, "First MethodMatcher must not be null");
