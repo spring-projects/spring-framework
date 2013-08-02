@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,17 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 						this.argsRequiringConversion, this.varargsPosition);
 			}
 			if (this.method.isVarArgs()) {
-				arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
+				
+				 if (arguments.length == 0) {
+					 arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
+				 }
+				 else {
+						Class lastArgumentType = arguments[arguments.length-1].getClass();
+						int varargsCount = arguments.length - this.varargsPosition;
+						if(!lastArgumentType.isArray() || varargsCount > 1) {
+							arguments = ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(), arguments);
+						}				 
+				 }				
 			}
 			ReflectionUtils.makeAccessible(this.method);
 			Object value = this.method.invoke(target, arguments);
