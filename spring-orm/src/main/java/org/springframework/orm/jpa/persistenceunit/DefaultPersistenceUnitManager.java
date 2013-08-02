@@ -30,6 +30,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceException;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
@@ -67,6 +69,9 @@ import org.springframework.util.ResourceUtils;
  * scanning for all matching files in the class path (as defined in the JPA specification).
  * DataSource names are by default interpreted as JNDI names, and no load time weaving
  * is available (which requires weaving to be turned off in the persistence provider).
+ *
+ * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
+ * Spring's persistence unit bootstrapping automatically detects JPA 2.1 at runtime.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -123,6 +128,10 @@ public class DefaultPersistenceUnitManager
 	private String[] packagesToScan;
 
 	private String[] mappingResources;
+
+	private SharedCacheMode sharedCacheMode;
+
+	private ValidationMode validationMode;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
@@ -208,6 +217,24 @@ public class DefaultPersistenceUnitManager
 	 */
 	public void setMappingResources(String... mappingResources) {
 		this.mappingResources = mappingResources;
+	}
+
+	/**
+	 * Specify the JPA 2.0 shared cache mode for all of this manager's persistence
+	 * units, overriding any value in {@code persistence.xml} if set.
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
+	 */
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.sharedCacheMode = sharedCacheMode;
+	}
+
+	/**
+	 * Specify the JPA 2.0 validation mode for all of this manager's persistence
+	 * units, overriding any value in {@code persistence.xml} if set.
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
+	 */
+	public void setValidationMode(ValidationMode validationMode) {
+		this.validationMode = validationMode;
 	}
 
 	/**
@@ -324,9 +351,6 @@ public class DefaultPersistenceUnitManager
 	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
 	 * with an underlying ClassLoader based on specific extended methods being available
 	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
-	 * <p><b>NOTE:</b> As of Spring 2.5, the context's default LoadTimeWeaver (defined
-	 * as bean with name "loadTimeWeaver") will be picked up automatically, if available,
-	 * removing the need for LoadTimeWeaver configuration on each affected target bean.</b>
 	 * Consider using the {@code context:load-time-weaver} XML tag for creating
 	 * such a shared LoadTimeWeaver (autodetecting the environment by default).
 	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
@@ -382,6 +406,12 @@ public class DefaultPersistenceUnitManager
 			}
 			if (pui.getNonJtaDataSource() == null) {
 				pui.setNonJtaDataSource(this.defaultDataSource);
+			}
+			if (this.sharedCacheMode != null) {
+				pui.setSharedCacheMode(this.sharedCacheMode);
+			}
+			if (this.validationMode != null) {
+				pui.setValidationMode(this.validationMode);
 			}
 			if (this.loadTimeWeaver != null) {
 				pui.init(this.loadTimeWeaver);

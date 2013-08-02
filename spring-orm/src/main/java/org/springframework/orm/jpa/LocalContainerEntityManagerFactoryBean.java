@@ -18,6 +18,8 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
@@ -66,6 +68,7 @@ import org.springframework.util.ClassUtils;
  * metadata as assembled by this FactoryBean.
  *
  * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
+ * Spring's persistence unit bootstrapping automatically detects JPA 2.1 at runtime.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -168,6 +171,28 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 */
 	public void setMappingResources(String... mappingResources) {
 		this.internalPersistenceUnitManager.setMappingResources(mappingResources);
+	}
+
+	/**
+	 * Specify the JPA 2.0 shared cache mode for this persistence unit,
+	 * overriding a value in {@code persistence.xml} if set.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.internalPersistenceUnitManager.setSharedCacheMode(sharedCacheMode);
+	}
+
+	/**
+	 * Specify the JPA 2.0 validation mode for this persistence unit,
+	 * overriding a value in {@code persistence.xml} if set.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setValidationMode(ValidationMode validationMode) {
+		this.internalPersistenceUnitManager.setValidationMode(validationMode);
 	}
 
 	/**
