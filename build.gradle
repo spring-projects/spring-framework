@@ -640,6 +640,7 @@ project("spring-webmvc") {
 
 	dependencies {
 		compile(project(":spring-core"))
+		compile(files(project(":spring-core").objenesisRepackJar))
 		compile(project(":spring-expression"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-web"))

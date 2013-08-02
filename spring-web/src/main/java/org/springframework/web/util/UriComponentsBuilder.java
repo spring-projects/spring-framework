@@ -554,12 +554,41 @@ public class UriComponentsBuilder {
 		return this;
 	}
 
+	public UriComponentsBuilder with(UriComponentsBuilder builder) {
+
+		UriComponents components = builder.build().normalize();
+
+		if (StringUtils.hasText(components.getScheme())) {
+			scheme(components.getScheme());
+		}
+
+		if (StringUtils.hasText(components.getHost())) {
+			host(components.getHost());
+		}
+
+		if (components.getPort() != -1) {
+			port(components.getPort());
+		}
+
+		if (StringUtils.hasText(components.getPath())) {
+			path(components.getPath());
+		}
+
+		if (StringUtils.hasText(components.getQuery())) {
+			query(components.getQuery());
+		}
+
+		if (StringUtils.hasText(components.getFragment())) {
+			fragment(components.getFragment());
+		}
+
+		return this;
+	}
 
 	private interface PathComponentBuilder {
 
 		PathComponent build();
 	}
-
 
 	private static class CompositePathComponentBuilder implements PathComponentBuilder {
 
