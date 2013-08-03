@@ -29,12 +29,12 @@ import org.springframework.util.Assert;
 
 
 /**
- * A {@link ServerHttpAsyncResponseControl} to use on Servlet containers (Servlet 3.0+).
+ * A {@link ServerHttpAsyncRequestControl} to use on Servlet containers (Servlet 3.0+).
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncResponseControl, AsyncListener {
+public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncRequestControl, AsyncListener {
 
 	private static long NO_TIMEOUT_VALUE = Long.MIN_VALUE;
 
@@ -52,27 +52,24 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncResp
 	 * {@link ServletServerHttpRequest} and {@link ServletServerHttpResponse}
 	 * respectively.
 	 */
-	public ServletServerHttpAsyncRequestControl(ServerHttpRequest request, ServerHttpResponse response) {
+	public ServletServerHttpAsyncRequestControl(ServletServerHttpRequest request, ServletServerHttpResponse response) {
 
 		Assert.notNull(request, "request is required");
 		Assert.notNull(response, "response is required");
 
-		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
-		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
-
-		this.request = (ServletServerHttpRequest) request;
-		this.response = (ServletServerHttpResponse) response;
-
-		Assert.isTrue(this.request.getServletRequest().isAsyncSupported(),
+		Assert.isTrue(request.getServletRequest().isAsyncSupported(),
 				"Async support must be enabled on a servlet and for all filters involved " +
 				"in async request processing. This is done in Java code using the Servlet API " +
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml. Also you must use a Servlet 3.0+ container");
+
+		this.request = request;
+		this.response = response;
 	}
 
 
 	@Override
-	public boolean hasStarted() {
+	public boolean isStarted() {
 		return ((this.asyncContext != null) && this.request.getServletRequest().isAsyncStarted());
 	}
 
@@ -91,7 +88,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncResp
 
 		Assert.state(!isCompleted(), "Async processing has already completed");
 
-		if (hasStarted()) {
+		if (isStarted()) {
 			return;
 		}
 
@@ -108,7 +105,7 @@ public class ServletServerHttpAsyncRequestControl implements ServerHttpAsyncResp
 
 	@Override
 	public void complete() {
-		if (hasStarted() && !isCompleted()) {
+		if (isStarted() && !isCompleted()) {
 			this.asyncContext.complete();
 		}
 	}

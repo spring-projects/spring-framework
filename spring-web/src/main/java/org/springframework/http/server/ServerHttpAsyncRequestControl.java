@@ -23,7 +23,7 @@ package org.springframework.http.server;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface ServerHttpAsyncResponseControl {
+public interface ServerHttpAsyncRequestControl {
 
 	/**
 	 * Enable asynchronous processing after which the response remains open until a call
@@ -42,7 +42,7 @@ public interface ServerHttpAsyncResponseControl {
 	/**
 	 * Whether asynchronous request processing has been started.
 	 */
-	boolean hasStarted();
+	boolean isStarted();
 
 	/**
 	 * Causes asynchronous request processing to be completed.

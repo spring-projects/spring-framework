@@ -246,7 +246,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		@Override
 		protected void handleTransportRequest(ServerHttpRequest req, ServerHttpResponse res, WebSocketHandler handler,
-				String sessionId, String transport) throws IOException, SockJsException {
+				String sessionId, String transport) throws SockJsException {
 
 			this.sessionId = sessionId;
 			this.transport = transport;

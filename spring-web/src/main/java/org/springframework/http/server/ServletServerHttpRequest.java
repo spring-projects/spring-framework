@@ -72,6 +72,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private MultiValueMap<String, String> queryParams;
 
+	private ServerHttpAsyncRequestControl asyncRequestControl;
 
 	/**
 	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}.
@@ -236,6 +237,16 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		writer.flush();
 
 		return new ByteArrayInputStream(bos.toByteArray());
+	}
+
+	@Override
+	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
+		if (this.asyncRequestControl == null) {
+			Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
+			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
+		}
+		return this.asyncRequestControl;
 	}
 
 }

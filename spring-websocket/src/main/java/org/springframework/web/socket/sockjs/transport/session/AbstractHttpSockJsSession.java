@@ -20,10 +20,9 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.springframework.http.server.ServerHttpAsyncResponseControl;
+import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpAsyncRequestControl;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
@@ -48,7 +47,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private ServerHttpResponse response;
 
-	private ServerHttpAsyncResponseControl asyncControl;
+	private ServerHttpAsyncRequestControl asyncRequestControl;
 
 	private String protocol;
 
@@ -109,7 +108,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			return;
 		}
 		try {
-			this.asyncControl.start(-1);
+			this.asyncRequestControl.start(-1);
 			scheduleHeartbeat();
 			tryFlushCache();
 		}
@@ -125,14 +124,14 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		Assert.notNull(frameFormat, "expected frameFormat");
 		this.request = request;
 		this.response = response;
-		this.asyncControl = new ServletServerHttpAsyncRequestControl(this.request, this.response);
+		this.asyncRequestControl = request.getAsyncRequestControl(response);
 		this.frameFormat = frameFormat;
 	}
 
 
 	@Override
 	public synchronized boolean isActive() {
-		return ((this.asyncControl != null) && (!this.asyncControl.isCompleted()));
+		return ((this.asyncRequestControl != null) && (!this.asyncRequestControl.isCompleted()));
 	}
 
 	protected BlockingQueue<String> getMessageCache() {
@@ -172,10 +171,10 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	protected synchronized void resetRequest() {
 		updateLastActiveTime();
-		if (isActive() && this.asyncControl.hasStarted()) {
+		if (isActive() && this.asyncRequestControl.isStarted()) {
 			try {
 				logger.debug("Completing asynchronous request");
-				this.asyncControl.complete();
+				this.asyncRequestControl.complete();
 			}
 			catch (Throwable ex) {
 				logger.error("Failed to complete request: " + ex.getMessage());
@@ -183,7 +182,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		}
 		this.request = null;
 		this.response = null;
-		this.asyncControl = null;
+		this.asyncRequestControl = null;
 	}
 
 	@Override

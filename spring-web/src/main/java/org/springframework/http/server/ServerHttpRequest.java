@@ -28,6 +28,7 @@ import org.springframework.util.MultiValueMap;
  * Represents a server-side HTTP request.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
@@ -39,7 +40,6 @@ public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
 
 	/**
 	 * Return the cookie values parsed from the "Cookie" request header.
-	 * @return the cookies
 	 */
 	Map<String, Cookie> getCookies();
 
@@ -59,5 +59,11 @@ public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
 	 * Return the IP address of the endpoint on the other end.
 	 */
 	String getRemoteAddress();
+
+	/**
+	 * Return a control that allows putting the request in asynchronous mode so the
+	 * response remains open until closed explicitly from the current or another thread.
+	 */
+	ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response);
 
 }

@@ -17,10 +17,9 @@
 package org.springframework.web.socket;
 
 import org.junit.Before;
-import org.springframework.http.server.ServerHttpAsyncResponseControl;
+import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -41,7 +40,7 @@ public class AbstractHttpRequestTests {
 
 	protected MockHttpServletResponse servletResponse;
 
-	protected ServerHttpAsyncResponseControl asyncControl;
+	protected ServerHttpAsyncRequestControl asyncControl;
 
 
 	@Before
@@ -57,7 +56,7 @@ public class AbstractHttpRequestTests {
 	protected void resetRequestAndResponse() {
 		resetRequest();
 		resetResponse();
-		this.asyncControl = new ServletServerHttpAsyncRequestControl(this.request, this.response);
+		this.asyncControl = this.request.getAsyncRequestControl(this.response);
 	}
 
 	protected void resetRequest() {
