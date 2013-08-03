@@ -43,7 +43,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.support.ServerWebSocketSessionInitializer;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
 import org.springframework.web.socket.sockjs.support.frame.Jackson2SockJsMessageCodec;
@@ -203,8 +203,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, String sessionId, String transport)
-					throws IOException, SockJsProcessingException {
+			WebSocketHandler wsHandler, String sessionId, String transport) throws SockJsException {
 
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {

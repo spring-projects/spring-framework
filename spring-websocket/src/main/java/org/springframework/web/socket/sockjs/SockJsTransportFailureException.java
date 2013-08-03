@@ -16,32 +16,21 @@
 
 package org.springframework.web.socket.sockjs;
 
-import org.springframework.core.NestedRuntimeException;
 
 /**
- * Raised when SockJS request handling fails.
+ * Indicates a serious failure that occurred in the SockJS implementation as opposed to in
+ * user code (e.g. IOException while writing to the response). When this exception is
+ * raised, the SockJS session is typically closed.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 @SuppressWarnings("serial")
-public class SockJsProcessingException extends NestedRuntimeException {
-
-	private final String sessionId;
+public class SockJsTransportFailureException extends SockJsException {
 
 
-	public SockJsProcessingException(String msg, Throwable cause, String sessionId) {
-		super(msg, cause);
-		this.sessionId = sessionId;
-	}
-
-	public String getSockJsSessionId() {
-		return this.sessionId;
-	}
-
-	@Override
-	public String getMessage() {
-		return "Transport error for SockJS session id=" + this.sessionId + ", " + super.getMessage();
+	public SockJsTransportFailureException(String message, String sessionId, Throwable cause) {
+		super(message, sessionId, cause);
 	}
 
 }

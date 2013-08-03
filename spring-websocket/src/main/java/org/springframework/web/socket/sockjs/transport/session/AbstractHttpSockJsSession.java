@@ -27,10 +27,10 @@ import org.springframework.http.server.ServletServerHttpAsyncRequestControl;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
  * An abstract base class for use with HTTP transport based SockJS sessions.
@@ -77,22 +77,22 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws SockJsProcessingException {
+			FrameFormat frameFormat) throws SockJsException {
 
+		udpateRequest(request, response, frameFormat);
 		try {
-			udpateRequest(request, response, frameFormat);
 			writePrelude();
 			writeFrame(SockJsFrame.openFrame());
 		}
 		catch (Throwable t) {
-			tryCloseWithSockJsTransportError(t, null);
-			throw new SockJsProcessingException("Failed open SockJS session", t, getId());
+			tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), t);
 		}
 		try {
 			delegateConnectionEstablished();
 		}
 		catch (Throwable t) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this, t, logger);
+			throw new SockJsException("Unhandled exception from WebSocketHandler", getId(), t);
 		}
 	}
 
@@ -100,30 +100,22 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	public synchronized void setLongPollingRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws SockJsProcessingException {
+			FrameFormat frameFormat) throws SockJsException {
 
+		udpateRequest(request, response, frameFormat);
+		if (isClosed()) {
+			logger.debug("Connection already closed (but not removed yet)");
+			writeFrame(SockJsFrame.closeFrameGoAway());
+			return;
+		}
 		try {
-			udpateRequest(request, response, frameFormat);
-
-			if (isClosed()) {
-				logger.debug("connection already closed");
-				try {
-					writeFrame(SockJsFrame.closeFrameGoAway());
-				}
-				catch (IOException ex) {
-					throw new SockJsProcessingException("Failed to send SockJS close frame", ex, getId());
-				}
-				return;
-			}
-
 			this.asyncControl.start(-1);
-
 			scheduleHeartbeat();
 			tryFlushCache();
 		}
 		catch (Throwable t) {
-			tryCloseWithSockJsTransportError(t, null);
-			throw new SockJsProcessingException("Failed to start long running request and flush messages", t, getId());
+			tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("Failed to flush messages", getId(), t);
 		}
 	}
 
@@ -156,12 +148,12 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	protected final synchronized void sendMessageInternal(String message) throws IOException {
+	protected final synchronized void sendMessageInternal(String message) throws SockJsTransportFailureException {
 		this.messageCache.add(message);
 		tryFlushCache();
 	}
 
-	private void tryFlushCache() throws IOException {
+	private void tryFlushCache() throws SockJsTransportFailureException {
 		if (isActive() && !getMessageCache().isEmpty()) {
 			logger.trace("Flushing messages");
 			flushCache();
@@ -171,7 +163,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	/**
 	 * Only called if the connection is currently active
 	 */
-	protected abstract void flushCache() throws IOException;
+	protected abstract void flushCache() throws SockJsTransportFailureException;
 
 	@Override
 	protected void disconnect(CloseStatus status) {
@@ -182,11 +174,11 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		updateLastActiveTime();
 		if (isActive() && this.asyncControl.hasStarted()) {
 			try {
-				logger.debug("Completing async request");
+				logger.debug("Completing asynchronous request");
 				this.asyncControl.complete();
 			}
 			catch (Throwable ex) {
-				logger.error("Failed to complete async request: " + ex.getMessage());
+				logger.error("Failed to complete request: " + ex.getMessage());
 			}
 		}
 		this.request = null;

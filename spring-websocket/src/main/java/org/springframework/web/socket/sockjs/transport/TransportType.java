@@ -25,7 +25,7 @@ import java.util.Map;
 import org.springframework.http.HttpMethod;
 
 /**
- * Defines SockJS transport types.
+ * SockJS transport types.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

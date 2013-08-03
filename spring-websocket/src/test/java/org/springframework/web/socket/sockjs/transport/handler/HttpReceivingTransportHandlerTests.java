@@ -20,13 +20,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.socket.AbstractHttpRequestTests;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
-import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
+import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -107,48 +106,47 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
 
-		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
-		TestSockJsSession session = new TestSockJsSession("1", sockJsConfig, webSocketHandler);
+		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler);
 		session.delegateConnectionEstablished();
 
-		doThrow(new Exception()).when(webSocketHandler).handleMessage(session, new TextMessage("x"));
+		doThrow(new Exception()).when(wsHandler).handleMessage(session, new TextMessage("x"));
 
 		try {
 			XhrTransportHandler transportHandler = new XhrTransportHandler();
 			transportHandler.setSockJsServiceConfiguration(sockJsConfig);
-			transportHandler.handleRequest(this.request, this.response, webSocketHandler, session);
+			transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 			fail("Expected exception");
 		}
-		catch (SockJsProcessingException ex) {
-			assertEquals(CloseStatus.SERVER_ERROR, session.getStatus());
+		catch (SockJsMessageDeliveryException ex) {
+			assertNull(session.getCloseStatus());
 		}
 	}
 
 
-	private void handleRequest(AbstractHttpReceivingTransportHandler transportHandler)
-			throws Exception {
+	private void handleRequest(AbstractHttpReceivingTransportHandler transportHandler) throws Exception {
 
-		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
-		AbstractSockJsSession session = new TestSockJsSession("1", new StubSockJsServiceConfig(), webSocketHandler);
+		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler);
 
 		transportHandler.setSockJsServiceConfiguration(new StubSockJsServiceConfig());
-		transportHandler.handleRequest(this.request, this.response, webSocketHandler, session);
+		transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 
 		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getContentType().toString());
-		verify(webSocketHandler).handleMessage(session, new TextMessage("x"));
+		verify(wsHandler).handleMessage(session, new TextMessage("x"));
 	}
 
 	private void handleRequestAndExpectFailure() throws Exception {
 
 		resetResponse();
 
-		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
-		AbstractSockJsSession session = new TestSockJsSession("1", new StubSockJsServiceConfig(), webSocketHandler);
+		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler);
 
-		new XhrTransportHandler().handleRequest(this.request, this.response, webSocketHandler, session);
+		new XhrTransportHandler().handleRequest(this.request, this.response, wsHandler, session);
 
 		assertEquals(500, this.servletResponse.getStatus());
-		verifyNoMoreInteractions(webSocketHandler);
+		verifyNoMoreInteractions(wsHandler);
 	}
 
 }

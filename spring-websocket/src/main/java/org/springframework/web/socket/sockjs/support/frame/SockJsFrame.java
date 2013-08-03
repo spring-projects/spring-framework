@@ -21,8 +21,7 @@ import java.nio.charset.Charset;
 import org.springframework.util.Assert;
 
 /**
- * Represents a SockJS frames. Provides methods for access to commonly used message
- * frames.
+ * Represents a SockJS frame and provides factory methods for creating SockJS frames.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

@@ -23,6 +23,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
 
@@ -63,7 +64,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 			this.webSocketSession.sendMessage(message);
 		}
 		catch (IOException ex) {
-			tryCloseWithSockJsTransportError(ex, null);
+			tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			return;
 		}
 		scheduleHeartbeat();
@@ -94,7 +95,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	public void sendMessageInternal(String message) throws IOException {
+	public void sendMessageInternal(String message) throws SockJsTransportFailureException {
 		cancelHeartbeat();
 		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
@@ -113,7 +114,9 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession {
 
 	@Override
 	protected void disconnect(CloseStatus status) throws IOException {
-		this.webSocketSession.close(status);
+		if (this.webSocketSession != null) {
+			this.webSocketSession.close(status);
+		}
 	}
 
 }

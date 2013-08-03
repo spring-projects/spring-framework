@@ -21,7 +21,10 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
@@ -33,7 +36,8 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 
 /**
@@ -45,7 +49,6 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 public abstract class AbstractSockJsSession implements ConfigurableWebSocketSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private final String id;
 
@@ -185,9 +188,21 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 		this.handler.afterConnectionEstablished(this);
 	}
 
-	public void delegateMessages(String[] messages) throws Exception {
+	public void delegateMessages(String[] messages) throws SockJsMessageDeliveryException {
+		List<String> undelivered = new ArrayList<String>(Arrays.asList(messages));
 		for (String message : messages) {
-			this.handler.handleMessage(this, new TextMessage(message));
+			try {
+				if (isClosed()) {
+					throw new SockJsMessageDeliveryException(this.id, undelivered, null);
+				}
+				else {
+					this.handler.handleMessage(this, new TextMessage(message));
+					undelivered.remove(0);
+				}
+			}
+			catch (Throwable t) {
+				throw new SockJsMessageDeliveryException(this.id, undelivered, t);
+			}
 		}
 	}
 
@@ -278,55 +293,53 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	/**
 	 * Close due to error arising from SockJS transport handling.
 	 */
-	protected void tryCloseWithSockJsTransportError(Throwable ex, CloseStatus closeStatus) {
-		logger.error("Closing due to transport error for " + this, ex);
+	public void tryCloseWithSockJsTransportError(Throwable ex, CloseStatus closeStatus) {
+		logger.error("Closing due to transport error for " + this);
 		try {
 			delegateError(ex);
 		}
 		catch (Throwable delegateEx) {
-			logger.error("Unhandled error for " + this, delegateEx);
 			try {
 				close(closeStatus);
 			}
 			catch (Throwable closeEx) {
-				logger.error("Unhandled error for " + this, closeEx);
+				// ignore
 			}
 		}
 	}
 
 	/**
 	 * For internal use within a TransportHandler and the (TransportHandler-specific)
-	 * session sub-class.
+	 * session class.
 	 */
-	protected void writeFrame(SockJsFrame frame) throws IOException {
+	protected void writeFrame(SockJsFrame frame) throws SockJsTransportFailureException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Preparing to write " + frame);
 		}
 		try {
 			writeFrameInternal(frame);
 		}
-		catch (IOException ex) {
+		catch (Throwable ex) {
 			if (ex instanceof EOFException || ex instanceof SocketException) {
 				logger.warn("Client went away. Terminating connection");
 			}
 			else {
-				logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
+				logger.warn("Terminating connection after failure to send message: " + ex.getMessage());
 			}
-			disconnect(CloseStatus.SERVER_ERROR);
-			close(CloseStatus.SERVER_ERROR);
-			throw ex;
-		}
-		catch (Throwable ex) {
-			logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
-			disconnect(CloseStatus.SERVER_ERROR);
-			close(CloseStatus.SERVER_ERROR);
-			throw new SockJsProcessingException("Failed to write " + frame, ex, this.getId());
+			try {
+				disconnect(CloseStatus.SERVER_ERROR);
+				close(CloseStatus.SERVER_ERROR);
+			}
+			catch (Throwable ex2) {
+				// ignore
+			}
+			throw new SockJsTransportFailureException("Failed to write " + frame, this.getId(), ex);
 		}
 	}
 
-	protected abstract void writeFrameInternal(SockJsFrame frame) throws Exception;
+	protected abstract void writeFrameInternal(SockJsFrame frame) throws IOException;
 
-	public synchronized void sendHeartbeat() throws Exception {
+	public synchronized void sendHeartbeat() throws SockJsTransportFailureException {
 		if (isActive()) {
 			writeFrame(SockJsFrame.heartbeatFrame());
 			scheduleHeartbeat();

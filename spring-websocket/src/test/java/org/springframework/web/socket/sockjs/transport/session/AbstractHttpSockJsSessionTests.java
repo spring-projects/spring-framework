@@ -151,7 +151,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 		}
 
 		@Override
-		protected void flushCache() throws IOException {
+		protected void flushCache() {
 			this.cacheFlushed = true;
 		}
 

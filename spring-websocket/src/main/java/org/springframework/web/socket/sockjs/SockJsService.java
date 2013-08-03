@@ -16,14 +16,24 @@
 
 package org.springframework.web.socket.sockjs;
 
-import java.io.IOException;
-
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
- * A service for processing SockJS HTTP requests.
+ * The main entry point for processing HTTP requests from SockJS clients.
+ * <p>
+ * In a Servlet 3+ container, {@link SockJsHttpRequestHandler} can be used to invoke this
+ * service. The processing servlet, as well as all filters involved, must have
+ * asynchronous support enabled through the ServletContext API or by adding an
+ * {@code <async-support>true</async-support>} element to servlet and filter declarations
+ * in web.xml.
+ * <p>
+ * The service can be integrated into any HTTP request handling mechanism (e.g. plain
+ * Servlet, Spring MVC, or other). It is expected that it will be mapped, as expected
+ * by the SockJS protocol, to a specific prefix (e.g. "/echo") including all sub-URLs
+ * (i.e. Ant path pattern "/echo/**").
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -34,16 +44,27 @@ public interface SockJsService {
 
 
 	/**
-	 * Process a SockJS request.
+	 * Process a SockJS HTTP request.
+	 * <p>
+	 * See the "Base URL", "Static URLs", and "Session URLs" sections of the <a
+	 * href="http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html">SockJS
+	 * protocol</a> for details on the types of URLs expected.
 	 *
 	 * @param request the current request
 	 * @param response the current response
-	 * @param handler the handler to process messages with
+	 * @param handler the handler that will exchange messages with the SockJS client
 	 *
-	 * @throws IOException raised if writing the to response of the current request fails
-	 * @throws SockJsProcessingException
+	 * @throws SockJsException raised when request processing fails; generally, failed
+	 *         attempts to send messages to clients automatically close the SockJS session
+	 *         and raise {@link SockJsTransportFailureException}; failed attempts to read
+	 *         messages from clients do not automatically close the session and may result
+	 *         in {@link SockJsMessageDeliveryException} or {@link SockJsException};
+	 *         exceptions from the WebSocketHandler can be handled internally or through
+	 *         {@link ExceptionWebSocketHandlerDecorator} or some alternative decorator.
+	 *         The former is automatically added when using
+	 *         {@link SockJsHttpRequestHandler}.
 	 */
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws IOException, SockJsProcessingException;
+			throws SockJsException;
 
 }

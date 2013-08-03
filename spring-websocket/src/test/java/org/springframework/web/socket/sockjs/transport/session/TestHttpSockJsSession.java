@@ -22,12 +22,13 @@ import java.util.List;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class TestSockJsSession extends AbstractSockJsSession {
+public class TestHttpSockJsSession extends AbstractHttpSockJsSession {
 
 	private boolean active;
 
@@ -44,7 +45,7 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	private String subProtocol;
 
 
-	public TestSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
+	public TestHttpSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
 		super(sessionId, config, handler);
 	}
 
@@ -100,10 +101,6 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	protected void sendMessageInternal(String message) {
-	}
-
-	@Override
 	protected void writeFrameInternal(SockJsFrame frame) throws IOException {
 		this.sockJsFrames.add(frame);
 		if (this.exceptionOnWrite != null) {
@@ -112,8 +109,12 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	protected void disconnect(CloseStatus status) throws IOException {
+	protected void disconnect(CloseStatus status) {
 		this.closeStatus = status;
+	}
+
+	@Override
+	protected void flushCache() throws SockJsTransportFailureException {
 	}
 
 }

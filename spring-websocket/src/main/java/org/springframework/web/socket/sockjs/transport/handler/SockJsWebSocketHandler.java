@@ -46,20 +46,20 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 
 	private final SockJsServiceConfig sockJsServiceConfig;
 
-	private final WebSocketServerSockJsSession session;
+	private final WebSocketServerSockJsSession sockJsSession;
 
 	private final AtomicInteger sessionCount = new AtomicInteger(0);
 
 
-	public SockJsWebSocketHandler(SockJsServiceConfig sockJsServiceConfig,
-			WebSocketHandler webSocketHandler, WebSocketServerSockJsSession session) {
+	public SockJsWebSocketHandler(SockJsServiceConfig serviceConfig,
+			WebSocketHandler webSocketHandler, WebSocketServerSockJsSession sockJsSession) {
 
-		Assert.notNull(sockJsServiceConfig, "sockJsServiceConfig must not be null");
+		Assert.notNull(serviceConfig, "serviceConfig must not be null");
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
-		Assert.notNull(session, "session must not be null");
+		Assert.notNull(sockJsSession, "session must not be null");
 
-		this.sockJsServiceConfig = sockJsServiceConfig;
-		this.session = session;
+		this.sockJsServiceConfig = serviceConfig;
+		this.sockJsSession = sockJsSession;
 	}
 
 	protected SockJsServiceConfig getSockJsConfig() {
@@ -69,22 +69,22 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
 		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
-		this.session.initWebSocketSession(wsSession);
+		this.sockJsSession.initWebSocketSession(wsSession);
 	}
 
 	@Override
 	public void handleTextMessage(WebSocketSession wsSession, TextMessage message) throws Exception {
-		this.session.handleMessage(message, wsSession);
+		this.sockJsSession.handleMessage(message, wsSession);
 	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession wsSession, CloseStatus status) throws Exception {
-		this.session.delegateConnectionClosed(status);
+		this.sockJsSession.delegateConnectionClosed(status);
 	}
 
 	@Override
 	public void handleTransportError(WebSocketSession webSocketSession, Throwable exception) throws Exception {
-		this.session.delegateError(exception);
+		this.sockJsSession.delegateError(exception);
 	}
 
 }

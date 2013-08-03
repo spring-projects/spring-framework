@@ -44,9 +44,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReadOnlyMultiValueMap;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -184,7 +184,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					}
 				}
 			}
-			this.queryParams = new ReadOnlyMultiValueMap<String, String>(result);
+			this.queryParams = CollectionUtils.unmodifiableMultiValueMap(result);
 		}
 		return this.queryParams;
 	}

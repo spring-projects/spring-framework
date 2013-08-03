@@ -24,7 +24,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.StringUtils;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.DefaultFrameFormat;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
@@ -32,7 +34,6 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
@@ -92,20 +93,22 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpSockJsSession session) throws SockJsProcessingException {
+			AbstractHttpSockJsSession sockJsSession) {
 
-		try {
 			String callback = request.getQueryParams().getFirst("c");
 			if (! StringUtils.hasText(callback)) {
 				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				try {
+					response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
+				}
+				catch (IOException t) {
+					sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
+					throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), t);
+				}
 				return;
 			}
-		}
-		catch (Throwable t) {
-			throw new SockJsProcessingException("Failed to send error to client", t, session.getId());
-		}
-		super.handleRequestInternal(request, response, session);
+
+		super.handleRequestInternal(request, response, sockJsSession);
 	}
 
 	@Override
@@ -127,7 +130,8 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 		@Override
 		protected void writePrelude() throws IOException {
-			// we already validated the parameter..
+
+			// we already validated the parameter above..
 			String callback = getRequest().getQueryParams().getFirst("c");
 
 			String html = String.format(PARTIAL_HTML_CONTENT, callback);

@@ -45,23 +45,21 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
 
 /**
  * An abstract base class for {@link SockJsService} implementations that provides SockJS
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
- * etc). Transport-specific requests are left as abstract methods.
+ * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  * <p>
- * This service can be integrated into any HTTP request handling mechanism (e.g. plain
- * Servlet, Spring MVC, or other). It is expected that it will be mapped correctly to a
- * prefix (e.g. "/echo") and will also handle all sub-URLs (i.e. "/echo/**").
- * <p>
- * The service itself is unaware of the underlying mapping mechanism but nevertheless must
- * be able to extract the SockJS path, i.e. the portion of the request path following the
- * prefix. In most cases, this class can auto-detect the SockJS path but it is also
- * possible to configure explicitly the prefixes via
- * {@link #setValidSockJsPrefixes(String...)}.
+ * This service is unaware of the underlying HTTP request processing mechanism and URL
+ * mappings but nevertheless needs to know the "SockJS path" for a given request, i.e. the
+ * portion of the URL path that follows the SockJS prefix. In most cases, this can be
+ * auto-detected since the <a href="https://github.com/sockjs/sockjs-client">SockJS
+ * client</a> sends a "greeting URL" first. However it is recommended to configure
+ * explicitly the expected SockJS prefixes via {@link #setValidSockJsPrefixes(String...)}
+ * to eliminate any potential issues.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -265,11 +263,14 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
-	 * TODO
+	 * {@inheritDoc}
+	 * <p>
+	 * This method determines the SockJS path and handles SockJS static URLs. Session URLs
+	 * and raw WebSocket requests are delegated to abstract methods.
 	 */
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws IOException, SockJsProcessingException {
+			throws SockJsException {
 
 		String sockJsPath = getSockJsPath(request);
 		if (sockJsPath == null) {
@@ -292,41 +293,38 @@ public abstract class AbstractSockJsService implements SockJsService {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
 				response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 				response.getBody().write("Welcome to SockJS!\n".getBytes("UTF-8"));
-				return;
 			}
 			else if (sockJsPath.equals("/info")) {
 				this.infoHandler.handle(request, response);
-				return;
 			}
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
 				this.iframeHandler.handle(request, response);
-				return;
 			}
 			else if (sockJsPath.equals("/websocket")) {
 				handleRawWebSocketRequest(request, response, handler);
-				return;
+			}
+			else {
+				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
+				if (pathSegments.length != 3) {
+					logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
+				String serverId = pathSegments[0];
+				String sessionId = pathSegments[1];
+				String transport = pathSegments[2];
+
+				if (!validateRequest(serverId, sessionId, transport)) {
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					return;
+				}
+				handleTransportRequest(request, response, handler, sessionId, transport);
 			}
 
-			String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
-			if (pathSegments.length != 3) {
-				logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
-				response.setStatusCode(HttpStatus.NOT_FOUND);
-				return;
-			}
-
-			String serverId = pathSegments[0];
-			String sessionId = pathSegments[1];
-			String transport = pathSegments[2];
-
-			if (!validateRequest(serverId, sessionId, transport)) {
-				response.setStatusCode(HttpStatus.NOT_FOUND);
-				return;
-			}
-
-			handleTransportRequest(request, response, handler, sessionId, transport);
-		}
-		finally {
 			response.flush();
+		}
+		catch (IOException ex) {
+			throw new SockJsException("Failed to write to the response", null, ex);
 		}
 	}
 
@@ -385,14 +383,23 @@ public abstract class AbstractSockJsService implements SockJsService {
 		return null;
 	}
 
+	/**
+	 * Validate whether the given transport String extracted from the URL is a valid
+	 * SockJS transport type (regardless of whether a transport handler is configured).
+	 */
 	protected abstract boolean isValidTransportType(String transportType);
 
+	/**
+	 * Handle request for raw WebSocket communication, i.e. without any SockJS message framing.
+	 */
 	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
 			ServerHttpResponse response, WebSocketHandler webSocketHandler) throws IOException;
 
+	/**
+	 * Handle a SockJS session URL (i.e. transport-specific request).
+	 */
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, String sessionId, String transport)
-					throws IOException, SockJsProcessingException;
+			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
 
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
@@ -446,7 +453,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 		response.getHeaders().setCacheControl("no-store, no-cache, must-revalidate, max-age=0");
 	}
 
-	protected void sendMethodNotAllowed(ServerHttpResponse response, List<HttpMethod> httpMethods) throws IOException {
+	protected void sendMethodNotAllowed(ServerHttpResponse response, List<HttpMethod> httpMethods) {
 		logger.debug("Sending Method Not Allowed (405)");
 		response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 		response.getHeaders().setAllow(new HashSet<HttpMethod>(httpMethods));

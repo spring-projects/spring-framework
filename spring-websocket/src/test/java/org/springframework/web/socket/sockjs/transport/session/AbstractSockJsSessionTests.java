@@ -18,15 +18,18 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
+import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
@@ -96,6 +99,33 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 	}
 
 	@Test
+	public void delegateMessagesWithErrorAndConnectionClosing() throws Exception {
+
+		WebSocketHandler wsHandler = new ExceptionWebSocketHandlerDecorator(this.webSocketHandler);
+		TestSockJsSession sockJsSession = new TestSockJsSession("1", this.sockJsConfig, wsHandler);
+
+		String msg1 = "message 1";
+		String msg2 = "message 2";
+		String msg3 = "message 3";
+
+		doThrow(new IOException()).when(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
+
+		sockJsSession.delegateConnectionEstablished();
+		try {
+			sockJsSession.delegateMessages(new String[] { msg1, msg2, msg3 });
+			fail("expected exception");
+		}
+		catch (SockJsMessageDeliveryException ex) {
+			assertEquals(Arrays.asList(msg3), ex.getUndeliveredMessages());
+			verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
+			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
+			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
+			verify(this.webSocketHandler).afterConnectionClosed(sockJsSession, CloseStatus.SERVER_ERROR);
+			verifyNoMoreInteractions(this.webSocketHandler);
+		}
+	}
+
+	@Test
 	public void delegateConnectionClosed() throws Exception {
 		this.session.delegateConnectionEstablished();
 		this.session.delegateConnectionClosed(CloseStatus.GOING_AWAY);
@@ -112,17 +142,17 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 		assertNew();
 
 		this.session.close();
-		assertNull("Close not ignored for a new session", this.session.getStatus());
+		assertNull("Close not ignored for a new session", this.session.getCloseStatus());
 
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
 		this.session.close();
 		assertClosed();
-		assertEquals(3000, this.session.getStatus().getCode());
+		assertEquals(3000, this.session.getCloseStatus().getCode());
 
 		this.session.close(CloseStatus.SERVER_ERROR);
-		assertEquals("Close should be ignored if already closed", 3000, this.session.getStatus().getCode());
+		assertEquals("Close should be ignored if already closed", 3000, this.session.getCloseStatus().getCode());
 	}
 
 	@Test
@@ -152,7 +182,7 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 		assertEquals(1, this.session.getNumberOfLastActiveTimeUpdates());
 		assertTrue(this.session.didCancelHeartbeat());
 
-		assertEquals(new CloseStatus(3000, "Go away!"), this.session.getStatus());
+		assertEquals(new CloseStatus(3000, "Go away!"), this.session.getCloseStatus());
 		assertClosed();
 		verify(this.webSocketHandler).afterConnectionClosed(this.session, new CloseStatus(3000, "Go away!"));
 	}
@@ -160,13 +190,13 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 	@Test
 	public void closeWithWriteFrameExceptions() throws Exception {
 
-		this.session.setExceptionOnWriteFrame(new IOException());
+		this.session.setExceptionOnWrite(new IOException());
 
 		this.session.delegateConnectionEstablished();
 		this.session.setActive(true);
 		this.session.close();
 
-		assertEquals(new CloseStatus(3000, "Go away!"), this.session.getStatus());
+		assertEquals(new CloseStatus(3000, "Go away!"), this.session.getCloseStatus());
 		assertClosed();
 	}
 
@@ -179,7 +209,7 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 		this.session.setActive(true);
 		this.session.close(CloseStatus.NORMAL);
 
-		assertEquals(CloseStatus.NORMAL, this.session.getStatus());
+		assertEquals(CloseStatus.NORMAL, this.session.getCloseStatus());
 		assertClosed();
 	}
 
@@ -193,28 +223,14 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 
 	@Test
 	public void writeFrameIoException() throws Exception {
-		this.session.setExceptionOnWriteFrame(new IOException());
+		this.session.setExceptionOnWrite(new IOException());
 		this.session.delegateConnectionEstablished();
 		try {
 			this.session.writeFrame(SockJsFrame.openFrame());
 			fail("expected exception");
 		}
-		catch (IOException ex) {
-			assertEquals(CloseStatus.SERVER_ERROR, this.session.getStatus());
-			verify(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.SERVER_ERROR);
-		}
-	}
-
-	@Test
-	public void writeFrameThrowable() throws Exception {
-		this.session.setExceptionOnWriteFrame(new NullPointerException());
-		this.session.delegateConnectionEstablished();
-		try {
-			this.session.writeFrame(SockJsFrame.openFrame());
-			fail("expected exception");
-		}
-		catch (SockJsProcessingException ex) {
-			assertEquals(CloseStatus.SERVER_ERROR, this.session.getStatus());
+		catch (SockJsTransportFailureException ex) {
+			assertEquals(CloseStatus.SERVER_ERROR, this.session.getCloseStatus());
 			verify(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.SERVER_ERROR);
 		}
 	}

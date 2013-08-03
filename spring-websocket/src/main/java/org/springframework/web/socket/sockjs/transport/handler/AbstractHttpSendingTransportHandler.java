@@ -23,14 +23,14 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 
 /**
- * Base class for HTTP-based transports that send messages over HTTP.
+ * Base class for HTTP transport handlers that push messages to connected clients.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -41,17 +41,17 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, WebSocketSession session) throws SockJsProcessingException {
+			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
 
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
 
-		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) session;
+		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 		handleRequestInternal(request, response, sockJsSession);
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpSockJsSession sockJsSession) throws SockJsProcessingException {
+			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		if (sockJsSession.isNew()) {
 			logger.debug("Opening " + getTransportType() + " connection");
@@ -62,13 +62,13 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 			sockJsSession.setLongPollingRequest(request, response, getFrameFormat(request));
 		}
 		else {
+			logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);
+			SockJsFrame frame = getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
 			try {
-				logger.debug("another " + getTransportType() + " connection still open: " + sockJsSession);
-				SockJsFrame closeFrame = SockJsFrame.closeFrameAnotherConnectionOpen();
-				response.getBody().write(getFrameFormat(request).format(closeFrame).getContentBytes());
+				response.getBody().write(frame.getContentBytes());
 			}
-			catch (IOException e) {
-				throw new SockJsProcessingException("Failed to send SockJS close frame", e, sockJsSession.getId());
+			catch (IOException ex) {
+				throw new SockJsException("Failed to send " + frame, sockJsSession.getId(), ex);
 			}
 		}
 	}

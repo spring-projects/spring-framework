@@ -16,9 +16,8 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
-import java.io.IOException;
-
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
 
@@ -35,7 +34,7 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	@Override
-	protected void flushCache() throws IOException {
+	protected void flushCache() throws SockJsTransportFailureException {
 
 		cancelHeartbeat();
 		String[] messages = getMessageCache().toArray(new String[getMessageCache().size()]);
@@ -47,7 +46,7 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 	@Override
-	protected void writeFrame(SockJsFrame frame) throws IOException {
+	protected void writeFrame(SockJsFrame frame) throws SockJsTransportFailureException {
 		super.writeFrame(frame);
 		resetRequest();
 	}

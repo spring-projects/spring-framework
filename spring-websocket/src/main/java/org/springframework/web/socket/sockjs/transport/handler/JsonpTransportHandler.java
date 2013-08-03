@@ -26,11 +26,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
+import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 
 /**
  * A {@link TransportHandler} that receives messages over HTTP.
@@ -49,15 +49,14 @@ public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, WebSocketSession webSocketSession) throws SockJsProcessingException {
+			WebSocketHandler wsHandler, AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
-		super.handleRequestInternal(request, response, webSocketHandler, webSocketSession);
-
+		super.handleRequestInternal(request, response, wsHandler, sockJsSession);
 		try {
 			response.getBody().write("ok".getBytes("UTF-8"));
 		}
-		catch (Throwable t) {
-			throw new SockJsProcessingException("Failed to write response body", t, webSocketSession.getId());
+		catch(IOException ex) {
+			throw new SockJsException("Failed to write to the response body", sockJsSession.getId(), ex);
 		}
 	}
 

@@ -23,13 +23,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.StringUtils;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsException;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
 import org.springframework.web.util.JavaScriptUtils;
 
 /**
@@ -57,7 +59,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 
 	@Override
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			AbstractHttpSockJsSession session) throws SockJsProcessingException {
+			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		try {
 			String callback = request.getQueryParams().getFirst("c");
@@ -68,16 +70,17 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 			}
 		}
 		catch (Throwable t) {
-			throw new SockJsProcessingException("Failed to send error to client", t, session.getId());
+			sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("Failed to send error", sockJsSession.getId(), t);
 		}
 
-		super.handleRequestInternal(request, response, session);
+		super.handleRequestInternal(request, response, sockJsSession);
 	}
 
 	@Override
 	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
 
-		// we already validated the parameter..
+		// we already validated the parameter above..
 		String callback = request.getQueryParams().getFirst("c");
 
 		return new SockJsFrame.DefaultFrameFormat(callback + "(\"%s\");\r\n") {

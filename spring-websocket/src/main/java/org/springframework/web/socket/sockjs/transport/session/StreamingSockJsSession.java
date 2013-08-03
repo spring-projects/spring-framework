@@ -21,10 +21,11 @@ import java.io.IOException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsException;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
-import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
 
 /**
  * A SockJS session for use with streaming HTTP transports.
@@ -43,7 +44,7 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 	@Override
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
-			FrameFormat frameFormat) throws SockJsProcessingException {
+			FrameFormat frameFormat) throws SockJsException {
 
 		super.setInitialRequest(request, response, frameFormat);
 
@@ -54,7 +55,7 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 	}
 
 	@Override
-	protected void flushCache() throws IOException {
+	protected void flushCache() throws SockJsTransportFailureException {
 
 		cancelHeartbeat();
 

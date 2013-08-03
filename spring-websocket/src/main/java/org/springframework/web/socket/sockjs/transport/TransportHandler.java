@@ -20,19 +20,36 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
+import org.springframework.web.socket.sockjs.SockJsService;
 
 /**
- * Handles SockJS session URLs.
+ * Handle a SockJS session URL, i.e. transport-specific request.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface TransportHandler {
 
+
+	/**
+	 * @return the transport type supported by this handler
+	 */
 	TransportType getTransportType();
 
+	/**
+	 * Handle the given request and delegate messages to the provided
+	 * {@link WebSocketHandler}.
+	 *
+	 * @param request the current request
+	 * @param response the current response
+	 * @param handler the target WebSocketHandler, never {@code null}
+	 * @param session the SockJS session, never {@code null}
+	 *
+	 * @throws SockJsException raised when request processing fails as explained in
+	 *         {@link SockJsService}
+	 */
 	void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler handler, WebSocketSession session) throws SockJsProcessingException;
+			WebSocketHandler handler, WebSocketSession session) throws SockJsException;
 
 }

@@ -21,10 +21,12 @@ import java.io.IOException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.HandshakeHandler;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
@@ -64,15 +66,16 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 
 	@Override
 	public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsProcessingException {
+			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
 
+		WebSocketServerSockJsSession sockJsSession = (WebSocketServerSockJsSession) wsSession;
 		try {
-			WebSocketServerSockJsSession sockJsSession = (WebSocketServerSockJsSession) wsSession;
-			WebSocketHandler sockJsHandler = new SockJsWebSocketHandler(getSockJsServiceConfig(), wsHandler, sockJsSession);
-			this.handshakeHandler.doHandshake(request, response, sockJsHandler);
+			wsHandler = new SockJsWebSocketHandler(getSockJsServiceConfig(), wsHandler, sockJsSession);
+			this.handshakeHandler.doHandshake(request, response, wsHandler);
 		}
 		catch (Throwable t) {
-			throw new SockJsProcessingException("Failed to start handshake request", t, wsSession.getId());
+			sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
+			throw new SockJsTransportFailureException("WebSocket handshake failure", wsSession.getId(), t);
 		}
 	}
 

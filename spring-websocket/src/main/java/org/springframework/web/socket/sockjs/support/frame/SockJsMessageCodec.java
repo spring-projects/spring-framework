@@ -21,8 +21,8 @@ import java.io.InputStream;
 
 
 /**
- * A contract for encoding and decoding of messages to and from a SockJS message frame,
- * which is essentially an array of JSON-encoded messages. For example:
+ * Encode and decode messages to and from a SockJS message frame, essentially an array of
+ * JSON-encoded messages. For example:
  *
  * <pre>
  * a["message1","message2"]

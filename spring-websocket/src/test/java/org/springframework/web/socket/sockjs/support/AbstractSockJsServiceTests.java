@@ -27,7 +27,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import static org.junit.Assert.*;
@@ -246,7 +246,7 @@ public class AbstractSockJsServiceTests extends AbstractHttpRequestTests {
 
 		@Override
 		protected void handleTransportRequest(ServerHttpRequest req, ServerHttpResponse res, WebSocketHandler handler,
-				String sessionId, String transport) throws IOException, SockJsProcessingException {
+				String sessionId, String transport) throws IOException, SockJsException {
 
 			this.sessionId = sessionId;
 			this.transport = transport;

@@ -25,17 +25,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.SockJsProcessingException;
+import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
-import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
+import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
- * Base class for HTTP-based transports that read input messages from HTTP requests.
+ * Base class for HTTP transport handlers that receive messages via HTTP POST.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -46,17 +45,19 @@ public abstract class AbstractHttpReceivingTransportHandler
 
 	@Override
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsProcessingException {
+			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
 
 		// TODO: check "Sec-WebSocket-Protocol" header
 		// https://github.com/sockjs/sockjs-client/issues/130
 
 		Assert.notNull(wsSession, "No session");
-		handleRequestInternal(request, response, wsHandler, wsSession);
+		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
+
+		handleRequestInternal(request, response, wsHandler, sockJsSession);
 	}
 
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsProcessingException {
+			WebSocketHandler wsHandler, AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		String[] messages = null;
 		try {
@@ -64,22 +65,22 @@ public abstract class AbstractHttpReceivingTransportHandler
 		}
 		catch (JsonMappingException ex) {
 			logger.error("Failed to read message: " + ex.getMessage());
-			sendInternalServerError(response, "Payload expected.", wsSession.getId());
+			handleReadError(response, "Payload expected.", sockJsSession.getId());
 			return;
 		}
 		catch (IOException ex) {
 			logger.error("Failed to read message: " + ex.getMessage());
-			sendInternalServerError(response, "Broken JSON encoding.", wsSession.getId());
+			handleReadError(response, "Broken JSON encoding.", sockJsSession.getId());
 			return;
 		}
 		catch (Throwable t) {
 			logger.error("Failed to read message: " + t.getMessage());
-			sendInternalServerError(response, "Failed to process messages", wsSession.getId());
+			handleReadError(response, "Failed to read message(s)", sockJsSession.getId());
 			return;
 		}
 
 		if (messages == null) {
-			sendInternalServerError(response, "Payload expected.", wsSession.getId());
+			handleReadError(response, "Payload expected.", sockJsSession.getId());
 			return;
 		}
 
@@ -90,26 +91,16 @@ public abstract class AbstractHttpReceivingTransportHandler
 		response.setStatusCode(getResponseStatus());
 		response.getHeaders().setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 
-		try {
-			for (String message : messages) {
-				wsHandler.handleMessage(wsSession, new TextMessage(message));
-			}
-		}
-		catch (Throwable t) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(wsSession, t, logger);
-			throw new SockJsProcessingException("Unhandled WebSocketHandler error in " + this, t, wsSession.getId());
-		}
+		sockJsSession.delegateMessages(messages);
 	}
 
-	protected void sendInternalServerError(ServerHttpResponse response, String error,
-			String sessionId) throws SockJsProcessingException {
-
+	private void handleReadError(ServerHttpResponse resp, String error, String sessionId) {
 		try {
-			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			response.getBody().write(error.getBytes("UTF-8"));
+			resp.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			resp.getBody().write(error.getBytes("UTF-8"));
 		}
-		catch (Throwable t) {
-			throw new SockJsProcessingException("Failed to send error message to client", t, sessionId);
+		catch (IOException ex) {
+			throw new SockJsException("Failed to send error: " + error, sessionId, ex);
 		}
 	}
 
