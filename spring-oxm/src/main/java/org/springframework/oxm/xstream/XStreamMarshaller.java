@@ -75,22 +75,28 @@ import org.springframework.util.xml.StaxUtils;
 /**
  * Implementation of the {@code Marshaller} interface for XStream.
  *
- * <p>By default, XStream does not require any further configuration,
- * though class aliases can be used to have more control over the behavior of XStream.
+ * <p>By default, XStream does not require any further configuration and can (un)marshal
+ * any class on the classpath. As such, it is <b>not recommended to use the
+ * {@code XStreamMarshaller} to unmarshal XML from external sources</b> (i.e. the Web),
+ * as this can result in <b>security vulnerabilities</b>. If you do use the
+ * {@code XStreamMarshaller} to unmarshal external XML, set the
+ * {@link #setConverters(ConverterMatcher[]) converters} and
+ * {@link #setSupportedClasses(Class[]) supportedClasses} properties or override the
+ * {@link #customizeXStream(XStream)} method to make sure it only accepts the classes
+ * you want it to support.
  *
  * <p>Due to XStream's API, it is required to set the encoding used for writing to OutputStreams.
  * It defaults to {@code UTF-8}.
  *
  * <p><b>NOTE:</b> XStream is an XML serialization library, not a data binding library.
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for
- * usage within Web services.
+ * usage within Web Services.
+ *
+ * <p>This marshaller is compatible with XStream 1.3 and 1.4.
  *
  * @author Peter Meijer
  * @author Arjen Poutsma
  * @since 3.0
- * @see #setAliases
- * @see #setConverters
- * @see #setEncoding
  */
 public class XStreamMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
 
@@ -106,15 +112,19 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private String encoding = DEFAULT_ENCODING;
 
-	private Class[] supportedClasses;
+	private Class<?>[] supportedClasses;
 
-	private ClassLoader classLoader;
+	private ClassLoader beanClassLoader;
 
 
 	/**
-	 * Returns the XStream instance used by this marshaller.
+	 * Return the XStream instance used by this marshaller.
+	 * <p><b>NOTE:</b> While this method can be overridden in Spring 3.x,
+	 * it wasn't originally meant to be. As of Spring 4.0, it will be
+	 * marked as final, with all of XStream 1.4's configurable strategies
+	 * to be exposed on XStreamMarshaller itself.
 	 */
-	public final XStream getXStream() {
+	public XStream getXStream() {
 		return this.xstream;
 	}
 
@@ -125,7 +135,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @see XStream#NO_REFERENCES
 	 */
 	public void setMode(int mode) {
-		this.xstream.setMode(mode);
+		getXStream().setMode(mode);
 	}
 
 	/**
@@ -137,10 +147,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	public void setConverters(ConverterMatcher[] converters) {
 		for (int i = 0; i < converters.length; i++) {
 			if (converters[i] instanceof Converter) {
-				this.xstream.registerConverter((Converter) converters[i], i);
+				getXStream().registerConverter((Converter) converters[i], i);
 			}
 			else if (converters[i] instanceof SingleValueConverter) {
-				this.xstream.registerConverter((SingleValueConverter) converters[i], i);
+				getXStream().registerConverter((SingleValueConverter) converters[i], i);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid ConverterMatcher [" + converters[i] + "]");
@@ -156,7 +166,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	public void setAliases(Map<String, ?> aliases) throws ClassNotFoundException {
 		Map<String, Class<?>> classMap = toClassMap(aliases);
 		for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-			this.xstream.alias(entry.getKey(), entry.getValue());
+			getXStream().alias(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -169,7 +179,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	public void setAliasesByType(Map<String, ?> aliases) throws ClassNotFoundException {
 		Map<String, Class<?>> classMap = toClassMap(aliases);
 		for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
-			this.xstream.aliasType(entry.getKey(), entry.getValue());
+			getXStream().aliasType(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -178,16 +188,16 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
-			Class type;
+			Class<?> type;
 			if (value instanceof Class) {
-				type = (Class) value;
+				type = (Class<?>) value;
 			}
 			else if (value instanceof String) {
-				String s = (String) value;
-				type = ClassUtils.forName(s, classLoader);
+				String className = (String) value;
+				type = ClassUtils.forName(className, this.beanClassLoader);
 			}
 			else {
-				throw new IllegalArgumentException("Unknown value [" + value + "], expected String or Class");
+				throw new IllegalArgumentException("Unknown value [" + value + "] - expected String or Class");
 			}
 			result.put(key, type);
 		}
@@ -205,9 +215,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			int idx = field.lastIndexOf('.');
 			if (idx != -1) {
 				String className = field.substring(0, idx);
-				Class clazz = ClassUtils.forName(className, classLoader);
+				Class<?> clazz = ClassUtils.forName(className, this.beanClassLoader);
 				String fieldName = field.substring(idx + 1);
-				this.xstream.aliasField(alias, clazz, fieldName);
+				getXStream().aliasField(alias, clazz, fieldName);
 			}
 			else {
 				throw new IllegalArgumentException("Field name [" + field + "] does not contain '.'");
@@ -219,9 +229,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * Set types to use XML attributes for.
 	 * @see XStream#useAttributeFor(Class)
 	 */
-	public void setUseAttributeForTypes(Class[] types) {
-		for (Class type : types) {
-			this.xstream.useAttributeFor(type);
+	public void setUseAttributeForTypes(Class<?>[] types) {
+		for (Class<?> type : types) {
+			getXStream().useAttributeFor(type);
 		}
 	}
 
@@ -237,36 +247,33 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<?, ?> entry : attributes.entrySet()) {
 			if (entry.getKey() instanceof String) {
 				if (entry.getValue() instanceof Class) {
-					this.xstream.useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+					getXStream().useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
 				}
 				else {
 					throw new IllegalArgumentException(
-							"Invalid argument 'attributes'. 'useAttributesFor' property takes map of <String, Class>," +
-									" when using a map key of type String");
+							"'useAttributesFor' takes Map<String, Class> when using a map key of type String");
 				}
 			}
 			else if (entry.getKey() instanceof Class) {
 				Class<?> key = (Class<?>) entry.getKey();
 				if (entry.getValue() instanceof String) {
-					this.xstream.useAttributeFor(key, (String) entry.getValue());
+					getXStream().useAttributeFor(key, (String) entry.getValue());
 				}
 				else if (entry.getValue() instanceof List) {
-					List list = (List) entry.getValue();
-
-					for (Object o : list) {
-						if (o instanceof String) {
-							this.xstream.useAttributeFor(key, (String) o);
+					List listValue = (List) entry.getValue();
+					for (Object element : listValue) {
+						if (element instanceof String) {
+							getXStream().useAttributeFor(key, (String) element);
 						}
 					}
 				}
 				else {
-					throw new IllegalArgumentException("Invalid argument 'attributes'. " +
-							"'useAttributesFor' property takes either <Class, String> or <Class, List<String>> map," +
-							" when using a map key of type Class");
+					throw new IllegalArgumentException("'useAttributesFor' property takes either Map<Class, String> " +
+							"or Map<Class, List<String>> when using a map key of type Class");
 				}
 			}
 			else {
-				throw new IllegalArgumentException("Invalid argument 'attributes. " +
+				throw new IllegalArgumentException(
 						"'useAttributesFor' property takes either a map key of type String or Class");
 			}
 		}
@@ -281,7 +288,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<Class<?>, String> entry : implicitCollections.entrySet()) {
 			String[] collectionFields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
 			for (String collectionField : collectionFields) {
-				this.xstream.addImplicitCollection(entry.getKey(), collectionField);
+				getXStream().addImplicitCollection(entry.getKey(), collectionField);
 			}
 		}
 	}
@@ -295,7 +302,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<Class<?>, String> entry : omittedFields.entrySet()) {
 			String[] fields = StringUtils.commaDelimitedListToStringArray(entry.getValue());
 			for (String field : fields) {
-				this.xstream.omitField(entry.getKey(), field);
+				getXStream().omitField(entry.getKey(), field);
 			}
 		}
 	}
@@ -306,7 +313,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setAnnotatedClass(Class<?> annotatedClass) {
 		Assert.notNull(annotatedClass, "'annotatedClass' must not be null");
-		this.xstream.processAnnotations(annotatedClass);
+		getXStream().processAnnotations(annotatedClass);
 	}
 
 	/**
@@ -315,17 +322,17 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "'annotatedClasses' must not be empty");
-		this.xstream.processAnnotations(annotatedClasses);
+		getXStream().processAnnotations(annotatedClasses);
 	}
 
 	/**
-	 * Set the autodetection mode of XStream.
-	 * <p><strong>Note</strong> that auto-detection implies that the XStream is configured while
+	 * Activate XStream's autodetection mode.
+	 * <p><b>Note</b>: Autodetection implies that the XStream instance is being configured while
 	 * it is processing the XML streams, and thus introduces a potential concurrency problem.
 	 * @see XStream#autodetectAnnotations(boolean)
 	 */
 	public void setAutodetectAnnotations(boolean autodetectAnnotations) {
-		this.xstream.autodetectAnnotations(autodetectAnnotations);
+		getXStream().autodetectAnnotations(autodetectAnnotations);
 	}
 
 	/**
@@ -348,17 +355,18 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * <p>If this property is empty (the default), all classes are supported.
 	 * @see #supports(Class)
 	 */
-	public void setSupportedClasses(Class[] supportedClasses) {
+	public void setSupportedClasses(Class<?>[] supportedClasses) {
 		this.supportedClasses = supportedClasses;
 	}
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
+		this.beanClassLoader = classLoader;
+		getXStream().setClassLoader(classLoader);
 	}
 
 
 	public final void afterPropertiesSet() throws Exception {
-		customizeXStream(this.xstream);
+		customizeXStream(getXStream());
 	}
 
 	/**
@@ -370,12 +378,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 
-	public boolean supports(Class clazz) {
+	public boolean supports(Class<?> clazz) {
 		if (ObjectUtils.isEmpty(this.supportedClasses)) {
 			return true;
 		}
 		else {
-			for (Class supportedClass : this.supportedClasses) {
+			for (Class<?> supportedClass : this.supportedClasses) {
 				if (supportedClass.isAssignableFrom(clazz)) {
 					return true;
 				}
@@ -453,7 +461,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	private void marshal(Object graph, HierarchicalStreamWriter streamWriter) {
 		try {
-			this.xstream.marshal(graph, streamWriter);
+			getXStream().marshal(graph, streamWriter);
 		}
 		catch (Exception ex) {
 			throw convertXStreamException(ex, true);
@@ -536,7 +544,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
      */
     private Object unmarshal(HierarchicalStreamReader streamReader) {
         try {
-            return this.xstream.unmarshal(streamReader);
+            return getXStream().unmarshal(streamReader);
         }
         catch (Exception ex) {
             throw convertXStreamException(ex, false);
