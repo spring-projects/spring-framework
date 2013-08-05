@@ -144,7 +144,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @see Converter
 	 * @see SingleValueConverter
 	 */
-	public void setConverters(ConverterMatcher[] converters) {
+	public void setConverters(ConverterMatcher... converters) {
 		for (int i = 0; i < converters.length; i++) {
 			if (converters[i] instanceof Converter) {
 				getXStream().registerConverter((Converter) converters[i], i);
@@ -159,8 +159,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Sets an alias/type map, consisting of string aliases mapped to classes. Keys are aliases; values are either
-	 * {@code Class} instances, or String class names.
+	 * Set an alias/type map, consisting of String aliases mapped to classes.
+	 * <p>Keys are aliases; values are either Class objects or String class names.
 	 * @see XStream#alias(String, Class)
 	 */
 	public void setAliases(Map<String, ?> aliases) throws ClassNotFoundException {
@@ -171,9 +171,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Sets the aliases by type map, consisting of string aliases mapped to classes. Any class that is assignable to
-	 * this type will be aliased to the same name. Keys are aliases; values are either
-	 * {@code Class} instances, or String class names.
+	 * Set the aliases by type map, consisting of String aliases mapped to classes.
+	 * <p>Any class that is assignable to this type will be aliased to the same name.
+	 * Keys are aliases; values are either Class objects or String class names.
 	 * @see XStream#aliasType(String, Class)
 	 */
 	public void setAliasesByType(Map<String, ?> aliases) throws ClassNotFoundException {
@@ -205,7 +205,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set a field alias/type map, consiting of field names.
+	 * Set a field alias/type map, consisting of field names.
 	 * @see XStream#aliasField(String, Class, String)
 	 */
 	public void setFieldAliases(Map<String, String> aliases) throws ClassNotFoundException, NoSuchFieldException {
@@ -229,7 +229,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * Set types to use XML attributes for.
 	 * @see XStream#useAttributeFor(Class)
 	 */
-	public void setUseAttributeForTypes(Class<?>[] types) {
+	public void setUseAttributeForTypes(Class<?>... types) {
 		for (Class<?> type : types) {
 			getXStream().useAttributeFor(type);
 		}
@@ -282,7 +282,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	/**
 	 * Specify implicit collection fields, as a Map consisting of {@code Class} instances
 	 * mapped to comma separated collection field names.
-	 *@see XStream#addImplicitCollection(Class, String)
+	 * @see XStream#addImplicitCollection(Class, String)
 	 */
 	public void setImplicitCollections(Map<Class<?>, String> implicitCollections) {
 		for (Map.Entry<Class<?>, String> entry : implicitCollections.entrySet()) {
@@ -308,19 +308,21 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set the classes for which mappings will be read from class-level JDK 1.5+ annotation metadata.
+	 * Set the classes for which mappings will be read from class-level annotation metadata.
 	 * @see XStream#processAnnotations(Class)
+	 * @deprecated in favor of {@link #setAnnotatedClasses} with varargs
 	 */
+	@Deprecated
 	public void setAnnotatedClass(Class<?> annotatedClass) {
 		Assert.notNull(annotatedClass, "'annotatedClass' must not be null");
 		getXStream().processAnnotations(annotatedClass);
 	}
 
 	/**
-	 * Set annotated classes for which aliases will be read from class-level JDK 1.5+ annotation metadata.
+	 * Set annotated classes for which aliases will be read from class-level annotation metadata.
 	 * @see XStream#processAnnotations(Class[])
 	 */
-	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
+	public void setAnnotatedClasses(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "'annotatedClasses' must not be empty");
 		getXStream().processAnnotations(annotatedClasses);
 	}
@@ -355,7 +357,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * <p>If this property is empty (the default), all classes are supported.
 	 * @see #supports(Class)
 	 */
-	public void setSupportedClasses(Class<?>[] supportedClasses) {
+	public void setSupportedClasses(Class<?>... supportedClasses) {
 		this.supportedClasses = supportedClasses;
 	}
 
