@@ -135,8 +135,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			throw new IllegalStateException("'cacheManager' is required");
 		}
 		if (this.cacheOperationSource == null) {
-			throw new IllegalStateException("The 'cacheOperationSources' property is required: "
-					+ "If there are no cacheable methods, then don't use a cache aspect.");
+			throw new IllegalStateException("The 'cacheOperationSources' property is required: " +
+					"If there are no cacheable methods, then don't use a cache aspect.");
 		}
 
 		this.initialized = true;
@@ -163,7 +163,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		for (String cacheName : cacheNames) {
 			Cache cache = this.cacheManager.getCache(cacheName);
 			if (cache == null) {
-				throw new IllegalArgumentException("Cannot find cache named [" + cacheName + "] for " + operation);
+				throw new IllegalArgumentException("Cannot find cache named '" + cacheName + "' for " + operation);
 			}
 			caches.add(cache);
 		}
@@ -188,7 +188,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		if (targetClass == null && target != null) {
 			targetClass = target.getClass();
 		}
-		final Collection<CacheOperation> cacheOp = getCacheOperationSource().getCacheOperations(method, targetClass);
+		Collection<CacheOperation> cacheOp = getCacheOperationSource().getCacheOperations(method, targetClass);
 
 		// analyze caching information
 		if (!CollectionUtils.isEmpty(cacheOp)) {
@@ -237,7 +237,6 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						// for each cache
 						// lazy key initialization
 						Object key = null;
-
 						for (Cache cache : context.getCaches()) {
 							// cache-wide flush
 							if (evictOp.isCacheWide()) {
@@ -284,9 +283,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						logger.trace("Computed cache key " + key + " for operation " + context.operation);
 					}
 					if (key == null) {
-						throw new IllegalArgumentException(
-								"Null key returned for cache operation (maybe you are using named params on classes without debug info?) "
-										+ context.operation);
+						throw new IllegalArgumentException("Null key returned for cache operation (maybe you " +
+								"are using named params on classes without debug info?) " + context.operation);
 					}
 					// add op/key (in case an update is discovered later on)
 					cacheUpdates.put(context, key);
@@ -313,7 +311,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				}
 			}
 
-			// return a status only if at least on cacheable matched
+			// return a status only if at least one cacheable matched
 			if (atLeastOnePassed) {
 				return new CacheStatus(cacheUpdates, updateRequired, retVal);
 			}
@@ -333,9 +331,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						logger.trace("Computed cache key " + key + " for operation " + context.operation);
 					}
 					if (key == null) {
-						throw new IllegalArgumentException(
-								"Null key returned for cache operation (maybe you are using named params on classes without debug info?) "
-										+ context.operation);
+						throw new IllegalArgumentException("Null key returned for cache operation (maybe you " +
+								"are using named params on classes without debug info?) " + context.operation);
 					}
 					// add op/key (in case an update is discovered later on)
 					cacheUpdates.put(context, key);
@@ -353,7 +350,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	private void update(Map<CacheOperationContext, Object> updates, Object retVal) {
 		for (Map.Entry<CacheOperationContext, Object> entry : updates.entrySet()) {
 			CacheOperationContext operationContext = entry.getKey();
-			if(operationContext.canPutToCache(retVal)) {
+			if (operationContext.canPutToCache(retVal)) {
 				for (Cache cache : operationContext.getCaches()) {
 					cache.put(entry.getValue(), retVal);
 				}
@@ -361,36 +358,31 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 	}
 
-	private Map<String, Collection<CacheOperationContext>> createOperationContext(Collection<CacheOperation> cacheOp,
-			Method method, Object[] args, Object target, Class<?> targetClass) {
+	private Map<String, Collection<CacheOperationContext>> createOperationContext(
+			Collection<CacheOperation> cacheOperations, Method method, Object[] args, Object target, Class<?> targetClass) {
 
-		Map<String, Collection<CacheOperationContext>> map = new LinkedHashMap<String, Collection<CacheOperationContext>>(3);
-
+		Map<String, Collection<CacheOperationContext>> result = new LinkedHashMap<String, Collection<CacheOperationContext>>(3);
 		Collection<CacheOperationContext> cacheables = new ArrayList<CacheOperationContext>();
 		Collection<CacheOperationContext> evicts = new ArrayList<CacheOperationContext>();
 		Collection<CacheOperationContext> updates = new ArrayList<CacheOperationContext>();
 
-		for (CacheOperation cacheOperation : cacheOp) {
+		for (CacheOperation cacheOperation : cacheOperations) {
 			CacheOperationContext opContext = getOperationContext(cacheOperation, method, args, target, targetClass);
-
 			if (cacheOperation instanceof CacheableOperation) {
 				cacheables.add(opContext);
 			}
-
 			if (cacheOperation instanceof CacheEvictOperation) {
 				evicts.add(opContext);
 			}
-
 			if (cacheOperation instanceof CachePutOperation) {
 				updates.add(opContext);
 			}
 		}
 
-		map.put(CACHEABLE, cacheables);
-		map.put(EVICT, evicts);
-		map.put(UPDATE, updates);
-
-		return map;
+		result.put(CACHEABLE, cacheables);
+		result.put(EVICT, evicts);
+		result.put(UPDATE, updates);
+		return result;
 	}
 
 
@@ -430,8 +422,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		protected boolean isConditionPassing(Object result) {
 			if (StringUtils.hasText(this.operation.getCondition())) {
 				EvaluationContext evaluationContext = createEvaluationContext(result);
-				return evaluator.condition(this.operation.getCondition(), this.method,
-						evaluationContext);
+				return evaluator.condition(this.operation.getCondition(), this.method, evaluationContext);
 			}
 			return true;
 		}
@@ -444,7 +435,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			else if (this.operation instanceof CachePutOperation) {
 				unless = ((CachePutOperation) this.operation).getUnless();
 			}
-			if(StringUtils.hasText(unless)) {
+			if (StringUtils.hasText(unless)) {
 				EvaluationContext evaluationContext = createEvaluationContext(value);
 				return !evaluator.unless(unless, this.method, evaluationContext);
 			}
@@ -464,8 +455,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 
 		private EvaluationContext createEvaluationContext(Object result) {
-			return evaluator.createEvaluationContext(this.caches, this.method, this.args,
-					this.target, this.targetClass, result);
+			return evaluator.createEvaluationContext(this.caches, this.method, this.args, this.target, this.targetClass, result);
 		}
 
 		protected Collection<Cache> getCaches() {
