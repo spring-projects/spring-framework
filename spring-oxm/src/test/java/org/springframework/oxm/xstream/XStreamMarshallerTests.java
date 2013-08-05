@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -37,27 +36,27 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InOrder;
-import org.springframework.util.xml.StaxUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.json.JsonWriter;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InOrder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.custommonkey.xmlunit.XMLAssert.assertXpathExists;
-import static org.custommonkey.xmlunit.XMLAssert.assertXpathNotExists;
-import static org.junit.Assert.*;
+import org.springframework.util.xml.StaxUtils;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -315,7 +314,9 @@ public class XStreamMarshallerTests {
 		marshaller.setStreamDriver(new JsonHierarchicalStreamDriver() {
 			@Override
 			public HierarchicalStreamWriter createWriter(Writer writer) {
-				return new JsonWriter(writer, new char[0], "", JsonWriter.DROP_ROOT_MODE);
+				return new JsonWriter(writer, JsonWriter.DROP_ROOT_MODE,
+						new JsonWriter.Format(new char[0], new char[0],
+								JsonWriter.Format.SPACE_AFTER_LABEL | JsonWriter.Format.COMPACT_EMPTY_ELEMENT));
 			}
 		});
 
@@ -326,7 +327,7 @@ public class XStreamMarshallerTests {
 
 	@Test
 	public void annotatedMarshalStreamResultWriter() throws Exception {
-		marshaller.setAnnotatedClass(Flight.class);
+		marshaller.setAnnotatedClasses(Flight.class);
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		Flight flight = new Flight();
