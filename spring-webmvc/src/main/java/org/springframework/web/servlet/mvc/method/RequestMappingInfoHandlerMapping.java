@@ -24,9 +24,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -205,7 +207,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				try {
 					contentType = MediaType.parseMediaType(request.getContentType());
 				}
-				catch (IllegalArgumentException ex) {
+				catch (InvalidMediaTypeException ex) {
 					throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 				}
 			}

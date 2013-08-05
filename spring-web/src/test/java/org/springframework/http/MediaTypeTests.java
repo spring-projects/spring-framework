@@ -16,7 +16,6 @@
 
 package org.springframework.http;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
@@ -35,60 +33,6 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  */
 public class MediaTypeTests {
-
-	@Test
-	public void includes() throws Exception {
-		MediaType textPlain = MediaType.TEXT_PLAIN;
-		assertTrue("Equal types is not inclusive", textPlain.includes(textPlain));
-		MediaType allText = new MediaType("text");
-
-		assertTrue("All subtypes is not inclusive", allText.includes(textPlain));
-		assertFalse("All subtypes is inclusive", textPlain.includes(allText));
-
-		assertTrue("All types is not inclusive", MediaType.ALL.includes(textPlain));
-		assertFalse("All types is inclusive", textPlain.includes(MediaType.ALL));
-
-		assertTrue("All types is not inclusive", MediaType.ALL.includes(textPlain));
-		assertFalse("All types is inclusive", textPlain.includes(MediaType.ALL));
-
-		MediaType applicationSoapXml = new MediaType("application", "soap+xml");
-		MediaType applicationWildcardXml = new MediaType("application", "*+xml");
-
-		assertTrue(applicationSoapXml.includes(applicationSoapXml));
-		assertTrue(applicationWildcardXml.includes(applicationWildcardXml));
-
-		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
-		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
-
-		assertFalse(applicationWildcardXml.includes(MediaType.APPLICATION_JSON));
-	}
-
-	@Test
-	public void isCompatible() throws Exception {
-		MediaType textPlain = MediaType.TEXT_PLAIN;
-		assertTrue("Equal types is not compatible", textPlain.isCompatibleWith(textPlain));
-		MediaType allText = new MediaType("text");
-
-		assertTrue("All subtypes is not compatible", allText.isCompatibleWith(textPlain));
-		assertTrue("All subtypes is not compatible", textPlain.isCompatibleWith(allText));
-
-		assertTrue("All types is not compatible", MediaType.ALL.isCompatibleWith(textPlain));
-		assertTrue("All types is not compatible", textPlain.isCompatibleWith(MediaType.ALL));
-
-		assertTrue("All types is not compatible", MediaType.ALL.isCompatibleWith(textPlain));
-		assertTrue("All types is compatible", textPlain.isCompatibleWith(MediaType.ALL));
-
-		MediaType applicationSoapXml = new MediaType("application", "soap+xml");
-		MediaType applicationWildcardXml = new MediaType("application", "*+xml");
-
-		assertTrue(applicationSoapXml.isCompatibleWith(applicationSoapXml));
-		assertTrue(applicationWildcardXml.isCompatibleWith(applicationWildcardXml));
-
-		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
-		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
-
-		assertFalse(applicationWildcardXml.isCompatibleWith(MediaType.APPLICATION_JSON));
-	}
 
 	@Test
 	public void testToString() throws Exception {
@@ -175,45 +119,6 @@ public class MediaTypeTests {
 	@Test(expected = InvalidMediaTypeException.class)
 	public void parseMediaTypeIllegalCharset() {
 		MediaType.parseMediaType("text/html; charset=foo-bar");
-	}
-
-	// SPR-8917
-
-	@Test
-	public void parseMediaTypeQuotedParameterValue() {
-		MediaType mediaType = MediaType.parseMediaType("audio/*;attr=\"v>alue\"");
-		assertEquals("\"v>alue\"", mediaType.getParameter("attr"));
-	}
-
-	// SPR-8917
-
-	@Test
-	public void parseMediaTypeSingleQuotedParameterValue() {
-		MediaType mediaType = MediaType.parseMediaType("audio/*;attr='v>alue'");
-		assertEquals("'v>alue'", mediaType.getParameter("attr"));
-	}
-
-	@Test(expected = InvalidMediaTypeException.class)
-	public void parseMediaTypeIllegalQuotedParameterValue() {
-		MediaType.parseMediaType("audio/*;attr=\"");
-	}
-
-	@Test
-	public void parseCharset() throws Exception {
-		String s = "text/html; charset=iso-8859-1";
-		MediaType mediaType = MediaType.parseMediaType(s);
-		assertEquals("Invalid type", "text", mediaType.getType());
-		assertEquals("Invalid subtype", "html", mediaType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mediaType.getCharSet());
-	}
-
-	@Test
-	public void parseQuotedCharset() {
-		String s = "application/xml;charset=\"utf-8\"";
-		MediaType mediaType = MediaType.parseMediaType(s);
-		assertEquals("Invalid type", "application", mediaType.getType());
-		assertEquals("Invalid subtype", "xml", mediaType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("UTF-8"), mediaType.getCharSet());
 	}
 
 	@Test
