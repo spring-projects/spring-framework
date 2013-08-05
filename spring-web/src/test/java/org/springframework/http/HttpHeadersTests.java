@@ -210,6 +210,14 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
 	}
 
+	// SPR-10648 (example is from INT-3063)
+
+	@Test
+	public void expiresInvalidDate() {
+		headers.set("Expires", "-1");
+		assertEquals(-1, headers.getExpires());
+	}
+
 	@Test
 	public void ifModifiedSince() {
 		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
