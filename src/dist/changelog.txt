@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2.4 (2013-08-02)
+Changes in version 3.2.4 (2013-08-06)
 -------------------------------------
 
 * support for Quartz 2.2 (SPR-10775)
@@ -15,18 +15,22 @@ Changes in version 3.2.4 (2013-08-02)
 * fixed regression with non-String value attributes on custom stereotypes (SPR-10580)
 * fixed regression in nested placeholder resolution in case of ignoreUnresolvablePlaceholders (SPR-10549)
 * fixed SpEL's MethodExecutor to correctly cache overloaded methods (SPR-10684)
+* fixed ClassFilterAwareUnionMethodMatcher equals implementation (SPR-10604)
 * introduced latest CGLIB UndeclaredThrowableStrategy changes for better memory usage (SPR-10709)
 * fixed regression with AspectJ-based @Async handling in case of no executor set (SPR-10715)
 * proper parsing of JPA's "exclude-unlisted-classes" element with a nested "true"/"false" value (SPR-10767)
 * resource-based PlatformTransactionManager implementations defensively handle Errors on begin (SPR-10755)
 * re-introduced RmiInvocationWrapperRTD.xml for WebLogic which has been missing in 3.2 (SPR-10649)
 * Jaxb2Marshaller scans for @XmlRegistry annotation as well (SPR-10714)
+* XStreamMarshaller's "getXStream() method is non-final again (SPR-10421)
+* DelegatingFilterProxy avoids synchronization for pre-resolved delegate (SPR-10413)
 * fixed regression in @RequestParam empty value handling (SPR-10578)
 * fixed ResourceHttpRequestHandler's locations-list-empty warn log (SPR-10780)
 * fixed ContentNegotiatingViewResolver regression in case of no content type requested (SPR-10683)
 * fixed MappingJackson(2)JsonView's handling of a prefixJson="false" value (SPR-10752)
 * added configurable JSON prefix handling to MappingJackson(2)HttpMessageConverter (SPR-10627)
 * several UriComponentsBuilder refinements (SPR-10779, SPR-10701)
+* several HttpHeaders refinements (SPR-10713, SPR-10648)
 
 
 Changes in version 3.2.3 (2013-05-17)
