@@ -91,8 +91,15 @@ import org.springframework.util.ClassUtils;
  * {@code Sessions} and/or the {@code TaskExecutor} does not pool threads (check
  * your configuration!). Note that dynamic scaling only really makes sense for a
  * queue in the first place; for a topic, you will typically stick with the default
- * number of 1 consumer, else you'd receive the same message multiple times on
+ * number of 1 consumer, otherwise you'd receive the same message multiple times on
  * the same node.
+ *
+ * <p><b>Note: Don't use Spring's {@link org.springframework.jms.connection.CachingConnectionFactory}
+ * in combination with dynamic scaling.</b> Ideally, don't use it with a message
+ * listener container at all, since it is generally preferable to let the
+ * listener container itself handle appropriate caching within its lifecycle.
+ * Also, stopping and restarting a listener container will only work with an
+ * independent, locally cached Connection - not with an externally cached one.
  *
  * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
  * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
