@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.io.xml.XppDriver;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import com.thoughtworks.xstream.mapper.Mapper;
+import com.thoughtworks.xstream.mapper.MapperWrapper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -73,6 +75,7 @@ import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -122,6 +125,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	private final XppDriver fallbackDriver = new XppDriver();
 
 	private Mapper mapper;
+
+	private Class<?>[] mapperWrappers;
 
 	private ConverterLookup converterLookup = new DefaultConverterLookup();
 
@@ -183,6 +188,16 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setMapper(Mapper mapper) {
 		this.mapper = mapper;
+	}
+
+	/**
+	 * Set one or more custom XStream {@link MapperWrapper} classes.
+	 * Each of those classes needs to have a constructor with a single argument
+	 * of type {@link Mapper} or {@link MapperWrapper}.
+	 * @since 4.0
+	 */
+	public void setMapperWrappers(Class<?>... mapperWrappers) {
+		this.mapperWrappers = mapperWrappers;
 	}
 
 	/**
@@ -282,7 +297,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	/**
 	 * Specify implicit collection fields, as a Map consisting of {@code Class} instances
 	 * mapped to comma separated collection field names.
-	 *@see XStream#addImplicitCollection(Class, String)
+	 * @see XStream#addImplicitCollection(Class, String)
 	 */
 	public void setImplicitCollections(Map<Class<?>, String> implicitCollections) {
 		this.implicitCollections = implicitCollections;
@@ -306,8 +321,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Activate the autodetection mode of XStream.
-	 * <p><b>Note</b> that auto-detection implies that the XStream is configured while
+	 * Activate XStream's autodetection mode.
+	 * <p><b>Note</b>: Autodetection implies that the XStream instance is being configured while
 	 * it is processing the XML streams, and thus introduces a potential concurrency problem.
 	 * @see XStream#autodetectAnnotations(boolean)
 	 */
@@ -348,7 +363,36 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	protected XStream buildXStream() {
 		XStream xstream = new XStream(this.reflectionProvider, this.streamDriver,
-				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry);
+				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry) {
+			@Override
+			protected MapperWrapper wrapMapper(MapperWrapper next) {
+				MapperWrapper mapperToWrap = next;
+				if (mapperWrappers != null) {
+					for (Class<?> mapperWrapper : mapperWrappers) {
+						Assert.isAssignable(MapperWrapper.class, mapperWrapper);
+						Constructor<?> ctor;
+						try {
+							ctor = mapperWrapper.getConstructor(Mapper.class);
+						}
+						catch (NoSuchMethodException ex) {
+							try {
+								ctor = mapperWrapper.getConstructor(MapperWrapper.class);
+							}
+							catch (NoSuchMethodException ex2) {
+								throw new IllegalStateException("No appropriate MapperWrapper constructor found: " + mapperWrapper);
+							}
+						}
+						try {
+							mapperToWrap = (MapperWrapper) ctor.newInstance(mapperToWrap);
+						}
+						catch (Exception ex) {
+							throw new IllegalStateException("Failed to construct MapperWrapper: " + mapperWrapper);
+						}
+					}
+				}
+				return mapperToWrap;
+			}
+		};
 
 		if (this.converters != null) {
 			for (int i = 0; i < this.converters.length; i++) {
@@ -391,7 +435,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 					int idx = field.lastIndexOf('.');
 					if (idx != -1) {
 						String className = field.substring(0, idx);
-						Class clazz = ClassUtils.forName(className, this.beanClassLoader);
+						Class<?> clazz = ClassUtils.forName(className, this.beanClassLoader);
 						String fieldName = field.substring(idx + 1);
 						xstream.aliasField(alias, clazz, fieldName);
 					}
@@ -418,8 +462,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 					}
 					else {
 						throw new IllegalArgumentException(
-								"Invalid argument 'attributes'. 'useAttributesFor' property takes map of <String, Class>," +
-										" when using a map key of type String");
+								"'useAttributesFor' takes Map<String, Class> when using a map key of type String");
 					}
 				}
 				else if (entry.getKey() instanceof Class) {
@@ -428,22 +471,20 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 						xstream.useAttributeFor(key, (String) entry.getValue());
 					}
 					else if (entry.getValue() instanceof List) {
-						List list = (List) entry.getValue();
-
-						for (Object o : list) {
-							if (o instanceof String) {
-								xstream.useAttributeFor(key, (String) o);
+						List listValue = (List) entry.getValue();
+						for (Object element : listValue) {
+							if (element instanceof String) {
+								xstream.useAttributeFor(key, (String) element);
 							}
 						}
 					}
 					else {
-						throw new IllegalArgumentException("Invalid argument 'attributes'. " +
-								"'useAttributesFor' property takes either <Class, String> or <Class, List<String>> map," +
-								" when using a map key of type Class");
+						throw new IllegalArgumentException("'useAttributesFor' property takes either Map<Class, String> " +
+								"or Map<Class, List<String>> when using a map key of type Class");
 					}
 				}
 				else {
-					throw new IllegalArgumentException("Invalid argument 'attributes. " +
+					throw new IllegalArgumentException(
 							"'useAttributesFor' property takes either a map key of type String or Class");
 				}
 			}
@@ -482,16 +523,16 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
-			Class type;
+			Class<?> type;
 			if (value instanceof Class) {
-				type = (Class) value;
+				type = (Class<?>) value;
 			}
 			else if (value instanceof String) {
 				String className = (String) value;
 				type = ClassUtils.forName(className, this.beanClassLoader);
 			}
 			else {
-				throw new IllegalArgumentException("Unknown value [" + value + "], expected String or Class");
+				throw new IllegalArgumentException("Unknown value [" + value + "] - expected String or Class");
 			}
 			result.put(key, type);
 		}
@@ -521,7 +562,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
 	@Override
-	public boolean supports(Class clazz) {
+	public boolean supports(Class<?> clazz) {
 		if (ObjectUtils.isEmpty(this.supportedClasses)) {
 			return true;
 		}
