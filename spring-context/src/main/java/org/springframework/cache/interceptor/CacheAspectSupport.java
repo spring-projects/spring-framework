@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -61,23 +62,25 @@ import org.springframework.util.StringUtils;
  */
 public abstract class CacheAspectSupport implements InitializingBean {
 
-	public interface Invoker {
-		Object invoke();
-	}
+	private static final String CACHEABLE = "cacheable";
+
+	private static final String UPDATE = "cacheupdate";
+
+	private static final String EVICT = "cacheevict";
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
 
 	private CacheManager cacheManager;
 
 	private CacheOperationSource cacheOperationSource;
 
-	private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
-
 	private KeyGenerator keyGenerator = new DefaultKeyGenerator();
 
 	private boolean initialized = false;
 
-	private static final String CACHEABLE = "cacheable", UPDATE = "cacheupdate", EVICT = "cacheevict";
 
 	/**
 	 * Set the CacheManager that this cache aspect should delegate to.
@@ -101,10 +104,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	 */
 	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
 		Assert.notEmpty(cacheOperationSources);
-		this.cacheOperationSource =
-				(cacheOperationSources.length > 1 ?
-						new CompositeCacheOperationSource(cacheOperationSources) :
-						cacheOperationSources[0]);
+		this.cacheOperationSource = (cacheOperationSources.length > 1 ?
+				new CompositeCacheOperationSource(cacheOperationSources) : cacheOperationSources[0]);
 	}
 
 	/**
@@ -140,6 +141,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		this.initialized = true;
 	}
+
 
 	/**
 	 * Convenience method to return a String representation of this Method
@@ -191,34 +193,26 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// analyze caching information
 		if (!CollectionUtils.isEmpty(cacheOp)) {
 			Map<String, Collection<CacheOperationContext>> ops = createOperationContext(cacheOp, method, args, target, targetClass);
-
 			// start with evictions
 			inspectBeforeCacheEvicts(ops.get(EVICT));
-
 			// follow up with cacheable
 			CacheStatus status = inspectCacheables(ops.get(CACHEABLE));
-
-			Object retVal = null;
+			Object retVal;
 			Map<CacheOperationContext, Object> updates = inspectCacheUpdates(ops.get(UPDATE));
-
 			if (status != null) {
 				if (status.updateRequired) {
-					updates.putAll(status.cUpdates);
+					updates.putAll(status.cacheUpdates);
 				}
 				// return cached object
 				else {
 					return status.retVal;
 				}
 			}
-
 			retVal = invoker.invoke();
-
 			inspectAfterCacheEvicts(ops.get(EVICT), retVal);
-
 			if (!updates.isEmpty()) {
 				update(updates, retVal);
 			}
-
 			return retVal;
 		}
 
@@ -229,21 +223,15 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		inspectCacheEvicts(evictions, true, ExpressionEvaluator.NO_RESULT);
 	}
 
-	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions,
-			Object result) {
+	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions, Object result) {
 		inspectCacheEvicts(evictions, false, result);
 	}
 
-	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions,
-			boolean beforeInvocation, Object result) {
-
+	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions, boolean beforeInvocation, Object result) {
 		if (!evictions.isEmpty()) {
-
 			boolean log = logger.isTraceEnabled();
-
 			for (CacheOperationContext context : evictions) {
 				CacheEvictOperation evictOp = (CacheEvictOperation) context.operation;
-
 				if (beforeInvocation == evictOp.isBeforeInvocation()) {
 					if (context.isConditionPassing(result)) {
 						// for each cache
@@ -257,7 +245,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 								if (log) {
 									logger.trace("Invalidating entire cache for operation " + evictOp + " on method " + context.method);
 								}
-							} else {
+							}
+							else {
 								// check key
 								if (key == null) {
 									key = context.generateKey();
@@ -268,7 +257,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 								cache.evict(key);
 							}
 						}
-					} else {
+					}
+					else {
 						if (log) {
 							logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
 						}
@@ -279,20 +269,17 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	private CacheStatus inspectCacheables(Collection<CacheOperationContext> cacheables) {
-		Map<CacheOperationContext, Object> cUpdates = new LinkedHashMap<CacheOperationContext, Object>(cacheables.size());
-
+		Map<CacheOperationContext, Object> cacheUpdates = new LinkedHashMap<CacheOperationContext, Object>(cacheables.size());
 		boolean updateRequired = false;
 		Object retVal = null;
 
 		if (!cacheables.isEmpty()) {
 			boolean log = logger.isTraceEnabled();
 			boolean atLeastOnePassed = false;
-
 			for (CacheOperationContext context : cacheables) {
 				if (context.isConditionPassing()) {
 					atLeastOnePassed = true;
 					Object key = context.generateKey();
-
 					if (log) {
 						logger.trace("Computed cache key " + key + " for operation " + context.operation);
 					}
@@ -301,12 +288,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
 								"Null key returned for cache operation (maybe you are using named params on classes without debug info?) "
 										+ context.operation);
 					}
-
 					// add op/key (in case an update is discovered later on)
-					cUpdates.put(context, key);
-
+					cacheUpdates.put(context, key);
 					boolean localCacheHit = false;
-
 					// check whether the cache needs to be inspected or not (the method will be invoked anyway)
 					if (!updateRequired) {
 						for (Cache cache : context.getCaches()) {
@@ -318,7 +302,6 @@ public abstract class CacheAspectSupport implements InitializingBean {
 							}
 						}
 					}
-
 					if (!localCacheHit) {
 						updateRequired = true;
 					}
@@ -332,38 +315,20 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 			// return a status only if at least on cacheable matched
 			if (atLeastOnePassed) {
-				return new CacheStatus(cUpdates, updateRequired, retVal);
+				return new CacheStatus(cacheUpdates, updateRequired, retVal);
 			}
 		}
 
 		return null;
 	}
 
-	private static class CacheStatus {
-		// caches/key
-		final Map<CacheOperationContext, Object> cUpdates;
-		final boolean updateRequired;
-		final Object retVal;
-
-		CacheStatus(Map<CacheOperationContext, Object> cUpdates, boolean updateRequired, Object retVal) {
-			this.cUpdates = cUpdates;
-			this.updateRequired = updateRequired;
-			this.retVal = retVal;
-		}
-	}
-
 	private Map<CacheOperationContext, Object> inspectCacheUpdates(Collection<CacheOperationContext> updates) {
-
-		Map<CacheOperationContext, Object> cUpdates = new LinkedHashMap<CacheOperationContext, Object>(updates.size());
-
+		Map<CacheOperationContext, Object> cacheUpdates = new LinkedHashMap<CacheOperationContext, Object>(updates.size());
 		if (!updates.isEmpty()) {
 			boolean log = logger.isTraceEnabled();
-
 			for (CacheOperationContext context : updates) {
 				if (context.isConditionPassing()) {
-
 					Object key = context.generateKey();
-
 					if (log) {
 						logger.trace("Computed cache key " + key + " for operation " + context.operation);
 					}
@@ -372,9 +337,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 								"Null key returned for cache operation (maybe you are using named params on classes without debug info?) "
 										+ context.operation);
 					}
-
 					// add op/key (in case an update is discovered later on)
-					cUpdates.put(context, key);
+					cacheUpdates.put(context, key);
 				}
 				else {
 					if (log) {
@@ -383,8 +347,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				}
 			}
 		}
-
-		return cUpdates;
+		return cacheUpdates;
 	}
 
 	private void update(Map<CacheOperationContext, Object> updates, Object retVal) {
@@ -400,6 +363,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private Map<String, Collection<CacheOperationContext>> createOperationContext(Collection<CacheOperation> cacheOp,
 			Method method, Object[] args, Object target, Class<?> targetClass) {
+
 		Map<String, Collection<CacheOperationContext>> map = new LinkedHashMap<String, Collection<CacheOperationContext>>(3);
 
 		Collection<CacheOperationContext> cacheables = new ArrayList<CacheOperationContext>();
@@ -428,6 +392,13 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		return map;
 	}
+
+
+	public interface Invoker {
+
+		Object invoke();
+	}
+
 
 	protected class CacheOperationContext {
 
@@ -501,4 +472,22 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			return this.caches;
 		}
 	}
+
+
+	private static class CacheStatus {
+
+		// caches/key
+		final Map<CacheOperationContext, Object> cacheUpdates;
+
+		final boolean updateRequired;
+
+		final Object retVal;
+
+		CacheStatus(Map<CacheOperationContext, Object> cacheUpdates, boolean updateRequired, Object retVal) {
+			this.cacheUpdates = cacheUpdates;
+			this.updateRequired = updateRequired;
+			this.retVal = retVal;
+		}
+	}
+
 }
