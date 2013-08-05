@@ -32,11 +32,16 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.thoughtworks.xstream.MarshallingStrategy;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.ConverterLookup;
 import com.thoughtworks.xstream.converters.ConverterMatcher;
+import com.thoughtworks.xstream.converters.ConverterRegistry;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
+import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
+import com.thoughtworks.xstream.core.DefaultConverterLookup;
 import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -110,15 +115,23 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
+	private ReflectionProvider reflectionProvider;
+
 	private HierarchicalStreamDriver streamDriver;
 
 	private final XppDriver fallbackDriver = new XppDriver();
 
 	private Mapper mapper;
 
-	private Integer mode;
+	private ConverterLookup converterLookup = new DefaultConverterLookup();
+
+	private ConverterRegistry converterRegistry;
 
 	private ConverterMatcher[] converters;
+
+	private MarshallingStrategy marshallingStrategy;
+
+	private Integer mode;
 
 	private Map<String, ?> aliases;
 
@@ -128,7 +141,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private Class<?>[] useAttributeForTypes;
 
-	private Map<?, ?> useAttributesFor;
+	private Map<?, ?> useAttributeFor;
 
 	private Map<Class<?>, String> implicitCollections;
 
@@ -148,7 +161,15 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
 	/**
-	 * Set the XStream hierarchical stream driver to be used for readers and writers.
+	 * Set a custom XStream {@link ReflectionProvider} to use.
+	 * @since 4.0
+	 */
+	public void setReflectionProvider(ReflectionProvider reflectionProvider) {
+		this.reflectionProvider = reflectionProvider;
+	}
+
+	/**
+	 * Set a XStream {@link HierarchicalStreamDriver} to be used for readers and writers.
 	 * <p>As of Spring 4.0, this stream driver will also be passed to the {@link XStream}
 	 * constructor and therefore used by streaming-related native API methods themselves.
 	 */
@@ -157,7 +178,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set a custom XStream Mapper to use.
+	 * Set a custom XStream {@link Mapper} to use.
 	 * @since 4.0
 	 */
 	public void setMapper(Mapper mapper) {
@@ -165,12 +186,23 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set the XStream mode to use.
-	 * @see XStream#ID_REFERENCES
-	 * @see XStream#NO_REFERENCES
+	 * Set a custom XStream {@link ConverterLookup} to use.
+	 * Also used as {@link ConverterRegistry} if the given reference implements it as well.
+	 * @since 4.0
+	 * @see DefaultConverterLookup
 	 */
-	public void setMode(int mode) {
-		this.mode = mode;
+	public void setConverterLookup(ConverterLookup converterLookup) {
+		this.converterLookup = converterLookup;
+	}
+
+	/**
+	 * Set a custom XStream {@link ConverterRegistry} to use.
+	 * @since 4.0
+	 * @see #setConverterLookup
+	 * @see DefaultConverterLookup
+	 */
+	public void setConverterRegistry(ConverterRegistry converterRegistry) {
+		this.converterRegistry = converterRegistry;
 	}
 
 	/**
@@ -181,6 +213,23 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 */
 	public void setConverters(ConverterMatcher... converters) {
 		this.converters = converters;
+	}
+
+	/**
+	 * Set a custom XStream {@link MarshallingStrategy} to use.
+	 * @since 4.0
+	 */
+	public void setMarshallingStrategy(MarshallingStrategy marshallingStrategy) {
+		this.marshallingStrategy = marshallingStrategy;
+	}
+
+	/**
+	 * Set the XStream mode to use.
+	 * @see XStream#ID_REFERENCES
+	 * @see XStream#NO_REFERENCES
+	 */
+	public void setMode(int mode) {
+		this.mode = mode;
 	}
 
 	/**
@@ -226,8 +275,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * or {@code &lt;Class, List&lt;String&gt;&gt;} pairs, which results
 	 * in {@link XStream#useAttributeFor(Class, String)} calls.
 	 */
-	public void setUseAttributeFor(Map<?, ?> useAttributesFor) {
-		this.useAttributesFor = useAttributesFor;
+	public void setUseAttributeFor(Map<?, ?> useAttributeFor) {
+		this.useAttributeFor = useAttributeFor;
 	}
 
 	/**
@@ -298,10 +347,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * Build the native XStream delegate to be used by this marshaller.
 	 */
 	protected XStream buildXStream() {
-		XStream xstream = new XStream(null, this.streamDriver, this.beanClassLoader, this.mapper);
-		if (this.mode != null) {
-			xstream.setMode(this.mode);
-		}
+		XStream xstream = new XStream(this.reflectionProvider, this.streamDriver,
+				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry);
 
 		if (this.converters != null) {
 			for (int i = 0; i < this.converters.length; i++) {
@@ -315,6 +362,13 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 					throw new IllegalArgumentException("Invalid ConverterMatcher [" + this.converters[i] + "]");
 				}
 			}
+		}
+
+		if (this.marshallingStrategy != null) {
+			xstream.setMarshallingStrategy(this.marshallingStrategy);
+		}
+		if (this.mode != null) {
+			xstream.setMode(this.mode);
 		}
 
 		try {
@@ -356,8 +410,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 				xstream.useAttributeFor(type);
 			}
 		}
-		if (this.useAttributesFor != null) {
-			for (Map.Entry<?, ?> entry : this.useAttributesFor.entrySet()) {
+		if (this.useAttributeFor != null) {
+			for (Map.Entry<?, ?> entry : this.useAttributeFor.entrySet()) {
 				if (entry.getKey() instanceof String) {
 					if (entry.getValue() instanceof Class) {
 						xstream.useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
