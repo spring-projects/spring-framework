@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  * configured with annotated classes, e.g. Spring's {@link
  * org.springframework.context.annotation.Configuration @Configuration} classes.
  *
- * <p>Concrete implementations are required to implement {@link #getRootConfigClasses()},
- * {@link #getServletConfigClasses()}, as well as {@link #getServletMappings()}. Further
+ * <p>Concrete implementations are required to implement {@link #getRootConfigClasses()}
+ * and {@link #getServletConfigClasses()} as well as {@link #getServletMappings()}. Further
  * template and customization methods are provided by {@link
  * AbstractDispatcherServletInitializer}.
  *
