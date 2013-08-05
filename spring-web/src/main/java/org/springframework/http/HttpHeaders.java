@@ -391,12 +391,20 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the date and time at which the message is no longer valid, as specified by the {@code Expires} header.
-	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 * Returns the date and time at which the message is no longer valid, as specified by
+	 * the {@code Expires} header.
+	 * <p>The date is returned as the number of milliseconds since January 1, 1970 GMT.
+	 * Returns -1 when the date is unknown.
+	 *
 	 * @return the expires value
 	 */
 	public long getExpires() {
-		return getFirstDate(EXPIRES);
+		try {
+			return getFirstDate(EXPIRES);
+		}
+		catch (IllegalArgumentException ex) {
+			return -1;
+		}
 	}
 
 	/**
