@@ -25,10 +25,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public abstract class AbstractEntityManagerFactoryIntegrationTests extends AbstractJpaTests {
 
-	public static final String[] TOPLINK_CONFIG_LOCATIONS = new String[] {
-			"/org/springframework/orm/jpa/toplink/toplink-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml"};
-
 	public static final String[] ECLIPSELINK_CONFIG_LOCATIONS = new String[] {
 			"/org/springframework/orm/jpa/eclipselink/eclipselink-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
 			"/org/springframework/orm/jpa/inject.xml"};
@@ -45,9 +41,6 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 	public static Provider getProvider() {
 		String provider = System.getProperty("org.springframework.orm.jpa.provider");
 		if (provider != null) {
-			if (provider.toLowerCase().contains("eclipselink")) {
-				return Provider.ECLIPSELINK;
-			}
 			if (provider.toLowerCase().contains("hibernate")) {
 				return Provider.HIBERNATE;
 			}
@@ -55,7 +48,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 				return Provider.OPENJPA;
 			}
 		}
-		return Provider.TOPLINK;
+		return Provider.ECLIPSELINK;
 	}
 
 
@@ -69,10 +62,10 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 	protected String[] getConfigLocations() {
 		Provider provider = getProvider();
 		switch (provider) {
+			case ECLIPSELINK:
+				return ECLIPSELINK_CONFIG_LOCATIONS;
 			case HIBERNATE:
 				return HIBERNATE_CONFIG_LOCATIONS;
-			case TOPLINK:
-				return TOPLINK_CONFIG_LOCATIONS;
 			case OPENJPA:
 				return OPENJPA_CONFIG_LOCATIONS;
 			default:
@@ -90,7 +83,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 
 
 	public enum Provider {
-		TOPLINK, ECLIPSELINK, HIBERNATE, OPENJPA
-	};
+		ECLIPSELINK, HIBERNATE, OPENJPA
+	}
 
 }

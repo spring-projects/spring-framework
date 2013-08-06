@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,6 @@ public class WebDataBinder extends DataBinder {
 	 * As the marker parameter is sent in any case, the data binder can
 	 * detect an empty field and automatically reset its value.
 	 * @see #DEFAULT_FIELD_MARKER_PREFIX
-	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
 	 */
 	public void setFieldMarkerPrefix(String fieldMarkerPrefix) {
 		this.fieldMarkerPrefix = fieldMarkerPrefix;
@@ -145,7 +144,6 @@ public class WebDataBinder extends DataBinder {
 	 * <p>The presence of a default parameter preempts the behavior of a field
 	 * marker for the given field.
 	 * @see #DEFAULT_FIELD_DEFAULT_PREFIX
-	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
 	 */
 	public void setFieldDefaultPrefix(String fieldDefaultPrefix) {
 		this.fieldDefaultPrefix = fieldDefaultPrefix;
@@ -264,30 +262,6 @@ public class WebDataBinder extends DataBinder {
 		else {
 			// Default value: try null.
 			return null;
-		}
-	}
-
-
-	/**
-	 * Bind the multipart files contained in the given request, if any
-	 * (in case of a multipart request).
-	 * <p>Multipart files will only be added to the property values if they
-	 * are not empty or if we're configured to bind empty multipart files too.
-	 * @param multipartFiles Map of field name String to MultipartFile object
-	 * @param mpvs the property values to be bound (can be modified)
-	 * @see org.springframework.web.multipart.MultipartFile
-	 * @see #setBindEmptyMultipartFiles
-	 * @deprecated as of Spring 3.0, in favor of {@link #bindMultipart} which binds
-	 * all multipart files, even if more than one sent for the same name
-	 */
-	@Deprecated
-	protected void bindMultipartFiles(Map<String, MultipartFile> multipartFiles, MutablePropertyValues mpvs) {
-		for (Map.Entry<String, MultipartFile> entry : multipartFiles.entrySet()) {
-			String key = entry.getKey();
-			MultipartFile value = entry.getValue();
-			if (isBindEmptyMultipartFiles() || !value.isEmpty()) {
-				mpvs.add(key, value);
-			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,22 @@ package org.springframework.web.servlet.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
@@ -69,6 +73,8 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
 
+	private final static Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
+
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
 
@@ -88,8 +94,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		this.locations = locations;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notEmpty(locations, "Locations list must not be empty");
+		if (logger.isWarnEnabled() && CollectionUtils.isEmpty(this.locations)) {
+			logger.warn("Locations list is empty. No resources will be served");
+		}
 	}
 
 	/**
@@ -104,6 +113,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * of the resource will be written to the response with caching headers
 	 * set to expire one year in the future.
 	 */
+	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

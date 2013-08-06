@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.context.ApplicationContextAware;
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
  *
- * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.0/2.1,
+ * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.x,
  * in contrast to the older {@link JobDetailBean} class.
  *
  * @author Juergen Hoeller
@@ -61,6 +61,8 @@ public class JobDetailFactoryBean
 	private JobDataMap jobDataMap = new JobDataMap();
 
 	private boolean durability = false;
+
+	private boolean requestsRecovery = false;
 
 	private String description;
 
@@ -133,16 +135,26 @@ public class JobDetailFactoryBean
 	}
 
 	/**
+	 * Set the recovery flag for this job, i.e. whether or not the job should
+	 * get re-executed if a 'recovery' or 'fail-over' situation is encountered.
+	 */
+	public void setRequestsRecovery(boolean requestsRecovery) {
+		this.requestsRecovery = requestsRecovery;
+	}
+
+	/**
 	 * Set a textual description for this job.
 	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -168,6 +180,7 @@ public class JobDetailFactoryBean
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -209,20 +222,24 @@ public class JobDetailFactoryBean
 		pvs.add("jobClass", this.jobClass);
 		pvs.add("jobDataMap", this.jobDataMap);
 		pvs.add("durability", this.durability);
+		pvs.add("requestsRecovery", this.requestsRecovery);
 		pvs.add("description", this.description);
 		bw.setPropertyValues(pvs);
 		this.jobDetail = (JobDetail) bw.getWrappedInstance();
 	}
 
 
+	@Override
 	public JobDetail getObject() {
 		return this.jobDetail;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return JobDetail.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

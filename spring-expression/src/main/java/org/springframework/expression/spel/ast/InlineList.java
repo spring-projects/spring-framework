@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.ast;
 
 import java.util.ArrayList;
@@ -35,10 +36,12 @@ public class InlineList extends SpelNodeImpl {
 	// if the list is purely literals, it is a constant value and can be computed and cached
 	TypedValue constant = null; // TODO must be immutable list
 
+
 	public InlineList(int pos, SpelNodeImpl... args) {
 		super(pos, args);
 		checkIfConstant();
 	}
+
 
 	/**
 	 * If all the components of the list are constants, or lists that themselves contain constants, then a constant list
@@ -55,7 +58,8 @@ public class InlineList extends SpelNodeImpl {
 					if (!inlineList.isConstant()) {
 						isConstant = false;
 					}
-				} else {
+				}
+				else {
 					isConstant = false;
 				}
 			}
@@ -67,7 +71,8 @@ public class InlineList extends SpelNodeImpl {
 				SpelNode child = getChild(c);
 				if ((child instanceof Literal)) {
 					constantList.add(((Literal) child).getLiteralValue().getValue());
-				} else if (child instanceof InlineList) {
+				}
+				else if (child instanceof InlineList) {
 					constantList.add(((InlineList) child).getConstantValue());
 				}
 			}
@@ -77,9 +82,10 @@ public class InlineList extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException {
-		if (constant != null) {
-			return constant;
-		} else {
+		if (this.constant != null) {
+			return this.constant;
+		}
+		else {
 			List<Object> returnValue = new ArrayList<Object>();
 			int childcount = getChildCount();
 			for (int c = 0; c < childcount; c++) {
@@ -109,12 +115,12 @@ public class InlineList extends SpelNodeImpl {
 	 * @return whether this list is a constant value
 	 */
 	public boolean isConstant() {
-		return constant != null;
+		return this.constant != null;
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<Object> getConstantValue() {
-		return (List<Object>) constant.getValue();
+		return (List<Object>) this.constant.getValue();
 	}
 
 }

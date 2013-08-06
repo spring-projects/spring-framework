@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +25,7 @@ import javax.servlet.http.Part;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -41,12 +35,20 @@ import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.test.MockPart;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
+
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestParamMethodArgumentResolver}.
@@ -66,9 +68,10 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramStringNotAnnot;
 	private MethodParameter paramMultipartFileNotAnnot;
 	private MethodParameter paramMultipartFileList;
-	private MethodParameter paramServlet30Part;
+	private MethodParameter paramPart;
 	private MethodParameter paramRequestPartAnnot;
 	private MethodParameter paramRequired;
+	private MethodParameter paramNotRequired;
 
 	private NativeWebRequest webRequest;
 
@@ -80,8 +83,10 @@ public class RequestParamMethodArgumentResolverTests {
 
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
-		Method method = getClass().getMethod("params", String.class, String[].class, Map.class, MultipartFile.class,
-				Map.class, String.class, MultipartFile.class, List.class, Part.class, MultipartFile.class, String.class);
+		Method method = getClass().getMethod("params", String.class, String[].class,
+				Map.class, MultipartFile.class, Map.class, String.class,
+				MultipartFile.class, List.class, Part.class, MultipartFile.class,
+				String.class, String.class);
 
 		paramNamedDefaultValueString = new MethodParameter(method, 0);
 		paramNamedStringArray = new MethodParameter(method, 1);
@@ -94,10 +99,11 @@ public class RequestParamMethodArgumentResolverTests {
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
 		paramMultipartFileList = new MethodParameter(method, 7);
 		paramMultipartFileList.initParameterNameDiscovery(paramNameDiscoverer);
-		paramServlet30Part = new MethodParameter(method, 8);
-		paramServlet30Part.initParameterNameDiscovery(paramNameDiscoverer);
+		paramPart = new MethodParameter(method, 8);
+		paramPart.initParameterNameDiscovery(paramNameDiscoverer);
 		paramRequestPartAnnot = new MethodParameter(method, 9);
 		paramRequired = new MethodParameter(method, 10);
+		paramNotRequired = new MethodParameter(method, 11);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -113,7 +119,7 @@ public class RequestParamMethodArgumentResolverTests {
 		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramMap));
 		assertTrue("Simple type params supported w/o annotations", resolver.supportsParameter(paramStringNotAnnot));
 		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultipartFileNotAnnot));
-		assertTrue("Part parameter not supported", resolver.supportsParameter(paramServlet30Part));
+		assertTrue("Part parameter not supported", resolver.supportsParameter(paramPart));
 
 		resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(resolver.supportsParameter(paramStringNotAnnot));
@@ -214,15 +220,15 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveServlet30Part() throws Exception {
-		MockPart expected = new MockPart("servlet30Part", "Hello World".getBytes());
+	public void resolvePart() throws Exception {
+		MockPart expected = new MockPart("part", "Hello World".getBytes());
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 
-		Object result = resolver.resolveArgument(paramServlet30Part, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramPart, null, webRequest, null);
 
 		assertTrue(result instanceof Part);
 		assertEquals("Invalid result", expected, result);
@@ -240,6 +246,40 @@ public class RequestParamMethodArgumentResolverTests {
 	public void missingRequestParam() throws Exception {
 		resolver.resolveArgument(paramNamedStringArray, null, webRequest, null);
 		fail("Expected exception");
+	}
+
+	// SPR-10578
+
+	@Test
+	public void missingRequestParamEmptyValueConvertedToNull() throws Exception {
+
+		WebDataBinder binder = new WebRequestDataBinder(null);
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, null, "stringNotAnnot")).willReturn(binder);
+
+		this.request.addParameter("stringNotAnnot", "");
+
+		Object arg = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, binderFactory);
+
+		assertNull(arg);
+	}
+
+	@Test
+	public void missingRequestParamEmptyValueNotRequired() throws Exception {
+
+		WebDataBinder binder = new WebRequestDataBinder(null);
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
+
+		this.request.addParameter("name", "");
+
+		Object arg = resolver.resolveArgument(paramNotRequired, null, webRequest, binderFactory);
+
+		assertNull(arg);
 	}
 
 	@Test
@@ -291,9 +331,10 @@ public class RequestParamMethodArgumentResolverTests {
 			String stringNotAnnot,
 			MultipartFile multipartFileNotAnnot,
 			List<MultipartFile> multipartFileList,
-			Part servlet30Part,
+			Part part,
 			@RequestPart MultipartFile requestPartAnnot,
-			@RequestParam(value = "name") String paramRequired) {
+			@RequestParam(value = "name") String paramRequired,
+			@RequestParam(value = "name", required=false) String paramNotRequired) {
 	}
 
 }

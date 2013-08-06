@@ -107,6 +107,7 @@ public final class WebAsyncManager {
 		Assert.state(!isConcurrentHandlingStarted(), "Can't set AsyncWebRequest with concurrent handling in progress");
 		this.asyncWebRequest = asyncWebRequest;
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
+			@Override
 			public void run() {
 				asyncWebRequest.removeAttribute(WebAsyncUtils.WEB_ASYNC_MANAGER_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 			}
@@ -291,6 +292,7 @@ public final class WebAsyncManager {
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(new Runnable() {
+			@Override
 			public void run() {
 				logger.debug("Processing timeout");
 				Object result = interceptorChain.triggerAfterTimeout(asyncWebRequest, callable);
@@ -301,6 +303,7 @@ public final class WebAsyncManager {
 		});
 
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
+			@Override
 			public void run() {
 				interceptorChain.triggerAfterCompletion(asyncWebRequest, callable);
 			}
@@ -311,6 +314,7 @@ public final class WebAsyncManager {
 		startAsyncProcessing(processingContext);
 
 		this.taskExecutor.submit(new Runnable() {
+			@Override
 			public void run() {
 				Object result = null;
 				try {
@@ -382,6 +386,7 @@ public final class WebAsyncManager {
 		final DeferredResultInterceptorChain interceptorChain = new DeferredResultInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					interceptorChain.triggerAfterTimeout(asyncWebRequest, deferredResult);
@@ -393,6 +398,7 @@ public final class WebAsyncManager {
 		});
 
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
+			@Override
 			public void run() {
 				interceptorChain.triggerAfterCompletion(asyncWebRequest, deferredResult);
 			}
@@ -405,6 +411,7 @@ public final class WebAsyncManager {
 		try {
 			interceptorChain.applyPreProcess(this.asyncWebRequest, deferredResult);
 			deferredResult.setResultHandler(new DeferredResultHandler() {
+				@Override
 				public void handleResult(Object result) {
 					result = interceptorChain.applyPostProcess(asyncWebRequest, deferredResult, result);
 					setConcurrentResultAndDispatch(result);

@@ -43,6 +43,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #preHandle}.
 	 */
+	@Override
 	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler)
 			throws Exception {
 
@@ -52,6 +53,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #afterCompletion}.
 	 */
+	@Override
 	public void afterActionCompletion(
 			ActionRequest request, ActionResponse response, Object handler, Exception ex)
 			throws Exception {
@@ -63,6 +65,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #preHandle}.
 	 */
+	@Override
 	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 			throws Exception {
 
@@ -72,6 +75,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation is empty.
 	 */
+	@Override
 	public void postHandleRender(
 			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
@@ -80,6 +84,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #afterCompletion}.
 	 */
+	@Override
 	public void afterRenderCompletion(
 			RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws Exception {
@@ -91,6 +96,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #preHandle}.
 	 */
+	@Override
 	public boolean preHandleResource(ResourceRequest request, ResourceResponse response, Object handler)
 			throws Exception {
 
@@ -100,6 +106,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation is empty.
 	 */
+	@Override
 	public void postHandleResource(
 			ResourceRequest request, ResourceResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
@@ -108,6 +115,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #afterCompletion}.
 	 */
+	@Override
 	public void afterResourceCompletion(
 			ResourceRequest request, ResourceResponse response, Object handler, Exception ex)
 			throws Exception {
@@ -119,6 +127,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #preHandle}.
 	 */
+	@Override
 	public boolean preHandleEvent(EventRequest request, EventResponse response, Object handler)
 			throws Exception {
 
@@ -128,6 +137,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 	/**
 	 * This implementation delegates to {@link #afterCompletion}.
 	 */
+	@Override
 	public void afterEventCompletion(
 			EventRequest request, EventResponse response, Object handler, Exception ex)
 			throws Exception {

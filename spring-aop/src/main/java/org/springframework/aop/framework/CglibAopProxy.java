@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
-import org.springframework.cglib.transform.impl.UndeclaredThrowableStrategy;
+import org.springframework.cglib.transform.impl.MemorySafeUndeclaredThrowableStrategy;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
@@ -146,10 +146,12 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 
+	@Override
 	public Object getProxy() {
 		return getProxy(null);
 	}
 
+	@Override
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating CGLIB proxy: target source is " + this.advised.getTargetSource());
@@ -181,7 +183,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 				}
 			}
 			enhancer.setSuperclass(proxySuperClass);
-			enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
+			enhancer.setStrategy(new MemorySafeUndeclaredThrowableStrategy(UndeclaredThrowableException.class));
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 			enhancer.setInterceptDuringConstruction(false);
 
@@ -386,6 +388,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.target = target;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object retVal = methodProxy.invoke(this.target, args);
 			return processReturnType(proxy, this.target, method, retVal);
@@ -405,6 +408,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.target = target;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			try {
@@ -432,6 +436,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.targetSource = targetSource;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object target = this.targetSource.getTarget();
 			try {
@@ -456,6 +461,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.targetSource = targetSource;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			Object target = this.targetSource.getTarget();
@@ -485,6 +491,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.target = target;
 		}
 
+		@Override
 		public Object loadObject() {
 			return this.target;
 		}
@@ -502,6 +509,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
+		@Override
 		public Object loadObject() throws Exception {
 			return this.advised;
 		}
@@ -520,6 +528,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) {
 			Object other = args[0];
 			if (proxy == other) {
@@ -552,6 +561,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) {
 			return CglibAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
 		}
@@ -575,6 +585,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.targetClass = targetClass;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			MethodInvocation invocation = new CglibMethodInvocation(proxy, this.target, method, args,
 					this.targetClass, this.adviceChain, methodProxy);
@@ -598,6 +609,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
+		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object oldProxy = null;
 			boolean setProxyContext = false;
@@ -754,6 +766,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 		 * DynamicUnadvisedInterceptor already considers this.</dd>
 		 * </dl>
 		 */
+		@Override
 		public int accept(Method method) {
 			if (AopUtils.isFinalizeMethod(method)) {
 				logger.debug("Found finalize() method - using NO_OVERRIDE");

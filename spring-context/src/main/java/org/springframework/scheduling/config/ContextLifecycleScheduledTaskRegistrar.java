@@ -35,6 +35,7 @@ public class ContextLifecycleScheduledTaskRegistrar extends ScheduledTaskRegistr
 	private ApplicationContext applicationContext;
 
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -55,6 +56,7 @@ public class ContextLifecycleScheduledTaskRegistrar extends ScheduledTaskRegistr
 	 * Actually schedule the tasks at the right time of the context lifecycle,
 	 * if we're running within an ApplicationContext.
 	 */
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (event.getApplicationContext() != this.applicationContext) {
 			return;

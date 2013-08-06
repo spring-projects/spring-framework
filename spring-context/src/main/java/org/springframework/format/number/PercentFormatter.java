@@ -34,6 +34,7 @@ import java.util.Locale;
  */
 public class PercentFormatter extends AbstractNumberFormatter {
 
+	@Override
 	protected NumberFormat getNumberFormat(Locale locale) {
 		NumberFormat format = NumberFormat.getPercentInstance(locale);
 		if (format instanceof DecimalFormat) {

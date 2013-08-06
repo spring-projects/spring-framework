@@ -81,6 +81,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 		return this.scope;
 	}
 
+	@Override
 	public String getConversationId() {
 		return RequestContextHolder.currentRequestAttributes().getSessionId();
 	}

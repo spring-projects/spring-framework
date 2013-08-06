@@ -36,7 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Hibernate's own {@code SessionFactory.getCurrentSession()} method, to be
  * able to detect a thread-bound Session. Typically, the code will look like as follows:
  *
- * <pre>
+ * <pre class="code">
  * public void doSomeDataAccessAction() {
  *   Session session = this.sessionFactory.getCurrentSession();
  *   ...
@@ -86,6 +86,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		Session session = getSession();
 		SessionHolder sessionHolder =

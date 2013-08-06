@@ -95,6 +95,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	}
 
 
+	@Override
 	public String getMultipartContentType(String paramOrFileName) {
 		try {
 			Part part = getPart(paramOrFileName);
@@ -105,6 +106,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		}
 	}
 
+	@Override
 	public HttpHeaders getMultipartHeaders(String paramOrFileName) {
 		try {
 			Part part = getPart(paramOrFileName);
@@ -139,34 +141,42 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			this.filename = filename;
 		}
 
+		@Override
 		public String getName() {
 			return this.part.getName();
 		}
 
+		@Override
 		public String getOriginalFilename() {
 			return this.filename;
 		}
 
+		@Override
 		public String getContentType() {
 			return this.part.getContentType();
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return (this.part.getSize() == 0);
 		}
 
+		@Override
 		public long getSize() {
 			return this.part.getSize();
 		}
 
+		@Override
 		public byte[] getBytes() throws IOException {
 			return FileCopyUtils.copyToByteArray(this.part.getInputStream());
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return this.part.getInputStream();
 		}
 
+		@Override
 		public void transferTo(File dest) throws IOException, IllegalStateException {
 			this.part.write(dest.getPath());
 		}

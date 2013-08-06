@@ -59,6 +59,7 @@ public class RequestResultMatchers {
 	 */
 	public ResultMatcher asyncStarted() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
 				assertEquals("Async started", true, request.isAsyncStarted());
@@ -72,6 +73,7 @@ public class RequestResultMatchers {
 	 */
 	public ResultMatcher asyncNotStarted() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
 				assertEquals("Async started", false, request.isAsyncStarted());
@@ -84,6 +86,7 @@ public class RequestResultMatchers {
 	 */
 	public <T> ResultMatcher asyncResult(final Matcher<T> matcher) {
 		return new ResultMatcher() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
@@ -101,6 +104,7 @@ public class RequestResultMatchers {
 	 */
 	public <T> ResultMatcher asyncResult(final Object expectedResult) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
 				assertEquals("Async started", true, request.isAsyncStarted());
@@ -114,6 +118,7 @@ public class RequestResultMatchers {
 	 */
 	public <T> ResultMatcher attribute(final String name, final Matcher<T> matcher) {
 		return new ResultMatcher() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getAttribute(name);
@@ -127,6 +132,7 @@ public class RequestResultMatchers {
 	 */
 	public <T> ResultMatcher attribute(final String name, final Object expectedValue) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				assertEquals("Request attribute", expectedValue, result.getRequest().getAttribute(name));
 			}
@@ -138,6 +144,7 @@ public class RequestResultMatchers {
 	 */
 	public <T> ResultMatcher sessionAttribute(final String name, final Matcher<T> matcher) {
 		return new ResultMatcher() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getSession().getAttribute(name);
@@ -151,6 +158,7 @@ public class RequestResultMatchers {
 	 */
 	public <T> ResultMatcher sessionAttribute(final String name, final Object value) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				assertEquals("Request attribute", value, result.getRequest().getSession().getAttribute(name));
 			}

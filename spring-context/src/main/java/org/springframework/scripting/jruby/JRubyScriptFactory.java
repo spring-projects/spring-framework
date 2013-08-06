@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's javadoc for a configuration example.
  *
+ * <p>Note: Spring 4.0 supports JRuby 1.5 and higher.
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
@@ -67,15 +69,18 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	}
 
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
+	@Override
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;
 	}
 
+	@Override
 	public Class[] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
@@ -83,6 +88,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	/**
 	 * JRuby scripts do require a config interface.
 	 */
+	@Override
 	public boolean requiresConfigInterface() {
 		return true;
 	}
@@ -91,6 +97,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Load and parse the JRuby script via JRubyScriptUtils.
 	 * @see JRubyScriptUtils#createJRubyObject(String, Class[], ClassLoader)
 	 */
+	@Override
 	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 		try {
@@ -108,12 +115,14 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 	}
 
+	@Override
 	public Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
 		return null;
 	}
 
+	@Override
 	public boolean requiresScriptedObjectRefresh(ScriptSource scriptSource) {
 		return scriptSource.isModified();
 	}

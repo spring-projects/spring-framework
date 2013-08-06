@@ -59,11 +59,13 @@ public class NumberFormatAnnotationFormatterFactory
 		this.fieldTypes = Collections.unmodifiableSet(rawFieldTypes);
 	}
 
+	@Override
 	public final Set<Class<?>> getFieldTypes() {
 		return this.fieldTypes;
 	}
 
 
+	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
@@ -73,10 +75,12 @@ public class NumberFormatAnnotationFormatterFactory
 	}
 
 
+	@Override
 	public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
 		return configureFormatterFrom(annotation);
 	}
 
+	@Override
 	public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
 		return configureFormatterFrom(annotation);
 	}

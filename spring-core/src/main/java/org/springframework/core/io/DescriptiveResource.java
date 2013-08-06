@@ -54,11 +54,13 @@ public class DescriptiveResource extends AbstractResource {
 		return false;
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		throw new FileNotFoundException(
 				getDescription() + " cannot be opened because it does not point to a readable resource");
 	}
 
+	@Override
 	public String getDescription() {
 		return this.description;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * Spring's JPA bootstrap support.
  *
  * <h2>Customizing the {@code LoadTimeWeaver}</h2>
- * The default weaver is determined automatically. As of Spring 3.1: detecting
- * Sun's GlassFish, Oracle's OC4J, Spring's VM agent and any ClassLoader supported by
- * Spring's {@link
- * org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
- * ReflectiveLoadTimeWeaver} (for example, the {@link
- * org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
- * TomcatInstrumentableClassLoader}).
+ * The default weaver is determined automatically: see {@link DefaultContextLoadTimeWeaver}.
  *
  * <p>To customize the weaver used, the {@code @Configuration} class annotated with
  * {@code @EnableLoadTimeWeaving} may also implement the {@link LoadTimeWeavingConfigurer}

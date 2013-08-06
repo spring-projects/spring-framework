@@ -73,14 +73,17 @@ public class MockEvent implements Event {
 	}
 
 
+	@Override
 	public QName getQName() {
 		return this.name;
 	}
 
+	@Override
 	public String getName() {
 		return this.name.getLocalPart();
 	}
 
+	@Override
 	public Serializable getValue() {
 		return this.value;
 	}

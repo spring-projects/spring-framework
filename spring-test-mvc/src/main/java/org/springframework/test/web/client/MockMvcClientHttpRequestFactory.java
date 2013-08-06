@@ -49,6 +49,7 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 		this.mockMvc = mockMvc;
 	}
 
+	@Override
 	public ClientHttpRequest createRequest(final URI uri, final HttpMethod httpMethod) throws IOException {
 		return new MockClientHttpRequest(httpMethod, uri) {
 

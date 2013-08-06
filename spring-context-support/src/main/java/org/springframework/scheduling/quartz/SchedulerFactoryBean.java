@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ import org.springframework.util.CollectionUtils;
  * automatically apply to Scheduler operations performed within those scopes.
  * Alternatively, you may add transactional advice for the Scheduler itself.
  *
- * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0/2.1, as of Spring 3.1.
+ * <p>Compatible with Quartz 1.8 as well as Quartz 2.0-2.2, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -369,6 +369,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * the scheduler will start after the context is refreshed and after the
 	 * start delay, if any.
 	 */
+	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
@@ -387,6 +388,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	/**
 	 * Return the phase in which this scheduler will be started and stopped.
 	 */
+	@Override
 	public int getPhase() {
 		return this.phase;
 	}
@@ -426,12 +428,14 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 
+	@Override
 	public void setBeanName(String name) {
 		if (this.schedulerName == null) {
 			this.schedulerName = name;
 		}
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -441,6 +445,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	// Implementation of InitializingBean interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.dataSource == null && this.nonTransactionalDataSource != null) {
 			this.dataSource = this.nonTransactionalDataSource;
@@ -689,14 +694,17 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		return this.scheduler;
 	}
 
+	@Override
 	public Scheduler getObject() {
 		return this.scheduler;
 	}
 
+	@Override
 	public Class<? extends Scheduler> getObjectType() {
 		return (this.scheduler != null) ? this.scheduler.getClass() : Scheduler.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -706,6 +714,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	// Implementation of Lifecycle interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void start() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
@@ -717,6 +726,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		}
 	}
 
+	@Override
 	public void stop() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
@@ -728,11 +738,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		}
 	}
 
+	@Override
 	public void stop(Runnable callback) throws SchedulingException {
 		stop();
 		callback.run();
 	}
 
+	@Override
 	public boolean isRunning() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
@@ -754,6 +766,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Shut down the Quartz scheduler on bean factory shutdown,
 	 * stopping all scheduled jobs.
 	 */
+	@Override
 	public void destroy() throws SchedulerException {
 		logger.info("Shutting down Quartz Scheduler");
 		this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);

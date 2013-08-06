@@ -91,7 +91,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>A typical TilesConfigurer bean definition looks as follows:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
  *   &lt;property name="definitions">
  *     &lt;list>
@@ -309,6 +309,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		CollectionUtils.mergePropertiesIntoMap(tilesProperties, this.tilesPropertyMap);
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -320,6 +321,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * @throws TilesException in case of setup failure
 	 * @see #createTilesInitializer()
 	 */
+	@Override
 	public void afterPropertiesSet() throws TilesException {
 		boolean activateEl = false;
 		if (tilesElPresent) {
@@ -376,6 +378,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Removes the TilesContainer from this web application.
 	 * @throws TilesException in case of cleanup failure
 	 */
+	@Override
 	public void destroy() throws TilesException {
 		try {
 			// Tiles 2.2?

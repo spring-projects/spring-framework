@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class ThemeTagTests extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setCode("themetest");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 		assertEquals("theme test message", message.toString());
 	}
 

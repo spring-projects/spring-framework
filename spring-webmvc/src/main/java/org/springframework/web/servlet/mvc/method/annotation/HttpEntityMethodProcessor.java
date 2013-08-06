@@ -61,16 +61,19 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		super(messageConverters, contentNegotiationManager);
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> parameterType = parameter.getParameterType();
 		return HttpEntity.class.equals(parameterType);
 	}
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> parameterType = returnType.getParameterType();
 		return HttpEntity.class.isAssignableFrom(parameterType) || ResponseEntity.class.isAssignableFrom(parameterType);
 	}
 
+	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
@@ -94,6 +97,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				+ " is not parameterized or has more than one parameter");
 	}
 
+	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

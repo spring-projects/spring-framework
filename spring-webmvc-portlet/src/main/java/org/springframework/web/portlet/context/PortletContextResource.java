@@ -134,6 +134,7 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 	 * but throws a FileNotFoundException if not found.
 	 * @see javax.portlet.PortletContext#getResourceAsStream(String)
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		InputStream is = this.portletContext.getResourceAsStream(this.path);
 		if (is == null) {
@@ -188,10 +189,12 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 		return StringUtils.getFilename(this.path);
 	}
 
+	@Override
 	public String getDescription() {
 		return "PortletContext resource [" + this.path + "]";
 	}
 
+	@Override
 	public String getPathWithinContext() {
 		return this.path;
 	}

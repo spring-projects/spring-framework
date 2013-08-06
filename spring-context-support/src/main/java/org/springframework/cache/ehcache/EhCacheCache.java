@@ -49,27 +49,33 @@ public class EhCacheCache implements Cache {
 	}
 
 
+	@Override
 	public String getName() {
 		return this.cache.getName();
 	}
 
+	@Override
 	public Ehcache getNativeCache() {
 		return this.cache;
 	}
 
+	@Override
 	public ValueWrapper get(Object key) {
 		Element element = this.cache.get(key);
 		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 
+	@Override
 	public void put(Object key, Object value) {
 		this.cache.put(new Element(key, value));
 	}
 
+	@Override
 	public void evict(Object key) {
 		this.cache.remove(key);
 	}
 
+	@Override
 	public void clear() {
 		this.cache.removeAll();
 	}

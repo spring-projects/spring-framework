@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -42,6 +42,8 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -63,6 +65,7 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  * @see ConfigurationClassParser
  */
@@ -84,15 +87,17 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final BeanNameGenerator importBeanNameGenerator;
 
+	private final ConditionEvaluator conditionEvaluator;
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
 	 */
 	public ConfigurationClassBeanDefinitionReader(
-			BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
-			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator) {
+			BeanDefinitionRegistry registry, ApplicationContext applicationContext,
+			SourceExtractor sourceExtractor, ProblemReporter problemReporter,
+			MetadataReaderFactory metadataReaderFactory, ResourceLoader resourceLoader,
+			Environment environment, BeanNameGenerator importBeanNameGenerator) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
@@ -101,6 +106,8 @@ class ConfigurationClassBeanDefinitionReader {
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
 		this.importBeanNameGenerator = importBeanNameGenerator;
+		this.conditionEvaluator = new ConditionEvaluator(registry, environment,
+				applicationContext, null, resourceLoader);
 	}
 
 
@@ -109,8 +116,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 * based on its contents.
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
+		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
 		for (ConfigurationClass configClass : configurationModel) {
-			loadBeanDefinitionsForConfigurationClass(configClass);
+			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
 		}
 	}
 
@@ -118,7 +126,13 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions for the
 	 * class itself, all its {@link Bean} methods
 	 */
-	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
+	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass,
+			TrackedConditionEvaluator trackedConditionEvaluator) {
+		if (trackedConditionEvaluator.shouldSkip(configClass)) {
+			removeBeanDefinition(configClass);
+			return;
+		}
+
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
@@ -126,6 +140,17 @@ class ConfigurationClassBeanDefinitionReader {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		loadBeanDefinitionsFromRegistrars(configClass.getMetadata(), configClass.getImportBeanDefinitionRegistrars());
+	}
+
+	private void removeBeanDefinition(ConfigurationClass configClass) {
+		if (StringUtils.hasLength(configClass.getBeanName())) {
+			try {
+				this.registry.removeBeanDefinition(configClass.getBeanName());
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+			}
+		}
 	}
 
 	/**
@@ -134,8 +159,6 @@ class ConfigurationClassBeanDefinitionReader {
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
-		String className = metadata.getClassName();
-		configBeanDef.setBeanClassName(className);
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
 			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
@@ -146,7 +169,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		else {
 			this.problemReporter.error(
-					new InvalidConfigurationImportProblem(className, configClass.getResource(), metadata));
+					new InvalidConfigurationImportProblem(metadata.getClassName(), configClass.getResource(), metadata));
 		}
 	}
 
@@ -155,6 +178,10 @@ class ConfigurationClassBeanDefinitionReader {
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
+		if (conditionEvaluator.shouldSkip(beanMethod.getMetadata(),
+				ConfigurationPhase.REGISTER_BEAN)) {
+			return;
+		}
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 
@@ -298,6 +325,14 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
+	private void loadBeanDefinitionsFromRegistrars(
+			AnnotationMetadata importingClassMetadata,
+			Set<ImportBeanDefinitionRegistrar> importBeanDefinitionRegistrars) {
+		for (ImportBeanDefinitionRegistrar registrar : importBeanDefinitionRegistrars) {
+			registrar.registerBeanDefinitions(importingClassMetadata, this.registry);
+		}
+	}
+
 
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
@@ -324,6 +359,7 @@ class ConfigurationClassBeanDefinitionReader {
 			this.annotationMetadata = original.annotationMetadata;
 		}
 
+		@Override
 		public AnnotationMetadata getMetadata() {
 			return this.annotationMetadata;
 		}
@@ -351,6 +387,34 @@ class ConfigurationClassBeanDefinitionReader {
 					"nor does it declare any @Bean methods; it does not implement ImportSelector " +
 					"or extend ImportBeanDefinitionRegistrar. Update the class to meet one of these requirements " +
 					"or do not attempt to @Import it.", className), new Location(resource, metadata));
+		}
+	}
+
+
+	/**
+	 * Evaluate {@Code @Conditional} annotations, tracking results and taking into
+	 * account 'imported by'.
+	 */
+	private class TrackedConditionEvaluator {
+
+		private final Map<ConfigurationClass, Boolean> skipped = new HashMap<ConfigurationClass, Boolean>();
+
+		public boolean shouldSkip(ConfigurationClass configClass) {
+			Boolean skip = this.skipped.get(configClass);
+			if (skip == null) {
+				if (configClass.isImported()) {
+					if (shouldSkip(configClass.getImportedBy())) {
+						// The config that imported this one was skipped, therefore we are skipped
+						skip = true;
+					}
+				}
+				if (skip == null) {
+					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(),
+							ConfigurationPhase.REGISTER_BEAN);
+				}
+				this.skipped.put(configClass, skip);
+			}
+			return skip;
 		}
 	}
 

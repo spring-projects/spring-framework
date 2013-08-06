@@ -97,6 +97,7 @@ public class DefaultMvcResultTests {
 			given(this.asyncContext.getTimeout()).willReturn(new Long(DEFAULT_TIMEOUT));
 		}
 
+		@Override
 		public void setAsyncStarted(boolean asyncStarted) {
 			this.asyncStarted = asyncStarted;
 		}

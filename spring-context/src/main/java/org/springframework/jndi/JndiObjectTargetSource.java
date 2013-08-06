@@ -31,7 +31,7 @@ import org.springframework.aop.TargetSource;
  *
  * <p>Example:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="queueConnectionFactoryTarget" class="org.springframework.jndi.JndiObjectTargetSource"&gt;
  *   &lt;property name="jndiName" value="JmsQueueConnectionFactory"/&gt;
  *   &lt;property name="lookupOnStartup" value="false"/&gt;
@@ -105,6 +105,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 	}
 
 
+	@Override
 	public Class<?> getTargetClass() {
 		if (this.cachedObject != null) {
 			return this.cachedObject.getClass();
@@ -117,10 +118,12 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 		}
 	}
 
+	@Override
 	public boolean isStatic() {
 		return (this.cachedObject != null);
 	}
 
+	@Override
 	public Object getTarget() {
 		try {
 			if (this.lookupOnStartup || !this.cache) {
@@ -140,6 +143,7 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 		}
 	}
 
+	@Override
 	public void releaseTarget(Object target) {
 	}
 

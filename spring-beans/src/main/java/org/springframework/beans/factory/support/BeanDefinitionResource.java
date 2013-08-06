@@ -64,11 +64,13 @@ class BeanDefinitionResource extends AbstractResource {
 		return false;
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		throw new FileNotFoundException(
 				"Resource cannot be opened because it points to " + getDescription());
 	}
 
+	@Override
 	public String getDescription() {
 		return "BeanDefinition defined in " + this.beanDefinition.getResourceDescription();
 	}

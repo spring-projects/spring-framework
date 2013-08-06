@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package org.springframework.validation.beanvalidation;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import org.hibernate.validator.resourceloading.ResourceBundleLocator;
+import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceResourceBundle;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of Hibernate Validator 4.1's {@link ResourceBundleLocator} interface,
+ * Implementation of Hibernate Validator 4.3/5.0's {@link ResourceBundleLocator} interface,
  * exposing a Spring {@link MessageSource} as localized {@link MessageSourceResourceBundle}.
  *
  * @author Juergen Hoeller
@@ -48,6 +48,7 @@ public class MessageSourceResourceBundleLocator implements ResourceBundleLocator
 		this.messageSource = messageSource;
 	}
 
+	@Override
 	public ResourceBundle getResourceBundle(Locale locale) {
 		return new MessageSourceResourceBundle(this.messageSource, locale);
 	}

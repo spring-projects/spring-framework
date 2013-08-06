@@ -61,7 +61,9 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -75,7 +77,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
@@ -119,9 +120,8 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener)
  * @see #setAdapters(XmlAdapter[])
  */
-public class Jaxb2Marshaller
-		implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller, BeanClassLoaderAware,
-		ResourceLoaderAware, InitializingBean {
+public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller,
+		BeanClassLoaderAware, InitializingBean {
 
 	private static final String CID = "cid:";
 
@@ -175,10 +175,12 @@ public class Jaxb2Marshaller
 
 	private Schema schema;
 
+	private boolean processExternalEntities = false;
+
 
 	/**
-	 * Set multiple JAXB context paths. The given array of context paths is converted to a
-	 * colon-delimited string, as supported by JAXB.
+	 * Set multiple JAXB context paths. The given array of context paths gets
+	 * converted to a colon-delimited string, as supported by JAXB.
 	 */
 	public void setContextPaths(String... contextPaths) {
 		Assert.notEmpty(contextPaths, "'contextPaths' must not be empty");
@@ -187,8 +189,8 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set a JAXB context path.
-	 * <p>Setting this property, {@link #setClassesToBeBound "classesToBeBound"}, or
-	 * {@link #setPackagesToScan "packagesToScan"} is required.
+	 * <p>Setting either this property, {@link #setClassesToBeBound "classesToBeBound"}
+	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
 	public void setContextPath(String contextPath) {
 		Assert.hasText(contextPath, "'contextPath' must not be null");
@@ -204,8 +206,8 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Set the list of Java classes to be recognized by a newly created JAXBContext.
-	 * <p>Setting this property, {@link #setContextPath "contextPath"}, or
-	 * {@link #setPackagesToScan "packagesToScan"} is required.
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
+	 * or {@link #setPackagesToScan "packagesToScan"} is required.
 	 */
 	public void setClassesToBeBound(Class<?>... classesToBeBound) {
 		Assert.notEmpty(classesToBeBound, "'classesToBeBound' must not be empty");
@@ -220,10 +222,11 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the packages to search using Spring-based scanning for classes with JAXB2 annotations in the classpath.
-	 * <p>Setting this property, {@link #setContextPath "contextPath"}, or
-	 * {@link #setClassesToBeBound "classesToBeBound"} is required. This is analogous to Spring's component-scan feature
-	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * Set the packages to search for classes with JAXB2 annotations in the classpath.
+	 * This is using a Spring-bases search and therefore analogous to Spring's component-scan
+	 * feature ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
+	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
@@ -386,16 +389,26 @@ public class Jaxb2Marshaller
 		this.mappedClass = mappedClass;
 	}
 
+	/**
+	 * Indicates whether external XML entities are processed when unmarshalling.
+	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * Note that processing of external entities will only be enabled/disabled when the
+	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
+	 * {@link StreamSource}. It has no effect for {@link DOMSource} or {@link StAXSource}
+	 * instances.
+	 */
+	public void setProcessExternalEntities(boolean processExternalEntities) {
+		this.processExternalEntities = processExternalEntities;
+	}
+
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
-	}
 
-
-	public final void afterPropertiesSet() throws Exception {
+	@Override
+	public void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
 		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(this.classesToBeBound);
 		boolean hasPackagesToScan = !ObjectUtils.isEmpty(this.packagesToScan);
@@ -487,10 +500,8 @@ public class Jaxb2Marshaller
 			logger.info("Creating JAXBContext by scanning packages [" +
 					StringUtils.arrayToCommaDelimitedString(this.packagesToScan) + "]");
 		}
-		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.packagesToScan);
-		scanner.setResourceLoader(this.resourceLoader);
-		scanner.scanPackages();
-		Class<?>[] jaxb2Classes = scanner.getJaxb2Classes();
+		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.beanClassLoader, this.packagesToScan);
+		Class<?>[] jaxb2Classes = scanner.scanPackages();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found JAXB2 classes: [" + StringUtils.arrayToCommaDelimitedString(jaxb2Classes) + "]");
 		}
@@ -527,11 +538,13 @@ public class Jaxb2Marshaller
 	}
 
 
+	@Override
 	public boolean supports(Class<?> clazz) {
 		return ((this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) ||
 				supportsInternal(clazz, this.checkForXmlRootElement));
 	}
 
+	@Override
 	public boolean supports(Type genericType) {
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -621,10 +634,12 @@ public class Jaxb2Marshaller
 
 	// Marshalling
 
+	@Override
 	public void marshal(Object graph, Result result) throws XmlMappingException {
 		marshal(graph, result, null);
 	}
 
+	@Override
 	public void marshal(Object graph, Result result, MimeContainer mimeContainer) throws XmlMappingException {
 		try {
 			Marshaller marshaller = createMarshaller();
@@ -706,11 +721,15 @@ public class Jaxb2Marshaller
 
 	// Unmarshalling
 
+	@Override
 	public Object unmarshal(Source source) throws XmlMappingException {
 		return unmarshal(source, null);
 	}
 
+	@Override
 	public Object unmarshal(Source source, MimeContainer mimeContainer) throws XmlMappingException {
+		source = processSource(source);
+
 		try {
 			Unmarshaller unmarshaller = createUnmarshaller();
 			if (this.mtomEnabled && mimeContainer != null) {
@@ -720,7 +739,7 @@ public class Jaxb2Marshaller
 				return unmarshalStaxSource(unmarshaller, source);
 			}
 			else if (this.mappedClass != null) {
-				return unmarshaller.unmarshal(source, this.mappedClass);
+				return unmarshaller.unmarshal(source, this.mappedClass).getValue();
 			}
 			else {
 				return unmarshaller.unmarshal(source);
@@ -734,16 +753,58 @@ public class Jaxb2Marshaller
 	protected Object unmarshalStaxSource(Unmarshaller jaxbUnmarshaller, Source staxSource) throws JAXBException {
 		XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(staxSource);
 		if (streamReader != null) {
-			return jaxbUnmarshaller.unmarshal(streamReader);
+			return (this.mappedClass != null ?
+					jaxbUnmarshaller.unmarshal(streamReader, this.mappedClass).getValue() :
+					jaxbUnmarshaller.unmarshal(streamReader));
 		}
 		else {
 			XMLEventReader eventReader = StaxUtils.getXMLEventReader(staxSource);
 			if (eventReader != null) {
-				return jaxbUnmarshaller.unmarshal(eventReader);
+				return (this.mappedClass != null ?
+						jaxbUnmarshaller.unmarshal(eventReader, this.mappedClass).getValue() :
+						jaxbUnmarshaller.unmarshal(eventReader));
 			}
 			else {
 				throw new IllegalArgumentException("StaxSource contains neither XMLStreamReader nor XMLEventReader");
 			}
+		}
+	}
+
+	private Source processSource(Source source) {
+		if (StaxUtils.isStaxSource(source) || source instanceof DOMSource) {
+			return source;
+		}
+
+		XMLReader xmlReader = null;
+		InputSource inputSource = null;
+
+		if (source instanceof SAXSource) {
+			SAXSource saxSource = (SAXSource) source;
+			xmlReader = saxSource.getXMLReader();
+			inputSource = saxSource.getInputSource();
+		}
+		else if (source instanceof StreamSource) {
+			StreamSource streamSource = (StreamSource) source;
+			if (streamSource.getInputStream() != null) {
+				inputSource = new InputSource(streamSource.getInputStream());
+			}
+			else if (streamSource.getReader() != null) {
+				inputSource = new InputSource(streamSource.getReader());
+			}
+		}
+
+		try {
+			if (xmlReader == null) {
+				xmlReader = XMLReaderFactory.createXMLReader();
+			}
+			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities",
+					this.processExternalEntities);
+
+			return new SAXSource(xmlReader, inputSource);
+		}
+		catch (SAXException ex) {
+			logger.warn("Processing of external entities could not be disabled", ex);
+			return source;
 		}
 	}
 
@@ -930,18 +991,22 @@ public class Jaxb2Marshaller
 			this.length = length;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(this.data, this.offset, this.length);
 		}
 
+		@Override
 		public OutputStream getOutputStream() throws IOException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String getContentType() {
 			return this.contentType;
 		}
 
+		@Override
 		public String getName() {
 			return "ByteArrayDataSource";
 		}

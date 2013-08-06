@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,12 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 	}
 
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.httpRequest.getMethod());
 	}
 
+	@Override
 	public URI getURI() {
 		return this.httpRequest.getURI();
 	}
@@ -71,22 +73,35 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
+		addHeaders(this.httpRequest, headers);
+
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
+			HttpEntityEnclosingRequest entityEnclosingRequest =
+					(HttpEntityEnclosingRequest) this.httpRequest;
+			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
+			entityEnclosingRequest.setEntity(requestEntity);
+		}
+		HttpResponse httpResponse =
+				this.httpClient.execute(this.httpRequest, this.httpContext);
+		return new HttpComponentsClientHttpResponse(httpResponse);
+	}
+
+	/**
+	 * Adds the given headers to the given HTTP request.
+	 *
+	 * @param httpRequest the request to add the headers to
+	 * @param headers the headers to add
+	 */
+	static void addHeaders(HttpUriRequest httpRequest, HttpHeaders headers) {
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			String headerName = entry.getKey();
 			if (!headerName.equalsIgnoreCase(HTTP.CONTENT_LEN) &&
 					!headerName.equalsIgnoreCase(HTTP.TRANSFER_ENCODING)) {
 				for (String headerValue : entry.getValue()) {
-					this.httpRequest.addHeader(headerName, headerValue);
+					httpRequest.addHeader(headerName, headerValue);
 				}
 			}
 		}
-		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
-			entityEnclosingRequest.setEntity(requestEntity);
-		}
-		HttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
-		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
 
 }

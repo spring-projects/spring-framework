@@ -85,6 +85,7 @@ public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvis
 	}
 
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

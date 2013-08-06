@@ -79,8 +79,9 @@ public class EhCacheSupportTests extends TestCase {
 	}
 
 	private void doTestEhCacheFactoryBean(boolean useCacheManagerFb) throws Exception {
-		Cache cache = null;
+		Cache cache;
 		EhCacheManagerFactoryBean cacheManagerFb = null;
+		boolean cacheManagerFbInitialized = false;
 		try {
 			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
 			Class<? extends Ehcache> objectType = cacheFb.getObjectType();
@@ -89,7 +90,9 @@ public class EhCacheSupportTests extends TestCase {
 			if (useCacheManagerFb) {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
 				cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
+				cacheManagerFb.setCacheManagerName("cache");
 				cacheManagerFb.afterPropertiesSet();
+				cacheManagerFbInitialized = true;
 				cacheFb.setCacheManager(cacheManagerFb.getObject());
 			}
 
@@ -118,11 +121,9 @@ public class EhCacheSupportTests extends TestCase {
 			config = cache.getCacheConfiguration();
 			assertEquals("undefinedCache", cache.getName());
 			assertTrue("default maxElements is correct", config.getMaxElementsInMemory() == 10000);
-			assertTrue("default overflowToDisk is correct", config.isOverflowToDisk());
 			assertFalse("default eternal is correct", config.isEternal());
 			assertTrue("default timeToLive is correct", config.getTimeToLiveSeconds() == 120);
 			assertTrue("default timeToIdle is correct", config.getTimeToIdleSeconds() == 120);
-			assertTrue("default diskPersistent is correct", !config.isDiskPersistent());
 			assertTrue("default diskExpiryThreadIntervalSeconds is correct", config.getDiskExpiryThreadIntervalSeconds() == 120);
 
 			// overriding the default properties
@@ -132,10 +133,8 @@ public class EhCacheSupportTests extends TestCase {
 			}
 			cacheFb.setBeanName("undefinedCache2");
 			cacheFb.setMaxElementsInMemory(5);
-			cacheFb.setOverflowToDisk(false);
 			cacheFb.setTimeToLive(8);
 			cacheFb.setTimeToIdle(7);
-			cacheFb.setDiskPersistent(true);
 			cacheFb.setDiskExpiryThreadIntervalSeconds(10);
 			cacheFb.afterPropertiesSet();
 			cache = (Cache) cacheFb.getObject();
@@ -143,14 +142,12 @@ public class EhCacheSupportTests extends TestCase {
 
 			assertEquals("undefinedCache2", cache.getName());
 			assertTrue("overridden maxElements is correct", config.getMaxElementsInMemory() == 5);
-			assertFalse("overridden overflowToDisk is correct", config.isOverflowToDisk());
 			assertTrue("default timeToLive is correct", config.getTimeToLiveSeconds() == 8);
 			assertTrue("default timeToIdle is correct", config.getTimeToIdleSeconds() == 7);
-			assertTrue("overridden diskPersistent is correct", config.isDiskPersistent());
 			assertTrue("overridden diskExpiryThreadIntervalSeconds is correct", config.getDiskExpiryThreadIntervalSeconds() == 10);
 		}
 		finally {
-			if (useCacheManagerFb && cacheManagerFb != null) {
+			if (cacheManagerFbInitialized) {
 				cacheManagerFb.destroy();
 			}
 			else {

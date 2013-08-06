@@ -61,6 +61,7 @@ public class NotificationListenerBean extends NotificationListenerHolder impleme
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getNotificationListener() == null) {
 			throw new IllegalArgumentException("Property 'notificationListener' is required");

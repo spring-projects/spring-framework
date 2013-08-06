@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ public class ReflectionUtilsIntegrationTests {
 
 	@Test
 	public void getUniqueDeclaredMethods_withCovariantReturnType_andCglibRewrittenMethodNames() throws Exception {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		Class<?> cglibLeaf = new ConfigurationClassEnhancer(bf).enhance(Leaf.class);
+		Class<?> cglibLeaf = new ConfigurationClassEnhancer().enhance(Leaf.class);
 		int m1MethodCount = 0;
 		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(cglibLeaf);
 		for (Method method : methods) {

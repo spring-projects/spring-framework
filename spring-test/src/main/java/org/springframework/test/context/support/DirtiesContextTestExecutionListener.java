@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -47,8 +48,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * Marks the {@linkplain ApplicationContext application context} of the supplied
 	 * {@linkplain TestContext test context} as
 	 * {@linkplain TestContext#markApplicationContextDirty() dirty}, and sets the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * in the test context to {@code true}.
 	 * @param testContext the test context whose application context should
 	 * marked as dirty
 	 * @deprecated as of Spring 3.2.2, use {@link #dirtyContext(TestContext, HierarchyMode)} instead.
@@ -61,10 +62,10 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 	/**
 	 * Marks the {@linkplain ApplicationContext application context} of the supplied
-	 * {@linkplain TestContext test context} as {@linkplain
-	 * TestContext#markApplicationContextDirty(HierarchyMode) dirty} and sets the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
+	 * {@linkplain TestContext test context} as
+	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
+	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * in the test context to {@code true}.
 	 * @param testContext the test context whose application context should
 	 * marked as dirty
 	 * @param hierarchyMode the context cache clearing mode to be applied if the
@@ -85,9 +86,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * AFTER_EACH_TEST_METHOD}, the {@linkplain ApplicationContext application
 	 * context} of the test context will be
 	 * {@linkplain TestContext#markApplicationContextDirty() marked as dirty} and the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
-	 * {@code true}.
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * in the test context will be set to {@code true}.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {

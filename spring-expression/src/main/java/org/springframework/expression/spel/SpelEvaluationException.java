@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.expression.spel;
 import org.springframework.expression.EvaluationException;
 
 /**
- * Root exception for Spring EL related exceptions. Rather than holding a hard coded string indicating the problem, it
- * records a message key and the inserts for the message. See {@link SpelMessage} for the list of all possible messages
- * that can occur.
+ * Root exception for Spring EL related exceptions. Rather than holding a hard coded
+ * string indicating the problem, it records a message key and the inserts for the
+ * message. See {@link SpelMessage} for the list of all possible messages that can occur.
  *
  * @author Andy Clement
  * @since 3.0
@@ -28,8 +28,10 @@ import org.springframework.expression.EvaluationException;
 @SuppressWarnings("serial")
 public class SpelEvaluationException extends EvaluationException {
 
-	private SpelMessage message;
-	private Object[] inserts;
+	private final SpelMessage message;
+
+	private final Object[] inserts;
+
 
 	public SpelEvaluationException(SpelMessage message, Object... inserts) {
 		super(message.formatMessage(0, inserts)); // TODO poor position information, can the callers not really supply something?
@@ -56,15 +58,18 @@ public class SpelEvaluationException extends EvaluationException {
 		this.inserts = inserts;
 	}
 
+
 	/**
 	 * @return a formatted message with inserts applied
 	 */
 	@Override
 	public String getMessage() {
-		if (message != null)
-			return message.formatMessage(position, inserts);
-		else
+		if (this.message != null) {
+			return this.message.formatMessage(this.position, this.inserts);
+		}
+		else {
 			return super.getMessage();
+		}
 	}
 
 	/**
@@ -87,7 +92,7 @@ public class SpelEvaluationException extends EvaluationException {
 	 * @return the message inserts
 	 */
 	public Object[] getInserts() {
-		return inserts;
+		return this.inserts;
 	}
 
 }

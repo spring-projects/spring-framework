@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import org.springframework.util.ClassUtils;
  *
  * <p>This class reads Spring's JDK 1.5+ {@link Transactional} annotation and
  * exposes corresponding transaction attributes to Spring's transaction infrastructure.
- * Also supports EJB3's {@link javax.ejb.TransactionAttribute} annotation (if present).
+ * Also supports JTA 1.2's {@link javax.transaction.Transactional} and EJB3's
+ * {@link javax.ejb.TransactionAttribute} annotation (if present).
  * This class may also serve as base class for a custom TransactionAttributeSource,
  * or get customized through {@link TransactionAnnotationParser} strategies.
  *
@@ -52,6 +53,9 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements Serializable {
+
+	private static final boolean jta12Present = ClassUtils.isPresent(
+			"javax.transaction.Transactional", AnnotationTransactionAttributeSource.class.getClassLoader());
 
 	private static final boolean ejb3Present = ClassUtils.isPresent(
 			"javax.ejb.TransactionAttribute", AnnotationTransactionAttributeSource.class.getClassLoader());
@@ -83,6 +87,9 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 		this.publicMethodsOnly = publicMethodsOnly;
 		this.annotationParsers = new LinkedHashSet<TransactionAnnotationParser>(2);
 		this.annotationParsers.add(new SpringTransactionAnnotationParser());
+		if (jta12Present) {
+			this.annotationParsers.add(new JtaTransactionAnnotationParser());
+		}
 		if (ejb3Present) {
 			this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
 		}

@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -38,7 +39,10 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.0
  */
-public class TypeDescriptor {
+public class TypeDescriptor implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
@@ -623,6 +627,7 @@ public class TypeDescriptor {
 	}
 
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -654,10 +659,12 @@ public class TypeDescriptor {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		return getType().hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Annotation ann : this.annotations) {

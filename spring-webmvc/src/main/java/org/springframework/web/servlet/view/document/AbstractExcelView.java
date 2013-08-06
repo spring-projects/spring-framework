@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Convenient superclass for Excel document views.
- * Compatible with Apache POI 3.0 as well as 3.5, as of Spring 3.0.
+ * Compatible with Apache POI 3.5 and higher, as of Spring 4.0.
  *
  * <p>Properties:
  * <ul>
@@ -203,9 +203,9 @@ public abstract class AbstractExcelView extends AbstractView {
 		if (sheetRow == null) {
 			sheetRow = sheet.createRow(row);
 		}
-		HSSFCell cell = sheetRow.getCell((short) col);
+		HSSFCell cell = sheetRow.getCell(col);
 		if (cell == null) {
-			cell = sheetRow.createCell((short) col);
+			cell = sheetRow.createCell(col);
 		}
 		return cell;
 	}

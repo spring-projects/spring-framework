@@ -64,6 +64,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>(32);
 
 
+	@Override
 	public String[] getParameterNames(Method method) {
 		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
 		Class<?> declaringClass = originalMethod.getDeclaringClass();
@@ -78,6 +79,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		return null;
 	}
 
+	@Override
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
@@ -114,8 +116,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		catch (IOException ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Exception thrown while reading '.class' file for class [" + clazz
-						+ "] - unable to determine constructors/methods parameter names", ex);
+				logger.debug("Exception thrown while reading '.class' file for class [" + clazz +
+						"] - unable to determine constructors/methods parameter names", ex);
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("ASM ClassReader failed to parse class file [" + clazz +
+						"], probably due to a new Java class file version that isn't supported yet " +
+						"- unable to determine constructors/methods parameter names", ex);
 			}
 		}
 		finally {

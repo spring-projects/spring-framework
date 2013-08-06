@@ -54,8 +54,19 @@ public enum TestGroup {
 	 * Tests requiring the presence of jmxremote_optional.jar in jre/lib/ext in order to
 	 * avoid "Unsupported protocol: jmxmp" errors.
 	 */
-	JMXMP;
+	JMXMP,
 
+	/**
+	 * Tests that should only be run on the continuous integration server.
+	 */
+	CI,
+
+	/**
+	 * Tests that require custom compilation beyond that of the standard JDK. This helps to
+	 * allow running tests that will otherwise fail when using JDK >  1.8 b88. See
+	 * <a href="https://jira.springsource.org/browse/SPR-10558">SPR-10558</a>
+	 */
+	CUSTOM_COMPILATION;
 
 	/**
 	 * Parse the specified comma separates string of groups.

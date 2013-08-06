@@ -755,7 +755,11 @@ public class Application {
                 <para>
                   By default, XStream allows for arbitrary classes to be unmarshalled, which can result in security
                   vulnerabilities.
-                  As such, it is recommended to set the <property>supportedClasses</property> property on the
+                  As such, it is <emphasis>not recommended to use the <classname>XStreamMarshaller</classname> to
+                  unmarshal XML from external sources</emphasis> (i.e. the Web), as this can result in
+                  <emphasis>security vulnerabilities</emphasis>.
+                  If you do use the <classname>XStreamMarshaller</classname> to unmarshal XML from an external source,
+                  set the <property>supportedClasses</property> property on the
                   <classname>XStreamMarshaller</classname>, like so:
                   <programlisting language="xml"><![CDATA[<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
     <property name="supportedClasses" value="org.springframework.oxm.xstream.Flight"/>

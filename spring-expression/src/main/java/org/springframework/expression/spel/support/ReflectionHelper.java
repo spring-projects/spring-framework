@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,15 @@ import org.springframework.util.MethodInvoker;
 public class ReflectionHelper {
 
 	/**
-	 * Compare argument arrays and return information about whether they match. A supplied type converter
-	 * and conversionAllowed flag allow for matches to take into account that a type may be transformed
-	 * into a different type by the converter.
+	 * Compare argument arrays and return information about whether they match. A supplied
+	 * type converter and conversionAllowed flag allow for matches to take into account
+	 * that a type may be transformed into a different type by the converter.
 	 * @param expectedArgTypes the array of types the method/constructor is expecting
-	 * @param suppliedArgTypes the array of types that are being supplied at the point of invocation
+	 * @param suppliedArgTypes the array of types that are being supplied at the point of
+	 *        invocation
 	 * @param typeConverter a registered type converter
-	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
+	 * @return a MatchInfo object indicating what kind of match it was or null if it was
+	 *         not a match
 	 */
 	static ArgumentsMatchInfo compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
@@ -199,6 +201,7 @@ public class ReflectionHelper {
 				}
 			}
 		}
+
 		// If already confirmed it cannot be a match, then return
 		if (match == null) {
 			return null;
@@ -381,57 +384,74 @@ public class ReflectionHelper {
 			// method the arguments should have been converted to the box form of the required type.
 			Class<?> componentType = requiredParameterTypes[parameterCount-1].getComponentType();
 			if (componentType.isPrimitive()) {
-				if (componentType==Integer.TYPE) {
-					int[] repackagedArguments = (int[]) Array.newInstance(componentType, arraySize);
+				if (componentType == Integer.TYPE) {
+					int[] repackagedArguments = (int[]) Array.newInstance(componentType,
+							arraySize);
 					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Integer)args[parameterCount + i - 1]).intValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Float.TYPE) {
-					float[] repackagedArguments = (float[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Float)args[parameterCount + i - 1]).floatValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Double.TYPE) {
-					double[] repackagedArguments = (double[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Double)args[parameterCount + i - 1]).doubleValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Short.TYPE) {
-					short[] repackagedArguments = (short[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Short)args[parameterCount + i - 1]).shortValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Character.TYPE) {
-					char[] repackagedArguments = (char[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Character)args[parameterCount + i - 1]).charValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Byte.TYPE) {
-					byte[] repackagedArguments = (byte[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Byte)args[parameterCount + i - 1]).byteValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Boolean.TYPE) {
-					boolean[] repackagedArguments = (boolean[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Boolean)args[parameterCount + i - 1]).booleanValue();
-					}
-					newArgs[newArgs.length - 1] = repackagedArguments;
-				} else if(componentType==Long.TYPE) {
-					long[] repackagedArguments = (long[]) Array.newInstance(componentType, arraySize);
-					for (int i = 0; i < arraySize; i++) {
-						repackagedArguments[i] = ((Long)args[parameterCount + i - 1]).longValue();
+						repackagedArguments[i] = ((Integer) args[parameterCount + i - 1]).intValue();
 					}
 					newArgs[newArgs.length - 1] = repackagedArguments;
 				}
-			} else {
-			  Object[] repackagedArguments = (Object[]) Array.newInstance(componentType, arraySize);
+				else if (componentType == Float.TYPE) {
+					float[] repackagedArguments = (float[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Float) args[parameterCount + i - 1]).floatValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+				else if (componentType == Double.TYPE) {
+					double[] repackagedArguments = (double[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Double) args[parameterCount + i - 1]).doubleValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+				else if (componentType == Short.TYPE) {
+					short[] repackagedArguments = (short[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Short) args[parameterCount + i - 1]).shortValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+				else if (componentType == Character.TYPE) {
+					char[] repackagedArguments = (char[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Character) args[parameterCount + i - 1]).charValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+				else if (componentType == Byte.TYPE) {
+					byte[] repackagedArguments = (byte[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Byte) args[parameterCount + i - 1]).byteValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+				else if (componentType == Boolean.TYPE) {
+					boolean[] repackagedArguments = (boolean[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Boolean) args[parameterCount + i - 1]).booleanValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+				else if (componentType == Long.TYPE) {
+					long[] repackagedArguments = (long[]) Array.newInstance(
+							componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Long) args[parameterCount + i - 1]).longValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+			}
+			else {
+				Object[] repackagedArguments = (Object[]) Array.newInstance(
+						componentType, arraySize);
 				// Copy all but the varargs arguments
 				for (int i = 0; i < arraySize; i++) {
 					repackagedArguments[i] = args[parameterCount + i - 1];
@@ -487,6 +507,7 @@ public class ReflectionHelper {
 			return (this.kind == ArgsMatchKind.REQUIRES_CONVERSION);
 		}
 
+		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("ArgumentMatch: ").append(this.kind);

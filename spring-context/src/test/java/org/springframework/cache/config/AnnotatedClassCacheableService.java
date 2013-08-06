@@ -31,6 +31,7 @@ import org.springframework.cache.annotation.Caching;
 public class AnnotatedClassCacheableService implements CacheableService<Object> {
 
 	private final AtomicLong counter = new AtomicLong();
+
 	public static final AtomicLong nullInvocations = new AtomicLong();
 
 	@Override
@@ -162,6 +163,13 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@Caching(put = { @CachePut("primary"), @CachePut("secondary") })
 	public Object multiUpdate(Object arg1) {
+		return arg1;
+	}
+
+	@Override
+	@CachePut(value="primary", key="#result.id")
+	public TestEntity putRefersToResult(TestEntity arg1) {
+		arg1.setId(Long.MIN_VALUE);
 		return arg1;
 	}
 }

@@ -59,27 +59,33 @@ public class CommAreaRecord implements Record, Streamable {
 	}
 
 
+	@Override
 	public void setRecordName(String recordName) {
 		this.recordName=recordName;
 	}
 
+	@Override
 	public String getRecordName() {
 		return recordName;
 	}
 
+	@Override
 	public void setRecordShortDescription(String recordShortDescription) {
 		this.recordShortDescription=recordShortDescription;
 	}
 
+	@Override
 	public String getRecordShortDescription() {
 		return recordShortDescription;
 	}
 
 
+	@Override
 	public void read(InputStream in) throws IOException {
 		this.bytes = FileCopyUtils.copyToByteArray(in);
 	}
 
+	@Override
 	public void write(OutputStream out) throws IOException {
 		out.write(this.bytes);
 		out.flush();

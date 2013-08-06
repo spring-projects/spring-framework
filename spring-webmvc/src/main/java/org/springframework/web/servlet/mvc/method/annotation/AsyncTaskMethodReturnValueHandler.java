@@ -39,11 +39,13 @@ public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnVal
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
 		return WebAsyncTask.class.isAssignableFrom(paramType);
 	}
 
+	@Override
 	public void handleReturnValue(Object returnValue,
 			MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {

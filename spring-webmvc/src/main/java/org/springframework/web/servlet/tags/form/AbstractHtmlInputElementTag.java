@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,9 +71,9 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 
 	private String accesskey;
 
-	private String disabled;
+	private boolean disabled;
 
-	private String readonly;
+	private boolean readonly;
 
 
 	/**
@@ -138,34 +138,29 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 
 	/**
 	 * Set the value of the '{@code disabled}' attribute.
-	 * May be a runtime expression.
 	 */
-	public void setDisabled(String disabled) {
+	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
 
 	/**
 	 * Get the value of the '{@code disabled}' attribute.
 	 */
-	protected String getDisabled() {
+	protected boolean isDisabled() {
 		return this.disabled;
 	}
 
 	/**
 	 * Sets the value of the '{@code readonly}' attribute.
-	 * May be a runtime expression.
-	 * @see #isReadonly()
 	 */
-	public void setReadonly(String readonly) {
+	public void setReadonly(boolean readonly) {
 		this.readonly = readonly;
 	}
 
 	/**
 	 * Gets the value of the '{@code readonly}' attribute.
-	 * May be a runtime expression.
-	 * @see #isReadonly()
 	 */
-	protected String getReadonly() {
+	protected boolean isReadonly() {
 		return this.readonly;
 	}
 
@@ -187,23 +182,6 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		if (isReadonly()) {
 			writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, "readonly");
 		}
-	}
-
-	/**
-	 * Is the current HTML tag disabled?
-	 */
-	protected boolean isDisabled() throws JspException {
-		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
-	}
-
-	/**
-	 * Is the current HTML tag readonly?
-	 * <p>Note: some {@link AbstractHtmlInputElementTag} subclasses (such a those
-	 * for checkboxes and radiobuttons)  may contain readonly attributes, but are
-	 * not affected by them since their values don't change (only their status does.)
-	 */
-	protected boolean isReadonly() throws JspException {
-		return evaluateBoolean(READONLY_ATTRIBUTE, getReadonly());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,6 @@ public abstract class ResourceUtils {
 
 	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
 	public static final String URL_PROTOCOL_WSJAR = "wsjar";
-
-	/** URL protocol for an entry from an OC4J jar file: "code-source" */
-	public static final String URL_PROTOCOL_CODE_SOURCE = "code-source";
 
 	/** Separator between JAR URL and file path within the JAR */
 	public static final String JAR_URL_SEPARATOR = "!/";
@@ -261,18 +258,14 @@ public abstract class ResourceUtils {
 	/**
 	 * Determine whether the given URL points to a resource in a jar file,
 	 * that is, has protocol "jar", "zip", "wsjar" or "code-source".
-	 * <p>"zip" and "wsjar" are used by BEA WebLogic Server and IBM WebSphere, respectively,
-	 * but can be treated like jar files. The same applies to "code-source" URLs on Oracle
-	 * OC4J, provided that the path contains a jar separator.
+	 * <p>"zip" and "wsjar" are used by WebLogic Server and WebSphere, respectively,
+	 * but can be treated like jar files.
 	 * @param url the URL to check
 	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
-		String protocol = url.getProtocol();
-		return (URL_PROTOCOL_JAR.equals(protocol) ||
-				URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_WSJAR.equals(protocol) ||
-				(URL_PROTOCOL_CODE_SOURCE.equals(protocol) && url.getPath().contains(JAR_URL_SEPARATOR)));
+		String up = url.getProtocol();
+		return (URL_PROTOCOL_JAR.equals(up) || URL_PROTOCOL_ZIP.equals(up) || URL_PROTOCOL_WSJAR.equals(up));
 	}
 
 	/**

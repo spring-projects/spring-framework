@@ -45,6 +45,7 @@ public class FlashAttributeResultMatchers {
 	 */
 	public <T> ResultMatcher attribute(final String name, final Matcher<T> matcher) {
 		return new ResultMatcher() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) throws Exception {
 				assertThat("Flash attribute", (T) result.getFlashMap().get(name), matcher);
@@ -57,6 +58,7 @@ public class FlashAttributeResultMatchers {
 	 */
 	public <T> ResultMatcher attribute(final String name, final Object value) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("Flash attribute", value, result.getFlashMap().get(name));
 			}
@@ -68,6 +70,7 @@ public class FlashAttributeResultMatchers {
 	 */
 	public <T> ResultMatcher attributeExists(final String... names) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				for (String name : names) {
 					assertTrue("Flash attribute [" + name + "] does not exist", result.getFlashMap().get(name) != null);
@@ -81,6 +84,7 @@ public class FlashAttributeResultMatchers {
 	 */
 	public <T> ResultMatcher attributeCount(final int count) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				assertEquals("FlashMap size", count, result.getFlashMap().size());
 			}

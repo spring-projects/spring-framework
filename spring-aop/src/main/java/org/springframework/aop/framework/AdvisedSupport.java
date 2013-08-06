@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,10 +137,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		setTargetSource(new SingletonTargetSource(target));
 	}
 
+	@Override
 	public void setTargetSource(TargetSource targetSource) {
 		this.targetSource = (targetSource != null ? targetSource : EMPTY_TARGET_SOURCE);
 	}
 
+	@Override
 	public TargetSource getTargetSource() {
 		return this.targetSource;
 	}
@@ -162,14 +164,17 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.targetSource = EmptyTargetSource.forClass(targetClass);
 	}
 
+	@Override
 	public Class<?> getTargetClass() {
 		return this.targetSource.getTargetClass();
 	}
 
+	@Override
 	public void setPreFiltered(boolean preFiltered) {
 		this.preFiltered = preFiltered;
 	}
 
+	@Override
 	public boolean isPreFiltered() {
 		return this.preFiltered;
 	}
@@ -228,10 +233,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.interfaces.remove(intf);
 	}
 
+	@Override
 	public Class[] getProxiedInterfaces() {
 		return this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
+	@Override
 	public boolean isInterfaceProxied(Class intf) {
 		for (Class proxyIntf : this.interfaces) {
 			if (intf.isAssignableFrom(proxyIntf)) {
@@ -242,15 +249,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 
+	@Override
 	public final Advisor[] getAdvisors() {
 		return this.advisorArray;
 	}
 
+	@Override
 	public void addAdvisor(Advisor advisor) {
 		int pos = this.advisors.size();
 		addAdvisor(pos, advisor);
 	}
 
+	@Override
 	public void addAdvisor(int pos, Advisor advisor) throws AopConfigException {
 		if (advisor instanceof IntroductionAdvisor) {
 			validateIntroductionAdvisor((IntroductionAdvisor) advisor);
@@ -258,6 +268,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisorInternal(pos, advisor);
 	}
 
+	@Override
 	public boolean removeAdvisor(Advisor advisor) {
 		int index = indexOf(advisor);
 		if (index == -1) {
@@ -269,6 +280,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
+	@Override
 	public void removeAdvisor(int index) throws AopConfigException {
 		if (isFrozen()) {
 			throw new AopConfigException("Cannot remove Advisor: Configuration is frozen.");
@@ -292,11 +304,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		adviceChanged();
 	}
 
+	@Override
 	public int indexOf(Advisor advisor) {
 		Assert.notNull(advisor, "Advisor must not be null");
 		return this.advisors.indexOf(advisor);
 	}
 
+	@Override
 	public boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
 		Assert.notNull(a, "Advisor a must not be null");
 		Assert.notNull(b, "Advisor b must not be null");
@@ -307,16 +321,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		removeAdvisor(index);
 		addAdvisor(index, b);
 		return true;
-	}
-
-	/**
-	 * Add all of the given advisors to this proxy configuration.
-	 * @param advisors the advisors to register
-	 * @deprecated as of Spring 3.0, in favor of {@link #addAdvisors}
-	 */
-	@Deprecated
-	public void addAllAdvisors(Advisor[] advisors) {
-		addAdvisors(Arrays.asList(advisors));
 	}
 
 	/**
@@ -388,6 +392,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 
+	@Override
 	public void addAdvice(Advice advice) throws AopConfigException {
 		int pos = this.advisors.size();
 		addAdvice(pos, advice);
@@ -396,6 +401,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Cannot add introductions this way unless the advice implements IntroductionInfo.
 	 */
+	@Override
 	public void addAdvice(int pos, Advice advice) throws AopConfigException {
 		Assert.notNull(advice, "Advice must not be null");
 		if (advice instanceof IntroductionInfo) {
@@ -412,6 +418,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
+	@Override
 	public boolean removeAdvice(Advice advice) throws AopConfigException {
 		int index = indexOf(advice);
 		if (index == -1) {
@@ -423,6 +430,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 	}
 
+	@Override
 	public int indexOf(Advice advice) {
 		Assert.notNull(advice, "Advice must not be null");
 		for (int i = 0; i < this.advisors.size(); i++) {
@@ -554,6 +562,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 
+	@Override
 	public String toProxyConfigString() {
 		return toString();
 	}

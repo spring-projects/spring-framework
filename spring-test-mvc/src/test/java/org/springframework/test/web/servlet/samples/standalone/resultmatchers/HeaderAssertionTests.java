@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,71 +16,153 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
-import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
-import java.util.Date;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
 /**
  * Examples of expectations on response header values.
- *
+ * 
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class HeaderAssertionTests {
+
+	private static final String EXPECTED_ASSERTION_ERROR_MSG = "Should have thrown an AssertionError";
+
+	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+
+	private static final String LAST_MODIFIED = "Last-Modified";
+
+	private final long currentTime = System.currentTimeMillis();
 
 	private MockMvc mockMvc;
 
 	private PersonController personController;
 
+
 	@Before
 	public void setup() {
 		this.personController = new PersonController();
+		this.personController.setStubTimestamp(currentTime);
 		this.mockMvc = standaloneSetup(this.personController).build();
 	}
 
 	@Test
-	public void testValue() throws Exception {
-		long currentTime = new Date().getTime();
-		this.personController.setStubTimestamp(currentTime);
-		this.mockMvc.perform(get("/persons/1").header("If-Modified-Since", currentTime - (1000 * 60)))
-			.andExpect(header().string("Last-Modified", String.valueOf(currentTime)));
+	public void stringWithCorrectResponseHeaderValue() throws Exception {
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
+		.andExpect(header().string(LAST_MODIFIED, String.valueOf(currentTime)));
 	}
 
 	@Test
-	public void testLongValue() throws Exception {
-		long currentTime = new Date().getTime();
-		this.personController.setStubTimestamp(currentTime);
-		this.mockMvc.perform(get("/persons/1").header("If-Modified-Since", currentTime - (1000 * 60)))
-			.andExpect(header().longValue("Last-Modified", currentTime));
+	public void stringWithMatcherAndCorrectResponseHeaderValue() throws Exception {
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
+		.andExpect(header().string(LAST_MODIFIED, equalTo(String.valueOf(currentTime))));
 	}
 
 	@Test
-	public void testMatcher() throws Exception {
-		long currentTime = new Date().getTime();
-		this.personController.setStubTimestamp(currentTime);
-		this.mockMvc.perform(get("/persons/1").header("If-Modified-Since", currentTime))
-			.andExpect(status().isNotModified())
-			.andExpect(header().string("Last-Modified", nullValue()));
+	public void longValueWithCorrectResponseHeaderValue() throws Exception {
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
+		.andExpect(header().longValue(LAST_MODIFIED, currentTime));
 	}
 
+	@Test
+	public void stringWithMissingResponseHeader() throws Exception {
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
+		.andExpect(status().isNotModified())//
+		.andExpect(header().string(LAST_MODIFIED, (String) null));
+	}
+
+	@Test
+	public void stringWithMatcherAndMissingResponseHeader() throws Exception {
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
+		.andExpect(status().isNotModified())//
+		.andExpect(header().string(LAST_MODIFIED, nullValue()));
+	}
+
+	@Test
+	public void longValueWithMissingResponseHeader() throws Exception {
+		try {
+			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
+			.andExpect(status().isNotModified())//
+			.andExpect(header().longValue(LAST_MODIFIED, 99L));
+
+			fail(EXPECTED_ASSERTION_ERROR_MSG);
+		}
+		catch (AssertionError e) {
+			if (EXPECTED_ASSERTION_ERROR_MSG.equals(e.getMessage())) {
+				throw e;
+			}
+			assertEquals("Response does not contain header " + LAST_MODIFIED, e.getMessage());
+		}
+	}
+
+	@Test
+	public void stringWithIncorrectResponseHeaderValue() throws Exception {
+		long unexpected = currentTime + 1;
+		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, String.valueOf(unexpected)), unexpected);
+	}
+
+	@Test
+	public void stringWithMatcherAndIncorrectResponseHeaderValue() throws Exception {
+		long unexpected = currentTime + 1;
+		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, equalTo(String.valueOf(unexpected))),
+			unexpected);
+	}
+
+	@Test
+	public void longValueWithIncorrectResponseHeaderValue() throws Exception {
+		long unexpected = currentTime + 1;
+		assertIncorrectResponseHeaderValue(header().longValue(LAST_MODIFIED, unexpected), unexpected);
+	}
+
+	private void assertIncorrectResponseHeaderValue(ResultMatcher resultMatcher, long unexpected) throws Exception {
+		try {
+			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
+			.andExpect(resultMatcher);
+
+			fail(EXPECTED_ASSERTION_ERROR_MSG);
+		}
+		catch (AssertionError e) {
+			if (EXPECTED_ASSERTION_ERROR_MSG.equals(e.getMessage())) {
+				throw e;
+			}
+			// [SPR-10659] Ensure that the header name is included in the message
+			//
+			// We don't use assertEquals() since we cannot control the formatting
+			// produced by JUnit or Hamcrest.
+			assertMessageContains(e, "Response header " + LAST_MODIFIED);
+			assertMessageContains(e, String.valueOf(unexpected));
+			assertMessageContains(e, String.valueOf(currentTime));
+		}
+	}
+
+	private void assertMessageContains(AssertionError error, String expected) {
+		String message = error.getMessage();
+		assertTrue("Failure message should contain: " + expected, message.contains(expected));
+	}
+
+
+	// -------------------------------------------------------------------------
 
 	@Controller
 	private static class PersonController {
 
 		private long timestamp;
+
 
 		public void setStubTimestamp(long timestamp) {
 			this.timestamp = timestamp;

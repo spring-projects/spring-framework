@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,12 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 	private ApplicationContext dirtiedApplicationContext;
 
 
-	@SuppressWarnings("deprecation")
 	private void performCommonAssertions() {
 		assertInTransaction(true);
 		assertNotNull(super.applicationContext,
 			"The application context should have been set due to ApplicationContextAware semantics.");
-		assertNotNull(super.simpleJdbcTemplate,
-			"The SimpleJdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
+		assertNotNull(super.jdbcTemplate,
+			"The JdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
 	}
 
 	@Test

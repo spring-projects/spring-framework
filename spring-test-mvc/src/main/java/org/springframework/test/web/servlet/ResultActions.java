@@ -31,7 +31,7 @@ public interface ResultActions {
 
 	/**
 	 * Provide an expectation. For example:
-	 * <pre>
+	 * <pre class="code">
 	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
 	 * mockMvc.perform(get("/person/1"))
@@ -52,7 +52,7 @@ public interface ResultActions {
 
 	/**
 	 * Provide a general action. For example:
-	 * <pre>
+	 * <pre class="code">
 	 * static imports: MockMvcRequestBuilders.*, MockMvcResultMatchers.*
 	 *
 	 * mockMvc.perform(get("/form")).andDo(print());

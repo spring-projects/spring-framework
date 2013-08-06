@@ -179,8 +179,10 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 		String getName();
 
+		@Override
 		boolean equals(Object other);
 
+		@Override
 		int hashCode();
 	}
 
@@ -194,6 +196,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 			return this.name;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
@@ -205,6 +208,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 			return true;
 		}
 
+		@Override
 		public int hashCode() {
 			return name.hashCode();
 		}

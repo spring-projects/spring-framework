@@ -17,6 +17,7 @@
 package org.springframework.http.server;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -36,8 +37,16 @@ public interface ServerHttpResponse extends HttpOutputMessage, Closeable {
 	void setStatusCode(HttpStatus status);
 
 	/**
+	 * Ensure the headers and the content of the response are written out. After the first
+	 * flush, headers can no longer be changed, only further content writing and flushing
+	 * is possible.
+	 */
+	void flush() throws IOException;
+
+	/**
 	 * Close this response, freeing any resources created.
 	 */
+	@Override
 	void close();
 
 }

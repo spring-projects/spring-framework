@@ -740,6 +740,7 @@ public class DefaultConversionTests {
 			this.value = value;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof SSN)) {
 				return false;
@@ -748,10 +749,12 @@ public class DefaultConversionTests {
 			return this.value.equals(ssn.value);
 		}
 
+		@Override
 		public int hashCode() {
 			return value.hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return value;
 		}
@@ -765,6 +768,7 @@ public class DefaultConversionTests {
 			this.value = value;
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof ISBN)) {
 				return false;
@@ -773,10 +777,12 @@ public class DefaultConversionTests {
 			return this.value.equals(isbn.value);
 		}
 
+		@Override
 		public int hashCode() {
 			return value.hashCode();
 		}
 
+		@Override
 		public String toString() {
 			return value;
 		}

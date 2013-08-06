@@ -117,14 +117,14 @@ public abstract class MockMvcRequestBuilders {
 	 * {@link MvcResult} of the request that started async processing.
 	 *
 	 * <p>Usage involves performing one request first that starts async processing:
-	 * <pre>
+	 * <pre class="code">
 	 * MvcResult mvcResult = this.mockMvc.perform(get("/1"))
 	 *	.andExpect(request().asyncStarted())
 	 *	.andReturn();
 	 *  </pre>
 	 *
 	 * <p>And then performing the async dispatch re-using the {@code MvcResult}:
-	 * <pre>
+	 * <pre class="code">
 	 * this.mockMvc.perform(asyncDispatch(mvcResult))
 	 * 	.andExpect(status().isOk())
 	 * 	.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -135,6 +135,7 @@ public abstract class MockMvcRequestBuilders {
 	 */
 	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
 		return new RequestBuilder() {
+			@Override
 			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 				MockHttpServletRequest request = mvcResult.getRequest();
 				Method method = ReflectionUtils.findMethod(request.getClass(), "setAsyncStarted", boolean.class);

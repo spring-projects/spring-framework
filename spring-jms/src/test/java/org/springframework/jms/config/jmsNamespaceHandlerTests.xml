@@ -52,7 +52,7 @@
 
 	<bean id="testDestinationResolver" class="org.springframework.jms.support.destination.DynamicDestinationResolver"/>
 
-	<bean id="testMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter102"/>
+	<bean id="testMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
 
 	<bean id="testTransactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 

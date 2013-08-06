@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +30,6 @@ import javax.servlet.jsp.PageContext;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
-import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
@@ -59,13 +57,13 @@ import org.springframework.web.util.UriUtils;
  * over direct EL substitution as the values are URL encoded.  Failure to properly
  * encode URL can leave an application vulnerable to XSS and other injection attacks.
  *
- * <p>URLs can be HTML/XML escaped by setting the {@link #setHtmlEscape(String)
+ * <p>URLs can be HTML/XML escaped by setting the {@link #setHtmlEscape(boolean)
  * 'htmlEscape'} attribute to 'true'.  Detects an HTML escaping setting, either on
  * this tag instance, the page level, or the {@code web.xml} level. The default
  * is 'false'.  When setting the URL value into a variable, escaping is not recommended.
  *
  * <p>Example usage:
- * <pre>&lt;spring:url value="/url/path/{variableName}"&gt;
+ * <pre class="code">&lt;spring:url value="/url/path/{variableName}"&gt;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
  * Results in:
@@ -152,11 +150,11 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	 * Set JavaScript escaping for this tag, as boolean value.
 	 * Default is "false".
 	 */
-	public void setJavaScriptEscape(String javaScriptEscape) throws JspException {
-		this.javaScriptEscape =
-				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, pageContext);
+	public void setJavaScriptEscape(boolean javaScriptEscape) throws JspException {
+		this.javaScriptEscape = javaScriptEscape;
 	}
 
+	@Override
 	public void addParam(Param param) {
 		this.params.add(param);
 	}

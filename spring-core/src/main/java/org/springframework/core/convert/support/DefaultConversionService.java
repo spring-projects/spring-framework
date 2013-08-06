@@ -53,6 +53,7 @@ public class DefaultConversionService extends GenericConversionService {
 	public static void addDefaultConverters(ConverterRegistry converterRegistry) {
 		addScalarConverters(converterRegistry);
 		addCollectionConverters(converterRegistry);
+		addBinaryConverters(converterRegistry);
 		addFallbackConverters(converterRegistry);
 	}
 
@@ -107,6 +108,11 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
 		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));
+	}
+
+	private static void addBinaryConverters(ConverterRegistry converterRegistry) {
+		ConversionService conversionService = (ConversionService) converterRegistry;
+		converterRegistry.addConverter(new ByteBufferConverter(conversionService));
 	}
 
 	private static void addFallbackConverters(ConverterRegistry converterRegistry) {

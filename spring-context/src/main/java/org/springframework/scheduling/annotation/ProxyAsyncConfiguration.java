@@ -38,7 +38,6 @@ import org.springframework.util.Assert;
 @Configuration
 public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {
 
-	@Override
 	@Bean(name=AnnotationConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AsyncAnnotationBeanPostProcessor asyncAdvisor() {

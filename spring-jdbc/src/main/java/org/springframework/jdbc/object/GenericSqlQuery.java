@@ -37,11 +37,13 @@ public class GenericSqlQuery extends SqlQuery {
 					"'org.springframework.jdbc.core.RowMapper'");
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		Assert.notNull(rowMapperClass, "The 'rowMapperClass' property is required");
 	}
 
+	@Override
 	protected RowMapper newRowMapper(Object[] parameters, Map context) {
 		try {
 			return (RowMapper) rowMapperClass.newInstance();

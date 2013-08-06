@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,13 @@ import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 
 import org.custommonkey.xmlunit.XMLUnit;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.Marshaller;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertFalse;
@@ -36,6 +39,11 @@ import static org.junit.Assert.assertTrue;
  * not occur by default. The Gradle build should succeed, however.
  */
 public class JibxMarshallerTests extends AbstractMarshallerTests {
+
+	@BeforeClass
+	public static void compilerAssumptions() {
+		Assume.group(TestGroup.CUSTOM_COMPILATION);
+	}
 
 	@Override
 	protected Marshaller createMarshaller() throws Exception {

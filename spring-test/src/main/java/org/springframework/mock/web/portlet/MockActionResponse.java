@@ -59,6 +59,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 	}
 
 
+	@Override
 	public void setWindowState(WindowState windowState) throws WindowStateException {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set WindowState after sendRedirect has been called");
@@ -67,6 +68,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 		this.redirectAllowed = false;
 	}
 
+	@Override
 	public void setPortletMode(PortletMode portletMode) throws PortletModeException {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set PortletMode after sendRedirect has been called");
@@ -75,6 +77,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 		this.redirectAllowed = false;
 	}
 
+	@Override
 	public void setRenderParameters(Map<String, String[]> parameters) {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set render parameters after sendRedirect has been called");
@@ -83,6 +86,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 		this.redirectAllowed = false;
 	}
 
+	@Override
 	public void setRenderParameter(String key, String value) {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set render parameters after sendRedirect has been called");
@@ -91,6 +95,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 		this.redirectAllowed = false;
 	}
 
+	@Override
 	public void setRenderParameter(String key, String[] values) {
 		if (this.redirectedUrl != null) {
 			throw new IllegalStateException("Cannot set render parameters after sendRedirect has been called");
@@ -99,6 +104,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 		this.redirectAllowed = false;
 	}
 
+	@Override
 	public void sendRedirect(String location) throws IOException {
 		if (!this.redirectAllowed) {
 			throw new IllegalStateException(
@@ -108,6 +114,7 @@ public class MockActionResponse extends MockStateAwareResponse implements Action
 		this.redirectedUrl = location;
 	}
 
+	@Override
 	public void sendRedirect(String location, String renderUrlParamName) throws IOException {
 		sendRedirect(location);
 		if (renderUrlParamName != null) {

@@ -227,15 +227,6 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Add a {@link org.springframework.jdbc.core.RowMapper} for the specified parameter or column.
-	 * @deprecated in favor of {@link #addDeclaredRowMapper(String, org.springframework.jdbc.core.RowMapper)}
-	 */
-	@Deprecated
-	public void addDeclaredRowMapper(String parameterName, ParameterizedRowMapper rowMapper) {
-		addDeclaredRowMapper(parameterName, (RowMapper) rowMapper);
-	}
-
-	/**
 	 * Get the call string that should be used based on parameters and meta data.
 	 */
 	public String getCallString() {

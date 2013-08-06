@@ -192,7 +192,7 @@
           <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulateAdvisor"
     class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
     &lt;property name="advice"&gt;
-        &lt;ref local="beanNameOfAopAllianceInterceptor"/&gt;
+        &lt;ref bean="beanNameOfAopAllianceInterceptor"/&gt;
     &lt;/property&gt;
     &lt;property name="patterns"&gt;
         &lt;list&gt;
@@ -1040,7 +1040,7 @@ public interface IntroductionInfo {
     class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
     &lt;property name="proxyInterfaces"&gt;&lt;value&gt;com.mycompany.Person&lt;/value&gt;&lt;/property&gt;
 
-    &lt;property name="target"&gt;&lt;ref local="personTarget"/&gt;&lt;/property&gt;
+    &lt;property name="target"&gt;&lt;ref bean="personTarget"/&gt;&lt;/property&gt;
     &lt;property name="interceptorNames"&gt;
         &lt;list&gt;
             &lt;value&gt;myAdvisor&lt;/value&gt;
@@ -1074,7 +1074,7 @@ public interface IntroductionInfo {
       dependency on it, as with an ordinary Java object:</para>
 
       <para><programlisting language="xml">&lt;bean id="personUser" class="com.mycompany.PersonUser"&gt;
-  &lt;property name="person"&gt;&lt;ref local="person" /&gt;&lt;/property&gt;
+  &lt;property name="person"&gt;&lt;ref bean="person" /&gt;&lt;/property&gt;
 &lt;/bean&gt;</programlisting></para>
 
       <para>The <literal>PersonUser</literal> class in this example would

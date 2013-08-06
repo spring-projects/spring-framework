@@ -37,16 +37,19 @@ public class ToStringCreatorTests extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		s1 = new SomeObject() {
+			@Override
 			public String toString() {
 				return "A";
 			}
 		};
 		s2 = new SomeObject() {
+			@Override
 			public String toString() {
 				return "B";
 			}
 		};
 		s3 = new SomeObject() {
+			@Override
 			public String toString() {
 				return "C";
 			}
@@ -56,6 +59,7 @@ public class ToStringCreatorTests extends TestCase {
 	public void testDefaultStyleMap() {
 		final Map map = getMap();
 		Object stringy = new Object() {
+			@Override
 			public String toString() {
 				return new ToStringCreator(this).append("familyFavoriteSport", map).toString();
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.View;
  *
  * <p>If the return value is {@code null}, the
  * {@link ModelAndViewContainer#setRequestHandled(boolean)} flag is set to
- * {@code false} to indicate the request was handled directly.
+ * {@code true} to indicate the request was handled directly.
  *
  * <p>A {@link ModelAndView} return type has a set purpose. Therefore this
  * handler should be configured ahead of handlers that support any return
@@ -42,10 +42,12 @@ import org.springframework.web.servlet.View;
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return ModelAndView.class.isAssignableFrom(returnType.getParameterType());
 	}
 
+	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

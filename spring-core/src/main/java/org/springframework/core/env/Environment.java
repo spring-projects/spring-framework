@@ -102,7 +102,7 @@ public interface Environment extends PropertyResolver {
 	 * explicit active profiles, whether one or more of the given profiles is included in
 	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
 	 * i.e. the method will return true if the given profile is <em>not</em> active. For
-	 * example, <pre>env.acceptsProfiles("p1", "!p2")</pre> will return true if profile
+	 * example, <pre class="code">env.acceptsProfiles("p1", "!p2")</pre> will return true if profile
 	 * 'p1' is active or 'p2' is not active.
 	 * @throws IllegalArgumentException if called with zero arguments
 	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only

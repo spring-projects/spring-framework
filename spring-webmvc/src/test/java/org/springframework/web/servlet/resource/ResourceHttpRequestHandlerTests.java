@@ -19,11 +19,11 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -217,11 +217,6 @@ public class ResourceHttpRequestHandlerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals(404, response.getStatus());
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void locationsNotSet() throws Exception {
-		new ResourceHttpRequestHandler().afterPropertiesSet();
 	}
 
 

@@ -403,7 +403,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Indicates whether the {@linkplain #getType() type} is the wildcard character {@code &#42;} or not.
 	 */
 	public boolean isWildcardType() {
-		return WILDCARD_TYPE.equals(type);
+		return WILDCARD_TYPE.equals(this.type);
 	}
 
 	/**
@@ -419,7 +419,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @return whether the subtype is {@code &#42;}
 	 */
 	public boolean isWildcardSubtype() {
-		return WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+");
+		return WILDCARD_TYPE.equals(this.subtype) || this.subtype.startsWith("*+");
 	}
 
 	/**
@@ -584,6 +584,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @param other media type to compare to
 	 * @see #sortBySpecificity(List)
 	 */
+	@Override
 	public int compareTo(MediaType other) {
 		int comp = this.type.compareToIgnoreCase(other.type);
 		if (comp != 0) {
@@ -685,7 +686,9 @@ public class MediaType implements Comparable<MediaType> {
 	 * @throws InvalidMediaTypeException if the string cannot be parsed
 	 */
 	public static MediaType parseMediaType(String mediaType) {
-		Assert.hasLength(mediaType, "'mediaType' must not be empty");
+		if (!StringUtils.hasLength(mediaType)) {
+			throw new InvalidMediaTypeException(mediaType, "'mediaType' must not be empty");
+		}
 		String[] parts = StringUtils.tokenizeToStringArray(mediaType, ";");
 
 		String fullType = parts[0].trim();
@@ -850,6 +853,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
 
+		@Override
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
 			if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
 				return 1;
@@ -893,6 +897,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
 
+		@Override
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
 			double quality1 = mediaType1.getQualityValue();
 			double quality2 = mediaType2.getQualityValue();

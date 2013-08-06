@@ -457,7 +457,7 @@ public class UrlPathHelper {
 	}
 
 	private String removeJsessionid(String requestUri) {
-		int startIndex = requestUri.indexOf(";jsessionid=");
+		int startIndex = requestUri.toLowerCase().indexOf(";jsessionid=");
 		if (startIndex != -1) {
 			int endIndex = requestUri.indexOf(';', startIndex + 12);
 			String start = requestUri.substring(0, startIndex);

@@ -173,6 +173,7 @@ public abstract class BshScriptUtils {
 			this.xt = xt;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				return (isProxyForSameBshObject(args[0]));

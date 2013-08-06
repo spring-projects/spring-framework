@@ -224,6 +224,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * Return the value for the 'autoStartup' property.	If "true", this
 	 * endpoint manager will start upon a ContextRefreshedEvent.
 	 */
+	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
@@ -242,6 +243,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Return the phase in which this endpoint manager will be started and stopped.
 	 */
+	@Override
 	public int getPhase() {
 		return this.phase;
 	}
@@ -250,6 +252,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * Prepares the message endpoint, and automatically activates it
 	 * if the "autoStartup" flag is set to "true".
 	 */
+	@Override
 	public void afterPropertiesSet() throws ResourceException {
 		if (getResourceAdapter() == null) {
 			throw new IllegalArgumentException("Property 'resourceAdapter' is required");
@@ -274,6 +277,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Activates the configured message endpoint.
 	 */
+	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (!this.running) {
@@ -291,6 +295,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Deactivates the configured message endpoint.
 	 */
+	@Override
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (this.running) {
@@ -300,6 +305,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 		}
 	}
 
+	@Override
 	public void stop(Runnable callback) {
 		synchronized (this.lifecycleMonitor) {
 			this.stop();
@@ -310,6 +316,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Return whether the configured message endpoint is currently active.
 	 */
+	@Override
 	public boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
 			return this.running;
@@ -319,6 +326,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	/**
 	 * Deactivates the message endpoint, preparing it for shutdown.
 	 */
+	@Override
 	public void destroy() {
 		stop();
 	}

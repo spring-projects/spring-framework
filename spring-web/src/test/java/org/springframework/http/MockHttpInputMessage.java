@@ -31,6 +31,7 @@ public class MockHttpInputMessage implements HttpInputMessage {
 
 	private final InputStream body;
 
+
 	public MockHttpInputMessage(byte[] contents) {
 		Assert.notNull(contents, "'contents' must not be null");
 		this.body = new ByteArrayInputStream(contents);

@@ -36,6 +36,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public abstract class AbstractSpringPreparerFactory implements PreparerFactory {
 
+	@Override
 	public ViewPreparer getPreparer(String name, TilesRequestContext context) throws TilesException {
 		WebApplicationContext webApplicationContext = (WebApplicationContext) context.getRequestScope().get(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);

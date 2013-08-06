@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private HttpClient httpClient;
 
+	private boolean bufferRequestBody = true;
 
 	/**
 	 * Create a new instance of the HttpComponentsClientHttpRequestFactory with a default
@@ -128,10 +129,28 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
+	/**
+	 * Indicates whether this request factory should buffer the request body internally.
+	 *
+	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is
+	 * recommended to change this property to {@code false}, so as not to run out of memory.
+	 */
+	public void setBufferRequestBody(boolean bufferRequestBody) {
+		this.bufferRequestBody = bufferRequestBody;
+	}
+
+	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
-		return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, createHttpContext(httpMethod, uri));
+		if (bufferRequestBody) {
+			return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest,
+					createHttpContext(httpMethod, uri));
+		}
+		else {
+			return new HttpComponentsStreamingClientHttpRequest(getHttpClient(),
+					httpRequest, createHttpContext(httpMethod, uri));
+		}
 	}
 
 	/**
@@ -188,6 +207,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * {@link org.apache.http.conn.ClientConnectionManager ClientConnectionManager}'s
 	 * connection pool, if any.
 	 */
+	@Override
 	public void destroy() {
 		getHttpClient().getConnectionManager().shutdown();
 	}

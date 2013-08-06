@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
-import org.hibernate.validator.method.MethodConstraintViolationException;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -61,21 +60,21 @@ public class MethodValidationTests {
 			assertNotNull(proxy.myValidMethod("value", 15));
 			fail("Should have thrown MethodConstraintViolationException");
 		}
-		catch (MethodConstraintViolationException ex) {
+		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			assertNotNull(proxy.myValidMethod(null, 5));
 			fail("Should have thrown MethodConstraintViolationException");
 		}
-		catch (MethodConstraintViolationException ex) {
+		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			assertNotNull(proxy.myValidMethod("value", 0));
 			fail("Should have thrown MethodConstraintViolationException");
 		}
-		catch (MethodConstraintViolationException ex) {
+		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 	}

@@ -140,6 +140,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * instance otherwise. Practically that means a method-level "consumes"
 	 * overrides a type-level "consumes" condition.
 	 */
+	@Override
 	public ConsumesRequestCondition combine(ConsumesRequestCondition other) {
 		return !other.expressions.isEmpty() ? other : this;
 	}
@@ -156,6 +157,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * 		or a new condition with matching expressions only;
 	 * 		or {@code null} if no expressions match.
 	 */
+	@Override
 	public ConsumesRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (isEmpty()) {
 			return this;
@@ -182,6 +184,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance contains
 	 * the matching consumable media type expression only or is otherwise empty.
 	 */
+	@Override
 	public int compareTo(ConsumesRequestCondition other, HttpServletRequest request) {
 		if (this.expressions.isEmpty() && other.expressions.isEmpty()) {
 			return 0;

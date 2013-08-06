@@ -30,7 +30,7 @@ import org.springframework.orm.jpa.JpaDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA.
- * Developed and tested against OpenJPA 1.1 as well as 2.0/2.1.
+ * Developed and tested against OpenJPA 2.2.
  *
  * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
  * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
@@ -48,6 +48,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final OpenJpaDialect jpaDialect = new OpenJpaDialect();
 
 
+	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}

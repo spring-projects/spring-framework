@@ -42,17 +42,11 @@ import org.springframework.web.util.HtmlUtils;
  * populating the data for their view. The name of this form object can be
  * configured using the {@link #setModelAttribute "modelAttribute"} property.
  *
- * <p>The default value for the {@link #setModelAttribute "modelAttribute"}
- * property is '{@code command}' which corresponds to the default name
- * when using the
- * {@link org.springframework.web.servlet.mvc.SimpleFormController SimpleFormController}.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Rossen Stoyanchev
  * @since 2.0
- * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
 @SuppressWarnings("serial")
 public class FormTag extends AbstractHtmlElementTag {
@@ -110,6 +104,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String name;
 
 	private String action;
+
+	private String servletRelativeAction;
 
 	private String method = DEFAULT_METHOD;
 
@@ -194,6 +190,21 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	protected String getAction() {
 		return this.action;
+	}
+
+	/**
+	 * Set the value of the '{@code action}' attribute.
+	 * <p>May be a runtime expression.
+	 */
+	public void setServletRelativeAction(String servletRelativeaction) {
+		this.servletRelativeAction = (servletRelativeaction != null ? servletRelativeaction : "");
+	}
+
+	/**
+	 * Get the value of the '{@code action}' attribute.
+	 */
+	protected String getServletRelativeAction() {
+		return this.servletRelativeAction;
 	}
 
 	/**
@@ -335,8 +346,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		tagWriter.startTag(FORM_TAG);
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE,
-				isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD);
+		writeOptionalAttribute(tagWriter, METHOD_ATTRIBUTE, getHttpMethod());
 		writeOptionalAttribute(tagWriter, TARGET_ATTRIBUTE, getTarget());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
@@ -360,7 +370,6 @@ public class FormTag extends AbstractHtmlElementTag {
 		// Expose the form object name for nested tags...
 		String modelAttribute = resolveModelAttribute();
 		this.pageContext.setAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
-		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
 
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
@@ -370,6 +379,10 @@ public class FormTag extends AbstractHtmlElementTag {
 				modelAttribute + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
+	}
+
+	private String getHttpMethod() {
+		return isMethodBrowserSupported(getMethod()) ? getMethod() : DEFAULT_METHOD;
 	}
 
 	private void assertHttpMethod(String method) {
@@ -403,21 +416,29 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Resolve the value of the '{@code action}' attribute.
-	 * <p>If the user configured an '{@code action}' value then
-	 * the result of evaluating this value is used. Otherwise, the
-	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI}
-	 * is used.
+	 * <p>If the user configured an '{@code action}' value then the result of
+	 * evaluating this value is used. If the user configured an
+	 * '{@code servletRelativeAction}' value then the value is prepended
+	 * with the context and servlet paths, and the result is used. Otherwise, the
+	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri()
+	 * originating URI} is used.
+	 *
 	 * @return the value that is to be used for the '{@code action}' attribute
 	 */
 	protected String resolveAction() throws JspException {
 		String action = getAction();
+		String servletRelativeAction = getServletRelativeAction();
 		if (StringUtils.hasText(action)) {
-			String pathToServlet = getRequestContext().getPathToServlet();
-			if (action.startsWith("/") && !action.startsWith(getRequestContext().getContextPath())) {
-				action = pathToServlet + action;
-			}
 			action = getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
 			return processAction(action);
+		}
+		else if (StringUtils.hasText(servletRelativeAction)) {
+			String pathToServlet = getRequestContext().getPathToServlet();
+			if (servletRelativeAction.startsWith("/") && !servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
+				servletRelativeAction = pathToServlet + servletRelativeAction;
+			}
+			servletRelativeAction = getDisplayString(evaluate(ACTION_ATTRIBUTE, servletRelativeAction));
+			return processAction(servletRelativeAction);
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
@@ -447,7 +468,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
 		if ((processor != null) && (request instanceof HttpServletRequest)) {
-			action = processor.processAction((HttpServletRequest) request, action);
+			action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
 		}
 		return action;
 	}
@@ -487,7 +508,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	public void doFinally() {
 		super.doFinally();
 		this.pageContext.removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-		this.pageContext.removeAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.
 			this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);

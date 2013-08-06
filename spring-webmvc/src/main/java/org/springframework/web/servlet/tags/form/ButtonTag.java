@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,20 +35,15 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
+
 	private TagWriter tagWriter;
 
 	private String name;
 
 	private String value;
 
-	private String disabled;
+	private boolean disabled;
 
-	/**
-	 * Set the value of the '{@code name}' attribute.
-	 */
-	public String getName() {
-		return name;
-	}
 
 	/**
 	 * Get the value of the '{@code name}' attribute.
@@ -58,10 +53,11 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '{@code value}' attribute.
+	 * Set the value of the '{@code name}' attribute.
 	 */
-	public String getValue() {
-		return this.value;
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	/**
@@ -72,19 +68,26 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '{@code disabled}' attribute.
+	 * Get the value of the '{@code value}' attribute.
 	 */
-	public String getDisabled() {
-		return this.disabled;
+	public String getValue() {
+		return this.value;
 	}
 
 	/**
 	 * Set the value of the '{@code disabled}' attribute.
-	 * May be a runtime expression.
 	 */
-	public void setDisabled(String disabled) {
+	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
+
+	/**
+	 * Get the value of the '{@code disabled}' attribute.
+	 */
+	public boolean isDisabled() {
+		return this.disabled;
+	}
+
 
 	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
@@ -101,13 +104,6 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Is the current HTML tag disabled?
-	 */
-	protected boolean isDisabled() throws JspException {
-		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
-	}
-
-	/**
 	 * Writes the '{@code value}' attribute to the supplied {@link TagWriter}.
 	 * Subclasses may choose to override this implementation to control exactly
 	 * when the value is written.
@@ -119,7 +115,6 @@ public class ButtonTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Return the default value.
-	 *
 	 * @return The default value if none supplied.
 	 */
 	protected String getDefaultValue() {

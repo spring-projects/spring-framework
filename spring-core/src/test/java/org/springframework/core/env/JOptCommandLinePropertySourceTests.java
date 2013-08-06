@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,10 +117,10 @@ public class JOptCommandLinePropertySourceTests {
 	@Test
 	public void withDefaultNonOptionArgsNameAndNoNonOptionArgsPresent() {
 		OptionParser parser = new OptionParser();
-		parser.accepts("o1").withRequiredArg();
+		parser.acceptsAll(Arrays.asList("o1","option1")).withRequiredArg();
 		parser.accepts("o2");
 		OptionSet optionSet = parser.parse("--o1=v1", "--o2");
-		PropertySource<?> ps = new JOptCommandLinePropertySource(optionSet);
+		EnumerablePropertySource<?> ps = new JOptCommandLinePropertySource(optionSet);
 
 		assertThat(ps.containsProperty("nonOptionArgs"), is(false));
 		assertThat(ps.containsProperty("o1"), is(true));
@@ -128,6 +128,7 @@ public class JOptCommandLinePropertySourceTests {
 
 		assertThat(ps.containsProperty("nonOptionArgs"), is(false));
 		assertThat(ps.getProperty("nonOptionArgs"), nullValue());
+		assertThat(ps.getPropertyNames().length, is(2));
 	}
 
 	@Test

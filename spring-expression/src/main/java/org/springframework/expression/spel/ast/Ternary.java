@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,22 +37,24 @@ public class Ternary extends SpelNodeImpl {
 	}
 
 	/**
-	 * Evaluate the condition and if true evaluate the first alternative, otherwise evaluate the second alternative.
+	 * Evaluate the condition and if true evaluate the first alternative, otherwise
+	 * evaluate the second alternative.
 	 * @param state the expression state
-	 * @throws EvaluationException if the condition does not evaluate correctly to a boolean or there is a problem
-	 * executing the chosen alternative
+	 * @throws EvaluationException if the condition does not evaluate correctly to a
+	 *         boolean or there is a problem executing the chosen alternative
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Boolean value = children[0].getValue(state, Boolean.class);
+		Boolean value = this.children[0].getValue(state, Boolean.class);
 		if (value == null) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
 					SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
 		if (value.booleanValue()) {
-			return children[1].getValueInternal(state);
-		} else {
-			return children[2].getValueInternal(state);
+			return this.children[1].getValueInternal(state);
+		}
+		else {
+			return this.children[2].getValueInternal(state);
 		}
 	}
 

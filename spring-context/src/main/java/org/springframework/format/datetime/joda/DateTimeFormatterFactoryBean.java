@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,15 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * {@link FactoryBean} that creates a Joda {@link DateTimeFormatter}. See the
- * {@linkplain DateTimeFormatterFactory base class} for configuration details.
+ * {@link FactoryBean} that creates a Joda-Time {@link DateTimeFormatter}.
+ * See the {@link DateTimeFormatterFactory base class} for configuration details.
  *
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 3.2
- * @see #setPattern(String)
- * @see #setIso(org.springframework.format.annotation.DateTimeFormat.ISO)
- * @see #setStyle(String)
+ * @see #setPattern
+ * @see #setIso
+ * @see #setStyle
  * @see DateTimeFormatterFactory
  */
 public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
@@ -39,18 +39,22 @@ public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
 	private DateTimeFormatter dateTimeFormatter;
 
 
+	@Override
 	public void afterPropertiesSet() {
 		this.dateTimeFormatter = createDateTimeFormatter();
 	}
 
+	@Override
 	public DateTimeFormatter getObject() {
 		return this.dateTimeFormatter;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return DateTimeFormatter.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

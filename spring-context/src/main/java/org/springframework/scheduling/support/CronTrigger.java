@@ -16,11 +16,11 @@
 
 package org.springframework.scheduling.support;
 
-import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.TriggerContext;
-
 import java.util.Date;
 import java.util.TimeZone;
+
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 
 /**
  * {@link Trigger} implementation for cron expressions.
@@ -55,6 +55,13 @@ public class CronTrigger implements Trigger {
 	}
 
 
+	/**
+	 * Determine the next execution time according to the given trigger context.
+	 * <p>Next execution times are calculated based on the
+	 * {@linkplain TriggerContext#lastCompletionTime completion time} of the
+	 * previous execution; therefore, overlapping executions won't occur.
+	 */
+	@Override
 	public Date nextExecutionTime(TriggerContext triggerContext) {
 		Date date = triggerContext.lastCompletionTime();
 		if (date != null) {

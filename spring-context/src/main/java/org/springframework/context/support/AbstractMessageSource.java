@@ -70,10 +70,12 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	private boolean useCodeAsDefaultMessage = false;
 
 
+	@Override
 	public void setParentMessageSource(MessageSource parent) {
 		this.parentMessageSource = parent;
 	}
 
+	@Override
 	public MessageSource getParentMessageSource() {
 		return this.parentMessageSource;
 	}
@@ -129,6 +131,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 
+	@Override
 	public final String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
@@ -143,6 +146,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		return renderDefaultMessage(defaultMessage, args, locale);
 	}
 
+	@Override
 	public final String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
@@ -155,6 +159,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		throw new NoSuchMessageException(code, locale);
 	}
 
+	@Override
 	public final String getMessage(MessageSourceResolvable resolvable, Locale locale)
 			throws NoSuchMessageException {
 

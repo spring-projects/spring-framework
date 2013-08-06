@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class DateTimeFormatAnnotationFormatterFactory implements
 
 	private static final Set<Class<?>> FIELD_TYPES;
 	static {
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>();
+		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(4);
 		fieldTypes.add(Date.class);
 		fieldTypes.add(Calendar.class);
 		fieldTypes.add(Long.class);
@@ -55,18 +55,22 @@ public class DateTimeFormatAnnotationFormatterFactory implements
 	private StringValueResolver embeddedValueResolver;
 
 
+	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
 
+	@Override
 	public Set<Class<?>> getFieldTypes() {
 		return FIELD_TYPES;
 	}
 
+	@Override
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
 		return getFormatter(annotation, fieldType);
 	}
 
+	@Override
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
 		return getFormatter(annotation, fieldType);
 	}
@@ -82,4 +86,5 @@ public class DateTimeFormatAnnotationFormatterFactory implements
 	protected String resolveEmbeddedValue(String value) {
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
+
 }

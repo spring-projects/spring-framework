@@ -126,11 +126,13 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			this.comparator = comparator;
 		}
 
+		@Override
 		public int compareTo(Object obj) {
 			Advisor otherAdvisor = ((PartiallyComparableAdvisorHolder) obj).advisor;
 			return this.comparator.compare(this.advisor, otherAdvisor);
 		}
 
+		@Override
 		public int fallbackCompareTo(Object obj) {
 			return 0;
 		}

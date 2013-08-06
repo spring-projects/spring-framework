@@ -34,6 +34,7 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	/**
 	 * This implementation always returns {@code true}.
 	 */
+	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 		throws Exception {
 		return true;
@@ -42,6 +43,7 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	/**
 	 * This implementation is empty.
 	 */
+	@Override
 	public void postHandle(
 			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
@@ -50,6 +52,7 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	/**
 	 * This implementation is empty.
 	 */
+	@Override
 	public void afterCompletion(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
@@ -58,6 +61,7 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	/**
 	 * This implementation is empty.
 	 */
+	@Override
 	public void afterConcurrentHandlingStarted(
 			HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {

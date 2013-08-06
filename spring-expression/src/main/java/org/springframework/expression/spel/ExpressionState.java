@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,15 @@ import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 
 /**
- * An ExpressionState is for maintaining per-expression-evaluation state, any changes to it are not seen by other
- * expressions but it gives a place to hold local variables and for component expressions in a compound expression to
- * communicate state. This is in contrast to the EvaluationContext, which is shared amongst expression evaluations, and
- * any changes to it will be seen by other expressions or any code that chooses to ask questions of the context.
+ * An ExpressionState is for maintaining per-expression-evaluation state, any changes to
+ * it are not seen by other expressions but it gives a place to hold local variables and
+ * for component expressions in a compound expression to communicate state. This is in
+ * contrast to the EvaluationContext, which is shared amongst expression evaluations, and
+ * any changes to it will be seen by other expressions or any code that chooses to ask
+ * questions of the context.
  *
- * <p>It also acts as a place for to define common utility routines that the various Ast nodes might need.
+ * <p>It also acts as a place for to define common utility routines that the various AST
+ * nodes might need.
  *
  * @author Andy Clement
  * @since 3.0
@@ -138,7 +141,8 @@ public class ExpressionState {
 	}
 
 	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
-		return this.relatedContext.getTypeConverter().convertValue(value, TypeDescriptor.forObject(value), targetTypeDescriptor);
+		return this.relatedContext.getTypeConverter().convertValue(value,
+				TypeDescriptor.forObject(value), targetTypeDescriptor);
 	}
 
 	public TypeConverter getTypeConverter() {
@@ -147,7 +151,8 @@ public class ExpressionState {
 
 	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		Object val = value.getValue();
-		return this.relatedContext.getTypeConverter().convertValue(val, TypeDescriptor.forObject(val), targetTypeDescriptor);
+		return this.relatedContext.getTypeConverter().convertValue(val,
+				TypeDescriptor.forObject(val), targetTypeDescriptor);
 	}
 
 	/*
@@ -210,6 +215,7 @@ public class ExpressionState {
 		return this.configuration;
 	}
 
+
 	/**
 	 * A new scope is entered when a function is called and it is used to hold the parameters to the function call.  If the names
 	 * of the parameters clash with those in a higher level scope, those in the higher level scope will not be accessible whilst
@@ -221,6 +227,7 @@ public class ExpressionState {
 
 		public VariableScope() { }
 
+
 		public VariableScope(Map<String, Object> arguments) {
 			if (arguments != null) {
 				this.vars.putAll(arguments);
@@ -230,6 +237,7 @@ public class ExpressionState {
 		public VariableScope(String name, Object value) {
 			this.vars.put(name,value);
 		}
+
 
 		public Object lookupVariable(String name) {
 			return this.vars.get(name);

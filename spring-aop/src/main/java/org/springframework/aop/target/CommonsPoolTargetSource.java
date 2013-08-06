@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.core.Constants;
  * of configuration properties that are relevant to your chosen implementation.
  *
  * <p>The {@code testOnBorrow}, {@code testOnReturn} and {@code testWhileIdle}
- * properties are explictly not mirrored because the implementation of
+ * properties are explicitly not mirrored because the implementation of
  * {@code PoolableObjectFactory} used by this class does not implement
  * meaningful validation. All exposed Commons Pool properties use the corresponding
  * Commons Pool defaults: for example,
@@ -252,10 +252,12 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		this.pool.returnObject(target);
 	}
 
+	@Override
 	public int getActiveCount() throws UnsupportedOperationException {
 		return this.pool.getNumActive();
 	}
 
+	@Override
 	public int getIdleCount() throws UnsupportedOperationException {
 		return this.pool.getNumIdle();
 	}
@@ -264,6 +266,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	/**
 	 * Closes the underlying {@code ObjectPool} when destroying this object.
 	 */
+	@Override
 	public void destroy() throws Exception {
 		logger.debug("Closing Commons ObjectPool");
 		this.pool.close();
@@ -274,21 +277,26 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	// Implementation of org.apache.commons.pool.PoolableObjectFactory interface
 	//----------------------------------------------------------------------------
 
+	@Override
 	public Object makeObject() throws BeansException {
 		return newPrototypeInstance();
 	}
 
+	@Override
 	public void destroyObject(Object obj) throws Exception {
 		destroyPrototypeInstance(obj);
 	}
 
+	@Override
 	public boolean validateObject(Object obj) {
 		return true;
 	}
 
+	@Override
 	public void activateObject(Object obj) {
 	}
 
+	@Override
 	public void passivateObject(Object obj) {
 	}
 

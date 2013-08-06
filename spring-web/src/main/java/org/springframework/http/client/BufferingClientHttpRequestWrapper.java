@@ -17,7 +17,6 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
@@ -42,10 +41,12 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 	}
 
 
+	@Override
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
 	}
 
+	@Override
 	public URI getURI() {
 		return this.request.getURI();
 	}

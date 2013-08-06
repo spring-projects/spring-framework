@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * A simple ConstructorExecutor implementation that runs a constructor using reflective invocation.
+ * A simple ConstructorExecutor implementation that runs a constructor using reflective
+ * invocation.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -54,6 +55,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 		this.argsRequiringConversion = argsRequiringConversion;
 	}
 
+	@Override
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
 			if (arguments != null) {

@@ -34,12 +34,14 @@ import net.sf.jasperreports.engine.data.JRAbstractBeanDataSourceProvider;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.ui.jasperreports.PersonBean;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -63,6 +65,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	/**
 	 * Simple test to see if compiled report succeeds.
 	 */
+	@Test
 	public void testCompiledReport() throws Exception {
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 		view.render(getModel(), request, response);
@@ -74,6 +77,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	@Test
 	public void testUncompiledReport() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -84,6 +88,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithInvalidPath() throws Exception {
 		try {
 			getView("foo.jasper");
@@ -94,6 +99,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	@Test
 	public void testInvalidExtension() throws Exception {
 		try {
 			getView("foo.bar");
@@ -104,12 +110,14 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	@Test
 	public void testContentType() throws Exception {
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 		view.render(getModel(), request, response);
 		assertEquals("Response content type is incorrect", getDesiredContentType(), response.getContentType());
 	}
 
+	@Test
 	public void testWithoutDatasource() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -118,6 +126,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getStatus() == HttpServletResponse.SC_OK);
 	}
 
+	@Test
 	public void testWithCollection() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -127,6 +136,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithMultipleCollections() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -137,6 +147,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		// no clear data source found
 	}
 
+	@Test
 	public void testWithJRDataSourceProvider() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -146,6 +157,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithSpecificCollection() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -157,6 +169,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithArray() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -166,6 +179,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithMultipleArrays() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -176,6 +190,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		// no clear data source found
 	}
 
+	@Test
 	public void testWithSpecificArray() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
@@ -187,6 +202,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithSubReport() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -208,6 +224,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertTrue(response.getContentAsByteArray().length > 0);
 	}
 
+	@Test
 	public void testWithNonExistentSubReport() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -258,6 +275,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertEquals(overiddenCharacterEncoding, this.response.getCharacterEncoding());
 	}
 
+	@Test
 	public void testSubReportWithUnspecifiedParentDataSource() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -282,6 +300,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	@Test
 	public void testContentDisposition() throws Exception {
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 		view.render(getModel(), request, response);
@@ -289,6 +308,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 	}
 
+	@Test
 	public void testOverrideContentDisposition() throws Exception {
 		Properties headers = new Properties();
 		String cd = "attachment";
@@ -300,6 +320,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertEquals("Invalid content type", cd, response.getHeader("Content-Disposition"));
 	}
 
+	@Test
 	public void testSetCustomHeaders() throws Exception {
 		Properties headers = new Properties();
 
@@ -316,6 +337,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		assertEquals("Invalid header value", value, response.getHeader(key));
 	}
 
+	@Test
 	public void testWithJdbcDataSource() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -336,6 +358,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	@Test
 	public void testWithJdbcDataSourceInModel() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -356,6 +379,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		}
 	}
 
+	@Test
 	public void testJRDataSourceOverridesJdbcDataSource() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -378,6 +402,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		return ds;
 	}
 
+	@Test
 	public void testWithCharacterEncoding() throws Exception {
 		AbstractJasperReportsView view = getView(COMPILED_REPORT);
 

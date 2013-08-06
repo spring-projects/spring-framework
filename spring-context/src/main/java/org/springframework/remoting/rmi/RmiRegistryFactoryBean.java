@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		// Check socket factories for registry.
 		if (this.clientSocketFactory instanceof RMIServerSocketFactory) {
@@ -180,7 +181,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 			throws RemoteException {
 
 		if (registryHost != null) {
-			// Host explictly specified: only lookup possible.
+			// Host explicitly specified: only lookup possible.
 			if (logger.isInfoEnabled()) {
 				logger.info("Looking for RMI registry at port '" + registryPort + "' of host [" + registryHost + "]");
 			}
@@ -282,14 +283,17 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	}
 
 
+	@Override
 	public Registry getObject() throws Exception {
 		return this.registry;
 	}
 
+	@Override
 	public Class<? extends Registry> getObjectType() {
 		return (this.registry != null ? this.registry.getClass() : Registry.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -299,6 +303,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	 * Unexport the RMI registry on bean factory shutdown,
 	 * provided that this bean actually created a registry.
 	 */
+	@Override
 	public void destroy() throws RemoteException {
 		if (this.created) {
 			logger.info("Unexporting RMI registry");

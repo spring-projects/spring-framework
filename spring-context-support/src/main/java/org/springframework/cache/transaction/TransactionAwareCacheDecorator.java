@@ -47,18 +47,22 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 
+	@Override
 	public String getName() {
 		return this.targetCache.getName();
 	}
 
+	@Override
 	public Object getNativeCache() {
 		return this.targetCache.getNativeCache();
 	}
 
+	@Override
 	public ValueWrapper get(Object key) {
 		return this.targetCache.get(key);
 	}
 
+	@Override
 	public void put(final Object key, final Object value) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -73,6 +77,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 		}
 	}
 
+	@Override
 	public void evict(final Object key) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -87,6 +92,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 		}
 	}
 
+	@Override
 	public void clear() {
 		this.targetCache.clear();
 	}

@@ -816,21 +816,6 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testSaveOrUpdateAll() throws HibernateException {
-		TestBean tb1 = new TestBean();
-		TestBean tb2 = new TestBean();
-		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
-		List tbs = new ArrayList();
-		tbs.add(tb1);
-		tbs.add(tb2);
-		hibernateTemplate.saveOrUpdateAll(tbs);
-		verify(session).saveOrUpdate(same(tb1));
-		verify(session).saveOrUpdate(same(tb2));
-		verify(session).flush();
-		verify(session).close();
-	}
-
-	@Test
 	public void testReplicate() throws HibernateException {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);

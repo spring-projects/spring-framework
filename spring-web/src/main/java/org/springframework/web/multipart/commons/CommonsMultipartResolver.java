@@ -111,6 +111,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		return new ServletFileUpload(fileItemFactory);
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		if (!isUploadTempDirSpecified()) {
 			getFileItemFactory().setRepository(WebUtils.getTempDir(servletContext));
@@ -118,10 +119,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 
+	@Override
 	public boolean isMultipart(HttpServletRequest request) {
 		return (request != null && ServletFileUpload.isMultipartContent(request));
 	}
 
+	@Override
 	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
 		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
@@ -182,6 +185,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		return encoding;
 	}
 
+	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		if (request != null) {
 			try {

@@ -45,6 +45,7 @@ import org.springframework.web.multipart.MultipartResolver;
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
+	@Override
 	public boolean isMultipart(HttpServletRequest request) {
 		// Same check as in Commons FileUpload...
 		if (!"post".equals(request.getMethod().toLowerCase())) {
@@ -54,10 +55,12 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
 	}
 
+	@Override
 	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
 		return new StandardMultipartHttpServletRequest(request);
 	}
 
+	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		// To be on the safe side: explicitly delete the parts,
 		// but only actual file parts (for Resin compatibility)

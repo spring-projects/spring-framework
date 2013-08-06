@@ -30,6 +30,7 @@ public class PlaceOfBirth {
 		return i*2;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof PlaceOfBirth)) {
 			return false;
@@ -38,6 +39,7 @@ public class PlaceOfBirth {
 		return (city.equals(oPOB.city));
 	}
 
+	@Override
 	public int hashCode() {
 		return city.hashCode();
 	}

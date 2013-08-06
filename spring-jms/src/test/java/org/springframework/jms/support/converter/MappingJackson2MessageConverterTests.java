@@ -44,6 +44,7 @@ public class MappingJackson2MessageConverterTests {
 
 	private Session sessionMock;
 
+
 	@Before
 	public void setUp() throws Exception {
 		sessionMock = mock(Session.class);
@@ -51,6 +52,7 @@ public class MappingJackson2MessageConverterTests {
 		converter.setEncodingPropertyName("__encoding__");
 		converter.setTypeIdPropertyName("__typeid__");
 	}
+
 
 	@Test
 	public void toBytesMessage() throws Exception {
@@ -74,8 +76,7 @@ public class MappingJackson2MessageConverterTests {
 		byte[] bytes = "{\"foo\":\"bar\"}".getBytes();
 		final ByteArrayInputStream byteStream = new ByteArrayInputStream(bytes);
 
-		given(bytesMessageMock.getStringProperty("__typeid__")).willReturn(
-				Object.class.getName());
+		given(bytesMessageMock.getStringProperty("__typeid__")).willReturn(Object.class.getName());
 		given(bytesMessageMock.propertyExists("__encoding__")).willReturn(false);
 		given(bytesMessageMock.getBodyLength()).willReturn(new Long(bytes.length));
 		given(bytesMessageMock.readBytes(any(byte[].class))).willAnswer(
@@ -96,8 +97,7 @@ public class MappingJackson2MessageConverterTests {
 		TextMessage textMessageMock = mock(TextMessage.class);
 		Date toBeMarshalled = new Date();
 
-		given(sessionMock.createTextMessage(isA(String.class))).willReturn(
-				textMessageMock);
+		given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
 
 		converter.toMessage(toBeMarshalled, sessionMock);
 		verify(textMessageMock).setStringProperty("__typeid__", Date.class.getName());
@@ -110,8 +110,7 @@ public class MappingJackson2MessageConverterTests {
 		Map<String, String> toBeMarshalled = new HashMap<String, String>();
 		toBeMarshalled.put("foo", "bar");
 
-		given(sessionMock.createTextMessage(isA(String.class))).willReturn(
-				textMessageMock);
+		given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
 
 		converter.toMessage(toBeMarshalled, sessionMock);
 		verify(textMessageMock).setStringProperty("__typeid__", HashMap.class.getName());
@@ -123,8 +122,7 @@ public class MappingJackson2MessageConverterTests {
 		Map<String, String> unmarshalled = Collections.singletonMap("foo", "bar");
 
 		String text = "{\"foo\":\"bar\"}";
-		given(textMessageMock.getStringProperty("__typeid__")).willReturn(
-				Object.class.getName());
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(Object.class.getName());
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
@@ -137,11 +135,11 @@ public class MappingJackson2MessageConverterTests {
 		Map<String, String> unmarshalled = Collections.singletonMap("foo", "bar");
 
 		String text = "{\"foo\":\"bar\"}";
-		given(textMessageMock.getStringProperty("__typeid__")).willReturn(
-				HashMap.class.getName());
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(HashMap.class.getName());
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
 		assertEquals("Invalid result", result, unmarshalled);
 	}
+
 }

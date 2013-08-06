@@ -127,6 +127,7 @@ public class MockPageContext extends PageContext {
 	}
 
 
+	@Override
 	public void initialize(
 			Servlet servlet, ServletRequest request, ServletResponse response,
 			String errorPageURL, boolean needsSession, int bufferSize, boolean autoFlush) {
@@ -134,9 +135,11 @@ public class MockPageContext extends PageContext {
 		throw new UnsupportedOperationException("Use appropriate constructor");
 	}
 
+	@Override
 	public void release() {
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
@@ -147,6 +150,7 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		switch (scope) {
@@ -167,11 +171,13 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public Object getAttribute(String name, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		switch (scope) {
@@ -189,6 +195,7 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
+	@Override
 	public Object findAttribute(String name) {
 		Object value = getAttribute(name);
 		if (value == null) {
@@ -203,6 +210,7 @@ public class MockPageContext extends PageContext {
 		return value;
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		this.removeAttribute(name, PageContext.PAGE_SCOPE);
@@ -211,6 +219,7 @@ public class MockPageContext extends PageContext {
 		this.removeAttribute(name, PageContext.APPLICATION_SCOPE);
 	}
 
+	@Override
 	public void removeAttribute(String name, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		switch (scope) {
@@ -231,6 +240,7 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
+	@Override
 	public int getAttributesScope(String name) {
 		if (getAttribute(name) != null) {
 			return PAGE_SCOPE;
@@ -253,7 +263,7 @@ public class MockPageContext extends PageContext {
 		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Enumeration<String> getAttributeNamesInScope(int scope) {
 		switch (scope) {
 			case PAGE_SCOPE:
@@ -270,6 +280,7 @@ public class MockPageContext extends PageContext {
 		}
 	}
 
+	@Override
 	public JspWriter getOut() {
 		if (this.out == null) {
 			this.out = new MockJspWriter(this.response);
@@ -277,54 +288,67 @@ public class MockPageContext extends PageContext {
 		return this.out;
 	}
 
+	@Override
 	public ExpressionEvaluator getExpressionEvaluator() {
 		return new MockExpressionEvaluator(this);
 	}
 
+	@Override
 	public ELContext getELContext() {
 		return null;
 	}
 
+	@Override
 	public VariableResolver getVariableResolver() {
 		return null;
 	}
 
+	@Override
 	public HttpSession getSession() {
 		return this.request.getSession();
 	}
 
+	@Override
 	public Object getPage() {
 		return this;
 	}
 
+	@Override
 	public ServletRequest getRequest() {
 		return this.request;
 	}
 
+	@Override
 	public ServletResponse getResponse() {
 		return this.response;
 	}
 
+	@Override
 	public Exception getException() {
 		return null;
 	}
 
+	@Override
 	public ServletConfig getServletConfig() {
 		return this.servletConfig;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
+	@Override
 	public void forward(String path) throws ServletException, IOException {
 		this.request.getRequestDispatcher(path).forward(this.request, this.response);
 	}
 
+	@Override
 	public void include(String path) throws ServletException, IOException {
 		this.request.getRequestDispatcher(path).include(this.request, this.response);
 	}
 
+	@Override
 	public void include(String path, boolean flush) throws ServletException, IOException {
 		this.request.getRequestDispatcher(path).include(this.request, this.response);
 		if (flush) {
@@ -342,10 +366,12 @@ public class MockPageContext extends PageContext {
 		return ((MockHttpServletResponse) this.response).getContentAsString();
 	}
 
+	@Override
 	public void handlePageException(Exception ex) throws ServletException, IOException {
 		throw new ServletException("Page exception", ex);
 	}
 
+	@Override
 	public void handlePageException(Throwable ex) throws ServletException, IOException {
 		throw new ServletException("Page exception", ex);
 	}

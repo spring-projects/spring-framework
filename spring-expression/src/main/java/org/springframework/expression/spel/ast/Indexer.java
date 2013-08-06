@@ -33,9 +33,8 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 
 /**
- * An Indexer can index into some proceeding structure to access a particular
- * piece of it. Supported structures are: strings/collections
- * (lists/sets)/arrays
+ * An Indexer can index into some proceeding structure to access a particular piece of it.
+ * Supported structures are: strings/collections (lists/sets)/arrays
  *
  * @author Andy Clement
  * @author Phillip Webb
@@ -95,27 +94,32 @@ public class Indexer extends SpelNodeImpl {
 
 		private final Object array;
 
-		private final int idx;
+		private final int index;
 
 		private final TypeDescriptor typeDescriptor;
 
-		ArrayIndexingValueRef(TypeConverter typeConverter, Object array, int idx, TypeDescriptor typeDescriptor) {
+
+		ArrayIndexingValueRef(TypeConverter typeConverter, Object array, int index, TypeDescriptor typeDescriptor) {
 			this.typeConverter = typeConverter;
 			this.array = array;
-			this.idx = idx;
+			this.index = index;
 			this.typeDescriptor = typeDescriptor;
 		}
 
+
+		@Override
 		public TypedValue getValue() {
-			Object arrayElement = accessArrayElement(this.array, this.idx);
+			Object arrayElement = accessArrayElement(this.array, this.index);
 			return new TypedValue(arrayElement, this.typeDescriptor.elementTypeDescriptor(arrayElement));
 		}
 
+		@Override
 		public void setValue(Object newValue) {
-			setArrayElement(this.typeConverter, this.array, this.idx, newValue,
+			setArrayElement(this.typeConverter, this.array, this.index, newValue,
 					this.typeDescriptor.getElementTypeDescriptor().getType());
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -133,18 +137,24 @@ public class Indexer extends SpelNodeImpl {
 
 		private final TypeDescriptor mapEntryTypeDescriptor;
 
-		MapIndexingValueRef(TypeConverter typeConverter, Map map, Object key, TypeDescriptor mapEntryTypeDescriptor) {
+
+		MapIndexingValueRef(TypeConverter typeConverter, Map map, Object key,
+				TypeDescriptor mapEntryTypeDescriptor) {
 			this.typeConverter = typeConverter;
 			this.map = map;
 			this.key = key;
 			this.mapEntryTypeDescriptor = mapEntryTypeDescriptor;
 		}
 
+
+		@Override
 		public TypedValue getValue() {
 			Object value = this.map.get(this.key);
-			return new TypedValue(value, this.mapEntryTypeDescriptor.getMapValueTypeDescriptor(value));
+			return new TypedValue(value,
+					this.mapEntryTypeDescriptor.getMapValueTypeDescriptor(value));
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			if (this.mapEntryTypeDescriptor.getMapValueTypeDescriptor() != null) {
 				newValue = this.typeConverter.convertValue(newValue, TypeDescriptor.forObject(newValue),
@@ -153,6 +163,7 @@ public class Indexer extends SpelNodeImpl {
 			this.map.put(this.key, newValue);
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -165,69 +176,75 @@ public class Indexer extends SpelNodeImpl {
 
 		private final String name;
 
-		private final EvaluationContext eContext;
+		private final EvaluationContext evaluationContext;
 
-		private final TypeDescriptor td;
+		private final TypeDescriptor targetObjectTypeDescriptor;
+
 
 		public PropertyIndexingValueRef(Object targetObject, String value, EvaluationContext evaluationContext,
 				TypeDescriptor targetObjectTypeDescriptor) {
 			this.targetObject = targetObject;
 			this.name = value;
-			this.eContext = evaluationContext;
-			this.td = targetObjectTypeDescriptor;
+			this.evaluationContext = evaluationContext;
+			this.targetObjectTypeDescriptor = targetObjectTypeDescriptor;
 		}
 
+
+		@Override
 		public TypedValue getValue() {
-			Class<?> targetObjectRuntimeClass = getObjectClass(targetObject);
+			Class<?> targetObjectRuntimeClass = getObjectClass(this.targetObject);
 			try {
-				if (cachedReadName != null && cachedReadName.equals(name) && cachedReadTargetType != null &&
-						cachedReadTargetType.equals(targetObjectRuntimeClass)) {
+				if (Indexer.this.cachedReadName != null && Indexer.this.cachedReadName.equals(this.name) && Indexer.this.cachedReadTargetType != null &&
+						Indexer.this.cachedReadTargetType.equals(targetObjectRuntimeClass)) {
 					// it is OK to use the cached accessor
-					return cachedReadAccessor.read(this.eContext, this.targetObject, this.name);
+					return Indexer.this.cachedReadAccessor.read(this.evaluationContext, this.targetObject, this.name);
 				}
-				List<PropertyAccessor> accessorsToTry =
-						AstUtils.getPropertyAccessorsToTry(targetObjectRuntimeClass, eContext.getPropertyAccessors());
+
+				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(
+						targetObjectRuntimeClass, this.evaluationContext.getPropertyAccessors());
+
 				if (accessorsToTry != null) {
 					for (PropertyAccessor accessor : accessorsToTry) {
-						if (accessor.canRead(this.eContext, this.targetObject, this.name)) {
+						if (accessor.canRead(this.evaluationContext, this.targetObject, this.name)) {
 							if (accessor instanceof ReflectivePropertyAccessor) {
 								accessor = ((ReflectivePropertyAccessor) accessor).createOptimalAccessor(
-										this.eContext, this.targetObject, this.name);
+										this.evaluationContext, this.targetObject, this.name);
 							}
-							cachedReadAccessor = accessor;
-							cachedReadName = this.name;
-							cachedReadTargetType = targetObjectRuntimeClass;
-							return accessor.read(this.eContext, this.targetObject, this.name);
+							Indexer.this.cachedReadAccessor = accessor;
+							Indexer.this.cachedReadName = this.name;
+							Indexer.this.cachedReadTargetType = targetObjectRuntimeClass;
+							return accessor.read(this.evaluationContext, this.targetObject, this.name);
 						}
 					}
 				}
 			}
 			catch (AccessException ex) {
 				throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-						this.td.toString());
+						this.targetObjectTypeDescriptor.toString());
 			}
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-					this.td.toString());
+					this.targetObjectTypeDescriptor.toString());
 		}
 
+		@Override
 		public void setValue(Object newValue) {
-			Class<?> contextObjectClass = getObjectClass(targetObject);
+			Class<?> contextObjectClass = getObjectClass(this.targetObject);
 			try {
-				if (cachedWriteName != null && cachedWriteName.equals(name) && cachedWriteTargetType != null &&
-						cachedWriteTargetType.equals(contextObjectClass)) {
+				if (Indexer.this.cachedWriteName != null && Indexer.this.cachedWriteName.equals(this.name) && Indexer.this.cachedWriteTargetType != null &&
+						Indexer.this.cachedWriteTargetType.equals(contextObjectClass)) {
 					// it is OK to use the cached accessor
-					cachedWriteAccessor.write(this.eContext, this.targetObject, this.name, newValue);
+					Indexer.this.cachedWriteAccessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 					return;
 				}
 				List<PropertyAccessor> accessorsToTry =
-						AstUtils.getPropertyAccessorsToTry(contextObjectClass, this.eContext.getPropertyAccessors());
+						AstUtils.getPropertyAccessorsToTry(contextObjectClass, this.evaluationContext.getPropertyAccessors());
 				if (accessorsToTry != null) {
 					for (PropertyAccessor accessor : accessorsToTry) {
-						if (accessor.canWrite(this.eContext, this.targetObject, this.name)) {
-							cachedWriteName = this.name;
-							cachedWriteTargetType = contextObjectClass;
-							cachedWriteAccessor = accessor;
-							accessor.write(this.eContext, this.targetObject, this.name, newValue);
+						if (accessor.canWrite(this.evaluationContext, this.targetObject, this.name)) {
+							Indexer.this.cachedWriteName = this.name;
+							Indexer.this.cachedWriteTargetType = contextObjectClass;
+							Indexer.this.cachedWriteAccessor = accessor;
+							accessor.write(this.evaluationContext, this.targetObject, this.name, newValue);
 							return;
 						}
 					}
@@ -239,6 +256,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -258,7 +276,8 @@ public class Indexer extends SpelNodeImpl {
 
 		private final boolean growCollection;
 
-		private int maximumSize;
+		private final int maximumSize;
+
 
 		CollectionIndexingValueRef(Collection collection, int index, TypeDescriptor collectionEntryTypeDescriptor,
 				TypeConverter typeConverter, boolean growCollection, int maximumSize) {
@@ -270,6 +289,8 @@ public class Indexer extends SpelNodeImpl {
 			this.maximumSize = maximumSize;
 		}
 
+
+		@Override
 		public TypedValue getValue() {
 			growCollectionIfNecessary();
 			if (this.collection instanceof List) {
@@ -286,6 +307,7 @@ public class Indexer extends SpelNodeImpl {
 			throw new IllegalStateException("Failed to find indexed element " + this.index + ": " + this.collection);
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			growCollectionIfNecessary();
 			if (this.collection instanceof List) {
@@ -332,6 +354,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -344,27 +367,32 @@ public class Indexer extends SpelNodeImpl {
 
 		private final int index;
 
-		private final TypeDescriptor td;
+		private final TypeDescriptor typeDescriptor;
 
-		public StringIndexingLValue(String target, int index, TypeDescriptor td) {
+
+		public StringIndexingLValue(String target, int index, TypeDescriptor typeDescriptor) {
 			this.target = target;
 			this.index = index;
-			this.td = td;
+			this.typeDescriptor = typeDescriptor;
 		}
 
+
+		@Override
 		public TypedValue getValue() {
 			if (this.index >= this.target.length()) {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.STRING_INDEX_OUT_OF_BOUNDS,
-						this.target.length(), index);
+						this.target.length(), this.index);
 			}
 			return new TypedValue(String.valueOf(this.target.charAt(this.index)));
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-					this.td.toString());
+					this.typeDescriptor.toString());
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -372,6 +400,7 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+
 		TypedValue context = state.getActiveContextObject();
 		Object targetObject = context.getValue();
 		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();

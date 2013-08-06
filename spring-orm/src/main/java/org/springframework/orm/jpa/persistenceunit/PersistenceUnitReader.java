@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -247,7 +249,7 @@ class PersistenceUnitReader {
 			unitInfo.setTransactionType(PersistenceUnitTransactionType.valueOf(txType));
 		}
 
-		// data-source
+		// evaluate data sources
 		String jtaDataSource = DomUtils.getChildElementValueByTagName(persistenceUnit, JTA_DATA_SOURCE);
 		if (StringUtils.hasText(jtaDataSource)) {
 			unitInfo.setJtaDataSource(this.dataSourceLookup.getDataSource(jtaDataSource.trim()));
@@ -267,19 +269,20 @@ class PersistenceUnitReader {
 		// exclude unlisted classes
 		Element excludeUnlistedClasses = DomUtils.getChildElementByTagName(persistenceUnit, EXCLUDE_UNLISTED_CLASSES);
 		if (excludeUnlistedClasses != null) {
-			unitInfo.setExcludeUnlistedClasses(true);
+			String excludeText = DomUtils.getTextValue(excludeUnlistedClasses);
+			unitInfo.setExcludeUnlistedClasses(!StringUtils.hasText(excludeText) || Boolean.valueOf(excludeText));
 		}
 
 		// set JPA 2.0 shared cache mode
 		String cacheMode = DomUtils.getChildElementValueByTagName(persistenceUnit, SHARED_CACHE_MODE);
 		if (StringUtils.hasText(cacheMode)) {
-			unitInfo.setSharedCacheModeName(cacheMode);
+			unitInfo.setSharedCacheMode(SharedCacheMode.valueOf(cacheMode));
 		}
 
 		// set JPA 2.0 validation mode
 		String validationMode = DomUtils.getChildElementValueByTagName(persistenceUnit, VALIDATION_MODE);
 		if (StringUtils.hasText(validationMode)) {
-			unitInfo.setValidationModeName(validationMode);
+			unitInfo.setValidationMode(ValidationMode.valueOf(validationMode));
 		}
 
 		parseProperties(persistenceUnit, unitInfo);

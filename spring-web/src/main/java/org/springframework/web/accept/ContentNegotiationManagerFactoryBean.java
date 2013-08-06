@@ -174,11 +174,13 @@ public class ContentNegotiationManagerFactoryBean
 		this.defaultContentType = defaultContentType;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
 
@@ -213,14 +215,17 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 
+	@Override
 	public ContentNegotiationManager getObject() {
 		return this.contentNegotiationManager;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return ContentNegotiationManager.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -67,20 +65,10 @@ public abstract class CollectionFactory {
 		approximableCollectionTypes.add(List.class);
 		approximableCollectionTypes.add(Set.class);
 		approximableCollectionTypes.add(SortedSet.class);
+		approximableCollectionTypes.add(NavigableSet.class);
 		approximableMapTypes.add(Map.class);
 		approximableMapTypes.add(SortedMap.class);
-
-		// New Java 6 collection interfaces
-		ClassLoader cl = CollectionFactory.class.getClassLoader();
-		try {
-			navigableSetClass = cl.loadClass("java.util.NavigableSet");
-			navigableMapClass = cl.loadClass("java.util.NavigableMap");
-			approximableCollectionTypes.add(navigableSetClass);
-			approximableMapTypes.add(navigableMapClass);
-		}
-		catch (ClassNotFoundException ex) {
-			// not running on Java 6 or above...
-		}
+		approximableMapTypes.add(NavigableMap.class);
 
 		// Common concrete collection classes
 		approximableCollectionTypes.add(ArrayList.class);
@@ -93,95 +81,6 @@ public abstract class CollectionFactory {
 		approximableMapTypes.add(TreeMap.class);
 	}
 
-
-	/**
-	 * Create a linked Set if possible: This implementation always
-	 * creates a {@link java.util.LinkedHashSet}, since Spring 2.5
-	 * requires JDK 1.4 anyway.
-	 * @param initialCapacity the initial capacity of the Set
-	 * @return the new Set instance
-	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
-	 */
-	@Deprecated
-	public static <T> Set<T> createLinkedSetIfPossible(int initialCapacity) {
-		return new LinkedHashSet<T>(initialCapacity);
-	}
-
-	/**
-	 * Create a copy-on-write Set (allowing for synchronization-less iteration) if possible:
-	 * This implementation always creates a {@link java.util.concurrent.CopyOnWriteArraySet},
-	 * since Spring 3 requires JDK 1.5 anyway.
-	 * @return the new Set instance
-	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
-	 */
-	@Deprecated
-	public static <T> Set<T> createCopyOnWriteSet() {
-		return new CopyOnWriteArraySet<T>();
-	}
-
-	/**
-	 * Create a linked Map if possible: This implementation always
-	 * creates a {@link java.util.LinkedHashMap}, since Spring 2.5
-	 * requires JDK 1.4 anyway.
-	 * @param initialCapacity the initial capacity of the Map
-	 * @return the new Map instance
-	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
-	 */
-	@Deprecated
-	public static <K,V> Map<K,V> createLinkedMapIfPossible(int initialCapacity) {
-		return new LinkedHashMap<K,V>(initialCapacity);
-	}
-
-	/**
-	 * Create a linked case-insensitive Map if possible: This implementation
-	 * always returns a {@link org.springframework.util.LinkedCaseInsensitiveMap}.
-	 * @param initialCapacity the initial capacity of the Map
-	 * @return the new Map instance
-	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
-	 */
-	@Deprecated
-	public static Map createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
-		return new LinkedCaseInsensitiveMap(initialCapacity);
-	}
-
-	/**
-	 * Create an identity Map if possible: This implementation always
-	 * creates a {@link java.util.IdentityHashMap}, since Spring 2.5
-	 * requires JDK 1.4 anyway.
-	 * @param initialCapacity the initial capacity of the Map
-	 * @return the new Map instance
-	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
-	 */
-	@Deprecated
-	public static Map createIdentityMapIfPossible(int initialCapacity) {
-		return new IdentityHashMap(initialCapacity);
-	}
-
-	/**
-	 * Create a concurrent Map if possible: This implementation always
-	 * creates a {@link java.util.concurrent.ConcurrentHashMap}, since Spring 3.0
-	 * requires JDK 1.5 anyway.
-	 * @param initialCapacity the initial capacity of the Map
-	 * @return the new Map instance
-	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
-	 */
-	@Deprecated
-	public static Map createConcurrentMapIfPossible(int initialCapacity) {
-		return new ConcurrentHashMap(initialCapacity);
-	}
-
-	/**
-	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface:
-	 * This implementation always creates a {@link java.util.concurrent.ConcurrentHashMap},
-	 * since Spring 3.0 requires JDK 1.5 anyway.
-	 * @param initialCapacity the initial capacity of the Map
-	 * @return the new ConcurrentMap instance
-	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
-	 */
-	@Deprecated
-	public static ConcurrentMap createConcurrentMap(int initialCapacity) {
-		return new JdkConcurrentHashMap(initialCapacity);
-	}
 
 	/**
 	 * Determine whether the given collection type is an approximable type,
@@ -326,19 +225,6 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Could not instantiate Map type: " +
 						mapType.getName(), ex);
 			}
-		}
-	}
-
-
-	/**
-	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
-	 */
-	@Deprecated
-	@SuppressWarnings("serial")
-	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
-
-		private JdkConcurrentHashMap(int initialCapacity) {
-			super(initialCapacity);
 		}
 	}
 

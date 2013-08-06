@@ -94,6 +94,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 			this.context = context;
 		}
 
+		@Override
 		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 			T result = updateRow(rs, rowNum, this.context);
 			rs.updateRow();

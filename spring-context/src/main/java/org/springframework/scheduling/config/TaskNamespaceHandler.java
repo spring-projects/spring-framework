@@ -26,6 +26,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class TaskNamespaceHandler extends NamespaceHandlerSupport {
 
+	@Override
 	public void init() {
 		this.registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 		this.registerBeanDefinitionParser("executor", new ExecutorBeanDefinitionParser());

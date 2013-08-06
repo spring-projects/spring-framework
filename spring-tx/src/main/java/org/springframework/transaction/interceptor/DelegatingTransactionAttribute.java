@@ -46,10 +46,12 @@ public abstract class DelegatingTransactionAttribute extends DelegatingTransacti
 	}
 
 
+	@Override
 	public String getQualifier() {
 		return this.targetAttribute.getQualifier();
 	}
 
+	@Override
 	public boolean rollbackOn(Throwable ex) {
 		return this.targetAttribute.rollbackOn(ex);
 	}

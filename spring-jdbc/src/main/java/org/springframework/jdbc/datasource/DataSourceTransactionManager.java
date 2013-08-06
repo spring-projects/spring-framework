@@ -162,6 +162,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		return this.dataSource;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getDataSource() == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
@@ -169,6 +170,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getDataSource();
 	}
@@ -236,7 +238,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			}
 		}
 
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			DataSourceUtils.releaseConnection(con, this.dataSource);
 			throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction", ex);
 		}
@@ -360,6 +362,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			getConnectionHolder().setRollbackOnly();
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			return getConnectionHolder().isRollbackOnly();
 		}

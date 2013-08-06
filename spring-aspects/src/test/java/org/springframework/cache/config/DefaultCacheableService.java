@@ -171,4 +171,11 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	public Long multiUpdate(Object arg1) {
 		return Long.valueOf(arg1.toString());
 	}
+
+	@Override
+	@CachePut(value="primary", key="#result.id")
+	public TestEntity putRefersToResult(TestEntity arg1) {
+		arg1.setId(Long.MIN_VALUE);
+		return arg1;
+	}
 }

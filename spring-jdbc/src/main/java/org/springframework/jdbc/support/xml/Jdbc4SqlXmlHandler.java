@@ -50,35 +50,43 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	// Convenience methods for accessing XML content
 	//-------------------------------------------------------------------------
 
+	@Override
 	public String getXmlAsString(ResultSet rs, String columnName) throws SQLException {
 		return rs.getSQLXML(columnName).getString();
 	}
 
+	@Override
 	public String getXmlAsString(ResultSet rs, int columnIndex) throws SQLException {
 		return rs.getSQLXML(columnIndex).getString();
 	}
 
+	@Override
 	public InputStream getXmlAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
 		return rs.getSQLXML(columnName).getBinaryStream();
 	}
 
+	@Override
 	public InputStream getXmlAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		return rs.getSQLXML(columnIndex).getBinaryStream();
 	}
 
+	@Override
 	public Reader getXmlAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
 		return rs.getSQLXML(columnName).getCharacterStream();
 	}
 
+	@Override
 	public Reader getXmlAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		return rs.getSQLXML(columnIndex).getCharacterStream();
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Source getXmlAsSource(ResultSet rs, String columnName, Class sourceClass) throws SQLException {
 		return rs.getSQLXML(columnName).getSource(sourceClass != null ? sourceClass : DOMSource.class);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class sourceClass) throws SQLException {
 		return rs.getSQLXML(columnIndex).getSource(sourceClass != null ? sourceClass : DOMSource.class);
@@ -89,6 +97,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	// Convenience methods for building XML content
 	//-------------------------------------------------------------------------
 
+	@Override
 	public SqlXmlValue newSqlXmlValue(final String value) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
@@ -98,6 +107,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 		};
 	}
 
+	@Override
 	public SqlXmlValue newSqlXmlValue(final XmlBinaryStreamProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
@@ -107,6 +117,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 		};
 	}
 
+	@Override
 	public SqlXmlValue newSqlXmlValue(final XmlCharacterStreamProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
@@ -116,6 +127,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 		};
 	}
 
+	@Override
 	public SqlXmlValue newSqlXmlValue(final Class resultClass, final XmlResultProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
@@ -126,6 +138,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 		};
 	}
 
+	@Override
 	public SqlXmlValue newSqlXmlValue(final Document document) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
@@ -143,6 +156,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 
 		private SQLXML xmlObject;
 
+		@Override
 		public void setValue(PreparedStatement ps, int paramIndex) throws SQLException {
 			this.xmlObject = ps.getConnection().createSQLXML();
 			try {
@@ -154,6 +168,7 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 			ps.setSQLXML(paramIndex, this.xmlObject);
 		}
 
+		@Override
 		public void cleanup() {
 			try {
 				this.xmlObject.free();

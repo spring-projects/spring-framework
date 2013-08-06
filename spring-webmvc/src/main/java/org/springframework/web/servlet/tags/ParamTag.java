@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
  * <p>This tag must be nested under a param aware tag.
  *
  * @author Scott Andrews
+ * @author Nicholas Williams
  * @since 3.0
  * @see Param
  * @see UrlTag
@@ -37,16 +38,16 @@ public class ParamTag extends BodyTagSupport {
 
 	private String value;
 
-	private Param param;
+	private boolean valueSet;
 
 	// tag lifecycle
 
 	@Override
 	public int doEndTag() throws JspException {
-		param = new Param();
-		param.setName(name);
-		if (value != null) {
-			param.setValue(value);
+		Param param = new Param();
+		param.setName(this.name);
+		if (this.valueSet) {
+			param.setValue(this.value);
 		}
 		else if (getBodyContent() != null) {
 			// get the value from the tag body
@@ -90,6 +91,15 @@ public class ParamTag extends BodyTagSupport {
 	 */
 	public void setValue(String value) {
 		this.value = value;
+		this.valueSet = true;
+	}
+
+	@Override
+	public void release() {
+		super.release();
+		this.name = null;
+		this.value = null;
+		this.valueSet = false;
 	}
 
 }

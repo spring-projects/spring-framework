@@ -47,6 +47,7 @@ public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 		setConcurrencyLimit(1);
 	}
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		beforeAccess();
 		try {

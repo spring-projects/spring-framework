@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -74,12 +75,12 @@ public abstract class GenericTypeResolver {
 	 * @param clazz the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
 	 */
-	public static Class<?> resolveParameterType(MethodParameter methodParam, Class clazz) {
+	public static Class<?> resolveParameterType(MethodParameter methodParam, Class<?> clazz) {
 		Type genericType = getTargetType(methodParam);
 		Assert.notNull(clazz, "Class must not be null");
 		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);
 		Type rawType = getRawType(genericType, typeVariableMap);
-		Class result = (rawType instanceof Class ? (Class) rawType : methodParam.getParameterType());
+		Class<?> result = (rawType instanceof Class ? (Class) rawType : methodParam.getParameterType());
 		methodParam.setParameterType(result);
 		methodParam.typeVariableMap = typeVariableMap;
 		return result;
@@ -111,7 +112,7 @@ public abstract class GenericTypeResolver {
 	 * method for {@code creatProxy()} and an {@code Object[]} array containing
 	 * {@code MyService.class}, {@code resolveReturnTypeForGenericMethod()} will
 	 * infer that the target return type is {@code MyService}.
-	 * <pre>{@code public static <T> T createProxy(Class<T> clazz)}</pre>
+	 * <pre class="code">{@code public static <T> T createProxy(Class<T> clazz)}</pre>
 	 * <h4>Possible Return Values</h4>
 	 * <ul>
 	 * <li>the target return type, if it can be inferred</li>
@@ -227,7 +228,7 @@ public abstract class GenericTypeResolver {
 	 * @param genericIfc the generic interface or superclass to resolve the type argument from
 	 * @return the resolved type of the argument, or {@code null} if not resolvable
 	 */
-	public static Class<?> resolveTypeArgument(Class clazz, Class genericIfc) {
+	public static Class<?> resolveTypeArgument(Class<?> clazz, Class<?> genericIfc) {
 		Class[] typeArgs = resolveTypeArguments(clazz, genericIfc);
 		if (typeArgs == null) {
 			return null;
@@ -248,11 +249,11 @@ public abstract class GenericTypeResolver {
 	 * @return the resolved type of each argument, with the array size matching the
 	 * number of actual type arguments, or {@code null} if not resolvable
 	 */
-	public static Class[] resolveTypeArguments(Class clazz, Class genericIfc) {
+	public static Class[] resolveTypeArguments(Class<?> clazz, Class<?> genericIfc) {
 		return doResolveTypeArguments(clazz, clazz, genericIfc);
 	}
 
-	private static Class[] doResolveTypeArguments(Class ownerClass, Class classToIntrospect, Class genericIfc) {
+	private static Class[] doResolveTypeArguments(Class<?> ownerClass, Class<?> classToIntrospect, Class<?> genericIfc) {
 		while (classToIntrospect != null) {
 			if (genericIfc.isInterface()) {
 				Type[] ifcs = classToIntrospect.getGenericInterfaces();
@@ -264,10 +265,15 @@ public abstract class GenericTypeResolver {
 				}
 			}
 			else {
-				Class[] result = doResolveTypeArguments(
-						ownerClass, classToIntrospect.getGenericSuperclass(), genericIfc);
-				if (result != null) {
-					return result;
+				try {
+					Class[] result = doResolveTypeArguments(ownerClass, classToIntrospect.getGenericSuperclass(), genericIfc);
+					if (result != null) {
+						return result;
+					}
+				}
+				catch (MalformedParameterizedTypeException ex) {
+					// from getGenericSuperclass() - return null to skip further superclass traversal
+					return null;
 				}
 			}
 			classToIntrospect = classToIntrospect.getSuperclass();
@@ -275,7 +281,7 @@ public abstract class GenericTypeResolver {
 		return null;
 	}
 
-	private static Class[] doResolveTypeArguments(Class ownerClass, Type ifc, Class genericIfc) {
+	private static Class[] doResolveTypeArguments(Class<?> ownerClass, Type ifc, Class<?> genericIfc) {
 		if (ifc instanceof ParameterizedType) {
 			ParameterizedType paramIfc = (ParameterizedType) ifc;
 			Type rawType = paramIfc.getRawType();
@@ -301,7 +307,7 @@ public abstract class GenericTypeResolver {
 	/**
 	 * Extract a class instance from given Type.
 	 */
-	private static Class extractClass(Class ownerClass, Type arg) {
+	private static Class<?> extractClass(Class<?> ownerClass, Type arg) {
 		if (arg instanceof ParameterizedType) {
 			return extractClass(ownerClass, ((ParameterizedType) arg).getRawType());
 		}
@@ -368,7 +374,7 @@ public abstract class GenericTypeResolver {
 	 * {@link Class concrete classes} for the specified {@link Class}. Searches
 	 * all super types, enclosing types and interfaces.
 	 */
-	public static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
+	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
 		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 
 		if (typeVariableMap == null) {
@@ -377,28 +383,37 @@ public abstract class GenericTypeResolver {
 			// interfaces
 			extractTypeVariablesFromGenericInterfaces(clazz.getGenericInterfaces(), typeVariableMap);
 
-			// super class
-			Type genericType = clazz.getGenericSuperclass();
-			Class type = clazz.getSuperclass();
-			while (type != null && !Object.class.equals(type)) {
-				if (genericType instanceof ParameterizedType) {
-					ParameterizedType pt = (ParameterizedType) genericType;
-					populateTypeMapFromParameterizedType(pt, typeVariableMap);
+			try {
+				// super class
+				Class<?> type = clazz;
+				while (type.getSuperclass() != null && !Object.class.equals(type.getSuperclass())) {
+					Type genericType = type.getGenericSuperclass();
+					if (genericType instanceof ParameterizedType) {
+						ParameterizedType pt = (ParameterizedType) genericType;
+						populateTypeMapFromParameterizedType(pt, typeVariableMap);
+					}
+					extractTypeVariablesFromGenericInterfaces(type.getSuperclass().getGenericInterfaces(), typeVariableMap);
+					type = type.getSuperclass();
 				}
-				extractTypeVariablesFromGenericInterfaces(type.getGenericInterfaces(), typeVariableMap);
-				genericType = type.getGenericSuperclass();
-				type = type.getSuperclass();
+			}
+			catch (MalformedParameterizedTypeException ex) {
+				// from getGenericSuperclass() - ignore and continue with member class check
 			}
 
-			// enclosing class
-			type = clazz;
-			while (type.isMemberClass()) {
-				genericType = type.getGenericSuperclass();
-				if (genericType instanceof ParameterizedType) {
-					ParameterizedType pt = (ParameterizedType) genericType;
-					populateTypeMapFromParameterizedType(pt, typeVariableMap);
+			try {
+				// enclosing class
+				Class<?> type = clazz;
+				while (type.isMemberClass()) {
+					Type genericType = type.getGenericSuperclass();
+					if (genericType instanceof ParameterizedType) {
+						ParameterizedType pt = (ParameterizedType) genericType;
+						populateTypeMapFromParameterizedType(pt, typeVariableMap);
+					}
+					type = type.getEnclosingClass();
 				}
-				type = type.getEnclosingClass();
+			}
+			catch (MalformedParameterizedTypeException ex) {
+				// from getGenericSuperclass() - ignore and preserve previously accumulated type variables
 			}
 
 			typeVariableCache.put(clazz, typeVariableMap);

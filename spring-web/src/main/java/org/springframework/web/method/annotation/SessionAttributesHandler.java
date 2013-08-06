@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.method.annotation;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,8 +51,8 @@ public class SessionAttributesHandler {
 
 	private final Set<Class<?>> attributeTypes = new HashSet<Class<?>>();
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<String, Boolean> knownAttributeNames = new ConcurrentHashMap<String, Boolean>(4);
+	private final Set<String> knownAttributeNames =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(4));
 
 	private final SessionAttributeStore sessionAttributeStore;
 
@@ -74,7 +75,7 @@ public class SessionAttributesHandler {
 		}
 
 		for (String attributeName : this.attributeNames) {
-			this.knownAttributeNames.put(attributeName, Boolean.TRUE);
+			this.knownAttributeNames.add(attributeName);
 		}
 	}
 
@@ -100,7 +101,7 @@ public class SessionAttributesHandler {
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
 		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
-			this.knownAttributeNames.put(attributeName, Boolean.TRUE);
+			this.knownAttributeNames.add(attributeName);
 			return true;
 		}
 		else {
@@ -134,7 +135,7 @@ public class SessionAttributesHandler {
 	 */
 	public Map<String, Object> retrieveAttributes(WebRequest request) {
 		Map<String, Object> attributes = new HashMap<String, Object>();
-		for (String name : this.knownAttributeNames.keySet()) {
+		for (String name : this.knownAttributeNames) {
 			Object value = this.sessionAttributeStore.retrieveAttribute(request, name);
 			if (value != null) {
 				attributes.put(name, value);
@@ -150,7 +151,7 @@ public class SessionAttributesHandler {
 	 * @param request the current request
 	 */
 	public void cleanupAttributes(WebRequest request) {
-		for (String attributeName : this.knownAttributeNames.keySet()) {
+		for (String attributeName : this.knownAttributeNames) {
 			this.sessionAttributeStore.cleanupAttribute(request, attributeName);
 		}
 	}

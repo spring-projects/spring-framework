@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import javax.sql.DataSource;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
 import org.springframework.dao.DataAccessException;
@@ -82,12 +81,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * The SqlErrorCodes or DataSource property must be set.
 	 */
 	public SQLErrorCodeSQLExceptionTranslator() {
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_16) {
-			setFallbackTranslator(new SQLExceptionSubclassTranslator());
-		}
-		else {
-			setFallbackTranslator(new SQLStateSQLExceptionTranslator());
-		}
+		setFallbackTranslator(new SQLExceptionSubclassTranslator());
 	}
 
 	/**

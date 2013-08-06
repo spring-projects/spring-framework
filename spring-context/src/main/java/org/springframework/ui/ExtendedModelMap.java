@@ -59,6 +59,7 @@ public class ExtendedModelMap extends ModelMap implements Model {
 		return this;
 	}
 
+	@Override
 	public Map<String, Object> asMap() {
 		return this;
 	}

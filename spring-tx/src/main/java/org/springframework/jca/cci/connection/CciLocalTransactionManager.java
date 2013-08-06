@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
@@ -109,6 +109,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		return this.connectionFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
@@ -116,6 +117,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getConnectionFactory();
 	}
@@ -139,7 +141,6 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		CciLocalTransactionObject txObject = (CciLocalTransactionObject) transaction;
-
 		Connection con = null;
 
 		try {
@@ -167,7 +168,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new CannotCreateTransactionException("Could not begin local CCI transaction", ex);
 		}
-		catch (ResourceException ex) {
+		catch (Throwable ex) {
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 			throw new TransactionSystemException("Unexpected failure on begin of CCI local transaction", ex);
 		}

@@ -88,10 +88,12 @@ public class SimpleTaskWorkManager implements WorkManager {
 	}
 
 
+	@Override
 	public void doWork(Work work) throws WorkException {
 		doWork(work, WorkManager.INDEFINITE, null, null);
 	}
 
+	@Override
 	public void doWork(Work work, long startTimeout, ExecutionContext executionContext, WorkListener workListener)
 			throws WorkException {
 
@@ -99,10 +101,12 @@ public class SimpleTaskWorkManager implements WorkManager {
 		executeWork(this.syncTaskExecutor, work, startTimeout, false, executionContext, workListener);
 	}
 
+	@Override
 	public long startWork(Work work) throws WorkException {
 		return startWork(work, WorkManager.INDEFINITE, null, null);
 	}
 
+	@Override
 	public long startWork(Work work, long startTimeout, ExecutionContext executionContext, WorkListener workListener)
 			throws WorkException {
 
@@ -110,10 +114,12 @@ public class SimpleTaskWorkManager implements WorkManager {
 		return executeWork(this.asyncTaskExecutor, work, startTimeout, true, executionContext, workListener);
 	}
 
+	@Override
 	public void scheduleWork(Work work) throws WorkException {
 		scheduleWork(work, WorkManager.INDEFINITE, null, null);
 	}
 
+	@Override
 	public void scheduleWork(Work work, long startTimeout, ExecutionContext executionContext, WorkListener workListener)
 			throws WorkException {
 
@@ -219,6 +225,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 			this.acceptOnExecution = acceptOnExecution;
 		}
 
+		@Override
 		public void run() {
 			if (this.acceptOnExecution) {
 				this.workListener.workAccepted(new WorkEvent(this, WorkEvent.WORK_ACCEPTED, work, null));
@@ -244,6 +251,7 @@ public class SimpleTaskWorkManager implements WorkManager {
 			this.workListener.workCompleted(new WorkEvent(this, WorkEvent.WORK_COMPLETED, this.work, null));
 		}
 
+		@Override
 		public void release() {
 			this.work.release();
 		}

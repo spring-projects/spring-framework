@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Subclass of {@link MutablePersistenceUnitInfo} that adds instrumentation hooks based on
@@ -38,37 +37,9 @@ import org.springframework.util.StringUtils;
  */
 class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
-	private static final String DEFAULT_SHARED_CACHE_MODE_NAME = "UNSPECIFIED";
-
-	private static final String DEFAULT_VALIDATION_MODE_NAME = "AUTO";
-
-
-	private String sharedCacheModeName = DEFAULT_SHARED_CACHE_MODE_NAME;
-
-	private String validationModeName = DEFAULT_VALIDATION_MODE_NAME;
-
 	private LoadTimeWeaver loadTimeWeaver;
 
 	private ClassLoader classLoader;
-
-
-	public void setSharedCacheModeName(String sharedCacheModeName) {
-		this.sharedCacheModeName =
-				(StringUtils.hasLength(sharedCacheModeName) ? sharedCacheModeName : DEFAULT_SHARED_CACHE_MODE_NAME);
-	}
-
-	public String getSharedCacheModeName() {
-		return this.sharedCacheModeName;
-	}
-
-	public void setValidationModeName(String validationModeName) {
-		this.validationModeName =
-				(StringUtils.hasLength(validationModeName) ? validationModeName : DEFAULT_VALIDATION_MODE_NAME);
-	}
-
-	public String getValidationModeName() {
-		return this.validationModeName;
-	}
 
 
 	/**

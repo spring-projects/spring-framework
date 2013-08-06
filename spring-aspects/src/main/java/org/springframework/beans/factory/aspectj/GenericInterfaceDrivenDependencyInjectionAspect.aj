@@ -23,7 +23,7 @@ package org.springframework.beans.factory.aspectj;
  *
  * The subaspect of this aspect doesn't need to include any AOP constructs.
  * For example, here is a subaspect that configures the {@code PricingStrategyClient} objects.
- * <pre>
+ * <pre class="code">
  * aspect PricingStrategyDependencyInjectionAspect
  *        extends GenericInterfaceDrivenDependencyInjectionAspect<PricingStrategyClient> {
  *     private PricingStrategy pricingStrategy;

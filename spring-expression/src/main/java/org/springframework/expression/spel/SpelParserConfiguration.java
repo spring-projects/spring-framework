@@ -30,7 +30,7 @@ public class SpelParserConfiguration {
 
 	private final boolean autoGrowCollections;
 
-	private int maximumAutoGrowSize;
+	private final int maximumAutoGrowSize;
 
 
 	/**

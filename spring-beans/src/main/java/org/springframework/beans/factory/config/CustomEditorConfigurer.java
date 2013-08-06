@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.beans.PropertyEditorRegistrySupport;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} implementation that allows for convenient
  * registration of custom {@link PropertyEditor property editors}.
  *
- * <p>
- * In case you want to register {@link PropertyEditor} instances, the
- * recommended usage as of Spring 2.0 is to use custom
+ * <p>In case you want to register {@link PropertyEditor} instances,
+ * the recommended usage as of Spring 2.0 is to use custom
  * {@link PropertyEditorRegistrar} implementations that in turn register any
  * desired editor instances on a given
  * {@link org.springframework.beans.PropertyEditorRegistry registry}. Each
@@ -100,7 +94,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.web.servlet.mvc.BaseCommandController#setPropertyEditorRegistrars
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
-public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
+public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -108,17 +102,14 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
-	private Map<String, ?> customEditors;
-
-	private boolean ignoreUnresolvableEditors = false;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private Map<Class<?>, Class<? extends PropertyEditor>> customEditors;
 
 
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -141,31 +132,14 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	 * Specify the custom editors to register via a {@link Map}, using the
 	 * class name of the required type as the key and the class name of the
 	 * associated {@link PropertyEditor} as value.
-	 * <p>Also supports {@link PropertyEditor} instances as values; however,
-	 * this is deprecated since Spring 2.0.7!
 	 * @see ConfigurableListableBeanFactory#registerCustomEditor
 	 */
-	public void setCustomEditors(Map<String, ?> customEditors) {
+	public void setCustomEditors(Map<Class<?>, Class<? extends PropertyEditor>> customEditors) {
 		this.customEditors = customEditors;
 	}
 
-	/**
-	 * Set whether unresolvable editors should simply be skipped.
-	 * Default is to raise an exception in such a case.
-	 * <p>This typically applies to either the editor class or the required type
-	 * class not being found in the classpath. If you expect this to happen in
-	 * some deployments and prefer to simply ignore the affected editors,
-	 * then switch this flag to "true".
-	 */
-	public void setIgnoreUnresolvableEditors(boolean ignoreUnresolvableEditors) {
-		this.ignoreUnresolvableEditors = ignoreUnresolvableEditors;
-	}
 
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.beanClassLoader = beanClassLoader;
-	}
-
-
+	@Override
 	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
@@ -173,77 +147,13 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 				beanFactory.addPropertyEditorRegistrar(propertyEditorRegistrar);
 			}
 		}
-
 		if (this.customEditors != null) {
-			for (Map.Entry<String, ?> entry : this.customEditors.entrySet()) {
-				String key = entry.getKey();
-				Object value = entry.getValue();
-				Class requiredType = null;
-
-				try {
-					requiredType = ClassUtils.forName(key, this.beanClassLoader);
-					if (value instanceof PropertyEditor) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Passing PropertyEditor instances into CustomEditorConfigurer is deprecated: " +
-									"use PropertyEditorRegistrars or PropertyEditor class names instead. " +
-									"Offending key [" + key + "; offending editor instance: " + value);
-						}
-						beanFactory.addPropertyEditorRegistrar(
-								new SharedPropertyEditorRegistrar(requiredType, (PropertyEditor) value));
-					}
-					else if (value instanceof Class) {
-						beanFactory.registerCustomEditor(requiredType, (Class) value);
-					}
-					else if (value instanceof String) {
-						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
-						Assert.isAssignable(PropertyEditor.class, editorClass);
-						beanFactory.registerCustomEditor(requiredType, editorClass);
-					}
-					else {
-						throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
-								key + "] is not of required type [" + PropertyEditor.class.getName() +
-								"] or a corresponding Class or String value indicating a PropertyEditor implementation");
-					}
-				}
-				catch (ClassNotFoundException ex) {
-					if (this.ignoreUnresolvableEditors) {
-						logger.info("Skipping editor [" + value + "] for required type [" + key + "]: " +
-								(requiredType != null ? "editor" : "required type") + " class not found.");
-					}
-					else {
-						throw new FatalBeanException(
-								(requiredType != null ? "Editor" : "Required type") + " class not found", ex);
-					}
-				}
+			for (Map.Entry<Class<?>, Class<? extends PropertyEditor>> entry : this.customEditors.entrySet()) {
+				Class requiredType = entry.getKey();
+				Class<? extends PropertyEditor> propertyEditorClass = entry.getValue();
+				beanFactory.registerCustomEditor(requiredType, propertyEditorClass);
 			}
 		}
 	}
-
-
-	/**
-	 * PropertyEditorRegistrar that registers a (deprecated) shared editor.
-	 */
-	private static class SharedPropertyEditorRegistrar implements PropertyEditorRegistrar {
-
-		private final Class requiredType;
-
-		private final PropertyEditor sharedEditor;
-
-		public SharedPropertyEditorRegistrar(Class requiredType, PropertyEditor sharedEditor) {
-			this.requiredType = requiredType;
-			this.sharedEditor = sharedEditor;
-		}
-
-		@Override
-		@SuppressWarnings("deprecation")
-		public void registerCustomEditors(PropertyEditorRegistry registry) {
-			if (!(registry instanceof PropertyEditorRegistrySupport)) {
-				throw new IllegalArgumentException("Cannot registered shared editor " +
-						"on non-PropertyEditorRegistrySupport registry: " + registry);
-			}
-			((PropertyEditorRegistrySupport) registry).registerSharedEditor(this.requiredType, this.sharedEditor);
-		}
-	}
-
 
 }

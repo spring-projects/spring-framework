@@ -65,17 +65,17 @@ import org.springframework.util.StringUtils;
  * int or a custom enumeration type, for example, stringified via
  * {@code toString}. The resulting String can be used as bean name as-is,
  * provided that corresponding beans are defined in the bean factory.
- * Alternatively, {@link #setServiceMappings(java.util.Properties) a custom mapping}
- * between service ids and bean names can be defined.
+ * Alternatively, {@linkplain #setServiceMappings(java.util.Properties) a custom
+ * mapping} between service IDs and bean names can be defined.
  *
  * <p>By way of an example, consider the following service locator interface.
- * Note that this interface is not dependant on any Spring APIs.
+ * Note that this interface is not dependent on any Spring APIs.
  *
  * <pre class="code">package a.b.c;
  *
  *public interface ServiceFactory {
  *
- *    public MyService getService ();
+ *    public MyService getService();
  *}</pre>
  *
  * <p>A sample config in an XML-based
@@ -121,7 +121,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>By way of an example that looks up a bean <b>by name</b>, consider
  * the following service locator interface. Again, note that this
- * interface is not dependant on any Spring APIs.
+ * interface is not dependent on any Spring APIs.
  *
  * <pre class="code">package a.b.c;
  *
@@ -245,6 +245,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		this.serviceMappings = serviceMappings;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new FatalBeanException(
@@ -253,6 +254,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		this.beanFactory = (ListableBeanFactory) beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.serviceLocatorInterface == null) {
 			throw new IllegalArgumentException("Property 'serviceLocatorInterface' is required");
@@ -322,14 +324,17 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.serviceLocatorInterface;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -340,6 +345,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	 */
 	private class ServiceLocatorInvocationHandler implements InvocationHandler {
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				// Only consider equal when proxies are identical.

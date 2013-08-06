@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,9 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * <p>The {@code @Profile} annotation may be used in any of the following ways:
  * <ul>
  * <li>as a type-level annotation on any class directly or indirectly annotated with
- * {@code @Component}, including {@link Configuration @Configuration} classes
- * <li>as a meta-annotation, for the purpose of composing custom stereotype annotations
+ * {@code @Component}, including {@link Configuration @Configuration} classes</li>
+ * <li>as a meta-annotation, for the purpose of composing custom stereotype annotations</li>
+ * <li>as a method-level annotation on any {@link Bean @Bean} method</li>
  * </ul>
  *
  * <p>If a {@code @Configuration} class is marked with {@code @Profile}, all of the
@@ -65,6 +66,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * {@code spring-beans} XSD (version 3.1 or greater) for details.
  *
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 3.1
  * @see ConfigurableEnvironment#setActiveProfiles
  * @see ConfigurableEnvironment#setDefaultProfiles
@@ -72,7 +74,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Conditional(ProfileCondition.class)
 public @interface Profile {
 
 	/**

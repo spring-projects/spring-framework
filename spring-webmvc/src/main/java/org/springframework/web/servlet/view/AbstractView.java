@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ package org.springframework.web.servlet.view;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +69,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	private String requestContextAttribute;
 
 	/** Map of static attributes, keyed by attribute name (String) */
-	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
+	private final Map<String, Object> staticAttributes = new LinkedHashMap<String, Object>();
 
 	/** Whether or not the view should add path variables in the model */
 	private boolean exposePathVariables = true;
@@ -79,6 +78,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Set the view's name. Helpful for traceability.
 	 * <p>Framework code must call this when constructing views.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -104,6 +104,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return the content type for this view.
 	 */
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -252,6 +253,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Delegates to renderMergedOutputModel for the actual rendering.
 	 * @see #renderMergedOutputModel
 	 */
+	@Override
 	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
@@ -269,6 +271,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Dynamic values take precedence over static attributes.
 	 */
 	protected Map<String, Object> createMergedOutputModel(Map<String, ?> model, HttpServletRequest request,
+
 			HttpServletResponse response) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = this.exposePathVariables ?
@@ -278,7 +281,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		int size = this.staticAttributes.size();
 		size += (model != null) ? model.size() : 0;
 		size += (pathVars != null) ? pathVars.size() : 0;
-		Map<String, Object> mergedModel = new HashMap<String, Object>(size);
+		Map<String, Object> mergedModel = new LinkedHashMap<String, Object>(size);
 		mergedModel.putAll(this.staticAttributes);
 		if (pathVars != null) {
 			mergedModel.putAll(pathVars);

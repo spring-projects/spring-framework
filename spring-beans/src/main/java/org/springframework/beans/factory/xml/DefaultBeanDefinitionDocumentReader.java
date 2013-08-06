@@ -90,6 +90,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * {@code <beans/>} element with a {@code profile} attribute present.
 	 * @see #doRegisterBeanDefinitions
 	 */
+	@Override
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
@@ -101,6 +102,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * <p>Opens a DOM Document; then initializes the default settings
 	 * specified at the {@code <beans/>} level; then parses the contained bean definitions.
 	 */
+	@Override
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
 		logger.debug("Loading bean definitions");

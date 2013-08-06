@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,22 +322,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return getInternalBindingResult();
 	}
 
-	/**
-	 * Return the Errors instance for this data binder.
-	 * @return the Errors instance, to be treated as Errors or as BindException
-	 * @deprecated in favor of {@link #getBindingResult()}.
-	 * Use the {@link BindException#BindException(BindingResult)} constructor
-	 * to create a BindException instance if still needed.
-	 * @see #getBindingResult()
-	 */
-	@Deprecated
-	public BindException getErrors() {
-		if (this.bindException == null) {
-			this.bindException = new BindException(getBindingResult());
-		}
-		return this.bindException;
-	}
-
 
 	/**
 	 * Set whether to ignore unknown fields, that is, whether to ignore bind
@@ -573,28 +557,34 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return this.conversionService;
 	}
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
 	}
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
+	@Override
 	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
 
+	@Override
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
 		return getTypeConverter().convertIfNecessary(value, requiredType);
 	}
 
+	@Override
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
 			throws TypeMismatchException {
 
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 
+	@Override
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
 			throws TypeMismatchException {
 

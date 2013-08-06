@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,12 +32,13 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.HandlerMethodSelector;
 
+
 /**
- * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class
- * type, including all super types, and helps to resolve an Exception to the method
- * its mapped to. Exception mappings are defined through {@code @ExceptionHandler}
- * annotation or by looking at the signature of an {@code @ExceptionHandler} method.
- *
+ * Discovers annotated exception handling methods in a given class type, including all
+ * super types, and helps to resolve an Exception to a method that can handle it. The
+ * exception types supported by a given method can also be discovered from the method
+ * signature.
+  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -71,8 +72,7 @@ public class ExceptionHandlerMethodResolver {
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
 		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
 
-		ExceptionHandler annotation = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
-		result.addAll(Arrays.asList(annotation.value()));
+		detectAnnotationExceptionMappings(method, result);
 
 		if (result.isEmpty()) {
 			for (Class<?> paramType : method.getParameterTypes()) {
@@ -85,6 +85,11 @@ public class ExceptionHandlerMethodResolver {
 		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
 
 		return result;
+	}
+
+	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
+		ExceptionHandler annot = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		result.addAll(Arrays.asList(annot.value()));
 	}
 
 	private void addExceptionMapping(Class<? extends Throwable> exceptionType, Method method) {
@@ -138,11 +143,11 @@ public class ExceptionHandlerMethodResolver {
 		}
 	}
 
-	/**
-	 * A filter for selecting {@code @ExceptionHandler} methods.
-	 */
+
+	/** A filter for selecting annotated exception handling methods. */
 	public final static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
 
+		@Override
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null;
 		}

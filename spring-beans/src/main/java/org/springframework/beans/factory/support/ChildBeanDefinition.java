@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ObjectUtils;
 
@@ -98,7 +97,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * @param pvs the property values to apply
 	 */
 	public ChildBeanDefinition(
-			String parentName, Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+			String parentName, Class<?> beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 
 		super(cargs, pvs);
 		this.parentName = parentName;
@@ -128,14 +127,16 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * @param original the original bean definition to copy from
 	 */
 	public ChildBeanDefinition(ChildBeanDefinition original) {
-		super((BeanDefinition) original);
+		super(original);
 	}
 
 
+	@Override
 	public void setParentName(String parentName) {
 		this.parentName = parentName;
 	}
 
+	@Override
 	public String getParentName() {
 		return this.parentName;
 	}

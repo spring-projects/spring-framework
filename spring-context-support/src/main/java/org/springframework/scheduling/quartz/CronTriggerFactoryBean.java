@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.ReflectionUtils;
  * to automatically register a trigger for the corresponding JobDetail,
  * instead of registering the JobDetail separately.
  *
- * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.0/2.1,
+ * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.x,
  * in contrast to the older {@link CronTriggerBean} class.
  *
  * @author Juergen Hoeller
@@ -191,11 +191,13 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -265,14 +267,17 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	}
 
 
+	@Override
 	public CronTrigger getObject() {
 		return this.cronTrigger;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return CronTrigger.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

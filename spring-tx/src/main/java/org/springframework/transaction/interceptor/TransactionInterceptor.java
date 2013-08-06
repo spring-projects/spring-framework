@@ -84,6 +84,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	}
 
 
+	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		// Work out the target class: may be {@code null}.
 		// The TransactionAttributeSource should be passed the target class
@@ -92,6 +93,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
 		return invokeWithinTransaction(invocation.getMethod(), targetClass, new InvocationCallback() {
+			@Override
 			public Object proceedWithInvocation() throws Throwable {
 				return invocation.proceed();
 			}

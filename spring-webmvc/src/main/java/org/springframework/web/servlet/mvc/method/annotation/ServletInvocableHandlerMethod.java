@@ -182,6 +182,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		return new CallableHandlerMethod(new Callable<Object>() {
 
+			@Override
 			public Object call() throws Exception {
 				if (result instanceof Exception) {
 					throw (Exception) result;

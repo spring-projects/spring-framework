@@ -72,6 +72,7 @@ public class BeanValidationPostProcessor implements BeanPostProcessor, Initializ
 		this.afterInitialization = afterInitialization;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.validator == null) {
 			this.validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -79,6 +80,7 @@ public class BeanValidationPostProcessor implements BeanPostProcessor, Initializ
 	}
 
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (!this.afterInitialization) {
 			doValidate(bean);
@@ -86,6 +88,7 @@ public class BeanValidationPostProcessor implements BeanPostProcessor, Initializ
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (this.afterInitialization) {
 			doValidate(bean);

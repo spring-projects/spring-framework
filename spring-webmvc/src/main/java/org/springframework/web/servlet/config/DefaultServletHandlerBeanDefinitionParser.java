@@ -43,6 +43,7 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
  */
 class DefaultServletHandlerBeanDefinitionParser implements BeanDefinitionParser {
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 

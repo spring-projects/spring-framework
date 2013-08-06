@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.Collection;
 import java.util.Map;
-
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
@@ -153,8 +152,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Set the value of the HTML '{@code size}' attribute rendered
 	 * on the final '{@code select}' element.
-	 * <p>May be a runtime expression.
-	 * @param size the desired value of the '{@code size}' attribute
 	 */
 	public void setSize(String size) {
 		this.size = size;
@@ -162,7 +159,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Get the value of the '{@code size}' attribute.
-	 * <p>May be a runtime expression.
 	 */
 	protected String getSize() {
 		return this.size;
@@ -171,7 +167,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Set the value of the HTML '{@code multiple}' attribute rendered
 	 * on the final '{@code select}' element.
-	 * <p>May be a runtime expression.
 	 */
 	public void setMultiple(Object multiple) {
 		this.multiple = multiple;
@@ -180,7 +175,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Get the value of the HTML '{@code multiple}' attribute rendered
 	 * on the final '{@code select}' element.
-	 * <p>May be a runtime expression.
 	 */
 	protected Object getMultiple() {
 		return this.multiple;
@@ -216,6 +210,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
 					OptionWriter optionWriter =
 							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape()) {
+								@Override
 								protected String processOptionValue(String resolvedValue) {
 									return processFieldValue(selectName, resolvedValue, "option");
 								}
@@ -256,9 +251,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		Object multiple = getMultiple();
 		if (Boolean.TRUE.equals(multiple) || "multiple".equals(multiple)) {
 			return true;
-		}
-		else if (this.multiple instanceof String) {
-			return evaluateBoolean("multiple", (String) multiple);
 		}
 		return forceMultiple();
 	}

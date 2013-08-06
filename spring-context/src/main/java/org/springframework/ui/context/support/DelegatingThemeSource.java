@@ -36,15 +36,18 @@ public class DelegatingThemeSource implements HierarchicalThemeSource {
 	private ThemeSource parentThemeSource;
 
 
+	@Override
 	public void setParentThemeSource(ThemeSource parentThemeSource) {
 		this.parentThemeSource = parentThemeSource;
 	}
 
+	@Override
 	public ThemeSource getParentThemeSource() {
 		return parentThemeSource;
 	}
 
 
+	@Override
 	public Theme getTheme(String themeName) {
 		if (this.parentThemeSource != null) {
 			return this.parentThemeSource.getTheme(themeName);

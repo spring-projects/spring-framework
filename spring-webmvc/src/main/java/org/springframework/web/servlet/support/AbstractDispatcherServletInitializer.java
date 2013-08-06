@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  *
  * <p>Concrete implementations are required to implement {@link
  * #createServletApplicationContext()}, as well as {@link #getServletMappings()}, both of
- * which gets invoked from {@link #registerDispatcherServlet(ServletContext)}. Further
+ * which get invoked from {@link #registerDispatcherServlet(ServletContext)}. Further
  * customization can be achieved by overriding
  * {@link #customizeRegistration(ServletRegistration.Dynamic)}.
  *
@@ -72,7 +72,7 @@ public abstract class AbstractDispatcherServletInitializer
 
 	/**
 	 * Register a {@link DispatcherServlet} against the given servlet context.
-	 * <p>This method will create a {@code DispatcherServlet} with the name returned by
+	 * <p>This method will create a {@code DispatcherServlet} with the name returned from
 	 * {@link #getServletName()}, initializing it with the application context returned
 	 * from {@link #createServletApplicationContext()}, and mapping it to the patterns
 	 * returned from {@link #getServletMappings()}.
@@ -82,8 +82,7 @@ public abstract class AbstractDispatcherServletInitializer
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = this.getServletName();
-		Assert.hasLength(servletName,
-				"getServletName() may not return empty or null");
+		Assert.hasLength(servletName, "getServletName() may not return empty or null");
 
 		WebApplicationContext servletAppContext = this.createServletApplicationContext();
 		Assert.notNull(servletAppContext,
@@ -96,7 +95,7 @@ public abstract class AbstractDispatcherServletInitializer
 				servletContext.addServlet(servletName, dispatcherServlet);
 
 		Assert.notNull(registration,
-				"Failed to register servlet with name '" + servletName + "'." +
+				"Failed to register servlet with name '" + servletName + "'. " +
 				"Check if there is another servlet registered under the same name.");
 
 		registration.setLoadOnStartup(1);
@@ -125,7 +124,7 @@ public abstract class AbstractDispatcherServletInitializer
 	/**
 	 * Create a servlet application context to be provided to the {@code DispatcherServlet}.
 	 * <p>The returned context is delegated to Spring's
-	 * {@link DispatcherServlet#DispatcherServlet(WebApplicationContext)} As such, it
+	 * {@link DispatcherServlet#DispatcherServlet(WebApplicationContext)}. As such, it
 	 * typically contains controllers, view resolvers, locale resolvers, and other
 	 * web-related beans.
 	 * @see #registerDispatcherServlet(ServletContext)
@@ -133,13 +132,14 @@ public abstract class AbstractDispatcherServletInitializer
 	protected abstract WebApplicationContext createServletApplicationContext();
 
 	/**
-	 * Specify the servlet mapping(s) for the {@code DispatcherServlet}, e.g. '/', '/app', etc.
+	 * Specify the servlet mapping(s) for the {@code DispatcherServlet} &mdash;
+	 * for example {@code "/"}, {@code "/app"}, etc.
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract String[] getServletMappings();
 
 	/**
-	 * Specify filters to add and also map to the {@code DispatcherServlet}.
+	 * Specify filters to add and map to the {@code DispatcherServlet}.
 	 *
 	 * @return an array of filters or {@code null}
 	 * @see #registerServletFilter(ServletContext, Filter)
@@ -159,8 +159,8 @@ public abstract class AbstractDispatcherServletInitializer
 	 * {@code FORWARD}, {@code INCLUDE}, and conditionally {@code ASYNC} depending
 	 * on the return value of {@link #isAsyncSupported() asyncSupported}
 	 * </ul>
-	 * <p>If the above defaults are not suitable or insufficient, register
-	 * filters directly with the {@code ServletContext}.
+	 * <p>If the above defaults are not suitable or insufficient, override this
+	 * method and register filters directly with the {@code ServletContext}.
 	 *
 	 * @param servletContext the servlet context to register filters with
 	 * @param filter the filter to be registered

@@ -179,7 +179,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onreset = "onreset";
 
 		this.tag.setCommandName(commandName);
-		this.tag.setAction(action);
+		this.tag.setServletRelativeAction(action);
 		this.tag.setMethod(method);
 		this.tag.setEnctype(enctype);
 		this.tag.setOnsubmit(onsubmit);
@@ -211,7 +211,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 	public void testWithNullResolvedCommand() throws Exception {
 		try {
-			tag.setCommandName("${null}");
+			tag.setCommandName(null);
 			tag.doStartTag();
 			fail("Must not be able to have a command name that resolves to null");
 		}
@@ -326,7 +326,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	public void testRequestDataValueProcessorHooks() throws Exception {
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
-		given(processor.processAction(this.request, action)).willReturn(action);
+		given(processor.processAction(this.request, action, "post")).willReturn(action);
 		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key", "value"));
 
 		this.tag.doStartTag();

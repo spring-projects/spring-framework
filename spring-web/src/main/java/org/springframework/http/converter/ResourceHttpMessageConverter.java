@@ -85,7 +85,17 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		StreamUtils.copy(resource.getInputStream(), outputMessage.getBody());
+		InputStream in = resource.getInputStream();
+		try {
+			StreamUtils.copy(in, outputMessage.getBody());
+		}
+		finally {
+			try {
+				in.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 		outputMessage.getBody().flush();
 	}
 

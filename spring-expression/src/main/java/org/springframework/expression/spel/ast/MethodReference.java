@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -33,6 +34,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 
 /**
+ * Expression language AST node that represents a method reference.
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -43,235 +46,247 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
-	private volatile MethodExecutor cachedExecutor;
+	private volatile CachedMethodExecutor cachedExecutor;
 
 
 	public MethodReference(boolean nullSafe, String methodName, int pos, SpelNodeImpl... arguments) {
-		super(pos,arguments);
+		super(pos, arguments);
 		this.name = methodName;
 		this.nullSafe = nullSafe;
 	}
 
-	class MethodValueRef implements ValueRef {
 
-		private ExpressionState state;
-		private EvaluationContext evaluationContext;
-		private Object target;
-		private Object[] arguments;
-
-		MethodValueRef(ExpressionState state, EvaluationContext evaluationContext, Object object, Object[] arguments) {
-			this.state = state;
-			this.evaluationContext = evaluationContext;
-			this.target = object;
-			this.arguments = arguments;
-		}
-
-		public TypedValue getValue() {
-			MethodExecutor executorToUse = cachedExecutor;
-			if (executorToUse != null) {
-				try {
-					return executorToUse.execute(evaluationContext, target, arguments);
-				}
-				catch (AccessException ae) {
-					// Two reasons this can occur:
-					// 1. the method invoked actually threw a real exception
-					// 2. the method invoked was not passed the arguments it expected and has become 'stale'
-
-					// In the first case we should not retry, in the second case we should see if there is a
-					// better suited method.
-
-					// To determine which situation it is, the AccessException will contain a cause.
-					// If the cause is an InvocationTargetException, a user exception was thrown inside the method.
-					// Otherwise the method could not be invoked.
-					throwSimpleExceptionIfPossible(state, ae);
-
-					// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
-					cachedExecutor = null;
-				}
-			}
-
-			// either there was no accessor or it no longer existed
-			executorToUse = findAccessorForMethod(name, getTypes(arguments), target, evaluationContext);
-			cachedExecutor = executorToUse;
-			try {
-				return executorToUse.execute(evaluationContext, target, arguments);
-			} catch (AccessException ae) {
-				// Same unwrapping exception handling as above in above catch block
-				throwSimpleExceptionIfPossible(state, ae);
-				throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
-						name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
-			}
-		}
-
-		public void setValue(Object newValue) {
-			throw new IllegalAccessError();
-		}
-
-		public boolean isWritable() {
-			return false;
-		}
-
+	public final String getName() {
+		return this.name;
 	}
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		TypedValue currentContext = state.getActiveContextObject();
-		Object[] arguments = new Object[getChildCount()];
-		for (int i = 0; i < arguments.length; i++) {
-			// Make the root object the active context again for evaluating the parameter
-			// expressions
-			try {
-				state.pushActiveContextObject(state.getRootContextObject());
-				arguments[i] = children[i].getValueInternal(state).getValue();
-			}
-			finally {
-				state.popActiveContextObject();
-			}
+		Object[] arguments = getArguments(state);
+		if (state.getActiveContextObject().getValue() == null) {
+			throwIfNotNullSafe(getArgumentTypes(arguments));
+			return ValueRef.NullValueRef.instance;
 		}
-		if (currentContext.getValue() == null) {
-			if (nullSafe) {
-				return ValueRef.NullValueRef.instance;
-			}
-			else {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
-			}
-		}
-
-		return new MethodValueRef(state,state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
+		return new MethodValueRef(state);
 	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		TypedValue currentContext = state.getActiveContextObject();
-		Object[] arguments = new Object[getChildCount()];
-		for (int i = 0; i < arguments.length; i++) {
-			// Make the root object the active context again for evaluating the parameter
-			// expressions
-			try {
-				state.pushActiveContextObject(state.getRootContextObject());
-				arguments[i] = children[i].getValueInternal(state).getValue();
-			}
-			finally {
-				state.popActiveContextObject();
-			}
-		}
-		if (currentContext.getValue() == null) {
-			if (this.nullSafe) {
-				return TypedValue.NULL;
-			}
-			else {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-						FormatHelper.formatMethodForMessage(name, getTypes(arguments)));
-			}
+		EvaluationContext evaluationContext = state.getEvaluationContext();
+		Object value = state.getActiveContextObject().getValue();
+		TypeDescriptor targetType = state.getActiveContextObject().getTypeDescriptor();
+		Object[] arguments = getArguments(state);
+		return getValueInternal(evaluationContext, value, arguments, targetType);
+	}
+
+	private TypedValue getValueInternal(EvaluationContext evaluationContext,
+			Object value, Object[] arguments, TypeDescriptor targetType) {
+
+		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
+		if (value == null) {
+			throwIfNotNullSafe(argumentTypes);
+			return TypedValue.NULL;
 		}
 
-		MethodExecutor executorToUse = this.cachedExecutor;
+		MethodExecutor executorToUse = getCachedExecutor(targetType, argumentTypes);
 		if (executorToUse != null) {
 			try {
-				return executorToUse.execute(
-						state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
+				return executorToUse.execute(evaluationContext, value, arguments);
 			}
 			catch (AccessException ae) {
 				// Two reasons this can occur:
 				// 1. the method invoked actually threw a real exception
-				// 2. the method invoked was not passed the arguments it expected and has become 'stale'
+				// 2. the method invoked was not passed the arguments it expected and
+				//    has become 'stale'
 
-				// In the first case we should not retry, in the second case we should see if there is a
-				// better suited method.
+				// In the first case we should not retry, in the second case we should see
+				// if there is a better suited method.
 
-				// To determine which situation it is, the AccessException will contain a cause.
-				// If the cause is an InvocationTargetException, a user exception was thrown inside the method.
+				// To determine the situation, the AccessException will contain a cause.
+				// If the cause is an InvocationTargetException, a user exception was
+				// thrown inside the method.
 				// Otherwise the method could not be invoked.
-				throwSimpleExceptionIfPossible(state, ae);
+				throwSimpleExceptionIfPossible(value, ae);
 
-				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
+				// at this point we know it wasn't a user problem so worth a retry if a
+				// better candidate can be found
 				this.cachedExecutor = null;
 			}
 		}
 
 		// either there was no accessor or it no longer existed
-		executorToUse = findAccessorForMethod(this.name, getTypes(arguments), state);
-		this.cachedExecutor = executorToUse;
+		executorToUse = findAccessorForMethod(this.name, argumentTypes, value, evaluationContext);
+		this.cachedExecutor = new CachedMethodExecutor(executorToUse, targetType, argumentTypes);
 		try {
-			return executorToUse.execute(
-					state.getEvaluationContext(), state.getActiveContextObject().getValue(), arguments);
-		} catch (AccessException ae) {
+			return executorToUse.execute(evaluationContext,
+					value, arguments);
+		}
+		catch (AccessException ex) {
 			// Same unwrapping exception handling as above in above catch block
-			throwSimpleExceptionIfPossible(state, ae);
-			throw new SpelEvaluationException( getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,
-					this.name, state.getActiveContextObject().getValue().getClass().getName(), ae.getMessage());
+			throwSimpleExceptionIfPossible(value, ex);
+			throw new SpelEvaluationException(getStartPosition(), ex,
+					SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION, this.name,
+					value.getClass().getName(), ex.getMessage());
 		}
 	}
 
+	private void throwIfNotNullSafe(List<TypeDescriptor> argumentTypes) {
+		if (!this.nullSafe) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
+					FormatHelper.formatMethodForMessage(this.name, argumentTypes));
+		}
+	}
+
+	private Object[] getArguments(ExpressionState state) {
+		Object[] arguments = new Object[getChildCount()];
+		for (int i = 0; i < arguments.length; i++) {
+			// Make the root object the active context again for evaluating the parameter
+			// expressions
+			try {
+				state.pushActiveContextObject(state.getRootContextObject());
+				arguments[i] = this.children[i].getValueInternal(state).getValue();
+			}
+			finally {
+				state.popActiveContextObject();
+			}
+		}
+		return arguments;
+	}
+
+	private List<TypeDescriptor> getArgumentTypes(Object... arguments) {
+		List<TypeDescriptor> descriptors = new ArrayList<TypeDescriptor>(arguments.length);
+		for (Object argument : arguments) {
+			descriptors.add(TypeDescriptor.forObject(argument));
+		}
+		return Collections.unmodifiableList(descriptors);
+	}
+
+	private MethodExecutor getCachedExecutor(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+		if (this.cachedExecutor != null && this.cachedExecutor.isSuitable(target, argumentTypes)) {
+			return this.cachedExecutor.get();
+		}
+		this.cachedExecutor = null;
+		return null;
+	}
+
+	private MethodExecutor findAccessorForMethod(String name,
+			List<TypeDescriptor> argumentTypes, Object contextObject,
+			EvaluationContext evaluationContext) throws SpelEvaluationException {
+
+		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
+		if (methodResolvers != null) {
+			for (MethodResolver methodResolver : methodResolvers) {
+				try {
+					MethodExecutor methodExecutor = methodResolver.resolve(
+							evaluationContext, contextObject, name, argumentTypes);
+					if (methodExecutor != null) {
+						return methodExecutor;
+					}
+				}
+				catch (AccessException ex) {
+					throw new SpelEvaluationException(getStartPosition(), ex,
+							SpelMessage.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
+				}
+			}
+		}
+
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_NOT_FOUND,
+				FormatHelper.formatMethodForMessage(name, argumentTypes),
+				FormatHelper.formatClassNameForMessage(
+						contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
+	}
 
 	/**
-	 * Decode the AccessException, throwing a lightweight evaluation exception or, if the cause was a RuntimeException,
-	 * throw the RuntimeException directly.
+	 * Decode the AccessException, throwing a lightweight evaluation exception or, if the
+	 * cause was a RuntimeException, throw the RuntimeException directly.
 	 */
-	private void throwSimpleExceptionIfPossible(ExpressionState state, AccessException ae) {
+	private void throwSimpleExceptionIfPossible(Object value, AccessException ae) {
 		if (ae.getCause() instanceof InvocationTargetException) {
 			Throwable rootCause = ae.getCause().getCause();
 			if (rootCause instanceof RuntimeException) {
 				throw (RuntimeException) rootCause;
 			}
-			else {
-				throw new ExpressionInvocationTargetException(getStartPosition(),
-						"A problem occurred when trying to execute method '" + this.name +
-						"' on object of type '" + state.getActiveContextObject().getValue().getClass().getName() + "'",
-						rootCause);
-			}
+			throw new ExpressionInvocationTargetException(getStartPosition(),
+					"A problem occurred when trying to execute method '" + this.name +
+					"' on object of type '" +
+					value.getClass().getName() + "'",
+					rootCause);
 		}
-	}
-
-	private List<TypeDescriptor> getTypes(Object... arguments) {
-		List<TypeDescriptor> descriptors = new ArrayList<TypeDescriptor>(arguments.length);
-		for (Object argument : arguments) {
-			descriptors.add(TypeDescriptor.forObject(argument));
-		}
-		return descriptors;
 	}
 
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(name).append("(");
+		sb.append(this.name).append("(");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0)
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append(getChild(i).toStringAST());
 		}
 		sb.append(")");
 		return sb.toString();
 	}
 
-	private MethodExecutor findAccessorForMethod(String name,
-			List<TypeDescriptor> argumentTypes, ExpressionState state)
-			throws SpelEvaluationException {
-		return findAccessorForMethod(name,argumentTypes,state.getActiveContextObject().getValue(),state.getEvaluationContext());
+
+	private class MethodValueRef implements ValueRef {
+
+		private final EvaluationContext evaluationContext;
+
+		private final Object value;
+
+		private final TypeDescriptor targetType;
+
+		private final Object[] arguments;
+
+		public MethodValueRef(ExpressionState state) {
+			this.evaluationContext = state.getEvaluationContext();
+			this.value = state.getActiveContextObject().getValue();
+			this.targetType = state.getActiveContextObject().getTypeDescriptor();
+			this.arguments = getArguments(state);
+		}
+
+		@Override
+		public TypedValue getValue() {
+			return MethodReference.this.getValueInternal(this.evaluationContext,
+					this.value, this.arguments, this.targetType);
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			throw new IllegalAccessError();
+		}
+
+		@Override
+		public boolean isWritable() {
+			return false;
+		}
 	}
 
-	private MethodExecutor findAccessorForMethod(String name,
-			List<TypeDescriptor> argumentTypes, Object contextObject, EvaluationContext eContext)
-			throws SpelEvaluationException {
 
-		List<MethodResolver> mResolvers = eContext.getMethodResolvers();
-		if (mResolvers != null) {
-			for (MethodResolver methodResolver : mResolvers) {
-				try {
-					MethodExecutor cEx = methodResolver.resolve(
-							eContext, contextObject, name, argumentTypes);
-					if (cEx != null) {
-						return cEx;
-					}
-				}
-				catch (AccessException ex) {
-					throw new SpelEvaluationException(getStartPosition(),ex, SpelMessage.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
-				}
-			}
+	private static class CachedMethodExecutor {
+
+		private final MethodExecutor methodExecutor;
+
+		private final TypeDescriptor target;
+
+		private final List<TypeDescriptor> argumentTypes;
+
+		public CachedMethodExecutor(MethodExecutor methodExecutor, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+			this.methodExecutor = methodExecutor;
+			this.target = target;
+			this.argumentTypes = argumentTypes;
 		}
-		throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_NOT_FOUND, FormatHelper.formatMethodForMessage(name, argumentTypes),
-				FormatHelper.formatClassNameForMessage(contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
+
+		public boolean isSuitable(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+			return (this.methodExecutor != null && this.target != null &&
+					this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
+		}
+
+		public MethodExecutor get() {
+			return this.methodExecutor;
+		}
 	}
 
 }

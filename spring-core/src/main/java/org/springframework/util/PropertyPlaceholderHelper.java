@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,8 @@ public class PropertyPlaceholderHelper {
 
 
 	/**
-	 * Replaces all placeholders of format {@code ${name}} with the corresponding property
-	 * from the supplied {@link Properties}.
+	 * Replaces all placeholders of format {@code ${name}} with the corresponding
+	 * property from the supplied {@link Properties}.
 	 * @param value the value containing the placeholders to be replaced.
 	 * @param properties the {@code Properties} to use for replacement.
 	 * @return the supplied value with placeholders replaced inline.
@@ -107,6 +107,7 @@ public class PropertyPlaceholderHelper {
 	public String replacePlaceholders(String value, final Properties properties) {
 		Assert.notNull(properties, "Argument 'properties' must not be null.");
 		return replacePlaceholders(value, new PlaceholderResolver() {
+			@Override
 			public String resolvePlaceholder(String placeholderName) {
 				return properties.getProperty(placeholderName);
 			}
@@ -114,8 +115,8 @@ public class PropertyPlaceholderHelper {
 	}
 
 	/**
-	 * Replaces all placeholders of format {@code ${name}} with the value returned from the supplied
-	 * {@link PlaceholderResolver}.
+	 * Replaces all placeholders of format {@code ${name}} with the value returned
+	 * from the supplied {@link PlaceholderResolver}.
 	 * @param value the value containing the placeholders to be replaced.
 	 * @param placeholderResolver the {@code PlaceholderResolver} to use for replacement.
 	 * @return the supplied value with placeholders replaced inline.
@@ -216,8 +217,8 @@ public class PropertyPlaceholderHelper {
 
 		/**
 		 * Resolves the supplied placeholder name into the replacement value.
-		 * @param placeholderName the name of the placeholder to resolve.
-		 * @return the replacement value or {@code null} if no replacement is to be made.
+		 * @param placeholderName the name of the placeholder to resolve
+		 * @return the replacement value or {@code null} if no replacement is to be made
 		 */
 		String resolvePlaceholder(String placeholderName);
 	}

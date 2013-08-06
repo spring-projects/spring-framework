@@ -378,10 +378,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -390,10 +392,12 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	}
 
 
+	@Override
 	public boolean supports(Object handler) {
 		return getMethodResolver(handler).hasHandlerMethods();
 	}
 
+	@Override
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
@@ -452,6 +456,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * to check it, and return {@code null} if that returns {@code true}.
 	 * @see org.springframework.web.context.request.WebRequest#checkNotModified(long)
 	 */
+	@Override
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}
@@ -1210,6 +1215,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			this.request = new ServletServerHttpRequest(request);
 		}
 
+		@Override
 		public int compare(RequestSpecificMappingInfo info1, RequestSpecificMappingInfo info2) {
 			int pathComparison = pathComparator.compare(info1.bestMatchedPattern(), info2.bestMatchedPattern());
 			if (pathComparison != 0) {

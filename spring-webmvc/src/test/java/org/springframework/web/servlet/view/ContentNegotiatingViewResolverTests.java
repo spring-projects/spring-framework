@@ -46,6 +46,7 @@ import org.springframework.web.servlet.ViewResolver;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma

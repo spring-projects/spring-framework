@@ -16,14 +16,17 @@
 
 package org.springframework.context.annotation.configuration;
 
+import java.util.Collections;
+
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.tests.sample.beans.TestBean;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +37,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 
 /**
  * Integration tests for {@link ImportResource} support.
@@ -178,4 +183,22 @@ public class ImportResourceTests {
 			reader=XmlBeanDefinitionReader.class)
 	static class SubResourceConfig extends ImportNonXmlResourceConfig {
 	}
+	
+	@Test
+	public void importWithPlaceHolder() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		PropertySource<?> propertySource = new MapPropertySource("test", 
+				Collections.<String, Object> singletonMap("test", "springframework"));
+		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
+		ctx.register(ImportXmlConfig.class);
+		ctx.refresh();
+		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
+	}
+
+	@Configuration
+	@ImportResource("classpath:org/${test}/context/annotation/configuration/ImportXmlConfig-context.xml")
+	static class ImportWithPlaceHolder {
+	}
+	
+	
 }

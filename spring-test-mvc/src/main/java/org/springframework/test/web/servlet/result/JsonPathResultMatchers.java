@@ -49,6 +49,7 @@ public class JsonPathResultMatchers {
 	 */
 	public <T> ResultMatcher value(final Matcher<T> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				jsonPathHelper.assertValue(content, matcher);
@@ -61,6 +62,7 @@ public class JsonPathResultMatchers {
 	 */
 	public ResultMatcher value(final Object expectedValue) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				jsonPathHelper.assertValue(result.getResponse().getContentAsString(), expectedValue);
 			}
@@ -72,6 +74,7 @@ public class JsonPathResultMatchers {
 	 */
 	public ResultMatcher exists() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				jsonPathHelper.exists(content);
@@ -84,6 +87,7 @@ public class JsonPathResultMatchers {
 	 */
 	public ResultMatcher doesNotExist() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				jsonPathHelper.doesNotExist(content);
@@ -96,6 +100,7 @@ public class JsonPathResultMatchers {
 	 */
 	public ResultMatcher isArray() {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				jsonPathHelper.assertValueIsArray(content);

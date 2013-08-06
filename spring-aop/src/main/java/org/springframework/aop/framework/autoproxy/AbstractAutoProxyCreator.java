@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.aop.Advice;
@@ -136,11 +138,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(64);
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<String, Boolean> targetSourcedBeans = new ConcurrentHashMap<String, Boolean>(16);
+	private final Set<String> targetSourcedBeans =
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
 
-	// using a ConcurrentHashMap as a Set
-	private final Map<Object, Boolean> earlyProxyReferences = new ConcurrentHashMap<Object, Boolean>(16);
+	private final Set<Object> earlyProxyReferences =
+			Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>(16));
 
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
 
@@ -155,6 +157,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		this.order = order;
 	}
 
+	@Override
 	public final int getOrder() {
 		return this.order;
 	}
@@ -232,12 +235,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		this.classLoaderConfigured = (classLoader != null);
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (!this.classLoaderConfigured) {
 			this.proxyClassLoader = classLoader;
 		}
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -251,25 +256,29 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 
+	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
 	}
 
+	@Override
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
+	@Override
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		this.earlyProxyReferences.put(cacheKey, Boolean.TRUE);
+		this.earlyProxyReferences.add(cacheKey);
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
+	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
-		if (beanName == null || !this.targetSourcedBeans.containsKey(beanName)) {
+		if (beanName == null || !this.targetSourcedBeans.contains(beanName)) {
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
@@ -285,7 +294,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (beanName != null) {
 			TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 			if (targetSource != null) {
-				this.targetSourcedBeans.put(beanName, Boolean.TRUE);
+				this.targetSourcedBeans.add(beanName);
 				Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
 				Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
 				this.proxyTypes.put(cacheKey, proxy.getClass());
@@ -296,16 +305,19 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return null;
 	}
 
+	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
 	}
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 
 		return pvs;
 	}
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
@@ -315,10 +327,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * identified as one to proxy by the subclass.
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
-			if (!this.earlyProxyReferences.containsKey(cacheKey)) {
+			if (!this.earlyProxyReferences.contains(cacheKey)) {
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -344,7 +357,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-		if (beanName != null && this.targetSourcedBeans.containsKey(beanName)) {
+		if (beanName != null && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {

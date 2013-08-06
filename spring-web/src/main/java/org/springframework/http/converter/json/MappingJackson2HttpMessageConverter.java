@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -39,19 +38,20 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
+ * can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 2.x's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json}. This can be overridden by setting the
- * {@link #setSupportedMediaTypes(List) supportedMediaTypes} property.
+ * {@link #setSupportedMediaTypes supportedMediaTypes} property.
+ *
+ * <p>Tested against Jackson 2.2; compatible with Jackson 2.0 and higher.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
  * @author Rossen Stoyanchev
  * @since 3.1.2
- * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
@@ -61,7 +61,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
-	private boolean prefixJson = false;
+	private String jsonPrefix;
 
 	private Boolean prettyPrint;
 
@@ -70,12 +70,14 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 * Construct a new {@code MappingJackson2HttpMessageConverter}.
 	 */
 	public MappingJackson2HttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET),
+				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
+
 	/**
-	 * Set the {@code ObjectMapper} for this view. If not set, a default
-	 * {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
+	 * Set the {@code ObjectMapper} for this view.
+	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
 	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON
 	 * serialization process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory}
 	 * can be configured that provides custom serializers for specific types. The other option for refining
@@ -88,12 +90,6 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		configurePrettyPrint();
 	}
 
-	private void configurePrettyPrint() {
-		if (this.prettyPrint != null) {
-			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
-		}
-	}
-
 	/**
 	 * Return the underlying {@code ObjectMapper} for this view.
 	 */
@@ -102,20 +98,30 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	}
 
 	/**
+	 * Specify a custom prefix to use for this view's JSON output.
+	 * Default is none.
+	 * @see #setPrefixJson
+	 */
+	public void setJsonPrefix(String jsonPrefix) {
+		this.jsonPrefix = jsonPrefix;
+	}
+
+	/**
 	 * Indicate whether the JSON output by this view should be prefixed with "{} &&". Default is false.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
 	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed on the
 	 * string, the prefix would need to be ignored.
+	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.prefixJson = prefixJson;
+		this.jsonPrefix = (prefixJson ? "{} && " : null);
 	}
 
 	/**
 	 * Whether to use the {@link DefaultPrettyPrinter} when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
-	 * <pre>
+	 * <pre class="code">
 	 * ObjectMapper mapper = new ObjectMapper();
 	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	 * converter.setObjectMapper(mapper);
@@ -126,12 +132,19 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		configurePrettyPrint();
 	}
 
+	private void configurePrettyPrint() {
+		if (this.prettyPrint != null) {
+			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
+		}
+	}
+
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return canRead(clazz, null, mediaType);
 	}
 
+	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		JavaType javaType = getJavaType(type, contextClass);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
@@ -156,6 +169,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@Override
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -172,12 +186,14 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 	}
 
-
 	@Override
 	protected void writeInternal(Object object, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
+		// The following has been deprecated as late as Jackson 2.2 (April 2013);
+		// preserved for the time being, for Jackson 2.0/2.1 compatibility.
+		@SuppressWarnings("deprecation")
 		JsonGenerator jsonGenerator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
 
@@ -188,7 +204,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		}
 
 		try {
-			if (this.prefixJson) {
+			if (this.jsonPrefix != null) {
 				jsonGenerator.writeRaw("{} && ");
 			}
 			this.objectMapper.writeValue(jsonGenerator, object);
@@ -200,8 +216,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.
-	 * <p>The default implementation returns {@link ObjectMapper#constructType(java.lang.reflect.Type)}
-	 * or {@code ObjectMapper.getTypeFactory().constructType(type, contextClass)},
+	 * <p>The default implementation returns {@code typeFactory.constructType(type, contextClass)},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
@@ -220,9 +235,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 * @return the java type
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return (contextClass != null) ?
-			this.objectMapper.getTypeFactory().constructType(type, contextClass) :
-			this.objectMapper.constructType(type);
+		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
 	}
 
 	/**

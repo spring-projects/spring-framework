@@ -76,6 +76,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		this.errorHandler = errorHandler;
 	}
 
+	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -113,6 +114,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	// SchedulingTaskExecutor implementation
 
+	@Override
 	public void execute(Runnable task) {
 		Executor executor = getScheduledExecutor();
 		try {
@@ -123,10 +125,12 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
@@ -137,6 +141,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
@@ -150,6 +155,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -157,6 +163,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	// TaskScheduler implementation
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -169,6 +176,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -180,6 +188,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -191,6 +200,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -201,6 +211,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -212,6 +223,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -238,6 +250,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			this.errorHandler = errorHandler;
 		}
 
+		@Override
 		public V call() throws Exception {
 			try {
 				return delegate.call();

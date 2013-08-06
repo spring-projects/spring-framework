@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -45,7 +46,9 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -70,6 +73,25 @@ public abstract class EntityManagerFactoryUtils {
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
 	private static final Log logger = LogFactory.getLog(EntityManagerFactoryUtils.class);
+
+	private static Method createEntityManagerWithSynchronizationTypeMethod;
+
+	private static Object synchronizationTypeUnsynchronized;
+
+	static {
+		try {
+			@SuppressWarnings("unchecked")
+			Class<Enum> synchronizationTypeClass = (Class<Enum>) ClassUtils.forName(
+					"javax.persistence.SynchronizationType", EntityManagerFactoryUtils.class.getClassLoader());
+			createEntityManagerWithSynchronizationTypeMethod = EntityManagerFactory.class.getMethod(
+					"createEntityManager", synchronizationTypeClass, Map.class);
+			synchronizationTypeUnsynchronized = Enum.valueOf(synchronizationTypeClass, "UNSYNCHRONIZED");
+		}
+		catch (Exception ex) {
+			// No JPA 2.1 API available
+			createEntityManagerWithSynchronizationTypeMethod = null;
+		}
+	}
 
 
 	/**
@@ -146,7 +168,7 @@ public abstract class EntityManagerFactoryUtils {
 	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map properties)
 			throws DataAccessResourceFailureException {
 		try {
-			return doGetTransactionalEntityManager(emf, properties);
+			return doGetTransactionalEntityManager(emf, properties, true);
 		}
 		catch (PersistenceException ex) {
 			throw new DataAccessResourceFailureException("Could not obtain JPA EntityManager", ex);
@@ -166,53 +188,113 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
+	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+			throws PersistenceException {
+
+		return doGetTransactionalEntityManager(emf, properties, true);
+	}
+
+	/**
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a
+	 * corresponding EntityManager bound to the current thread,
+	 * for example when using JpaTransactionManager.
+	 * <p>Same as {@code getEntityManager}, but throwing the original PersistenceException.
+	 * @param emf EntityManagerFactory to create the EntityManager with
+	 * @param properties the properties to be passed into the {@code createEntityManager}
+	 * call (may be {@code null})
+	 * @param synchronizedWithTransaction whether to automatically join ongoing
+	 * transactions (according to the JPA 2.1 SynchronizationType rules)
+	 * @return the EntityManager, or {@code null} if none found
+	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
+	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
+	 * @see JpaTransactionManager
+	 */
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, Map properties) throws PersistenceException {
+			EntityManagerFactory emf, Map properties, boolean synchronizedWithTransaction) throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
 		EntityManagerHolder emHolder =
 				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null) {
-			if (!emHolder.isSynchronizedWithTransaction() &&
-					TransactionSynchronizationManager.isSynchronizationActive()) {
-				// Try to explicitly synchronize the EntityManager itself
-				// with an ongoing JTA transaction, if any.
-				try {
-					emHolder.getEntityManager().joinTransaction();
+			if (synchronizedWithTransaction) {
+				if (!emHolder.isSynchronizedWithTransaction() &&
+						TransactionSynchronizationManager.isSynchronizationActive()) {
+					// Try to explicitly synchronize the EntityManager itself
+					// with an ongoing JTA transaction, if any.
+					try {
+						emHolder.getEntityManager().joinTransaction();
+					}
+					catch (TransactionRequiredException ex) {
+						logger.debug("Could not join transaction because none was actually active", ex);
+					}
+					Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
+					TransactionSynchronizationManager.registerSynchronization(
+							new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, false));
+					emHolder.setSynchronizedWithTransaction(true);
 				}
-				catch (TransactionRequiredException ex) {
-					logger.debug("Could not join JTA transaction because none was active", ex);
-				}
-				Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
-				TransactionSynchronizationManager.registerSynchronization(
-						new EntityManagerSynchronization(emHolder, emf, transactionData, false));
-				emHolder.setSynchronizedWithTransaction(true);
+				// Use holder's reference count to track synchronizedWithTransaction access.
+				// isOpen() check used below to find out about it.
+				emHolder.requested();
+				return emHolder.getEntityManager();
 			}
-			return emHolder.getEntityManager();
+			else {
+				// unsynchronized EntityManager demanded
+				if (emHolder.isTransactionActive() && !emHolder.isOpen()) {
+					if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+						return null;
+					}
+					// EntityManagerHolder with an active transaction coming from JpaTransactionManager,
+					// with no synchronized EntityManager having been requested by application code before.
+					// Unbind in order to register a new unsynchronized EntityManager instead.
+					TransactionSynchronizationManager.unbindResource(emf);
+				}
+				else {
+					// Either a previously bound unsynchronized EntityManager, or the application
+					// has requested a synchronized EntityManager before and therefore upgraded
+					// this transaction's EntityManager to synchronized before.
+					return emHolder.getEntityManager();
+				}
+			}
 		}
-
-		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+		else if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			// Indicate that we can't obtain a transactional EntityManager.
 			return null;
 		}
 
 		// Create a new EntityManager for use within the current transaction.
 		logger.debug("Opening JPA EntityManager");
-		EntityManager em =
-				(!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+		EntityManager em = null;
+		if (!synchronizedWithTransaction && createEntityManagerWithSynchronizationTypeMethod != null) {
+			try {
+				em = (EntityManager) ReflectionUtils.invokeMethod(createEntityManagerWithSynchronizationTypeMethod,
+						emf, synchronizationTypeUnsynchronized, properties);
+			}
+			catch (AbstractMethodError err) {
+				// JPA 2.1 API available but method not actually implemented in persistence provider:
+				// falling back to regular createEntityManager method.
+			}
+		}
+		if (em == null) {
+			em = (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+		}
 
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			logger.debug("Registering transaction synchronization for JPA EntityManager");
-			// Use same EntityManager for further JPA actions within the transaction.
-			// Thread object will get removed by synchronization at transaction completion.
-			emHolder = new EntityManagerHolder(em);
+		// Use same EntityManager for further JPA actions within the transaction.
+		// Thread object will get removed by synchronization at transaction completion.
+		logger.debug("Registering transaction synchronization for JPA EntityManager");
+		emHolder = new EntityManagerHolder(em);
+		if (synchronizedWithTransaction) {
 			Object transactionData = prepareTransaction(em, emf);
 			TransactionSynchronizationManager.registerSynchronization(
-					new EntityManagerSynchronization(emHolder, emf, transactionData, true));
+					new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, true));
 			emHolder.setSynchronizedWithTransaction(true);
-			TransactionSynchronizationManager.bindResource(emf, emHolder);
 		}
+		else {
+			// unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec
+			TransactionSynchronizationManager.registerSynchronization(
+					new TransactionScopedEntityManagerSynchronization(emHolder, emf));
+		}
+		TransactionSynchronizationManager.bindResource(emf, emHolder);
 
 		return em;
 	}
@@ -356,7 +438,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class EntityManagerSynchronization
+	private static class TransactionalEntityManagerSynchronization
 			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
 			implements Ordered {
 
@@ -366,7 +448,7 @@ public abstract class EntityManagerFactoryUtils {
 
 		private final boolean newEntityManager;
 
-		public EntityManagerSynchronization(
+		public TransactionalEntityManagerSynchronization(
 				EntityManagerHolder emHolder, EntityManagerFactory emf, Object txData, boolean newEm) {
 			super(emHolder, emf);
 			this.transactionData = txData;
@@ -375,14 +457,24 @@ public abstract class EntityManagerFactoryUtils {
 			this.newEntityManager = newEm;
 		}
 
+		@Override
 		public int getOrder() {
 			return ENTITY_MANAGER_SYNCHRONIZATION_ORDER;
 		}
 
 		@Override
 		protected void flushResource(EntityManagerHolder resourceHolder) {
+			EntityManager em = resourceHolder.getEntityManager();
+			if (em instanceof EntityManagerProxy) {
+				EntityManager target = ((EntityManagerProxy) em).getTargetEntityManager();
+				if (TransactionSynchronizationManager.hasResource(target)) {
+					// ExtendedEntityManagerSynchronization active after joinTransaction() call:
+					// flush synchronization already registered.
+					return;
+				}
+			}
 			try {
-				resourceHolder.getEntityManager().flush();
+				em.flush();
 			}
 			catch (RuntimeException ex) {
 				if (this.jpaDialect != null) {
@@ -412,6 +504,29 @@ public abstract class EntityManagerFactoryUtils {
 				resourceHolder.getEntityManager().clear();
 			}
 			cleanupTransaction(this.transactionData, resourceKey);
+		}
+	}
+
+
+	/**
+	 * Minimal callback that just closes the EntityManager at the end of the transaction.
+	 */
+	private static class TransactionScopedEntityManagerSynchronization
+			extends ResourceHolderSynchronization<EntityManagerHolder, EntityManagerFactory>
+			implements Ordered {
+
+		public TransactionScopedEntityManagerSynchronization(EntityManagerHolder emHolder, EntityManagerFactory emf) {
+			super(emHolder, emf);
+		}
+
+		@Override
+		public int getOrder() {
+			return ENTITY_MANAGER_SYNCHRONIZATION_ORDER + 1;
+		}
+
+		@Override
+		protected void releaseResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey) {
+			closeEntityManager(resourceHolder.getEntityManager());
 		}
 	}
 

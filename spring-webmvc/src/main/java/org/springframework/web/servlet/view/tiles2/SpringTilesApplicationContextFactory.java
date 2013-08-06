@@ -47,10 +47,12 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 
 	private Map<String, String> params;
 
+	@Override
 	public void init(Map<String, String> params) {
 		this.params = params;
 	}
 
+	@Override
 	public TilesApplicationContext createApplicationContext(Object context) {
 		return new SpringWildcardServletTilesApplicationContext((ServletContext) context, this.params);
 	}

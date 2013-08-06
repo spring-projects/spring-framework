@@ -87,7 +87,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	public void testDisabledTrue() throws Exception {
-		this.tag.setDisabled("true");
+		this.tag.setDisabled(true);
 
 		this.tag.doStartTag();
 		this.tag.doEndTag();
@@ -102,7 +102,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	// SPR-8661
 
 	public void testDisabledFalse() throws Exception {
-		this.tag.setDisabled("false");
+		this.tag.setDisabled(false);
 
 		this.tag.doStartTag();
 		this.tag.doEndTag();

@@ -142,22 +142,6 @@ public class FreeMarkerConfigurationFactory {
 	 * Set a List of {@code TemplateLoader}s that will be used to search
 	 * for templates. For example, one or more custom loaders such as database
 	 * loaders could be configured and injected here.
-	 * @deprecated as of Spring 2.0.1, in favor of the "preTemplateLoaders"
-	 * and "postTemplateLoaders" properties
-	 * @see #setPreTemplateLoaders
-	 * @see #setPostTemplateLoaders
-	 */
-	@Deprecated
-	public void setTemplateLoaders(TemplateLoader... templateLoaders) {
-		if (templateLoaders != null) {
-			this.templateLoaders.addAll(Arrays.asList(templateLoaders));
-		}
-	}
-
-	/**
-	 * Set a List of {@code TemplateLoader}s that will be used to search
-	 * for templates. For example, one or more custom loaders such as database
-	 * loaders could be configured and injected here.
 	 * <p>The {@link TemplateLoader TemplateLoaders} specified here will be
 	 * registered <i>before</i> the default template loaders that this factory
 	 * registers (such as loaders for specified "templateLoaderPaths" or any

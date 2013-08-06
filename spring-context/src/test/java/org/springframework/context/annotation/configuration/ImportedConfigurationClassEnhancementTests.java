@@ -79,7 +79,7 @@ public class ImportedConfigurationClassEnhancementTests {
 
 
 	@Test(expected=BeanDefinitionParsingException.class)
-	public void importingAnNonConfigurationClassCausesIllegalArgumentException() {
+	public void importingNonConfigurationClassCausesBeanDefinitionParsingException() {
 		new AnnotationConfigApplicationContext(ConfigThatImportsNonConfigClass.class);
 	}
 }
@@ -103,5 +103,5 @@ class ConfigThatDoesImport extends Config { }
 class ConfigThatDoesNotImport extends Config { }
 
 @Configuration
-@Import(Void.class)
+@Import(TestBean.class)
 class ConfigThatImportsNonConfigClass { }

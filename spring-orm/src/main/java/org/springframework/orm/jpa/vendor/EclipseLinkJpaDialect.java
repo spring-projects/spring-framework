@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,6 @@ import java.sql.SQLException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
-import org.eclipse.persistence.internal.sessions.AbstractSession;
-import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.sessions.UnitOfWork;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -34,8 +31,7 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink
- * 1.0 as well as 2.0-2.3.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
  *
  * <p>By default, this class acquires a EclipseLink transaction to get the JDBC Connection
  * early. This allows mixing JDBC and JPA/EclipseLink operations in the same transaction.
@@ -45,10 +41,6 @@ import org.springframework.transaction.TransactionException;
  * use a {@link org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy}
  * to ensure that the cost of connection acquisition is near zero until code actually
  * needs a JDBC Connection.
- *
- * <p>This class is very analogous to {@link TopLinkJpaDialect}, since
- * EclipseLink is effectively the next generation of the TopLink product.
- * Thanks to Mike Keith for the original EclipseLink support prototype!
  *
  * @author Juergen Hoeller
  * @since 2.5.2
@@ -84,33 +76,19 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 		super.beginTransaction(entityManager, definition);
 		if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
-			// This is the magic bit. As with the existing Spring TopLink integration,
-			// begin an early transaction to force EclipseLink to get a JDBC Connection
+			// Begin an early transaction to force EclipseLink to get a JDBC Connection
 			// so that Spring can manage transactions with JDBC as well as EclipseLink.
-			UnitOfWork uow = (UnitOfWork) getSession(entityManager);
-			uow.beginEarlyTransaction();
+			entityManager.unwrap(UnitOfWork.class).beginEarlyTransaction();
 		}
-		// Could return the UOW, if there were any advantage in having it later.
 		return null;
 	}
 
 	@Override
-	public ConnectionHandle getJdbcConnection(EntityManager em, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
-		AbstractSession session = (AbstractSession) getSession(em);
-		// The connection was already acquired eagerly in beginTransaction,
-		// unless lazyDatabaseTransaction was set to true.
-		Connection con = session.getAccessor().getConnection();
+		Connection con = entityManager.unwrap(Connection.class);
 		return (con != null ? new SimpleConnectionHandle(con) : null);
-	}
-
-	/**
-	 * Get a traditional EclipseLink Session from the given EntityManager.
-	 */
-	protected Session getSession(EntityManager em) {
-		JpaEntityManager emi = (JpaEntityManager) em;
-		return emi.getActiveSession();
 	}
 
 }

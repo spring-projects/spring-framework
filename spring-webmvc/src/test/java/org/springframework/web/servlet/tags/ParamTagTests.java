@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
- * Unit tests for ParamTag
+ * Unit tests for {@link ParamTag}
  *
  * @author Scott Andrews
+ * @author Nicholas Williams
  */
 public class ParamTagTests extends AbstractTagTests {
 
@@ -67,7 +68,7 @@ public class ParamTagTests extends AbstractTagTests {
 		assertEquals("value", parent.getParam().getValue());
 	}
 
-	public void testParamWithNullValue() throws JspException {
+	public void testParamWithImplicitNullValue() throws JspException {
 		tag.setName("name");
 
 		int action = tag.doEndTag();
@@ -75,6 +76,43 @@ public class ParamTagTests extends AbstractTagTests {
 		assertEquals(Tag.EVAL_PAGE, action);
 		assertEquals("name", parent.getParam().getName());
 		assertNull(parent.getParam().getValue());
+	}
+
+	public void testParamWithExplicitNullValue() throws JspException {
+		tag.setName("name");
+		tag.setValue(null);
+
+		int action = tag.doEndTag();
+
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("name", parent.getParam().getName());
+		assertNull(parent.getParam().getValue());
+	}
+
+	public void testParamWithValueThenReleaseThenBodyValue() throws JspException {
+		tag.setName("name1");
+		tag.setValue("value1");
+
+		int action = tag.doEndTag();
+
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("name1", parent.getParam().getName());
+		assertEquals("value1", parent.getParam().getValue());
+
+		tag.release();
+
+		parent = new MockParamSupportTag();
+		tag.setPageContext(createPageContext());
+		tag.setParent(parent);
+		tag.setName("name2");
+		tag.setBodyContent(new MockBodyContent("value2",
+				new MockHttpServletResponse()));
+
+		action = tag.doEndTag();
+
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("name2", parent.getParam().getName());
+		assertEquals("value2", parent.getParam().getValue());
 	}
 
 	public void testParamWithNoParent() {

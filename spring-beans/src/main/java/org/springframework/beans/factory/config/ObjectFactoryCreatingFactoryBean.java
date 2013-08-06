@@ -143,6 +143,7 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 			this.targetBeanName = targetBeanName;
 		}
 
+		@Override
 		public Object getObject() throws BeansException {
 			return this.beanFactory.getBean(this.targetBeanName);
 		}

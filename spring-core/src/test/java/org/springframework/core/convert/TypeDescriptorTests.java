@@ -16,6 +16,10 @@
 
 package org.springframework.core.convert;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +36,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -869,5 +874,17 @@ public class TypeDescriptorTests {
 	@Test
 	public void createNullArray() throws Exception {
 		assertNull(TypeDescriptor.array(null));
+	}
+
+	@Test
+	public void serializable() throws Exception {
+		TypeDescriptor typeDescriptor = TypeDescriptor.forObject("");
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ObjectOutputStream outputStream = new ObjectOutputStream(out);
+		outputStream.writeObject(typeDescriptor);
+		ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(
+				out.toByteArray()));
+		TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
+		assertThat(readObject, equalTo(typeDescriptor));
 	}
 }

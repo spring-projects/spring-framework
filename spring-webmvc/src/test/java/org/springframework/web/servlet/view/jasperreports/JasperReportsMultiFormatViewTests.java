@@ -19,9 +19,14 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -34,6 +39,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		model.put(getDiscriminatorKey(), "csv");
 	}
 
+	@Test
 	public void testSimpleHtmlRender() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -50,6 +56,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	@Override
+	@Test
 	public void testOverrideContentDisposition() throws Exception {
 		if (!canCompileReport) {
 			return;
@@ -73,6 +80,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 				response.getHeader("Content-Disposition"));
 	}
 
+	@Test
 	public void testExporterParametersAreCarriedAcross() throws Exception {
 		if (!canCompileReport) {
 			return;

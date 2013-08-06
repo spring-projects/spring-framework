@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,44 @@
 package org.springframework.expression.spel.ast;
 
 /**
- * Captures primitive types and their corresponding class objects, plus one special entry that represents all reference
- * (non-primitive) types.
+ * Captures primitive types and their corresponding class objects, plus one special entry
+ * that represents all reference (non-primitive) types.
  *
  * @author Andy Clement
  */
 public enum TypeCode {
 
-	OBJECT(Object.class), BOOLEAN(Boolean.TYPE), BYTE(Byte.TYPE), CHAR(Character.TYPE), //
-	SHORT(Short.TYPE), INT(Integer.TYPE), LONG(Long.TYPE), FLOAT(Float.TYPE), DOUBLE(Double.TYPE);
+	OBJECT(Object.class),
+
+	BOOLEAN(Boolean.TYPE),
+
+	BYTE(Byte.TYPE),
+
+	CHAR(Character.TYPE),
+
+	SHORT(Short.TYPE),
+
+	INT(Integer.TYPE),
+
+	LONG(Long.TYPE),
+
+	FLOAT(Float.TYPE),
+
+	DOUBLE(Double.TYPE);
+
 
 	private Class<?> type;
+
 
 	TypeCode(Class<?> type) {
 		this.type = type;
 	}
 
+
 	public Class<?> getType() {
-		return type;
+		return this.type;
 	}
+
 
 	public static TypeCode forName(String name) {
 		String searchingFor = name.toUpperCase();

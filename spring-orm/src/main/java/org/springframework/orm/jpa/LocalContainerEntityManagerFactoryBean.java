@@ -18,6 +18,8 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
@@ -64,6 +66,9 @@ import org.springframework.util.ClassUtils;
  * the underlying native EntityManagerFactory returned by the PersistenceProvider,
  * plus the {@link EntityManagerFactoryInfo} interface which exposes additional
  * metadata as assembled by this FactoryBean.
+ *
+ * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
+ * Spring's persistence unit bootstrapping automatically detects JPA 2.1 at runtime.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -169,6 +174,28 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
+	 * Specify the JPA 2.0 shared cache mode for this persistence unit,
+	 * overriding a value in {@code persistence.xml} if set.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setSharedCacheMode(SharedCacheMode sharedCacheMode) {
+		this.internalPersistenceUnitManager.setSharedCacheMode(sharedCacheMode);
+	}
+
+	/**
+	 * Specify the JPA 2.0 validation mode for this persistence unit,
+	 * overriding a value in {@code persistence.xml} if set.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setValidationMode(ValidationMode validationMode) {
+		this.internalPersistenceUnitManager.setValidationMode(validationMode);
+	}
+
+	/**
 	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
 	 * to use for accessing the database. This is an alternative to keeping the
 	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
@@ -240,10 +267,12 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
 	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
 	 */
+	@Override
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.internalPersistenceUnitManager.setLoadTimeWeaver(loadTimeWeaver);
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
 	}

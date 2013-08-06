@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,58 +34,6 @@ import org.springframework.expression.spel.SpelMessage;
 public interface ValueRef {
 
 	/**
-	 * A ValueRef for the null value.
-	 */
-	static class NullValueRef implements ValueRef {
-
-		static NullValueRef instance = new NullValueRef();
-
-		public TypedValue getValue() {
-			return TypedValue.NULL;
-		}
-
-		public void setValue(Object newValue) {
-			// The exception position '0' isn't right but the overhead of creating
-			// instances of this per node (where the node is solely for error reporting)
-			// would be unfortunate.
-			throw new SpelEvaluationException(0,SpelMessage.NOT_ASSIGNABLE,"null");
-		}
-
-		public boolean isWritable() {
-			return false;
-		}
-
-	}
-
-	/**
-	 * A ValueRef holder for a single value, which cannot be set.
-	 */
-	static class TypedValueHolderValueRef implements ValueRef {
-
-		private TypedValue typedValue;
-		private SpelNodeImpl node; // used only for error reporting
-
-		public TypedValueHolderValueRef(TypedValue typedValue,SpelNodeImpl node) {
-			this.typedValue = typedValue;
-			this.node = node;
-		}
-
-		public TypedValue getValue() {
-			return typedValue;
-		}
-
-		public void setValue(Object newValue) {
-			throw new SpelEvaluationException(
-					node.pos, SpelMessage.NOT_ASSIGNABLE, node.toStringAST());
-		}
-
-		public boolean isWritable() {
-			return false;
-		}
-
-	}
-
-	/**
 	 * Returns the value this ValueRef points to, it should not require expression
 	 * component re-evaluation.
 	 * @return the value
@@ -104,4 +52,65 @@ public interface ValueRef {
 	 * @return true if setValue() is supported for this value reference.
 	 */
 	boolean isWritable();
+
+
+	/**
+	 * A ValueRef for the null value.
+	 */
+	static class NullValueRef implements ValueRef {
+
+		static NullValueRef instance = new NullValueRef();
+
+		@Override
+		public TypedValue getValue() {
+			return TypedValue.NULL;
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			// The exception position '0' isn't right but the overhead of creating
+			// instances of this per node (where the node is solely for error reporting)
+			// would be unfortunate.
+			throw new SpelEvaluationException(0,SpelMessage.NOT_ASSIGNABLE,"null");
+		}
+
+		@Override
+		public boolean isWritable() {
+			return false;
+		}
+
+	}
+
+
+	/**
+	 * A ValueRef holder for a single value, which cannot be set.
+	 */
+	static class TypedValueHolderValueRef implements ValueRef {
+
+		private final TypedValue typedValue;
+		private final SpelNodeImpl node; // used only for error reporting
+
+		public TypedValueHolderValueRef(TypedValue typedValue,SpelNodeImpl node) {
+			this.typedValue = typedValue;
+			this.node = node;
+		}
+
+		@Override
+		public TypedValue getValue() {
+			return typedValue;
+		}
+
+		@Override
+		public void setValue(Object newValue) {
+			throw new SpelEvaluationException(
+					node.pos, SpelMessage.NOT_ASSIGNABLE, node.toStringAST());
+		}
+
+		@Override
+		public boolean isWritable() {
+			return false;
+		}
+
+	}
+
 }

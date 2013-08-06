@@ -26,19 +26,27 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.Principal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.Cookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -54,10 +62,17 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private static final String METHOD_POST = "POST";
 
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
+
 	private final HttpServletRequest servletRequest;
 
 	private HttpHeaders headers;
 
+	private Map<String, Cookie> cookies;
+
+	private MultiValueMap<String, String> queryParams;
+
+	private ServerHttpAsyncRequestControl asyncRequestControl;
 
 	/**
 	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}.
@@ -76,10 +91,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.servletRequest;
 	}
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.servletRequest.getMethod());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
@@ -91,6 +108,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -123,6 +141,56 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.headers;
 	}
 
+	@Override
+	public Principal getPrincipal() {
+		return this.servletRequest.getUserPrincipal();
+	}
+
+	@Override
+	public String getRemoteHostName() {
+		return this.servletRequest.getRemoteHost();
+	}
+
+	@Override
+	public String getRemoteAddress() {
+		return this.servletRequest.getRemoteAddr();
+	}
+
+	@Override
+	public Map<String, Cookie> getCookies() {
+		if (this.cookies == null) {
+			this.cookies = new HashMap<String, Cookie>();
+			if (this.servletRequest.getCookies() != null) {
+				for (javax.servlet.http.Cookie cookie : this.servletRequest.getCookies()) {
+					this.cookies.put(cookie.getName(), new ServletServerCookie(cookie));
+				}
+			}
+			this.cookies = Collections.unmodifiableMap(this.cookies);
+		}
+		return this.cookies;
+	}
+
+	@Override
+	public MultiValueMap<String, String> getQueryParams() {
+		if (this.queryParams == null) {
+			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
+			String queryString = this.servletRequest.getQueryString();
+			if (queryString != null) {
+				Matcher m = QUERY_PARAM_PATTERN.matcher(queryString);
+				while (m.find()) {
+					String name = m.group(1);
+					String[] values = this.servletRequest.getParameterValues(name);
+					if (values != null) {
+						result.put(name, Arrays.asList(values));
+					}
+				}
+			}
+			this.queryParams = CollectionUtils.unmodifiableMultiValueMap(result);
+		}
+		return this.queryParams;
+	}
+
+	@Override
 	public InputStream getBody() throws IOException {
 		if (isFormPost(this.servletRequest)) {
 			return getBodyFromServletRequestParameters(this.servletRequest);
@@ -169,6 +237,16 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		writer.flush();
 
 		return new ByteArrayInputStream(bos.toByteArray());
+	}
+
+	@Override
+	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
+		if (this.asyncRequestControl == null) {
+			Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
+			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
+		}
+		return this.asyncRequestControl;
 	}
 
 }

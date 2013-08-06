@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,15 +98,14 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 		this.classLoader = classLoader;
 		this.addTransformerMethod = ClassUtils.getMethodIfAvailable(
 				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME,
-				new Class [] {ClassFileTransformer.class});
+				new Class[] {ClassFileTransformer.class});
 		if (this.addTransformerMethod == null) {
 			throw new IllegalStateException(
 					"ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide an " +
 					"'addTransformer(ClassFileTransformer)' method.");
 		}
 		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
-				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME,
-				new Class[0]);
+				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME, new Class[0]);
 		// getThrowawayClassLoader method is optional
 		if (this.getThrowawayClassLoaderMethod == null) {
 			if (logger.isInfoEnabled()) {
@@ -117,22 +116,25 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
-		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] {transformer});
+		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		if (this.getThrowawayClassLoaderMethod != null) {
-			return (ClassLoader) ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader,
-					new Object[0]);
+			return (ClassLoader) ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader);
 		}
 		else {
 			return new SimpleThrowawayClassLoader(this.classLoader);
 		}
 	}
+
 }

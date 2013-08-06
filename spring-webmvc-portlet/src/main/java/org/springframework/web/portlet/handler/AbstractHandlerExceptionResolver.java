@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	private Set mappedHandlers;
+	private Set<?> mappedHandlers;
 
 	private Class[] mappedHandlerClasses;
 
@@ -61,6 +61,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -74,7 +75,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * error view will be used as fallback for all exceptions; any further
 	 * HandlerExceptionResolvers in the chain will be ignored in this case.
 	 */
-	public void setMappedHandlers(Set mappedHandlers) {
+	public void setMappedHandlers(Set<?> mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
 	}
 
@@ -124,6 +125,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * matches in case of "mappedHandlers" having been specified), then
 	 * delegates to the {@link #doResolveException} template method.
 	 */
+	@Override
 	public ModelAndView resolveException(RenderRequest request, RenderResponse response, Object handler, Exception ex) {
 		if (shouldApplyTo(request, handler)) {
 			return doResolveException(request, response, handler, ex);
@@ -133,6 +135,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		}
 	}
 
+	@Override
 	public ModelAndView resolveException(ResourceRequest request, ResourceResponse response, Object handler, Exception ex) {
 		if (shouldApplyTo(request, handler)) {
 			return doResolveException(request, response, handler, ex);
@@ -145,7 +148,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/**
 	 * Check whether this resolver is supposed to apply to the given handler.
 	 * <p>The default implementation checks against the specified mapped handlers
-	 * and handler classes, if any, and alspo checks the window state (according
+	 * and handler classes, if any, and also checks the window state (according
 	 * to the "renderWhenMinimize" property).
 	 * @param request current portlet request
 	 * @param handler the executed handler, or {@code null} if none chosen at the
