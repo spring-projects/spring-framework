@@ -22,6 +22,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -32,11 +38,6 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
-import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 
 /**
  * A {@link FactoryBean} for creating a Jackson 2.x {@link ObjectMapper} with setters
@@ -111,6 +112,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
+
+	private JsonInclude.Include serializationInclusion;
 
 
 	/**
@@ -247,6 +250,13 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		}
 	}
 
+	/**
+	 * Sets the custom inclusion strategy for serialization.
+	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
+	 */
+	public void setSerializationInclusion(JsonInclude.Include serializationInclusion) {
+		this.serializationInclusion = serializationInclusion;
+	}
 
 	@Override
 	public void afterPropertiesSet() {
@@ -271,6 +281,10 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 		for (Object feature : this.features.keySet()) {
 			configureFeature(feature, this.features.get(feature));
+		}
+
+		if (this.serializationInclusion != null) {
+			this.objectMapper.setSerializationInclusion(this.serializationInclusion);
 		}
 	}
 
