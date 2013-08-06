@@ -6,6 +6,7 @@ http://www.springsource.org
 Changes in version 3.2.4 (2013-08-06)
 -------------------------------------
 
+* fixed potential security risk when using Spring OXM with JAXB (SPR-10806)
 * support for Quartz 2.2 (SPR-10775)
 * updated spring-instrument manifest to include JDK 7 redefine/retransform attributes (SPR-10731)
 * TypeDescriptor class is marked as Serializable now (SPR-10631)
