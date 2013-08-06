@@ -19,16 +19,17 @@ package org.springframework.http.converter.json;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.FatalBeanException;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -36,14 +37,20 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
+import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
+import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
+import com.fasterxml.jackson.databind.ser.Serializers;
+import com.fasterxml.jackson.databind.ser.std.NumberSerializers.NumberSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdJdkSerializers.ClassSerializer;
+import com.fasterxml.jackson.databind.type.SimpleType;
 
 /**
  * Test cases for {@link org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean} class.
@@ -62,9 +69,13 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test
-	public void testSetFeaturesToEnableEmpty() {
-		factory.setFeaturesToEnable(new Object[0]);
-		factory.setFeaturesToDisable(new Object[0]);
+	public void testSettersWithNullValues() {
+		// Should not crash:
+		factory.setSerializers((JsonSerializer<?>[]) null);
+		factory.setSerializersByType(null);
+		factory.setDeserializersByType(null);
+		factory.setFeaturesToEnable((Object[]) null);
+		factory.setFeaturesToDisable((Object[]) null);
 	}
 
 	@Test(expected = FatalBeanException.class)
@@ -156,19 +167,12 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertEquals(ObjectMapper.class, factory.getObjectType());
 	}
 
-	/**
-	 * TODO: Remove use of {@link DirectFieldAccessor} with getters.
-	 * See <a href="https://github.com/FasterXML/jackson-databind/issues/65">issue#65</a>.
-	 */
 	private static final SerializerFactoryConfig getSerializerFactoryConfig(ObjectMapper objectMapper) {
-		Object factoryProp = new DirectFieldAccessor(objectMapper).getPropertyValue("_serializerFactory");
-		return (SerializerFactoryConfig) new DirectFieldAccessor(factoryProp).getPropertyValue("_factoryConfig");
+		return ((BasicSerializerFactory) objectMapper.getSerializerFactory()).getFactoryConfig();
 	}
 
 	private static final DeserializerFactoryConfig getDeserializerFactoryConfig(ObjectMapper objectMapper) {
-		Object contextProp = new DirectFieldAccessor(objectMapper).getPropertyValue("_deserializationContext");
-		Object factoryProp = new DirectFieldAccessor(contextProp).getPropertyValue("_factory");
-		return (DeserializerFactoryConfig) new DirectFieldAccessor(factoryProp).getPropertyValue("_factoryConfig");
+		return ((BasicDeserializerFactory) objectMapper.getDeserializationContext().getFactory()).getFactoryConfig();
 	}
 
 	@Test
@@ -183,7 +187,12 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		deserializers.put(Date.class, new DateDeserializer());
 
 		factory.setObjectMapper(objectMapper);
-		factory.setSerializers(new ClassSerializer());
+
+		JsonSerializer serializer1 = new ClassSerializer();
+		JsonSerializer serializer2 = new NumberSerializer();
+
+		factory.setSerializers(serializer1);
+		factory.setSerializersByType(Collections.<Class<?>, JsonSerializer<?>> singletonMap(Boolean.class, serializer2));
 		factory.setDeserializersByType(deserializers);
 		factory.setAnnotationIntrospector(annotationIntrospector);
 
@@ -206,18 +215,24 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertTrue(getSerializerFactoryConfig(objectMapper).hasSerializers());
 		assertTrue(getDeserializerFactoryConfig(objectMapper).hasDeserializers());
 
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Class.class), null) == serializer1);
+		assertTrue(serializers.findSerializer(null, SimpleType.construct(Boolean.class), null) == serializer2);
+		assertNull(serializers.findSerializer(null, SimpleType.construct(Number.class), null));
+
 		assertTrue(annotationIntrospector == objectMapper.getSerializationConfig().getAnnotationIntrospector());
 		assertTrue(annotationIntrospector == objectMapper.getDeserializationConfig().getAnnotationIntrospector());
 
 		assertTrue(objectMapper.getSerializationConfig().isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS));
 		assertTrue(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.UNWRAP_ROOT_VALUE));
-		assertTrue(objectMapper.getJsonFactory().isEnabled(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
-		assertTrue(objectMapper.getJsonFactory().isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS));
+		assertTrue(objectMapper.getFactory().isEnabled(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
+		assertTrue(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS));
 
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.AUTO_DETECT_GETTERS));
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
-		assertFalse(objectMapper.getJsonFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
-		assertFalse(objectMapper.getJsonFactory().isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
+		assertFalse(objectMapper.getFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
+		assertFalse(objectMapper.getFactory().isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
 
 		assertTrue(objectMapper.getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.NON_NULL);
 	}
