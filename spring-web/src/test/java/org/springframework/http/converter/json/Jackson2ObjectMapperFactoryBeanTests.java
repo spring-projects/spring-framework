@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.FatalBeanException;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -88,6 +89,40 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_SETTERS));
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS));
 		assertTrue(objectMapper.getSerializationConfig().isEnabled(SerializationFeature.INDENT_OUTPUT));
+		assertTrue(objectMapper.getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
+	}
+
+	@Test
+	public void testSetNotNullSerializationInclusion() {
+		factory.setNotNullSerializationInclusion(false);
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
+
+		factory.setNotNullSerializationInclusion(true);
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.NON_NULL);
+	}
+
+	@Test
+	public void testSetNotDefaultSerializationInclusion() {
+		factory.setNotDefaultSerializationInclusion(false);
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
+
+		factory.setNotDefaultSerializationInclusion(true);
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.NON_DEFAULT);
+	}
+
+	@Test
+	public void testSetNotEmptySerializationInclusion() {
+		factory.setNotEmptySerializationInclusion(false);
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.ALWAYS);
+
+		factory.setNotEmptySerializationInclusion(true);
+		factory.afterPropertiesSet();
+		assertTrue(factory.getObject().getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.NON_EMPTY);
 	}
 
 	@Test
@@ -162,6 +197,8 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertFalse(getSerializerFactoryConfig(objectMapper).hasSerializers());
 		assertFalse(getDeserializerFactoryConfig(objectMapper).hasDeserializers());
 
+		factory.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
 		factory.afterPropertiesSet();
 
 		assertTrue(objectMapper == factory.getObject());
@@ -181,5 +218,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.AUTO_DETECT_FIELDS));
 		assertFalse(objectMapper.getJsonFactory().isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
 		assertFalse(objectMapper.getJsonFactory().isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
+
+		assertTrue(objectMapper.getSerializationConfig().getSerializationInclusion() == JsonInclude.Include.NON_NULL);
 	}
 }

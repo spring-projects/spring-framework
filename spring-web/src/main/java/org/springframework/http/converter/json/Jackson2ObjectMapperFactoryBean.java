@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -103,6 +104,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private ObjectMapper objectMapper;
 
 	private Map<Object, Boolean> features = new HashMap<Object, Boolean>();
+
+	private JsonInclude.Include serializationInclusion;
 
 	private DateFormat dateFormat;
 
@@ -244,6 +247,61 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		}
 	}
 
+	/**
+	 * Sets the custom inclusion strategy for serialization.
+	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
+	 */
+	public void setSerializationInclusion(JsonInclude.Include serializationInclusion) {
+		this.serializationInclusion = serializationInclusion;
+	}
+
+	/**
+	 * The shortcut for
+	 * {@link Jackson2ObjectMapperFactoryBean#setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include)}
+	 * that indicates that only properties with non-null values are to be
+	 * included. Mutually exclusive with
+	 * {@link #setNotDefaultSerializationInclusion(boolean)} and
+	 * {@link #setNotEmptySerializationInclusion(boolean)}.
+	 * 
+	 * @param notNullSerializationInclusion if true then serialization inclusion
+	 * is set to {@link JsonInclude.Include.NON_NULL} otherwise set to default
+	 */
+	public void setNotNullSerializationInclusion(boolean notNullSerializationInclusion) {
+		setSerializationInclusion(notNullSerializationInclusion ? JsonInclude.Include.NON_NULL : null);
+	}
+
+	/**
+	 * The shortcut for
+	 * {@link Jackson2ObjectMapperFactoryBean#setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include)}
+	 * that indicates that properties that differ from default settings are not
+	 * to be included. Mutually exclusive with
+	 * {@link #setNotNullSerializationInclusion(boolean)} and
+	 * {@link #setNotEmptySerializationInclusion(boolean)}.
+	 * 
+	 * @param notDefaultSerializationInclusion if true then serialization
+	 * inclusion is set to {@link JsonInclude.Include.NON_DEFAULT } otherwise set
+	 * to default
+	 */
+	public void setNotDefaultSerializationInclusion(boolean notDefaultSerializationInclusion) {
+		setSerializationInclusion(notDefaultSerializationInclusion ? JsonInclude.Include.NON_DEFAULT : null);
+	}
+
+	/**
+	 * The shortcut for
+	 * {@link Jackson2ObjectMapperFactoryBean#setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include)}
+	 * that indicates that properties considered empty are not to be included.
+	 * Mutually exclusive with
+	 * {@link #setNotNullSerializationInclusion(boolean)} and
+	 * {@link #setNotDefaultSerializationInclusion(boolean)}.
+	 * 
+	 * @param notEmptySerializationInclusion if true then serialization
+	 * inclusion is set to {@link JsonInclude.Include.NON_EMPTY } otherwise set
+	 * to default
+	 */
+	public void setNotEmptySerializationInclusion(boolean notEmptySerializationInclusion) {
+		setSerializationInclusion(notEmptySerializationInclusion ? JsonInclude.Include.NON_EMPTY : null);
+	}
+
 	@Override
 	public void afterPropertiesSet() {
 		if (objectMapper == null) {
@@ -267,6 +325,10 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 		for (Object feature : features.keySet()) {
 			configureFeature(feature, features.get(feature));
+		}
+
+		if (serializationInclusion != null) {
+			objectMapper.setSerializationInclusion(serializationInclusion);
 		}
 	}
 
