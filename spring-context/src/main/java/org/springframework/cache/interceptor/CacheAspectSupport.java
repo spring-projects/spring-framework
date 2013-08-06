@@ -129,9 +129,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	public void afterPropertiesSet() {
 		Assert.state(this.cacheManager != null, "'cacheManager' is required");
-		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' "
-				+ "property is required: If there are no cacheable methods, "
-				+ "then don't use a cache aspect.");
+		Assert.state(this.cacheOperationSource != null, "The 'cacheOperationSources' property is required: " +
+				"If there are no cacheable methods, then don't use a cache aspect.");
 		this.initialized = true;
 	}
 
@@ -155,7 +154,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		Collection<Cache> caches = new ArrayList<Cache>(cacheNames.size());
 		for (String cacheName : cacheNames) {
 			Cache cache = this.cacheManager.getCache(cacheName);
-			Assert.notNull(cache,  "Cannot find cache named [" + cacheName + "] for " + operation);
+			Assert.notNull(cache, "Cannot find cache named '" + cacheName + "' for " + operation);
 			caches.add(cache);
 		}
 		return caches;
@@ -249,8 +248,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		}
 	}
 
-	private void logInvalidating(CacheOperationContext context,
-			CacheEvictOperation operation, Object key) {
+	private void logInvalidating(CacheOperationContext context, CacheEvictOperation operation, Object key) {
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace("Invalidating " + (key == null ? "entire cache" : "cache key " + key) +
 					" for operation " + operation + " on method " + context.method);
@@ -326,8 +324,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				Method method, Object[] args, Object target, Class<?> targetClass) {
 
 			for (CacheOperation operation : operations) {
-				this.contexts.add(operation.getClass(), new CacheOperationContext(operation,
-						method, args, target, targetClass));
+				this.contexts.add(operation.getClass(), new CacheOperationContext(operation, method, args, target, targetClass));
 			}
 		}
 
