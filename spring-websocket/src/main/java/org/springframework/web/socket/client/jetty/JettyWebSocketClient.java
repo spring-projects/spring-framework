@@ -17,17 +17,16 @@
 package org.springframework.web.socket.client.jetty;
 
 import java.net.URI;
+import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.JettyWebSocketListenerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSessionAdapter;
-import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.AbstractWebSocketClient;
 import org.springframework.web.socket.client.WebSocketConnectFailureException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,9 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
-
-	private static final Log logger = LogFactory.getLog(JettyWebSocketClient.class);
+public class JettyWebSocketClient extends AbstractWebSocketClient implements SmartLifecycle {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
 
@@ -133,17 +130,15 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
-			throws WebSocketConnectFailureException {
+	public WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler, HttpHeaders headers,
+			URI uri, List<String> protocols) throws WebSocketConnectFailureException {
 
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
-		Assert.notNull(uri, "uri must not be null");
+		ClientUpgradeRequest request = new ClientUpgradeRequest();
+		request.setSubProtocols(protocols);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Connecting to " + uri);
+		for (String header : headers.keySet()) {
+			request.setHeader(header, headers.get(header));
 		}
-
-		// TODO: populate headers
 
 		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
 		session.setUri(uri);
@@ -153,7 +148,7 @@ public class JettyWebSocketClient implements WebSocketClient, SmartLifecycle {
 
 		try {
 			// TODO: do not block
-			this.client.connect(listener, uri).get();
+			this.client.connect(listener, uri, request).get();
 			return session;
 		}
 		catch (Exception e) {

@@ -44,14 +44,12 @@ public class WebSocketConnectionManagerTests {
 	public void openConnection() throws Exception {
 
 		List<String> subprotocols = Arrays.asList("abc");
-		HttpHeaders headers = new HttpHeaders();
-		headers.setSecWebSocketProtocol(subprotocols);
 
 		WebSocketClient client = mock(WebSocketClient.class);
 		WebSocketHandler handler = new WebSocketHandlerAdapter();
 
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/path/{id}", "123");
-		manager.setSupportedProtocols(subprotocols);
+		manager.setSubProtocols(subprotocols);
 		manager.openConnection();
 
 		ArgumentCaptor<WebSocketHandlerDecorator> captor = ArgumentCaptor.forClass(WebSocketHandlerDecorator.class);
@@ -60,7 +58,10 @@ public class WebSocketConnectionManagerTests {
 
 		verify(client).doHandshake(captor.capture(), headersCaptor.capture(), uriCaptor.capture());
 
-		assertEquals(headers, headersCaptor.getValue());
+		HttpHeaders expectedHeaders = new HttpHeaders();
+		expectedHeaders.setSecWebSocketProtocol(subprotocols);
+
+		assertEquals(expectedHeaders, headersCaptor.getValue());
 		assertEquals(new URI("/path/123"), uriCaptor.getValue());
 
 		WebSocketHandlerDecorator loggingHandler = captor.getValue();
