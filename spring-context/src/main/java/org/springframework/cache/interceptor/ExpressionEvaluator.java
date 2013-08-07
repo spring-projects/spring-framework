@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.cache.Cache;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -46,7 +46,7 @@ class ExpressionEvaluator {
 	private final SpelExpressionParser parser = new SpelExpressionParser();
 
 	// shared param discoverer since it caches data internally
-	private final ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+	private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final Map<String, Expression> keyCache = new ConcurrentHashMap<String, Expression>(64);
 

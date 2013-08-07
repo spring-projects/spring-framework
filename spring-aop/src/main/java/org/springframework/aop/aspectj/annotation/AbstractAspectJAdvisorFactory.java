@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,6 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
 
-	protected static final ParameterNameDiscoverer ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER =
-			new AspectJAnnotationParameterNameDiscoverer();
-
 	private static final String AJC_MAGIC = "ajc$";
 
 
@@ -96,14 +93,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	protected final ParameterNameDiscoverer parameterNameDiscoverer;
+	protected final ParameterNameDiscoverer parameterNameDiscoverer = new AspectJAnnotationParameterNameDiscoverer();
 
-
-	protected AbstractAspectJAdvisorFactory() {
-		PrioritizedParameterNameDiscoverer prioritizedParameterNameDiscoverer = new PrioritizedParameterNameDiscoverer();
-		prioritizedParameterNameDiscoverer.addDiscoverer(ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER);
-		this.parameterNameDiscoverer = prioritizedParameterNameDiscoverer;
-	}
 
 	/**
 	 * We consider something to be an AspectJ aspect suitable for use by the Spring AOP system

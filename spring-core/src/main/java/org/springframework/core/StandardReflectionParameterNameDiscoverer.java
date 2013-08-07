@@ -20,6 +20,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import org.springframework.util.ClassUtils;
+
 /**
  * {@link ParameterNameDiscoverer} implementation which uses JDK 8's
  * reflection facilities for introspecting parameter names.
@@ -35,7 +37,11 @@ public class StandardReflectionParameterNameDiscoverer implements ParameterNameD
 		Parameter[] parameters = method.getParameters();
 		String[] parameterNames = new String[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
-			parameterNames[i] = parameters[i].getName();
+			Parameter param = parameters[i];
+			if (!param.isNamePresent()) {
+				return null;
+			}
+			parameterNames[i] = param.getName();
 		}
 		return parameterNames;
 	}
@@ -45,7 +51,11 @@ public class StandardReflectionParameterNameDiscoverer implements ParameterNameD
 		Parameter[] parameters = ctor.getParameters();
 		String[] parameterNames = new String[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
-			parameterNames[i] = parameters[i].getName();
+			Parameter param = parameters[i];
+			if (!param.isNamePresent()) {
+				return null;
+			}
+			parameterNames[i] = param.getName();
 		}
 		return parameterNames;
 	}
