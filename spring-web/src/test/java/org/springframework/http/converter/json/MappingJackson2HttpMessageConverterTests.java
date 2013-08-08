@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,16 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.junit.Assert.*;
 
 /**
  * Jackson 2.x converter tests.
@@ -110,6 +111,24 @@ public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJac
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 
 		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
+	}
+
+	@Test
+	public void prefixJson() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		getConverter().setPrefixJson(true);
+		getConverter().writeInternal("foo", outputMessage);
+
+		assertEquals("{} && \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+	}
+
+	@Test
+	public void prefixJsonCustom() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		getConverter().setJsonPrefix(")]}',");
+		getConverter().writeInternal("foo", outputMessage);
+
+		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 
