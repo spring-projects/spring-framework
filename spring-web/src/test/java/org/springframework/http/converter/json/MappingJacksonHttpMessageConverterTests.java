@@ -24,13 +24,13 @@ import java.util.List;
 
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+
+import static org.junit.Assert.*;
 
 /**
  * Jackson 1.x converter tests.
@@ -107,6 +107,24 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 
 		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
+	}
+
+	@Test
+	public void prefixJson() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		getConverter().setPrefixJson(true);
+		getConverter().writeInternal("foo", outputMessage);
+
+		assertEquals("{} && \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+	}
+
+	@Test
+	public void prefixJsonCustom() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		getConverter().setJsonPrefix(")]}',");
+		getConverter().writeInternal("foo", outputMessage);
+
+		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 

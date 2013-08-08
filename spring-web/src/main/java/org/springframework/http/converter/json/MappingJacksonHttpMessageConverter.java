@@ -28,7 +28,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -196,7 +195,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 		try {
 			if (this.jsonPrefix != null) {
-				jsonGenerator.writeRaw("{} && ");
+				jsonGenerator.writeRaw(this.jsonPrefix);
 			}
 			this.objectMapper.writeValue(jsonGenerator, object);
 		}
