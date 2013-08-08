@@ -24,9 +24,13 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -51,9 +55,11 @@ import reactor.tcp.spec.TcpClientSpec;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Andy Wilkinson
+ *
  * @since 4.0
  */
-public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLifecycle {
+public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
 
 	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandler.class);
 
@@ -62,6 +68,8 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 	private final MessageChannel messageChannel;
 
 	private final String[] destinationPrefixes;
+
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	private String relayHost = "127.0.0.1";
 
@@ -83,6 +91,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 	private boolean running = false;
 
+	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
 
 	/**
 	 * @param messageChannel the channel to send messages from the STOMP broker to
@@ -195,6 +204,12 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			openSystemSession();
 			this.running = true;
 		}
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher)
+			throws BeansException {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	/**
@@ -342,6 +357,18 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		return false;
 	}
 
+	private void brokerAvailable() {
+		if (this.brokerAvailable.compareAndSet(false, true)) {
+			this.applicationEventPublisher.publishEvent(new BrokerBecameAvailableEvent(this));
+		}
+	}
+
+	private void brokerUnavailable() {
+		if (this.brokerAvailable.compareAndSet(true, false)) {
+			this.applicationEventPublisher.publishEvent(new BrokerBecameUnavailableEvent(this));
+		}
+	}
+
 
 	private class RelaySession {
 
@@ -356,7 +383,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		private final Object monitor = new Object();
 
 
-		public RelaySession(String sessionId) {
+		private RelaySession(String sessionId) {
 			Assert.notNull(sessionId, "sessionId is required");
 			this.sessionId = sessionId;
 		}
@@ -404,6 +431,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			if (StompCommand.CONNECTED == headers.getCommand()) {
 				synchronized(this.monitor) {
 					this.isConnected = true;
+					brokerAvailable();
 					flushMessages(this.promise.get());
 				}
 				return;
@@ -419,6 +447,8 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 
 		private void sendError(String sessionId, String errorText) {
+			brokerUnavailable();
+
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 			headers.setSessionId(sessionId);
 			headers.setMessage(errorText);

@@ -25,8 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.StringUtils;
 
 import reactor.core.Environment;
 import reactor.function.Consumer;
@@ -40,7 +42,7 @@ import reactor.tcp.spec.TcpServerSpec;
 /**
  * @author Andy Wilkinson
  */
-class TestStompBroker {
+class TestStompBroker implements SmartLifecycle {
 
 	private final StompMessageConverter messageConverter = new StompMessageConverter();
 
@@ -60,11 +62,13 @@ class TestStompBroker {
 
 	private volatile TcpServer tcpServer;
 
+	private volatile boolean running;
+
 	TestStompBroker(int port) {
 		this.port = port;
 	}
 
-	public void start() throws IOException {
+	public void start() {
 		this.environment = new Environment();
 
 		this.tcpServer = new TcpServerSpec<String, String>(NettyTcpServer.class)
@@ -78,7 +82,9 @@ class TestStompBroker {
 						connection.consume(new Consumer<String>() {
 							@Override
 							public void accept(String stompFrame) {
-								handleMessage(messageConverter.toMessage(stompFrame), connection);
+								if (!StringUtils.isEmpty(stompFrame)) {
+									handleMessage(messageConverter.toMessage(stompFrame), connection);
+								}
 							}
 						});
 					}
@@ -86,10 +92,16 @@ class TestStompBroker {
 				.get();
 
 		this.tcpServer.start();
+		this.running = true;
 	}
 
-	public void stop() throws IOException, InterruptedException {
-		this.tcpServer.shutdown().await();
+	public void stop() {
+		try {
+			this.tcpServer.shutdown().await();
+		} catch (InterruptedException ie) {
+			Thread.currentThread().interrupt();
+		}
+		this.running = false;
 	}
 
 	private void handleMessage(Message<?> message, TcpConnection<String, String> connection) {
@@ -157,5 +169,26 @@ class TestStompBroker {
 			this.tcpConnection = tcpConnection;
 		}
 
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public int getPhase() {
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return true;
+	}
+
+	@Override
+	public void stop(Runnable callback) {
+		this.stop();
+		callback.run();
 	}
 }

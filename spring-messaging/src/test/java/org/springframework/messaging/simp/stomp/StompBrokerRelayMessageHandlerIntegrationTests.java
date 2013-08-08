@@ -17,20 +17,34 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.SocketUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -38,20 +52,29 @@ import static org.junit.Assert.*;
  *
  * @author Andy Wilkinson
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {StompBrokerRelayMessageHandlerIntegrationTests.TestConfiguration.class})
+@DirtiesContext(classMode=ClassMode.AFTER_EACH_TEST_METHOD)
 public class StompBrokerRelayMessageHandlerIntegrationTests {
 
-	private final SubscribableChannel messageChannel = new ExecutorSubscribableChannel();
+	@Autowired
+	private SubscribableChannel messageChannel;
 
-	private final StompBrokerRelayMessageHandler relay =
-			new StompBrokerRelayMessageHandler(messageChannel, Arrays.asList("/queue/", "/topic/"));
+	@Autowired
+	private StompBrokerRelayMessageHandler relay;
+
+	@Autowired
+	private TestStompBroker stompBroker;
+
+	@Autowired
+	private ApplicationContext applicationContext;
+
+	@Autowired
+	private BrokerAvailabilityListener brokerAvailabilityListener;
 
 
 	@Test
 	public void basicPublishAndSubscribe() throws IOException, InterruptedException {
-		int port = SocketUtils.findAvailableTcpPort();
-
-		TestStompBroker stompBroker = new TestStompBroker(port);
-		stompBroker.start();
 
 		String client1SessionId = "abc123";
 		String client2SessionId = "def456";
@@ -70,9 +93,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		});
 
-		relay.setRelayPort(port);
-		relay.start();
-
 		relay.handleMessage(createConnectMessage(client1SessionId));
 		relay.handleMessage(createConnectMessage(client2SessionId));
 		relay.handleMessage(createSubscribeMessage(client1SessionId, "/topic/test"));
@@ -83,17 +103,13 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		assertTrue(messageLatch.await(30, TimeUnit.SECONDS));
 
-		this.relay.stop();
-		stompBroker.stop();
+		assertEquals(1, brokerAvailabilityListener.availabilityEvents.size());
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
 	}
 
 	@Test
 	public void whenConnectFailsDueToTheBrokerBeingUnavailableAnErrorFrameIsSentToTheClient()
 			throws IOException, InterruptedException {
-		int port = SocketUtils.findAvailableTcpPort();
-
-		TestStompBroker stompBroker = new TestStompBroker(port);
-		stompBroker.start();
 
 		String sessionId = "abc123";
 
@@ -111,25 +127,25 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		});
 
-		relay.setRelayPort(port);
-		relay.start();
-
 		stompBroker.awaitMessages(1);
+
+		assertEquals(1, brokerAvailabilityListener.availabilityEvents.size());
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
 
 		stompBroker.stop();
 
 		relay.handleMessage(createConnectMessage(sessionId));
 
 		errorLatch.await(30, TimeUnit.SECONDS);
+
+		assertEquals(2, brokerAvailabilityListener.availabilityEvents.size());
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
 	}
 
 	@Test
 	public void whenSendFailsDueToTheBrokerBeingUnavailableAnErrorFrameIsSentToTheClient()
 			throws IOException, InterruptedException {
-		int port = SocketUtils.findAvailableTcpPort();
-
-		TestStompBroker stompBroker = new TestStompBroker(port);
-		stompBroker.start();
 
 		String sessionId = "abc123";
 
@@ -147,18 +163,22 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		});
 
-		relay.setRelayPort(port);
-		relay.start();
-
 		relay.handleMessage(createConnectMessage(sessionId));
 
 		stompBroker.awaitMessages(2);
+
+		assertEquals(1, brokerAvailabilityListener.availabilityEvents.size());
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
 
 		stompBroker.stop();
 
 		relay.handleMessage(createSubscribeMessage(sessionId, "/topic/test/"));
 
 		errorLatch.await(30, TimeUnit.SECONDS);
+
+		assertEquals(2, brokerAvailabilityListener.availabilityEvents.size());
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+		assertTrue(brokerAvailabilityListener.availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
 	}
 
 	private Message<?> createConnectMessage(String sessionId) {
@@ -182,5 +202,45 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		headers.setDestination(destination);
 
 		return MessageBuilder.withPayloadAndHeaders(payload.getBytes(), headers).build();
+	}
+
+
+	@Configuration
+	public static class TestConfiguration {
+
+		@Bean
+		public MessageChannel messageChannel() {
+			return new ExecutorSubscribableChannel();
+		}
+
+		@Bean
+		public StompBrokerRelayMessageHandler relay() {
+			StompBrokerRelayMessageHandler relay =
+					new StompBrokerRelayMessageHandler(messageChannel(), Arrays.asList("/queue/", "/topic/"));
+			relay.setRelayPort(SocketUtils.findAvailableTcpPort());
+			return relay;
+		}
+
+		@Bean
+		public TestStompBroker broker() throws IOException {
+			TestStompBroker broker = new TestStompBroker(relay().getRelayPort());
+			return broker;
+		}
+
+		@Bean
+		public BrokerAvailabilityListener availabilityListener() {
+			return new BrokerAvailabilityListener();
+		}
+	}
+
+
+	private static class BrokerAvailabilityListener implements ApplicationListener<BrokerAvailabilityEvent> {
+
+		private final List<BrokerAvailabilityEvent> availabilityEvents = new ArrayList<BrokerAvailabilityEvent>();
+
+		@Override
+		public void onApplicationEvent(BrokerAvailabilityEvent event) {
+			this.availabilityEvents.add(event);
+		}
 	}
 }
