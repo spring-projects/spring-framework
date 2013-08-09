@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	private static final String DEFAULT_BINDING_NAME = "binding";
 
+
 	private Class<?> targetClass;
 
 	private String targetPackage;
@@ -112,7 +113,6 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	/**
 	 * Set the target class for this instance. Setting either this property or the
 	 * {@link #setTargetPackage(String) targetPackage} property is required.
-	 *
 	 * <p>If this property is set, {@link #setTargetPackage(String) targetPackage} is ignored.
 	 */
 	public void setTargetClass(Class<?> targetClass) {
@@ -122,7 +122,6 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	/**
 	 * Set the target package for this instance. Setting either this property or the
 	 * {@link #setTargetClass(Class) targetClass} property is required.
-	 *
 	 * <p>If {@link #setTargetClass(Class) targetClass} is set, this property is ignored.
 	 */
 	public void setTargetPackage(String targetPackage) {
@@ -157,10 +156,9 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Sets the root element name for the DTD declaration written when marshalling. By default, this is
-	 * {@code null} (i.e. no DTD declaration is written). If set to a value, the system ID or public ID also need to
-	 * be set.
-	 *
+	 * Set the root element name for the DTD declaration written when marshalling.
+	 * By default, this is {@code null} (i.e. no DTD declaration is written).
+	 * <p>If set to a value, the system ID or public ID also need to be set.
 	 * @see #setDocTypeSystemId(String)
 	 * @see #setDocTypePublicId(String)
 	 */
@@ -169,10 +167,9 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Sets the system Id for the DTD declaration written when marshalling. By default, this is
-	 * {@code null}. Only used when the root element also has been set. Set either this property or
-	 * {@code docTypePublicId}, not both.
-	 *
+	 * Set the system Id for the DTD declaration written when marshalling.
+	 * By default, this is {@code null}. Only used when the root element also has been set.
+	 * <p>Set either this property or {@code docTypePublicId}, not both.
 	 * @see #setDocTypeRootElementName(String)
 	 */
 	public void setDocTypeSystemId(String docTypeSystemId) {
@@ -180,10 +177,9 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Sets the public Id for the DTD declaration written when marshalling. By default, this is
-	 * {@code null}. Only used when the root element also has been set. Set either this property or
-	 * {@code docTypeSystemId}, not both.
-	 *
+	 * Set the public Id for the DTD declaration written when marshalling.
+	 * By default, this is {@code null}. Only used when the root element also has been set.
+	 * <p>Set either this property or {@code docTypeSystemId}, not both.
 	 * @see #setDocTypeRootElementName(String)
 	 */
 	public void setDocTypePublicId(String docTypePublicId) {
@@ -191,14 +187,14 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Sets the internal subset Id for the DTD declaration written when marshalling. By default, this is
-	 * {@code null}. Only used when the root element also has been set.
-	 *
+	 * Set the internal subset Id for the DTD declaration written when marshalling.
+	 * By default, this is {@code null}. Only used when the root element also has been set.
 	 * @see #setDocTypeRootElementName(String)
 	 */
 	public void setDocTypeInternalSubset(String docTypeInternalSubset) {
 		this.docTypeInternalSubset = docTypeInternalSubset;
 	}
+
 
 	@Override
 	public void afterPropertiesSet() throws JiBXException {
@@ -215,7 +211,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 				}
 				this.bindingFactory = BindingDirectory.getFactory(this.targetClass);
 			}
-		} else if (this.targetPackage != null) {
+		}
+		else if (this.targetPackage != null) {
 			if (!StringUtils.hasLength(bindingName)) {
 				bindingName = DEFAULT_BINDING_NAME;
 			}
@@ -223,7 +220,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 				logger.info("Configured for target package [" + targetPackage	+ "] using binding [" + bindingName + "]");
 			}
 			this.bindingFactory = BindingDirectory.getFactory(bindingName, targetPackage);
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("either 'targetClass' or 'targetPackage' is required");
 		}
 	}
@@ -246,7 +244,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 
-	// Supported Marshalling
+	// Supported marshalling
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream)
@@ -273,13 +271,33 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 	}
 
-	private void marshalDocument(IMarshallingContext marshallingContext, Object graph) throws IOException,
-			JiBXException {
+	private void marshalDocument(IMarshallingContext marshallingContext, Object graph) throws IOException, JiBXException {
 		if (StringUtils.hasLength(docTypeRootElementName)) {
 			IXMLWriter xmlWriter = marshallingContext.getXmlWriter();
 			xmlWriter.writeDocType(docTypeRootElementName, docTypeSystemId, docTypePublicId, docTypeInternalSubset);
 		}
 		marshallingContext.marshalDocument(graph);
+	}
+
+
+	// Unsupported marshalling
+
+	@Override
+	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
+		try {
+			// JiBX does not support DOM natively, so we write to a buffer first, and transform that to the Node
+			Result result = new DOMResult(node);
+			transformAndMarshal(graph, result);
+		}
+		catch (IOException ex) {
+			throw new MarshallingFailureException("JiBX marshalling exception", ex);
+		}
+	}
+
+	@Override
+	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
+		XMLStreamWriter streamWriter = StaxUtils.createEventStreamWriter(eventWriter);
+		marshalXmlStreamWriter(graph, streamWriter);
 	}
 
 	@Override
@@ -292,20 +310,6 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 		catch (JiBXException ex) {
 			throw convertJibxException(ex, false);
-		}
-	}
-
-	// Unsupported Marshalling
-
-	@Override
-	protected void marshalDomNode(Object graph, Node node) throws XmlMappingException {
-		try {
-			// JiBX does not support DOM natively, so we write to a buffer first, and transform that to the Node
-			Result result = new DOMResult(node);
-			transformAndMarshal(graph, result);
-		}
-		catch (IOException ex) {
-			throw new MarshallingFailureException("JiBX marshalling exception", ex);
 		}
 	}
 
@@ -338,14 +342,32 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	}
 
-	@Override
-	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
-		XMLStreamWriter streamWriter = StaxUtils.createEventStreamWriter(eventWriter);
-		marshalXmlStreamWriter(graph, streamWriter);
-	}
-
 
 	// Unmarshalling
+
+	@Override
+	protected Object unmarshalXmlEventReader(XMLEventReader eventReader) {
+		try {
+			XMLStreamReader streamReader = StaxUtils.createEventStreamReader(eventReader);
+			return unmarshalXmlStreamReader(streamReader);
+		}
+		catch (XMLStreamException ex) {
+			return new UnmarshallingFailureException("JiBX unmarshalling exception", ex);
+		}
+	}
+
+	@Override
+	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
+		try {
+			UnmarshallingContext unmarshallingContext = (UnmarshallingContext) createUnmarshallingContext();
+			IXMLReader xmlReader = new StAXReaderWrapper(streamReader, null, true);
+			unmarshallingContext.setDocument(xmlReader);
+			return unmarshallingContext.unmarshalElement();
+		}
+		catch (JiBXException ex) {
+			throw convertJibxException(ex, false);
+		}
+	}
 
 	@Override
 	protected Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
@@ -366,30 +388,6 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		}
 		catch (JiBXException ex) {
 			throw convertJibxException(ex, false);
-		}
-	}
-
-	@Override
-	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
-		try {
-			UnmarshallingContext unmarshallingContext = (UnmarshallingContext) createUnmarshallingContext();
-			IXMLReader xmlReader = new StAXReaderWrapper(streamReader, null, true);
-			unmarshallingContext.setDocument(xmlReader);
-			return unmarshallingContext.unmarshalElement();
-		}
-		catch (JiBXException ex) {
-			throw convertJibxException(ex, false);
-		}
-	}
-
-	@Override
-	protected Object unmarshalXmlEventReader(XMLEventReader eventReader) {
-		try {
-			XMLStreamReader streamReader = StaxUtils.createEventStreamReader(eventReader);
-			return unmarshalXmlStreamReader(streamReader);
-		}
-		catch (XMLStreamException ex) {
-			return new UnmarshallingFailureException("JiBX unmarshalling exception", ex);
 		}
 	}
 
