@@ -46,6 +46,7 @@ import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
 import org.springframework.web.socket.sockjs.support.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.support.frame.JacksonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
@@ -88,18 +89,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	 *        application stops.
 	 */
 	public DefaultSockJsService(TaskScheduler taskScheduler) {
-		super(taskScheduler);
-		addTransportHandlers(getDefaultTransportHandlers());
-		initMessageCodec();
-	}
-
-	protected void initMessageCodec() {
-		if (jackson2Present) {
-			this.messageCodec = new Jackson2SockJsMessageCodec();
-		}
-		else if (jacksonPresent) {
-			this.messageCodec = new Jackson2SockJsMessageCodec();
-		}
+		this(taskScheduler, null);
 	}
 
 	/**
@@ -111,7 +101,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	 *        Spring bean to ensure it is initialized at start up and shut down when the
 	 *        application stops.
 	 * @param transportHandlers the transport handlers to use (replaces the default ones);
-	 *        can be {@code null}.
+	 *        can be {@code null} if you don't want to install the default ones.
 	 * @param transportHandlerOverrides zero or more overrides to the default transport
 	 *        handler types.
 	 */
@@ -122,9 +112,13 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 		initMessageCodec();
 
-		if (!CollectionUtils.isEmpty(transportHandlers)) {
+		if (CollectionUtils.isEmpty(transportHandlers)) {
+			addTransportHandlers(getDefaultTransportHandlers());
+		}
+		else {
 			addTransportHandlers(transportHandlers);
 		}
+
 		if (!ObjectUtils.isEmpty(transportHandlerOverrides)) {
 			addTransportHandlers(Arrays.asList(transportHandlerOverrides));
 		}
@@ -134,13 +128,21 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		}
 	}
 
+	private void initMessageCodec() {
+		if (jackson2Present) {
+			this.messageCodec = new Jackson2SockJsMessageCodec();
+		}
+		else if (jacksonPresent) {
+			this.messageCodec = new JacksonSockJsMessageCodec();
+		}
+	}
 
 	protected final Set<TransportHandler> getDefaultTransportHandlers() {
 		Set<TransportHandler> result = new HashSet<TransportHandler>();
 		result.add(new XhrPollingTransportHandler());
-		result.add(new XhrTransportHandler());
+		result.add(new XhrReceivingTransportHandler());
 		result.add(new JsonpPollingTransportHandler());
-		result.add(new JsonpTransportHandler());
+		result.add(new JsonpReceivingTransportHandler());
 		result.add(new XhrStreamingTransportHandler());
 		result.add(new EventSourceTransportHandler());
 		result.add(new HtmlFileTransportHandler());

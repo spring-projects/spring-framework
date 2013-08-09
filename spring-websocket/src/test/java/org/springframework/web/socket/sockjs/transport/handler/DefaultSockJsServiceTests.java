@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -95,6 +96,30 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertNotNull(handlers.get(TransportType.JSONP_SEND));
 		assertNotNull(handlers.get(TransportType.HTML_FILE));
 		assertNotNull(handlers.get(TransportType.EVENT_SOURCE));
+	}
+
+	@Test
+	public void defaultTransportHandlersWithOverride() {
+
+		XhrReceivingTransportHandler xhrHandler = new XhrReceivingTransportHandler();
+
+		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), null, xhrHandler);
+		Map<TransportType, TransportHandler> handlers = service.getTransportHandlers();
+
+		assertEquals(8, handlers.size());
+		assertSame(xhrHandler, handlers.get(xhrHandler.getTransportType()));
+	}
+
+	@Test
+	public void customizedTransportHandlerList() {
+
+		List<TransportHandler> handlers = Arrays.<TransportHandler>asList(
+				new XhrPollingTransportHandler(), new XhrReceivingTransportHandler());
+
+		DefaultSockJsService service = new DefaultSockJsService(mock(TaskScheduler.class), handlers);
+		Map<TransportType, TransportHandler> actualHandlers = service.getTransportHandlers();
+
+		assertEquals(handlers.size(), actualHandlers.size());
 	}
 
 	@Test

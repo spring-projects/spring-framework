@@ -87,13 +87,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpRequest httpRequest = new ServletServerHttpRequest(request);
 		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
 
-		try {
-			this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.webSocketHandler);
-			httpResponse.flush();
-		}
-		catch (IOException ex) {
-			throw ex;
-		}
+		this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.webSocketHandler);
+		httpResponse.flush();
 	}
 
 }

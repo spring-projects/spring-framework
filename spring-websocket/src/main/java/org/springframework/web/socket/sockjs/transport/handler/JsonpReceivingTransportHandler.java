@@ -37,7 +37,7 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJ
  *
  * @author Rossen Stoyanchev
  */
-public class JsonpTransportHandler extends AbstractHttpReceivingTransportHandler {
+public class JsonpReceivingTransportHandler extends AbstractHttpReceivingTransportHandler {
 
 	private final FormHttpMessageConverter formConverter = new FormHttpMessageConverter();
 

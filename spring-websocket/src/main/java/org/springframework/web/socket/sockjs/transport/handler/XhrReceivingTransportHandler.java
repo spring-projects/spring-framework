@@ -28,7 +28,7 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
  *
  * @author Rossen Stoyanchev
  */
-public class XhrTransportHandler extends AbstractHttpReceivingTransportHandler {
+public class XhrReceivingTransportHandler extends AbstractHttpReceivingTransportHandler {
 
 
 	@Override

@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link AbstractHttpReceivingTransportHandler} and sub-classes
- * {@link XhrTransportHandler} and {@link JsonpTransportHandler}.
+ * {@link XhrReceivingTransportHandler} and {@link JsonpReceivingTransportHandler}.
  *
  * @author Rossen Stoyanchev
  */
@@ -48,7 +48,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	@Test
 	public void readMessagesXhr() throws Exception {
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
-		handleRequest(new XhrTransportHandler());
+		handleRequest(new XhrReceivingTransportHandler());
 
 		assertEquals(204, this.servletResponse.getStatus());
 	}
@@ -56,7 +56,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	@Test
 	public void readMessagesJsonp() throws Exception {
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
-		handleRequest(new JsonpTransportHandler());
+		handleRequest(new JsonpReceivingTransportHandler());
 
 		assertEquals(200, this.servletResponse.getStatus());
 		assertEquals("ok", this.servletResponse.getContentAsString());
@@ -66,7 +66,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	public void readMessagesJsonpFormEncoded() throws Exception {
 		this.servletRequest.setContent("d=[\"x\"]".getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-		handleRequest(new JsonpTransportHandler());
+		handleRequest(new JsonpReceivingTransportHandler());
 
 		assertEquals(200, this.servletResponse.getStatus());
 		assertEquals("ok", this.servletResponse.getContentAsString());
@@ -78,7 +78,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	public void readMessagesJsonpFormEncodedWithEncoding() throws Exception {
 		this.servletRequest.setContent("d=[\"x\"]".getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/x-www-form-urlencoded;charset=UTF-8");
-		handleRequest(new JsonpTransportHandler());
+		handleRequest(new JsonpReceivingTransportHandler());
 
 		assertEquals(200, this.servletResponse.getStatus());
 		assertEquals("ok", this.servletResponse.getContentAsString());
@@ -96,7 +96,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	@Test(expected=IllegalArgumentException.class)
 	public void readMessagesNoSession() throws Exception {
 		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
-		new XhrTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null);
+		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null);
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		doThrow(new Exception()).when(wsHandler).handleMessage(session, new TextMessage("x"));
 
 		try {
-			XhrTransportHandler transportHandler = new XhrTransportHandler();
+			XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();
 			transportHandler.setSockJsServiceConfiguration(sockJsConfig);
 			transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 			fail("Expected exception");
@@ -143,7 +143,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler);
 
-		new XhrTransportHandler().handleRequest(this.request, this.response, wsHandler, session);
+		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, wsHandler, session);
 
 		assertEquals(500, this.servletResponse.getStatus());
 		verifyNoMoreInteractions(wsHandler);
