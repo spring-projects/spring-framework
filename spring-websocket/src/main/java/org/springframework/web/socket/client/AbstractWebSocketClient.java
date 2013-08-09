@@ -73,6 +73,9 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		Assert.notNull(uri, "uri must not be null");
 
+		String scheme = uri.getScheme();
+		Assert.isTrue(((scheme != null) && ("ws".equals(scheme) || "wss".equals(scheme))), "Invalid scheme: " + scheme);
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Connecting to " + uri);
 		}

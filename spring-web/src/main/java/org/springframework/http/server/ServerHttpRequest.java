@@ -16,6 +16,7 @@
 
 package org.springframework.http.server;
 
+import java.net.InetSocketAddress;
 import java.security.Principal;
 import java.util.Map;
 
@@ -51,14 +52,14 @@ public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
 	Principal getPrincipal();
 
 	/**
-	 * Return the host name of the endpoint on the other end.
+	 * Return the address on which the request was received.
 	 */
-	String getRemoteHostName();
+	InetSocketAddress getLocalAddress();
 
 	/**
-	 * Return the IP address of the endpoint on the other end.
+	 * Return the address of the remote client.
 	 */
-	String getRemoteAddress();
+	InetSocketAddress getRemoteAddress();
 
 	/**
 	 * Return a control that allows putting the request in asynchronous mode so the

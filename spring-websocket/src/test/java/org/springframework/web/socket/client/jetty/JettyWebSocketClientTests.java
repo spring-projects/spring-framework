@@ -33,8 +33,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.JettyWebSocketListenerAdapter;
-import org.springframework.web.socket.adapter.JettyWebSocketSessionAdapter;
+import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
 
 import static org.junit.Assert.*;
@@ -113,8 +113,8 @@ public class JettyWebSocketClientTests {
 								resp.setAcceptedSubProtocol(req.getSubProtocols().get(0));
 							}
 
-							JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
-							return new JettyWebSocketListenerAdapter(webSocketHandler, session);
+							JettyWebSocketSession session = new JettyWebSocketSession(null);
+							return new JettyWebSocketHandlerAdapter(webSocketHandler, session);
 						}
 					});
 				}

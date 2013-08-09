@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSessionTests.TestWebSocketServerSockJsSession;
 import org.springframework.web.socket.support.TestWebSocketSession;
 
@@ -61,7 +60,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	public void isActive() throws Exception {
 		assertFalse(this.session.isActive());
 
-		this.session.initWebSocketSession(this.webSocketSession);
+		this.session.afterSessionInitialized(this.webSocketSession);
 		assertTrue(this.session.isActive());
 
 		this.webSocketSession.setOpen(false);
@@ -69,9 +68,9 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	}
 
 	@Test
-	public void initWebSocketSession() throws Exception {
+	public void afterSessionInitialized() throws Exception {
 
-		this.session.initWebSocketSession(this.webSocketSession);
+		this.session.afterSessionInitialized(this.webSocketSession);
 
 		assertEquals("Open frame not sent",
 				Collections.singletonList(new TextMessage("o")), this.webSocketSession.getSentMessages());
@@ -110,7 +109,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	@Test
 	public void sendMessageInternal() throws Exception {
 
-		this.session.initWebSocketSession(this.webSocketSession);
+		this.session.afterSessionInitialized(this.webSocketSession);
 		this.session.sendMessageInternal("x");
 
 		assertEquals(Arrays.asList(new TextMessage("o"), new TextMessage("a[\"x\"]")),
@@ -122,7 +121,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	@Test
 	public void disconnect() throws Exception {
 
-		this.session.initWebSocketSession(this.webSocketSession);
+		this.session.afterSessionInitialized(this.webSocketSession);
 		this.session.close(CloseStatus.NOT_ACCEPTABLE);
 
 		assertEquals(CloseStatus.NOT_ACCEPTABLE, this.webSocketSession.getCloseStatus());

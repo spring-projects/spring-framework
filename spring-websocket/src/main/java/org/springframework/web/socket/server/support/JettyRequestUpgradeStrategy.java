@@ -33,8 +33,8 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.JettyWebSocketListenerAdapter;
-import org.springframework.web.socket.adapter.JettyWebSocketSessionAdapter;
+import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
@@ -58,8 +58,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			+ ".HANDLER_PROVIDER";
 
 	private WebSocketServerFactory factory;
-
-	private final ServerWebSocketSessionInitializer wsSessionInitializer = new ServerWebSocketSessionInitializer();
 
 
 	public JettyRequestUpgradeStrategy() {
@@ -87,7 +85,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler webSocketHandler) throws IOException {
+			String protocol, WebSocketHandler wsHandler) throws IOException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -100,14 +98,13 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			throw new HandshakeFailureException("Not a WebSocket request");
 		}
 
-		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
-		this.wsSessionInitializer.initialize(request, response, protocol, session);
-		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler, session);
+		JettyWebSocketSession wsSession = new JettyWebSocketSession(request.getPrincipal());
+		JettyWebSocketHandlerAdapter wsListener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
-		servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME, listener);
+		servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME, wsListener);
 
 		if (!this.factory.acceptWebSocket(servletRequest, servletResponse)) {
-			// should never happen
+			// should not happen
 			throw new HandshakeFailureException("WebSocket request not accepted by Jetty");
 		}
 	}

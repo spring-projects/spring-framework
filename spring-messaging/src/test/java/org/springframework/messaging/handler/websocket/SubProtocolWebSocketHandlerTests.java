@@ -91,7 +91,18 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
-	public void noSubProtocol() throws Exception {
+	public void nullSubProtocol() throws Exception {
+		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
+		this.webSocketHandler.afterConnectionEstablished(session);
+
+		verify(this.defaultHandler).afterSessionStarted(session, this.channel);
+		verify(this.stompHandler, times(0)).afterSessionStarted(session, this.channel);
+		verify(this.mqttHandler, times(0)).afterSessionStarted(session, this.channel);
+	}
+
+	@Test
+	public void emptySubProtocol() throws Exception {
+		this.session.setAcceptedProtocol("");
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.afterConnectionEstablished(session);
 

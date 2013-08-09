@@ -17,9 +17,12 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.security.Principal;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -51,11 +54,55 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private String protocol;
 
+	private HttpHeaders handshakeHeaders;
 
-	public AbstractHttpSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
-		super(sessionId, config, handler);
+	private Principal principal;
+
+	private InetSocketAddress localAddress;
+
+	private InetSocketAddress remoteAddress;
+
+
+	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler wsHandler) {
+		super(id, config, wsHandler);
 	}
 
+
+	@Override
+	public HttpHeaders getHandshakeHeaders() {
+		return this.handshakeHeaders;
+	}
+
+	protected void setHandshakeHeaders(HttpHeaders handshakeHeaders) {
+		this.handshakeHeaders = handshakeHeaders;
+	}
+
+	@Override
+	public Principal getPrincipal() {
+		return this.principal;
+	}
+
+	protected void setPrincipal(Principal principal) {
+		this.principal = principal;
+	}
+
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
+	}
+
+	protected void setLocalAddress(InetSocketAddress localAddress) {
+		this.localAddress = localAddress;
+	}
+
+	@Override
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
+	}
+
+	protected void setRemoteAddress(InetSocketAddress remoteAddress) {
+		this.remoteAddress = remoteAddress;
+	}
 
 	/**
 	 * Unlike WebSocket where sub-protocol negotiation is part of the
@@ -87,6 +134,12 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
 			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), t);
 		}
+
+		this.handshakeHeaders = request.getHeaders();
+		this.principal = request.getPrincipal();
+		this.localAddress = request.getLocalAddress();
+		this.remoteAddress = request.getRemoteAddress();
+
 		try {
 			delegateConnectionEstablished();
 		}

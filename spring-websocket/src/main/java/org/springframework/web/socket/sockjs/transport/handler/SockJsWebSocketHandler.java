@@ -69,7 +69,7 @@ public class SockJsWebSocketHandler extends TextWebSocketHandlerAdapter {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession wsSession) throws Exception {
 		Assert.isTrue(this.sessionCount.compareAndSet(0, 1), "Unexpected connection");
-		this.sockJsSession.initWebSocketSession(wsSession);
+		this.sockJsSession.afterSessionInitialized(wsSession);
 	}
 
 	@Override

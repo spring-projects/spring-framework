@@ -32,19 +32,41 @@ import org.springframework.web.socket.WebSocketSession;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractWebSocketSesssionAdapter<T> implements ConfigurableWebSocketSession {
+public abstract class AbstractWebSocketSesssion<T> implements DelegatingWebSocketSession<T> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private T delegateSession;
 
-	public abstract void initSession(T session);
+
+	/**
+	 * @return the WebSocket session to delegate to
+	 */
+	public T getDelegateSession() {
+		return this.delegateSession;
+	}
+
+
+	@Override
+	public void afterSessionInitialized(T session) {
+		Assert.notNull(session, "session must not be null");
+		this.delegateSession = session;
+	}
+
+	protected final void checkDelegateSessionInitialized() {
+		Assert.state(this.delegateSession != null, "WebSocket session is not yet initialized");
+	}
 
 	@Override
 	public final void sendMessage(WebSocketMessage message) throws IOException {
+
+		checkDelegateSessionInitialized();
+		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Sending " + message + ", " + this);
 		}
-		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
+
 		if (message instanceof TextMessage) {
 			sendTextMessage((TextMessage) message);
 		}
@@ -60,13 +82,15 @@ public abstract class AbstractWebSocketSesssionAdapter<T> implements Configurabl
 
 	protected abstract void sendBinaryMessage(BinaryMessage message) throws IOException ;
 
+
 	@Override
-	public void close() throws IOException {
+	public final void close() throws IOException {
 		close(CloseStatus.NORMAL);
 	}
 
 	@Override
 	public final void close(CloseStatus status) throws IOException {
+		checkDelegateSessionInitialized();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing " + this);
 		}
@@ -74,6 +98,7 @@ public abstract class AbstractWebSocketSesssionAdapter<T> implements Configurabl
 	}
 
 	protected abstract void closeInternal(CloseStatus status) throws IOException;
+
 
 	@Override
 	public String toString() {

@@ -28,21 +28,22 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
- * Adapts {@link WebSocketHandler} to the Jetty 9 {@link WebSocketListener}.
+ * Adapts {@link WebSocketHandler} to the Jetty 9 WebSocket API.
  *
  * @author Phillip Webb
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JettyWebSocketListenerAdapter implements WebSocketListener {
+public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 
-	private static final Log logger = LogFactory.getLog(JettyWebSocketListenerAdapter.class);
+	private static final Log logger = LogFactory.getLog(JettyWebSocketHandlerAdapter.class);
 
 	private final WebSocketHandler webSocketHandler;
 
-	private final JettyWebSocketSessionAdapter wsSession;
+	private final JettyWebSocketSession wsSession;
 
 
-	public JettyWebSocketListenerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSessionAdapter wsSession) {
+	public JettyWebSocketHandlerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSession wsSession) {
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		Assert.notNull(wsSession, "wsSession must not be null");
 		this.webSocketHandler = webSocketHandler;
@@ -52,8 +53,8 @@ public class JettyWebSocketListenerAdapter implements WebSocketListener {
 
 	@Override
 	public void onWebSocketConnect(Session session) {
-		this.wsSession.initSession(session);
 		try {
+			this.wsSession.afterSessionInitialized(session);
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 		}
 		catch (Throwable t) {

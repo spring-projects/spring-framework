@@ -17,9 +17,12 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
@@ -28,6 +31,14 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  */
 public class TestSockJsSession extends AbstractSockJsSession {
+
+	private HttpHeaders headers;
+
+	private Principal principal;
+
+	private InetSocketAddress localAddress;
+
+	private InetSocketAddress remoteAddress;
 
 	private boolean active;
 
@@ -48,12 +59,76 @@ public class TestSockJsSession extends AbstractSockJsSession {
 		super(sessionId, config, handler);
 	}
 
+
+	@Override
+	public HttpHeaders getHandshakeHeaders() {
+		return this.headers;
+	}
+
+	/**
+	 * @return the headers
+	 */
+	public HttpHeaders getHeaders() {
+		return this.headers;
+	}
+
+	/**
+	 * @param headers the headers to set
+	 */
+	public void setHeaders(HttpHeaders headers) {
+		this.headers = headers;
+	}
+
+	/**
+	 * @return the principal
+	 */
+	@Override
+	public Principal getPrincipal() {
+		return this.principal;
+	}
+
+	/**
+	 * @param principal the principal to set
+	 */
+	public void setPrincipal(Principal principal) {
+		this.principal = principal;
+	}
+
+	/**
+	 * @return the localAddress
+	 */
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
+	}
+
+	/**
+	 * @param remoteAddress the remoteAddress to set
+	 */
+	public void setLocalAddress(InetSocketAddress localAddress) {
+		this.localAddress = localAddress;
+	}
+
+	/**
+	 * @return the remoteAddress
+	 */
+	@Override
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
+	}
+
+	/**
+	 * @param remoteAddress the remoteAddress to set
+	 */
+	public void setRemoteAddress(InetSocketAddress remoteAddress) {
+		this.remoteAddress = remoteAddress;
+	}
+
 	@Override
 	public String getAcceptedProtocol() {
 		return this.subProtocol;
 	}
 
-	@Override
 	public void setAcceptedProtocol(String protocol) {
 		this.subProtocol = protocol;
 	}

@@ -52,7 +52,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws IOException {
+			String acceptedProtocol, Endpoint endpoint) throws IOException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -82,7 +82,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		ServerEndpointConfig endpointConfig = new ServerEndpointRegistration("/shouldntmatter", endpoint);
 
 		upgradeHandler.preInit(endpoint, endpointConfig, serverContainer, webSocketRequest,
-				selectedProtocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());
+				acceptedProtocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());
 	}
 
 }

@@ -17,11 +17,13 @@
 package org.springframework.web.socket.support;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -37,13 +39,11 @@ public class TestWebSocketSession implements WebSocketSession {
 
 	private URI uri;
 
-	private boolean secure;
-
 	private Principal principal;
 
-	private String remoteHostName;
+	private InetSocketAddress localAddress;
 
-	private String remoteAddress;
+	private InetSocketAddress remoteAddress;
 
 	private String protocol;
 
@@ -52,6 +52,8 @@ public class TestWebSocketSession implements WebSocketSession {
 	private final List<WebSocketMessage<?>> messages = new ArrayList<>();
 
 	private CloseStatus status;
+
+	private HttpHeaders headers;
 
 
 	/**
@@ -84,19 +86,24 @@ public class TestWebSocketSession implements WebSocketSession {
 		this.uri = uri;
 	}
 
-	/**
-	 * @return the secure
-	 */
+
 	@Override
-	public boolean isSecure() {
-		return this.secure;
+	public HttpHeaders getHandshakeHeaders() {
+		return this.headers;
 	}
 
 	/**
-	 * @param secure the secure to set
+	 * @return the headers
 	 */
-	public void setSecure(boolean secure) {
-		this.secure = secure;
+	public HttpHeaders getHeaders() {
+		return this.headers;
+	}
+
+	/**
+	 * @param headers the headers to set
+	 */
+	public void setHeaders(HttpHeaders headers) {
+		this.headers = headers;
 	}
 
 	/**
@@ -115,32 +122,32 @@ public class TestWebSocketSession implements WebSocketSession {
 	}
 
 	/**
-	 * @return the remoteHostName
+	 * @return the localAddress
 	 */
 	@Override
-	public String getRemoteHostName() {
-		return this.remoteHostName;
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
 	}
 
 	/**
-	 * @param remoteHostName the remoteHostName to set
+	 * @param remoteAddress the remoteAddress to set
 	 */
-	public void setRemoteHostName(String remoteHostName) {
-		this.remoteHostName = remoteHostName;
+	public void setLocalAddress(InetSocketAddress localAddress) {
+		this.localAddress = localAddress;
 	}
 
 	/**
 	 * @return the remoteAddress
 	 */
 	@Override
-	public String getRemoteAddress() {
+	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
 	}
 
 	/**
 	 * @param remoteAddress the remoteAddress to set
 	 */
-	public void setRemoteAddress(String remoteAddress) {
+	public void setRemoteAddress(InetSocketAddress remoteAddress) {
 		this.remoteAddress = remoteAddress;
 	}
 

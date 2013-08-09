@@ -17,16 +17,18 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import javax.websocket.Endpoint;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.StandardEndpointAdapter;
-import org.springframework.web.socket.adapter.StandardWebSocketSessionAdapter;
+import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
@@ -40,17 +42,19 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final ServerWebSocketSessionInitializer wsSessionInitializer = new ServerWebSocketSessionInitializer();
-
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler handler) throws IOException, HandshakeFailureException {
+			String acceptedProtocol, WebSocketHandler wsHandler) throws IOException, HandshakeFailureException {
 
-		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
-		this.wsSessionInitializer.initialize(request, response, protocol, session);
-		StandardEndpointAdapter endpoint = new StandardEndpointAdapter(handler, session);
-		upgradeInternal(request, response, protocol, endpoint);
+		HttpHeaders headers = request.getHeaders();
+		InetSocketAddress localAddress = request.getLocalAddress();
+		InetSocketAddress remoteAddress = request.getRemoteAddress();
+
+		StandardWebSocketSession wsSession = new StandardWebSocketSession(headers, localAddress, remoteAddress);
+		StandardWebSocketHandlerAdapter endpoint = new StandardWebSocketHandlerAdapter(wsHandler, wsSession);
+
+		upgradeInternal(request, response, acceptedProtocol, endpoint);
 	}
 
 	protected abstract void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,

@@ -201,10 +201,14 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	protected String selectProtocol(List<String> requestedProtocols) {
 		if (requestedProtocols != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Requested sub-protocol(s): " + requestedProtocols
+						+ ", supported sub-protocol(s): " + this.supportedProtocols);
+			}
 			for (String protocol : requestedProtocols) {
 				if (this.supportedProtocols.contains(protocol.toLowerCase())) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Selected sub-protocol '" + protocol + "'");
+						logger.debug("Selected sub-protocol: '" + protocol + "'");
 					}
 					return protocol;
 				}

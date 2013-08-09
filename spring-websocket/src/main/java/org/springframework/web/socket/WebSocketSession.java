@@ -17,8 +17,11 @@
 package org.springframework.web.socket;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+
+import org.springframework.http.HttpHeaders;
 
 /**
  * A WebSocket session abstraction. Allows sending messages over a WebSocket connection
@@ -28,6 +31,7 @@ import java.security.Principal;
  * @since 4.0
  */
 public interface WebSocketSession {
+
 
 	/**
 	 * Return a unique session identifier.
@@ -40,9 +44,9 @@ public interface WebSocketSession {
 	URI getUri();
 
 	/**
-     * Return whether the underlying socket is using a secure transport.
+	 * Return the headers used in the handshake request.
 	 */
-	boolean isSecure();
+	HttpHeaders getHandshakeHeaders();
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the
@@ -52,17 +56,18 @@ public interface WebSocketSession {
 	Principal getPrincipal();
 
 	/**
-	 * Return the host name of the endpoint on the other end.
+	 * Return the address on which the request was received.
 	 */
-	String getRemoteHostName();
+	InetSocketAddress getLocalAddress();
 
 	/**
-	 * Return the IP address of the endpoint on the other end.
+	 * Return the address of the remote client.
 	 */
-	String getRemoteAddress();
+	InetSocketAddress getRemoteAddress();
 
 	/**
-	 * Return the negotiated sub-protocol or {@code null} if none was specified.
+	 * Return the negotiated sub-protocol or {@code null} if none was specified or
+	 * negotiated successfully.
 	 */
 	String getAcceptedProtocol();
 

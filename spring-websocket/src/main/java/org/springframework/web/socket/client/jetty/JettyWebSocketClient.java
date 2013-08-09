@@ -24,8 +24,8 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.JettyWebSocketListenerAdapter;
-import org.springframework.web.socket.adapter.JettyWebSocketSessionAdapter;
+import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
+import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
 import org.springframework.web.socket.client.WebSocketConnectFailureException;
 import org.springframework.web.util.UriComponents;
@@ -130,7 +130,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 	}
 
 	@Override
-	public WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler, HttpHeaders headers,
+	public WebSocketSession doHandshakeInternal(WebSocketHandler wsHandler, HttpHeaders headers,
 			URI uri, List<String> protocols) throws WebSocketConnectFailureException {
 
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
@@ -140,16 +140,13 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 			request.setHeader(header, headers.get(header));
 		}
 
-		JettyWebSocketSessionAdapter session = new JettyWebSocketSessionAdapter();
-		session.setUri(uri);
-		session.setRemoteHostName(uri.getHost());
-
-		JettyWebSocketListenerAdapter listener = new JettyWebSocketListenerAdapter(webSocketHandler, session);
+		JettyWebSocketSession wsSession = new JettyWebSocketSession(null);
+		JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		try {
 			// TODO: do not block
 			this.client.connect(listener, uri, request).get();
-			return session;
+			return wsSession;
 		}
 		catch (Exception e) {
 			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);

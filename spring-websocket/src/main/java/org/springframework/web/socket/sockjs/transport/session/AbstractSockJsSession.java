@@ -35,7 +35,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.ConfigurableWebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
@@ -46,7 +45,7 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractSockJsSession implements ConfigurableWebSocketSession {
+public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -95,46 +94,6 @@ public abstract class AbstractSockJsSession implements ConfigurableWebSocketSess
 	@Override
 	public URI getUri() {
 		return this.uri;
-	}
-
-	@Override
-	public void setUri(URI uri) {
-		this.uri = uri;
-	}
-
-	@Override
-	public boolean isSecure() {
-		return "wss".equals(this.uri.getSchemeSpecificPart());
-	}
-
-	@Override
-	public String getRemoteHostName() {
-		return this.remoteHostName;
-	}
-
-	@Override
-	public void setRemoteHostName(String remoteHostName) {
-		this.remoteHostName = remoteHostName;
-	}
-
-	@Override
-	public String getRemoteAddress() {
-		return this.remoteAddress;
-	}
-
-	@Override
-	public void setRemoteAddress(String remoteAddress) {
-		this.remoteAddress = remoteAddress;
-	}
-
-	@Override
-	public Principal getPrincipal() {
-		return this.principal;
-	}
-
-	@Override
-	public void setPrincipal(Principal principal) {
-		this.principal = principal;
 	}
 
 	public SockJsServiceConfig getSockJsServiceConfig() {

@@ -43,10 +43,14 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
 
+		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
+
+		String protocol = null; // TODO: https://github.com/sockjs/sockjs-client/issues/130
+		sockJsSession.setAcceptedProtocol(protocol);
+
 		// Set content type before writing
 		response.getHeaders().setContentType(getContentType());
 
-		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 		handleRequestInternal(request, response, sockJsSession);
 	}
 

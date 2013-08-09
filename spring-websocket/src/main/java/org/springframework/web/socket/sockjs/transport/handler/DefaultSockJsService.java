@@ -42,7 +42,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
-import org.springframework.web.socket.server.support.ServerWebSocketSessionInitializer;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
@@ -76,8 +75,6 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	private SockJsMessageCodec messageCodec;
 
 	private final Map<String, AbstractSockJsSession> sessions = new ConcurrentHashMap<String, AbstractSockJsSession>();
-
-	private final ServerWebSocketSessionInitializer sessionInitializer = new ServerWebSocketSessionInitializer();
 
 	private ScheduledFuture sessionCleanupTask;
 
@@ -279,8 +276,6 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			}
 			logger.debug("Creating new session with session id \"" + sessionId + "\"");
 			session = sessionFactory.createSession(sessionId, handler);
-			String protocol = null; // TODO: https://github.com/sockjs/sockjs-client/issues/130
-			this.sessionInitializer.initialize(request, response, protocol, session);
 			this.sessions.put(sessionId, session);
 			return session;
 		}

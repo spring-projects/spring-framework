@@ -16,34 +16,25 @@
 
 package org.springframework.web.socket.adapter;
 
-import java.net.URI;
-import java.security.Principal;
-
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.server.DefaultHandshakeHandler;
+
 
 /**
- * A WebSocketSession with configurable properties.
+ * A contract for {@link WebSocketSession} implementations that delegate to another
+ * WebSocket session (e.g. a native session).
+ *
+ * @param T the type of the delegate WebSocket session
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface ConfigurableWebSocketSession extends WebSocketSession {
+public interface DelegatingWebSocketSession<T> extends WebSocketSession {
 
-	void setUri(URI uri);
-
-	void setRemoteHostName(String name);
-
-	void setRemoteAddress(String address);
-
-	void setPrincipal(Principal principal);
 
 	/**
-	 * Set the protocol accepted as part of the WebSocket handshake. This property can be
-	 * used when the WebSocket handshake is performed through
-	 * {@link DefaultHandshakeHandler} rather than the underlying WebSocket runtime, or
-	 * when there is no WebSocket handshake (e.g. SockJS HTTP fallback options)
+	 * Invoked when the delegate WebSocket session has been initialized.
 	 */
-	void setAcceptedProtocol(String protocol);
+	void afterSessionInitialized(T session);
+
 
 }

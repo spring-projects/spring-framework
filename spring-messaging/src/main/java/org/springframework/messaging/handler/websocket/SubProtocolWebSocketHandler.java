@@ -30,6 +30,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
@@ -133,7 +134,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	protected final SubProtocolHandler getProtocolHandler(WebSocketSession session) {
 		SubProtocolHandler handler;
 		String protocol = session.getAcceptedProtocol();
-		if (protocol != null) {
+		if (!StringUtils.isEmpty(protocol)) {
 			handler = this.protocolHandlers.get(protocol);
 			Assert.state(handler != null,
 					"No handler for sub-protocol '" + protocol + "', handlers=" + this.protocolHandlers);

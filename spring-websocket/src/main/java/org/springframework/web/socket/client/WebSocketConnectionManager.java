@@ -16,12 +16,10 @@
 
 package org.springframework.web.socket.client;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
@@ -43,9 +41,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private WebSocketSession webSocketSession;
 
-	private final List<String> protocols = new ArrayList<String>();
-
-	private HttpHeaders headers;
+	private HttpHeaders headers = new HttpHeaders();
 
 	private final boolean syncClientLifecycle;
 
@@ -76,24 +72,36 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	 * any.
 	 */
 	public void setSubProtocols(List<String> protocols) {
-		this.protocols.clear();
-		if (!CollectionUtils.isEmpty(protocols)) {
-			this.protocols.addAll(protocols);
-		}
+		this.headers.setSecWebSocketProtocol(protocols);
 	}
 
 	/**
 	 * Return the configured sub-protocols to use.
 	 */
 	public List<String> getSubProtocols() {
-		return this.protocols;
+		return this.headers.getSecWebSocketProtocol();
+	}
+
+	/**
+	 * Set the origin to use.
+	 */
+	public void setOrigin(String origin) {
+		this.headers.setOrigin(origin);
+	}
+
+	/**
+	 * @return the configured origin.
+	 */
+	public String getOrigin() {
+		return this.headers.getOrigin();
 	}
 
 	/**
 	 * Provide default headers to add to the WebSocket handshake request.
 	 */
 	public void setHeaders(HttpHeaders headers) {
-		this.headers = headers;
+		this.headers.clear();
+		this.headers.putAll(headers);
 	}
 
 	/**
@@ -122,14 +130,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected void openConnection() throws Exception {
-
-		HttpHeaders headers = new HttpHeaders();
-		if (this.headers != null) {
-			headers.putAll(this.headers);
-		}
-		headers.setSecWebSocketProtocol(this.protocols);
-
-		this.webSocketSession = this.client.doHandshake(this.webSocketHandler, headers, getUri());
+		this.webSocketSession = this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
 	}
 
 	@Override

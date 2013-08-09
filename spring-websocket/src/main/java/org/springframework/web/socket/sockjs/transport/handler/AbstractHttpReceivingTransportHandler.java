@@ -47,9 +47,6 @@ public abstract class AbstractHttpReceivingTransportHandler
 	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, WebSocketSession wsSession) throws SockJsException {
 
-		// TODO: check "Sec-WebSocket-Protocol" header
-		// https://github.com/sockjs/sockjs-client/issues/130
-
 		Assert.notNull(wsSession, "No session");
 		AbstractHttpSockJsSession sockJsSession = (AbstractHttpSockJsSession) wsSession;
 

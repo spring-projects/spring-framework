@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -147,13 +148,13 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public String getRemoteHostName() {
-		return this.servletRequest.getRemoteHost();
+	public InetSocketAddress getLocalAddress() {
+		return new InetSocketAddress(this.servletRequest.getLocalName(), this.servletRequest.getLocalPort());
 	}
 
 	@Override
-	public String getRemoteAddress() {
-		return this.servletRequest.getRemoteAddr();
+	public InetSocketAddress getRemoteAddress() {
+		return new InetSocketAddress(this.servletRequest.getRemoteHost(), this.servletRequest.getRemotePort());
 	}
 
 	@Override

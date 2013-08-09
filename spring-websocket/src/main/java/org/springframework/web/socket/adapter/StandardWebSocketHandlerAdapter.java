@@ -33,21 +33,21 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
 /**
- * Adapts a {@link WebSocketHandler} to a standard {@link Endpoint}.
+ * Adapts a {@link WebSocketHandler} to the standard WebSocket for Java API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardEndpointAdapter extends Endpoint {
+public class StandardWebSocketHandlerAdapter extends Endpoint {
 
-	private static final Log logger = LogFactory.getLog(StandardEndpointAdapter.class);
+	private static final Log logger = LogFactory.getLog(StandardWebSocketHandlerAdapter.class);
 
 	private final WebSocketHandler handler;
 
-	private final StandardWebSocketSessionAdapter wsSession;
+	private final StandardWebSocketSession wsSession;
 
 
-	public StandardEndpointAdapter(WebSocketHandler handler, StandardWebSocketSessionAdapter wsSession) {
+	public StandardWebSocketHandlerAdapter(WebSocketHandler handler, StandardWebSocketSession wsSession) {
 		Assert.notNull(handler, "handler must not be null");
 		Assert.notNull(wsSession, "wsSession must not be null");
 		this.handler = handler;
@@ -58,7 +58,7 @@ public class StandardEndpointAdapter extends Endpoint {
 	@Override
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
 
-		this.wsSession.initSession(session);
+		this.wsSession.afterSessionInitialized(session);
 
 		if (this.handler.supportsPartialMessages()) {
 			session.addMessageHandler(new MessageHandler.Partial<String>() {
