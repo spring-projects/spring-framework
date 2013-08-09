@@ -40,6 +40,7 @@ import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.ConverterLookup;
 import com.thoughtworks.xstream.converters.ConverterMatcher;
 import com.thoughtworks.xstream.converters.ConverterRegistry;
+import com.thoughtworks.xstream.converters.DataHolder;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.DefaultConverterLookup;
@@ -354,15 +355,29 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
 	@Override
-	public final void afterPropertiesSet() {
+	public void afterPropertiesSet() {
 		this.xstream = buildXStream();
 	}
 
 	/**
-	 * Build the native XStream delegate to be used by this marshaller.
+	 * Build the native XStream delegate to be used by this marshaller,
+	 * delegating to {@link #constructXStream()}, {@link #configureXStream}
+	 * and {@link #customizeXStream}.
 	 */
 	protected XStream buildXStream() {
-		XStream xstream = new XStream(this.reflectionProvider, this.streamDriver,
+		XStream xstream = constructXStream();
+		configureXStream(xstream);
+		customizeXStream(xstream);
+		return xstream;
+	}
+
+	/**
+	 * Construct an XStream instance, either using one of the
+	 * standard constructors or creating a custom subclass.
+	 * @return the {@code XStream} instance
+	 */
+	protected XStream constructXStream() {
+		return new XStream(this.reflectionProvider, this.streamDriver,
 				this.beanClassLoader, this.mapper, this.converterLookup, this.converterRegistry) {
 			@Override
 			protected MapperWrapper wrapMapper(MapperWrapper next) {
@@ -393,7 +408,13 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 				return mapperToWrap;
 			}
 		};
+	}
 
+	/**
+	 * Configure the XStream instance with this marshaller's bean properties.
+	 * @param xstream the {@code XStream} instance
+	 */
+	protected void configureXStream(XStream xstream) {
 		if (this.converters != null) {
 			for (int i = 0; i < this.converters.length; i++) {
 				if (this.converters[i] instanceof Converter) {
@@ -513,9 +534,6 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		if (this.autodetectAnnotations) {
 			xstream.autodetectAnnotations(this.autodetectAnnotations);
 		}
-
-		customizeXStream(xstream);
-		return xstream;
 	}
 
 	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
@@ -591,7 +609,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		else {
 			throw new IllegalArgumentException("DOMResult contains neither Document nor Element");
 		}
-		marshal(graph, streamWriter);
+		doMarshal(graph, streamWriter, null);
 	}
 
 	@Override
@@ -603,20 +621,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	@Override
 	protected void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter) throws XmlMappingException {
 		try {
-			marshal(graph, new StaxWriter(new QNameMap(), streamWriter));
+			doMarshal(graph, new StaxWriter(new QNameMap(), streamWriter), null);
 		}
 		catch (XMLStreamException ex) {
 			throw convertXStreamException(ex, true);
-		}
-	}
-
-	@Override
-	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-		if (this.streamDriver != null) {
-			marshal(graph, this.streamDriver.createWriter(outputStream));
-		}
-		else {
-			marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
 		}
 	}
 
@@ -626,16 +634,38 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 		SaxWriter saxWriter = new SaxWriter();
 		saxWriter.setContentHandler(contentHandler);
-		marshal(graph, saxWriter);
+		doMarshal(graph, saxWriter, null);
 	}
 
 	@Override
-	protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
+	public void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
+		marshalOutputStream(graph, outputStream, null);
+	}
+
+	public void marshalOutputStream(Object graph, OutputStream outputStream, DataHolder dataHolder)
+			throws XmlMappingException, IOException {
+
 		if (this.streamDriver != null) {
-			marshal(graph, this.streamDriver.createWriter(writer));
+			doMarshal(graph, this.streamDriver.createWriter(outputStream), dataHolder);
 		}
 		else {
-			marshal(graph, new CompactWriter(writer));
+			marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding), dataHolder);
+		}
+	}
+
+	@Override
+	public void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
+		marshalWriter(graph, writer, null);
+	}
+
+	public void marshalWriter(Object graph, Writer writer, DataHolder dataHolder)
+			throws XmlMappingException, IOException {
+
+		if (this.streamDriver != null) {
+			doMarshal(graph, this.streamDriver.createWriter(writer), dataHolder);
+		}
+		else {
+			doMarshal(graph, new CompactWriter(writer), dataHolder);
 		}
 	}
 
@@ -643,9 +673,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * Marshals the given graph to the given XStream HierarchicalStreamWriter.
 	 * Converts exceptions using {@link #convertXStreamException}.
 	 */
-	private void marshal(Object graph, HierarchicalStreamWriter streamWriter) {
+	private void doMarshal(Object graph, HierarchicalStreamWriter streamWriter, DataHolder dataHolder) {
 		try {
-			getXStream().marshal(graph, streamWriter);
+			getXStream().marshal(graph, streamWriter, dataHolder);
 		}
 		catch (Exception ex) {
 			throw convertXStreamException(ex, true);
@@ -675,7 +705,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
 		}
-        return unmarshal(streamReader);
+        return doUnmarshal(streamReader, null);
 	}
 
 	@Override
@@ -691,27 +721,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-        return unmarshal(new StaxReader(new QNameMap(), streamReader));
-	}
-
-	@Override
-	protected Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            return unmarshal(this.streamDriver.createReader(inputStream));
-        }
-        else {
-		    return unmarshalReader(new InputStreamReader(inputStream, this.encoding));
-        }
-	}
-
-	@Override
-	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            return unmarshal(this.streamDriver.createReader(reader));
-        }
-        else {
-            return unmarshal(this.fallbackDriver.createReader(reader));
-        }
+        return doUnmarshal(new StaxReader(new QNameMap(), streamReader), null);
 	}
 
 	@Override
@@ -722,13 +732,41 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 				"XStreamMarshaller does not support unmarshalling using SAX XMLReaders");
 	}
 
+	@Override
+	public Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
+		return unmarshalInputStream(inputStream, null);
+	}
+
+	public Object unmarshalInputStream(InputStream inputStream, DataHolder dataHolder) throws XmlMappingException, IOException {
+        if (this.streamDriver != null) {
+            return doUnmarshal(this.streamDriver.createReader(inputStream), dataHolder);
+        }
+        else {
+		    return unmarshalReader(new InputStreamReader(inputStream, this.encoding), dataHolder);
+        }
+	}
+
+	@Override
+	public Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
+		return unmarshalReader(reader, null);
+	}
+
+	public Object unmarshalReader(Reader reader, DataHolder dataHolder) throws XmlMappingException, IOException {
+        if (this.streamDriver != null) {
+            return doUnmarshal(this.streamDriver.createReader(reader), dataHolder);
+        }
+        else {
+            return doUnmarshal(this.fallbackDriver.createReader(reader), dataHolder);
+        }
+	}
+
     /**
      * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
      * Converts exceptions using {@link #convertXStreamException}.
      */
-    private Object unmarshal(HierarchicalStreamReader streamReader) {
+    private Object doUnmarshal(HierarchicalStreamReader streamReader, DataHolder dataHolder) {
         try {
-            return getXStream().unmarshal(streamReader);
+            return getXStream().unmarshal(streamReader, null, dataHolder);
         }
         catch (Exception ex) {
             throw convertXStreamException(ex, false);
