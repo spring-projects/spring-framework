@@ -46,12 +46,14 @@ import static org.junit.Assert.*;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class ScheduledAnnotationBeanPostProcessorTests {
 
+	private final StaticApplicationContext context = new StaticApplicationContext();
+
 	@Test
 	public void fixedDelayTask() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedDelayTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -77,7 +79,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void fixedRateTask() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.FixedRateTestBean.class);
@@ -104,7 +105,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void fixedRateTaskWithInitialDelay() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithInitialDelayTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -130,9 +130,22 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void severalFixedRates() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesTestBean.class);
+		severalFixedRates(context, processorDefinition, targetDefinition);
+	}
+
+	@Test
+	public void severalFixedRatesWithSchedulesContainer() {
+		BeanDefinition processorDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				SeveralFixedRatesWithSchedulesContainerTestBean.class);
+		severalFixedRates(context, processorDefinition, targetDefinition);
+	}
+
+	private void severalFixedRates(StaticApplicationContext context,
+			BeanDefinition processorDefinition, BeanDefinition targetDefinition) {
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
@@ -166,7 +179,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	public void cronTask() throws InterruptedException {
 		Assume.group(TestGroup.LONG_RUNNING);
 
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.CronTestBean.class);
@@ -193,7 +205,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void metaAnnotationWithFixedRate() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(MetaAnnotationFixedRateTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -218,7 +229,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void metaAnnotationWithCronExpression() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.MetaAnnotationCronTestBean.class);
@@ -245,7 +255,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void propertyPlaceholderWithCron() {
 		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
@@ -275,7 +284,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void propertyPlaceholderWithFixedDelay() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
@@ -307,7 +315,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void propertyPlaceholderWithFixedRate() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
@@ -340,7 +347,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void propertyPlaceholderForMetaAnnotation() {
 		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
@@ -371,7 +377,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test(expected = BeanCreationException.class)
 	public void emptyAnnotation() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.EmptyAnnotationTestBean.class);
@@ -382,7 +387,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test(expected = BeanCreationException.class)
 	public void invalidCron() throws Throwable {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.InvalidCronTestBean.class);
@@ -393,7 +397,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test(expected = BeanCreationException.class)
 	public void nonVoidReturnType() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.NonVoidReturnTypeTestBean.class);
@@ -404,7 +407,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test(expected = BeanCreationException.class)
 	public void nonEmptyParamList() {
-		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessorTests.NonEmptyParamListTestBean.class);
@@ -437,6 +439,14 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		}
 	}
 
+
+	static class SeveralFixedRatesWithSchedulesContainerTestBean {
+
+		@Schedules({ @Scheduled(fixedRate = 4000),
+			@Scheduled(fixedRate = 4000, initialDelay = 2000) })
+		public void fixedRate() {
+		}
+	}
 
 	static class SeveralFixedRatesTestBean {
 
