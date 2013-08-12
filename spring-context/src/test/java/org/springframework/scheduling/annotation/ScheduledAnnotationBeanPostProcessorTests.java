@@ -128,19 +128,23 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(3000L, task.getInterval());
 	}
 
-	@Test
-	public void severalFixedRates() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesTestBean.class);
-		severalFixedRates(context, processorDefinition, targetDefinition);
-	}
+	// TODO Reinstate repeated @Scheduled tests once we have full Java 8 support in the
+	// IDEs.
+	// @Test
+	// public void severalFixedRatesWithRepeatedScheduledAnnotation() {
+	// BeanDefinition processorDefinition = new
+	// RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+	// BeanDefinition targetDefinition = new RootBeanDefinition(
+	// SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
+	// severalFixedRates(context, processorDefinition, targetDefinition);
+	// }
 
 	@Test
-	public void severalFixedRatesWithSchedulesContainer() {
+	public void severalFixedRatesWithSchedulesContainerAnnotation() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(
 				ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
-				SeveralFixedRatesWithSchedulesContainerTestBean.class);
+				SeveralFixedRatesWithSchedulesContainerAnnotationTestBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
@@ -440,7 +444,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	static class SeveralFixedRatesWithSchedulesContainerTestBean {
+	static class SeveralFixedRatesWithSchedulesContainerAnnotationTestBean {
 
 		@Schedules({ @Scheduled(fixedRate = 4000),
 			@Scheduled(fixedRate = 4000, initialDelay = 2000) })
@@ -448,14 +452,16 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		}
 	}
 
-	static class SeveralFixedRatesTestBean {
 
-		@Scheduled(fixedRate=4000)
-		@Scheduled(fixedRate=4000, initialDelay=2000)
-		public void fixedRate() {
-		}
-	}
-
+	// TODO Reinstate repeated @Scheduled tests once we have full Java 8 support in the
+	// IDEs.
+	// static class SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean {
+	//
+	// @Scheduled(fixedRate=4000)
+	// @Scheduled(fixedRate=4000, initialDelay=2000)
+	// public void fixedRate() {
+	// }
+	// }
 
 	static class CronTestBean {
 
