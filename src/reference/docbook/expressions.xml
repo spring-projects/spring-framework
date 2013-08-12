@@ -458,7 +458,7 @@ Boolean b = simple.booleanList.get(0);
 
   @Autowired
   public void configure(MovieFinder movieFinder,
-                        @Value("#{ systemProperties['user.region'] }"} String defaultLocale) {
+                        @Value("#{ systemProperties['user.region'] }") String defaultLocale) {
       this.movieFinder = movieFinder;
       this.defaultLocale = defaultLocale;
   }
@@ -474,7 +474,7 @@ Boolean b = simple.booleanList.get(0);
 
   @Autowired
   public MovieRecommender(CustomerPreferenceDao customerPreferenceDao,
-                          @Value("#{systemProperties['user.country']}"} String defaultLocale) {
+                          @Value("#{systemProperties['user.country']}") String defaultLocale) {
       this.customerPreferenceDao = customerPreferenceDao;
       this.defaultLocale = defaultLocale;
   }
