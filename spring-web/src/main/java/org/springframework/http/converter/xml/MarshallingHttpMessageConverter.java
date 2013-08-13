@@ -17,17 +17,18 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
+
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
-import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.util.Assert;
 
 /**
@@ -46,10 +47,9 @@ import org.springframework.util.Assert;
  */
 public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConverter<Object> {
 
-	private Marshaller marshaller;
+	private Marshaller[] marshallers;
 
-	private Unmarshaller unmarshaller;
-
+	private Unmarshaller[] unmarshallers;
 
 	/**
 	 * Construct a new {@code MarshallingHttpMessageConverter} with no {@link Marshaller} or
@@ -68,11 +68,17 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	 * @param marshaller object used as marshaller and unmarshaller
 	 */
 	public MarshallingHttpMessageConverter(Marshaller marshaller) {
-		Assert.notNull(marshaller, "Marshaller must not be null");
-		this.marshaller = marshaller;
+		setMarshaller(marshaller);
 		if (marshaller instanceof Unmarshaller) {
-			this.unmarshaller = (Unmarshaller) marshaller;
+			setUnmarshaller((Unmarshaller) marshaller);
 		}
+	}
+
+	/**
+	 * Construct a new {@code MarshallingMessageConverter} with the given {@link Unmarshaller}.
+	 */
+	public MarshallingHttpMessageConverter(Unmarshaller unmarshaller) {
+		setUnmarshaller(unmarshaller);
 	}
 
 	/**
@@ -82,57 +88,133 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	 * @param unmarshaller the Unmarshaller to use
 	 */
 	public MarshallingHttpMessageConverter(Marshaller marshaller, Unmarshaller unmarshaller) {
-		Assert.notNull(marshaller, "Marshaller must not be null");
-		Assert.notNull(unmarshaller, "Unmarshaller must not be null");
-		this.marshaller = marshaller;
-		this.unmarshaller = unmarshaller;
+		setMarshaller(marshaller);
+		setUnmarshaller(unmarshaller);
 	}
 
+	/**
+	 * Construct a new {@code MarshallingMessageConverter} with the given {@code Marshaller}s and
+	 * {@code Unmarshaller}s.
+	 * @param marshallers the Marshallers to use
+	 * @param unmarshallers the Unmarshallers to use
+	 */
+	public MarshallingHttpMessageConverter(Marshaller[] marshallers, Unmarshaller[] unmarshallers) {
+		setMarshallers(marshallers);
+		setUnmarshallers(unmarshallers);
+	}
 
 	/**
 	 * Set the {@link Marshaller} to be used by this message converter.
 	 */
 	public void setMarshaller(Marshaller marshaller) {
-		this.marshaller = marshaller;
+		Assert.notNull(marshaller, "Marshaller must not be null");
+		this.marshallers = new Marshaller[] { marshaller };
+	}
+
+	/**
+	 * Set {@link Marshaller}s to be used by this message converter.
+	 */
+	public void setMarshallers(Marshaller... marshallers) {
+		Assert.notEmpty(marshallers, "Marshallers must not be empty");
+		this.marshallers = marshallers;
 	}
 
 	/**
 	 * Set the {@link Unmarshaller} to be used by this message converter.
 	 */
 	public void setUnmarshaller(Unmarshaller unmarshaller) {
-		this.unmarshaller = unmarshaller;
+		Assert.notNull(unmarshaller, "Unmarshaller must not be null");
+		this.unmarshallers = new Unmarshaller[] { unmarshaller };
 	}
 
-
-	@Override
-	public boolean supports(Class<?> clazz) {
-		return this.unmarshaller.supports(clazz);
+	/**
+	 * Set {@link Unmarshaller}s to be used by this message converter.
+	 */
+	public void setUnmarshallers(Unmarshaller... unmarshallers) {
+		Assert.notEmpty(unmarshallers, "Unmarshallers must not be empty");
+		this.unmarshallers = unmarshallers;
 	}
 
 	@Override
-	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source) throws IOException {
-		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
-		try {
-			Object result = this.unmarshaller.unmarshal(source);
-			if (!clazz.isInstance(result)) {
-				throw new TypeMismatchException(result, clazz);
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		if (!canRead(mediaType)) {
+			return false;
+		}
+
+		for (Marshaller marshaller : marshallers) {
+			if (marshaller.supports(clazz)) {
+				return true;
 			}
-			return result;
 		}
-		catch (UnmarshallingFailureException ex) {
-			throw new HttpMessageNotReadableException("Could not read [" + clazz + "]", ex);
+
+		return false;
+	}
+
+	@Override
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		if (!canWrite(mediaType)) {
+			return false;
 		}
+
+		for (Unmarshaller unmarshaller : unmarshallers) {
+			if (unmarshaller.supports(clazz)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	protected boolean supports(Class<?> clazz) {
+		// should not be called, since we override canRead/Write
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected Object readFromSource(Class<?> clazz, HttpHeaders headers, Source source)
+			throws IOException {
+		Assert.notEmpty(this.unmarshallers, "Property 'unmarshallers' is required");
+		for (Unmarshaller unmarshaller : unmarshallers) {
+			if (unmarshaller.supports(clazz)) {
+				try {
+					Object result = unmarshaller.unmarshal(source);
+
+					if (!clazz.isInstance(result)) {
+						throw new TypeMismatchException(result, clazz);
+					}
+
+					return result;
+				}
+				catch (MarshallingFailureException ex) {
+					throw new HttpMessageNotReadableException("Could not write [" + clazz.getName()
+							+ "]", ex);
+				}
+			}
+		}
+
+		throw new HttpMessageNotReadableException("No suitable unmarshaller found for class "
+				+ clazz.getName());
 	}
 
 	@Override
 	protected void writeToResult(Object o, HttpHeaders headers, Result result) throws IOException {
-		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
-		try {
-			this.marshaller.marshal(o, result);
-		}
-		catch (MarshallingFailureException ex) {
-			throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
-		}
-	}
+		Assert.notNull(this.marshallers, "Property 'marshallers' is required");
+		for (Marshaller marshaller : marshallers) {
+			if (marshaller.supports(o.getClass())) {
+				try {
+					marshaller.marshal(o, result);
 
+					return;
+				}
+				catch (MarshallingFailureException ex) {
+					throw new HttpMessageNotWritableException("Could not write ["
+							+ o.getClass().getName() + "]", ex);
+				}
+			}
+		}
+
+		throw new HttpMessageNotWritableException("No suitable marshaller found for class "
+				+ o.getClass().getName());
+	}
 }
