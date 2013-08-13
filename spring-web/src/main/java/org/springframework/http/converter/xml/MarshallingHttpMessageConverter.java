@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
+
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.oxm.Marshaller;
@@ -103,10 +105,20 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 		this.unmarshaller = unmarshaller;
 	}
 
+	@Override
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		return canRead(mediaType) && (this.unmarshaller != null) && this.unmarshaller.supports(clazz);
+	}
 
 	@Override
-	public boolean supports(Class<?> clazz) {
-		return this.unmarshaller.supports(clazz);
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		return canWrite(mediaType) && (this.marshaller != null) && this.marshaller.supports(clazz);
+	}
+
+	@Override
+	protected boolean supports(Class<?> clazz) {
+		// should not be called, since we override canRead()/canWrite()
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -134,5 +146,4 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 			throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
 		}
 	}
-
 }
