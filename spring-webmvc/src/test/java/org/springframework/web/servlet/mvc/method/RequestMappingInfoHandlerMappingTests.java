@@ -185,7 +185,7 @@ public class RequestMappingInfoHandlerMappingTests {
 			fail("HttpMediaTypeNotSupportedException expected");
 		}
 		catch (HttpMediaTypeNotSupportedException ex) {
-			assertEquals("Invalid media type \"bogus\": does not contain '/'", ex.getMessage());
+			assertEquals("Invalid mime type \"bogus\": does not contain '/'", ex.getMessage());
 		}
 	}
 

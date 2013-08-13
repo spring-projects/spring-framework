@@ -297,7 +297,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Specify the {@code XmlAdapter}s to be registered with the JAXB {@code Marshaller}
 	 * and {@code Unmarshaller}
 	 */
-	public void setAdapters(XmlAdapter<?, ?>[] adapters) {
+	public void setAdapters(XmlAdapter<?, ?>... adapters) {
 		this.adapters = adapters;
 	}
 
@@ -311,7 +311,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	/**
 	 * Set the schema resources to use for validation.
 	 */
-	public void setSchemas(Resource[] schemaResources) {
+	public void setSchemas(Resource... schemaResources) {
 		this.schemaResources = schemaResources;
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.web.accept;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -48,7 +49,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 				return mediaTypes;
 			}
 		}
-		catch (IllegalArgumentException ex) {
+		catch (InvalidMediaTypeException ex) {
 			throw new HttpMediaTypeNotAcceptableException(
 					"Could not parse accept header [" + acceptHeader + "]: " + ex.getMessage());
 		}

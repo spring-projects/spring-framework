@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,8 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -435,15 +434,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * Create a ParameterNameDiscoverer to be used for argument binding.
-	 * <p>The default implementation creates a {@link PrioritizedParameterNameDiscoverer}
-	 * containing a {@link LocalVariableTableParameterNameDiscoverer} and an
-	 * {@link AspectJAdviceParameterNameDiscoverer}.
+	 * <p>The default implementation creates a {@link DefaultParameterNameDiscoverer}
+	 * and adds a specifically configured {@link AspectJAdviceParameterNameDiscoverer}.
 	 */
 	protected ParameterNameDiscoverer createParameterNameDiscoverer() {
 		// We need to discover them, or if that fails, guess,
 		// and if we can't guess with 100% accuracy, fail.
-		PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
-		discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		DefaultParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
 		AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer =
 				new AspectJAdviceParameterNameDiscoverer(this.pointcut.getExpression());
 		adviceParameterNameDiscoverer.setReturningName(this.returningName);

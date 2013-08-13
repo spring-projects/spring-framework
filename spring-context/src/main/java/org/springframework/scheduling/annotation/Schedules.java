@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.bind.annotation;
+package org.springframework.scheduling.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -23,20 +23,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that indicates a method return value should be bound to the web response
- * body. Supported for annotated handler methods in Servlet environments.
- * <p>
- * As of version 4.0 this annotation can also be added on the type level in which case
- * is inherited and does not need to be added on the method level.
+ * Container annotation that aggregates several {@link Scheduled} annotations.
  *
- * @author Arjen Poutsma
- * @since 3.0
- * @see RequestBody
- * @see RestController
+ * <p>Can be used natively, declaring several nested {@link Scheduled} annotations.
+ * Can also be used in conjunction with Java 8's support for repeatable annotations,
+ * where {@link Scheduled} can simply be declared several times on the same method,
+ * implicitly generating this container annotation.
+ *
+ * @author Juergen Hoeller
+ * @since 4.0
+ * @see Scheduled
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ResponseBody {
+public @interface Schedules {
+
+	Scheduled[] value();
 
 }

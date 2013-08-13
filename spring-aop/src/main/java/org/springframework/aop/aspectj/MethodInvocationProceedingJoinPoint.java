@@ -27,7 +27,8 @@ import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
 
 import org.springframework.aop.ProxyMethodInvocation;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
 /**
@@ -50,6 +51,8 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
+
+	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final ProxyMethodInvocation methodInvocation;
 
@@ -213,7 +216,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		@Override
 		public String[] getParameterNames() {
 			if (this.parameterNames == null) {
-				this.parameterNames = (new LocalVariableTableParameterNameDiscoverer()).getParameterNames(getMethod());
+				this.parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
 			}
 			return this.parameterNames;
 		}

@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,11 +36,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for a {@link RequestResponseBodyMethodProcessor} with actual delegation
@@ -231,6 +233,34 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("text/plain;charset=UTF-8", servletResponse.getHeader("Content-Type"));
 	}
 
+	@Test
+	public void supportsReturnTypeResponseBodyOnType() throws Exception {
+
+		Method method = ResponseBodyController.class.getMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new StringHttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		assertTrue("Failed to recognize type-level @ResponseBody", processor.supportsReturnType(returnType));
+	}
+
+	@Test
+	public void supportsReturnTypeRestController() throws Exception {
+
+		Method method = TestRestController.class.getMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new StringHttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		assertTrue("Failed to recognize type-level @RestController", processor.supportsReturnType(returnType));
+	}
+
 
 	public String handle(
 			@RequestBody List<SimpleBean> list,
@@ -286,6 +316,24 @@ public class RequestResponseBodyMethodProcessorTests {
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
 			dataBinder.setValidator(validator);
 			return dataBinder;
+		}
+	}
+
+	@ResponseBody
+	private static class ResponseBodyController {
+
+		@RequestMapping
+		public String handle() {
+			return "hello";
+		}
+	}
+
+	@RestController
+	private static class TestRestController {
+
+		@RequestMapping
+		public String handle() {
+			return "hello";
 		}
 	}
 

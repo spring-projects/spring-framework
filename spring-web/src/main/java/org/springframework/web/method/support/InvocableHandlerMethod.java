@@ -20,8 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.ReflectionUtils;
@@ -51,7 +51,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private WebDataBinderFactory dataBinderFactory;
 
-	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 
 	/**
@@ -97,8 +97,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Set the ParameterNameDiscoverer for resolving parameter names when needed (e.g. default request attribute name).
-	 * <p>Default is an {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer} instance.
+	 * Set the ParameterNameDiscoverer for resolving parameter names when needed
+	 * (e.g. default request attribute name).
+	 * <p>Default is a {@link org.springframework.core.DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;

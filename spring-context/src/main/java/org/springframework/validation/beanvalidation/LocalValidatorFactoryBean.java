@@ -42,7 +42,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.MessageSource;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ClassUtils;
@@ -93,7 +93,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	private ConstraintValidatorFactory constraintValidatorFactory;
 
-	private ParameterNameDiscoverer parameterNameDiscoverer;
+	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private Resource[] mappingLocations;
 
@@ -161,7 +161,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	/**
 	 * Set the ParameterNameDiscoverer to use for resolving method and constructor
 	 * parameter names if needed for message interpolation.
-	 * <p>Default is a {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}.
+	 * <p>Default is a {@link org.springframework.core.DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
@@ -269,8 +269,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 					Configuration.class.getMethod("parameterNameProvider", parameterNameProviderClass);
 			final Object defaultProvider = ReflectionUtils.invokeMethod(
 					Configuration.class.getMethod("getDefaultParameterNameProvider"), configuration);
-			final ParameterNameDiscoverer discoverer = (this.parameterNameDiscoverer != null ?
-					this.parameterNameDiscoverer : new LocalVariableTableParameterNameDiscoverer());
+			final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
 			Object parameterNameProvider = Proxy.newProxyInstance(getClass().getClassLoader(),
 					new Class[] {parameterNameProviderClass}, new InvocationHandler() {
 				@Override

@@ -226,7 +226,9 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * @return the created factory
 	 */
 	protected XMLInputFactory createXmlInputFactory() {
-		return XMLInputFactory.newInstance();
+		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+		return inputFactory;
 	}
 
 }

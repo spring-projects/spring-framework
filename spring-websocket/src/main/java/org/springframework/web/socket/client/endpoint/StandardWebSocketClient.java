@@ -17,11 +17,8 @@
 package org.springframework.web.socket.client.endpoint;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
@@ -30,18 +27,14 @@ import javax.websocket.Endpoint;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.WebSocketContainer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.StandardEndpointAdapter;
 import org.springframework.web.socket.adapter.StandardWebSocketSessionAdapter;
-import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.AbstractWebSocketClient;
 import org.springframework.web.socket.client.WebSocketConnectFailureException;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programatically through the standard
@@ -50,9 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StandardWebSocketClient implements WebSocketClient {
-
-	private static final Log logger = LogFactory.getLog(StandardWebSocketClient.class);
+public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final WebSocketContainer webSocketContainer;
 
@@ -68,26 +59,8 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
-			throws WebSocketConnectFailureException {
-
-		Assert.notNull(uriTemplate, "uriTemplate must not be null");
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
-		return doHandshake(webSocketHandler, null, uriComponents.toUri());
-	}
-
-	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders httpHeaders, URI uri)
-			throws WebSocketConnectFailureException {
-
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
-		Assert.notNull(uri, "uri must not be null");
-
-		httpHeaders = (httpHeaders != null) ? httpHeaders : new HttpHeaders();
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Connecting to " + uri);
-		}
+	protected WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler,
+			HttpHeaders httpHeaders, URI uri, List<String> protocols) throws WebSocketConnectFailureException {
 
 		StandardWebSocketSessionAdapter session = new StandardWebSocketSessionAdapter();
 		session.setUri(uri);
@@ -95,11 +68,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		configBuidler.configurator(new StandardWebSocketClientConfigurator(httpHeaders));
-
-		List<String> protocols = httpHeaders.getSecWebSocketProtocol();
-		if (!protocols.isEmpty()) {
-			configBuidler.preferredSubprotocols(protocols);
-		}
+		configBuidler.preferredSubprotocols(protocols);
 
 		try {
 			// TODO: do not block
@@ -114,11 +83,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 
-	private static class StandardWebSocketClientConfigurator extends Configurator {
-
-		private static final Set<String> EXCLUDED_HEADERS = new HashSet<String>(
-				Arrays.asList("Sec-WebSocket-Accept", "Sec-WebSocket-Extensions", "Sec-WebSocket-Key",
-						"Sec-WebSocket-Protocol", "Sec-WebSocket-Version"));
+	private class StandardWebSocketClientConfigurator extends Configurator {
 
 		private final HttpHeaders httpHeaders;
 
@@ -129,23 +94,15 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 		@Override
 		public void beforeRequest(Map<String, List<String>> headers) {
-			for (String headerName : this.httpHeaders.keySet()) {
-				if (!EXCLUDED_HEADERS.contains(headerName)) {
-					List<String> value = this.httpHeaders.get(headerName);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Adding header [" + headerName + "=" + value + "]");
-					}
-					headers.put(headerName, value);
-				}
-			}
+			headers.putAll(this.httpHeaders);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request headers: " + headers);
 			}
 		}
 		@Override
-		public void afterResponse(HandshakeResponse handshakeResponse) {
+		public void afterResponse(HandshakeResponse response) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Handshake response headers: " + handshakeResponse.getHeaders());
+				logger.debug("Handshake response headers: " + response.getHeaders());
 			}
 		}
 	}

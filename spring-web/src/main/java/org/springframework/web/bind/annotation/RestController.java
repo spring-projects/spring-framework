@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.stereotype.Controller;
+
 /**
- * Annotation that indicates a method return value should be bound to the web response
- * body. Supported for annotated handler methods in Servlet environments.
+ * A convenience annotation that is itself annotated with {@link Controller @Controller}
+ * and {@link ResponseBody @ResponseBody}.
  * <p>
- * As of version 4.0 this annotation can also be added on the type level in which case
- * is inherited and does not need to be added on the method level.
+ * Types that carry this annotation are treated as
+ * controllers where {@link RequestMapping @RequestMapping} methods assume
+ * {@link ResponseBody @ResponseBody} semantics by default.
  *
- * @author Arjen Poutsma
- * @since 3.0
- * @see RequestBody
- * @see RestController
+ * @author Rossen Stoyanchev
+ * @since 4.0
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ResponseBody {
+@Controller
+@ResponseBody
+public @interface RestController {
 
 }

@@ -45,6 +45,8 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	private final List<String> protocols = new ArrayList<String>();
 
+	private HttpHeaders headers;
+
 	private final boolean syncClientLifecycle;
 
 
@@ -67,16 +69,40 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
-	public void setSupportedProtocols(List<String> protocols) {
+	/**
+	 * Set the sub-protocols to use. If configured, specified sub-protocols will be
+	 * requested in the handshake through the {@code Sec-WebSocket-Protocol} header. The
+	 * resulting WebSocket session will contain the protocol accepted by the server, if
+	 * any.
+	 */
+	public void setSubProtocols(List<String> protocols) {
 		this.protocols.clear();
 		if (!CollectionUtils.isEmpty(protocols)) {
 			this.protocols.addAll(protocols);
 		}
 	}
 
-	public List<String> getSupportedProtocols() {
+	/**
+	 * Return the configured sub-protocols to use.
+	 */
+	public List<String> getSubProtocols() {
 		return this.protocols;
 	}
+
+	/**
+	 * Provide default headers to add to the WebSocket handshake request.
+	 */
+	public void setHeaders(HttpHeaders headers) {
+		this.headers = headers;
+	}
+
+	/**
+	 * Return the default headers for the WebSocket handshake request.
+	 */
+	public HttpHeaders getHeaders() {
+		return this.headers;
+	}
+
 
 	@Override
 	public void startInternal() {
@@ -96,8 +122,13 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 
 	@Override
 	protected void openConnection() throws Exception {
+
 		HttpHeaders headers = new HttpHeaders();
+		if (this.headers != null) {
+			headers.putAll(this.headers);
+		}
 		headers.setSecWebSocketProtocol(this.protocols);
+
 		this.webSocketSession = this.client.doHandshake(this.webSocketHandler, headers, getUri());
 	}
 

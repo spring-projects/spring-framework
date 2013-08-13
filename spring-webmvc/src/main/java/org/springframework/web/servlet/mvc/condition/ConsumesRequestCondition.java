@@ -26,6 +26,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -221,7 +222,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 						MediaType.APPLICATION_OCTET_STREAM;
 						return getMediaType().includes(contentType);
 			}
-			catch (IllegalArgumentException ex) {
+			catch (InvalidMediaTypeException ex) {
 				throw new HttpMediaTypeNotSupportedException(
 						"Can't parse Content-Type [" + request.getContentType() + "]: " + ex.getMessage());
 			}

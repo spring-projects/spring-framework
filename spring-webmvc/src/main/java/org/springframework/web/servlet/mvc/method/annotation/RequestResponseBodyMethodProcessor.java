@@ -81,7 +81,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return returnType.getMethodAnnotation(ResponseBody.class) != null;
+		return ((AnnotationUtils.findAnnotation(returnType.getDeclaringClass(), ResponseBody.class) != null)
+				|| (returnType.getMethodAnnotation(ResponseBody.class) != null));
 	}
 
 	/**
