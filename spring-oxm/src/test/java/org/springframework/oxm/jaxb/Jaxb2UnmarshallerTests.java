@@ -16,8 +16,9 @@
 
 package org.springframework.oxm.jaxb;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
-
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
@@ -26,7 +27,11 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
@@ -35,9 +40,6 @@ import org.springframework.oxm.jaxb.test.FlightType;
 import org.springframework.oxm.jaxb.test.Flights;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.xml.StaxUtils;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -132,6 +134,15 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests {
 		JAXBElement<Airplane> airplane = (JAXBElement<Airplane>) unmarshaller.unmarshal(source);
 		assertEquals("Unmarshalling via explicit @XmlRegistry tag should return correct type",
 				"test", airplane.getValue().getName());
+	}
+
+	@Test
+	public void unmarshalFile() throws IOException {
+		Resource resource = new ClassPathResource("jaxb2.xml", getClass());
+		File file = resource.getFile();
+
+		Flights f = (Flights) unmarshaller.unmarshal(new StreamSource(file));
+		testFlights(f);
 	}
 
 }
