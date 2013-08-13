@@ -17,11 +17,13 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
+
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.oxm.Marshaller;
@@ -49,7 +51,6 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	private Marshaller marshaller;
 
 	private Unmarshaller unmarshaller;
-
 
 	/**
 	 * Construct a new {@code MarshallingHttpMessageConverter} with no {@link Marshaller} or
@@ -88,7 +89,6 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 		this.unmarshaller = unmarshaller;
 	}
 
-
 	/**
 	 * Set the {@link Marshaller} to be used by this message converter.
 	 */
@@ -103,10 +103,24 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 		this.unmarshaller = unmarshaller;
 	}
 
+	@Override
+	public boolean canRead(Class<?> clazz, MediaType mediaType) {
+		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
+
+		return canRead(mediaType) && unmarshaller.supports(clazz);
+	}
 
 	@Override
-	public boolean supports(Class<?> clazz) {
-		return this.unmarshaller.supports(clazz);
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
+
+		return canWrite(mediaType) && marshaller.supports(clazz);
+	}
+
+	@Override
+	protected boolean supports(Class<?> clazz) {
+		// should not be called, since we override canRead()/canWrite()
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -131,8 +145,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 			this.marshaller.marshal(o, result);
 		}
 		catch (MarshallingFailureException ex) {
-			throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
+			throw new HttpMessageNotWritableException("Could not write [" + o.getClass() + "]", ex);
 		}
 	}
-
 }
