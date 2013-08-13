@@ -50,7 +50,7 @@ public class StandardWebSocketHandlerAdapterTests {
 	public void setup() {
 		this.session = mock(Session.class);
 		this.webSocketHandler = mock(WebSocketHandler.class);
-		this.webSocketSession = new StandardWebSocketSession(null, null, null);
+		this.webSocketSession = new StandardWebSocketSession(null, null, null, null);
 		this.adapter = new StandardWebSocketHandlerAdapter(this.webSocketHandler, this.webSocketSession);
 	}
 

@@ -113,7 +113,7 @@ public class JettyWebSocketClientTests {
 								resp.setAcceptedSubProtocol(req.getSubProtocols().get(0));
 							}
 
-							JettyWebSocketSession session = new JettyWebSocketSession(null);
+							JettyWebSocketSession session = new JettyWebSocketSession(null, null);
 							return new JettyWebSocketHandlerAdapter(webSocketHandler, session);
 						}
 					});

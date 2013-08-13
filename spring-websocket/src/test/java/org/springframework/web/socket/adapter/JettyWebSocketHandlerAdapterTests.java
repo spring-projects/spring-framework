@@ -44,7 +44,7 @@ public class JettyWebSocketHandlerAdapterTests {
 	public void setup() {
 		this.session = mock(Session.class);
 		this.webSocketHandler = mock(WebSocketHandler.class);
-		this.webSocketSession = new JettyWebSocketSession(null);
+		this.webSocketSession = new JettyWebSocketSession(null, null);
 		this.adapter = new JettyWebSocketHandlerAdapter(this.webSocketHandler, this.webSocketSession);
 	}
 

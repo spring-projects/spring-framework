@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -70,10 +71,11 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		MockitoAnnotations.initMocks(this);
 
-		this.session = new TestSockJsSession(sessionId, new StubSockJsServiceConfig(), this.wsHandler);
+		Map<String, Object> attributes = Collections.emptyMap();
+		this.session = new TestSockJsSession(sessionId, new StubSockJsServiceConfig(), this.wsHandler, attributes);
 
 		when(this.xhrHandler.getTransportType()).thenReturn(TransportType.XHR);
-		when(this.xhrHandler.createSession(sessionId, this.wsHandler)).thenReturn(this.session);
+		when(this.xhrHandler.createSession(sessionId, this.wsHandler, attributes)).thenReturn(this.session);
 		when(this.xhrSendHandler.getTransportType()).thenReturn(TransportType.XHR_SEND);
 
 		this.service = new DefaultSockJsService(this.taskScheduler,

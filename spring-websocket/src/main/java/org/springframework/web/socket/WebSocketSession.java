@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 
@@ -47,6 +48,13 @@ public interface WebSocketSession {
 	 * Return the headers used in the handshake request.
 	 */
 	HttpHeaders getHandshakeHeaders();
+
+	/**
+	 * Handshake request specific attributes.
+	 * To add attributes to a server-side WebSocket session see
+	 * {@link org.springframework.web.socket.server.HandshakeInterceptor}.
+	 */
+	Map<String, Object> getHandshakeAttributes();
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the

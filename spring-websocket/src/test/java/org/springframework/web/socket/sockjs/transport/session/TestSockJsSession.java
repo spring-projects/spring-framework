@@ -18,9 +18,11 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
@@ -31,6 +33,8 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  */
 public class TestSockJsSession extends AbstractSockJsSession {
+
+	private URI uri;
 
 	private HttpHeaders headers;
 
@@ -55,10 +59,21 @@ public class TestSockJsSession extends AbstractSockJsSession {
 	private String subProtocol;
 
 
-	public TestSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
-		super(sessionId, config, handler);
+	public TestSockJsSession(String sessionId, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+		super(sessionId, config, wsHandler, attributes);
 	}
 
+
+	public void setUri(URI uri) {
+		this.uri = uri;
+	}
+
+	@Override
+	public URI getUri() {
+		return this.uri;
+	}
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {

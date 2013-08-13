@@ -66,7 +66,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		XhrPollingTransportHandler transportHandler = new XhrPollingTransportHandler();
 		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
 
-		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler);
+		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
 		assertEquals("application/javascript;charset=UTF-8", this.response.getHeaders().getContentType().toString());
@@ -92,7 +92,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		JsonpPollingTransportHandler transportHandler = new JsonpPollingTransportHandler();
 		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
-		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler);
+		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
@@ -114,7 +114,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		XhrStreamingTransportHandler transportHandler = new XhrStreamingTransportHandler();
 		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
-		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler);
+		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
@@ -128,7 +128,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		HtmlFileTransportHandler transportHandler = new HtmlFileTransportHandler();
 		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
-		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler);
+		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
@@ -150,7 +150,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		EventSourceTransportHandler transportHandler = new EventSourceTransportHandler();
 		transportHandler.setSockJsServiceConfiguration(this.sockJsConfig);
-		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler);
+		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
 		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 

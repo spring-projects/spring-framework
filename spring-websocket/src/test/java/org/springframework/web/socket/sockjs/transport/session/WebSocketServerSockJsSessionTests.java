@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,8 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 
 	@Override
 	protected TestWebSocketServerSockJsSession initSockJsSession() {
-		return new TestWebSocketServerSockJsSession(this.sockJsConfig, this.webSocketHandler);
+		return new TestWebSocketServerSockJsSession(this.sockJsConfig, this.webSocketHandler,
+				Collections.<String, Object>emptyMap());
 	}
 
 	@Test
@@ -132,8 +134,10 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 
 		private final List<String> heartbeatSchedulingEvents = new ArrayList<>();
 
-		public TestWebSocketServerSockJsSession(SockJsServiceConfig config, WebSocketHandler handler) {
-			super("1", config, handler);
+		public TestWebSocketServerSockJsSession(SockJsServiceConfig config, WebSocketHandler handler,
+				Map<String, Object> attributes) {
+
+			super("1", config, handler, attributes);
 		}
 
 		@Override

@@ -19,12 +19,11 @@ package org.springframework.web.socket.sockjs.transport.session;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.net.URI;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
@@ -51,17 +50,11 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 	private final String id;
 
-	private URI uri;
-
-	private String remoteHostName;
-
-	private String remoteAddress;
-
-	private Principal principal;
-
-	private final SockJsServiceConfig sockJsServiceConfig;
+	private final SockJsServiceConfig config;
 
 	private final WebSocketHandler handler;
+
+	private final Map<String, Object> handshakeAttributes;
 
 	private State state = State.NEW;
 
@@ -73,17 +66,21 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 
 
 	/**
-	 * @param sessionId the session ID
+	 * @param id the session ID
 	 * @param config SockJS service configuration options
 	 * @param wsHandler the recipient of SockJS messages
 	 */
-	public AbstractSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler wsHandler) {
-		Assert.notNull(sessionId, "sessionId is required");
+	public AbstractSockJsSession(String id, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
+
+		Assert.notNull(id, "sessionId is required");
 		Assert.notNull(config, "sockJsConfig is required");
 		Assert.notNull(wsHandler, "webSocketHandler is required");
-		this.id = sessionId;
-		this.sockJsServiceConfig = config;
+
+		this.id = id;
+		this.config = config;
 		this.handler = wsHandler;
+		this.handshakeAttributes = handshakeAttributes;
 	}
 
 	@Override
@@ -91,13 +88,13 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 		return this.id;
 	}
 
-	@Override
-	public URI getUri() {
-		return this.uri;
+	public SockJsServiceConfig getSockJsServiceConfig() {
+		return this.config;
 	}
 
-	public SockJsServiceConfig getSockJsServiceConfig() {
-		return this.sockJsServiceConfig;
+	@Override
+	public Map<String, Object> getHandshakeAttributes() {
+		return this.handshakeAttributes;
 	}
 
 	public boolean isNew() {
@@ -306,13 +303,13 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 	}
 
 	protected void scheduleHeartbeat() {
-		Assert.state(this.sockJsServiceConfig.getTaskScheduler() != null, "heartbeatScheduler not configured");
+		Assert.state(this.config.getTaskScheduler() != null, "heartbeatScheduler not configured");
 		cancelHeartbeat();
 		if (!isActive()) {
 			return;
 		}
-		Date time = new Date(System.currentTimeMillis() + this.sockJsServiceConfig.getHeartbeatTime());
-		this.heartbeatTask = this.sockJsServiceConfig.getTaskScheduler().schedule(new Runnable() {
+		Date time = new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
+		this.heartbeatTask = this.config.getTaskScheduler().schedule(new Runnable() {
 			public void run() {
 				try {
 					sendHeartbeat();
@@ -323,7 +320,7 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 		}, time);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Scheduled heartbeat after " + this.sockJsServiceConfig.getHeartbeatTime()/1000 + " seconds");
+			logger.trace("Scheduled heartbeat after " + this.config.getHeartbeatTime()/1000 + " seconds");
 		}
 	}
 

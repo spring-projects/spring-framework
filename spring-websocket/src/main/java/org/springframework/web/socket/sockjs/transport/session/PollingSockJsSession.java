@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
+import java.util.Map;
+
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
@@ -28,8 +30,11 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
  */
 public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
-	public PollingSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
-		super(sessionId, config, handler);
+
+	public PollingSockJsSession(String sessionId, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+		super(sessionId, config, wsHandler, attributes);
 	}
 
 

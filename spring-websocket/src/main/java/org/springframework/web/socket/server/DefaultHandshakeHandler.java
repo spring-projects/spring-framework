@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -98,7 +99,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	@Override
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler) throws IOException, HandshakeFailureException {
+			WebSocketHandler webSocketHandler, Map<String, Object> attributes) throws IOException, HandshakeFailureException {
 
 		logger.debug("Starting handshake for " + request.getURI());
 
@@ -150,7 +151,7 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			logger.trace("Upgrading with " + webSocketHandler);
 		}
 
-		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, webSocketHandler);
+		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, webSocketHandler, attributes);
 
 		return true;
 	}

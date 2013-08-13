@@ -16,6 +16,9 @@
 
 package org.springframework.web.socket.server;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -62,10 +65,11 @@ public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 		this.request.getHeaders().setSecWebSocketProtocol("STOMP");
 
 		WebSocketHandler handler = new TextWebSocketHandlerAdapter();
+		Map<String, Object> attributes = Collections.<String, Object>emptyMap();
 
-		this.handshakeHandler.doHandshake(this.request, this.response, handler);
+		this.handshakeHandler.doHandshake(this.request, this.response, handler, attributes);
 
-		verify(this.upgradeStrategy).upgrade(request, response, "STOMP", handler);
+		verify(this.upgradeStrategy).upgrade(this.request, this.response, "STOMP", handler, attributes);
 	}
 
 }

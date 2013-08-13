@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -87,8 +88,10 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	}
 
 	@Override
-	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		return new HtmlFileStreamingSockJsSession(sessionId, getSockJsServiceConfig(), handler);
+	public StreamingSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
+			Map<String, Object> attributes) {
+
+		return new HtmlFileStreamingSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
 	}
 
 	@Override
@@ -124,8 +127,10 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 
 	private final class HtmlFileStreamingSockJsSession extends StreamingSockJsSession {
 
-		private HtmlFileStreamingSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
-			super(sessionId, config, handler);
+		private HtmlFileStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+				WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+			super(sessionId, config, wsHandler, attributes);
 		}
 
 		@Override

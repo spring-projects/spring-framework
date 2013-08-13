@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
@@ -39,7 +40,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.websocket.Session> {
 
-	private final HttpHeaders headers;
+	private final HttpHeaders handshakeHeaders;
 
 	private final InetSocketAddress localAddress;
 
@@ -50,12 +51,17 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 	 * Class constructor.
 	 *
 	 * @param handshakeHeaders the headers of the handshake request
+	 * @param handshakeAttributes attributes from the HTTP handshake to make available
+	 *        through the WebSocket session
+	 * @param localAddress the address on which the request was received
+	 * @param remoteAddress the address of the remote client
 	 */
-	public StandardWebSocketSession(HttpHeaders handshakeHeaders, InetSocketAddress localAddress,
-			InetSocketAddress remoteAddress) {
+	public StandardWebSocketSession(HttpHeaders handshakeHeaders, Map<String, Object> handshakeAttributes,
+			InetSocketAddress localAddress, InetSocketAddress remoteAddress) {
 
+		super(handshakeAttributes);
 		handshakeHeaders = (handshakeHeaders != null) ? handshakeHeaders : new HttpHeaders();
-		this.headers = HttpHeaders.readOnlyHttpHeaders(handshakeHeaders);
+		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(handshakeHeaders);
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
 	}
@@ -74,7 +80,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
-		return this.headers;
+		return this.handshakeHeaders;
 	}
 
 	@Override

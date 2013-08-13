@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +42,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.socket.server.support.HandshakeInterceptorChain;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
@@ -74,6 +78,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 	private final Map<TransportType, TransportHandler> transportHandlers = new HashMap<TransportType, TransportHandler>();
 
 	private SockJsMessageCodec messageCodec;
+
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
 	private final Map<String, AbstractSockJsSession> sessions = new ConcurrentHashMap<String, AbstractSockJsSession>();
 
@@ -168,6 +174,23 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 
 	/**
+	 * Configure one or more WebSocket handshake request interceptors.
+	 */
+	public void setHandshakeInterceptors(List<HandshakeInterceptor> interceptors) {
+		this.interceptors.clear();
+		if (interceptors != null) {
+			this.interceptors.addAll(interceptors);
+		}
+	}
+
+	/**
+	 * Return the configured WebSocket handshake request interceptors.
+	 */
+	public List<HandshakeInterceptor> getHandshakeInterceptors() {
+		return this.interceptors;
+	}
+
+	/**
 	 * The codec to use for encoding and decoding SockJS messages.
 	 * @exception IllegalStateException if no {@link SockJsMessageCodec} is available
 	 */
@@ -185,19 +208,42 @@ public class DefaultSockJsService extends AbstractSockJsService {
 
 	@Override
 	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler) throws IOException {
+			WebSocketHandler wsHandler) throws IOException {
 
-		if (isWebSocketEnabled()) {
-			TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
-			if (transportHandler != null) {
-				if (transportHandler instanceof HandshakeHandler) {
-					((HandshakeHandler) transportHandler).doHandshake(request, response, webSocketHandler);
-					return;
-				}
-			}
-			logger.warn("No handler for raw WebSocket messages");
+		if (!isWebSocketEnabled()) {
+			return;
 		}
-		response.setStatusCode(HttpStatus.NOT_FOUND);
+
+		TransportHandler transportHandler = this.transportHandlers.get(TransportType.WEBSOCKET);
+		if ((transportHandler == null) || !(transportHandler instanceof HandshakeHandler)) {
+			logger.warn("No handler for raw WebSocket messages");
+			response.setStatusCode(HttpStatus.NOT_FOUND);
+			return;
+		}
+
+		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, wsHandler);
+		HandshakeFailureException failure = null;
+
+		try {
+			Map<String, Object> attributes = new HashMap<String, Object>();
+			if (!chain.applyBeforeHandshake(request, response, attributes)) {
+				return;
+			}
+			((HandshakeHandler) transportHandler).doHandshake(request, response, wsHandler, attributes);
+			chain.applyAfterHandshake(request, response, null);
+		}
+		catch (HandshakeFailureException ex) {
+			failure = ex;
+		}
+		catch (Throwable t) {
+			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), t);
+		}
+		finally {
+			if (failure != null) {
+				chain.applyAfterHandshake(request, response, failure);
+				throw failure;
+			}
+		}
 	}
 
 	@Override
@@ -235,38 +281,61 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			return;
 		}
 
-		WebSocketSession session = this.sessions.get(sessionId);
-		if (session == null) {
-			if (transportHandler instanceof SockJsSessionFactory) {
-				SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
-				session = createSockJsSession(sessionId, sessionFactory, wsHandler, request, response);
+		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, wsHandler);
+		SockJsException failure = null;
+
+		try {
+			WebSocketSession session = this.sessions.get(sessionId);
+			if (session == null) {
+				if (transportHandler instanceof SockJsSessionFactory) {
+					Map<String, Object> attributes = new HashMap<String, Object>();
+					if (!chain.applyBeforeHandshake(request, response, attributes)) {
+						return;
+					}
+					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
+					session = createSockJsSession(sessionId, sessionFactory, wsHandler, attributes, request, response);
+				}
+				else {
+					response.setStatusCode(HttpStatus.NOT_FOUND);
+					logger.warn("Session not found");
+					return;
+				}
+			}
+
+			if (transportType.sendsNoCacheInstruction()) {
+				addNoCacheHeaders(response);
+			}
+
+			if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
+				Cookie cookie = request.getCookies().get("JSESSIONID");
+				String value = (cookie != null) ? cookie.getValue() : "dummy";
+				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + value + ";path=/");
+			}
+
+			if (transportType.supportsCors()) {
+				addCorsHeaders(request, response);
+			}
+
+			transportHandler.handleRequest(request, response, wsHandler, session);
+			chain.applyAfterHandshake(request, response, null);
+		}
+		catch (SockJsException ex) {
+			failure = ex;
+		}
+		catch (Throwable t) {
+			failure = new SockJsException("Uncaught failure for request " + request.getURI(), sessionId, t);
+		}
+		finally {
+			if (failure != null) {
+				chain.applyAfterHandshake(request, response, failure);
+				throw failure;
 			}
 		}
-		if (session == null) {
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-			logger.warn("Session not found");
-			return;
-		}
-
-		if (transportType.sendsNoCacheInstruction()) {
-			addNoCacheHeaders(response);
-		}
-
-		if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
-			Cookie cookie = request.getCookies().get("JSESSIONID");
-			String value = (cookie != null) ? cookie.getValue() : "dummy";
-			response.getHeaders().set("Set-Cookie", "JSESSIONID=" + value + ";path=/");
-		}
-
-		if (transportType.supportsCors()) {
-			addCorsHeaders(request, response);
-		}
-
-		transportHandler.handleRequest(request, response, wsHandler, session);
 	}
 
 	private WebSocketSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,
-			WebSocketHandler handler, ServerHttpRequest request, ServerHttpResponse response) {
+			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes,
+			ServerHttpRequest request, ServerHttpResponse response) {
 
 		synchronized (this.sessions) {
 			AbstractSockJsSession session = this.sessions.get(sessionId);
@@ -276,8 +345,9 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			if (this.sessionCleanupTask == null) {
 				scheduleSessionTask();
 			}
+
 			logger.debug("Creating new session with session id \"" + sessionId + "\"");
-			session = sessionFactory.createSession(sessionId, handler);
+			session = sessionFactory.createSession(sessionId, wsHandler, handshakeAttributes);
 			this.sessions.put(sessionId, session);
 			return session;
 		}

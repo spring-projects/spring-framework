@@ -20,8 +20,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * A contract for {@link WebSocketSession} implementations that delegate to another
- * WebSocket session (e.g. a native session).
+ * A contract for a {@link WebSocketSession} that delegates to another WebSocket session
+ * (e.g. a native session).
  *
  * @param T the type of the delegate WebSocket session
  *

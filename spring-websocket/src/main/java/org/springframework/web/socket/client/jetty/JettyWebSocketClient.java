@@ -17,7 +17,9 @@
 package org.springframework.web.socket.client.jetty;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.springframework.context.SmartLifecycle;
@@ -122,25 +124,26 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
+	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVars)
 			throws WebSocketConnectFailureException {
 
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVariables).encode();
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode();
 		return doHandshake(webSocketHandler, null, uriComponents.toUri());
 	}
 
 	@Override
 	public WebSocketSession doHandshakeInternal(WebSocketHandler wsHandler, HttpHeaders headers,
-			URI uri, List<String> protocols) throws WebSocketConnectFailureException {
+			URI uri, List<String> protocols, Map<String, Object> handshakeAttributes)
+					throws WebSocketConnectFailureException {
 
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);
-
 		for (String header : headers.keySet()) {
 			request.setHeader(header, headers.get(header));
 		}
 
-		JettyWebSocketSession wsSession = new JettyWebSocketSession(null);
+		Principal user = getUser();
+		JettyWebSocketSession wsSession = new JettyWebSocketSession(user, handshakeAttributes);
 		JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		try {
@@ -151,6 +154,15 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		catch (Exception e) {
 			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);
 		}
+	}
+
+
+	/**
+	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};
+	 *         by default this method returns {@code null}
+	 */
+	protected Principal getUser() {
+		return null;
 	}
 
 }

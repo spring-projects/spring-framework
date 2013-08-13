@@ -18,7 +18,9 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.security.Principal;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -52,7 +54,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private ServerHttpAsyncRequestControl asyncRequestControl;
 
-	private String protocol;
+	private URI uri;
 
 	private HttpHeaders handshakeHeaders;
 
@@ -62,11 +64,20 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private InetSocketAddress remoteAddress;
 
+	private String acceptedProtocol;
 
-	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler wsHandler) {
-		super(id, config, wsHandler);
+
+	public AbstractHttpSockJsSession(String id, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
+
+		super(id, config, wsHandler, handshakeAttributes);
 	}
 
+
+	@Override
+	public URI getUri() {
+		return this.uri;
+	}
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
@@ -112,14 +123,14 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 * @param protocol the sub-protocol to set
 	 */
 	public void setAcceptedProtocol(String protocol) {
-		this.protocol = protocol;
+		this.acceptedProtocol = protocol;
 	}
 
 	/**
 	 * Return the selected sub-protocol to use.
 	 */
 	public String getAcceptedProtocol() {
-		return this.protocol;
+		return this.acceptedProtocol;
 	}
 
 	public synchronized void setInitialRequest(ServerHttpRequest request, ServerHttpResponse response,
@@ -135,6 +146,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			throw new SockJsTransportFailureException("Failed to send \"open\" frame", getId(), t);
 		}
 
+		this.uri = request.getURI();
 		this.handshakeHeaders = request.getHeaders();
 		this.principal = request.getPrincipal();
 		this.localAddress = request.getLocalAddress();

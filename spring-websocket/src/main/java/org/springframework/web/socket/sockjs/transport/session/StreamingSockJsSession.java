@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -37,8 +38,10 @@ public class StreamingSockJsSession extends AbstractHttpSockJsSession {
 	private int byteCount;
 
 
-	public StreamingSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
-		super(sessionId, config, handler);
+	public StreamingSockJsSession(String sessionId, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+		super(sessionId, config, wsHandler, attributes);
 	}
 
 

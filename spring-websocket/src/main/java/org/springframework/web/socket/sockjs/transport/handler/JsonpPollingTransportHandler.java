@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,8 +54,10 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	}
 
 	@Override
-	public PollingSockJsSession createSession(String sessionId, WebSocketHandler handler) {
-		return new PollingSockJsSession(sessionId, getSockJsServiceConfig(), handler);
+	public PollingSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
+			Map<String, Object> attributes) {
+
+		return new PollingSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
 	}
 
 	@Override

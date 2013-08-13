@@ -17,6 +17,8 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -60,8 +62,10 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 	}
 
 	@Override
-	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler) {
-		return new WebSocketServerSockJsSession(sessionId, getSockJsServiceConfig(), webSocketHandler);
+	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
+			Map<String, Object> attributes) {
+
+		return new WebSocketServerSockJsSession(sessionId, getSockJsServiceConfig(), wsHandler, attributes);
 	}
 
 	@Override
@@ -71,7 +75,7 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 		WebSocketServerSockJsSession sockJsSession = (WebSocketServerSockJsSession) wsSession;
 		try {
 			wsHandler = new SockJsWebSocketHandler(getSockJsServiceConfig(), wsHandler, sockJsSession);
-			this.handshakeHandler.doHandshake(request, response, wsHandler);
+			this.handshakeHandler.doHandshake(request, response, wsHandler, Collections.<String, Object>emptyMap());
 		}
 		catch (Throwable t) {
 			sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
@@ -82,10 +86,10 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 	// HandshakeHandler methods
 
 	@Override
-	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws IOException {
+	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler handler, Map<String, Object> attributes) throws IOException {
 
-		return this.handshakeHandler.doHandshake(request, response, handler);
+		return this.handshakeHandler.doHandshake(request, response, handler, attributes);
 	}
 
 }

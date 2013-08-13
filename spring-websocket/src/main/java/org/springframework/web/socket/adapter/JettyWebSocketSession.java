@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ObjectUtils;
@@ -46,8 +47,11 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 	 * Class constructor.
 	 *
 	 * @param principal the user associated with the session, or {@code null}
+	 * @param handshakeAttributes attributes from the HTTP handshake to make available
+	 *        through the WebSocket session
 	 */
-	public JettyWebSocketSession(Principal principal) {
+	public JettyWebSocketSession(Principal principal, Map<String, Object> handshakeAttributes) {
+		super(handshakeAttributes);
 		this.principal = principal;
 	}
 

@@ -107,7 +107,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
-		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler);
+		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler, null);
 		session.delegateConnectionEstablished();
 
 		doThrow(new Exception()).when(wsHandler).handleMessage(session, new TextMessage("x"));
@@ -127,7 +127,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	private void handleRequest(AbstractHttpReceivingTransportHandler transportHandler) throws Exception {
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
-		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler);
+		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
 		transportHandler.setSockJsServiceConfiguration(new StubSockJsServiceConfig());
 		transportHandler.handleRequest(this.request, this.response, wsHandler, session);
@@ -141,7 +141,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		resetResponse();
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
-		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler);
+		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
 		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, wsHandler, session);
 

@@ -17,6 +17,7 @@
 package org.springframework.web.socket.server;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -40,14 +41,18 @@ public interface RequestUpgradeStrategy {
 	 * Perform runtime specific steps to complete the upgrade. Invoked after successful
 	 * negotiation of the handshake request.
 	 *
-	 * @param webSocketHandler the handler for WebSocket messages
+	 * @param request the current request
+	 * @param response the current response
+	 * @param acceptedProtocol the accepted sub-protocol, if any
+	 * @param wsHandler the handler for WebSocket messages
+	 * @param attributes handshake context attributes
 	 *
 	 * @throws HandshakeFailureException thrown when handshake processing failed to
 	 *         complete due to an internal, unrecoverable error, i.e. a server error as
 	 *         opposed to a failure to successfully negotiate the requirements of the
 	 *         handshake request.
 	 */
-	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String selectedProtocol,
-			WebSocketHandler webSocketHandler) throws IOException, HandshakeFailureException;
+	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String acceptedProtocol,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws IOException, HandshakeFailureException;
 
 }

@@ -269,8 +269,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 	 * and raw WebSocket requests are delegated to abstract methods.
 	 */
 	@Override
-	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler)
-			throws SockJsException {
+	public final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler wsHandler) throws SockJsException {
 
 		String sockJsPath = getSockJsPath(request);
 		if (sockJsPath == null) {
@@ -301,7 +301,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 				this.iframeHandler.handle(request, response);
 			}
 			else if (sockJsPath.equals("/websocket")) {
-				handleRawWebSocketRequest(request, response, handler);
+				handleRawWebSocketRequest(request, response, wsHandler);
 			}
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
@@ -318,7 +318,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
-				handleTransportRequest(request, response, handler, sessionId, transport);
+				handleTransportRequest(request, response, wsHandler, sessionId, transport);
 			}
 
 			response.flush();

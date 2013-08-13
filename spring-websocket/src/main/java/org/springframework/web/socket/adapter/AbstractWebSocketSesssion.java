@@ -16,6 +16,7 @@
 package org.springframework.web.socket.adapter;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,24 @@ public abstract class AbstractWebSocketSesssion<T> implements DelegatingWebSocke
 
 	private T delegateSession;
 
+	private final Map<String, Object> handshakeAttributes;
+
+
+	/**
+	 * Class constructor
+	 *
+	 * @param handshakeAttributes attributes from the HTTP handshake to make available
+	 *        through the WebSocket session
+	 */
+	public AbstractWebSocketSesssion(Map<String, Object> handshakeAttributes) {
+		this.handshakeAttributes = handshakeAttributes;
+	}
+
+
+	@Override
+	public Map<String, Object> getHandshakeAttributes() {
+		return this.handshakeAttributes;
+	}
 
 	/**
 	 * @return the WebSocket session to delegate to

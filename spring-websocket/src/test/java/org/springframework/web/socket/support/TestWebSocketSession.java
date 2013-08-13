@@ -21,7 +21,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
@@ -38,6 +40,8 @@ public class TestWebSocketSession implements WebSocketSession {
 	private String id;
 
 	private URI uri;
+
+	private Map<String, Object> attributes = new HashMap<String, Object>();
 
 	private Principal principal;
 
@@ -104,6 +108,21 @@ public class TestWebSocketSession implements WebSocketSession {
 	 */
 	public void setHeaders(HttpHeaders headers) {
 		this.headers = headers;
+	}
+
+	/**
+	 * @param attributes the attributes to set
+	 */
+	public void setHandshakeAttributes(Map<String, Object> attributes) {
+		this.attributes = attributes;
+	}
+
+	/**
+	 * @return the attributes
+	 */
+	@Override
+	public Map<String, Object> getHandshakeAttributes() {
+		return this.attributes;
 	}
 
 	/**

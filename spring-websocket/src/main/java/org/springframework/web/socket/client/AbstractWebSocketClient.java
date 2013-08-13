@@ -18,8 +18,10 @@ package org.springframework.web.socket.client;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -94,21 +96,27 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 			subProtocols.addAll(headers.getSecWebSocketProtocol());
 		}
 
-		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols);
+		return doHandshakeInternal(webSocketHandler, headersToUse, uri, subProtocols,
+				Collections.<String, Object>emptyMap());
 	}
 
 	/**
-	 *
+	 * Perform the actual handshake to establish a connection to the server.
 	 *
 	 * @param webSocketHandler the client-side handler for WebSocket messages
 	 * @param headers HTTP headers to use for the handshake, with unwanted (forbidden)
 	 *        headers filtered out, never {@code null}
 	 * @param uri the target URI for the handshake, never {@code null}
 	 * @param subProtocols requested sub-protocols, or an empty list
+	 * @param handshakeAttributes attributes to make available via
+	 *        {@link WebSocketSession#getHandshakeAttributes()}; currently always an empty map.
+	 *
 	 * @return the established WebSocket session
+	 *
 	 * @throws WebSocketConnectFailureException
 	 */
 	protected abstract WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> subProtocols) throws WebSocketConnectFailureException;
+			HttpHeaders headers, URI uri, List<String> subProtocols,
+			Map<String, Object> handshakeAttributes) throws WebSocketConnectFailureException;
 
 }

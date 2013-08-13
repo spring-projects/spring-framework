@@ -19,6 +19,7 @@ package org.springframework.web.socket.sockjs.transport.session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
@@ -45,8 +46,10 @@ public class TestHttpSockJsSession extends AbstractHttpSockJsSession {
 	private String subProtocol;
 
 
-	public TestHttpSockJsSession(String sessionId, SockJsServiceConfig config, WebSocketHandler handler) {
-		super(sessionId, config, handler);
+	public TestHttpSockJsSession(String sessionId, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+		super(sessionId, config, wsHandler, attributes);
 	}
 
 	@Override

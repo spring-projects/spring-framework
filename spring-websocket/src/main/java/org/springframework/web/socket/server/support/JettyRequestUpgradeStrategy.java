@@ -17,6 +17,7 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +86,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler wsHandler) throws IOException {
+			String protocol, WebSocketHandler wsHandler, Map<String, Object> attrs) throws IOException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -98,7 +99,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			throw new HandshakeFailureException("Not a WebSocket request");
 		}
 
-		JettyWebSocketSession wsSession = new JettyWebSocketSession(request.getPrincipal());
+		JettyWebSocketSession wsSession = new JettyWebSocketSession(request.getPrincipal(), attrs);
 		JettyWebSocketHandlerAdapter wsListener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME, wsListener);

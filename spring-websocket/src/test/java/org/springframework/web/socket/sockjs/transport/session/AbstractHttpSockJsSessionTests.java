@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 
 	@Override
 	protected TestAbstractHttpSockJsSession initSockJsSession() {
-		return new TestAbstractHttpSockJsSession(this.sockJsConfig, this.webSocketHandler);
+		return new TestAbstractHttpSockJsSession(this.sockJsConfig, this.webSocketHandler, null);
 	}
 
 	@Test
@@ -126,8 +127,10 @@ public class AbstractHttpSockJsSessionTests extends BaseAbstractSockJsSessionTes
 		private boolean heartbeatScheduled;
 
 
-		public TestAbstractHttpSockJsSession(SockJsServiceConfig config, WebSocketHandler handler) {
-			super("1", config, handler);
+		public TestAbstractHttpSockJsSession(SockJsServiceConfig config, WebSocketHandler handler,
+				Map<String, Object> attributes) {
+
+			super("1", config, handler, attributes);
 		}
 
 		public boolean wasCacheFlushed() {

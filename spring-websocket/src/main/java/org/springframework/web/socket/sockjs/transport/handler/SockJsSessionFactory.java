@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.util.Map;
+
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
@@ -31,10 +33,13 @@ public interface SockJsSessionFactory {
 
 	/**
 	 * Create a new SockJS session.
+	 *
 	 * @param sessionId the ID of the session
-	 * @param webSocketHandler the underlying {@link WebSocketHandler}
-	 * @return a new non-null session
+	 * @param wsHandler the underlying {@link WebSocketHandler}
+	 * @param attributes handshake request specific attributes
+	 *
+	 * @return a new session, never {@code null}
 	 */
-	AbstractSockJsSession createSession(String sessionId, WebSocketHandler webSocketHandler);
+	AbstractSockJsSession createSession(String sessionId, WebSocketHandler wsHandler, Map<String, Object> attributes);
 
 }

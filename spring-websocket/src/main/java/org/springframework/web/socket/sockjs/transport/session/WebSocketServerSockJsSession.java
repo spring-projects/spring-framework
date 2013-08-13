@@ -18,7 +18,9 @@ package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -44,8 +46,17 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession
 	private WebSocketSession wsSession;
 
 
-	public WebSocketServerSockJsSession(String id, SockJsServiceConfig config, WebSocketHandler wsHandler) {
-		super(id, config, wsHandler);
+	public WebSocketServerSockJsSession(String id, SockJsServiceConfig config,
+			WebSocketHandler wsHandler, Map<String, Object> attributes) {
+
+		super(id, config, wsHandler, attributes);
+	}
+
+
+	@Override
+	public URI getUri() {
+		checkDelegateSessionInitialized();
+		return this.wsSession.getUri();
 	}
 
 	@Override

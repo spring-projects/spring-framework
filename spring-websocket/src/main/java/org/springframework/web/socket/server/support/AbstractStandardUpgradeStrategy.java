@@ -18,6 +18,7 @@ package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 import javax.websocket.Endpoint;
 
@@ -44,14 +45,15 @@ public abstract class AbstractStandardUpgradeStrategy implements RequestUpgradeS
 
 
 	@Override
-	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String acceptedProtocol, WebSocketHandler wsHandler) throws IOException, HandshakeFailureException {
+	public void upgrade(ServerHttpRequest request, ServerHttpResponse response, String acceptedProtocol,
+			WebSocketHandler wsHandler, Map<String, Object> attributes)
+					throws IOException, HandshakeFailureException {
 
 		HttpHeaders headers = request.getHeaders();
-		InetSocketAddress localAddress = request.getLocalAddress();
-		InetSocketAddress remoteAddress = request.getRemoteAddress();
+		InetSocketAddress localAddr = request.getLocalAddress();
+		InetSocketAddress remoteAddr = request.getRemoteAddress();
 
-		StandardWebSocketSession wsSession = new StandardWebSocketSession(headers, localAddress, remoteAddress);
+		StandardWebSocketSession wsSession = new StandardWebSocketSession(headers, attributes, localAddr, remoteAddr);
 		StandardWebSocketHandlerAdapter endpoint = new StandardWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		upgradeInternal(request, response, acceptedProtocol, endpoint);

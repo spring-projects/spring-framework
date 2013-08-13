@@ -17,6 +17,10 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +34,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
+import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 
@@ -56,6 +62,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 	private final WebSocketHandler webSocketHandler;
 
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+
 
 	public WebSocketHttpRequestHandler(WebSocketHandler webSocketHandler) {
 		this(webSocketHandler, new DefaultHandshakeHandler());
@@ -70,6 +78,23 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 
 	/**
+	 * Configure one or more WebSocket handshake request interceptors.
+	 */
+	public void setHandshakeInterceptors(List<HandshakeInterceptor> interceptors) {
+		this.interceptors.clear();
+		if (interceptors != null) {
+			this.interceptors.addAll(interceptors);
+		}
+	}
+
+	/**
+	 * Return the configured WebSocket handshake request interceptors.
+	 */
+	public List<HandshakeInterceptor> getHandshakeInterceptors() {
+		return this.interceptors;
+	}
+
+	/**
 	 * Decorate the WebSocketHandler provided to the class constructor.
 	 *
 	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
@@ -81,14 +106,36 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	}
 
 	@Override
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
 			throws ServletException, IOException {
 
-		ServerHttpRequest httpRequest = new ServletServerHttpRequest(request);
-		ServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
 
-		this.handshakeHandler.doHandshake(httpRequest, httpResponse, this.webSocketHandler);
-		httpResponse.flush();
+		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.webSocketHandler);
+		HandshakeFailureException failure = null;
+
+		try {
+			Map<String, Object> attributes = new HashMap<String, Object>();
+			if (!chain.applyBeforeHandshake(request, response, attributes)) {
+				return;
+			}
+			this.handshakeHandler.doHandshake(request, response, this.webSocketHandler, attributes);
+			chain.applyAfterHandshake(request, response, null);
+		}
+		catch (HandshakeFailureException ex) {
+			failure = ex;
+		}
+		catch (Throwable t) {
+			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), t);
+		}
+		finally {
+			if (failure != null) {
+				chain.applyAfterHandshake(request, response, failure);
+				throw failure;
+			}
+			response.flush();
+		}
 	}
 
 }

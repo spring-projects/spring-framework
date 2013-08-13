@@ -63,14 +63,16 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 
 	@Override
-	protected WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> protocols) throws WebSocketConnectFailureException {
+	protected WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler, HttpHeaders headers,
+			URI uri, List<String> protocols, Map<String, Object> handshakeAttributes)
+					throws WebSocketConnectFailureException {
 
 		int port = getPort(uri);
 		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
 		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), port);
 
-		StandardWebSocketSession session = new StandardWebSocketSession(headers, localAddress, remoteAddress);
+		StandardWebSocketSession session = new StandardWebSocketSession(headers,
+				handshakeAttributes, localAddress, remoteAddress);
 
 		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));

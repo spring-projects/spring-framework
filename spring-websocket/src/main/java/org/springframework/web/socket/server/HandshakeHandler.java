@@ -17,6 +17,7 @@
 package org.springframework.web.socket.server;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -29,7 +30,9 @@ import org.springframework.web.socket.support.PerConnectionWebSocketHandler;
  * @author Rossen Stoyanchev
  * @since 4.0
  *
+ * @see HandshakeInterceptor
  * @see org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
+ * @see org.springframework.web.socket.sockjs.SockJsService
  */
 public interface HandshakeHandler {
 
@@ -38,9 +41,11 @@ public interface HandshakeHandler {
 	 *
 	 * @param request the current request
 	 * @param response the current response
-	 * @param webSocketHandler the handler to process WebSocket messages; see
+	 * @param wsHandler the handler to process WebSocket messages; see
 	 *        {@link PerConnectionWebSocketHandler} for providing a handler with
 	 *        per-connection lifecycle.
+	 * @param attributes handshake request specific attributes to be set on the WebSocket
+	 *        session and thus made available to the {@link WebSocketHandler}
 	 *
 	 * @return whether the handshake negotiation was successful or not. In either case the
 	 *         response status, headers, and body will have been updated to reflect the
@@ -53,7 +58,7 @@ public interface HandshakeHandler {
 	 *         opposed to a failure to successfully negotiate the requirements of the
 	 *         handshake request.
 	 */
-	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler webSocketHandler)
-			throws IOException, HandshakeFailureException;
+	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+			Map<String, Object> attributes) throws IOException, HandshakeFailureException;
 
 }
