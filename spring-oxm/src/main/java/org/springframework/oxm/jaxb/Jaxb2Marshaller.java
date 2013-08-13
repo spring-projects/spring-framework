@@ -791,6 +791,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			else if (streamSource.getReader() != null) {
 				inputSource = new InputSource(streamSource.getReader());
 			}
+			else {
+				inputSource = new InputSource(streamSource.getSystemId());
+			}
 		}
 
 		try {
