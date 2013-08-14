@@ -21,7 +21,6 @@ import java.security.Principal;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a server-side HTTP request.
@@ -31,11 +30,6 @@ import org.springframework.util.MultiValueMap;
  * @since 3.0
  */
 public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
-
-	/**
-	 * Returns the map of query parameters. Empty if no query has been set.
-	 */
-	MultiValueMap<String, String> getQueryParams();
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the

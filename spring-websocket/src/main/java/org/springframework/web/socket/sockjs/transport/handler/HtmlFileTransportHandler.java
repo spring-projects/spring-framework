@@ -98,18 +98,18 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
 			AbstractHttpSockJsSession sockJsSession) {
 
-			String callback = request.getQueryParams().getFirst("c");
-			if (! StringUtils.hasText(callback)) {
-				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-				try {
-					response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
-				}
-				catch (IOException t) {
-					sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
-					throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), t);
-				}
-				return;
+		String callback = getCallbackParam(request);
+		if (! StringUtils.hasText(callback)) {
+			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			try {
+				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
 			}
+			catch (IOException t) {
+				sockJsSession.tryCloseWithSockJsTransportError(t, CloseStatus.SERVER_ERROR);
+				throw new SockJsTransportFailureException("Failed to write to response", sockJsSession.getId(), t);
+			}
+			return;
+		}
 
 		super.handleRequestInternal(request, response, sockJsSession);
 	}
@@ -137,7 +137,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 		protected void writePrelude() throws IOException {
 
 			// we already validated the parameter above..
-			String callback = getRequest().getQueryParams().getFirst("c");
+			String callback = getCallbackParam(getRequest());
 
 			String html = String.format(PARTIAL_HTML_CONTENT, callback);
 			getResponse().getBody().write(html.getBytes("UTF-8"));

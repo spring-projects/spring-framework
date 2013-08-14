@@ -65,7 +65,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 			AbstractHttpSockJsSession sockJsSession) throws SockJsException {
 
 		try {
-			String callback = request.getQueryParams().getFirst("c");
+			String callback = getCallbackParam(request);
 			if (! StringUtils.hasText(callback)) {
 				response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 				response.getBody().write("\"callback\" parameter required".getBytes("UTF-8"));
@@ -84,7 +84,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 	protected FrameFormat getFrameFormat(ServerHttpRequest request) {
 
 		// we already validated the parameter above..
-		String callback = request.getQueryParams().getFirst("c");
+		String callback = getCallbackParam(request);
 
 		return new SockJsFrame.DefaultFrameFormat(callback + "(\"%s\");\r\n") {
 			@Override

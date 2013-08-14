@@ -34,8 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,9 +41,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -61,13 +56,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private static final String METHOD_POST = "POST";
 
-	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
-
 	private final HttpServletRequest servletRequest;
 
 	private HttpHeaders headers;
-
-	private MultiValueMap<String, String> queryParams;
 
 	private ServerHttpAsyncRequestControl asyncRequestControl;
 
@@ -152,26 +143,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return new InetSocketAddress(this.servletRequest.getRemoteHost(), this.servletRequest.getRemotePort());
-	}
-
-	@Override
-	public MultiValueMap<String, String> getQueryParams() {
-		if (this.queryParams == null) {
-			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
-			String queryString = this.servletRequest.getQueryString();
-			if (queryString != null) {
-				Matcher m = QUERY_PARAM_PATTERN.matcher(queryString);
-				while (m.find()) {
-					String name = m.group(1);
-					String[] values = this.servletRequest.getParameterValues(name);
-					if (values != null) {
-						result.put(name, Arrays.asList(values));
-					}
-				}
-			}
-			this.queryParams = CollectionUtils.unmodifiableMultiValueMap(result);
-		}
-		return this.queryParams;
 	}
 
 	@Override

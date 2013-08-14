@@ -17,10 +17,13 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsException;
@@ -28,6 +31,8 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame.FrameFormat;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.session.AbstractHttpSockJsSession;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Base class for HTTP transport handlers that push messages to connected clients.
@@ -80,5 +85,18 @@ public abstract class AbstractHttpSendingTransportHandler extends TransportHandl
 	protected abstract MediaType getContentType();
 
 	protected abstract FrameFormat getFrameFormat(ServerHttpRequest request);
+
+	protected final String getCallbackParam(ServerHttpRequest request) {
+		String query = request.getURI().getQuery();
+		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
+		String value = params.getFirst("c");
+		try {
+			return StringUtils.isEmpty(value) ? null : UriUtils.decode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			// should never happen
+			throw new SockJsException("Unable to decode callback query parameter", null, e);
+		}
+	}
 
 }
