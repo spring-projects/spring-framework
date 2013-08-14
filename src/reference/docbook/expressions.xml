@@ -980,7 +980,7 @@ StandardEvaluationContext context = new StandardEvaluationContext(tesla);
 
 String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.class);
 
-System.out.println(name); // Mike Tesla
+System.out.println(name); // Nikola Tesla
 
 tesla.setName(null);
 
