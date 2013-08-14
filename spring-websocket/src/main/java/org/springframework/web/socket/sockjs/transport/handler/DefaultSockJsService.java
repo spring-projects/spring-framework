@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-import org.springframework.http.Cookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -307,9 +307,8 @@ public class DefaultSockJsService extends AbstractSockJsService {
 			}
 
 			if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
-				Cookie cookie = request.getCookies().get("JSESSIONID");
-				String value = (cookie != null) ? cookie.getValue() : "dummy";
-				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + value + ";path=/");
+				String cookieValue = getJsessionIdCookieValue(request.getHeaders());
+				response.getHeaders().set("Set-Cookie", "JSESSIONID=" + cookieValue + ";path=/");
 			}
 
 			if (transportType.supportsCors()) {
@@ -385,6 +384,20 @@ public class DefaultSockJsService extends AbstractSockJsService {
 				}
 			}
 		}, getDisconnectDelay());
+	}
+
+	private String getJsessionIdCookieValue(HttpHeaders headers) {
+		List<String> rawCookies = headers.get("Cookie");
+		if (!CollectionUtils.isEmpty(rawCookies)) {
+			for (String rawCookie : rawCookies) {
+				if (rawCookie.startsWith("JSESSIONID=")) {
+					int start = "JSESSIONID=".length();
+					int end = rawCookie.indexOf(';');
+					return (end != -1) ? rawCookie.substring(start, end) : rawCookie.substring(start);
+				}
+			}
+		}
+		return "dummy";
 	}
 
 

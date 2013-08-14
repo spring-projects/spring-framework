@@ -18,9 +18,7 @@ package org.springframework.http.server;
 
 import java.net.InetSocketAddress;
 import java.security.Principal;
-import java.util.Map;
 
-import org.springframework.http.Cookie;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.MultiValueMap;
@@ -38,11 +36,6 @@ public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
 	 * Returns the map of query parameters. Empty if no query has been set.
 	 */
 	MultiValueMap<String, String> getQueryParams();
-
-	/**
-	 * Return the cookie values parsed from the "Cookie" request header.
-	 */
-	Map<String, Cookie> getCookies();
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the

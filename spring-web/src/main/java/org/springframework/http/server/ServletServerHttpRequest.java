@@ -29,7 +29,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,7 +39,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.Cookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -69,11 +67,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers;
 
-	private Map<String, Cookie> cookies;
-
 	private MultiValueMap<String, String> queryParams;
 
 	private ServerHttpAsyncRequestControl asyncRequestControl;
+
 
 	/**
 	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}.
@@ -155,20 +152,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return new InetSocketAddress(this.servletRequest.getRemoteHost(), this.servletRequest.getRemotePort());
-	}
-
-	@Override
-	public Map<String, Cookie> getCookies() {
-		if (this.cookies == null) {
-			this.cookies = new HashMap<String, Cookie>();
-			if (this.servletRequest.getCookies() != null) {
-				for (javax.servlet.http.Cookie cookie : this.servletRequest.getCookies()) {
-					this.cookies.put(cookie.getName(), new ServletServerCookie(cookie));
-				}
-			}
-			this.cookies = Collections.unmodifiableMap(this.cookies);
-		}
-		return this.cookies;
 	}
 
 	@Override
