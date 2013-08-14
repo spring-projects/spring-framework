@@ -318,8 +318,8 @@ project("spring-messaging") {
 		compile(project(":spring-context"))
 		optional(project(":spring-websocket"))
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
-		optional("org.projectreactor:reactor-core:1.0.0.M1")
-		optional("org.projectreactor:reactor-tcp:1.0.0.M1")
+		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("org.projectreactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")
 		optional("com.lmax:disruptor:3.1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:javax.inject-tck:1")
@@ -328,6 +328,7 @@ project("spring-messaging") {
 
 	repositories {
 		maven { url 'http://repo.springsource.org/libs-milestone' } // reactor
+		maven { url 'http://repo.springsource.org/libs-snapshot' } // reactor
 	}
 }
 

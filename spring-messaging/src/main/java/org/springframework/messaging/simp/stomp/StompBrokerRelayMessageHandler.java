@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,16 +42,20 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import reactor.core.Environment;
+import reactor.core.composable.Composable;
 import reactor.core.composable.Deferred;
 import reactor.core.composable.Promise;
 import reactor.core.composable.spec.DeferredPromiseSpec;
 import reactor.function.Consumer;
+import reactor.tcp.Reconnect;
 import reactor.tcp.TcpClient;
 import reactor.tcp.TcpConnection;
 import reactor.tcp.encoding.DelimitedCodec;
 import reactor.tcp.encoding.StandardCodecs;
 import reactor.tcp.netty.NettyTcpClient;
 import reactor.tcp.spec.TcpClientSpec;
+import reactor.tuple.Tuple;
+import reactor.tuple.Tuple2;
 
 
 /**
@@ -219,12 +224,24 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 	private void openSystemSession() {
 
 		RelaySession session = new RelaySession(STOMP_RELAY_SYSTEM_SESSION_ID) {
+
 			@Override
 			protected void sendMessageToClient(Message<?> message) {
 				// ignore, only used to send messages
 				// TODO: ERROR frame/reconnect
 			}
+
+			@Override
+			protected Composable<TcpConnection<String, String>> openConnection() {
+				return tcpClient.open(new Reconnect() {
+					@Override
+					public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress currentAddress, int attempt) {
+						return Tuple.of(currentAddress, 5000L);
+					}
+				});
+			}
 		};
+
 		this.relaySessions.put(STOMP_RELAY_SYSTEM_SESSION_ID, session);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
@@ -376,7 +393,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 		private final BlockingQueue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>(50);
 
-		private Promise<TcpConnection<String, String>> promise;
+		private volatile TcpConnection<String, String> connection = null;
 
 		private volatile boolean isConnected = false;
 
@@ -391,21 +408,24 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		public void open(final Message<?> message) {
 			Assert.notNull(message, "message is required");
 
-			this.promise = tcpClient.open();
+			Composable<TcpConnection<String, String>> connectionComposable = openConnection();
 
-			this.promise.consume(new Consumer<TcpConnection<String,String>>() {
+			connectionComposable.consume(new Consumer<TcpConnection<String, String>>() {
 				@Override
-				public void accept(TcpConnection<String, String> connection) {
-					connection.in().consume(new Consumer<String>() {
+				public void accept(TcpConnection<String, String> newConnection) {
+					isConnected = false;
+					connection = newConnection;
+					newConnection.in().consume(new Consumer<String>() {
 						@Override
 						public void accept(String stompFrame) {
 							readStompFrame(stompFrame);
 						}
 					});
-					forwardInternal(message, connection);
+					forwardInternal(message);
 				}
 			});
-			this.promise.onError(new Consumer<Throwable>() {
+
+			connectionComposable.when(Throwable.class, new Consumer<Throwable>() {
 				@Override
 				public void accept(Throwable ex) {
 					relaySessions.remove(sessionId);
@@ -413,6 +433,10 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 					sendError(sessionId, "Failed to connect to message broker " + ex.toString());
 				}
 			});
+		}
+
+		protected Composable<TcpConnection<String, String>> openConnection() {
+			return tcpClient.open();
 		}
 
 		private void readStompFrame(String stompFrame) {
@@ -432,7 +456,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 				synchronized(this.monitor) {
 					this.isConnected = true;
 					brokerAvailable();
-					flushMessages(this.promise.get());
+					flushMessages();
 				}
 				return;
 			}
@@ -447,13 +471,21 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 
 		private void sendError(String sessionId, String errorText) {
-			brokerUnavailable();
+			disconnect();
 
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 			headers.setSessionId(sessionId);
 			headers.setMessage(errorText);
 			Message<?> errorMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 			sendMessageToClient(errorMessage);
+		}
+
+		private void disconnect() {
+			this.isConnected = false;
+			this.connection.close();
+			this.connection = null;
+
+			brokerUnavailable();
 		}
 
 		public void forward(Message<?> message) {
@@ -463,72 +495,77 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 					if (!this.isConnected) {
 						this.messageQueue.add(message);
 						if (logger.isTraceEnabled()) {
-							logger.trace("Not connected yet, message queued, queue size=" + this.messageQueue.size());
+							logger.trace("Not connected, message queued. Queue size=" + this.messageQueue.size());
 						}
 						return;
 					}
 				}
 			}
 
-			TcpConnection<String, String> connection = this.promise.get();
-
 			if (this.messageQueue.isEmpty()) {
-				forwardInternal(message, connection);
+				forwardInternal(message);
 			}
 			else {
 				this.messageQueue.add(message);
-				flushMessages(connection);
+				flushMessages();
 			}
 		}
 
-		private boolean forwardInternal(final Message<?> message, TcpConnection<String, String> connection) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
-			}
-			byte[] bytes = stompMessageConverter.fromMessage(message);
+		private boolean forwardInternal(final Message<?> message) {
+			TcpConnection<String, String> localConnection = this.connection;
 
-			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
-
-			connection.send(new String(bytes, Charset.forName("UTF-8")), new Consumer<Boolean>() {
-
-				@Override
-				public void accept(Boolean success) {
-					if (!success && StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
-						deferred.accept(false);
-					} else {
-						deferred.accept(true);
-					}
+			if (localConnection != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
 				}
-			});
+				byte[] bytes = stompMessageConverter.fromMessage(message);
 
-			Boolean success = null;
+				final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
 
-			try {
-				success = deferred.compose().await();
+				String payload = new String(bytes, Charset.forName("UTF-8"));
+				localConnection.send(payload, new Consumer<Boolean>() {
+
+					@Override
+					public void accept(Boolean success) {
+						if (!success && StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
+							deferred.accept(false);
+						} else {
+							deferred.accept(true);
+						}
+					}
+				});
+
+				Boolean success = null;
+
+				try {
+					success = deferred.compose().await();
+
+					if (success == null) {
+						sendError(sessionId, "Timed out waiting for message to be forwarded to the broker");
+					}
+					else if (!success) {
+						sendError(sessionId, "Failed to forward message to the broker");
+					}
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					sendError(sessionId, "Interrupted while forwarding message to the broker");
+				}
 
 				if (success == null) {
-					sendError(sessionId, "Timed out waiting for message to be forwarded to the broker");
+					success = false;
 				}
-				else if (!success) {
-					sendError(sessionId, "Failed to forward message to the broker");
-				}
-			} catch (InterruptedException ie) {
-				Thread.currentThread().interrupt();
-				sendError(sessionId, "Interrupted while forwarding message to the broker");
-			}
 
-			if (success == null) {
-				success = false;
+				return success;
+			} else {
+				return false;
 			}
-
-			return success;
 		}
 
-		private void flushMessages(TcpConnection<String, String> connection) {
+		private void flushMessages() {
 			List<Message<?>> messages = new ArrayList<Message<?>>();
 			this.messageQueue.drainTo(messages);
 			for (Message<?> message : messages) {
-				if (!forwardInternal(message, connection)) {
+				if (!forwardInternal(message)) {
 					return;
 				}
 			}

@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
