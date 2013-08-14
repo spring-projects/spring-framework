@@ -20,10 +20,14 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
@@ -36,7 +40,8 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleBrokerMessageHandler implements MessageHandler {
+public class SimpleBrokerMessageHandler implements MessageHandler, ApplicationEventPublisherAware,
+		SmartLifecycle {
 
 	private static final Log logger = LogFactory.getLog(SimpleBrokerMessageHandler.class);
 
@@ -45,6 +50,10 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 	private List<String> destinationPrefixes;
 
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
+
+	private ApplicationEventPublisher eventPublisher;
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -71,6 +80,10 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 
 	public SubscriptionRegistry getSubscriptionRegistry() {
 		return this.subscriptionRegistry;
+	}
+
+	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+		this.eventPublisher = eventPublisher;
 	}
 
 	@Override
@@ -142,4 +155,38 @@ public class SimpleBrokerMessageHandler implements MessageHandler {
 			}
 		}
 	}
+
+	@Override
+	public void start() {
+		this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
+		this.running = true;
+	}
+
+	@Override
+	public void stop() {
+		this.running = false;
+		this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public int getPhase() {
+		return 0;
+	}
+
+	@Override
+	public boolean isAutoStartup() {
+		return true;
+	}
+
+	@Override
+	public void stop(Runnable callback) {
+		callback.run();
+		this.stop();
+	}
+
 }

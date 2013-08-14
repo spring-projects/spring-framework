@@ -36,6 +36,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
@@ -376,13 +377,13 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 	private void brokerAvailable() {
 		if (this.brokerAvailable.compareAndSet(false, true)) {
-			this.applicationEventPublisher.publishEvent(new BrokerBecameAvailableEvent(this));
+			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
 		}
 	}
 
 	private void brokerUnavailable() {
 		if (this.brokerAvailable.compareAndSet(true, false)) {
-			this.applicationEventPublisher.publishEvent(new BrokerBecameUnavailableEvent(this));
+			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
 		}
 	}
 
@@ -482,8 +483,12 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 		private void disconnect() {
 			this.isConnected = false;
-			this.connection.close();
-			this.connection = null;
+
+			TcpConnection<String, String> localConnection = this.connection;
+			if (localConnection != null) {
+				localConnection.close();
+				this.connection = null;
+			}
 
 			brokerUnavailable();
 		}

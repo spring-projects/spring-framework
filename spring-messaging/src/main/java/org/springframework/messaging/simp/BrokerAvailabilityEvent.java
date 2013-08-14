@@ -14,20 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp.stomp;
+package org.springframework.messaging.simp;
 
 import org.springframework.context.ApplicationEvent;
 
 
 /**
- * Base class for application events relating to broker availability.
+ * Event raised when a broker's availabilty changes
  *
  * @author Andy Wilkinson
  */
-public abstract class BrokerAvailabilityEvent extends ApplicationEvent {
+public class BrokerAvailabilityEvent extends ApplicationEvent {
 
+	private final boolean brokerAvailable;
 
-	protected BrokerAvailabilityEvent(Object source) {
+	/**
+	 * Creates a new {@code BrokerAvailabilityEvent}.
+	 *
+	 * @param brokerAvailable {@code true} if the broker is available, {@code}
+	 * false otherwise
+	 * @param source the component that is acting as the broker, or as a relay
+	 * for an external broker, that has changed availability. Must not be {@code
+	 * null}.
+	 */
+	public BrokerAvailabilityEvent(boolean brokerAvailable, Object source) {
 		super(source);
+		this.brokerAvailable = brokerAvailable;
+	}
+
+	public boolean isBrokerAvailable() {
+		return this.brokerAvailable;
 	}
 }

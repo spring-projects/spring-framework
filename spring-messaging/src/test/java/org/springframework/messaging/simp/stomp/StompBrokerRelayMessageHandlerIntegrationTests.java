@@ -35,6 +35,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
@@ -45,6 +46,7 @@ import org.springframework.util.SocketUtils;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 
 /**
@@ -104,7 +106,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		assertTrue(messageLatch.await(30, TimeUnit.SECONDS));
 
 		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
 	}
 
 	@Test
@@ -130,7 +132,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.stompBroker.awaitMessages(1);
 
 		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
 
 		this.stompBroker.stop();
 
@@ -139,8 +141,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		errorLatch.await(30, TimeUnit.SECONDS);
 
 		availabilityEvents = brokerAvailabilityListener.awaitAvailabilityEvents(2);
-		assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
-		assertTrue(availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
+		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
+		assertFalse(availabilityEvents.get(1).isBrokerAvailable());
 	}
 
 	@Test
@@ -168,7 +170,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.stompBroker.awaitMessages(2);
 
 		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
 
 		this.stompBroker.stop();
 
@@ -177,14 +179,14 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		errorLatch.await(30, TimeUnit.SECONDS);
 
 		availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
-		assertTrue(availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
+		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
+		assertFalse(availabilityEvents.get(1).isBrokerAvailable());
 	}
 
 	@Test
 	public void relayReconnectsIfTheBrokerComesBackUp() throws InterruptedException {
 		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
 
 		List<Message<?>> messages = this.stompBroker.awaitMessages(1);
 		assertEquals(1, messages.size());
@@ -195,7 +197,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.relay.handleMessage(createSendMessage(null, "/topic/test", "test"));
 
 		availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(2);
-		assertTrue(availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
+		assertFalse(availabilityEvents.get(1).isBrokerAvailable());
 
 		this.relay.handleMessage(createSendMessage(null, "/topic/test", "test-again"));
 
@@ -207,7 +209,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		assertStompCommandAndPayload(messages.get(2), StompCommand.SEND, "test-again");
 
 		availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(3);
-		assertTrue(availabilityEvents.get(2) instanceof BrokerBecameAvailableEvent);
+		assertTrue(availabilityEvents.get(2).isBrokerAvailable());
 	}
 
 	private Message<?> createConnectMessage(String sessionId) {
