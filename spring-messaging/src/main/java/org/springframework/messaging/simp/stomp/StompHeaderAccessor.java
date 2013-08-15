@@ -54,7 +54,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public static final String STOMP_MESSAGE_ID_HEADER = "message-id";
 
-	public static final String STOMP_RECEIPT_ID_HEADER = "receipt-id";
+	public static final String STOMP_RECEIPT_HEADER = "receipt"; // any client frame except CONNECT
+
+	public static final String STOMP_RECEIPT_ID_HEADER = "receipt-id"; // RECEIPT frame
 
 	public static final String STOMP_SUBSCRIPTION_HEADER = "subscription";
 
@@ -176,18 +178,20 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			result.put(STOMP_CONTENT_TYPE_HEADER, Arrays.asList(contentType.toString()));
 		}
 
-		if (StompCommand.MESSAGE.equals(getCommand())) {
+		if (getCommand().requiresSubscriptionId()) {
 			String subscriptionId = getSubscriptionId();
 			if (subscriptionId != null) {
-				result.put(STOMP_SUBSCRIPTION_HEADER, Arrays.asList(subscriptionId));
+				String name = StompCommand.MESSAGE.equals(getCommand()) ? STOMP_SUBSCRIPTION_HEADER : STOMP_ID_HEADER;
+				result.put(name, Arrays.asList(subscriptionId));
 			}
 			else {
-				logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
+				logger.warn(getCommand() + " frame should have a subscription: " + this.toString());
 			}
-			if ((getMessageId() == null)) {
-				String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
-				result.put(STOMP_MESSAGE_ID_HEADER, Arrays.asList(messageId));
-			}
+		}
+
+		if (StompCommand.MESSAGE.equals(getCommand()) && ((getMessageId() == null))) {
+			String messageId = getSessionId() + "-" + messageIdCounter.getAndIncrement();
+			result.put(STOMP_MESSAGE_ID_HEADER, Arrays.asList(messageId));
 		}
 
 		return result;
@@ -300,6 +304,14 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public String getReceiptId() {
 		return getFirstNativeHeader(STOMP_RECEIPT_ID_HEADER);
+	}
+
+	public void setReceipt(String receiptId) {
+		setNativeHeader(STOMP_RECEIPT_HEADER, receiptId);
+	}
+
+	public String getReceipt() {
+		return getFirstNativeHeader(STOMP_RECEIPT_HEADER);
 	}
 
 	public String getMessage() {

@@ -16,285 +16,538 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.activemq.broker.BrokerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.SocketUtils;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import reactor.util.Assert;
+
+import static org.junit.Assert.*;
 
 
 /**
- * Integration tests for {@link StompBrokerRelayMessageHandler}
- *
- * @author Andy Wilkinson
+ * @author Rossen Stoyanchev
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {StompBrokerRelayMessageHandlerIntegrationTests.TestConfiguration.class})
-@DirtiesContext(classMode=ClassMode.AFTER_EACH_TEST_METHOD)
 public class StompBrokerRelayMessageHandlerIntegrationTests {
 
-	@Autowired
-	private SubscribableChannel messageChannel;
+	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandlerIntegrationTests.class);
 
-	@Autowired
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
+
 	private StompBrokerRelayMessageHandler relay;
 
-	@Autowired
-	private TestStompBroker stompBroker;
+	private BrokerService activeMQBroker;
 
-	@Autowired
-	private ApplicationContext applicationContext;
+	private ExecutorSubscribableChannel responseChannel;
 
-	@Autowired
-	private BrokerAvailabilityListener brokerAvailabilityListener;
+	private ExpectationMatchingMessageHandler responseHandler;
 
+	private ExpectationMatchingEventPublisher eventPublisher;
+
+	@Before
+	public void setUp() throws Exception {
+
+		int port = SocketUtils.findAvailableTcpPort(61613);
+
+		this.activeMQBroker = new BrokerService();
+		this.activeMQBroker.addConnector("stomp://localhost:" + port);
+		this.activeMQBroker.setStartAsync(false);
+		this.activeMQBroker.setDeleteAllMessagesOnStartup(true);
+		this.activeMQBroker.start();
+
+		this.responseChannel = new ExecutorSubscribableChannel();
+		this.responseHandler = new ExpectationMatchingMessageHandler();
+		this.responseChannel.subscribe(this.responseHandler);
+
+		this.eventPublisher = new ExpectationMatchingEventPublisher();
+
+		this.relay = new StompBrokerRelayMessageHandler(this.responseChannel, Arrays.asList("/queue/", "/topic/"));
+		this.relay.setRelayPort(port);
+		this.relay.setApplicationEventPublisher(this.eventPublisher);
+		this.relay.start();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		try {
+			this.relay.stop();
+		}
+		finally {
+			stopBrokerAndAwait();
+		}
+	}
 
 	@Test
-	public void basicPublishAndSubscribe() throws IOException, InterruptedException {
+	public void publishSubscribe() throws Exception {
 
-		String client1SessionId = "abc123";
-		String client2SessionId = "def456";
+		String sess1 = "sess1";
+		MessageExchange conn1 = MessageExchangeBuilder.connect(sess1).build();
+		this.relay.handleMessage(conn1.message);
 
-		final CountDownLatch messageLatch = new CountDownLatch(1);
+		String sess2 = "sess2";
+		MessageExchange conn2 = MessageExchangeBuilder.connect(sess2).build();
+		this.relay.handleMessage(conn2.message);
 
-		this.messageChannel.subscribe(new MessageHandler() {
+		String subs1 = "subs1";
+		String destination = "/topic/test";
 
-			@Override
-			public void handleMessage(Message<?> message) throws MessagingException {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				if (headers.getCommand() == StompCommand.MESSAGE) {
-					messageLatch.countDown();
-				}
+		MessageExchange subscribe = MessageExchangeBuilder.subscribeWithReceipt(sess1, subs1, destination, "r1").build();
+		this.responseHandler.expect(subscribe);
+
+		this.relay.handleMessage(subscribe.message);
+		this.responseHandler.awaitAndAssert();
+
+		MessageExchange send = MessageExchangeBuilder.send(destination, "foo").andExpectMessage(sess1, subs1).build();
+		this.responseHandler.reset();
+		this.responseHandler.expect(send);
+
+		this.relay.handleMessage(send.message);
+		this.responseHandler.awaitAndAssert();
+	}
+
+	@Test
+	public void brokerUnvailableErrorFrameOnConnect() throws Exception {
+
+		stopBrokerAndAwait();
+
+		MessageExchange connect = MessageExchangeBuilder.connect("sess1").andExpectError().build();
+		this.responseHandler.expect(connect);
+
+		this.relay.handleMessage(connect.message);
+		this.responseHandler.awaitAndAssert();
+	}
+
+	@Test
+	public void brokerUnvailableErrorFrameOnSend() throws Exception {
+
+		String sess1 = "sess1";
+		MessageExchange connect = MessageExchangeBuilder.connect(sess1).build();
+		this.relay.handleMessage(connect.message);
+
+		// TODO: expect CONNECTED
+		Thread.sleep(2000);
+
+		stopBrokerAndAwait();
+
+		MessageExchange subscribe = MessageExchangeBuilder.subscribe(sess1, "s1", "/topic/a").andExpectError().build();
+		this.responseHandler.expect(subscribe);
+
+		this.relay.handleMessage(subscribe.message);
+		this.responseHandler.awaitAndAssert();
+	}
+
+	@Test
+	public void brokerAvailabilityEvents() throws Exception {
+
+		// TODO: expect CONNECTED
+		Thread.sleep(2000);
+
+		this.eventPublisher.expect(true, false);
+
+		stopBrokerAndAwait();
+
+		// TODO: remove when stop is detecteded
+		this.relay.handleMessage(MessageExchangeBuilder.connect("sess1").build().message);
+
+		this.eventPublisher.awaitAndAssert();
+	}
+
+	@Test
+	public void relayReconnectsIfBrokerComesBackUp() throws Exception {
+
+		String sess1 = "sess1";
+		MessageExchange conn1 = MessageExchangeBuilder.connect(sess1).build();
+		this.relay.handleMessage(conn1.message);
+
+		String subs1 = "subs1";
+		String destination = "/topic/test";
+		MessageExchange subscribe = MessageExchangeBuilder.subscribeWithReceipt(sess1, subs1, destination, "r1").build();
+		this.responseHandler.expect(subscribe);
+
+		this.relay.handleMessage(subscribe.message);
+		this.responseHandler.awaitAndAssert();
+
+		stopBrokerAndAwait();
+
+		// TODO:
+		// 1st message will see ERROR frame (broker shutdown is not but should be detected)
+		// 2nd message will be queued (a side effect of CONNECT/CONNECTED-buffering, likely to be removed)
+		// Finish this once the above changes are made.
+
+/*		MessageExchange send = MessageExchangeBuilder.send(destination, "foo").build();
+		this.responseHandler.reset();
+		this.relay.handleMessage(send.message);
+		Thread.sleep(2000);
+
+		this.activeMQBroker.start();
+		Thread.sleep(5000);
+
+		send = MessageExchangeBuilder.send(destination, "foo").andExpectMessage(sess1, subs1).build();
+		this.responseHandler.reset();
+		this.responseHandler.expect(send);
+		this.relay.handleMessage(send.message);
+
+		this.responseHandler.awaitAndAssert();
+*/
+	}
+
+
+	private void stopBrokerAndAwait() throws Exception {
+		logger.debug("Stopping ActiveMQ broker and will await shutdown");
+		if (!this.activeMQBroker.isStarted()) {
+			logger.debug("Broker not running");
+			return;
+		}
+		final CountDownLatch latch = new CountDownLatch(1);
+		this.activeMQBroker.addShutdownHook(new Runnable() {
+			public void run() {
+				latch.countDown();
 			}
-
 		});
-
-		this.relay.handleMessage(createConnectMessage(client1SessionId));
-		this.relay.handleMessage(createConnectMessage(client2SessionId));
-		this.relay.handleMessage(createSubscribeMessage(client1SessionId, "/topic/test"));
-
-		this.stompBroker.awaitMessages(4);
-
-		this.relay.handleMessage(createSendMessage(client2SessionId, "/topic/test", "fromClient2"));
-
-		assertTrue(messageLatch.await(30, TimeUnit.SECONDS));
-
-		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
-	}
-
-	@Test
-	public void whenConnectFailsDueToTheBrokerBeingUnavailableAnErrorFrameIsSentToTheClient()
-			throws IOException, InterruptedException {
-
-		String sessionId = "abc123";
-
-		final CountDownLatch errorLatch = new CountDownLatch(1);
-
-		this.messageChannel.subscribe(new MessageHandler() {
-
-			@Override
-			public void handleMessage(Message<?> message) throws MessagingException {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				if (headers.getCommand() == StompCommand.ERROR) {
-					errorLatch.countDown();
-				}
-			}
-
-		});
-
-		this.stompBroker.awaitMessages(1);
-
-		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
-
-		this.stompBroker.stop();
-
-		this.relay.handleMessage(createConnectMessage(sessionId));
-
-		errorLatch.await(30, TimeUnit.SECONDS);
-
-		availabilityEvents = brokerAvailabilityListener.awaitAvailabilityEvents(2);
-		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
-		assertFalse(availabilityEvents.get(1).isBrokerAvailable());
-	}
-
-	@Test
-	public void whenSendFailsDueToTheBrokerBeingUnavailableAnErrorFrameIsSentToTheClient()
-			throws IOException, InterruptedException {
-
-		String sessionId = "abc123";
-
-		final CountDownLatch errorLatch = new CountDownLatch(1);
-
-		this.messageChannel.subscribe(new MessageHandler() {
-
-			@Override
-			public void handleMessage(Message<?> message) throws MessagingException {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				if (headers.getCommand() == StompCommand.ERROR) {
-					errorLatch.countDown();
-				}
-			}
-
-		});
-
-		this.relay.handleMessage(createConnectMessage(sessionId));
-
-		this.stompBroker.awaitMessages(2);
-
-		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
-
-		this.stompBroker.stop();
-
-		this.relay.handleMessage(createSubscribeMessage(sessionId, "/topic/test/"));
-
-		errorLatch.await(30, TimeUnit.SECONDS);
-
-		availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
-		assertFalse(availabilityEvents.get(1).isBrokerAvailable());
-	}
-
-	@Test
-	public void relayReconnectsIfTheBrokerComesBackUp() throws InterruptedException {
-		List<BrokerAvailabilityEvent> availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-		assertTrue(availabilityEvents.get(0).isBrokerAvailable());
-
-		List<Message<?>> messages = this.stompBroker.awaitMessages(1);
-		assertEquals(1, messages.size());
-		assertStompCommand(messages.get(0), StompCommand.CONNECT);
-
-		this.stompBroker.stop();
-
-		this.relay.handleMessage(createSendMessage(null, "/topic/test", "test"));
-
-		availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(2);
-		assertFalse(availabilityEvents.get(1).isBrokerAvailable());
-
-		this.relay.handleMessage(createSendMessage(null, "/topic/test", "test-again"));
-
-		this.stompBroker.start();
-
-		messages = this.stompBroker.awaitMessages(3);
-		assertEquals(3, messages.size());
-		assertStompCommand(messages.get(1), StompCommand.CONNECT);
-		assertStompCommandAndPayload(messages.get(2), StompCommand.SEND, "test-again");
-
-		availabilityEvents = this.brokerAvailabilityListener.awaitAvailabilityEvents(3);
-		assertTrue(availabilityEvents.get(2).isBrokerAvailable());
-	}
-
-	private Message<?> createConnectMessage(String sessionId) {
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		headers.setSessionId(sessionId);
-		return MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-	}
-
-	private Message<?> createSubscribeMessage(String sessionId, String destination) {
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
-		headers.setSessionId(sessionId);
-		headers.setDestination(destination);
-		headers.setNativeHeader(StompHeaderAccessor.STOMP_ID_HEADER,  sessionId);
-
-		return MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-	}
-
-	private Message<?> createSendMessage(String sessionId, String destination, String payload) {
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		headers.setSessionId(sessionId);
-		headers.setDestination(destination);
-
-		return MessageBuilder.withPayloadAndHeaders(payload.getBytes(), headers).build();
-	}
-
-	private void assertStompCommand(Message<?> message, StompCommand expectedCommand) {
-		assertEquals(expectedCommand, StompHeaderAccessor.wrap(message).getCommand());
-	}
-
-	private void assertStompCommandAndPayload(Message<?> message, StompCommand expectedCommand,
-			String expectedPayload) {
-		assertStompCommand(message, expectedCommand);
-		assertEquals(expectedPayload, new String(((byte[])message.getPayload())));
+		this.activeMQBroker.stop();
+		assertTrue("Broker did not stop", latch.await(5, TimeUnit.SECONDS));
+		logger.debug("Broker stopped");
 	}
 
 
-	@Configuration
-	public static class TestConfiguration {
+	/**
+	 * Handles messages by matching them to expectations including a latch to wait for
+	 * the completion of expected messages.
+	 */
+	private static class ExpectationMatchingMessageHandler implements MessageHandler {
 
-		@Bean
-		public MessageChannel messageChannel() {
-			return new ExecutorSubscribableChannel();
+		private final List<MessageExchange> expected;
+
+		private final List<MessageExchange> actual = new CopyOnWriteArrayList<>();
+
+		private final List<Message<?>> unexpected = new CopyOnWriteArrayList<>();
+
+		private CountDownLatch latch = new CountDownLatch(1);
+
+
+		public ExpectationMatchingMessageHandler(MessageExchange... expected) {
+			this.expected = new CopyOnWriteArrayList<>(expected);
 		}
 
-		@Bean
-		public StompBrokerRelayMessageHandler relay() {
-			StompBrokerRelayMessageHandler relay =
-					new StompBrokerRelayMessageHandler(messageChannel(), Arrays.asList("/queue/", "/topic/"));
-			relay.setRelayPort(SocketUtils.findAvailableTcpPort());
-			return relay;
+
+		public void expect(MessageExchange... expected) {
+			this.expected.addAll(Arrays.asList(expected));
 		}
 
-		@Bean
-		public TestStompBroker broker() throws IOException {
-			TestStompBroker broker = new TestStompBroker(relay().getRelayPort());
-			return broker;
+		public void awaitAndAssert() throws InterruptedException {
+			boolean result = this.latch.await(5000, TimeUnit.MILLISECONDS);
+			assertTrue(getAsString(), result && this.unexpected.isEmpty());
 		}
 
-		@Bean
-		public BrokerAvailabilityListener availabilityListener() {
-			return new BrokerAvailabilityListener();
+		public void reset() {
+			this.latch = new CountDownLatch(1);
+			this.expected.clear();
+			this.actual.clear();
+			this.unexpected.clear();
 		}
-	}
-
-	private static class BrokerAvailabilityListener implements ApplicationListener<BrokerAvailabilityEvent> {
-
-		private final List<BrokerAvailabilityEvent> availabilityEvents = new ArrayList<BrokerAvailabilityEvent>();
-
-		private final Object monitor = new Object();
 
 		@Override
-		public void onApplicationEvent(BrokerAvailabilityEvent event) {
-			synchronized (this.monitor) {
-				this.availabilityEvents.add(event);
-				this.monitor.notifyAll();
+		public void handleMessage(Message<?> message) throws MessagingException {
+			for (MessageExchange exch : this.expected) {
+				if (exch.matchMessage(message)) {
+					if (exch.isDone()) {
+						this.expected.remove(exch);
+						this.actual.add(exch);
+						if (this.expected.isEmpty()) {
+							this.latch.countDown();
+						}
+					}
+					return;
+				}
+			}
+			this.unexpected.add(message);
+		}
+
+		public String getAsString() {
+			StringBuilder sb = new StringBuilder("\n");
+			sb.append("INCOMPLETE:\n").append(this.expected).append("\n");
+			sb.append("COMPLETE:\n").append(this.actual).append("\n");
+			sb.append("UNMATCHED MESSAGES:\n").append(this.unexpected).append("\n");
+			return sb.toString();
+		}
+	}
+
+	/**
+	 * Holds a message as well as expected and actual messages matched against expectations.
+	 */
+	private static class MessageExchange {
+
+		private final Message<?> message;
+
+		private final MessageMatcher[] expected;
+
+		private final Message<?>[] actual;
+
+
+		public MessageExchange(Message<?> message, MessageMatcher... expected) {
+			this.message = message;
+			this.expected = expected;
+			this.actual = new Message<?>[expected.length];
+		}
+
+
+		public boolean isDone() {
+			for (int i=0 ; i < actual.length; i++) {
+				if (actual[i] == null) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public boolean matchMessage(Message<?> message) {
+			for (int i=0 ; i < this.expected.length; i++) {
+				if (this.expected[i].match(message)) {
+					this.actual[i] = message;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Forwarded message:\n").append(this.message).append("\n");
+			sb.append("Should receive back:\n").append(Arrays.toString(this.expected)).append("\n");
+			sb.append("Actually received:\n").append(Arrays.toString(this.actual)).append("\n");
+			return sb.toString();
+		}
+	}
+
+	private static class MessageExchangeBuilder {
+
+		private final Message<?> message;
+
+		private final StompHeaderAccessor headers;
+
+		private final List<MessageMatcher> expected = new ArrayList<>();
+
+
+		private MessageExchangeBuilder(Message<?> message) {
+			this.message = message;
+			this.headers = StompHeaderAccessor.wrap(message);
+		}
+
+
+		public static MessageExchangeBuilder connect(String sessionId) {
+			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+			headers.setSessionId(sessionId);
+			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			return new MessageExchangeBuilder(message);
+		}
+
+		public static MessageExchangeBuilder subscribe(String sessionId, String subscriptionId, String destination) {
+			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+			headers.setSessionId(sessionId);
+			headers.setSubscriptionId(subscriptionId);
+			headers.setDestination(destination);
+			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			return new MessageExchangeBuilder(message);
+		}
+
+		public static MessageExchangeBuilder subscribeWithReceipt(String sessionId, String subscriptionId,
+				String destination, String receiptId) {
+
+			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+			headers.setSessionId(sessionId);
+			headers.setSubscriptionId(subscriptionId);
+			headers.setDestination(destination);
+			headers.setReceipt(receiptId);
+			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+
+			MessageExchangeBuilder builder = new MessageExchangeBuilder(message);
+			builder.expected.add(new StompReceiptFrameMessageMatcher(sessionId, receiptId));
+			return builder;
+		}
+
+		public static MessageExchangeBuilder send(String destination, String payload) {
+			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
+			headers.setDestination(destination);
+			Message<?> message = MessageBuilder.withPayloadAndHeaders(payload.getBytes(UTF_8), headers).build();
+			return new MessageExchangeBuilder(message);
+		}
+
+		public MessageExchangeBuilder andExpectMessage(String sessionId, String subscriptionId) {
+			Assert.isTrue(StompCommand.SEND.equals(headers.getCommand()), "MESSAGE can only be expected after SEND");
+			String destination = this.headers.getDestination();
+			Object payload = this.message.getPayload();
+			this.expected.add(new StompMessageFrameMessageMatcher(sessionId, subscriptionId, destination, payload));
+			return this;
+		}
+
+		public MessageExchangeBuilder andExpectError() {
+			String sessionId = this.headers.getSessionId();
+			Assert.notNull(sessionId, "No sessionId to match the ERROR frame to");
+			return andExpectError(sessionId);
+		}
+
+		public MessageExchangeBuilder andExpectError(String sessionId) {
+			this.expected.add(new StompFrameMessageMatcher(StompCommand.ERROR, sessionId));
+			return this;
+		}
+
+		public MessageExchange build() {
+			return new MessageExchange(this.message, this.expected.toArray(new MessageMatcher[this.expected.size()]));
+		}
+	}
+
+	private static interface MessageMatcher {
+
+		boolean match(Message<?> message);
+
+	}
+
+	private static class StompFrameMessageMatcher implements MessageMatcher {
+
+		private final StompCommand command;
+
+		private final String sessionId;
+
+
+		public StompFrameMessageMatcher(StompCommand command, String sessionId) {
+			this.command = command;
+			this.sessionId = sessionId;
+		}
+
+
+		@Override
+		public final boolean match(Message<?> message) {
+			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			if (!this.command.equals(headers.getCommand()) || (this.sessionId != headers.getSessionId())) {
+				return false;
+			}
+			return matchInternal(headers, message.getPayload());
+		}
+
+		protected boolean matchInternal(StompHeaderAccessor headers, Object payload) {
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "command=" + this.command  + ", session=\"" + this.sessionId + "\"";
+		}
+	}
+
+	private static class StompReceiptFrameMessageMatcher extends StompFrameMessageMatcher {
+
+		private final String receiptId;
+
+		public StompReceiptFrameMessageMatcher(String sessionId, String receipt) {
+			super(StompCommand.RECEIPT, sessionId);
+			this.receiptId = receipt;
+		}
+
+		@Override
+		protected boolean matchInternal(StompHeaderAccessor headers, Object payload) {
+			return (this.receiptId.equals(headers.getReceiptId()));
+		}
+
+		@Override
+		public String toString() {
+			return super.toString() + ", receiptId=\"" + this.receiptId + "\"";
+		}
+	}
+
+	private static class StompMessageFrameMessageMatcher extends StompFrameMessageMatcher {
+
+		private final String subscriptionId;
+
+		private final String destination;
+
+		private final Object payload;
+
+
+		public StompMessageFrameMessageMatcher(String sessionId, String subscriptionId, String destination, Object payload) {
+			super(StompCommand.MESSAGE, sessionId);
+			this.subscriptionId = subscriptionId;
+			this.destination = destination;
+			this.payload = payload;
+		}
+
+		@Override
+		protected boolean matchInternal(StompHeaderAccessor headers, Object payload) {
+			if (!this.subscriptionId.equals(headers.getSubscriptionId()) ||  !this.destination.equals(headers.getDestination())) {
+				return false;
+			}
+			if (payload instanceof byte[] && this.payload instanceof byte[]) {
+				return Arrays.equals((byte[]) payload, (byte[]) this.payload);
+			}
+			else {
+				return this.payload.equals(payload);
 			}
 		}
 
-		private List<BrokerAvailabilityEvent> awaitAvailabilityEvents(int eventCount) throws InterruptedException {
-			synchronized (this.monitor) {
-				while (this.availabilityEvents.size() < eventCount) {
-					this.monitor.wait();
+		@Override
+		public String toString() {
+			return super.toString() + ", subscriptionId=\"" + this.subscriptionId
+					+ "\", destination=\"" + this.destination + "\", payload=\"" + getPayloadAsText() + "\"";
+		}
+
+		protected String getPayloadAsText() {
+			return (this.payload instanceof byte[])
+					? new String((byte[]) this.payload, UTF_8) : payload.toString();
+		}
+	}
+
+	private static class ExpectationMatchingEventPublisher implements ApplicationEventPublisher {
+
+		private final List<Boolean> expected = new CopyOnWriteArrayList<>();
+
+		private final List<Boolean> actual = new CopyOnWriteArrayList<>();
+
+		private CountDownLatch latch = new CountDownLatch(1);
+
+
+		public void expect(Boolean... expected) {
+			this.expected.addAll(Arrays.asList(expected));
+		}
+
+		public void awaitAndAssert() throws InterruptedException {
+			if (this.expected.size() == this.actual.size()) {
+				assertEquals(this.expected, this.actual);
+			}
+			else {
+				assertTrue("Expected=" + this.expected + ", actual=" + this.actual,
+						this.latch.await(5, TimeUnit.SECONDS));
+			}
+		}
+
+		@Override
+		public void publishEvent(ApplicationEvent event) {
+			if (event instanceof BrokerAvailabilityEvent) {
+				this.actual.add(((BrokerAvailabilityEvent) event).isBrokerAvailable());
+				if (this.actual.size() == this.expected.size()) {
+					this.latch.countDown();
 				}
-				return new ArrayList<BrokerAvailabilityEvent>(this.availabilityEvents);
 			}
 		}
 	}
+
 }

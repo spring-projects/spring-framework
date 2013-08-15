@@ -57,6 +57,9 @@ public enum StompCommand {
 	private static Set<StompCommand> destinationRequiredLookup =
 			new HashSet<StompCommand>(Arrays.asList(SEND, SUBSCRIBE, MESSAGE));
 
+	private static Set<StompCommand> subscriptionIdRequiredLookup =
+			new HashSet<StompCommand>(Arrays.asList(SUBSCRIBE, UNSUBSCRIBE, MESSAGE));
+
 	static {
 		messageTypeLookup.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
 		messageTypeLookup.put(StompCommand.STOMP, SimpMessageType.CONNECT);
@@ -74,6 +77,10 @@ public enum StompCommand {
 
 	public boolean requiresDestination() {
 		return destinationRequiredLookup.contains(this);
+	}
+
+	public boolean requiresSubscriptionId() {
+		return subscriptionIdRequiredLookup.contains(this);
 	}
 
 }

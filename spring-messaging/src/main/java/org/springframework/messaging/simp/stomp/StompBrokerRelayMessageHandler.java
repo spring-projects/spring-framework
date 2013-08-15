@@ -376,13 +376,19 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 	}
 
 	private void brokerAvailable() {
-		if (this.brokerAvailable.compareAndSet(false, true)) {
+		if ((this.applicationEventPublisher != null) && this.brokerAvailable.compareAndSet(false, true)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Publishing BrokerAvailabilityEvent (available)");
+			}
 			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
 		}
 	}
 
 	private void brokerUnavailable() {
-		if (this.brokerAvailable.compareAndSet(true, false)) {
+		if ((this.applicationEventPublisher != null) && this.brokerAvailable.compareAndSet(true, false)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Publishing BrokerAvailabilityEvent (unavailable)");
+			}
 			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
 		}
 	}
@@ -518,52 +524,42 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 		private boolean forwardInternal(final Message<?> message) {
 			TcpConnection<String, String> localConnection = this.connection;
-
-			if (localConnection != null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
-				}
-				byte[] bytes = stompMessageConverter.fromMessage(message);
-
-				final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
-
-				String payload = new String(bytes, Charset.forName("UTF-8"));
-				localConnection.send(payload, new Consumer<Boolean>() {
-
-					@Override
-					public void accept(Boolean success) {
-						if (!success && StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
-							deferred.accept(false);
-						} else {
-							deferred.accept(true);
-						}
-					}
-				});
-
-				Boolean success = null;
-
-				try {
-					success = deferred.compose().await();
-
-					if (success == null) {
-						sendError(sessionId, "Timed out waiting for message to be forwarded to the broker");
-					}
-					else if (!success) {
-						sendError(sessionId, "Failed to forward message to the broker");
-					}
-				} catch (InterruptedException ie) {
-					Thread.currentThread().interrupt();
-					sendError(sessionId, "Interrupted while forwarding message to the broker");
-				}
-
-				if (success == null) {
-					success = false;
-				}
-
-				return success;
-			} else {
+			if (localConnection == null) {
 				return false;
 			}
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Forwarding to STOMP broker, message: " + message);
+			}
+
+			byte[] bytes = stompMessageConverter.fromMessage(message);
+			String payload = new String(bytes, Charset.forName("UTF-8"));
+
+			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
+			localConnection.send(payload, new Consumer<Boolean>() {
+				@Override
+				public void accept(Boolean success) {
+					deferred.accept(success);
+				}
+			});
+
+			Boolean success = null;
+			try {
+				success = deferred.compose().await();
+				if (success == null) {
+					sendError(sessionId, "Timed out waiting for message to be forwarded to the broker");
+				}
+				else if (!success) {
+					if (StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
+						sendError(sessionId, "Failed to forward message to the broker");
+					}
+				}
+			}
+			catch (InterruptedException ie) {
+				Thread.currentThread().interrupt();
+				sendError(sessionId, "Interrupted while forwarding message to the broker");
+			}
+			return (success != null) ? success : false;
 		}
 
 		private void flushMessages() {
