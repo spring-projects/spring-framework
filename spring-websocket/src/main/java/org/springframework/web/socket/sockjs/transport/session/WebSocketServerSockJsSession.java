@@ -124,7 +124,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession
 		try {
 			messages = getSockJsServiceConfig().getMessageCodec().decode(payload);
 		}
-		catch (IOException ex) {
+		catch (Throwable ex) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);
 			tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
 			return;

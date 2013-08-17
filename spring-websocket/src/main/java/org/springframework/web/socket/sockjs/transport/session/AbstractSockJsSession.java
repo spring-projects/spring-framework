@@ -255,12 +255,13 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			delegateError(ex);
 		}
 		catch (Throwable delegateEx) {
-			try {
-				close(closeStatus);
-			}
-			catch (Throwable closeEx) {
-				// ignore
-			}
+			// ignore
+		}
+		try {
+			close(closeStatus);
+		}
+		catch (Throwable closeEx) {
+			// ignore
 		}
 	}
 

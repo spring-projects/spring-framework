@@ -17,15 +17,11 @@
 package org.springframework.web.socket.server;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,24 +35,38 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * A default implemnetation of {@link HandshakeHandler}.
+ * A default {@link HandshakeHandler} implementation. Performs initial validation of the
+ * WebSocket handshake request -- possibly rejecting it through the appropriate HTTP
+ * status code -- while also allowing sub-classes to override various parts of the
+ * negotiation process (e.g. origin validation, sub-protocol negotiation, etc).
  *
- * <p>A container-specific {@link RequestUpgradeStrategy} is required since standard Java
- * WebSocket currently does not provide a way to initiate a WebSocket handshake.
- * Currently available are implementations for Tomcat and GlassFish.
+ * <p>
+ * If the negotiation succeeds, the actual upgrade is delegated to a server-specific
+ * {@link RequestUpgradeStrategy}, which will update the response as necessary and
+ * initialize the WebSocket. Currently supported servers are Tomcat 7 and 8, Jetty 9, and
+ * Glassfish 4.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class DefaultHandshakeHandler implements HandshakeHandler {
 
-	private static final String GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
 	protected Log logger = LogFactory.getLog(getClass());
+
+	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
+			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", HandshakeHandler.class.getClassLoader());
+
+	private static final boolean jettyWsPresent = ClassUtils.isPresent(
+			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", HandshakeHandler.class.getClassLoader());
+
+	private static final boolean glassFishWsPresent = ClassUtils.isPresent(
+			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", HandshakeHandler.class.getClassLoader());
+
+
+	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
 	private final List<String> supportedProtocols = new ArrayList<String>();
 
-	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
 
 	/**
@@ -66,7 +76,30 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	 * @throws IllegalStateException if no {@link RequestUpgradeStrategy} can be found.
 	 */
 	public DefaultHandshakeHandler() {
-		this.requestUpgradeStrategy = new RequestUpgradeStrategyFactory().create();
+		this(initRequestUpgradeStrategy());
+	}
+
+	private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
+		String className;
+		if (tomcatWsPresent) {
+			className = "org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy";
+		}
+		else if (jettyWsPresent) {
+			className = "org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
+		}
+		else if (glassFishWsPresent) {
+			className = "org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
+		}
+		else {
+			throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
+		}
+		try {
+			Class<?> clazz = ClassUtils.forName(className, DefaultHandshakeHandler.class.getClassLoader());
+			return (RequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Failed to instantiate " + className, t);
+		}
 	}
 
 	/**
@@ -101,7 +134,9 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler webSocketHandler, Map<String, Object> attributes) throws IOException, HandshakeFailureException {
 
-		logger.debug("Starting handshake for " + request.getURI());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initiating handshake for " + request.getURI() + ", headers=" + request.getHeaders());
+		}
 
 		if (!HttpMethod.GET.equals(request.getMethod())) {
 			response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
@@ -136,19 +171,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 		String selectedProtocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
 		// TODO: select extensions
 
-		logger.debug("Upgrading HTTP request");
-
-		response.setStatusCode(HttpStatus.SWITCHING_PROTOCOLS);
-		response.getHeaders().setUpgrade("WebSocket");
-		response.getHeaders().setConnection("Upgrade");
-		response.getHeaders().setSecWebSocketProtocol(selectedProtocol);
-		response.getHeaders().setSecWebSocketAccept(getWebSocketKeyHash(wsKey));
-		// TODO: response.getHeaders().setSecWebSocketExtensions(extensions);
-
-		response.flush();
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Upgrading with " + webSocketHandler);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Upgrading request");
 		}
 
 		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, webSocketHandler, attributes);
@@ -169,11 +193,18 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	protected boolean isWebSocketVersionSupported(ServerHttpRequest request) {
-		String requestedVersion = request.getHeaders().getSecWebSocketVersion();
-		for (String supportedVersion : getSupportedVerions()) {
-			if (supportedVersion.equals(requestedVersion)) {
+		String version = request.getHeaders().getSecWebSocketVersion();
+		String[] supportedVersions = getSupportedVerions();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Requested version=" + version + ", supported=" + Arrays.toString(supportedVersions));
+		}
+		for (String supportedVersion : supportedVersions) {
+			if (supportedVersion.trim().equals(version)) {
 				return true;
 			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Version=" + version + " is not a supported version");
 		}
 		return false;
 	}
@@ -216,53 +247,6 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 			}
 		}
 		return null;
-	}
-
-    private String getWebSocketKeyHash(String key) throws HandshakeFailureException {
-    	try {
-    		MessageDigest digest = MessageDigest.getInstance("SHA1");
-    		byte[] bytes = digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
-    		return DatatypeConverter.printBase64Binary(bytes);
-    	}
-    	catch (NoSuchAlgorithmException ex) {
-    		throw new HandshakeFailureException("Failed to generate value for Sec-WebSocket-Key header", ex);
-    	}
-    }
-
-
-    private static class RequestUpgradeStrategyFactory {
-
-		private static final boolean tomcatWebSocketPresent = ClassUtils.isPresent(
-				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
-
-		private static final boolean glassFishWebSocketPresent = ClassUtils.isPresent(
-				"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", DefaultHandshakeHandler.class.getClassLoader());
-
-		private static final boolean jettyWebSocketPresent = ClassUtils.isPresent(
-				"org.eclipse.jetty.websocket.server.UpgradeContext", DefaultHandshakeHandler.class.getClassLoader());
-
-		private RequestUpgradeStrategy create() {
-			String className;
-			if (tomcatWebSocketPresent) {
-				className = "org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy";
-			}
-			else if (glassFishWebSocketPresent) {
-				className = "org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
-			}
-			else if (jettyWebSocketPresent) {
-				className = "org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
-			}
-			else {
-				throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
-			}
-			try {
-				Class<?> clazz = ClassUtils.forName(className, DefaultHandshakeHandler.class.getClassLoader());
-				return (RequestUpgradeStrategy) BeanUtils.instantiateClass(clazz.getConstructor());
-			}
-			catch (Throwable t) {
-				throw new IllegalStateException("Failed to instantiate " + className, t);
-			}
-		}
 	}
 
 }
