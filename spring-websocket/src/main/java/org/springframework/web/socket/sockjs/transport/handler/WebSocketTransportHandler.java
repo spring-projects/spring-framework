@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,6 +25,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -35,7 +35,7 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSes
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSession;
 
 /**
- * A WebSocket {@link TransportHandler}. Uses {@link SockJsWebSocketHandler} and
+ * WebSocket-based {@link TransportHandler}. Uses {@link SockJsWebSocketHandler} and
  * {@link WebSocketServerSockJsSession} to add SockJS processing.
  *
  * <p>Also implements {@link HandshakeHandler} to support raw WebSocket communication at
@@ -87,7 +87,7 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 
 	@Override
 	public boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler handler, Map<String, Object> attributes) throws IOException {
+			WebSocketHandler handler, Map<String, Object> attributes) throws HandshakeFailureException {
 
 		return this.handshakeHandler.doHandshake(request, response, handler, attributes);
 	}

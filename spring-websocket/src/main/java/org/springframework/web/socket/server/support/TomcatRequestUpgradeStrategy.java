@@ -16,11 +16,13 @@
 
 package org.springframework.web.socket.server.support;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Endpoint;
@@ -67,8 +69,13 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		try {
 			getContainer(servletRequest).doUpgrade(servletRequest, servletResponse, endpointConfig, pathParams);
 		}
-		catch (Exception ex) {
-			throw new HandshakeFailureException("Failed to upgrade HttpServletRequest", ex);
+		catch (ServletException ex) {
+			throw new HandshakeFailureException(
+					"Servlet request failed to upgrade to WebSocket, uri=" + request.getURI(), ex);
+		}
+		catch (IOException ex) {
+			throw new HandshakeFailureException(
+					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 	}
 

@@ -70,7 +70,7 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws IOException, HandshakeFailureException {
+			String selectedProtocol, Endpoint endpoint) throws HandshakeFailureException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -85,11 +85,15 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 			webSocketEngine.register(webSocketApplication);
 		}
 		catch (DeploymentException ex) {
-			throw new HandshakeFailureException("Failed to deploy endpoint in GlassFish", ex);
+			throw new HandshakeFailureException("Failed to configure endpoint in GlassFish", ex);
 		}
 
 		try {
 			performUpgrade(servletRequest, servletResponse, request.getHeaders(), webSocketApplication);
+		}
+		catch (IOException ex) {
+			throw new HandshakeFailureException(
+					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 		finally {
 			webSocketEngine.unregister(webSocketApplication);

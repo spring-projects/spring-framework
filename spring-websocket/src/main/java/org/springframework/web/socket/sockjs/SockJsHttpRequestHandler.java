@@ -74,10 +74,15 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
 			throws ServletException, IOException {
 
-		ServerHttpRequest serverRequest = new ServletServerHttpRequest(servletRequest);
-		ServerHttpResponse serverResponse = new ServletServerHttpResponse(servletResponse);
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
 
-		this.sockJsService.handleRequest(serverRequest, serverResponse, this.webSocketHandler);
+		try {
+			this.sockJsService.handleRequest(request, response, this.webSocketHandler);
+		}
+		catch (Throwable t) {
+			throw new SockJsException("Uncaught failure in SockJS request, uri=" + request.getURI(), t);
+		}
 	}
 
 }

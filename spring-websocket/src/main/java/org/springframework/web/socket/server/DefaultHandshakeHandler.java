@@ -132,50 +132,55 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 
 	@Override
 	public final boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, Map<String, Object> attributes) throws IOException, HandshakeFailureException {
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Initiating handshake for " + request.getURI() + ", headers=" + request.getHeaders());
 		}
 
-		if (!HttpMethod.GET.equals(request.getMethod())) {
-			response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
-			response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
-			logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
-			return false;
+		try {
+			if (!HttpMethod.GET.equals(request.getMethod())) {
+				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
+				response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
+				logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
+				return false;
+			}
+			if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+				handleInvalidUpgradeHeader(request, response);
+				return false;
+			}
+			if (!request.getHeaders().getConnection().contains("Upgrade") &&
+					!request.getHeaders().getConnection().contains("upgrade")) {
+				handleInvalidConnectHeader(request, response);
+				return false;
+			}
+			if (!isWebSocketVersionSupported(request)) {
+				handleWebSocketVersionNotSupported(request, response);
+				return false;
+			}
+			if (!isValidOrigin(request)) {
+				response.setStatusCode(HttpStatus.FORBIDDEN);
+				return false;
+			}
+			String wsKey = request.getHeaders().getSecWebSocketKey();
+			if (wsKey == null) {
+				logger.debug("Missing \"Sec-WebSocket-Key\" header");
+				response.setStatusCode(HttpStatus.BAD_REQUEST);
+				return false;
+			}
 		}
-		if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
-			handleInvalidUpgradeHeader(request, response);
-			return false;
-		}
-		if (!request.getHeaders().getConnection().contains("Upgrade") &&
-				!request.getHeaders().getConnection().contains("upgrade")) {
-			handleInvalidConnectHeader(request, response);
-			return false;
-		}
-		if (!isWebSocketVersionSupported(request)) {
-			handleWebSocketVersionNotSupported(request, response);
-			return false;
-		}
-		if (!isValidOrigin(request)) {
-			response.setStatusCode(HttpStatus.FORBIDDEN);
-			return false;
-		}
-		String wsKey = request.getHeaders().getSecWebSocketKey();
-		if (wsKey == null) {
-			logger.debug("Missing \"Sec-WebSocket-Key\" header");
-			response.setStatusCode(HttpStatus.BAD_REQUEST);
-			return false;
+		catch (IOException ex) {
+			throw new HandshakeFailureException(
+					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 
-		String selectedProtocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
-		// TODO: select extensions
+		String subProtocol = selectProtocol(request.getHeaders().getSecWebSocketProtocol());
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Upgrading request");
+			logger.debug("Upgrading request, sub-protocol=" + subProtocol);
 		}
 
-		this.requestUpgradeStrategy.upgrade(request, response, selectedProtocol, webSocketHandler, attributes);
+		this.requestUpgradeStrategy.upgrade(request, response, subProtocol, wsHandler, attributes);
 
 		return true;
 	}

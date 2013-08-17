@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.server;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -53,6 +52,6 @@ public interface RequestUpgradeStrategy {
 	 *         handshake request.
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String acceptedProtocol,
-			WebSocketHandler wsHandler, Map<String, Object> attributes) throws IOException, HandshakeFailureException;
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException;
 
 }
