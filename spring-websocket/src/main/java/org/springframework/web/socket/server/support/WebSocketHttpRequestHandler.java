@@ -60,7 +60,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 
 	private final HandshakeHandler handshakeHandler;
 
-	private final WebSocketHandler webSocketHandler;
+	private final WebSocketHandler wsHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
@@ -72,7 +72,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	public WebSocketHttpRequestHandler(	WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler) {
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		Assert.notNull(handshakeHandler, "handshakeHandler must not be null");
-		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+		this.wsHandler = decorateWebSocketHandler(webSocketHandler);
 		this.handshakeHandler = handshakeHandler;
 	}
 
@@ -100,9 +100,9 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
 	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
 	 */
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
-		handler = new ExceptionWebSocketHandlerDecorator(handler);
-		return new LoggingWebSocketHandlerDecorator(handler);
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler wsHandler) {
+		wsHandler = new ExceptionWebSocketHandlerDecorator(wsHandler);
+		return new LoggingWebSocketHandlerDecorator(wsHandler);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
 		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
 
-		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.webSocketHandler);
+		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, this.wsHandler);
 		HandshakeFailureException failure = null;
 
 		try {
@@ -120,8 +120,9 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}
-			this.handshakeHandler.doHandshake(request, response, this.webSocketHandler, attributes);
+			this.handshakeHandler.doHandshake(request, response, this.wsHandler, attributes);
 			chain.applyAfterHandshake(request, response, null);
+			response.close();
 		}
 		catch (HandshakeFailureException ex) {
 			failure = ex;
@@ -134,7 +135,6 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 				chain.applyAfterHandshake(request, response, failure);
 				throw failure;
 			}
-			response.flush();
 		}
 	}
 

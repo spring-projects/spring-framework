@@ -320,8 +320,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 				}
 				handleTransportRequest(request, response, wsHandler, sessionId, transport);
 			}
-
-			response.flush();
+			response.close();
 		}
 		catch (IOException ex) {
 			throw new SockJsException("Failed to write to the response", null, ex);
