@@ -510,8 +510,8 @@ project("spring-websocket") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 		}
-		optional("org.glassfish.tyrus:tyrus-websocket-core:1.0")
-		optional("org.glassfish.tyrus:tyrus-container-servlet:1.0")
+		optional("org.glassfish.tyrus:tyrus-websocket-core:1.2.1")
+		optional("org.glassfish.tyrus:tyrus-container-servlet:1.2.1")
 		optional("org.eclipse.jetty:jetty-webapp:9.0.4.v20130625") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}

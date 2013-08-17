@@ -32,7 +32,7 @@ import org.glassfish.tyrus.core.ComponentProviderService;
 import org.glassfish.tyrus.core.EndpointWrapper;
 import org.glassfish.tyrus.core.ErrorCollector;
 import org.glassfish.tyrus.core.RequestContext;
-import org.glassfish.tyrus.server.TyrusEndpoint;
+import org.glassfish.tyrus.core.TyrusEndpoint;
 import org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler;
 import org.glassfish.tyrus.websockets.Connection;
 import org.glassfish.tyrus.websockets.Version;
