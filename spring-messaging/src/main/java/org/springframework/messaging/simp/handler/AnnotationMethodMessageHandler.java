@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,7 @@ import org.springframework.messaging.handler.annotation.support.ExceptionHandler
 import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethod;
+import org.springframework.messaging.handler.method.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
 import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.messaging.handler.method.HandlerMethodSelector;
@@ -92,6 +94,8 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
 
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+
 	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
@@ -130,6 +134,16 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
+	/**
+	 * Sets the custom list of {@code HandlerMethodArgumentResolver}s that will be used as the <em>first</em>
+	 * argument resolvers when resolving the values of the mapped methods.
+	 */
+	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
+		Assert.notNull(customArgumentResolvers, "The 'customArgumentResolvers' cannot be null.");
+
+		this.customArgumentResolvers = customArgumentResolvers;
+	}
+
 	public MessageConverter<?> getMessageConverter() {
 		return this.messageConverter;
 	}
@@ -144,6 +158,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		initHandlerMethods();
 
+		this.argumentResolvers.addResolvers(this.customArgumentResolvers);
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
