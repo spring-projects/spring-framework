@@ -305,7 +305,7 @@ public abstract class GenericTypeResolver {
 	}
 
 	/**
-	 * Extract a class instance from given Type.
+	 * Extract a Class from the given Type.
 	 */
 	private static Class<?> extractClass(Class<?> ownerClass, Type arg) {
 		if (arg instanceof ParameterizedType) {
@@ -322,9 +322,12 @@ public abstract class GenericTypeResolver {
 			arg = getTypeVariableMap(ownerClass).get(tv);
 			if (arg == null) {
 				arg = extractBoundForTypeVariable(tv);
+				if (arg instanceof ParameterizedType) {
+					return extractClass(ownerClass, ((ParameterizedType) arg).getRawType());
+				}
 			}
 			else {
-				arg = extractClass(ownerClass, arg);
+				return extractClass(ownerClass, arg);
 			}
 		}
 		return (arg instanceof Class ? (Class) arg : Object.class);
