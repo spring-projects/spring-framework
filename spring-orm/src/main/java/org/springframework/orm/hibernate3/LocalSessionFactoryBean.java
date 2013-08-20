@@ -88,7 +88,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p><b>Requires Hibernate 3.6 or later.</b>
+ * <p>Requires Hibernate 3.6 or later, as of Spring 4.0.
  * Note that this factory will use "on_close" as default Hibernate connection
  * release mode, unless in the case of a "jtaTransactionManager" specified,
  * for the reason that this is appropriate for most Spring-based applications
@@ -220,18 +220,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	/**
 	 * Specify the Hibernate Configuration class to use.
-	 * Default is "org.hibernate.cfg.Configuration"; any subclass of
-	 * this default Hibernate Configuration class can be specified.
-	 * <p>Can be set to "org.hibernate.cfg.AnnotationConfiguration" for
-	 * using Hibernate3 annotation support (initially only available as
-	 * alpha download separate from the main Hibernate3 distribution).
-	 * <p>Annotated packages and annotated classes can be specified via the
-	 * corresponding tags in "hibernate.cfg.xml" then, so this will usually
-	 * be combined with a "configLocation" property that points at such a
-	 * standard Hibernate configuration file.
-	 * @see #setConfigLocation
-	 * @see org.hibernate.cfg.Configuration
-	 * @see org.hibernate.cfg.AnnotationConfiguration
+	 * <p>Default is {@link org.hibernate.cfg.Configuration}; any subclass
+	 * of this default Hibernate Configuration class can be specified.
 	 */
 	@SuppressWarnings("unchecked")
 	public void setConfigurationClass(Class<?> configurationClass) {
