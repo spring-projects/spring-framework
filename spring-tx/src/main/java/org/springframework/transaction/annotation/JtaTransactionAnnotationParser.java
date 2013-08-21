@@ -20,7 +20,9 @@ import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -37,7 +39,7 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		javax.transaction.Transactional ann = AnnotationUtils.getAnnotation(ae, javax.transaction.Transactional.class);
+		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(ae, javax.transaction.Transactional.class.getName());
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);
 		}
@@ -47,15 +49,20 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 	}
 
 	public TransactionAttribute parseTransactionAnnotation(javax.transaction.Transactional ann) {
+		return parseTransactionAnnotation(AnnotationUtils.getAnnotationAttributes(ann, false, false));
+	}
+
+	protected TransactionAttribute parseTransactionAnnotation(AnnotationAttributes attributes) {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-		rbta.setPropagationBehaviorName(RuleBasedTransactionAttribute.PREFIX_PROPAGATION + ann.value().toString());
+		rbta.setPropagationBehaviorName(
+				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
 		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
-		Class[] rbf = ann.rollbackOn();
+		Class[] rbf = attributes.getClassArray("rollbackOn");
 		for (Class rbRule : rbf) {
 			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);
 		}
-		Class[] nrbf = ann.dontRollbackOn();
+		Class[] nrbf = attributes.getClassArray("dontRollbackOn");
 		for (Class rbRule : nrbf) {
 			NoRollbackRuleAttribute rule = new NoRollbackRuleAttribute(rbRule);
 			rollBackRules.add(rule);

@@ -20,6 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
+
+import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +62,19 @@ public class BeanMethodQualificationTests {
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));
 	}
 
+	@Test
+	public void testCustomWithAttributeOverride() {
+		AnnotationConfigApplicationContext ctx =
+				new AnnotationConfigApplicationContext(CustomConfigWithAttributeOverride.class, CustomPojo.class);
+		assertFalse(ctx.getBeanFactory().containsSingleton("testBeanX"));
+		CustomPojo pojo = ctx.getBean(CustomPojo.class);
+		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+	}
+
 
 	@Configuration
 	static class StandardConfig {
+
 		@Bean @Lazy @Qualifier("interesting")
 		public TestBean testBean1() {
 			return new TestBean("interesting");
@@ -76,12 +88,28 @@ public class BeanMethodQualificationTests {
 
 	@Component @Lazy
 	static class StandardPojo {
+
 		@Autowired @Qualifier("interesting") TestBean testBean;
 	}
 
 	@Configuration
 	static class CustomConfig {
+
 		@InterestingBean
+		public TestBean testBean1() {
+			return new TestBean("interesting");
+		}
+
+		@Bean @Qualifier("boring")
+		public TestBean testBean2() {
+			return new TestBean("boring");
+		}
+	}
+
+	@Configuration
+	static class CustomConfigWithAttributeOverride {
+
+		@InterestingBeanWithName(name="testBeanX")
 		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
@@ -94,7 +122,10 @@ public class BeanMethodQualificationTests {
 
 	@InterestingPojo
 	static class CustomPojo {
+
 		@InterestingNeed TestBean testBean;
+
+		@InterestingNeedWithRequiredOverride(required=false) NestedTestBean nestedTestBean;
 	}
 
 	@Bean @Lazy @Qualifier("interesting")
@@ -102,9 +133,23 @@ public class BeanMethodQualificationTests {
 	public @interface InterestingBean {
 	}
 
+	@Bean @Lazy @Qualifier("interesting")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface InterestingBeanWithName {
+
+		String name();
+	}
+
 	@Autowired @Qualifier("interesting")
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface InterestingNeed {
+	}
+
+	@Autowired @Qualifier("interesting")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface InterestingNeedWithRequiredOverride {
+
+		boolean required();
 	}
 
 	@Component @Lazy

@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -49,9 +50,14 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	/**
-	 * Create a new StandardMethodMetadata wrapper for the given Method.
+	 * Create a new StandardMethodMetadata wrapper for the given Method,
+	 * providing the option to return any nested annotations or annotation arrays in the
+	 * form of {@link org.springframework.core.annotation.AnnotationAttributes} instead
+	 * of actual {@link java.lang.annotation.Annotation} instances.
 	 * @param introspectedMethod the Method to introspect
-	 * @param nestedAnnotationsAsMap
+	 * @param nestedAnnotationsAsMap return nested annotations and annotation arrays as
+	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
+	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
 	 */
 	public StandardMethodMetadata(Method introspectedMethod, boolean nestedAnnotationsAsMap) {
@@ -115,8 +121,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(
-			String annotationType, boolean classValuesAsString) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
 				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
