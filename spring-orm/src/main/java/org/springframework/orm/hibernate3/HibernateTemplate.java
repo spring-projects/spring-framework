@@ -410,10 +410,10 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			return result;
 		}
 		catch (HibernateException ex) {
-			throw convertHibernateAccessException(ex);
+			throw (DataAccessException) convertHibernateAccessException(ex).fillInStackTrace();
 		}
 		catch (SQLException ex) {
-			throw convertJdbcAccessException(ex);
+			throw (DataAccessException) convertJdbcAccessException(ex).fillInStackTrace();
 		}
 		catch (RuntimeException ex) {
 			// Callback code threw application exception...

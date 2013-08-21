@@ -640,7 +640,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					session.flush();
 				}
 				catch (HibernateException ex) {
-					throw convertHibernateAccessException(ex);
+					throw (DataAccessException) convertHibernateAccessException(ex).fillInStackTrace();
 				}
 				finally {
 					session.setFlushMode(FlushMode.MANUAL);
@@ -659,13 +659,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		try {
 			txObject.getSessionHolder().getTransaction().commit();
 		}
-		catch (org.hibernate.TransactionException ex) {
+		catch (TransactionException ex) {
 			// assumably from commit call to the underlying JDBC connection
 			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
 		}
 		catch (HibernateException ex) {
 			// assumably failed to flush changes to database
-			throw convertHibernateAccessException(ex);
+			throw (DataAccessException) convertHibernateAccessException(ex).fillInStackTrace();
 		}
 	}
 
@@ -679,12 +679,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		try {
 			txObject.getSessionHolder().getTransaction().rollback();
 		}
-		catch (org.hibernate.TransactionException ex) {
+		catch (TransactionException ex) {
 			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
 		}
 		catch (HibernateException ex) {
 			// Shouldn't really happen, as a rollback doesn't cause a flush.
-			throw convertHibernateAccessException(ex);
+			throw (DataAccessException) convertHibernateAccessException(ex).fillInStackTrace();
 		}
 		finally {
 			if (!txObject.isNewSession() && !this.hibernateManagedSession) {
@@ -897,7 +897,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				this.sessionHolder.getSession().flush();
 			}
 			catch (HibernateException ex) {
-				throw convertHibernateAccessException(ex);
+				throw (DataAccessException) convertHibernateAccessException(ex).fillInStackTrace();
 			}
 		}
 	}

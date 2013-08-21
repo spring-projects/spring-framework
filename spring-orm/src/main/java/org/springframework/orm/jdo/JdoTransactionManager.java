@@ -440,7 +440,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 		catch (JDOException ex) {
 			// Assumably failed to flush changes to database.
-			throw convertJdoAccessException(ex);
+			throw (DataAccessException) convertJdoAccessException(ex).fillInStackTrace();
 		}
 	}
 
@@ -584,7 +584,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 				this.persistenceManagerHolder.getPersistenceManager().flush();
 			}
 			catch (JDOException ex) {
-				throw convertJdoAccessException(ex);
+				throw (DataAccessException) convertJdoAccessException(ex).fillInStackTrace();
 			}
 		}
 	}

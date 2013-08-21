@@ -350,7 +350,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			// in the case when the exception translator hasn't been initialized yet.
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("ConnectionCallback", getSql(action), ex);
+			throw (DataAccessException) getExceptionTranslator().translate("ConnectionCallback", getSql(action), ex).fillInStackTrace();
 		}
 		finally {
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -409,7 +409,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			stmt = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("StatementCallback", getSql(action), ex);
+			throw (DataAccessException) getExceptionTranslator().translate("StatementCallback", getSql(action), ex).fillInStackTrace();
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
@@ -656,7 +656,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			ps = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("PreparedStatementCallback", sql, ex);
+			throw (DataAccessException) getExceptionTranslator().translate("PreparedStatementCallback", sql, ex).fillInStackTrace();
 		}
 		finally {
 			if (psc instanceof ParameterDisposer) {
@@ -1137,7 +1137,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			cs = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
 			con = null;
-			throw getExceptionTranslator().translate("CallableStatementCallback", sql, ex);
+			throw (DataAccessException) getExceptionTranslator().translate("CallableStatementCallback", sql, ex).fillInStackTrace();
 		}
 		finally {
 			if (csc instanceof ParameterDisposer) {

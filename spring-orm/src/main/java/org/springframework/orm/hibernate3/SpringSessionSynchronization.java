@@ -134,7 +134,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 			getCurrentSession().flush();
 		}
 		catch (HibernateException ex) {
-			throw translateException(ex);
+			throw (DataAccessException) translateException(ex).fillInStackTrace();
 		}
 	}
 
@@ -150,7 +150,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 					session.flush();
 				}
 				catch (HibernateException ex) {
-					throw translateException(ex);
+					throw (DataAccessException) translateException(ex).fillInStackTrace();
 				}
 			}
 		}
