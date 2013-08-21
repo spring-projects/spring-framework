@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 import java.util.Collections;
@@ -45,7 +46,9 @@ import java.util.TreeSet;
  *
  * @see MimeTypeUtils
  */
-public class MimeType implements Comparable<MimeType> {
+public class MimeType implements Comparable<MimeType>, Serializable {
+
+	private static final long serialVersionUID = 4085923477777865903L;
 
 	protected static final String WILDCARD_TYPE = "*";
 
