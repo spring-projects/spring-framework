@@ -23,8 +23,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.util.Assert;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * A {@link ScopeMetadataResolver} implementation that by default checks for
  * the presence of Spring's {@link Scope} annotation on the bean class.
@@ -79,7 +77,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		ScopeMetadata metadata = new ScopeMetadata();
 		if (definition instanceof AnnotatedBeanDefinition) {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
-			AnnotationAttributes attributes = attributesFor(annDef.getMetadata(), this.scopeAnnotationType);
+			AnnotationAttributes attributes = MetadataUtils.attributesFor(annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
 				metadata.setScopeName(attributes.getString("value"));
 				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");

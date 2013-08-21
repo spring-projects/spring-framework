@@ -75,9 +75,9 @@ public interface AnnotatedTypeMetadata {
 	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
 	 * defined on the underlying method, as direct annotation or as meta-annotation).
 	 * @param annotationType the annotation type to look for
-	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value") and
-	 *         a list of the defined attribute values as Map value. This return value will
-	 *         be {@code null} if no matching annotation is defined.
+	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
+	 * and a list of the defined attribute values as Map value. This return value will
+	 * be {@code null} if no matching annotation is defined.
 	 */
 	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType);
 
@@ -86,12 +86,11 @@ public interface AnnotatedTypeMetadata {
 	 * defined on the underlying method, as direct annotation or as meta-annotation).
 	 * @param annotationType the annotation type to look for
 	 * @param classValuesAsString  whether to convert class references to String
-	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value") and
-	 *         a list of the defined attribute values as Map value. This return value will
-	 *         be {@code null} if no matching annotation is defined.
+	 * @return a MultiMap of attributes, with the attribute name as key (e.g. "value")
+	 * and a list of the defined attribute values as Map value. This return value will
+	 * be {@code null} if no matching annotation is defined.
 	 * @see #getAllAnnotationAttributes(String)
 	 */
-	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType,
-			boolean classValuesAsString);
+	MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString);
 
 }

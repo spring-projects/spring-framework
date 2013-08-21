@@ -419,8 +419,8 @@ public abstract class AnnotationUtils {
 						Annotation[] realAnnotations = (Annotation[]) value;
 						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
 						for (int i = 0; i < realAnnotations.length; i++) {
-							mappedAnnotations[i] = getAnnotationAttributes(realAnnotations[i], classValuesAsString,
-								nestedAnnotationsAsMap);
+							mappedAnnotations[i] = getAnnotationAttributes(
+									realAnnotations[i], classValuesAsString, nestedAnnotationsAsMap);
 						}
 						attrs.put(method.getName(), mappedAnnotations);
 					}
