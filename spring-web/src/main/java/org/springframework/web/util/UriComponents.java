@@ -162,6 +162,17 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	/**
+	 * Replaces all URI template variables with the values obtained through the
+	 * given {@link UriTemplateVariables} instance.
+	 * @param uriTemplateVars resolves URI template variable values
+	 * @return the expanded uri components
+	 */
+	public final UriComponents expand(UriTemplateVariables uriTemplateVars) {
+		Assert.notNull(uriTemplateVars, "'uriTemplateVars' must not be null");
+		return expandInternal(uriTemplateVars);
+	}
+
+	/**
 	 * Replaces all URI template variables with the values from the given {@link
 	 * UriTemplateVariables}
 	 * @param uriVariables URI template values
@@ -228,7 +239,7 @@ public abstract class UriComponents implements Serializable {
 	 * Defines the contract for URI Template variables
 	 * @see HierarchicalUriComponents#expand
 	 */
-	interface UriTemplateVariables {
+	public interface UriTemplateVariables {
 
 		Object getValue(String name);
 	}
