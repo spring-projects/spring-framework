@@ -138,8 +138,12 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		}
 
 		public static MediaType getMediaType(Resource resource) {
-			String mediaType = fileTypeMap.getContentType(resource.getFilename());
-			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
+			if(resource.getFilename() == null) {
+				return null;
+			} else {
+				String mediaType = fileTypeMap.getContentType(resource.getFilename());
+				return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
+			}
 		}
 	}
 
