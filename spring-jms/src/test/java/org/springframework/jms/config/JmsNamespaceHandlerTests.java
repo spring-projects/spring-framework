@@ -163,6 +163,24 @@ public class JmsNamespaceHandlerTests {
 		assertEquals(77, phase4);
 		assertEquals(Integer.MAX_VALUE, defaultPhase);
 	}
+	
+	@Test
+	public void testRecoveryInterval() {
+		long recoveryInterval1 = getRecoveryInterval("listener1");
+		long recoveryInterval2 = getRecoveryInterval("listener2");
+		long recoveryInterval3 = getRecoveryInterval(DefaultMessageListenerContainer.class.getName() + "#0");
+		
+		assertEquals(1000L, recoveryInterval1);
+		assertEquals(1000L, recoveryInterval2);
+		assertEquals(DefaultMessageListenerContainer.DEFAULT_RECOVERY_INTERVAL, recoveryInterval3);
+	}
+
+	private long getRecoveryInterval(String containerBeanName) {
+		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
+		Long recoveryInterval = (Long) new DirectFieldAccessor(container).getPropertyValue("recoveryInterval");
+		return recoveryInterval.longValue();
+	}
+	
 
 	private MessageListener getListener(String containerBeanName) {
 		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);

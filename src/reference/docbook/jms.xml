@@ -1087,6 +1087,16 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
           </row>
 
           <row>
+            <entry>container-class</entry>
+
+            <entry><para>A custom listener container implementation class
+            as fully qualified class name. Default is Spring's standard
+            <classname>DefaultMessageListenerContainer</classname> or
+            <classname>SimpleMessageListenerContainer</classname>,
+            according to the "container-type" attribute.</para></entry>
+          </row>
+
+          <row>
             <entry>connection-factory</entry>
 
             <entry><para>A reference to the JMS
@@ -1119,6 +1129,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <interfacename>MessageConverter</interfacename> strategy for
             converting JMS Messages to listener method arguments. Default is a
             <classname>SimpleMessageConverter</classname>.</para></entry>
+          </row>
+
+          <row>
+            <entry>error-handler</entry>
+
+            <entry><para>A reference to an 
+            <interfacename>ErrorHandler</interfacename> strategy for handling
+            any uncaught Exceptions that may occur during the execution of the
+            <interfacename>MessageListener</interfacename>.</para></entry>
           </row>
 
           <row>
@@ -1194,6 +1213,32 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <entry><para>The maximum number of messages to load into a single
             session. Note that raising this number might lead to starvation of
             concurrent consumers!</para></entry>
+          </row>
+
+          <row>
+            <entry>receive-timeout</entry>
+
+            <entry><para>The timeout to use for receive calls (in milliseconds).
+			The default is <literal>1000</literal> ms (1 sec); <literal>-1</literal>
+			indicates no timeout at all.</para></entry>
+          </row>
+
+          <row>
+            <entry>phase</entry>
+
+            <entry><para>The lifecycle phase within which this container should
+            start and stop. The lower the value the earlier this container will
+            start and the later it will stop. The default is 
+            <literal>Integer.MAX_VALUE</literal> meaning the container will start
+            as late as possible and stop as soon as possible.</para></entry>
+          </row>
+
+          <row>
+            <entry>recovery-interval</entry>
+
+            <entry><para>Specify the interval between recovery attempts, in
+            milliseconds. The default is <literal>5000</literal> ms, that is,
+            5 seconds.</para></entry>
           </row>
         </tbody>
       </tgroup>
@@ -1325,6 +1370,16 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <entry><para>The maximum number of messages to load into a single
             session. Note that raising this number might lead to starvation of
             concurrent consumers!</para></entry>
+          </row>
+
+          <row>
+            <entry>phase</entry>
+
+            <entry><para>The lifecycle phase within which this container should
+            start and stop. The lower the value the earlier this container will
+            start and the later it will stop. The default is 
+            <literal>Integer.MAX_VALUE</literal> meaning the container will start
+            as late as possible and stop as soon as possible.</para></entry>
           </row>
         </tbody>
       </tgroup>

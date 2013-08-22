@@ -48,6 +48,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String CACHE_ATTRIBUTE = "cache";
 
 	private static final String RECEIVE_TIMEOUT_ATTRIBUTE = "receive-timeout";
+	
+	private static final String RECOVERY_INTERVAL_ATTRIBUTE = "recovery-interval";
 
 
 	@Override
@@ -163,6 +165,11 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
 		if (StringUtils.hasText(phase)) {
 			containerDef.getPropertyValues().add("phase", phase);
+		}
+
+		String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
+		if (StringUtils.hasText(recoveryInterval)) {
+			containerDef.getPropertyValues().add("recoveryInterval", recoveryInterval);
 		}
 
 		return containerDef;
