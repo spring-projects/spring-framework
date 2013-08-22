@@ -17,11 +17,13 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -68,6 +70,15 @@ public class ResourceHttpMessageConverterTests {
 		assertEquals("Invalid content-type", MediaType.IMAGE_JPEG,
 				outputMessage.getHeaders().getContentType());
 		assertEquals("Invalid content-length", body.getFile().length(), outputMessage.getHeaders().getContentLength());
+	}
+	
+	@Test
+	public void writeByteArray() throws IOException {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		byte[] byteArray = {1, 2, 3};
+		Resource body = new ByteArrayResource(byteArray);
+		converter.write(body, null, outputMessage);
+		assertTrue(Arrays.equals(byteArray, outputMessage.getBodyAsBytes()));
 	}
 
 }
