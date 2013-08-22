@@ -25,8 +25,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -40,6 +42,8 @@ public class SpringConfiguratorTests {
 
 	private AnnotationConfigWebApplicationContext webAppContext;
 
+	private SpringConfigurator configurator;
+
 
 	@Before
 	public void setup() {
@@ -50,6 +54,8 @@ public class SpringConfiguratorTests {
 
 		this.contextLoader = new ContextLoader(this.webAppContext);
 		this.contextLoader.initWebApplicationContext(this.servletContext);
+
+		this.configurator = new SpringConfigurator();
 	}
 
 	@After
@@ -59,29 +65,33 @@ public class SpringConfiguratorTests {
 
 
 	@Test
-	public void getEndpointInstanceCreateBean() throws Exception {
-
-		PerConnectionEchoEndpoint endpoint = new SpringConfigurator().getEndpointInstance(PerConnectionEchoEndpoint.class);
-
+	public void getEndpointInstancePerConnection() throws Exception {
+		PerConnectionEchoEndpoint endpoint = this.configurator.getEndpointInstance(PerConnectionEchoEndpoint.class);
 		assertNotNull(endpoint);
 	}
 
 	@Test
-	public void getEndpointInstanceUseBean() throws Exception {
+	public void getEndpointInstanceSingletonByType() throws Exception {
+		EchoEndpoint expected = this.webAppContext.getBean(EchoEndpoint.class);
+		EchoEndpoint actual = this.configurator.getEndpointInstance(EchoEndpoint.class);
+		assertSame(expected, actual);
+	}
 
-		EchoEndpointBean expected = this.webAppContext.getBean(EchoEndpointBean.class);
-		EchoEndpointBean actual = new SpringConfigurator().getEndpointInstance(EchoEndpointBean.class);
-
+	@Test
+	public void getEndpointInstanceSingletonByComponentName() throws Exception {
+		AlternativeEchoEndpoint expected = this.webAppContext.getBean(AlternativeEchoEndpoint.class);
+		AlternativeEchoEndpoint actual = this.configurator.getEndpointInstance(AlternativeEchoEndpoint.class);
 		assertSame(expected, actual);
 	}
 
 
 	@Configuration
+	@ComponentScan(basePackageClasses=SpringConfiguratorTests.class)
 	static class Config {
 
 		@Bean
-		public EchoEndpointBean echoEndpointBean() {
-			return new EchoEndpointBean(echoService());
+		public EchoEndpoint echoEndpoint() {
+			return new EchoEndpoint(echoService());
 		}
 
 		@Bean
@@ -90,13 +100,29 @@ public class SpringConfiguratorTests {
 		}
 	}
 
-	private static class EchoEndpointBean extends Endpoint {
+	private static class EchoEndpoint extends Endpoint {
 
 		@SuppressWarnings("unused")
 		private final EchoService service;
 
 		@Autowired
-		public EchoEndpointBean(EchoService service) {
+		public EchoEndpoint(EchoService service) {
+			this.service = service;
+		}
+
+		@Override
+		public void onOpen(Session session, EndpointConfig config) {
+		}
+	}
+
+	@Component("echoEndpoint")
+	private static class AlternativeEchoEndpoint extends Endpoint {
+
+		@SuppressWarnings("unused")
+		private final EchoService service;
+
+		@Autowired
+		public AlternativeEchoEndpoint(EchoService service) {
 			this.service = service;
 		}
 
