@@ -57,6 +57,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -436,7 +437,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		if (cachedArgument instanceof DependencyDescriptor) {
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
 			TypeConverter typeConverter = this.beanFactory.getTypeConverter();
-			return this.beanFactory.resolveDependency(descriptor, beanName, null, typeConverter);
+			Object value = this.beanFactory.resolveDependency(descriptor, beanName, null, typeConverter);
+			AnnotationAwareOrderComparator.sortIfNecessary(value);
+			return value;
 		}
 		else if (cachedArgument instanceof RuntimeBeanReference) {
 			return this.beanFactory.getBean(((RuntimeBeanReference) cachedArgument).getBeanName());
@@ -476,6 +479,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					Set<String> autowiredBeanNames = new LinkedHashSet<String>(1);
 					TypeConverter typeConverter = beanFactory.getTypeConverter();
 					value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
+					AnnotationAwareOrderComparator.sortIfNecessary(value);
 					synchronized (this) {
 						if (!this.cached) {
 							if (value != null || this.required) {
@@ -547,12 +551,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						MethodParameter methodParam = new MethodParameter(method, i);
 						GenericTypeResolver.resolveParameterType(methodParam, bean.getClass());
 						descriptors[i] = new DependencyDescriptor(methodParam, this.required);
-						arguments[i] = beanFactory.resolveDependency(
+						Object arg = beanFactory.resolveDependency(
 								descriptors[i], beanName, autowiredBeanNames, typeConverter);
-						if (arguments[i] == null && !this.required) {
+						if (arg == null && !this.required) {
 							arguments = null;
 							break;
 						}
+						AnnotationAwareOrderComparator.sortIfNecessary(arg);
+						arguments[i] = arg;
 					}
 					synchronized (this) {
 						if (!this.cached) {
