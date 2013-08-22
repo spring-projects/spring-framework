@@ -301,7 +301,7 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	 * can be resolved. Alternatively consider creating a test that initializes a
 	 * {@link WebApplicationContext}.
 	 */
-	public StandaloneMockMvcBuilder addPlaceHolderValues(String name, String value) {
+	public StandaloneMockMvcBuilder addPlaceHolderValue(String name, String value) {
 		this.placeHolderValues.put(name, value);
 		return this;
 	}

@@ -41,7 +41,7 @@ public class StandaloneMockMvcBuilderTests {
 
 		StubWebApplicationContext cxt = new StubWebApplicationContext(new MockServletContext());
 		StandaloneMockMvcBuilder builder = new StandaloneMockMvcBuilder(new PlaceholderController());
-		builder.addPlaceHolderValues("sys.login.ajax", "/foo");
+		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
 		builder.initWebAppContext(cxt);
 
 		RequestMappingHandlerMapping hm = cxt.getBean(RequestMappingHandlerMapping.class);
