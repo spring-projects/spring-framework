@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.TypeUtils;
 
@@ -74,9 +75,33 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		Class type = getDiscoveredReturningType();
 		Type genericType = getDiscoveredReturningGenericType();
 		// If we aren't dealing with a raw type, check if  generic parameters are assignable.
-		return (ClassUtils.isAssignableValue(type, returnValue) &&
+		return (isAssignableReturnValueConsideringNullValue(type, method, returnValue) &&
 				(genericType == null || genericType == type ||
 						TypeUtils.isAssignable(genericType, method.getGenericReturnType())));
 	}
-
+	
+	/**
+	 * Following AspectJ semantics, if a return value is null(or return type is void),
+	 * then the returnType of target method should be used to determine whether advice
+	 * is invoked or not. Also even if return type is void, if the type of argument 
+	 * declared in advice method is Object, then the advice must be invoked.
+	 * 
+	 * @param type the type of argument declared in advice method
+	 * @param method the advice method
+	 * @param returnValue the return value of the target method
+	 * @return whether to invoke the advice method for the given return value and type
+	 */
+	private boolean isAssignableReturnValueConsideringNullValue(Class type, Method method, Object returnValue) {
+		Class genericReturnType = GenericTypeResolver.resolveReturnType(method, method.getClass());
+		if(returnValue != null) {
+			return ClassUtils.isAssignableValue(type, returnValue);
+		}
+		else if(type.equals(Object.class) && genericReturnType.equals(void.class)) {
+			return true;
+		}
+		else{
+			return ClassUtils.isAssignable(type, genericReturnType);
+		}
+	}
+	
 }
