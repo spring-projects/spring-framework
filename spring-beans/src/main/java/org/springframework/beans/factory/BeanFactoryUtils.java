@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.TypeMatchUtils;
+import org.springframework.beans.type.ClassTypeInformation;
+import org.springframework.beans.type.TypeInformation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -39,6 +42,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Oliver Gierke
  * @since 04.07.2003
  */
 public abstract class BeanFactoryUtils {
@@ -160,6 +164,12 @@ public abstract class BeanFactoryUtils {
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static String[] beanNamesForTypeIncludingAncestors(
+			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+		return beanNamesForTypeIncludingAncestors(lbf, ClassTypeInformation.from(type), includeNonSingletons, allowEagerInit);
+	}
+
 	/**
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
@@ -181,10 +191,11 @@ public abstract class BeanFactoryUtils {
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+			ListableBeanFactory lbf, TypeInformation<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		String[] result = TypeMatchUtils.getBeanNamesForType(type, includeNonSingletons, allowEagerInit, lbf);
+
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {

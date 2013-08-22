@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,15 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.type.ClassTypeInformation;
+import org.springframework.beans.type.TypeInformation;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -35,6 +41,7 @@ import org.springframework.util.Assert;
  * allowing unified access to their metadata.
  *
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  * @since 2.5
  */
 @SuppressWarnings("serial")
@@ -45,6 +52,10 @@ public class DependencyDescriptor implements Serializable {
 	private transient Field field;
 
 	private Class declaringClass;
+
+	private Class<?> sourceBeanClass;
+
+	private transient TypeInformation<?> owningTypeInformation;
 
 	private String methodName;
 
@@ -81,6 +92,21 @@ public class DependencyDescriptor implements Serializable {
 	 * eagerly resolving potential target beans for type matching
 	 */
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
+		this(methodParameter, required, eager, methodParameter.getDeclaringClass());
+	}
+
+	/**
+	 * Create a new descriptor for a method or constructor parameter as well as the source bean class which is used to
+	 * resolve generic type information if necessary.
+	 *
+	 * @param methodParameter the {@link MethodParameter} to wrap
+	 * @param required whether the dependency is required
+	 * @param eager whether this dependency is 'eager' in the sense of eagerly resolving potential target beans for type
+	 *          matching
+	 * @param sourceBeanClass the owning class of the dependency descriptor
+	 */
+	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager, Class<?> sourceBeanClass) {
+
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		this.methodParameter = methodParameter;
 		this.declaringClass = methodParameter.getDeclaringClass();
@@ -94,6 +120,7 @@ public class DependencyDescriptor implements Serializable {
 		this.parameterIndex = methodParameter.getParameterIndex();
 		this.required = required;
 		this.eager = eager;
+		this.sourceBeanClass = sourceBeanClass;
 	}
 
 	/**
@@ -114,12 +141,27 @@ public class DependencyDescriptor implements Serializable {
 	 * eagerly resolving potential target beans for type matching
 	 */
 	public DependencyDescriptor(Field field, boolean required, boolean eager) {
+		this(field, required, eager, field.getDeclaringClass());
+	}
+
+	/**
+	 * Create a new descriptor for a field.
+	 *
+	 * @param field the field to wrap
+	 * @param required whether the dependency is required
+	 * @param eager whether this dependency is 'eager' in the sense of
+	 * eagerly resolving potential target beans for type matching
+	 * @param sourceBeanClass the owning class of the dependency descriptor
+	 */
+	public DependencyDescriptor(Field field, boolean required, boolean eager, Class<?> sourceBeanClass) {
+
 		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 		this.declaringClass = field.getDeclaringClass();
 		this.fieldName = field.getName();
 		this.required = required;
 		this.eager = eager;
+		this.sourceBeanClass = sourceBeanClass;
 	}
 
 	/**
@@ -138,6 +180,8 @@ public class DependencyDescriptor implements Serializable {
 		this.eager = original.eager;
 		this.nestingLevel = original.nestingLevel;
 		this.fieldAnnotations = original.fieldAnnotations;
+		this.sourceBeanClass = original.sourceBeanClass;
+		this.owningTypeInformation = original.owningTypeInformation;
 	}
 
 
@@ -238,6 +282,35 @@ public class DependencyDescriptor implements Serializable {
 	}
 
 	/**
+	 * {@link TypeInformation} based variant of {@link #getDependencyType()} to ensure we keep generics information
+	 * around.
+	 *
+	 * @return
+	 */
+	public TypeInformation<?> getDependencyTypeInformation() {
+
+		TypeInformation<?> info = null;
+
+		if (this.owningTypeInformation == null) {
+			this.owningTypeInformation = ClassTypeInformation.from(this.sourceBeanClass);
+		}
+
+		if (field == null) {
+
+			Method method = this.methodParameter.getMethod();
+			List<TypeInformation<?>> paramTypeInformations = method == null ?
+					this.owningTypeInformation.getParameterTypes(this.methodParameter.getConstructor()) :
+					this.owningTypeInformation.getParameterTypes(this.methodParameter.getMethod());
+
+			info = paramTypeInformations.get(this.methodParameter.getParameterIndex());
+		} else {
+			info = this.owningTypeInformation.getProperty(fieldName);
+		}
+
+		return this.nestingLevel > 1 ? info.getComponentType() : info;
+	}
+
+	/**
 	 * Determine the generic element type of the wrapped Collection parameter/field, if any.
 	 * @return the generic type, or {@code null} if none
 	 */
@@ -280,6 +353,31 @@ public class DependencyDescriptor implements Serializable {
 		else {
 			return this.methodParameter.getParameterAnnotations();
 		}
+	}
+	
+	/**
+	 * Returns whether the dependecy shall be autowired. This will rule out dependency
+	 * descriptors for {@link Object} as well as {@link Collection}s and {@link Map}s with
+	 * {@link Object} as component or value type.
+	 */
+	public boolean shouldBeAutowired() {
+		
+		Class<?> dependencyType = getDependencyType();
+		
+		if (Collection.class.isAssignableFrom(dependencyType)) {
+			return isNotNullAndNotObject(getCollectionType());
+		}
+		
+		if (Map.class.isAssignableFrom(dependencyType) && dependencyType.isInterface()) {
+			dependencyType = getMapValueType();
+			return isNotNullAndNotObject(getMapValueType());
+		}
+		
+		return isNotNullAndNotObject(dependencyType);
+	}
+	
+	private static boolean isNotNullAndNotObject(Class<?> type) {
+		return type != null && !Object.class.equals(type);
 	}
 
 

@@ -57,6 +57,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.type.ClassTypeInformation;
+import org.springframework.beans.type.TypeInformation;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -90,6 +92,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Oliver Gierke
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -135,10 +138,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
 
 	/** Map of singleton and non-singleton bean names keyed by dependency type */
-	private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
+	private final Map<TypeInformation<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<TypeInformation<?>, String[]>(64);
 
 	/** Map of singleton-only bean names keyed by dependency type */
-	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
+	private final Map<TypeInformation<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<TypeInformation<?>, String[]>(64);
 
 	/** List of bean definition names, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>();
@@ -328,11 +331,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+		return getBeanNamesForType(ClassTypeInformation.from(type), includeNonSingletons, allowEagerInit);
+	}
+
+	public String[] getBeanNamesForType(TypeInformation<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen()  || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
-		Map<Class<?>, String[]> cache =
-				(includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
+		Map<TypeInformation<?>, String[]> cache = includeNonSingletons ?
+				this.allBeanNamesByType : this.singletonBeanNamesByType;
 		String[] resolvedBeanNames = cache.get(type);
 		if (resolvedBeanNames != null) {
 			return resolvedBeanNames;
@@ -342,7 +349,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return resolvedBeanNames;
 	}
 
-	private String[] doGetBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+	private String[] doGetBeanNamesForType(TypeInformation<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<String>();
 
 		// Check all bean definitions.
@@ -776,7 +783,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
@@ -786,14 +793,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {
-			return doResolveDependency(descriptor, descriptor.getDependencyType(), beanName, autowiredBeanNames, typeConverter);
+			return doResolveDependency(descriptor, descriptor.getDependencyTypeInformation(), beanName, autowiredBeanNames, typeConverter);
 		}
 	}
 
-	protected Object doResolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
-			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
+	protected Object doResolveDependency(DependencyDescriptor descriptor, TypeInformation<?> typeInformation, String beanName,
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
+		Class<?> type = typeInformation.getType();
+
 		if (value != null) {
 			if (value instanceof String) {
 				String strVal = resolveEmbeddedValue((String) value);
@@ -803,15 +812,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			return (descriptor.getField() != null ?
 					converter.convertIfNecessary(value, type, descriptor.getField()) :
-					converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
+			        converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
 		}
 
 		if (type.isArray()) {
-			Class<?> componentType = type.getComponentType();
+			TypeInformation<?> componentType = typeInformation.getComponentType();
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(componentType, "array of " + componentType.getName(), descriptor);
+					Class<?> rawComponentType = componentType.getType();
+					raiseNoSuchBeanDefinitionException(rawComponentType, "array of " + rawComponentType.getName(), descriptor);
 				}
 				return null;
 			}
@@ -822,8 +832,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return converter.convertIfNecessary(matchingBeans.values(), type);
 		}
 		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
-			Class<?> elementType = descriptor.getCollectionType();
-			if (elementType == null) {
+			TypeInformation<?> elementType = typeInformation.getComponentType();
+			if (typeInformation.isRawType()) {
 				if (descriptor.isRequired()) {
 					throw new FatalBeanException("No element type declared for collection [" + type.getName() + "]");
 				}
@@ -832,7 +842,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(elementType, "collection of " + elementType.getName(), descriptor);
+					Class<?> rawElementType = elementType.getType();
+					raiseNoSuchBeanDefinitionException(rawElementType, "collection of " + rawElementType.getName(), descriptor);
 				}
 				return null;
 			}
@@ -851,7 +862,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return null;
 			}
-			Class<?> valueType = descriptor.getMapValueType();
+			TypeInformation<?> valueType = typeInformation.getMapValueType();
 			if (valueType == null) {
 				if (descriptor.isRequired()) {
 					throw new FatalBeanException("No value type declared for map [" + type.getName() + "]");
@@ -861,7 +872,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(valueType, "map with value type " + valueType.getName(), descriptor);
+					Class<?> rawValueType = valueType.getType();
+					raiseNoSuchBeanDefinitionException(rawValueType, "map with value type " + rawValueType.getName(), descriptor);
 				}
 				return null;
 			}
@@ -871,7 +883,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return matchingBeans;
 		}
 		else {
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, typeInformation, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
 					raiseNoSuchBeanDefinitionException(type, "", descriptor);
@@ -911,16 +923,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @see #autowireConstructor
 	 */
 	protected Map<String, Object> findAutowireCandidates(
-			String beanName, Class<?> requiredType, DependencyDescriptor descriptor) {
+			String beanName, TypeInformation<?> requiredType, DependencyDescriptor descriptor) {
 
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this, requiredType, true, descriptor.isEager());
 		Map<String, Object> result = new LinkedHashMap<String, Object>(candidateNames.length);
 		for (Class<?> autowiringType : this.resolvableDependencies.keySet()) {
-			if (autowiringType.isAssignableFrom(requiredType)) {
+			if (autowiringType.isAssignableFrom(requiredType.getType())) {
 				Object autowiringValue = this.resolvableDependencies.get(autowiringType);
 				autowiringValue = AutowireUtils.resolveAutowiringValue(autowiringValue, requiredType);
-				if (requiredType.isInstance(autowiringValue)) {
+				if (requiredType.getType().isInstance(autowiringValue)) {
 					result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
 					break;
 				}
@@ -1091,7 +1103,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getObject() throws BeansException {
-			return doResolveDependency(this.descriptor, this.descriptor.getDependencyType(), this.beanName, null, null);
+			TypeInformation<?> componentType = this.descriptor.getDependencyTypeInformation();
+			return doResolveDependency(this.descriptor, componentType == null ? ClassTypeInformation.OBJECT : componentType, this.beanName, null, null);
 		}
 	}
 

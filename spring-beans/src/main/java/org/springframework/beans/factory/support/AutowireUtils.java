@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.Comparator;
 import java.util.Set;
 
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.type.ClassTypeInformation;
+import org.springframework.beans.type.TypeInformation;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -37,6 +39,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Oliver Gierke
  * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
@@ -137,12 +140,16 @@ abstract class AutowireUtils {
 	 * @param requiredType the type to assign the result to
 	 * @return the resolved value
 	 */
-	public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
-		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
+	public static Object resolveAutowiringValue(Object autowiringValue, TypeInformation<?> requiredType) {
+
+		TypeInformation<?> valueTypeInformation = ClassTypeInformation.from(autowiringValue.getClass());
+		Class<?> rawRequiredType = requiredType.getType();
+
+		if (autowiringValue instanceof ObjectFactory && !requiredType.isAssignableFrom(valueTypeInformation)) {
 			ObjectFactory factory = (ObjectFactory) autowiringValue;
-			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
-				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
-						new Class[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
+			if (autowiringValue instanceof Serializable && rawRequiredType.isInterface()) {
+				autowiringValue = Proxy.newProxyInstance(rawRequiredType.getClassLoader(),
+						new Class[] {requiredType.getType()}, new ObjectFactoryDelegatingInvocationHandler(factory));
 			}
 			else {
 				return factory.getObject();
