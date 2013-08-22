@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -104,6 +105,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	private Map<Object, Boolean> features = new HashMap<Object, Boolean>();
 
+	private JsonInclude.Include serializationInclusion;
+
 	private DateFormat dateFormat;
 
 	private AnnotationIntrospector annotationIntrospector;
@@ -111,7 +114,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
-
 
 	/**
 	 * Set the ObjectMapper instance to use. If not set, the ObjectMapper will
@@ -123,8 +125,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Define the format for date/time with the given {@link DateFormat}.
-	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
-	 * non-thread-safe, according to Jackson's thread safety rules.
 	 * @see #setSimpleDateFormat(String)
 	 */
 	public void setDateFormat(DateFormat dateFormat) {
@@ -133,8 +133,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Define the date/time format with a {@link SimpleDateFormat}.
-	 * <p>Note: Setting this property makes the exposed {@link ObjectMapper}
-	 * non-thread-safe, according to Jackson's thread safety rules.
+	 * <p>Note: even though {@link SimpleDateFormat} is not thread-safe,
+	 * <a href="http://stackoverflow.com/a/3909846/267197">Jackson will clone it under the hood</a>.
 	 * @see #setDateFormat(DateFormat)
 	 */
 	public void setSimpleDateFormat(String format) {
@@ -159,8 +159,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		if (serializers != null) {
 			for (JsonSerializer<?> serializer : serializers) {
 				Class<?> handledType = serializer.handledType();
-				Assert.isTrue(handledType != null && handledType != Object.class,
-						"Unknown handled type in " + serializer.getClass().getName());
+				Assert.isTrue(handledType != null && handledType != Object.class, "Unknown handled type in "
+						+ serializer.getClass().getName());
 				this.serializers.put(serializer.handledType(), serializer);
 			}
 		}
@@ -189,7 +189,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * Shortcut for {@link MapperFeature#AUTO_DETECT_FIELDS} option.
 	 */
 	public void setAutoDetectFields(boolean autoDetectFields) {
-		this.features.put(MapperFeature.AUTO_DETECT_FIELDS, autoDetectFields);
+		features.put(MapperFeature.AUTO_DETECT_FIELDS, autoDetectFields);
 	}
 
 	/**
@@ -197,22 +197,22 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * {@link MapperFeature#AUTO_DETECT_GETTERS} option.
 	 */
 	public void setAutoDetectGettersSetters(boolean autoDetectGettersSetters) {
-		this.features.put(MapperFeature.AUTO_DETECT_GETTERS, autoDetectGettersSetters);
-		this.features.put(MapperFeature.AUTO_DETECT_SETTERS, autoDetectGettersSetters);
+		features.put(MapperFeature.AUTO_DETECT_GETTERS, autoDetectGettersSetters);
+		features.put(MapperFeature.AUTO_DETECT_SETTERS, autoDetectGettersSetters);
 	}
 
 	/**
 	 * Shortcut for {@link SerializationFeature#FAIL_ON_EMPTY_BEANS} option.
 	 */
 	public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
-		this.features.put(SerializationFeature.FAIL_ON_EMPTY_BEANS, failOnEmptyBeans);
+		features.put(SerializationFeature.FAIL_ON_EMPTY_BEANS, failOnEmptyBeans);
 	}
 
 	/**
 	 * Shortcut for {@link SerializationFeature#INDENT_OUTPUT} option.
 	 */
 	public void setIndentOutput(boolean indentOutput) {
-		this.features.put(SerializationFeature.INDENT_OUTPUT, indentOutput);
+		features.put(SerializationFeature.INDENT_OUTPUT, indentOutput);
 	}
 
 	/**
@@ -226,7 +226,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	public void setFeaturesToEnable(Object... featuresToEnable) {
 		if (featuresToEnable != null) {
 			for (Object feature : featuresToEnable) {
-				this.features.put(feature, Boolean.TRUE);
+				features.put(feature, Boolean.TRUE);
 			}
 		}
 	}
@@ -242,80 +242,137 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	public void setFeaturesToDisable(Object... featuresToDisable) {
 		if (featuresToDisable != null) {
 			for (Object feature : featuresToDisable) {
-				this.features.put(feature, Boolean.FALSE);
+				features.put(feature, Boolean.FALSE);
 			}
 		}
 	}
 
+	/**
+	 * Sets the custom inclusion strategy for serialization.
+	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
+	 */
+	public void setSerializationInclusion(JsonInclude.Include serializationInclusion) {
+		this.serializationInclusion = serializationInclusion;
+	}
+
+	/**
+	 * The shortcut for
+	 * {@link Jackson2ObjectMapperFactoryBean#setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include)}
+	 * that indicates that only properties with non-null values are to be
+	 * included. Mutually exclusive with
+	 * {@link #setNotDefaultSerializationInclusion(boolean)} and
+	 * {@link #setNotEmptySerializationInclusion(boolean)}.
+	 * 
+	 * @param notNullSerializationInclusion if true then serialization inclusion
+	 * is set to {@link JsonInclude.Include.NON_NULL} otherwise set to default
+	 */
+	public void setNotNullSerializationInclusion(boolean notNullSerializationInclusion) {
+		setSerializationInclusion(notNullSerializationInclusion ? JsonInclude.Include.NON_NULL : null);
+	}
+
+	/**
+	 * The shortcut for
+	 * {@link Jackson2ObjectMapperFactoryBean#setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include)}
+	 * that indicates that properties that differ from default settings are not
+	 * to be included. Mutually exclusive with
+	 * {@link #setNotNullSerializationInclusion(boolean)} and
+	 * {@link #setNotEmptySerializationInclusion(boolean)}.
+	 * 
+	 * @param notDefaultSerializationInclusion if true then serialization
+	 * inclusion is set to {@link JsonInclude.Include.NON_DEFAULT } otherwise set
+	 * to default
+	 */
+	public void setNotDefaultSerializationInclusion(boolean notDefaultSerializationInclusion) {
+		setSerializationInclusion(notDefaultSerializationInclusion ? JsonInclude.Include.NON_DEFAULT : null);
+	}
+
+	/**
+	 * The shortcut for
+	 * {@link Jackson2ObjectMapperFactoryBean#setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include)}
+	 * that indicates that properties considered empty are not to be included.
+	 * Mutually exclusive with
+	 * {@link #setNotNullSerializationInclusion(boolean)} and
+	 * {@link #setNotDefaultSerializationInclusion(boolean)}.
+	 * 
+	 * @param notEmptySerializationInclusion if true then serialization
+	 * inclusion is set to {@link JsonInclude.Include.NON_EMPTY } otherwise set
+	 * to default
+	 */
+	public void setNotEmptySerializationInclusion(boolean notEmptySerializationInclusion) {
+		setSerializationInclusion(notEmptySerializationInclusion ? JsonInclude.Include.NON_EMPTY : null);
+	}
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.objectMapper == null) {
-			this.objectMapper = new ObjectMapper();
+		if (objectMapper == null) {
+			objectMapper = new ObjectMapper();
 		}
 
-		if (this.dateFormat != null) {
-			this.objectMapper.setDateFormat(this.dateFormat);
+		if (dateFormat != null) {
+			objectMapper.setDateFormat(dateFormat);
 		}
 
-		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
+		if (!serializers.isEmpty() || !deserializers.isEmpty()) {
 			SimpleModule module = new SimpleModule();
 			addSerializers(module);
 			addDeserializers(module);
-			this.objectMapper.registerModule(module);
+			objectMapper.registerModule(module);
 		}
 
-		if (this.annotationIntrospector != null) {
-			this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
+		if (annotationIntrospector != null) {
+			objectMapper.setAnnotationIntrospector(annotationIntrospector);
 		}
 
-		for (Object feature : this.features.keySet()) {
-			configureFeature(feature, this.features.get(feature));
+		for (Object feature : features.keySet()) {
+			configureFeature(feature, features.get(feature));
+		}
+
+		if (serializationInclusion != null) {
+			objectMapper.setSerializationInclusion(serializationInclusion);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> void addSerializers(SimpleModule module) {
-		for (Class<?> type : this.serializers.keySet()) {
-			module.addSerializer((Class<? extends T>) type, (JsonSerializer<T>) this.serializers.get(type));
+		for (Class<?> type : serializers.keySet()) {
+			module.addSerializer((Class<? extends T>) type, (JsonSerializer<T>) serializers.get(type));
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> void addDeserializers(SimpleModule module) {
-		for (Class<?> type : this.deserializers.keySet()) {
-			module.addDeserializer((Class<T>) type, (JsonDeserializer<? extends T>) this.deserializers.get(type));
+		for (Class<?> type : deserializers.keySet()) {
+			module.addDeserializer((Class<T>) type, (JsonDeserializer<? extends T>) deserializers.get(type));
 		}
 	}
 
 	private void configureFeature(Object feature, boolean enabled) {
 		if (feature instanceof JsonParser.Feature) {
-			this.objectMapper.configure((JsonParser.Feature) feature, enabled);
+			objectMapper.configure((JsonParser.Feature) feature, enabled);
 		}
 		else if (feature instanceof JsonGenerator.Feature) {
-			this.objectMapper.configure((JsonGenerator.Feature) feature, enabled);
+			objectMapper.configure((JsonGenerator.Feature) feature, enabled);
 		}
 		else if (feature instanceof SerializationFeature) {
-			this.objectMapper.configure((SerializationFeature) feature, enabled);
+			objectMapper.configure((SerializationFeature) feature, enabled);
 		}
 		else if (feature instanceof DeserializationFeature) {
-			this.objectMapper.configure((DeserializationFeature) feature, enabled);
+			objectMapper.configure((DeserializationFeature) feature, enabled);
 		}
 		else if (feature instanceof MapperFeature) {
-			this.objectMapper.configure((MapperFeature) feature, enabled);
+			objectMapper.configure((MapperFeature) feature, enabled);
 		}
 		else {
 			throw new FatalBeanException("Unknown feature class " + feature.getClass().getName());
 		}
 	}
 
-
 	/**
 	 * Return the singleton ObjectMapper.
 	 */
 	@Override
 	public ObjectMapper getObject() {
-		return this.objectMapper;
+		return objectMapper;
 	}
 
 	@Override
@@ -327,5 +384,4 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	public boolean isSingleton() {
 		return true;
 	}
-
 }
