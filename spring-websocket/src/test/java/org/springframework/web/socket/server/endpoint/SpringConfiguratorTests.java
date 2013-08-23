@@ -79,8 +79,8 @@ public class SpringConfiguratorTests {
 
 	@Test
 	public void getEndpointInstanceSingletonByComponentName() throws Exception {
-		AlternativeEchoEndpoint expected = this.webAppContext.getBean(AlternativeEchoEndpoint.class);
-		AlternativeEchoEndpoint actual = this.configurator.getEndpointInstance(AlternativeEchoEndpoint.class);
+		AnotherEchoEndpoint expected = this.webAppContext.getBean(AnotherEchoEndpoint.class);
+		AnotherEchoEndpoint actual = this.configurator.getEndpointInstance(AnotherEchoEndpoint.class);
 		assertSame(expected, actual);
 	}
 
@@ -115,14 +115,14 @@ public class SpringConfiguratorTests {
 		}
 	}
 
-	@Component("echoEndpoint")
-	private static class AlternativeEchoEndpoint extends Endpoint {
+	@Component("myEchoEndpoint")
+	private static class AnotherEchoEndpoint extends Endpoint {
 
 		@SuppressWarnings("unused")
 		private final EchoService service;
 
 		@Autowired
-		public AlternativeEchoEndpoint(EchoService service) {
+		public AnotherEchoEndpoint(EchoService service) {
 			this.service = service;
 		}
 
