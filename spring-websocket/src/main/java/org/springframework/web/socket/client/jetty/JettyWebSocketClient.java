@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.WebSocketHandler;
@@ -51,12 +52,22 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 	private final Object lifecycleMonitor = new Object();
 
 
+	/**
+	 * Default constructor that creates an instance of
+	 * {@link org.eclipse.jetty.websocket.client.WebSocketClient} with default settings.
+	 */
 	public JettyWebSocketClient() {
 		this.client = new org.eclipse.jetty.websocket.client.WebSocketClient();
 	}
 
+	/**
+	 * Constructor that accepts a pre-configured {@link WebSocketClient}.
+	 */
+	public JettyWebSocketClient(WebSocketClient client) {
+		super();
+		this.client = client;
+	}
 
-	// TODO: configure Jetty WebSocketClient properties
 
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;

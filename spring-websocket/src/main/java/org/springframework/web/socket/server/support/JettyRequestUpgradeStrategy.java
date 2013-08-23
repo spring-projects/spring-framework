@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -55,10 +56,19 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	/**
-	 * Default constructor.
+	 * Default constructor that creates {@link WebSocketServerFactory} through its default
+	 * constructor thus using a default {@link WebSocketPolicy}.
 	 */
 	public JettyRequestUpgradeStrategy() {
-		this.factory = new WebSocketServerFactory();
+		this(new WebSocketServerFactory());
+	}
+
+	/**
+	 * A constructor accepting a {@link WebSocketServerFactory}. This may be useful for
+	 * modifying the factory's {@link WebSocketPolicy} via
+	 * {@link WebSocketServerFactory#getPolicy()}.
+	 */
+	public JettyRequestUpgradeStrategy(WebSocketServerFactory factory) {
 		this.factory.setCreator(new WebSocketCreator() {
 			@Override
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {

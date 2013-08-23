@@ -30,14 +30,16 @@ import org.springframework.web.socket.WebSocketSession;
 /**
  * An abstract base class for implementations of {@link WebSocketSession}.
  *
+ * @param T the type of the native (or delegate) WebSocket session
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractWebSocketSesssion<T> implements DelegatingWebSocketSession<T> {
+public abstract class AbstractWebSocketSesssion<T> implements WebSocketSession, NativeWebSocketSession {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private T delegateSession;
+	private T nativeSession;
 
 	private final Map<String, Object> handshakeAttributes;
 
@@ -58,28 +60,35 @@ public abstract class AbstractWebSocketSesssion<T> implements DelegatingWebSocke
 		return this.handshakeAttributes;
 	}
 
-	/**
-	 * @return the WebSocket session to delegate to
-	 */
-	public T getDelegateSession() {
-		return this.delegateSession;
-	}
-
-
 	@Override
-	public void afterSessionInitialized(T session) {
-		Assert.notNull(session, "session must not be null");
-		this.delegateSession = session;
+	public T getNativeSession() {
+		return this.nativeSession;
 	}
 
-	protected final void checkDelegateSessionInitialized() {
-		Assert.state(this.delegateSession != null, "WebSocket session is not yet initialized");
+	@SuppressWarnings("unchecked")
+	@Override
+	public <R> R getNativeSession(Class<R> requiredType) {
+		if (requiredType != null) {
+			if (requiredType.isInstance(this.nativeSession)) {
+				return (R) this.nativeSession;
+			}
+		}
+		return null;
+	}
+
+	public void initializeNativeSession(T session) {
+		Assert.notNull(session, "session must not be null");
+		this.nativeSession = session;
+	}
+
+	protected final void checkNativeSessionInitialized() {
+		Assert.state(this.nativeSession != null, "WebSocket session is not yet initialized");
 	}
 
 	@Override
 	public final void sendMessage(WebSocketMessage message) throws IOException {
 
-		checkDelegateSessionInitialized();
+		checkNativeSessionInitialized();
 		Assert.isTrue(isOpen(), "Cannot send message after connection closed.");
 
 		if (logger.isTraceEnabled()) {
@@ -109,7 +118,7 @@ public abstract class AbstractWebSocketSesssion<T> implements DelegatingWebSocke
 
 	@Override
 	public final void close(CloseStatus status) throws IOException {
-		checkDelegateSessionInitialized();
+		checkNativeSessionInitialized();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Closing " + this);
 		}

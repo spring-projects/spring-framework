@@ -62,7 +62,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	public void isActive() throws Exception {
 		assertFalse(this.session.isActive());
 
-		this.session.afterSessionInitialized(this.webSocketSession);
+		this.session.initializeDelegateSession(this.webSocketSession);
 		assertTrue(this.session.isActive());
 
 		this.webSocketSession.setOpen(false);
@@ -72,7 +72,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	@Test
 	public void afterSessionInitialized() throws Exception {
 
-		this.session.afterSessionInitialized(this.webSocketSession);
+		this.session.initializeDelegateSession(this.webSocketSession);
 
 		assertEquals("Open frame not sent",
 				Collections.singletonList(new TextMessage("o")), this.webSocketSession.getSentMessages());
@@ -111,7 +111,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	@Test
 	public void sendMessageInternal() throws Exception {
 
-		this.session.afterSessionInitialized(this.webSocketSession);
+		this.session.initializeDelegateSession(this.webSocketSession);
 		this.session.sendMessageInternal("x");
 
 		assertEquals(Arrays.asList(new TextMessage("o"), new TextMessage("a[\"x\"]")),
@@ -123,7 +123,7 @@ public class WebSocketServerSockJsSessionTests extends BaseAbstractSockJsSession
 	@Test
 	public void disconnect() throws Exception {
 
-		this.session.afterSessionInitialized(this.webSocketSession);
+		this.session.initializeDelegateSession(this.webSocketSession);
 		this.session.close(CloseStatus.NOT_ACCEPTABLE);
 
 		assertEquals(CloseStatus.NOT_ACCEPTABLE, this.webSocketSession.getCloseStatus());

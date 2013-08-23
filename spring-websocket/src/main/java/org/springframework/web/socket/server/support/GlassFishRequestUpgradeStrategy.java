@@ -50,10 +50,15 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
+import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
 
 
 /**
- * GlassFish support for upgrading a request during a WebSocket handshake.
+ * GlassFish support for upgrading a request during a WebSocket handshake. To modify
+ * properties of the underlying {@link javax.websocket.server.ServerContainer} you can use
+ * {@link ServletServerContainerFactoryBean} in XML configuration or if using Java
+ * configuration, access the container instance through the
+ * "javax.websocket.server.ServerContainer" ServletContext attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

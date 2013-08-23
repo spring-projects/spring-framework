@@ -68,14 +68,14 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 
 	@Override
 	public String getId() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getId();
+		checkNativeSessionInitialized();
+		return getNativeSession().getId();
 	}
 
 	@Override
 	public URI getUri() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getRequestURI();
+		checkNativeSessionInitialized();
+		return getNativeSession().getRequestURI();
 	}
 
 	@Override
@@ -85,8 +85,8 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 
 	@Override
 	public Principal getPrincipal() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getUserPrincipal();
+		checkNativeSessionInitialized();
+		return getNativeSession().getUserPrincipal();
 	}
 
 	@Override
@@ -101,29 +101,29 @@ public class StandardWebSocketSession extends AbstractWebSocketSesssion<javax.we
 
 	@Override
 	public String getAcceptedProtocol() {
-		checkDelegateSessionInitialized();
-		String protocol = getDelegateSession().getNegotiatedSubprotocol();
+		checkNativeSessionInitialized();
+		String protocol = getNativeSession().getNegotiatedSubprotocol();
 		return StringUtils.isEmpty(protocol)? null : protocol;
 	}
 
 	@Override
 	public boolean isOpen() {
-		return ((getDelegateSession() != null) && getDelegateSession().isOpen());
+		return ((getNativeSession() != null) && getNativeSession().isOpen());
 	}
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
-		getDelegateSession().getBasicRemote().sendText(message.getPayload(), message.isLast());
+		getNativeSession().getBasicRemote().sendText(message.getPayload(), message.isLast());
 	}
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		getDelegateSession().getBasicRemote().sendBinary(message.getPayload(), message.isLast());
+		getNativeSession().getBasicRemote().sendBinary(message.getPayload(), message.isLast());
 	}
 
 	@Override
 	protected void closeInternal(CloseStatus status) throws IOException {
-		getDelegateSession().close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
+		getNativeSession().close(new CloseReason(CloseCodes.getCloseCode(status.getCode()), status.getReason()));
 	}
 
 }

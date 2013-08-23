@@ -20,21 +20,26 @@ import org.springframework.web.socket.WebSocketSession;
 
 
 /**
- * A contract for a {@link WebSocketSession} that delegates to another WebSocket session
- * (e.g. a native session).
- *
- * @param T the type of the delegate WebSocket session
+ * A {@link WebSocketSession} that exposes the underlying, native WebSocketSession
+ * through a getter.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public interface DelegatingWebSocketSession<T> extends WebSocketSession {
+public interface NativeWebSocketSession extends WebSocketSession {
 
 
 	/**
-	 * Invoked when the delegate WebSocket session has been initialized.
+	 * Return the underlying native WebSocketSession, if available.
+	 * @return the native session or {@code null}
 	 */
-	void afterSessionInitialized(T session);
+	Object getNativeSession();
 
+	/**
+	 * Return the underlying native WebSocketSession, if available.
+	 * @param requiredType the required type of the session
+	 * @return the native session of the required type or {@code null}
+	 */
+	<T> T getNativeSession(Class<T> requiredType);
 
 }

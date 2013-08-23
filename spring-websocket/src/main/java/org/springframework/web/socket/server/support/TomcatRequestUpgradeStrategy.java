@@ -40,9 +40,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
+import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
 
 /**
- * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket handshake.
+ * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket
+ * handshake. To modify properties of the underlying
+ * {@link javax.websocket.server.ServerContainer} you can use
+ * {@link ServletServerContainerFactoryBean} in XML configuration or if using Java
+ * configuration, access the container instance through the
+ * "javax.websocket.server.ServerContainer" ServletContext attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -96,7 +102,7 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 		}
 	}
 
-	private WsServerContainer getContainer(HttpServletRequest servletRequest) {
+	public WsServerContainer getContainer(HttpServletRequest servletRequest) {
 		String attribute = "javax.websocket.server.ServerContainer";
 		ServletContext servletContext = servletRequest.getServletContext();
 		return (WsServerContainer) servletContext.getAttribute(attribute);

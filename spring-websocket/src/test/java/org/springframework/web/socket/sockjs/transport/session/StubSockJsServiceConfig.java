@@ -34,6 +34,8 @@ public class StubSockJsServiceConfig implements SockJsServiceConfig {
 
 	private SockJsMessageCodec messageCodec = new Jackson2SockJsMessageCodec();
 
+	private int httpMessageCacheSize = 100;
+
 
 	@Override
 	public int getStreamBytesLimit() {
@@ -69,6 +71,14 @@ public class StubSockJsServiceConfig implements SockJsServiceConfig {
 
 	public void setMessageCodec(SockJsMessageCodec messageCodec) {
 		this.messageCodec = messageCodec;
+	}
+
+	public int getHttpMessageCacheSize() {
+		return this.httpMessageCacheSize;
+	}
+
+	public void setHttpMessageCacheSize(int httpMessageCacheSize) {
+		this.httpMessageCacheSize = httpMessageCacheSize;
 	}
 
 }

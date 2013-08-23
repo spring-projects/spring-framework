@@ -58,22 +58,22 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 
 	@Override
 	public String getId() {
-		checkDelegateSessionInitialized();
-		return ObjectUtils.getIdentityHexString(getDelegateSession());
+		checkNativeSessionInitialized();
+		return ObjectUtils.getIdentityHexString(getNativeSession());
 	}
 
 	@Override
 	public URI getUri() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getUpgradeRequest().getRequestURI();
+		checkNativeSessionInitialized();
+		return getNativeSession().getUpgradeRequest().getRequestURI();
 	}
 
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
-		checkDelegateSessionInitialized();
+		checkNativeSessionInitialized();
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			this.headers.putAll(getDelegateSession().getUpgradeRequest().getHeaders());
+			this.headers.putAll(getNativeSession().getUpgradeRequest().getHeaders());
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 		}
 		return this.headers;
@@ -86,40 +86,40 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getLocalAddress();
+		checkNativeSessionInitialized();
+		return getNativeSession().getLocalAddress();
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getRemoteAddress();
+		checkNativeSessionInitialized();
+		return getNativeSession().getRemoteAddress();
 	}
 
 	@Override
 	public String getAcceptedProtocol() {
-		checkDelegateSessionInitialized();
-		return getDelegateSession().getUpgradeResponse().getAcceptedSubProtocol();
+		checkNativeSessionInitialized();
+		return getNativeSession().getUpgradeResponse().getAcceptedSubProtocol();
 	}
 
 	@Override
 	public boolean isOpen() {
-		return ((getDelegateSession() != null) && getDelegateSession().isOpen());
+		return ((getNativeSession() != null) && getNativeSession().isOpen());
 	}
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
-		getDelegateSession().getRemote().sendString(message.getPayload());
+		getNativeSession().getRemote().sendString(message.getPayload());
 	}
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		getDelegateSession().getRemote().sendBytes(message.getPayload());
+		getNativeSession().getRemote().sendBytes(message.getPayload());
 	}
 
 	@Override
 	protected void closeInternal(CloseStatus status) throws IOException {
-		getDelegateSession().close(status.getCode(), status.getReason());
+		getNativeSession().close(status.getCode(), status.getReason());
 	}
 
 }

@@ -46,7 +46,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 
 	private FrameFormat frameFormat;
 
-	private final BlockingQueue<String> messageCache = new ArrayBlockingQueue<String>(100);
+	private final BlockingQueue<String> messageCache;
 
 	private ServerHttpRequest request;
 
@@ -71,6 +71,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			WebSocketHandler wsHandler, Map<String, Object> handshakeAttributes) {
 
 		super(id, config, wsHandler, handshakeAttributes);
+		this.messageCache = new ArrayBlockingQueue<String>(config.getHttpMessageCacheSize());
 	}
 
 
