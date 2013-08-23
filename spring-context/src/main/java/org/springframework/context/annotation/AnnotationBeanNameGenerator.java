@@ -87,7 +87,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		Set<String> types = amd.getAnnotationTypes();
 		String beanName = null;
 		for (String type : types) {
-			AnnotationAttributes attributes = MetadataUtils.attributesFor(amd, type);
+			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
 			if (isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
 				String value = (String) attributes.get("value");
 				if (StringUtils.hasLength(value)) {

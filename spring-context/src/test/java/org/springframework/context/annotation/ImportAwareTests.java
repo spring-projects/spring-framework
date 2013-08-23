@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.util.Assert;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Tests that an ImportAware @Configuration classes gets injected with the
@@ -59,7 +58,7 @@ public class ImportAwareTests {
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
 		assertThat("import metadata was not injected", importMetadata, notNullValue());
 		assertThat(importMetadata.getClassName(), is(ImportingConfig.class.getName()));
-		AnnotationAttributes importAttribs = attributesFor(importMetadata, Import.class);
+		AnnotationAttributes importAttribs = AnnotationConfigUtils.attributesFor(importMetadata, Import.class);
 		Class<?>[] importedClasses = importAttribs.getClassArray("value");
 		assertThat(importedClasses[0].getName(), is(ImportedConfig.class.getName()));
 	}
@@ -76,7 +75,7 @@ public class ImportAwareTests {
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
 		assertThat("import metadata was not injected", importMetadata, notNullValue());
 		assertThat(importMetadata.getClassName(), is(IndirectlyImportingConfig.class.getName()));
-		AnnotationAttributes enableAttribs = attributesFor(importMetadata, EnableImportedConfig.class);
+		AnnotationAttributes enableAttribs = AnnotationConfigUtils.attributesFor(importMetadata, EnableImportedConfig.class);
 		String foo = enableAttribs.getString("foo");
 		assertThat(foo, is("xyz"));
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import static org.springframework.context.weaving.AspectJWeavingEnabler.*;
 /**
  * {@code @Configuration} class that registers a {@link LoadTimeWeaver} bean.
  *
- * <p>This configuration class is automatically imported when using the @{@link
- * EnableLoadTimeWeaving} annotation.  See {@code @EnableLoadTimeWeaving} Javadoc for
- * complete usage details.
+ * <p>This configuration class is automatically imported when using the
+ * @{@link EnableLoadTimeWeaving} annotation. See {@code @EnableLoadTimeWeaving}
+ * javadoc for complete usage details.
  *
  * @author Chris Beams
  * @since 3.1
@@ -52,12 +52,12 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 
 	private ClassLoader beanClassLoader;
 
+
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		this.enableLTW = MetadataUtils.attributesFor(importMetadata, EnableLoadTimeWeaving.class);
+		this.enableLTW = AnnotationConfigUtils.attributesFor(importMetadata, EnableLoadTimeWeaving.class);
 		Assert.notNull(this.enableLTW,
-				"@EnableLoadTimeWeaving is not present on importing class " +
-				importMetadata.getClassName());
+				"@EnableLoadTimeWeaving is not present on importing class " + importMetadata.getClassName());
 	}
 
 	@Override
@@ -65,12 +65,13 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 		this.beanClassLoader = beanClassLoader;
 	}
 
+
 	@Bean(name=ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public LoadTimeWeaver loadTimeWeaver() {
 		LoadTimeWeaver loadTimeWeaver = null;
 
-		if (ltwConfigurer != null) {
+		if (this.ltwConfigurer != null) {
 			// the user has provided a custom LTW instance
 			loadTimeWeaver = ltwConfigurer.getLoadTimeWeaver();
 		}

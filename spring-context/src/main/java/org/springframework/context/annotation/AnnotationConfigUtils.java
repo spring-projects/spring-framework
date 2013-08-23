@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,9 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.ClassUtils;
-
-import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Utility class that allows for convenient registration of common
@@ -231,20 +230,31 @@ public class AnnotationConfigUtils {
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
-		AnnotationMetadata metadata = abd.getMetadata();
-		if (metadata.isAnnotated(Primary.class.getName())) {
-			abd.setPrimary(true);
-		}
+		processCommonDefinitionAnnotations(abd, abd.getMetadata());
+	}
+
+	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
 		if (metadata.isAnnotated(Lazy.class.getName())) {
 			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
+		}
+		else if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
+			abd.setLazyInit(attributesFor(abd.getMetadata(), Lazy.class).getBoolean("value"));
+		}
+
+		if (metadata.isAnnotated(Primary.class.getName())) {
+			abd.setPrimary(true);
 		}
 		if (metadata.isAnnotated(DependsOn.class.getName())) {
 			abd.setDependsOn(attributesFor(metadata, DependsOn.class).getStringArray("value"));
 		}
+
 		if (abd instanceof AbstractBeanDefinition) {
+			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
 			if (metadata.isAnnotated(Role.class.getName())) {
-				Integer role = attributesFor(metadata, Role.class).getNumber("value");
-				((AbstractBeanDefinition)abd).setRole(role);
+				absBd.setRole(attributesFor(metadata, Role.class).getNumber("value").intValue());
+			}
+			if (metadata.isAnnotated(Description.class.getName())) {
+				absBd.setDescription(attributesFor(metadata, Description.class).getString("value"));
 			}
 		}
 	}
@@ -260,5 +270,12 @@ public class AnnotationConfigUtils {
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, Class<?> annoClass) {
+		return attributesFor(metadata, annoClass.getName());
+	}
+
+	static AnnotationAttributes attributesFor(AnnotatedTypeMetadata metadata, String annoClassName) {
+		return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annoClassName, false));
+	}
 
 }
