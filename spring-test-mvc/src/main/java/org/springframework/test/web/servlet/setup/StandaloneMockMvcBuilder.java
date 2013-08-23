@@ -318,7 +318,9 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 
 		StandaloneConfiguration config = new StandaloneConfiguration();
 
-		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping(cxt);
+		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
+		hm.setServletContext(cxt.getServletContext());
+		hm.setApplicationContext(cxt);
 		hm.registerHandlers(controllers);
 		cxt.addBean("requestMappingHandlerMapping", hm);
 
@@ -358,11 +360,8 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
 
-		public StaticRequestMappingHandlerMapping getHandlerMapping(StubWebApplicationContext cxt) {
-
+		public StaticRequestMappingHandlerMapping getHandlerMapping() {
 			StaticRequestMappingHandlerMapping handlerMapping = new StaticRequestMappingHandlerMapping();
-			handlerMapping.setServletContext(cxt.getServletContext());
-			handlerMapping.setApplicationContext(cxt);
 			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeHolderValues));
 			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
