@@ -55,20 +55,9 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 		Assert.notNull(sockJsService, "sockJsService must not be null");
 		Assert.notNull(wsHandler, "webSocketHandler must not be null");
 		this.sockJsService = sockJsService;
-		this.wsHandler = decorateWebSocketHandler(wsHandler);
+		this.wsHandler = new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
 	}
 
-
-	/**
-	 * Decorate the WebSocketHandler provided to the class constructor.
-	 *
-	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
-	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
-	 */
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler wsHandler) {
-		wsHandler = new ExceptionWebSocketHandlerDecorator(wsHandler);
-		return new LoggingWebSocketHandlerDecorator(wsHandler);
-	}
 
 	@Override
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)

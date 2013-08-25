@@ -49,7 +49,7 @@ import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
  * {@link HttpServletResponse} to {@link ServerHttpRequest} and {@link ServerHttpResponse}
  * respectively.
  *
- * <p>The {@link #decorateWebSocketHandler(WebSocketHandler)} method decorates the given
+ * <p>The {@link #applyDefaultDecorators(WebSocketHandler)} method decorates the given
  * WebSocketHandler with a logging and exception handling decorators. This method can
  * be overridden to change that.
  *
@@ -69,10 +69,10 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 		this(webSocketHandler, new DefaultHandshakeHandler());
 	}
 
-	public WebSocketHttpRequestHandler(	WebSocketHandler webSocketHandler, HandshakeHandler handshakeHandler) {
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+	public WebSocketHttpRequestHandler(WebSocketHandler wsHandler, HandshakeHandler handshakeHandler) {
+		Assert.notNull(wsHandler, "wsHandler must not be null");
 		Assert.notNull(handshakeHandler, "handshakeHandler must not be null");
-		this.wsHandler = decorateWebSocketHandler(webSocketHandler);
+		this.wsHandler = new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(wsHandler));
 		this.handshakeHandler = handshakeHandler;
 	}
 
@@ -92,17 +92,6 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	 */
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
 		return this.interceptors;
-	}
-
-	/**
-	 * Decorate the WebSocketHandler provided to the class constructor.
-	 *
-	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
-	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
-	 */
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler wsHandler) {
-		wsHandler = new ExceptionWebSocketHandlerDecorator(wsHandler);
-		return new LoggingWebSocketHandlerDecorator(wsHandler);
 	}
 
 	@Override
