@@ -115,8 +115,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
 		AnnotationAttributes raw = (attributes == null ? null : attributes.get(0));
-		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw,
-				classValuesAsString);
+		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 
 	@Override
@@ -125,16 +124,15 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(
-			String annotationType, boolean classValuesAsString) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
 		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
 		if (attributes == null) {
 			return null;
 		}
 		for (AnnotationAttributes raw : attributes) {
-			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					this.classLoader, raw, classValuesAsString).entrySet()) {
+			for (Map.Entry<String, Object> entry :
+					AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,23 @@ public class OrderComparator implements Comparator<Object> {
 	public static void sort(Object[] array) {
 		if (array.length > 1) {
 			Arrays.sort(array, INSTANCE);
+		}
+	}
+
+	/**
+	 * Sort the given array or List with a default OrderComparator,
+	 * if necessary. Simply skips sorting when given any other value.
+	 * <p>Optimized to skip sorting for lists with size 0 or 1,
+	 * in order to avoid unnecessary array extraction.
+	 * @param value the array or List to sort
+	 * @see java.util.Arrays#sort(Object[], java.util.Comparator)
+	 */
+	public static void sortIfNecessary(Object value) {
+		if (value instanceof Object[]) {
+			sort((Object[]) value);
+		}
+		else if (value instanceof List) {
+			sort((List) value);
 		}
 	}
 

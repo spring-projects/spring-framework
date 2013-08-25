@@ -36,19 +36,26 @@ import org.springframework.util.Assert;
 import org.springframework.web.socket.support.BeanCreatingHandlerProvider;
 
 /**
- * An implementation of {@link javax.websocket.server.ServerEndpointConfig} that also
- * contains the target {@link javax.websocket.Endpoint}, provided either as a reference or
- * as a bean name.
- *
- * <p>{@link ServerEndpointRegistration} beans are detected by
+ * An implementation of {@link javax.websocket.server.ServerEndpointConfig} for use in
+ * Spring applications. A {@link ServerEndpointRegistration} bean is detected by
  * {@link ServerEndpointExporter} and registered with a Java WebSocket runtime at startup.
+ *
+ * <p>Class constructors accept a singleton {@link javax.websocket.Endpoint} instance
+ * or an Endpoint specified by type {@link Class}. When specified by type, the endpoint
+ * will be instantiated and initialized through the Spring ApplicationContext before
+ * each client WebSocket connection.
+ *
+ * <p>This class also extends
+ * {@link javax.websocket.server.ServerEndpointConfig.Configurator} to make it easier to
+ * override methods for customizing the handshake process.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  *
  * @see ServerEndpointExporter
  */
-public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFactoryAware {
+public class ServerEndpointRegistration extends ServerEndpointConfig.Configurator
+		implements ServerEndpointConfig, BeanFactoryAware {
 
 	private final String path;
 
@@ -65,8 +72,6 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 	private List<Extension> extensions = new ArrayList<Extension>();
 
 	private final Map<String, Object> userProperties = new HashMap<String, Object>();
-
-	private final Configurator configurator = new EndpointRegistrationConfigurator();
 
 
 	/**
@@ -161,7 +166,7 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 
 	@Override
 	public Configurator getConfigurator() {
-		return this.configurator;
+		return this;
 	}
 
 	@Override
@@ -171,50 +176,32 @@ public class ServerEndpointRegistration implements ServerEndpointConfig, BeanFac
 		}
 	}
 
-	protected void modifyHandshake(HandshakeRequest request, HandshakeResponse response) {
-		this.configurator.modifyHandshake(this, request, response);
+	// Implementations of ServerEndpointConfig.Configurator
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public final <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
+		return (T) getEndpoint();
 	}
 
-	protected boolean checkOrigin(String originHeaderValue) {
-		return this.configurator.checkOrigin(originHeaderValue);
+	@Override
+	public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+		super.modifyHandshake(this, request, response);
 	}
 
-	protected String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-		return this.configurator.getNegotiatedSubprotocol(supported, requested);
+	@Override
+	public boolean checkOrigin(String originHeaderValue) {
+		return super.checkOrigin(originHeaderValue);
 	}
 
-	protected List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-		return this.configurator.getNegotiatedExtensions(installed, requested);
+	@Override
+	public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
+		return super.getNegotiatedSubprotocol(supported, requested);
 	}
 
-
-	private class EndpointRegistrationConfigurator extends Configurator {
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
-			return (T) getEndpoint();
-		}
-
-		@Override
-		public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
-			super.modifyHandshake(sec, request, response);
-		}
-
-		@Override
-		public boolean checkOrigin(String originHeaderValue) {
-			return super.checkOrigin(originHeaderValue);
-		}
-
-		@Override
-		public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
-			return super.getNegotiatedSubprotocol(supported, requested);
-		}
-
-		@Override
-		public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
-			return super.getNegotiatedExtensions(installed, requested);
-		}
+	@Override
+	public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
+		return super.getNegotiatedExtensions(installed, requested);
 	}
 
 }

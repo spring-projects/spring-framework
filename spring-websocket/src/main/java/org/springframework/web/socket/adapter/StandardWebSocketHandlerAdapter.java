@@ -58,7 +58,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 	@Override
 	public void onOpen(final javax.websocket.Session session, EndpointConfig config) {
 
-		this.wsSession.afterSessionInitialized(session);
+		this.wsSession.initializeNativeSession(session);
 
 		if (this.handler.supportsPartialMessages()) {
 			session.addMessageHandler(new MessageHandler.Partial<String>() {

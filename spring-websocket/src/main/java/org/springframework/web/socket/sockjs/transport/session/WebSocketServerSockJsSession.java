@@ -29,7 +29,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.adapter.DelegatingWebSocketSession;
+import org.springframework.web.socket.adapter.NativeWebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.support.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
@@ -41,7 +41,7 @@ import org.springframework.web.socket.sockjs.support.frame.SockJsMessageCodec;
  * @since 4.0
  */
 public class WebSocketServerSockJsSession extends AbstractSockJsSession
-		implements DelegatingWebSocketSession<WebSocketSession> {
+		implements WebSocketSession, NativeWebSocketSession {
 
 	private WebSocketSession wsSession;
 
@@ -93,9 +93,24 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession
 		Assert.state(this.wsSession != null, "WebSocketSession not yet initialized");
 	}
 
+	@Override
+	public Object getNativeSession() {
+		if ((this.wsSession != null) && (this.wsSession instanceof NativeWebSocketSession)) {
+			return ((NativeWebSocketSession) this.wsSession).getNativeSession();
+		}
+		return null;
+	}
 
 	@Override
-	public void afterSessionInitialized(WebSocketSession session) {
+	public <T> T getNativeSession(Class<T> requiredType) {
+		if ((this.wsSession != null) && (this.wsSession instanceof NativeWebSocketSession)) {
+			return ((NativeWebSocketSession) this.wsSession).getNativeSession(requiredType);
+		}
+		return null;
+	}
+
+
+	public void initializeDelegateSession(WebSocketSession session) {
 		this.wsSession = session;
 		try {
 			TextMessage message = new TextMessage(SockJsFrame.openFrame().getContent());
@@ -124,7 +139,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession
 		try {
 			messages = getSockJsServiceConfig().getMessageCodec().decode(payload);
 		}
-		catch (IOException ex) {
+		catch (Throwable ex) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);
 			tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
 			return;

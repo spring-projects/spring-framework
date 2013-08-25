@@ -53,8 +53,6 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * Reads a given fully-populated set of ConfigurationClass instances, registering bean
  * definitions with the given {@link BeanDefinitionRegistry} based on its contents.
@@ -178,14 +176,13 @@ class ConfigurationClassBeanDefinitionReader {
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
-		if (conditionEvaluator.shouldSkip(beanMethod.getMetadata(),
-				ConfigurationPhase.REGISTER_BEAN)) {
+		if (this.conditionEvaluator.shouldSkip(beanMethod.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			return;
 		}
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 
-		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
+		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
 		beanDef.setResource(configClass.getResource());
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 		if (metadata.isStatic()) {
@@ -201,14 +198,8 @@ class ConfigurationClassBeanDefinitionReader {
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
 
-		// consider role
-		AnnotationAttributes role = attributesFor(metadata, Role.class);
-		if (role != null) {
-			beanDef.setRole(role.<Integer>getNumber("value"));
-		}
-
 		// consider name and any aliases
-		AnnotationAttributes bean = attributesFor(metadata, Bean.class);
+		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
 		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
 		for (String alias : names) {
@@ -230,27 +221,7 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 		}
 
-		if (metadata.isAnnotated(Primary.class.getName())) {
-			beanDef.setPrimary(true);
-		}
-
-		// is this bean to be instantiated lazily?
-		if (metadata.isAnnotated(Lazy.class.getName())) {
-			AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
-			beanDef.setLazyInit(lazy.getBoolean("value"));
-		}
-		else if (configClass.getMetadata().isAnnotated(Lazy.class.getName())){
-			AnnotationAttributes lazy = attributesFor(configClass.getMetadata(), Lazy.class);
-			beanDef.setLazyInit(lazy.getBoolean("value"));
-		}
-
-		if (metadata.isAnnotated(DependsOn.class.getName())) {
-			AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
-			String[] otherBeans = dependsOn.getStringArray("value");
-			if (otherBeans.length > 0) {
-				beanDef.setDependsOn(otherBeans);
-			}
-		}
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef, metadata);
 
 		Autowire autowire = bean.getEnum("autowire");
 		if (autowire.isAutowire()) {
@@ -269,7 +240,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		AnnotationAttributes scope = attributesFor(metadata, Scope.class);
+		AnnotationAttributes scope = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
 		if (scope != null) {
 			beanDef.setScope(scope.getString("value"));
 			proxyMode = scope.getEnum("proxyMode");

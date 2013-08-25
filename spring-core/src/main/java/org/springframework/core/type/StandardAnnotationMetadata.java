@@ -22,7 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -52,11 +52,12 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	/**
 	 * Create a new {@link StandardAnnotationMetadata} wrapper for the given Class,
 	 * providing the option to return any nested annotations or annotation arrays in the
-	 * form of {@link AnnotationAttributes} instead of actual {@link Annotation} instances.
+	 * form of {@link org.springframework.core.annotation.AnnotationAttributes} instead
+	 * of actual {@link Annotation} instances.
 	 * @param introspectedClass the Class to instrospect
 	 * @param nestedAnnotationsAsMap return nested annotations and annotation arrays as
-	 * {@link AnnotationAttributes} for compatibility with ASM-based
-	 * {@link AnnotationMetadata} implementations
+	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
+	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
 	 */
 	public StandardAnnotationMetadata(Class<?> introspectedClass, boolean nestedAnnotationsAsMap) {
@@ -107,8 +108,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType,
-			boolean classValuesAsString) {
+	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAnnotationAttributes(getIntrospectedClass(),
 				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
@@ -119,8 +119,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(
-			String annotationType, boolean classValuesAsString) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAllAnnotationAttributes(getIntrospectedClass(),
 				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
@@ -141,7 +140,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
-			// TODO: on OpenJDK 8 b99, bridge methods seem to be discovered as annotated as well...
 			if (AnnotatedElementUtils.isAnnotated(method, annotationType)) {
 				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
 			}

@@ -54,7 +54,7 @@ public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 	@Override
 	public void onWebSocketConnect(Session session) {
 		try {
-			this.wsSession.afterSessionInitialized(session);
+			this.wsSession.initializeNativeSession(session);
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
 		}
 		catch (Throwable t) {

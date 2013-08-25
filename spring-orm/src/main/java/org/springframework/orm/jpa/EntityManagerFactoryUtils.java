@@ -22,11 +22,14 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.LockTimeoutException;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceException;
+import javax.persistence.PessimisticLockException;
 import javax.persistence.Query;
+import javax.persistence.QueryTimeoutException;
 import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
@@ -36,12 +39,14 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.core.Ordered;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -387,6 +392,15 @@ public abstract class EntityManagerFactoryUtils {
 		}
 		if (ex instanceof NonUniqueResultException) {
 			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
+		}
+		if (ex instanceof QueryTimeoutException) {
+			return new org.springframework.dao.QueryTimeoutException(ex.getMessage(), ex);
+		}
+		if (ex instanceof LockTimeoutException) {
+			return new CannotAcquireLockException(ex.getMessage(), ex);
+		}
+		if (ex instanceof PessimisticLockException) {
+			return new PessimisticLockingFailureException(ex.getMessage(), ex);
 		}
 		if (ex instanceof OptimisticLockException) {
 			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);

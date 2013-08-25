@@ -16,8 +16,7 @@
 
 package org.springframework.core.annotation;
 
-import static java.lang.String.format;
-
+import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,10 +26,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link LinkedHashMap} subclass representing annotation attribute key/value pairs
- * as read by Spring's reflection- or ASM-based {@link
- * org.springframework.core.type.AnnotationMetadata AnnotationMetadata} implementations.
- * Provides 'pseudo-reification' to avoid noisy Map generics in the calling code as well
- * as convenience methods for looking up annotation attributes in a type-safe fashion.
+ * as read by Spring's reflection- or ASM-based {@link org.springframework.core.type.AnnotationMetadata}
+ * implementations. Provides 'pseudo-reification' to avoid noisy Map generics in the calling code
+ * as well as convenience methods for looking up annotation attributes in a type-safe fashion.
  *
  * @author Chris Beams
  * @since 3.1.1
@@ -63,24 +61,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		super(map);
 	}
 
-	/**
-	 * Return an {@link AnnotationAttributes} instance based on the given map; if the map
-	 * is already an {@code AnnotationAttributes} instance, it is casted and returned
-	 * immediately without creating any new instance; otherwise create a new instance by
-	 * wrapping the map with the {@link #AnnotationAttributes(Map)} constructor.
-	 * @param map original source of annotation attribute key/value pairs
-	 */
-	public static AnnotationAttributes fromMap(Map<String, Object> map) {
-		if (map == null) {
-			return null;
-		}
-
-		if (map instanceof AnnotationAttributes) {
-			return (AnnotationAttributes) map;
-		}
-
-		return new AnnotationAttributes(map);
-	}
 
 	public String getString(String attributeName) {
 		return doGet(attributeName, String.class);
@@ -96,7 +76,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	@SuppressWarnings("unchecked")
 	public <N extends Number> N getNumber(String attributeName) {
-		return (N) doGet(attributeName, Integer.class);
+		return (N) doGet(attributeName, Number.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -124,11 +104,20 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	@SuppressWarnings("unchecked")
 	private <T> T doGet(String attributeName, Class<T> expectedType) {
 		Assert.hasText(attributeName, "attributeName must not be null or empty");
-		Object value = this.get(attributeName);
-		Assert.notNull(value, format("Attribute '%s' not found", attributeName));
-		Assert.isAssignable(expectedType, value.getClass(),
-				format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",
+		Object value = get(attributeName);
+		Assert.notNull(value, String.format("Attribute '%s' not found", attributeName));
+		if (!expectedType.isInstance(value)) {
+			if (expectedType.isArray() && expectedType.getComponentType().isInstance(value)) {
+				Object arrayValue = Array.newInstance(expectedType.getComponentType(), 1);
+				Array.set(arrayValue, 0, value);
+				value = arrayValue;
+			}
+			else {
+				throw new IllegalArgumentException(
+						String.format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",
 						attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName()));
+			}
+		}
 		return (T) value;
 	}
 
@@ -156,4 +145,23 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		}
 		return String.valueOf(value);
 	}
+
+
+	/**
+	 * Return an {@link AnnotationAttributes} instance based on the given map; if the map
+	 * is already an {@code AnnotationAttributes} instance, it is casted and returned
+	 * immediately without creating any new instance; otherwise create a new instance by
+	 * wrapping the map with the {@link #AnnotationAttributes(Map)} constructor.
+	 * @param map original source of annotation attribute key/value pairs
+	 */
+	public static AnnotationAttributes fromMap(Map<String, Object> map) {
+		if (map == null) {
+			return null;
+		}
+		if (map instanceof AnnotationAttributes) {
+			return (AnnotationAttributes) map;
+		}
+		return new AnnotationAttributes(map);
+	}
+
 }

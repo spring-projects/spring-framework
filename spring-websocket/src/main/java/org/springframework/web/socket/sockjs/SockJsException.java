@@ -30,6 +30,10 @@ public class SockJsException extends NestedRuntimeException {
 	private final String sessionId;
 
 
+	public SockJsException(String message, Throwable cause) {
+		this(message, null, cause);
+	}
+
 	public SockJsException(String message, String sessionId, Throwable cause) {
 		super(message, cause);
 		this.sessionId = sessionId;

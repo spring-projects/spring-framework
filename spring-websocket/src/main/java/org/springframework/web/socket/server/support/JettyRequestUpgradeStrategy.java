@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
+import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.server.HandshakeRFC6455;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -44,30 +45,35 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
  *
  * @author Phillip Webb
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	// FIXME jetty has options, timeouts etc. Do we need a common abstraction
-
-	// FIXME need a way for someone to plug their own RequestUpgradeStrategy or override
-	// Jetty settings
-
-	// FIXME when to call factory.cleanup();
-
-	private static final String WEBSOCKET_LISTENER_ATTR_NAME = JettyRequestUpgradeStrategy.class.getName()
-			+ ".HANDLER_PROVIDER";
+	private static final String WS_HANDLER_ATTR_NAME = JettyRequestUpgradeStrategy.class.getName() + ".WS_LISTENER";
 
 	private WebSocketServerFactory factory;
 
 
+	/**
+	 * Default constructor that creates {@link WebSocketServerFactory} through its default
+	 * constructor thus using a default {@link WebSocketPolicy}.
+	 */
 	public JettyRequestUpgradeStrategy() {
-		this.factory = new WebSocketServerFactory();
+		this(new WebSocketServerFactory());
+	}
+
+	/**
+	 * A constructor accepting a {@link WebSocketServerFactory}. This may be useful for
+	 * modifying the factory's {@link WebSocketPolicy} via
+	 * {@link WebSocketServerFactory#getPolicy()}.
+	 */
+	public JettyRequestUpgradeStrategy(WebSocketServerFactory factory) {
 		this.factory.setCreator(new WebSocketCreator() {
 			@Override
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
 				Assert.isInstanceOf(ServletUpgradeRequest.class, request);
-				return ((ServletUpgradeRequest) request).getServletAttributes().get(WEBSOCKET_LISTENER_ATTR_NAME);
+				return ((ServletUpgradeRequest) request).getServletAttributes().get(WS_HANDLER_ATTR_NAME);
 			}
 		});
 		try {
@@ -86,7 +92,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
 	public void upgrade(ServerHttpRequest request, ServerHttpResponse response,
-			String protocol, WebSocketHandler wsHandler, Map<String, Object> attrs) throws IOException {
+			String protocol, WebSocketHandler wsHandler, Map<String, Object> attrs) throws HandshakeFailureException {
 
 		Assert.isInstanceOf(ServletServerHttpRequest.class, request);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
@@ -94,19 +100,21 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		Assert.isInstanceOf(ServletServerHttpResponse.class, response);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
 
-		if (!this.factory.isUpgradeRequest(servletRequest, servletResponse)) {
-			// should never happen
-			throw new HandshakeFailureException("Not a WebSocket request");
+		Assert.isTrue(this.factory.isUpgradeRequest(servletRequest, servletResponse), "Not a WebSocket handshake");
+
+		JettyWebSocketSession session = new JettyWebSocketSession(request.getPrincipal(), attrs);
+		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(wsHandler, session);
+
+		try {
+			servletRequest.setAttribute(WS_HANDLER_ATTR_NAME, handlerAdapter);
+			this.factory.acceptWebSocket(servletRequest, servletResponse);
 		}
-
-		JettyWebSocketSession wsSession = new JettyWebSocketSession(request.getPrincipal(), attrs);
-		JettyWebSocketHandlerAdapter wsListener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
-
-		servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME, wsListener);
-
-		if (!this.factory.acceptWebSocket(servletRequest, servletResponse)) {
-			// should not happen
-			throw new HandshakeFailureException("WebSocket request not accepted by Jetty");
+		catch (IOException ex) {
+			throw new HandshakeFailureException(
+					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
+		}
+		finally {
+			servletRequest.removeAttribute(WS_HANDLER_ATTR_NAME);
 		}
 	}
 

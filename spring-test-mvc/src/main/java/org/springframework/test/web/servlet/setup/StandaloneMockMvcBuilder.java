@@ -19,9 +19,12 @@ package org.springframework.test.web.servlet.setup;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -30,6 +33,9 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PropertyPlaceholderHelper;
+import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
+import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.WebApplicationContext;
@@ -109,6 +115,8 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	private boolean useTrailingSlashPatternMatch = true;
 
 	private Boolean removeSemicolonContent;
+
+	private Map<String, String> placeHolderValues = new HashMap<String, String>();
 
 
 	/**
@@ -282,9 +290,22 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	 * if provided, is in turn set on
 	 * {@link AbstractHandlerMapping#setRemoveSemicolonContent(boolean)}.
 	 */
-	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+	public StandaloneMockMvcBuilder setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.removeSemicolonContent = removeSemicolonContent;
+		return this;
 	}
+
+	/**
+	 * In a standalone setup there is no support for placeholder values embedded in
+	 * request mappings. This method allows manually provided placeholder values so they
+	 * can be resolved. Alternatively consider creating a test that initializes a
+	 * {@link WebApplicationContext}.
+	 */
+	public StandaloneMockMvcBuilder addPlaceHolderValue(String name, String value) {
+		this.placeHolderValues.put(name, value);
+		return this;
+	}
+
 
 	@Override
 	protected void initWebAppContext(WebApplicationContext cxt) {
@@ -295,20 +316,21 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 
 	private void registerMvcSingletons(StubWebApplicationContext cxt) {
 
-		StandaloneConfiguration configuration = new StandaloneConfiguration();
+		StandaloneConfiguration config = new StandaloneConfiguration();
 
-		RequestMappingHandlerMapping handlerMapping = configuration.requestMappingHandlerMapping();
-		handlerMapping.setServletContext(cxt.getServletContext());
-		handlerMapping.setApplicationContext(cxt);
-		cxt.addBean("requestMappingHandlerMapping", handlerMapping);
+		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
+		hm.setServletContext(cxt.getServletContext());
+		hm.setApplicationContext(cxt);
+		hm.registerHandlers(controllers);
+		cxt.addBean("requestMappingHandlerMapping", hm);
 
-		RequestMappingHandlerAdapter handlerAdapter = configuration.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter handlerAdapter = config.requestMappingHandlerAdapter();
 		handlerAdapter.setServletContext(cxt.getServletContext());
 		handlerAdapter.setApplicationContext(cxt);
 		handlerAdapter.afterPropertiesSet();
 		cxt.addBean("requestMappingHandlerAdapter", handlerAdapter);
 
-		cxt.addBean("handlerExceptionResolver", configuration.handlerExceptionResolver());
+		cxt.addBean("handlerExceptionResolver", config.handlerExceptionResolver());
 
 		cxt.addBeans(initViewResolvers(cxt));
 		cxt.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, this.localeResolver);
@@ -337,12 +359,10 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	/** Using the MVC Java configuration as the starting point for the "standalone" setup */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
-		@Override
-		public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 
+		public StaticRequestMappingHandlerMapping getHandlerMapping() {
 			StaticRequestMappingHandlerMapping handlerMapping = new StaticRequestMappingHandlerMapping();
-			handlerMapping.registerHandlers(controllers);
-
+			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeHolderValues));
 			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
@@ -351,7 +371,6 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 			if (removeSemicolonContent != null) {
 				handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
 			}
-
 			return handlerMapping;
 		}
 
@@ -424,6 +443,30 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 			for (Object handler : handlers) {
 				super.detectHandlerMethods(handler);
 			}
+		}
+	}
+
+	/** A static resolver placeholder for values embedded in request mappings */
+	private static class StaticStringValueResolver implements StringValueResolver {
+
+		private final PropertyPlaceholderHelper helper;
+
+		private final PlaceholderResolver resolver;
+
+
+		public StaticStringValueResolver(final Map<String, String> values) {
+			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
+			this.resolver = new PlaceholderResolver() {
+				@Override
+				public String resolvePlaceholder(String placeholderName) {
+					return values.get(placeholderName);
+				}
+			};
+		}
+
+		@Override
+		public String resolveStringValue(String strVal) throws BeansException {
+			return this.helper.replacePlaceholders(strVal, this.resolver);
 		}
 	}
 

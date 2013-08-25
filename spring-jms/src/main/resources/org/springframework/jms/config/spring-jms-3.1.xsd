@@ -2,7 +2,6 @@
 
 <xsd:schema xmlns="http://www.springframework.org/schema/jms"
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:tool="http://www.springframework.org/schema/tool"
 		targetNamespace="http://www.springframework.org/schema/jms"
 		elementFormDefault="qualified"

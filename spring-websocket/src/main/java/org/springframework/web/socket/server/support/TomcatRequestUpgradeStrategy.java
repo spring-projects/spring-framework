@@ -18,11 +18,14 @@ package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Endpoint;
 import javax.websocket.server.ServerEndpointConfig;
 
@@ -32,18 +35,26 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
+import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
 
 /**
- * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket handshake.
+ * Tomcat support for upgrading an {@link HttpServletRequest} during a WebSocket
+ * handshake. To modify properties of the underlying
+ * {@link javax.websocket.server.ServerContainer} you can use
+ * {@link ServletServerContainerFactoryBean} in XML configuration or if using Java
+ * configuration, access the container instance through the
+ * "javax.websocket.server.ServerContainer" ServletContext attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
+
 
 	@Override
 	public String[] getSupportedVersions() {
@@ -52,20 +63,64 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String acceptedProtocol, Endpoint endpoint) throws IOException {
+			String acceptedProtocol, Endpoint endpoint) throws HandshakeFailureException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
+		Assert.isTrue(response instanceof ServletServerHttpResponse);
+		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
+
+		if (hasDoUpgrade) {
+			doUpgrade(servletRequest, servletResponse, acceptedProtocol, endpoint);
+		}
+		else {
+			upgradeTomcat80RC1(servletRequest, acceptedProtocol, endpoint);
+		}
+	}
+
+	private void doUpgrade(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+			String acceptedProtocol, Endpoint endpoint) {
+
+		StringBuffer requestUrl = servletRequest.getRequestURL();
+		String path = servletRequest.getRequestURI(); // shouldn't matter
+		Map<String, String> pathParams = Collections.<String, String> emptyMap();
+
+		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(path, endpoint);
+		endpointConfig.setSubprotocols(Arrays.asList(acceptedProtocol));
+
+		try {
+			getContainer(servletRequest).doUpgrade(servletRequest, servletResponse, endpointConfig, pathParams);
+		}
+		catch (ServletException ex) {
+			throw new HandshakeFailureException(
+					"Servlet request failed to upgrade to WebSocket, uri=" + requestUrl, ex);
+		}
+		catch (IOException ex) {
+			throw new HandshakeFailureException(
+					"Response update failed during upgrade to WebSocket, uri=" + requestUrl, ex);
+		}
+	}
+
+	public WsServerContainer getContainer(HttpServletRequest servletRequest) {
+		String attribute = "javax.websocket.server.ServerContainer";
+		ServletContext servletContext = servletRequest.getServletContext();
+		return (WsServerContainer) servletContext.getAttribute(attribute);
+	}
+
+	// FIXME: Remove this after RC2 is out
+
+	private void upgradeTomcat80RC1(HttpServletRequest request, String protocol, Endpoint endpoint) {
+
 		WsHttpUpgradeHandler upgradeHandler;
 		try {
-			upgradeHandler = servletRequest.upgrade(WsHttpUpgradeHandler.class);
+			upgradeHandler = request.upgrade(WsHttpUpgradeHandler.class);
 		}
-		catch (ServletException e) {
+		catch (Exception e) {
 			throw new HandshakeFailureException("Unable to create UpgardeHandler", e);
 		}
 
-		WsHandshakeRequest webSocketRequest = new WsHandshakeRequest(servletRequest);
+		WsHandshakeRequest webSocketRequest = new WsHandshakeRequest(request);
 		try {
 			Method method = ReflectionUtils.findMethod(WsHandshakeRequest.class, "finished");
 			ReflectionUtils.makeAccessible(method);
@@ -75,14 +130,14 @@ public class TomcatRequestUpgradeStrategy extends AbstractStandardUpgradeStrateg
 			throw new HandshakeFailureException("Failed to upgrade HttpServletRequest", ex);
 		}
 
-		String attribute = "javax.websocket.server.ServerContainer";
-		ServletContext servletContext = servletRequest.getServletContext();
-		WsServerContainer serverContainer = (WsServerContainer) servletContext.getAttribute(attribute);
-
 		ServerEndpointConfig endpointConfig = new ServerEndpointRegistration("/shouldntmatter", endpoint);
 
-		upgradeHandler.preInit(endpoint, endpointConfig, serverContainer, webSocketRequest,
-				acceptedProtocol, Collections.<String, String> emptyMap(), servletRequest.isSecure());
+		upgradeHandler.preInit(endpoint, endpointConfig, getContainer(request), webSocketRequest,
+				protocol, Collections.<String, String> emptyMap(), request.isSecure());
 	}
+
+	private static boolean hasDoUpgrade = (ReflectionUtils.findMethod(WsServerContainer.class,
+			"doUpgrade", HttpServletRequest.class, HttpServletResponse.class,
+			ServerEndpointConfig.class, Map.class) != null);
 
 }

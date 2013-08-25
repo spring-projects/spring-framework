@@ -214,12 +214,42 @@ public class AnnotationTransactionAttributeSourceTests {
 		Method method = TestBean6.class.getMethod("getAge", (Class[]) null);
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
-		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean5.class);
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean6.class);
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
 		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+	}
+
+	@Test
+	public void testCustomClassAttributeWithReadOnlyOverrideDetected() throws Exception {
+		Method method = TestBean7.class.getMethod("getAge", (Class[]) null);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean7.class);
+
+		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
+		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+
+		assertTrue(actual.isReadOnly());
+	}
+
+	@Test
+	public void testCustomMethodAttributeWithReadOnlyOverrideDetected() throws Exception {
+		Method method = TestBean8.class.getMethod("getAge", (Class[]) null);
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean8.class);
+
+		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
+		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
+		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
+		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+
+		assertTrue(actual.isReadOnly());
 	}
 
 	@Test
@@ -537,6 +567,33 @@ public class AnnotationTransactionAttributeSourceTests {
 	public static class TestBean6 {
 
 		@Tx
+		public int getAge() {
+			return 10;
+		}
+	}
+
+
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Transactional(rollbackFor=Exception.class, noRollbackFor={IOException.class})
+	public @interface TxWithAttribute {
+
+		boolean readOnly();
+	}
+
+
+	@TxWithAttribute(readOnly=true)
+	public static class TestBean7 {
+
+		public int getAge() {
+			return 10;
+		}
+	}
+
+
+	public static class TestBean8 {
+
+		@TxWithAttribute(readOnly=true)
 		public int getAge() {
 			return 10;
 		}

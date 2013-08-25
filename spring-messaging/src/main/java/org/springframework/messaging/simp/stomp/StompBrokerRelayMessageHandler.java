@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,42 +25,59 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import reactor.core.Environment;
+import reactor.core.composable.Composable;
+import reactor.core.composable.Deferred;
 import reactor.core.composable.Promise;
+import reactor.core.composable.spec.DeferredPromiseSpec;
 import reactor.function.Consumer;
+import reactor.tcp.Reconnect;
 import reactor.tcp.TcpClient;
 import reactor.tcp.TcpConnection;
 import reactor.tcp.encoding.DelimitedCodec;
 import reactor.tcp.encoding.StandardCodecs;
 import reactor.tcp.netty.NettyTcpClient;
 import reactor.tcp.spec.TcpClientSpec;
+import reactor.tuple.Tuple;
+import reactor.tuple.Tuple2;
 
 
 /**
+ * A {@link MessageHandler} that handles messages by forwarding them to a STOMP broker and
+ * reversely sends any returned messages from the broker to the provided
+ * {@link MessageChannel}.
+ *
  * @author Rossen Stoyanchev
+ * @author Andy Wilkinson
  * @since 4.0
  */
-public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLifecycle {
+public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
 
 	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandler.class);
-
-	private static final String STOMP_RELAY_SYSTEM_SESSION_ID = "stompRelaySystemSessionId";
 
 	private final MessageChannel messageChannel;
 
 	private final String[] destinationPrefixes;
+
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	private String relayHost = "127.0.0.1";
 
@@ -81,6 +99,8 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 	private boolean running = false;
 
+	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
+
 
 	/**
 	 * @param messageChannel the channel to send messages from the STOMP broker to
@@ -93,6 +113,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		this.messageChannel = messageChannel;
 		this.destinationPrefixes = destinationPrefixes.toArray(new String[destinationPrefixes.size()]);
 	}
+
 
 	/**
 	 * Set the STOMP message broker host.
@@ -190,37 +211,22 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 					.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
 					.connect(this.relayHost, this.relayPort)
 					.get();
-			openSystemSession();
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Initializing \"system\" TCP connection");
+			}
+			SystemRelaySession session = new SystemRelaySession();
+			this.relaySessions.put(session.getId(), session);
+			session.connect();
+
 			this.running = true;
 		}
 	}
 
-	/**
-	 * Open a "system" session for sending messages from parts of the application
-	 * not associated with a client STOMP session.
-	 */
-	private void openSystemSession() {
-
-		RelaySession session = new RelaySession(STOMP_RELAY_SYSTEM_SESSION_ID) {
-			@Override
-			protected void sendMessageToClient(Message<?> message) {
-				// ignore, only used to send messages
-				// TODO: ERROR frame/reconnect
-			}
-		};
-		this.relaySessions.put(STOMP_RELAY_SYSTEM_SESSION_ID, session);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		headers.setAcceptVersion("1.1,1.2");
-		headers.setLogin(this.systemLogin);
-		headers.setPasscode(this.systemPasscode);
-		headers.setHeartbeat(0,0); // TODO
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Sending STOMP CONNECT frame to initialize \"system\" TCP connection");
-		}
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		session.open(message);
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher)
+			throws BeansException {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	@Override
@@ -270,7 +276,7 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
-			sessionId = (sessionId == null) ? STOMP_RELAY_SYSTEM_SESSION_ID : sessionId;
+			sessionId = (sessionId == null) ? SystemRelaySession.ID : sessionId;
 			headers.setSessionId(sessionId);
 			command = (command == null) ? StompCommand.SEND : command;
 			headers.setCommandIfNotSet(command);
@@ -294,11 +300,11 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 				}
 
 				if (SimpMessageType.CONNECT.equals(messageType)) {
-					headers.setHeartbeat(0, 0); // TODO: disable for now
+					headers.setHeartbeat(0, 0);
 					message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 					RelaySession session = new RelaySession(sessionId);
 					this.relaySessions.put(sessionId, session);
-					session.open(message);
+					session.connect(message);
 				}
 				else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 					RelaySession session = this.relaySessions.remove(sessionId);
@@ -340,6 +346,24 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		return false;
 	}
 
+	private void publishBrokerAvailableEvent() {
+		if ((this.applicationEventPublisher != null) && this.brokerAvailable.compareAndSet(false, true)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Publishing BrokerAvailabilityEvent (available)");
+			}
+			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
+		}
+	}
+
+	private void publishBrokerUnavailableEvent() {
+		if ((this.applicationEventPublisher != null) && this.brokerAvailable.compareAndSet(true, false)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Publishing BrokerAvailabilityEvent (unavailable)");
+			}
+			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
+		}
+	}
+
 
 	private class RelaySession {
 
@@ -347,43 +371,53 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 		private final BlockingQueue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>(50);
 
-		private Promise<TcpConnection<String, String>> promise;
-
-		private volatile boolean isConnected = false;
+		private volatile StompConnection stompConnection = new StompConnection();
 
 		private final Object monitor = new Object();
 
 
-		public RelaySession(String sessionId) {
+		private RelaySession(String sessionId) {
 			Assert.notNull(sessionId, "sessionId is required");
 			this.sessionId = sessionId;
 		}
 
-		public void open(final Message<?> message) {
-			Assert.notNull(message, "message is required");
 
-			this.promise = tcpClient.open();
+		public String getId() {
+			return this.sessionId;
+		}
 
-			this.promise.consume(new Consumer<TcpConnection<String,String>>() {
+		public void connect(final Message<?> connectMessage) {
+			Assert.notNull(connectMessage, "connectMessage is required");
+
+			Composable<TcpConnection<String, String>> connectionComposable = openTcpConnection();
+			connectionComposable.consume(new Consumer<TcpConnection<String, String>>() {
 				@Override
 				public void accept(TcpConnection<String, String> connection) {
-					connection.in().consume(new Consumer<String>() {
-						@Override
-						public void accept(String stompFrame) {
-							readStompFrame(stompFrame);
-						}
-					});
-					forwardInternal(message, connection);
+					handleTcpConnection(connection, connectMessage);
 				}
 			});
-			this.promise.onError(new Consumer<Throwable>() {
+			connectionComposable.when(Throwable.class, new Consumer<Throwable>() {
 				@Override
 				public void accept(Throwable ex) {
 					relaySessions.remove(sessionId);
-					logger.error("Failed to connect to broker", ex);
-					sendError(sessionId, "Failed to connect to message broker " + ex.toString());
+					handleTcpClientFailure("Failed to connect to message broker", ex);
 				}
 			});
+		}
+
+		protected Composable<TcpConnection<String, String>> openTcpConnection() {
+			return tcpClient.open();
+		}
+
+		protected void handleTcpConnection(TcpConnection<String, String> tcpConn, final Message<?> connectMessage) {
+			this.stompConnection.setTcpConnection(tcpConn);
+			tcpConn.in().consume(new Consumer<String>() {
+				@Override
+				public void accept(String message) {
+					readStompFrame(message);
+				}
+			});
+			forwardInternal(tcpConn, connectMessage);
 		}
 
 		private void readStompFrame(String stompFrame) {
@@ -401,8 +435,9 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 			if (StompCommand.CONNECTED == headers.getCommand()) {
 				synchronized(this.monitor) {
-					this.isConnected = true;
-					flushMessages(this.promise.get());
+					this.stompConnection.setReady();
+					publishBrokerAvailableEvent();
+					flushMessages();
 				}
 				return;
 			}
@@ -412,71 +447,182 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 			sendMessageToClient(message);
 		}
 
-		protected void sendMessageToClient(Message<?> message) {
-			messageChannel.send(message);
+		private void handleTcpClientFailure(String message, Throwable ex) {
+			if (logger.isErrorEnabled()) {
+				logger.error(message + ", sessionId=" + this.sessionId, ex);
+			}
+			this.stompConnection.setDisconnected();
+			sendError(message);
+			publishBrokerUnavailableEvent();
 		}
 
-		private void sendError(String sessionId, String errorText) {
+		private void sendError(String errorText) {
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
-			headers.setSessionId(sessionId);
+			headers.setSessionId(this.sessionId);
 			headers.setMessage(errorText);
 			Message<?> errorMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 			sendMessageToClient(errorMessage);
 		}
 
+		protected void sendMessageToClient(Message<?> message) {
+			messageChannel.send(message);
+		}
+
 		public void forward(Message<?> message) {
 
-			if (!this.isConnected) {
+			if (!this.stompConnection.isReady()) {
 				synchronized(this.monitor) {
-					if (!this.isConnected) {
+					if (!this.stompConnection.isReady()) {
 						this.messageQueue.add(message);
 						if (logger.isTraceEnabled()) {
-							logger.trace("Not connected yet, message queued, queue size=" + this.messageQueue.size());
+							logger.trace("Not connected, message queued. Queue size=" + this.messageQueue.size());
 						}
 						return;
 					}
 				}
 			}
 
-			TcpConnection<String, String> connection = this.promise.get();
-
 			if (this.messageQueue.isEmpty()) {
-				forwardInternal(message, connection);
+				forwardInternal(message);
 			}
 			else {
 				this.messageQueue.add(message);
-				flushMessages(connection);
+				flushMessages();
 			}
 		}
 
-		private boolean forwardInternal(final Message<?> message, TcpConnection<String, String> connection) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
+		private boolean forwardInternal(final Message<?> message) {
+			TcpConnection<String, String> tcpConnection = this.stompConnection.getReadyConnection();
+			if (tcpConnection == null) {
+				return false;
 			}
+			return forwardInternal(tcpConnection, message);
+		}
+
+		private boolean forwardInternal(TcpConnection<String, String> tcpConnection, final Message<?> message) {
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Forwarding to STOMP broker, message: " + message);
+			}
+
 			byte[] bytes = stompMessageConverter.fromMessage(message);
-			connection.send(new String(bytes, Charset.forName("UTF-8")), new Consumer<Boolean>() {
+			String payload = new String(bytes, Charset.forName("UTF-8"));
+
+			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
+			tcpConnection.send(payload, new Consumer<Boolean>() {
 				@Override
 				public void accept(Boolean success) {
-					if (!success) {
-						String sessionId = StompHeaderAccessor.wrap(message).getSessionId();
-						relaySessions.remove(sessionId);
-						sendError(sessionId, "Failed to relay message to broker");
-					}
+					deferred.accept(success);
 				}
 			});
 
-			// TODO: detect if send fails and send ERROR downstream (except on DISCONNECT)
-			return true;
+			Boolean success = null;
+			try {
+				success = deferred.compose().await();
+				if (success == null) {
+					handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker", null);
+				}
+				else if (!success) {
+					if (StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
+						handleTcpClientFailure("Failed to forward message to the broker", null);
+					}
+				}
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+				handleTcpClientFailure("Interrupted while forwarding message to the broker", ex);
+			}
+			return (success != null) ? success : false;
 		}
 
-		private void flushMessages(TcpConnection<String, String> connection) {
+		private void flushMessages() {
 			List<Message<?>> messages = new ArrayList<Message<?>>();
 			this.messageQueue.drainTo(messages);
 			for (Message<?> message : messages) {
-				if (!forwardInternal(message, connection)) {
+				if (!forwardInternal(message)) {
 					return;
 				}
 			}
 		}
 	}
+
+	private static class StompConnection {
+
+		private volatile TcpConnection<String, String> connection;
+
+		private AtomicReference<TcpConnection<String, String>> readyConnection =
+				new AtomicReference<TcpConnection<String, String>>();
+
+
+		public void setTcpConnection(TcpConnection<String, String> connection) {
+			Assert.notNull(connection, "connection must not be null");
+			this.connection = connection;
+		}
+
+		public TcpConnection<String, String> getReadyConnection() {
+			return this.readyConnection.get();
+		}
+
+		public void setReady() {
+			this.readyConnection.set(this.connection);
+		}
+
+		public boolean isReady() {
+			return (this.readyConnection.get() != null);
+		}
+
+		public void setDisconnected() {
+			this.readyConnection.set(null);
+			this.connection = null;
+		}
+
+		@Override
+		public String toString() {
+			return "StompConnection [ready=" + isReady() + "]";
+		}
+	}
+
+	private class SystemRelaySession extends RelaySession {
+
+		public static final String ID = "stompRelaySystemSessionId";
+
+
+		public SystemRelaySession() {
+			super(ID);
+		}
+
+		public void connect() {
+			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+			headers.setAcceptVersion("1.1,1.2");
+			headers.setLogin(systemLogin);
+			headers.setPasscode(systemPasscode);
+			headers.setHeartbeat(0,0);
+			Message<?> connectMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+			super.connect(connectMessage);
+		}
+
+		@Override
+		protected Composable<TcpConnection<String, String>> openTcpConnection() {
+			return tcpClient.open(new Reconnect() {
+				@Override
+				public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
+					return Tuple.of(address, 5000L);
+				}
+			});
+		}
+
+		@Override
+		protected void sendMessageToClient(Message<?> message) {
+			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			if (StompCommand.ERROR.equals(headers.getCommand())) {
+				if (logger.isErrorEnabled()) {
+					logger.error("System session received ERROR frame from broker: " + message);
+				}
+			}
+			else {
+				// Ignore
+			}
+		}
+	}
+
 }

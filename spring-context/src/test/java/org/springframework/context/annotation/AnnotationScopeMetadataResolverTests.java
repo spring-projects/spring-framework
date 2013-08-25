@@ -16,18 +16,19 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Retention;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
@@ -83,6 +84,15 @@ public final class AnnotationScopeMetadataResolverTests {
 		assertEquals(ScopedProxyMode.NO, scopeMetadata.getScopedProxyMode());
 	}
 
+	@Test
+	public void testCustomRequestScopeWithAttribute() {
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithCustomRequestScopeWithAttribute.class);
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
+		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
+		assertEquals("request", scopeMetadata.getScopeName());
+		assertEquals(ScopedProxyMode.TARGET_CLASS, scopeMetadata.getScopedProxyMode());
+	}
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNullScopedProxyMode() {
 		new AnnotationScopeMetadataResolver(null);
@@ -98,16 +108,20 @@ public final class AnnotationScopeMetadataResolverTests {
 	private static final class AnnotatedWithSingletonScope {
 	}
 
-
 	@Scope("prototype")
 	private static final class AnnotatedWithPrototypeScope {
 	}
-
 
 	@Scope(value="request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	private static final class AnnotatedWithScopedProxy {
 	}
 
+
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope("request")
+	public @interface CustomRequestScope {
+	}
 
 	@CustomRequestScope
 	private static final class AnnotatedWithCustomRequestScope {
@@ -117,8 +131,13 @@ public final class AnnotationScopeMetadataResolverTests {
 	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Scope("request")
-	public @interface CustomRequestScope {
+	public @interface CustomRequestScopeWithAttribute {
 
+		ScopedProxyMode proxyMode();
+	}
+
+	@CustomRequestScopeWithAttribute(proxyMode = ScopedProxyMode.TARGET_CLASS)
+	private static final class AnnotatedWithCustomRequestScopeWithAttribute {
 	}
 
 }

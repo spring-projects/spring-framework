@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +43,9 @@ import org.springframework.util.comparator.CompoundComparator;
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
  */
-public class MediaType extends MimeType {
+public class MediaType extends MimeType implements Serializable {
+
+	private static final long serialVersionUID = 2069937152339670231L;
 
 	/**
 	 * Public constant media type that includes all media ranges (i.e. "&#42;/&#42;").

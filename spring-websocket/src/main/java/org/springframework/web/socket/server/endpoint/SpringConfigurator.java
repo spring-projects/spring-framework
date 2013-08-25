@@ -16,13 +16,14 @@
 
 package org.springframework.web.socket.server.endpoint;
 
-import java.util.Map;
-
 import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -58,25 +59,28 @@ public class SpringConfigurator extends Configurator {
 			throw new IllegalStateException(message);
 		}
 
-		Map<String, T> beans = wac.getBeansOfType(endpointClass);
-		if (beans.isEmpty()) {
+		String beanName = ClassUtils.getShortNameAsProperty(endpointClass);
+		if (wac.containsBean(beanName)) {
+			T endpoint = wac.getBean(beanName, endpointClass);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Creating new @ServerEndpoint instance of type " + endpointClass);
+				logger.trace("Using @ServerEndpoint singleton " + endpoint);
 			}
-			return wac.getAutowireCapableBeanFactory().createBean(endpointClass);
+			return endpoint;
 		}
-		else if (beans.size() == 1) {
+
+		Component annot = AnnotationUtils.findAnnotation(endpointClass, Component.class);
+		if ((annot != null) && wac.containsBean(annot.value())) {
+			T endpoint = wac.getBean(annot.value(), endpointClass);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Using @ServerEndpoint singleton " + beans.keySet().iterator().next());
+				logger.trace("Using @ServerEndpoint singleton " + endpoint);
 			}
-			return beans.values().iterator().next();
+			return endpoint;
 		}
-		else {
-			// Should not happen ..
-			String message = "Found more than one matching @ServerEndpoint beans of type " + endpointClass;
-			logger.error(message);
-			throw new IllegalStateException(message);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Creating new @ServerEndpoint instance of type " + endpointClass);
 		}
+		return wac.getAutowireCapableBeanFactory().createBean(endpointClass);
 	}
 
 }

@@ -1,5 +1,5 @@
  /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.context.annotation;
-
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
 
 import java.util.Set;
 
@@ -61,7 +59,7 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 		boolean candidateFound = false;
 		Set<String> annoTypes = importingClassMetadata.getAnnotationTypes();
 		for (String annoType : annoTypes) {
-			AnnotationAttributes candidate = attributesFor(importingClassMetadata, annoType);
+			AnnotationAttributes candidate = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
 			Object mode = candidate.get("mode");
 			Object proxyTargetClass = candidate.get("proxyTargetClass");
 			if (mode != null && proxyTargetClass != null

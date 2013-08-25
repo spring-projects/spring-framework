@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.server;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -24,13 +23,13 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 
 /**
- * A strategy for performing container-specific steps to upgrade an HTTP request during a
- * WebSocket handshake. Intended for use within {@link HandshakeHandler} implementations.
+ * A server-specific strategy for performing the actual upgrade to a WebSocket exchange.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public interface RequestUpgradeStrategy {
+
 
 	/**
 	 * Return the supported WebSocket protocol versions.
@@ -53,6 +52,6 @@ public interface RequestUpgradeStrategy {
 	 *         handshake request.
 	 */
 	void upgrade(ServerHttpRequest request, ServerHttpResponse response, String acceptedProtocol,
-			WebSocketHandler wsHandler, Map<String, Object> attributes) throws IOException, HandshakeFailureException;
+			WebSocketHandler wsHandler, Map<String, Object> attributes) throws HandshakeFailureException;
 
 }

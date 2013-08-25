@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate3;
 
+import org.hibernate.OptimisticLockException;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.StaleStateException;
 
@@ -23,7 +24,8 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 /**
  * Hibernate-specific subclass of ObjectOptimisticLockingFailureException.
- * Converts Hibernate's StaleObjectStateException and StaleStateException.
+ * Converts Hibernate's StaleObjectStateException, StaleStateException
+ * and OptimisticLockException.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -37,6 +39,10 @@ public class HibernateOptimisticLockingFailureException extends ObjectOptimistic
 	}
 
 	public HibernateOptimisticLockingFailureException(StaleStateException ex) {
+		super(ex.getMessage(), ex);
+	}
+
+	public HibernateOptimisticLockingFailureException(OptimisticLockException ex) {
 		super(ex.getMessage(), ex);
 	}
 

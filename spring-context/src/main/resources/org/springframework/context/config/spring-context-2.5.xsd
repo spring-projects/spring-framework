@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xsd:schema xmlns="http://www.springframework.org/schema/context" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+<xsd:schema xmlns="http://www.springframework.org/schema/context"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 		xmlns:beans="http://www.springframework.org/schema/beans"
 		xmlns:tool="http://www.springframework.org/schema/tool"
-		targetNamespace="http://www.springframework.org/schema/context" elementFormDefault="qualified"
+		targetNamespace="http://www.springframework.org/schema/context"
+		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"/>

@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd" />
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.0.xsd"/>
 
 	<xsd:element name="embedded-database">
 		<xsd:annotation>
@@ -123,6 +123,33 @@
 	The resource location of an SQL script to execute. Can be a single script location or a pattern (e.g. classpath:/com/foo/sql/*-data.sql).
 				]]></xsd:documentation>
 			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="encoding" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The encoding for SQL scripts, if different from the platform encoding.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="separator" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The statement separator in the script (the default is to use ';' if it is present in the script, or '\n' otherwise).
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="execution">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Indicate the timing of the execution of this script. Use INIT to execute on startup (as a bean initialization) and DESTROY to execute on shutdown (as a bean destruction callback).
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="INIT"/>
+					<xsd:enumeration value="DESTROY"/>
+				</xsd:restriction>
+			</xsd:simpleType>
 		</xsd:attribute>
 	</xsd:complexType>
 

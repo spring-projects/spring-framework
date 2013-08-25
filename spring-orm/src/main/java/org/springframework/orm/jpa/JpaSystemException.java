@@ -36,4 +36,8 @@ public class JpaSystemException extends UncategorizedDataAccessException {
 		super(ex.getMessage(), ex);
 	}
 
+	public JpaSystemException(RuntimeException ex) {
+		super(ex.getMessage(), ex);
+	}
+
 }

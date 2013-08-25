@@ -425,6 +425,11 @@ public class DefaultSockJsService extends AbstractSockJsService {
 					+ " Either add Jackson 2 or Jackson 1.x to the classpath, or configure a SockJsMessageCode");
 			return DefaultSockJsService.this.getMessageCodec();
 		}
+
+		@Override
+		public int getHttpMessageCacheSize() {
+			return DefaultSockJsService.this.getHttpMessageCacheSize();
+		}
 	};
 
 }

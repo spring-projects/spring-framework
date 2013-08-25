@@ -17,17 +17,19 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -68,6 +70,17 @@ public class ResourceHttpMessageConverterTests {
 		assertEquals("Invalid content-type", MediaType.IMAGE_JPEG,
 				outputMessage.getHeaders().getContentType());
 		assertEquals("Invalid content-length", body.getFile().length(), outputMessage.getHeaders().getContentLength());
+	}
+
+	// SPR-10848
+
+	@Test
+	public void writeByteArrayNullMediaType() throws IOException {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		byte[] byteArray = {1, 2, 3};
+		Resource body = new ByteArrayResource(byteArray);
+		converter.write(body, null, outputMessage);
+		assertTrue(Arrays.equals(byteArray, outputMessage.getBodyAsBytes()));
 	}
 
 }

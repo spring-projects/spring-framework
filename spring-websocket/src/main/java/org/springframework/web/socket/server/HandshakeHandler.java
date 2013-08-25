@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.server;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -36,6 +35,7 @@ import org.springframework.web.socket.support.PerConnectionWebSocketHandler;
  */
 public interface HandshakeHandler {
 
+
 	/**
 	 * Initiate the handshake.
 	 *
@@ -51,14 +51,11 @@ public interface HandshakeHandler {
 	 *         response status, headers, and body will have been updated to reflect the
 	 *         result of the negotiation
 	 *
-	 * @throws IOException thrown when accessing or setting the response
-	 *
 	 * @throws HandshakeFailureException thrown when handshake processing failed to
 	 *         complete due to an internal, unrecoverable error, i.e. a server error as
-	 *         opposed to a failure to successfully negotiate the requirements of the
-	 *         handshake request.
+	 *         opposed to a failure to successfully negotiate the handshake.
 	 */
 	boolean doHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) throws IOException, HandshakeFailureException;
+			Map<String, Object> attributes) throws HandshakeFailureException;
 
 }

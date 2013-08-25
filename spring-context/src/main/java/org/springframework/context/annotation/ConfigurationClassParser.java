@@ -66,8 +66,6 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.context.annotation.MetadataUtils.*;
-
 /**
  * Parses a {@link Configuration} class definition, populating a collection of
  * {@link ConfigurationClass} objects (parsing a single Configuration class may result in
@@ -223,13 +221,13 @@ class ConfigurationClassParser {
 		processMemberClasses(configClass, sourceClass);
 
 		// process any @PropertySource annotations
-		AnnotationAttributes propertySource = attributesFor(sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class);
+		AnnotationAttributes propertySource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class);
 		if (propertySource != null) {
 			processPropertySource(propertySource);
 		}
 
 		// process any @ComponentScan annotations
-		AnnotationAttributes componentScan = attributesFor(sourceClass.getMetadata(), ComponentScan.class);
+		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
 			if (!conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
@@ -250,7 +248,7 @@ class ConfigurationClassParser {
 
 		// process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
-			AnnotationAttributes importResource = attributesFor(sourceClass.getMetadata(), ImportResource.class);
+			AnnotationAttributes importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
 			String[] resources = importResource.getStringArray("value");
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {

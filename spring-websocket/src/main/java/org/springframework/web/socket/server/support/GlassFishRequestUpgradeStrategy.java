@@ -25,7 +25,6 @@ import java.util.Random;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import javax.websocket.DeploymentException;
 import javax.websocket.Endpoint;
 
@@ -33,7 +32,7 @@ import org.glassfish.tyrus.core.ComponentProviderService;
 import org.glassfish.tyrus.core.EndpointWrapper;
 import org.glassfish.tyrus.core.ErrorCollector;
 import org.glassfish.tyrus.core.RequestContext;
-import org.glassfish.tyrus.server.TyrusEndpoint;
+import org.glassfish.tyrus.core.TyrusEndpoint;
 import org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler;
 import org.glassfish.tyrus.websockets.Connection;
 import org.glassfish.tyrus.websockets.Version;
@@ -41,7 +40,6 @@ import org.glassfish.tyrus.websockets.WebSocketApplication;
 import org.glassfish.tyrus.websockets.WebSocketEngine;
 import org.glassfish.tyrus.websockets.WebSocketEngine.WebSocketHolderListener;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -52,10 +50,15 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.endpoint.ServerEndpointRegistration;
+import org.springframework.web.socket.server.endpoint.ServletServerContainerFactoryBean;
+
 
 /**
- * GlassFish support for upgrading an {@link HttpServletRequest} during a WebSocket
- * handshake.
+ * GlassFish support for upgrading a request during a WebSocket handshake. To modify
+ * properties of the underlying {@link javax.websocket.server.ServerContainer} you can use
+ * {@link ServletServerContainerFactoryBean} in XML configuration or if using Java
+ * configuration, access the container instance through the
+ * "javax.websocket.server.ServerContainer" ServletContext attribute.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -72,32 +75,33 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 
 	@Override
 	public void upgradeInternal(ServerHttpRequest request, ServerHttpResponse response,
-			String selectedProtocol, Endpoint endpoint) throws IOException, HandshakeFailureException {
+			String selectedProtocol, Endpoint endpoint) throws HandshakeFailureException {
 
 		Assert.isTrue(request instanceof ServletServerHttpRequest);
 		HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
 		Assert.isTrue(response instanceof ServletServerHttpResponse);
 		HttpServletResponse servletResponse = ((ServletServerHttpResponse) response).getServletResponse();
-		servletResponse = new AlreadyUpgradedResponseWrapper(servletResponse);
 
-		WebSocketApplication wsApp = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
-		WebSocketEngine engine = WebSocketEngine.getEngine();
+		WebSocketApplication webSocketApplication = createTyrusEndpoint(servletRequest, endpoint, selectedProtocol);
+		WebSocketEngine webSocketEngine = WebSocketEngine.getEngine();
 
 		try {
-			engine.register(wsApp);
+			webSocketEngine.register(webSocketApplication);
 		}
 		catch (DeploymentException ex) {
-			throw new HandshakeFailureException("Failed to deploy endpoint in GlassFish", ex);
+			throw new HandshakeFailureException("Failed to configure endpoint in GlassFish", ex);
 		}
 
 		try {
-			if (!performUpgrade(servletRequest, servletResponse, request.getHeaders(), wsApp)) {
-				throw new HandshakeFailureException("Failed to upgrade HttpServletRequest");
-			}
+			performUpgrade(servletRequest, servletResponse, request.getHeaders(), webSocketApplication);
+		}
+		catch (IOException ex) {
+			throw new HandshakeFailureException(
+					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
 		}
 		finally {
-			engine.unregister(wsApp);
+			webSocketEngine.unregister(webSocketApplication);
 		}
 	}
 
@@ -133,11 +137,8 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 	private WebSocketApplication createTyrusEndpoint(HttpServletRequest request,
 			Endpoint endpoint, String selectedProtocol) {
 
-		// Use randomized path
-		String requestUri = request.getRequestURI();
-		String randomValue = String.valueOf(random.nextLong());
-		String endpointPath = requestUri.endsWith("/") ? requestUri + randomValue : requestUri + "/" + randomValue;
-
+		// shouldn't matter for processing but must be unique
+		String endpointPath = "/" + random.nextLong();
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(endpointPath, endpoint);
 		endpointConfig.setSubprotocols(Arrays.asList(selectedProtocol));
 
@@ -156,23 +157,6 @@ public class GlassFishRequestUpgradeStrategy extends AbstractStandardUpgradeStra
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException("Failed to instantiate GlassFish connection", ex);
-		}
-	}
-
-
-	private static class AlreadyUpgradedResponseWrapper extends HttpServletResponseWrapper {
-
-		public AlreadyUpgradedResponseWrapper(HttpServletResponse response) {
-			super(response);
-		}
-
-		@Override
-		public void setStatus(int sc) {
-			Assert.isTrue(sc == HttpStatus.SWITCHING_PROTOCOLS.value(), "Unexpected status code " + sc);
-		}
-		@Override
-		public void addHeader(String name, String value) {
-			// ignore
 		}
 	}
 

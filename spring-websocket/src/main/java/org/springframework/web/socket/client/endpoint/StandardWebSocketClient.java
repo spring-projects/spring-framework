@@ -52,10 +52,20 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	private final WebSocketContainer webSocketContainer;
 
 
+	/**
+	 * Default constructor that calls {@code ContainerProvider.getWebSocketContainer()} to
+	 * obtain a {@link WebSocketContainer} instance.
+	 */
 	public StandardWebSocketClient() {
 		this.webSocketContainer = ContainerProvider.getWebSocketContainer();
 	}
 
+	/**
+	 * Constructor that accepts a pre-configured {@link WebSocketContainer} instance. If
+	 * using XML configuration see {@link WebSocketContainerFactoryBean}. In Java
+	 * configuration use {@code ContainerProvider.getWebSocketContainer()} to obtain
+	 * a container instance.
+	 */
 	public StandardWebSocketClient(WebSocketContainer webSocketContainer) {
 		Assert.notNull(webSocketContainer, "webSocketContainer must not be null");
 		this.webSocketContainer = webSocketContainer;
@@ -63,9 +73,9 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 
 	@Override
-	protected WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler, HttpHeaders headers,
-			URI uri, List<String> protocols, Map<String, Object> handshakeAttributes)
-					throws WebSocketConnectFailureException {
+	protected WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler,
+			HttpHeaders headers, URI uri, List<String> protocols,
+			Map<String, Object> handshakeAttributes) throws WebSocketConnectFailureException {
 
 		int port = getPort(uri);
 		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);

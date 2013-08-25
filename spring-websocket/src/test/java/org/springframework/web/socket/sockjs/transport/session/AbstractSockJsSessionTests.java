@@ -216,6 +216,17 @@ public class AbstractSockJsSessionTests extends BaseAbstractSockJsSessionTests<T
 	}
 
 	@Test
+	public void tryCloseWithWebSocketHandlerExceptions() throws Exception {
+
+		this.session.delegateConnectionEstablished();
+		this.session.setActive(true);
+		this.session.tryCloseWithSockJsTransportError(new Exception(), CloseStatus.BAD_DATA);
+
+		assertEquals(CloseStatus.BAD_DATA, this.session.getCloseStatus());
+		assertClosed();
+	}
+
+	@Test
 	public void writeFrame() throws Exception {
 		this.session.writeFrame(SockJsFrame.openFrame());
 

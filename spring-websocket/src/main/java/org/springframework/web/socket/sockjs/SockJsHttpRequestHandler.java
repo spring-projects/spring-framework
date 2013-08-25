@@ -43,19 +43,19 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 
 	private final SockJsService sockJsService;
 
-	private final WebSocketHandler webSocketHandler;
+	private final WebSocketHandler wsHandler;
 
 
 	/**
 	 * Create a new {@link SockJsHttpRequestHandler}.
 	 * @param sockJsService the SockJS service
-	 * @param webSocketHandler the websocket handler
+	 * @param wsHandler the websocket handler
 	 */
-	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
+	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler wsHandler) {
 		Assert.notNull(sockJsService, "sockJsService must not be null");
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(wsHandler, "webSocketHandler must not be null");
 		this.sockJsService = sockJsService;
-		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+		this.wsHandler = decorateWebSocketHandler(wsHandler);
 	}
 
 
@@ -65,19 +65,24 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	 * <p>By default {@link ExceptionWebSocketHandlerDecorator} and
 	 * {@link LoggingWebSocketHandlerDecorator} are applied are added.
 	 */
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
-		handler = new ExceptionWebSocketHandlerDecorator(handler);
-		return new LoggingWebSocketHandlerDecorator(handler);
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler wsHandler) {
+		wsHandler = new ExceptionWebSocketHandlerDecorator(wsHandler);
+		return new LoggingWebSocketHandlerDecorator(wsHandler);
 	}
 
 	@Override
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
 			throws ServletException, IOException {
 
-		ServerHttpRequest serverRequest = new ServletServerHttpRequest(servletRequest);
-		ServerHttpResponse serverResponse = new ServletServerHttpResponse(servletResponse);
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		ServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
 
-		this.sockJsService.handleRequest(serverRequest, serverResponse, this.webSocketHandler);
+		try {
+			this.sockJsService.handleRequest(request, response, this.wsHandler);
+		}
+		catch (Throwable t) {
+			throw new SockJsException("Uncaught failure in SockJS request, uri=" + request.getURI(), t);
+		}
 	}
 
 }

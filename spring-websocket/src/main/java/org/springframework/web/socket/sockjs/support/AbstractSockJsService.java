@@ -83,6 +83,8 @@ public abstract class AbstractSockJsService implements SockJsService {
 
 	private long disconnectDelay = 5 * 1000;
 
+	private int httpMessageCacheSize = 100;
+
 	private boolean webSocketsEnabled = true;
 
 	private final TaskScheduler taskScheduler;
@@ -245,6 +247,28 @@ public abstract class AbstractSockJsService implements SockJsService {
 	}
 
 	/**
+	 * The number of server-to-client messages that a session can cache while waiting for
+	 * the next HTTP polling request from the client. All HTTP transports use this
+	 * property since even streaming transports recycle HTTP requests periodically.
+	 * <p>
+	 * The amount of time between HTTP requests should be relatively brief and will not
+	 * exceed the allows disconnect delay (see
+	 * {@link #setDisconnectDelay(long)}), 5 seconds by default.
+	 * <p>
+	 * The default size is 100.
+	 */
+	public void setHttpMessageCacheSize(int httpMessageCacheSize) {
+		this.httpMessageCacheSize = httpMessageCacheSize;
+	}
+
+	/**
+	 * Return the size of the HTTP message cache.
+	 */
+	public int getHttpMessageCacheSize() {
+		return this.httpMessageCacheSize;
+	}
+
+	/**
 	 * Some load balancers don't support websockets. This option can be used to
 	 * disable the WebSocket transport on the server side.
 	 *
@@ -320,8 +344,7 @@ public abstract class AbstractSockJsService implements SockJsService {
 				}
 				handleTransportRequest(request, response, wsHandler, sessionId, transport);
 			}
-
-			response.flush();
+			response.close();
 		}
 		catch (IOException ex) {
 			throw new SockJsException("Failed to write to the response", null, ex);
