@@ -59,6 +59,20 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	}
 
 
+	/**
+	 * Return the {@link SockJsService}.
+	 */
+	public SockJsService getSockJsService() {
+		return this.sockJsService;
+	}
+
+	/**
+	 * Return the {@link WebSocketHandler}.
+	 */
+	public WebSocketHandler getWebSocketHandler() {
+		return this.wsHandler;
+	}
+
 	@Override
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
 			throws ServletException, IOException {

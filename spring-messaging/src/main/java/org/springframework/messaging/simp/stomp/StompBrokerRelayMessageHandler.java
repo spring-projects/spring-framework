@@ -25,20 +25,13 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -69,15 +62,9 @@ import reactor.tuple.Tuple2;
  * @author Andy Wilkinson
  * @since 4.0
  */
-public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLifecycle, ApplicationEventPublisherAware {
-
-	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandler.class);
+public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
 
 	private final MessageChannel messageChannel;
-
-	private final String[] destinationPrefixes;
-
-	private ApplicationEventPublisher applicationEventPublisher;
 
 	private String relayHost = "127.0.0.1";
 
@@ -95,12 +82,6 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 
 	private final Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
 
-	private Object lifecycleMonitor = new Object();
-
-	private boolean running = false;
-
-	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
-
 
 	/**
 	 * @param messageChannel the channel to send messages from the STOMP broker to
@@ -108,10 +89,9 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 	 *        that do not match the given prefix are ignored.
 	 */
 	public StompBrokerRelayMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
+		super(destinationPrefixes);
 		Assert.notNull(messageChannel, "messageChannel is required");
-		Assert.notNull(destinationPrefixes, "destinationPrefixes is required");
 		this.messageChannel = messageChannel;
-		this.destinationPrefixes = destinationPrefixes.toArray(new String[destinationPrefixes.size()]);
 	}
 
 
@@ -175,105 +155,48 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		return this.systemPasscode;
 	}
 
-	/**
-	 * @return the configured STOMP broker supported destination prefixes.
-	 */
-	public String[] getDestinationPrefixes() {
-		return destinationPrefixes;
+
+	@Override
+	protected void startInternal() {
+		this.environment = new Environment();
+		this.tcpClient = new TcpClientSpec<String, String>(NettyTcpClient.class)
+				.env(this.environment)
+				.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
+				.connect(this.relayHost, this.relayPort)
+				.get();
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initializing \"system\" TCP connection");
+		}
+		SystemRelaySession session = new SystemRelaySession();
+		this.relaySessions.put(session.getId(), session);
+		session.connect();
 	}
 
 	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
+	protected void stopInternal() {
+		try {
+			this.tcpClient.close().await();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to close reactor TCP client", t);
+		}
+		try {
+			this.environment.shutdown();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to shut down reactor Environment", t);
 		}
 	}
 
 	@Override
-	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Starting STOMP broker relay");
-			}
-			this.environment = new Environment();
-			this.tcpClient = new TcpClientSpec<String, String>(NettyTcpClient.class)
-					.env(this.environment)
-					.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
-					.connect(this.relayHost, this.relayPort)
-					.get();
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Initializing \"system\" TCP connection");
-			}
-			SystemRelaySession session = new SystemRelaySession();
-			this.relaySessions.put(session.getId(), session);
-			session.connect();
-
-			this.running = true;
-		}
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher)
-			throws BeansException {
-		this.applicationEventPublisher = applicationEventPublisher;
-	}
-
-	@Override
-	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Stopping STOMP broker relay");
-			}
-			this.running = false;
-			try {
-				this.tcpClient.close().await();
-			}
-			catch (Throwable t) {
-				logger.error("Failed to close reactor TCP client", t);
-			}
-			try {
-				this.environment.shutdown();
-			}
-			catch (Throwable t) {
-				logger.error("Failed to shut down reactor Environment", t);
-			}
-		}
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		synchronized (this.lifecycleMonitor) {
-			stop();
-			callback.run();
-		}
-	}
-
-	@Override
-	public void handleMessage(Message<?> message) {
+	protected void handleMessageInternal(Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 		String sessionId = headers.getSessionId();
 		String destination = headers.getDestination();
 		StompCommand command = headers.getCommand();
 		SimpMessageType messageType = headers.getMessageType();
-
-		if (!this.running) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("STOMP broker relay not running. Ignoring message id=" + headers.getId());
-			}
-			return;
-		}
 
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
 			sessionId = (sessionId == null) ? SystemRelaySession.ID : sessionId;
@@ -284,83 +207,46 @@ public class StompBrokerRelayMessageHandler implements MessageHandler, SmartLife
 		}
 
 		if (headers.getCommand() == null) {
-			logger.error("Ignoring message, no STOMP command: " + message);
+			logger.error("No STOMP command, ignoring message: " + message);
 			return;
 		}
 		if (sessionId == null) {
-			logger.error("Ignoring message, no sessionId: " + message);
+			logger.error("No sessionId, ignoring message: " + message);
+			return;
+		}
+		if (command.requiresDestination() && !checkDestinationPrefix(destination)) {
 			return;
 		}
 
 		try {
-			if (checkDestinationPrefix(command, destination)) {
-
-				if (logger.isTraceEnabled()) {
-					logger.trace("Processing message: " + message);
-				}
-
-				if (SimpMessageType.CONNECT.equals(messageType)) {
-					headers.setHeartbeat(0, 0);
-					message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-					RelaySession session = new RelaySession(sessionId);
-					this.relaySessions.put(sessionId, session);
-					session.connect(message);
-				}
-				else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-					RelaySession session = this.relaySessions.remove(sessionId);
-					if (session == null) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Session already removed, sessionId=" + sessionId);
-						}
-						return;
+			if (SimpMessageType.CONNECT.equals(messageType)) {
+				headers.setHeartbeat(0, 0);
+				message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+				RelaySession session = new RelaySession(sessionId);
+				this.relaySessions.put(sessionId, session);
+				session.connect(message);
+			}
+			else if (SimpMessageType.DISCONNECT.equals(messageType)) {
+				RelaySession session = this.relaySessions.remove(sessionId);
+				if (session == null) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Session already removed, sessionId=" + sessionId);
 					}
-					session.forward(message);
+					return;
 				}
-				else {
-					RelaySession session = this.relaySessions.get(sessionId);
-					if (session == null) {
-						logger.warn("Session id=" + sessionId + " not found. Ignoring message: " + message);
-						return;
-					}
-					session.forward(message);
+				session.forward(message);
+			}
+			else {
+				RelaySession session = this.relaySessions.get(sessionId);
+				if (session == null) {
+					logger.warn("Session id=" + sessionId + " not found. Ignoring message: " + message);
+					return;
 				}
+				session.forward(message);
 			}
 		}
 		catch (Throwable t) {
 			logger.error("Failed to handle message " + message, t);
-		}
-	}
-
-	protected boolean checkDestinationPrefix(StompCommand command, String destination) {
-		if (!command.requiresDestination()) {
-			return true;
-		}
-		else if (destination == null) {
-			return false;
-		}
-		for (String prefix : this.destinationPrefixes) {
-			if (destination.startsWith(prefix)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void publishBrokerAvailableEvent() {
-		if ((this.applicationEventPublisher != null) && this.brokerAvailable.compareAndSet(false, true)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Publishing BrokerAvailabilityEvent (available)");
-			}
-			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
-		}
-	}
-
-	private void publishBrokerUnavailableEvent() {
-		if ((this.applicationEventPublisher != null) && this.brokerAvailable.compareAndSet(true, false)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Publishing BrokerAvailabilityEvent (unavailable)");
-			}
-			this.applicationEventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
 		}
 	}
 

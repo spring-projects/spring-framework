@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.handler;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,7 +52,7 @@ public class SimpleBrokerMessageHandlerTests {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		this.messageHandler = new SimpleBrokerMessageHandler(this.clientChannel);
+		this.messageHandler = new SimpleBrokerMessageHandler(this.clientChannel, Collections.<String>emptyList());
 	}
 
 

@@ -17,8 +17,10 @@
 package org.springframework.messaging.handler.websocket;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -79,21 +81,25 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	public void setProtocolHandlers(List<SubProtocolHandler> protocolHandlers) {
 		this.protocolHandlers.clear();
 		for (SubProtocolHandler handler: protocolHandlers) {
-			List<String> protocols = handler.getSupportedProtocols();
-			if (CollectionUtils.isEmpty(protocols)) {
-				logger.warn("No sub-protocols, ignoring handler " + handler);
-				continue;
-			}
-			for (String protocol: protocols) {
-				SubProtocolHandler replaced = this.protocolHandlers.put(protocol, handler);
-				if (replaced != null) {
-					throw new IllegalStateException("Failed to map handler " + handler
-							+ " to protocol '" + protocol + "', it is already mapped to handler " + replaced);
-				}
-			}
+			addProtocolHandler(handler);
 		}
-		if ((this.protocolHandlers.size() == 1) &&(this.defaultProtocolHandler == null)) {
-			this.defaultProtocolHandler = this.protocolHandlers.values().iterator().next();
+	}
+
+	/**
+	 * Register a sub-protocol handler.
+	 */
+	public void addProtocolHandler(SubProtocolHandler handler) {
+		List<String> protocols = handler.getSupportedProtocols();
+		if (CollectionUtils.isEmpty(protocols)) {
+			logger.warn("No sub-protocols, ignoring handler " + handler);
+			return;
+		}
+		for (String protocol: protocols) {
+			SubProtocolHandler replaced = this.protocolHandlers.put(protocol, handler);
+			if ((replaced != null) && (replaced != handler) ) {
+				throw new IllegalStateException("Failed to map handler " + handler
+						+ " to protocol '" + protocol + "', it is already mapped to handler " + replaced);
+			}
 		}
 	}
 
@@ -128,10 +134,10 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		this.sessions.put(session.getId(), session);
-		getProtocolHandler(session).afterSessionStarted(session, this.outputChannel);
+		findProtocolHandler(session).afterSessionStarted(session, this.outputChannel);
 	}
 
-	protected final SubProtocolHandler getProtocolHandler(WebSocketSession session) {
+	protected final SubProtocolHandler findProtocolHandler(WebSocketSession session) {
 		SubProtocolHandler handler;
 		String protocol = session.getAcceptedProtocol();
 		if (!StringUtils.isEmpty(protocol)) {
@@ -140,16 +146,26 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 					"No handler for sub-protocol '" + protocol + "', handlers=" + this.protocolHandlers);
 		}
 		else {
-			handler = this.defaultProtocolHandler;
-			Assert.state(handler != null,
-					"No sub-protocol was requested and a default sub-protocol handler was not configured");
+			if (this.defaultProtocolHandler != null) {
+				handler = this.defaultProtocolHandler;
+			}
+			else {
+				Set<SubProtocolHandler> handlers = new HashSet<SubProtocolHandler>(this.protocolHandlers.values());
+				if (handlers.size() == 1) {
+					handler = handlers.iterator().next();
+				}
+				else {
+					throw new IllegalStateException(
+							"No sub-protocol was requested and a default sub-protocol handler was not configured");
+				}
+			}
 		}
 		return handler;
 	}
 
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-		getProtocolHandler(session).handleMessageFromClient(session, message, this.outputChannel);
+		findProtocolHandler(session).handleMessageFromClient(session, message, this.outputChannel);
 	}
 
 	@Override
@@ -168,7 +184,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 		}
 
 		try {
-			getProtocolHandler(session).handleMessageToClient(session, message);
+			findProtocolHandler(session).handleMessageToClient(session, message);
 		}
 		catch (Exception e) {
 			logger.error("Failed to send message to client " + message, e);
@@ -198,7 +214,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		this.sessions.remove(session.getId());
-		getProtocolHandler(session).afterSessionEnded(session, closeStatus, this.outputChannel);
+		findProtocolHandler(session).afterSessionEnded(session, closeStatus, this.outputChannel);
 	}
 
 	@Override

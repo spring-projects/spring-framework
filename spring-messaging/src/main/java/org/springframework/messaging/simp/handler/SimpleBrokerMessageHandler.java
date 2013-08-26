@@ -16,23 +16,14 @@
 
 package org.springframework.messaging.simp.handler;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.simp.BrokerAvailabilityEvent;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 
@@ -40,37 +31,25 @@ import org.springframework.util.MultiValueMap;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class SimpleBrokerMessageHandler implements MessageHandler, ApplicationEventPublisherAware,
-		SmartLifecycle {
-
-	private static final Log logger = LogFactory.getLog(SimpleBrokerMessageHandler.class);
+public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private final MessageChannel messageChannel;
 
-	private List<String> destinationPrefixes;
-
 	private SubscriptionRegistry subscriptionRegistry = new DefaultSubscriptionRegistry();
-
-	private ApplicationEventPublisher eventPublisher;
-
-	private volatile boolean running = false;
 
 
 	/**
 	 * @param messageChannel the channel to broadcast messages to
 	 */
-	public SimpleBrokerMessageHandler(MessageChannel messageChannel) {
+	public SimpleBrokerMessageHandler(MessageChannel messageChannel, Collection<String> destinationPrefixes) {
+		super(destinationPrefixes);
 		Assert.notNull(messageChannel, "messageChannel is required");
 		this.messageChannel = messageChannel;
 	}
 
 
-	public void setDestinationPrefixes(List<String> destinationPrefixes) {
-		this.destinationPrefixes = destinationPrefixes;
-	}
-
-	public List<String> getDestinationPrefixes() {
-		return this.destinationPrefixes;
+	public MessageChannel getMessageChannel() {
+		return this.messageChannel;
 	}
 
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
@@ -82,12 +61,19 @@ public class SimpleBrokerMessageHandler implements MessageHandler, ApplicationEv
 		return this.subscriptionRegistry;
 	}
 
-	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
+
+	@Override
+	public void startInternal() {
+		publishBrokerAvailableEvent();
 	}
 
 	@Override
-	public void handleMessage(Message<?> message) throws MessagingException {
+	public void stopInternal() {
+		publishBrokerUnavailableEvent();
+	}
+
+	@Override
+	protected void handleMessageInternal(Message<?> message) {
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 		SimpMessageType messageType = headers.getMessageType();
@@ -116,18 +102,6 @@ public class SimpleBrokerMessageHandler implements MessageHandler, ApplicationEv
 		}
 	}
 
-	private boolean checkDestinationPrefix(String destination) {
-		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
-			return true;
-		}
-		for (String prefix : this.destinationPrefixes) {
-			if (destination.startsWith(prefix)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private void preProcessMessage(Message<?> message) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Processing " + message);
@@ -154,39 +128,6 @@ public class SimpleBrokerMessageHandler implements MessageHandler, ApplicationEv
 				}
 			}
 		}
-	}
-
-	@Override
-	public void start() {
-		this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(true, this));
-		this.running = true;
-	}
-
-	@Override
-	public void stop() {
-		this.running = false;
-		this.eventPublisher.publishEvent(new BrokerAvailabilityEvent(false, this));
-	}
-
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
-	@Override
-	public int getPhase() {
-		return 0;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		callback.run();
-		this.stop();
 	}
 
 }

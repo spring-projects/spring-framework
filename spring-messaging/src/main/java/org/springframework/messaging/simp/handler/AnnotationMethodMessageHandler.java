@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.ReplyTo;
 import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
@@ -76,11 +76,11 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private static final Log logger = LogFactory.getLog(AnnotationMethodMessageHandler.class);
 
-	private final SimpMessageSendingOperations dispatchMessagingTemplate;
+	private final SimpMessageSendingOperations brokerTemplate;
 
-	private final SimpMessageSendingOperations webSocketSessionMessagingTemplate;
+	private final SimpMessageSendingOperations webSocketReplyTemplate;
 
-	private List<String> destinationPrefixes;
+	private Collection<String> destinationPrefixes;
 
 	private MessageConverter<?> messageConverter;
 
@@ -105,35 +105,31 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 
 	/**
-	 * @param dispatchMessagingTemplate a messaging template to dispatch messages to for
-	 *        further processing, e.g. the use of an {@link ReplyTo} annotation on a
-	 *        message handling method, causes a new (broadcast) message to be sent.
-	 * @param webSocketSessionChannel the channel to send messages to WebSocket sessions
-	 *        on this application server. This is used primarily for processing the return
-	 *        values from {@link SubscribeEvent}-annotated methods.
+	 * @param brokerTemplate a messaging template to sending messages to the broker
+	 * @param webSocketReplyChannel the channel for messages to WebSocket clients
 	 */
-	public AnnotationMethodMessageHandler(SimpMessageSendingOperations dispatchMessagingTemplate,
-			MessageChannel webSocketSessionChannel) {
+	public AnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
+			MessageChannel webSocketReplyChannel) {
 
-		Assert.notNull(dispatchMessagingTemplate, "dispatchMessagingTemplate is required");
-		Assert.notNull(webSocketSessionChannel, "webSocketSessionChannel is required");
-		this.dispatchMessagingTemplate = dispatchMessagingTemplate;
-		this.webSocketSessionMessagingTemplate = new SimpMessagingTemplate(webSocketSessionChannel);
+		Assert.notNull(brokerTemplate, "brokerTemplate is required");
+		Assert.notNull(webSocketReplyChannel, "webSocketReplyChannel is required");
+		this.brokerTemplate = brokerTemplate;
+		this.webSocketReplyTemplate = new SimpMessagingTemplate(webSocketReplyChannel);
 	}
 
 
-	public void setDestinationPrefixes(List<String> destinationPrefixes) {
+	public void setDestinationPrefixes(Collection<String> destinationPrefixes) {
 		this.destinationPrefixes = destinationPrefixes;
 	}
 
-	public List<String> getDestinationPrefixes() {
+	public Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}
 
 	public void setMessageConverter(MessageConverter<?> converter) {
 		this.messageConverter = converter;
 		if (converter != null) {
-			((AbstractMessageSendingTemplate<?>) this.webSocketSessionMessagingTemplate).setMessageConverter(converter);
+			((AbstractMessageSendingTemplate<?>) this.webSocketReplyTemplate).setMessageConverter(converter);
 		}
 	}
 
@@ -184,12 +180,11 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
 		// Annotation-based return value types
-		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.dispatchMessagingTemplate));
-		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketSessionMessagingTemplate));
+		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate));
+		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketReplyTemplate));
 
 		// custom return value types
 		this.returnValueHandlers.addHandlers(this.customReturnValueHandlers);
-
 	}
 
 	protected void initHandlerMethods() {

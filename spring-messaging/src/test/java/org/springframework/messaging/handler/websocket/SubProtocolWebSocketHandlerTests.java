@@ -54,7 +54,7 @@ public class SubProtocolWebSocketHandlerTests {
 		MockitoAnnotations.initMocks(this);
 
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.channel);
-		when(stompHandler.getSupportedProtocols()).thenReturn(Arrays.asList("STOMP"));
+		when(stompHandler.getSupportedProtocols()).thenReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
 		when(mqttHandler.getSupportedProtocols()).thenReturn(Arrays.asList("MQTT"));
 
 		this.session = new TestWebSocketSession();
@@ -65,7 +65,7 @@ public class SubProtocolWebSocketHandlerTests {
 	@Test
 	public void subProtocolMatch() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
-		this.session.setAcceptedProtocol("sToMp");
+		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
 
 		verify(this.stompHandler).afterSessionStarted(session, this.channel);
@@ -75,7 +75,7 @@ public class SubProtocolWebSocketHandlerTests {
 	@Test
 	public void subProtocolDefaultHandlerOnly() throws Exception {
 		this.webSocketHandler.setDefaultProtocolHandler(stompHandler);
-		this.session.setAcceptedProtocol("sToMp");
+		this.session.setAcceptedProtocol("v12.sToMp");
 		this.webSocketHandler.afterConnectionEstablished(session);
 
 		verify(this.stompHandler).afterSessionStarted(session, this.channel);
