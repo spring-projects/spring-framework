@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,11 +44,7 @@ import org.springframework.messaging.handler.annotation.ReplyTo;
 import org.springframework.messaging.handler.annotation.support.ExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.annotation.support.MessageBodyMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
-import org.springframework.messaging.handler.method.HandlerMethod;
-import org.springframework.messaging.handler.method.HandlerMethodArgumentResolverComposite;
-import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandlerComposite;
-import org.springframework.messaging.handler.method.HandlerMethodSelector;
-import org.springframework.messaging.handler.method.InvocableHandlerMethod;
+import org.springframework.messaging.handler.method.*;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -92,6 +89,10 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
 
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+
 	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
@@ -130,6 +131,30 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
+	/**
+	 * Sets the custom list of {@code HandlerMethodArgumentResolver}s that will be used as the <em>first</em>
+	 * argument resolvers when resolving the values of the mapped methods.
+	 *
+	 * @param customArgumentResolvers the custom argument resolvers to be used first; never {@code null}.
+	 */
+	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
+		Assert.notNull(customArgumentResolvers, "The 'customArgumentResolvers' cannot be null.");
+
+		this.customArgumentResolvers = customArgumentResolvers;
+	}
+
+	/**
+	 * Set the custom list of {@code HandlerMethodReturnValueHandler}s that will be used as the <em>first</em>
+	 * return value handlers when handling the method return values.
+	 *
+	 * @param customReturnValueHandlers the custom return value resolvers that will be used first; never {@code null}.
+	 */
+	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
+		Assert.notNull(customReturnValueHandlers, "The 'customReturnValueHandlers' cannot be null.");
+
+		this.customReturnValueHandlers = customReturnValueHandlers;
+	}
+
 	public MessageConverter<?> getMessageConverter() {
 		return this.messageConverter;
 	}
@@ -144,10 +169,12 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		initHandlerMethods();
 
+		this.argumentResolvers.addResolvers(this.customArgumentResolvers);
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
+		this.returnValueHandlers.addHandlers(this.customReturnValueHandlers);
 		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.dispatchMessagingTemplate));
 		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketSessionMessagingTemplate));
 	}
