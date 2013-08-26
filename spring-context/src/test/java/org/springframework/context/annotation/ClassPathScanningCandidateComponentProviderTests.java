@@ -16,28 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Iterator;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.aspectj.lang.annotation.Aspect;
-import org.junit.Test;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.core.type.filter.RegexPatternTypeFilter;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import example.profilescan.DevComponent;
 import example.profilescan.ProfileAnnotatedComponent;
@@ -50,6 +32,22 @@ import example.scannable.NamedComponent;
 import example.scannable.NamedStubDao;
 import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
+import org.aspectj.lang.annotation.Aspect;
+import org.junit.Test;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
@@ -276,9 +274,39 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		}
 	}
 
+	@Test
+	public void testIntegrationWithAnnotationConfigApplicationContext_metaProfile() {
+		Class<?> beanClass = MetaProfileAnnotatedComponent.class;
+		String beanName = MetaProfileAnnotatedComponent.BEAN_NAME;
+		{
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
+			// no active profiles are set
+			ctx.register(beanClass);
+			ctx.refresh();
+			assertThat(ctx.containsBean(beanName), is(true));
+		}
+		{
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
+			ctx.getEnvironment().setActiveProfiles("dev");
+			ctx.register(beanClass);
+			ctx.refresh();
+			assertThat(ctx.containsBean(beanName), is(true));
+		}
+		{
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setDefaultProfiles(TEST_DEFAULT_PROFILE_NAME);
+			ctx.getEnvironment().setActiveProfiles("other");
+			ctx.register(beanClass);
+			ctx.refresh();
+			assertThat(ctx.containsBean(beanName), is(false));
+		}
+	}
+
 	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class<?> beanClass) {
-		for (Iterator<BeanDefinition> it = candidates.iterator(); it.hasNext();) {
-			ScannedGenericBeanDefinition definition = (ScannedGenericBeanDefinition) it.next();
+		for (BeanDefinition candidate : candidates) {
+			ScannedGenericBeanDefinition definition = (ScannedGenericBeanDefinition) candidate;
 			if (beanClass.getName().equals(definition.getBeanClassName())) {
 				return true;
 			}
@@ -293,9 +321,26 @@ public class ClassPathScanningCandidateComponentProviderTests {
 		static final String BEAN_NAME = "defaultProfileAnnotatedComponent";
 	}
 
-	@Profile({TEST_DEFAULT_PROFILE_NAME,"dev"})
+	@Profile({TEST_DEFAULT_PROFILE_NAME, "dev"})
 	@Component(DefaultAndDevProfileAnnotatedComponent.BEAN_NAME)
 	private static class DefaultAndDevProfileAnnotatedComponent {
 		static final String BEAN_NAME = "defaultAndDevProfileAnnotatedComponent";
 	}
+
+	@DefaultProfile @DevProfile
+	@Component(MetaProfileAnnotatedComponent.BEAN_NAME)
+	private static class MetaProfileAnnotatedComponent {
+		static final String BEAN_NAME = "metaProfileAnnotatedComponent";
+	}
+
+	@Profile(TEST_DEFAULT_PROFILE_NAME)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface DefaultProfile {
+	}
+
+	@Profile("dev")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface DevProfile {
+	}
+
 }
