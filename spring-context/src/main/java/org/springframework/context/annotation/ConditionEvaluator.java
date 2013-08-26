@@ -42,9 +42,6 @@ import org.springframework.util.MultiValueMap;
  */
 class ConditionEvaluator {
 
-	private static final String CONDITIONAL_ANNOTATION = Conditional.class.getName();
-
-
 	private final ConditionContextImpl context;
 
 
@@ -52,10 +49,9 @@ class ConditionEvaluator {
 	 * Create a new {@link ConditionEvaluator} instance.
 	 */
 	public ConditionEvaluator(BeanDefinitionRegistry registry, Environment environment,
-			ApplicationContext applicationContext, ClassLoader classLoader,
-			ResourceLoader resourceLoader) {
-		this.context = new ConditionContextImpl(registry, environment,
-				applicationContext, classLoader, resourceLoader);
+			ApplicationContext applicationContext, ClassLoader classLoader, ResourceLoader resourceLoader) {
+
+		this.context = new ConditionContextImpl(registry, environment, applicationContext, classLoader, resourceLoader);
 	}
 
 
@@ -77,7 +73,7 @@ class ConditionEvaluator {
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(AnnotatedTypeMetadata metadata, ConfigurationPhase phase) {
-		if (metadata == null || !metadata.isAnnotated(CONDITIONAL_ANNOTATION)) {
+		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
 		}
 
@@ -108,16 +104,13 @@ class ConditionEvaluator {
 
 	@SuppressWarnings("unchecked")
 	private List<String[]> getConditionClasses(AnnotatedTypeMetadata metadata) {
-		MultiValueMap<String, Object> attributes = metadata.getAllAnnotationAttributes(
-				CONDITIONAL_ANNOTATION, true);
-		Object values = attributes == null ? null : attributes.get("value");
-		return (List<String[]>) (values == null ? Collections.emptyList() : values);
+		MultiValueMap<String, Object> attributes = metadata.getAllAnnotationAttributes(Conditional.class.getName(), true);
+		Object values = (attributes != null ? attributes.get("value") : null);
+		return (List<String[]>) (values != null ? values : Collections.emptyList());
 	}
 
-	private Condition getCondition(String conditionClassName,
-			ClassLoader classloader) {
-		Class<?> conditionClass = ClassUtils.resolveClassName(conditionClassName,
-				classloader);
+	private Condition getCondition(String conditionClassName, ClassLoader classloader) {
+		Class<?> conditionClass = ClassUtils.resolveClassName(conditionClassName, classloader);
 		return (Condition) BeanUtils.instantiateClass(conditionClass);
 	}
 
@@ -138,7 +131,6 @@ class ConditionEvaluator {
 		private ClassLoader classLoader;
 
 		private ResourceLoader resourceLoader;
-
 
 		public ConditionContextImpl(BeanDefinitionRegistry registry,
 				Environment environment, ApplicationContext applicationContext,
@@ -169,7 +161,7 @@ class ConditionEvaluator {
 			if (this.registry != null) {
 				return this.registry;
 			}
-			 if(getBeanFactory() != null && getBeanFactory() instanceof BeanDefinitionRegistry) {
+			if (getBeanFactory() instanceof BeanDefinitionRegistry) {
 				return (BeanDefinitionRegistry) getBeanFactory();
 			}
 			return null;
@@ -180,7 +172,7 @@ class ConditionEvaluator {
 			if (this.environment != null) {
 				return this.environment;
 			}
-			if (getRegistry() != null && getRegistry() instanceof EnvironmentCapable) {
+			if (getRegistry() instanceof EnvironmentCapable) {
 				return ((EnvironmentCapable) getRegistry()).getEnvironment();
 			}
 			return null;
@@ -197,7 +189,7 @@ class ConditionEvaluator {
 			if (this.resourceLoader != null) {
 				return this.resourceLoader;
 			}
-			if (registry instanceof ResourceLoader) {
+			if (this.registry instanceof ResourceLoader) {
 				return (ResourceLoader) registry;
 			}
 			return null;
@@ -219,7 +211,7 @@ class ConditionEvaluator {
 			if (this.applicationContext != null) {
 				return this.applicationContext;
 			}
-			if (getRegistry() != null && getRegistry() instanceof ApplicationContext) {
+			if (getRegistry() instanceof ApplicationContext) {
 				return (ApplicationContext) getRegistry();
 			}
 			return null;
