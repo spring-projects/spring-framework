@@ -38,7 +38,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -342,29 +341,24 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		}
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
-				return !shouldSkip(metadataReader);
+				return isConditionMatch(metadataReader);
 			}
 		}
 		return false;
 	}
 
-	private boolean shouldSkip(MetadataReader metadataReader) throws IOException {
+	/**
+	 * Determine whether the given class is a candidate component based on any
+	 * {@code @Conditional} annotations.
+	 * @param metadataReader the ASM ClassReader for the class
+	 * @return whether the class qualifies as a candidate component
+	 */
+	private boolean isConditionMatch(MetadataReader metadataReader) {
 		if (this.conditionEvaluator == null) {
 			this.conditionEvaluator = new ConditionEvaluator(getRegistry(),
 					getEnvironment(), null, null, getResourceLoader());
 		}
-
-		while(metadataReader != null) {
-			AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-			if(this.conditionEvaluator.shouldSkip(metadata)) {
-				return true;
-			}
-			metadataReader = (metadata.hasSuperClass() ?
-					this.metadataReaderFactory.getMetadataReader(metadata.getSuperClassName())
-					: null);
-		}
-
-		return false;
+		return !conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
 	}
 
 	/**

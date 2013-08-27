@@ -134,10 +134,10 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
-		if (shouldSkip(annotatedClass)) {
+		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		if (conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
-		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
@@ -160,17 +160,6 @@ public class AnnotatedBeanDefinitionReader {
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 
-
-	private boolean shouldSkip(Class<?> annotatedClass) {
-		while(annotatedClass != null) {
-			AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
-			if(conditionEvaluator.shouldSkip(abd.getMetadata())) {
-				return true;
-			}
-			annotatedClass = annotatedClass.getSuperclass();
-		}
-		return false;
-	}
 
 	/**
 	 * Get the Environment from the given registry if possible, otherwise return a new

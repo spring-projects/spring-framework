@@ -380,21 +380,12 @@ class ConfigurationClassBeanDefinitionReader {
 					}
 				}
 				if (skip == null) {
-					skip = shouldSkipConsideringHierarchy(configClass);
+					skip = conditionEvaluator.shouldSkip(configClass.getMetadata(),
+							ConfigurationPhase.REGISTER_BEAN);
 				}
 				this.skipped.put(configClass, skip);
 			}
 			return skip;
-		}
-
-		private boolean shouldSkipConsideringHierarchy(ConfigurationClass configClass) {
-			for (AnnotationMetadata metadata : configClass.getMetadataHierarchy()) {
-				if (conditionEvaluator.shouldSkip(metadata,
-						ConfigurationPhase.REGISTER_BEAN)) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 

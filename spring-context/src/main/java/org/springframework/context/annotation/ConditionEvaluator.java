@@ -50,6 +50,7 @@ class ConditionEvaluator {
 	 */
 	public ConditionEvaluator(BeanDefinitionRegistry registry, Environment environment,
 			ApplicationContext applicationContext, ClassLoader classLoader, ResourceLoader resourceLoader) {
+
 		this.context = new ConditionContextImpl(registry, environment, applicationContext, classLoader, resourceLoader);
 	}
 
@@ -72,6 +73,10 @@ class ConditionEvaluator {
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(AnnotatedTypeMetadata metadata, ConfigurationPhase phase) {
+		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
+			return false;
+		}
+
 		if (phase == null) {
 			if (metadata instanceof AnnotationMetadata &&
 					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
@@ -94,7 +99,6 @@ class ConditionEvaluator {
 				}
 			}
 		}
-
 		return false;
 	}
 

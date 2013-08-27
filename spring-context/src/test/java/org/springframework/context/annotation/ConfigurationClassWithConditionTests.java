@@ -55,21 +55,6 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	@Test
-	public void conditionalOnConfiguration() throws Exception {
-		ctx.register(ConditionOnConfiguration.class);
-		ctx.refresh();
-		assertThat(ctx.getBeansOfType(ConditionOnConfiguration.class).size(), equalTo(0));
-	}
-
-	@Test
-	public void inheritedConditionalOnConfiguration() throws Exception {
-		ctx.register(InheritedConditionOnConfiguration.class);
-		ctx.refresh();
-		assertThat(ctx.getBeansOfType(ConditionOnConfiguration.class).size(), equalTo(0));
-		assertThat(ctx.getBeansOfType(InheritedConditionOnConfiguration.class).size(), equalTo(0));
-	}
-
-	@Test
 	public void conditionalOnMissingBeanMatch() throws Exception {
 		ctx.register(BeanOneConfiguration.class, BeanTwoConfiguration.class);
 		ctx.refresh();
@@ -119,14 +104,6 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	@Test
-	public void inheritedNonConfigurationClass() throws Exception {
-		ctx.register(InheritedNonConfigurationClass.class);
-		ctx.refresh();
-		thrown.expect(NoSuchBeanDefinitionException.class);
-		assertNull(ctx.getBean(InheritedNonConfigurationClass.class));
-	}
-
-	@Test
 	public void methodConditional() throws Exception {
 		ctx.register(ConditionOnMethodConfiguration.class);
 		ctx.refresh();
@@ -138,13 +115,6 @@ public class ConfigurationClassWithConditionTests {
 	public void importsNotCreated() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ImportsNotCreated.class);
-		ctx.refresh();
-	}
-
-	@Test
-	public void inheritedImportsNotCreated() throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(InheritedImportsNotCreated.class);
 		ctx.refresh();
 	}
 
@@ -258,10 +228,6 @@ public class ConfigurationClassWithConditionTests {
 	static class NonConfigurationClass {
 	}
 
-	@Component
-	static class InheritedNonConfigurationClass extends NonConfigurationClass {
-	}
-
 	@Configuration
 	static class ConditionOnMethodConfiguration {
 
@@ -279,21 +245,6 @@ public class ConfigurationClassWithConditionTests {
 		static {
 			if (true) throw new RuntimeException();
 		}
-	}
-
-	@Configuration
-	@Never
-	static class ConditionOnConfiguration {
-	}
-
-	@Configuration
-	static class InheritedConditionOnConfiguration extends ConditionOnConfiguration {
-	}
-
-
-	@Import({ ConfigurationNotCreated.class, RegistrarNotCreated.class, ImportSelectorNotCreated.class })
-	static class InheritedImportsNotCreated extends ConditionOnConfiguration {
-
 	}
 
 	@Configuration
