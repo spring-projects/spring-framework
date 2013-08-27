@@ -109,7 +109,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		this.reader.setBeanNameGenerator(beanNameGenerator);
 		this.scanner.setBeanNameGenerator(beanNameGenerator);
-		this.getBeanFactory().registerSingleton(
+		getBeanFactory().registerSingleton(
 				AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
 	}
 
@@ -126,9 +126,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 
 	/**
 	 * Register one or more annotated classes to be processed.
-	 * Note that {@link #refresh()} must be called in order for the context to fully
-	 * process the new class.
-	 * <p>Calls to {@link #register} are idempotent; adding the same
+	 * Note that {@link #refresh()} must be called in order for the context
+	 * to fully process the new class.
+	 * <p>Calls to {@code register} are idempotent; adding the same
 	 * annotated class more than once has no additional effect.
 	 * @param annotatedClasses one or more annotated classes,
 	 * e.g. {@link Configuration @Configuration} classes
