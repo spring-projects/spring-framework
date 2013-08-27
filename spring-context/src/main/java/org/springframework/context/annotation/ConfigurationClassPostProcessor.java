@@ -27,6 +27,7 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -50,8 +51,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationClassEnhancer.EnhancedConfiguration;
@@ -92,8 +91,7 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * @since 3.0
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware, ApplicationContextAware,
-		Ordered {
+		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware, Ordered {
 
 	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
@@ -112,8 +110,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
 	private Environment environment;
-
-	private ApplicationContext applicationContext;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
@@ -201,12 +197,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	public void setEnvironment(Environment environment) {
 		Assert.notNull(environment, "Environment must not be null");
 		this.environment = environment;
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
 	}
 
 	@Override
@@ -303,8 +293,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		// Parse each @Configuration class
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
-				this.resourceLoader, this.componentScanBeanNameGenerator, registry,
-				this.applicationContext);
+				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 		parser.parse(configCandidates);
 		parser.validate();
 
@@ -325,10 +314,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		// Read the model and create bean definitions based on its content
 		if (this.reader == null) {
-			this.reader = new ConfigurationClassBeanDefinitionReader(
-					registry, this.applicationContext, this.sourceExtractor,
-					this.problemReporter, this.metadataReaderFactory,
-					this.resourceLoader, this.environment, this.importBeanNameGenerator);
+			this.reader = new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor,
+					this.problemReporter, this.metadataReaderFactory, this.resourceLoader, this.environment,
+					this.importBeanNameGenerator);
 		}
 
 		reader.loadBeanDefinitions(parser.getConfigurationClasses());

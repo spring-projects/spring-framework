@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -174,7 +175,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
-	 * Returns the {@link BeanDefinitionRegistry} used by this scanner or {@code null}.
+	 * Returns the {@link BeanDefinitionRegistry} used by this scanner, if any.
 	 */
 	protected BeanDefinitionRegistry getRegistry() {
 		return null;
@@ -355,8 +356,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	private boolean isConditionMatch(MetadataReader metadataReader) {
 		if (this.conditionEvaluator == null) {
-			this.conditionEvaluator = new ConditionEvaluator(getRegistry(),
-					getEnvironment(), null, null, getResourceLoader());
+			this.conditionEvaluator = new ConditionEvaluator(getRegistry(), getEnvironment(), getResourceLoader());
 		}
 		return !conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
 	}

@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -333,7 +334,6 @@ public class ConfigurationClassWithConditionTests {
 
 		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			assertThat(context.getApplicationContext(), notNullValue());
 			assertThat(context.getBeanFactory(), notNullValue());
 			assertThat(context.getClassLoader(), notNullValue());
 			assertThat(context.getEnvironment(), notNullValue());
@@ -341,7 +341,6 @@ public class ConfigurationClassWithConditionTests {
 			assertThat(context.getResourceLoader(), notNullValue());
 			return true;
 		}
-
 	}
 
 	static class ExampleBean {

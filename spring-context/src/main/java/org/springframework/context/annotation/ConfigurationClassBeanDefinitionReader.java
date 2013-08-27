@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -42,7 +43,6 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -87,15 +87,14 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final ConditionEvaluator conditionEvaluator;
 
+
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
 	 */
-	public ConfigurationClassBeanDefinitionReader(
-			BeanDefinitionRegistry registry, ApplicationContext applicationContext,
-			SourceExtractor sourceExtractor, ProblemReporter problemReporter,
-			MetadataReaderFactory metadataReaderFactory, ResourceLoader resourceLoader,
-			Environment environment, BeanNameGenerator importBeanNameGenerator) {
+	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
+			ResourceLoader resourceLoader, Environment environment, BeanNameGenerator importBeanNameGenerator) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
@@ -104,8 +103,7 @@ class ConfigurationClassBeanDefinitionReader {
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
 		this.importBeanNameGenerator = importBeanNameGenerator;
-		this.conditionEvaluator = new ConditionEvaluator(registry, environment,
-				applicationContext, null, resourceLoader);
+		this.conditionEvaluator = new ConditionEvaluator(registry, environment, resourceLoader);
 	}
 
 
