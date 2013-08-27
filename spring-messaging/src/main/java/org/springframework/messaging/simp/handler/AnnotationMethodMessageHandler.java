@@ -173,15 +173,15 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		initHandlerMethods();
 
-		// Annotation-based argument resolution
-		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
-
 		// Type-based argument resolution
 		this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
 		this.argumentResolvers.addResolver(new MessageMethodArgumentResolver());
 
 		// custom arguments
 		this.argumentResolvers.addResolvers(this.customArgumentResolvers);
+
+		// catch-all argument resolver
+		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
 		// Annotation-based return value types
 		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.dispatchMessagingTemplate));
