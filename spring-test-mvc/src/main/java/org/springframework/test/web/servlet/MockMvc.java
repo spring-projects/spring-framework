@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.Mergeable;
@@ -54,7 +55,9 @@ public final class MockMvc {
 
 	static String MVC_RESULT_ATTRIBUTE = MockMvc.class.getName().concat(".MVC_RESULT_ATTRIBUTE");
 
-	private final MockFilterChain filterChain;
+	private final TestDispatcherServlet servlet;
+
+	private final Filter[] filters;
 
 	private final ServletContext servletContext;
 
@@ -69,11 +72,15 @@ public final class MockMvc {
 	 * Private constructor, not for direct instantiation.
 	 * @see org.springframework.test.web.servlet.setup.MockMvcBuilders
 	 */
-	MockMvc(MockFilterChain filterChain, ServletContext servletContext) {
-		Assert.notNull(servletContext, "A ServletContext is required");
-		Assert.notNull(filterChain, "A MockFilterChain is required");
+	MockMvc(TestDispatcherServlet servlet, Filter[] filters, ServletContext servletContext) {
 
-		this.filterChain = filterChain;
+		Assert.notNull(servlet, "DispatcherServlet is required");
+		Assert.notNull(filters, "filters cannot be null");
+		Assert.noNullElements(filters, "filters cannot contain null values");
+		Assert.notNull(servletContext, "A ServletContext is required");
+
+		this.servlet = servlet;
+		this.filters = filters;
 		this.servletContext = servletContext;
 	}
 
@@ -130,8 +137,8 @@ public final class MockMvc {
 		final MvcResult mvcResult = new DefaultMvcResult(request, response);
 		request.setAttribute(MVC_RESULT_ATTRIBUTE, mvcResult);
 
-		this.filterChain.reset();
-		this.filterChain.doFilter(request, response);
+		MockFilterChain filterChain = new MockFilterChain(this.servlet, this.filters);
+		filterChain.doFilter(request, response);
 
 		applyDefaultResultActions(mvcResult);
 
