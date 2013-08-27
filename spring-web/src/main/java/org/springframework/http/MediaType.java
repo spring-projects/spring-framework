@@ -296,6 +296,28 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
+	 * Indicate whether this {@code MediaType} includes the given media type.
+	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html}, and {@code application/*+xml}
+	 * includes {@code application/soap+xml}, etc. This method is <b>not</b> symmetric.
+	 * @param other the reference media type with which to compare
+	 * @return {@code true} if this media type includes the given media type; {@code false} otherwise
+	 */
+	public boolean includes(MediaType other) {
+		return super.includes(other);
+	}
+
+	/**
+	 * Indicate whether this {@code MediaType} is compatible with the given media type.
+	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa.
+	 * In effect, this method is similar to {@link #includes(MediaType)}, except that it <b>is</b> symmetric.
+	 * @param other the reference media type with which to compare
+	 * @return {@code true} if this media type is compatible with the given media type; {@code false} otherwise
+	 */
+	public boolean isCompatibleWith(MediaType other) {
+		return super.isCompatibleWith(other);
+	}
+
+	/**
 	 * Return a replica of this instance with the quality value of the given MediaType.
 	 * @return the same instance if the given MediaType doesn't have a quality value, or a new one otherwise
 	 */
