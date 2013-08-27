@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #setTargetSource
 	 * @see #setTarget
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetSource = EmptyTargetSource.forClass(targetClass);
 	}
 
@@ -194,7 +194,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Set the interfaces to be proxied.
 	 */
-	public void setInterfaces(Class[] interfaces) {
+	public void setInterfaces(Class<?>... interfaces) {
 		Assert.notNull(interfaces, "Interfaces must not be null");
 		this.interfaces.clear();
 		for (Class ifc : interfaces) {
@@ -206,7 +206,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Add a new proxied interface.
 	 * @param intf the additional interface to proxy
 	 */
-	public void addInterface(Class intf) {
+	public void addInterface(Class<?> intf) {
 		Assert.notNull(intf, "Interface must not be null");
 		if (!intf.isInterface()) {
 			throw new IllegalArgumentException("[" + intf.getName() + "] is not an interface");
@@ -224,15 +224,15 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return {@code true} if the interface was removed; {@code false}
 	 * if the interface was not found and hence could not be removed
 	 */
-	public boolean removeInterface(Class intf) {
+	public boolean removeInterface(Class<?> intf) {
 		return this.interfaces.remove(intf);
 	}
 
-	public Class[] getProxiedInterfaces() {
+	public Class<?>[] getProxiedInterfaces() {
 		return this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
-	public boolean isInterfaceProxied(Class intf) {
+	public boolean isInterfaceProxied(Class<?> intf) {
 		for (Class proxyIntf : this.interfaces) {
 			if (intf.isAssignableFrom(proxyIntf)) {
 				return true;
