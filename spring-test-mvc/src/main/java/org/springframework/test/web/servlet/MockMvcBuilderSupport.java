@@ -23,7 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -57,9 +56,7 @@ public abstract class MockMvcBuilderSupport {
 			throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet", ex);
 		}
 
-		MockFilterChain filterChain = new MockFilterChain(dispatcherServlet, filters);
-
-		MockMvc mockMvc = new MockMvc(filterChain, servletContext);
+		MockMvc mockMvc = new MockMvc(dispatcherServlet, filters, servletContext);
 		mockMvc.setDefaultRequest(defaultRequestBuilder);
 		mockMvc.setGlobalResultMatchers(globalResultMatchers);
 		mockMvc.setGlobalResultHandlers(globalResultHandlers);
