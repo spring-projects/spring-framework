@@ -138,12 +138,10 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	}
 
 	/**
-	 * Sets the custom list of {@code HandlerMethodArgumentResolver}s that will be used as
-	 * the <em>first</em> argument resolvers when resolving the values of the mapped
-	 * methods.
+	 * Sets the list of custom {@code HandlerMethodArgumentResolver}s that will be used
+	 * after resolvers for supported argument type.
 	 *
-	 * @param customArgumentResolvers the custom argument resolvers to be used first;
-	 *        never {@code null}.
+	 * @param customArgumentResolvers the list of resolvers; never {@code null}.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
 		Assert.notNull(customArgumentResolvers, "The 'customArgumentResolvers' cannot be null.");
@@ -152,10 +150,9 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	/**
 	 * Set the list of custom {@code HandlerMethodReturnValueHandler}s that will be used
-	 * as the <em>first</em> return value handlers when handling the method return values.
+	 * after return value handlers for known types.
 	 *
-	 * @param customReturnValueHandlers the custom return value resolvers that will be
-	 *        used first; never {@code null}.
+	 * @param customReturnValueHandlers the list of custom return value handlers, never {@code null}.
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
 		Assert.notNull(customReturnValueHandlers, "The 'customReturnValueHandlers' cannot be null.");
