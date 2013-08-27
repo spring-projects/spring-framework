@@ -183,7 +183,7 @@ class ConfigurationClassParser {
 
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
-		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
+		if (shouldSkip(asSourceClass(configClass), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
 
@@ -201,6 +201,7 @@ class ConfigurationClassParser {
 		// Recursively process the configuration class and its superclass hierarchy.
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
+			configClass.addMetadataHierarchy(sourceClass.getMetadata());
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
@@ -230,7 +231,7 @@ class ConfigurationClassParser {
 		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			if (!conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			if (!shouldSkip(sourceClass, ConfigurationPhase.REGISTER_BEAN)) {
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 
@@ -269,17 +270,23 @@ class ConfigurationClassParser {
 			if (!this.knownSuperclasses.containsKey(superclass)) {
 				this.knownSuperclasses.put(superclass, configClass);
 				// superclass found, return its annotation metadata and recurse
-				try {
-					return sourceClass.getSuperClass();
-				}
-				catch (ClassNotFoundException ex) {
-					throw new IllegalStateException(ex);
-				}
+				return sourceClass.getSuperClass();
 			}
 		}
 
 		// no superclass, processing is complete
 		return null;
+	}
+
+	private boolean shouldSkip(SourceClass sourceClass, ConfigurationPhase phase)
+			throws IOException {
+		while (sourceClass != null) {
+			if (conditionEvaluator.shouldSkip(sourceClass.getMetadata(), phase)) {
+				return true;
+			}
+			sourceClass = sourceClass.getSuperClass();
+		}
+		return false;
 	}
 
 	/**
@@ -692,11 +699,19 @@ class ConfigurationClassParser {
 			return members;
 		}
 
-		public SourceClass getSuperClass() throws IOException, ClassNotFoundException {
-			if (this.source instanceof Class<?>) {
-				return asSourceClass(((Class<?>) this.source).getSuperclass());
+		public SourceClass getSuperClass() throws IOException {
+			if (!getMetadata().hasSuperClass()) {
+				return null;
 			}
-			return asSourceClass(((MetadataReader) this.source).getClassMetadata().getSuperClassName());
+			try {
+				if (this.source instanceof Class<?>) {
+					return asSourceClass(((Class<?>) this.source).getSuperclass());
+				}
+				return asSourceClass(((MetadataReader) this.source).getClassMetadata().getSuperClassName());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException(ex);
+			}
 		}
 
 		public Set<SourceClass> getAnnotations() throws IOException, ClassNotFoundException {

@@ -16,10 +16,12 @@
 
 package org.springframework.context.annotation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,6 +52,8 @@ import org.springframework.util.ClassUtils;
 final class ConfigurationClass {
 
 	private final AnnotationMetadata metadata;
+
+	private final List<AnnotationMetadata> metadataHierarchy = new ArrayList<AnnotationMetadata>();
 
 	private final Resource resource;
 
@@ -127,6 +131,14 @@ final class ConfigurationClass {
 
 	public AnnotationMetadata getMetadata() {
 		return this.metadata;
+	}
+
+	public List<AnnotationMetadata> getMetadataHierarchy() {
+		return Collections.unmodifiableList(metadataHierarchy);
+	}
+
+	public void addMetadataHierarchy(AnnotationMetadata metadata) {
+		this.metadataHierarchy.add(metadata);
 	}
 
 	public Resource getResource() {
