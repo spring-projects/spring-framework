@@ -41,6 +41,9 @@ import java.lang.annotation.Target;
  * {@code @Bean} methods and {@link Import @Import} annotations associated with that class
  * will be subject to the conditions.
  *
+ * <p>NOTE: {@code @Conditional} annotations are not inherited, any conditions from
+ * super-classes or from overridden methods are not considered.
+ *
  * @author Phillip Webb
  * @since 4.0
  * @see Condition
