@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -75,11 +76,12 @@ import org.springframework.core.env.ConfigurableEnvironment;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
+@Documented
 @Conditional(ProfileCondition.class)
 public @interface Profile {
 
 	/**
-	 * The set of profiles for which this component should be registered.
+	 * The set of profiles for which the annotated component should be registered.
 	 */
 	String[] value();
 
