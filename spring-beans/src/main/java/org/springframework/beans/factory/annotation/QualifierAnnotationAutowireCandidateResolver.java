@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,10 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+	}
+
+	protected final BeanFactory getBeanFactory() {
+		return this.beanFactory;
 	}
 
 
@@ -334,6 +338,16 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			throw new IllegalStateException("Value annotation must have a value attribute");
 		}
 		return value;
+	}
+
+
+	/**
+	 * This implementation always returns {@code null},
+	 * leaving lazy resolution support up to subclasses.
+	 */
+	@Override
+	public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
+		return null;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  * Strategy interface for determining whether a specific bean definition
  * qualifies as an autowire candidate for a specific dependency.
  *
- * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.5
  */
 public interface AutowireCandidateResolver {
@@ -46,5 +46,16 @@ public interface AutowireCandidateResolver {
 	 * @since 3.0
 	 */
 	Object getSuggestedValue(DependencyDescriptor descriptor);
+
+	/**
+	 * Build a proxy for lazy resolution of the actual dependency target,
+	 * if demanded by the injection point.
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @param beanName the name of the bean that contains the injection point
+	 * @return the lazy resolution proxy for the actual dependency target,
+	 * or {@code null} if straight resolution is to be performed
+	 * @since 4.0
+	 */
+	Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName);
 
 }

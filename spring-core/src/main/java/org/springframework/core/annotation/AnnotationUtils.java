@@ -57,6 +57,22 @@ public abstract class AnnotationUtils {
 
 	/**
 	 * Get a single {@link Annotation} of {@code annotationType} from the supplied
+	 * annotation: either the given annotation itself or a meta-annotation thereof.
+	 * @param ann the Annotation to check
+	 * @param annotationType the annotation class to look for, both locally and as a meta-annotation
+	 * @return the matching annotation or {@code null} if not found
+	 * @since 4.0
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Annotation> T getAnnotation(Annotation ann, Class<T> annotationType) {
+		if (annotationType.isInstance(ann)) {
+			return (T) ann;
+		}
+		return ann.annotationType().getAnnotation(annotationType);
+	}
+
+	/**
+	 * Get a single {@link Annotation} of {@code annotationType} from the supplied
 	 * Method, Constructor or Field. Meta-annotations will be searched if the annotation
 	 * is not declared locally on the supplied element.
 	 * @param ae the Method, Constructor or Field from which to get the annotation
@@ -98,16 +114,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationType) {
 		Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
-		A ann = resolvedMethod.getAnnotation(annotationType);
-		if (ann == null) {
-			for (Annotation metaAnn : resolvedMethod.getAnnotations()) {
-				ann = metaAnn.annotationType().getAnnotation(annotationType);
-				if (ann != null) {
-					break;
-				}
-			}
-		}
-		return ann;
+		return getAnnotation((AnnotatedElement) resolvedMethod, annotationType);
 	}
 
 	/**

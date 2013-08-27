@@ -26,8 +26,11 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.ClassUtils;
 
@@ -35,14 +38,16 @@ import org.springframework.util.ClassUtils;
  * Utility class that allows for convenient registration of common
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} and
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
- * definitions for annotation-based configuration.
+ * definitions for annotation-based configuration. Also registers a common
+ * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 2.5
+ * @see ContextAnnotationAutowireCandidateResolver
  * @see CommonAnnotationBeanPostProcessor
- * @see org.springframework.context.annotation.ConfigurationClassPostProcessor
+ * @see ConfigurationClassPostProcessor
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
@@ -176,6 +181,16 @@ public class AnnotationConfigUtils {
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, Object source) {
 
+		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
+		if (beanFactory != null) {
+			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+			}
+			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+			}
+		}
+
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<BeanDefinitionHolder>(4);
 
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
@@ -227,6 +242,18 @@ public class AnnotationConfigUtils {
 		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
+	}
+
+	private static DefaultListableBeanFactory unwrapDefaultListableBeanFactory(BeanDefinitionRegistry registry) {
+		if (registry instanceof DefaultListableBeanFactory) {
+			return (DefaultListableBeanFactory) registry;
+		}
+		else if (registry instanceof GenericApplicationContext) {
+			return ((GenericApplicationContext) registry).getDefaultListableBeanFactory();
+		}
+		else {
+			return null;
+		}
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {

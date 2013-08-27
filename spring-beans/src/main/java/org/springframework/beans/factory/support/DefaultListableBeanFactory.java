@@ -29,6 +29,8 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -125,6 +127,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Whether to allow eager class loading even for lazy-init beans */
 	private boolean allowEagerClassLoading = true;
 
+	/** Optional OrderComparator for dependency Lists and arrays */
+	private Comparator dependencyComparator;
+
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
 
@@ -203,6 +208,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public void setAllowEagerClassLoading(boolean allowEagerClassLoading) {
 		this.allowEagerClassLoading = allowEagerClassLoading;
+	}
+
+	/**
+	 * Set a {@link java.util.Comparator} for dependency Lists and arrays.
+	 * @see org.springframework.core.OrderComparator
+	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
+	 */
+	public void setDependencyComparator(Comparator dependencyComparator) {
+		this.dependencyComparator = dependencyComparator;
+	}
+
+	/**
+	 * Return the dependency comparator for this BeanFactory (may be {@code null}.
+	 */
+	public Comparator getDependencyComparator() {
+		return this.dependencyComparator;
 	}
 
 	/**
@@ -786,13 +807,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {
-			return doResolveDependency(descriptor, descriptor.getDependencyType(), beanName, autowiredBeanNames, typeConverter);
+			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(descriptor, beanName);
+			if (result == null) {
+				result = doResolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
+			}
+			return result;
 		}
 	}
 
-	protected Object doResolveDependency(DependencyDescriptor descriptor, Class<?> type, String beanName,
+	public Object doResolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
+		Class<?> type = descriptor.getDependencyType();
 		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 		if (value != null) {
 			if (value instanceof String) {
@@ -819,7 +845,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			return converter.convertIfNecessary(matchingBeans.values(), type);
+			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
+			if (this.dependencyComparator != null && result instanceof Object[]) {
+				Arrays.sort((Object[]) result, this.dependencyComparator);
+			}
+			return result;
 		}
 		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
 			Class<?> elementType = descriptor.getCollectionType();
@@ -840,7 +870,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			return converter.convertIfNecessary(matchingBeans.values(), type);
+			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
+			if (this.dependencyComparator != null && result instanceof List) {
+				Collections.sort((List) result, this.dependencyComparator);
+			}
+			return result;
 		}
 		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
 			Class<?> keyType = descriptor.getMapKeyType();
@@ -1091,7 +1125,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getObject() throws BeansException {
-			return doResolveDependency(this.descriptor, this.descriptor.getDependencyType(), this.beanName, null, null);
+			return doResolveDependency(this.descriptor, this.beanName, null, null);
 		}
 	}
 

@@ -37,6 +37,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
@@ -46,16 +47,13 @@ import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
 
-
 /**
- * Unit tests for {@link AutowiredAnnotationBeanPostProcessor}.
- *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
  * @author Chris Beams
  */
-public final class AutowiredAnnotationBeanPostProcessorTests {
+public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testIncompleteBeanDefinition() {
@@ -348,6 +346,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testOrderedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -381,6 +380,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testAnnotationOrderedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -412,6 +412,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testOrderedCollectionResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -452,6 +453,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testAnnotationOrderedCollectionResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -563,6 +565,55 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		assertEquals(2, bean.getNestedTestBeans().size());
 		assertSame(ntb1, bean.getNestedTestBeans().get(0));
 		assertSame(ntb2, bean.getNestedTestBeans().get(1));
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testConstructorResourceInjectionWithMultipleOrderedCandidates() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		FixedOrder2NestedTestBean ntb1 = new FixedOrder2NestedTestBean();
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		FixedOrder1NestedTestBean ntb2 = new FixedOrder1NestedTestBean();
+		bf.registerSingleton("nestedTestBean2", ntb2);
+
+		ConstructorsResourceInjectionBean bean = (ConstructorsResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNull(bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertEquals(2, bean.getNestedTestBeans().length);
+		assertSame(ntb2, bean.getNestedTestBeans()[0]);
+		assertSame(ntb1, bean.getNestedTestBeans()[1]);
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testConstructorResourceInjectionWithMultipleCandidatesAsOrderedCollection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(
+				ConstructorsCollectionResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		FixedOrder2NestedTestBean ntb1 = new FixedOrder2NestedTestBean();
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		FixedOrder1NestedTestBean ntb2 = new FixedOrder1NestedTestBean();
+		bf.registerSingleton("nestedTestBean2", ntb2);
+
+		ConstructorsCollectionResourceInjectionBean bean = (ConstructorsCollectionResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNull(bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertEquals(2, bean.getNestedTestBeans().size());
+		assertSame(ntb2, bean.getNestedTestBeans().get(0));
+		assertSame(ntb1, bean.getNestedTestBeans().get(1));
 		bf.destroySingletons();
 	}
 
@@ -1101,7 +1152,6 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		private TestBean testBean;
 
 		private TestBean testBean2;
-
 
 		@Autowired
 		public void setTestBean2(TestBean testBean2) {

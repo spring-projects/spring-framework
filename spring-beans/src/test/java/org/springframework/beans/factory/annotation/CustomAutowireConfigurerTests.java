@@ -16,10 +16,8 @@
 
 package org.springframework.beans.factory.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
@@ -27,6 +25,9 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+
+import static org.junit.Assert.*;
+import static org.springframework.tests.TestResourceUtils.*;
 
 /**
  * Unit tests for {@link CustomAutowireConfigurer}.
@@ -85,6 +86,11 @@ public final class CustomAutowireConfigurerTests {
 
 		@Override
 		public Object getSuggestedValue(DependencyDescriptor descriptor) {
+			return null;
+		}
+
+		@Override
+		public Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, String beanName) {
 			return null;
 		}
 	}

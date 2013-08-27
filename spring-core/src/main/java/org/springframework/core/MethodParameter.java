@@ -164,7 +164,7 @@ public class MethodParameter {
 	 * Returns the wrapped member.
 	 * @return the Method or Constructor as Member
 	 */
-	private Member getMember() {
+	public Member getMember() {
 		// NOTE: no ternary expression to retain JDK <8 compatibility even when using
 		// the JDK 8 compiler (potentially selecting java.lang.reflect.Executable
 		// as common type, with that new base class not available on older JDKs)
@@ -180,7 +180,7 @@ public class MethodParameter {
 	 * Returns the wrapped annotated element.
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
-	private AnnotatedElement getAnnotatedElement() {
+	public AnnotatedElement getAnnotatedElement() {
 		// NOTE: no ternary expression to retain JDK <8 compatibility even when using
 		// the JDK 8 compiler (potentially selecting java.lang.reflect.Executable
 		// as common type, with that new base class not available on older JDKs)
