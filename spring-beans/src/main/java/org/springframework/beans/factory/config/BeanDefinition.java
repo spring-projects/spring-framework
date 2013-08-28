@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,11 +229,11 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Get the role hint for this {@code BeanDefinition}. The role hint
-	 * provides tools with an indication of the importance of a particular
-	 * {@code BeanDefinition}.
+	 * provides the frameworks as well as tools with an indication of
+	 * the role and importance of a particular {@code BeanDefinition}.
 	 * @see #ROLE_APPLICATION
-	 * @see #ROLE_INFRASTRUCTURE
 	 * @see #ROLE_SUPPORT
+	 * @see #ROLE_INFRASTRUCTURE
 	 */
 	int getRole();
 

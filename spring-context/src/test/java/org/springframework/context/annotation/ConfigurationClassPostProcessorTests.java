@@ -16,13 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-import org.springframework.tests.sample.beans.TestBean;
 
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.io.DescriptiveResource;
+import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Chris Beams
@@ -83,6 +85,33 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void testPostProcessorOverridesNonApplicationBeanDefinitions() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setRole(RootBeanDefinition.ROLE_SUPPORT);
+		beanFactory.registerBeanDefinition("bar", rbd);
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void testPostProcessorDoesNotOverrideRegularBeanDefinitions() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
+		rbd.setResource(new DescriptiveResource("XML or something"));
+		beanFactory.registerBeanDefinition("bar", rbd);
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		TestBean bar = beanFactory.getBean("bar", TestBean.class);
+	}
+
+	@Test
 	public void testProcessingAllowedOnlyOncePerProcessorRegistryPair() {
 		DefaultListableBeanFactory bf1 = new DefaultListableBeanFactory();
 		DefaultListableBeanFactory bf2 = new DefaultListableBeanFactory();
@@ -91,13 +120,15 @@ public class ConfigurationClassPostProcessorTests {
 		try {
 			pp.postProcessBeanFactory(bf1); // second invocation for bf1 -- should throw
 			fail("expected exception");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 		}
 		pp.postProcessBeanFactory(bf2); // first invocation for bf2 -- should succeed
 		try {
 			pp.postProcessBeanFactory(bf2); // second invocation for bf2 -- should throw
 			fail("expected exception");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 		}
 	}
 
