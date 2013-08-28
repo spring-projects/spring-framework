@@ -16,14 +16,8 @@
 
 package org.springframework.messaging.support.channel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 
 /**
@@ -32,57 +26,17 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public abstract class AbstractSubscribableChannel implements SubscribableChannel, BeanNameAware  {
+public abstract class AbstractSubscribableChannel extends AbstractMessageChannel implements SubscribableChannel {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
-	private String beanName;
-
-
-	public AbstractSubscribableChannel() {
-		this.beanName = getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>Used primarily for logging purposes.
-	 */
-	@Override
-	public void setBeanName(String name) {
-		this.beanName = name;
-	}
-
-	/**
-	 * @return the name for this channel.
-	 */
-	public String getBeanName() {
-		return this.beanName;
-	}
-
-	@Override
-	public final boolean send(Message<?> message) {
-		return send(message, INDEFINITE_TIMEOUT);
-	}
-
-	@Override
-	public final boolean send(Message<?> message, long timeout) {
-		Assert.notNull(message, "Message must not be null");
-		if (logger.isTraceEnabled()) {
-			logger.trace("[" + this.beanName + "] sending message " + message);
-		}
-		return sendInternal(message, timeout);
-	}
-
-	protected abstract boolean sendInternal(Message<?> message, long timeout);
 
 	@Override
 	public final boolean subscribe(MessageHandler handler) {
 		if (hasSubscription(handler)) {
-			logger.warn("[" + this.beanName + "] handler already subscribed " + handler);
+			logger.warn("[" + getBeanName() + "] handler already subscribed " + handler);
 			return false;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("[" + this.beanName + "] subscribing " + handler);
+			logger.debug("[" + getBeanName() + "] subscribing " + handler);
 		}
 		return subscribeInternal(handler);
 	}
@@ -94,7 +48,7 @@ public abstract class AbstractSubscribableChannel implements SubscribableChannel
 	@Override
 	public final boolean unsubscribe(MessageHandler handler) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("[" + this.beanName + "] unsubscribing " + handler);
+			logger.debug("[" + getBeanName() + "] unsubscribing " + handler);
 		}
 		return unsubscribeInternal(handler);
 	}

@@ -107,7 +107,10 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		return result;
 	}
 
-	protected List<String> getNativeHeader(String headerName) {
+	/**
+	 * Return all values for the specified native header or {@code null}.
+	 */
+	public List<String> getNativeHeader(String headerName) {
 		if (this.nativeHeaders.containsKey(headerName)) {
 			return this.nativeHeaders.get(headerName);
 		}
@@ -117,23 +120,28 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		return null;
 	}
 
+	/**
+	 * Return the first value for the specified native header of {@code null}.
+	 */
 	public String getFirstNativeHeader(String headerName) {
 		List<String> values = getNativeHeader(headerName);
 		return CollectionUtils.isEmpty(values) ? null : values.get(0);
 	}
 
 	/**
-	 * Set the value for the given header name. If the provided value is {@code null} the
-	 * header will be removed.
+	 * Set the specified native header value.
 	 */
-	protected void putNativeHeader(String name, List<String> value) {
+	public void setNativeHeader(String name, String value) {
 		if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
-			this.nativeHeaders.put(name, value);
+			this.nativeHeaders.set(name, value);
 		}
 	}
 
-	public void setNativeHeader(String name, String value) {
-		this.nativeHeaders.set(name, value);
+	/**
+	 * Add the specified native header value.
+	 */
+	public void addNativeHeader(String name, String value) {
+		this.nativeHeaders.add(name, value);
 	}
 
 }
