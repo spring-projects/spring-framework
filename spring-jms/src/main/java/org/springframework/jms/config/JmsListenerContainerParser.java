@@ -49,6 +49,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String RECEIVE_TIMEOUT_ATTRIBUTE = "receive-timeout";
 
+	private static final String RECOVERY_INTERVAL_ATTRIBUTE = "recovery-interval";
+
 
 	@Override
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
@@ -157,6 +159,13 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		if (StringUtils.hasText(receiveTimeout)) {
 			if (containerType.startsWith("default")) {
 				containerDef.getPropertyValues().add("receiveTimeout", new Integer(receiveTimeout));
+			}
+		}
+
+		String recoveryInterval = containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
+		if (StringUtils.hasText(recoveryInterval)) {
+			if (containerType.startsWith("default")) {
+				containerDef.getPropertyValues().add("recoveryInterval", recoveryInterval);
 			}
 		}
 

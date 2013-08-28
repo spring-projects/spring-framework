@@ -240,6 +240,14 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="recovery-interval" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Specify the interval between recovery attempts, in milliseconds.
+	The default is 5000 ms, that is, 5 seconds.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="phase" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

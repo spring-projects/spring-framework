@@ -140,6 +140,17 @@ public class JmsNamespaceHandlerTests {
 	}
 
 	@Test
+	public void testRecoveryInterval() {
+		long recoveryInterval1 = getRecoveryInterval("listener1");
+		long recoveryInterval2 = getRecoveryInterval("listener2");
+		long recoveryInterval3 = getRecoveryInterval(DefaultMessageListenerContainer.class.getName() + "#0");
+
+		assertEquals(1000L, recoveryInterval1);
+		assertEquals(1000L, recoveryInterval2);
+		assertEquals(DefaultMessageListenerContainer.DEFAULT_RECOVERY_INTERVAL, recoveryInterval3);
+	}
+
+	@Test
 	public void testErrorHandlers() {
 		ErrorHandler expected = this.context.getBean("testErrorHandler", ErrorHandler.class);
 		ErrorHandler errorHandler1 = getErrorHandler("listener1");
@@ -164,24 +175,6 @@ public class JmsNamespaceHandlerTests {
 		assertEquals(Integer.MAX_VALUE, defaultPhase);
 	}
 
-	private MessageListener getListener(String containerBeanName) {
-		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
-		return (MessageListener) container.getMessageListener();
-	}
-
-	private ErrorHandler getErrorHandler(String containerBeanName) {
-		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
-		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
-	}
-
-	public int getPhase(String containerBeanName) {
-		Object container = this.context.getBean(containerBeanName);
-		if (!(container instanceof Phased)) {
-			throw new IllegalStateException("Container '" + containerBeanName + "' does not implement Phased.");
-		}
-		return ((Phased) container).getPhase();
-	}
-
 	@Test
 	public void testComponentRegistration() {
 		assertTrue("Parser should have registered a component named 'listener1'", context.containsComponentDefinition("listener1"));
@@ -203,11 +196,36 @@ public class JmsNamespaceHandlerTests {
 		}
 	}
 
+
 	private void validateComponentDefinition(ComponentDefinition compDef) {
 		BeanDefinition[] beanDefs = compDef.getBeanDefinitions();
 		for (BeanDefinition beanDef : beanDefs) {
 			assertNotNull("BeanDefinition has no source attachment", beanDef.getSource());
 		}
+	}
+
+	private MessageListener getListener(String containerBeanName) {
+		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
+		return (MessageListener) container.getMessageListener();
+	}
+
+	private ErrorHandler getErrorHandler(String containerBeanName) {
+		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
+		return (ErrorHandler) new DirectFieldAccessor(container).getPropertyValue("errorHandler");
+	}
+
+	private long getRecoveryInterval(String containerBeanName) {
+		DefaultMessageListenerContainer container = this.context.getBean(containerBeanName, DefaultMessageListenerContainer.class);
+		Long recoveryInterval = (Long) new DirectFieldAccessor(container).getPropertyValue("recoveryInterval");
+		return recoveryInterval.longValue();
+	}
+
+	private int getPhase(String containerBeanName) {
+		Object container = this.context.getBean(containerBeanName);
+		if (!(container instanceof Phased)) {
+			throw new IllegalStateException("Container '" + containerBeanName + "' does not implement Phased.");
+		}
+		return ((Phased) container).getPhase();
 	}
 
 
