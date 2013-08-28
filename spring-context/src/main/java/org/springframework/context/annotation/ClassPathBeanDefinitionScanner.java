@@ -317,8 +317,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	/**
 	 * Determine whether the given new bean definition is compatible with
 	 * the given existing bean definition.
-	 * <p>The default implementation simply considers them as compatible
-	 * when the bean class name matches.
+	 * <p>The default implementation considers them as compatible when the existing
+	 * bean definition comes from the same source or from a non-scanning source.
 	 * @param newDefinition the new bean definition, originated from scanning
 	 * @param existingDefinition the existing bean definition, potentially an
 	 * explicitly defined one or a previously generated one from scanning
