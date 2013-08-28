@@ -42,6 +42,7 @@ public interface AsyncRestOperations {
 	 */
 	RestOperations getRestOperations();
 
+
 	// GET
 
 	/**
@@ -272,6 +273,7 @@ public interface AsyncRestOperations {
 	 */
 	Future<Set<HttpMethod>> optionsForAllow(URI url) throws RestClientException;
 
+
 	// exchange
 
 	/**
@@ -281,8 +283,8 @@ public interface AsyncRestOperations {
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestEntity the entity (headers and/or body) to write to the request, may
-	 *                      be {@code null}
+	 * @param requestEntity the entity (headers and/or body) to write to the request
+	 * (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity wrapped in a {@link Future}
@@ -298,8 +300,8 @@ public interface AsyncRestOperations {
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestEntity the entity (headers and/or body) to write to the request, may
-	 *                      be {@code null}
+	 * @param requestEntity the entity (headers and/or body) to write to the request
+	 * (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity wrapped in a {@link Future}
@@ -314,8 +316,8 @@ public interface AsyncRestOperations {
 	 * {@link ResponseEntity}.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestEntity the entity (headers and/or body) to write to the request, may
-	 *                      be {@code null}
+	 * @param requestEntity the entity (headers and/or body) to write to the request
+	 * (may be {@code null})
 	 * @param responseType the type of the return value
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
@@ -328,12 +330,10 @@ public interface AsyncRestOperations {
 	 * request entity to the request, and returns the response as {@link ResponseEntity}.
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
-	 *
 	 * <pre class="code">
 	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
-	 *
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the
@@ -351,12 +351,10 @@ public interface AsyncRestOperations {
 	 * request entity to the request, and returns the response as {@link ResponseEntity}.
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
-	 *
 	 * <pre class="code">
 	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
-	 *
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
@@ -373,12 +371,10 @@ public interface AsyncRestOperations {
 	 * request entity to the request, and returns the response as {@link ResponseEntity}.
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
-	 *
 	 * <pre class="code">
 	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
-	 *
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}

@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.AsyncClientHttpRequest;
 import org.springframework.http.client.AsyncClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -55,7 +57,7 @@ import org.springframework.web.util.UriTemplate;
  * {@linkplain #setMessageConverters(List) message converters} with this
  * {@code RestTemplate}.
  *
- * <p>For more information, please refer to the {@link RestTemplate} API documentation</p>
+ * <p>For more information, please refer to the {@link RestTemplate} API documentation.
  *
  * @author Arjen Poutsma
  * @since 4.0
@@ -82,7 +84,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * with the given {@code AsyncTaskExecutor} for asynchronous execution.
 	 */
 	public AsyncRestTemplate(AsyncTaskExecutor taskExecutor) {
-		Assert.notNull(taskExecutor, "'taskExecutor' must not be null");
+		Assert.notNull(taskExecutor, "AsyncTaskExecutor must not be null");
 		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 		requestFactory.setTaskExecutor(taskExecutor);
 		this.syncTemplate = new RestTemplate(requestFactory);
@@ -108,8 +110,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param asyncRequestFactory the asynchronous request factory
 	 * @param syncRequestFactory the synchronous request factory
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory,
-			ClientHttpRequestFactory syncRequestFactory) {
+	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
 		this(asyncRequestFactory, new RestTemplate(syncRequestFactory));
 	}
 
@@ -119,12 +120,12 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param requestFactory the asynchronous request factory to use
 	 * @param restTemplate the synchronous template to use
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory,
-			RestTemplate restTemplate) {
+	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
 		Assert.notNull(restTemplate, "'restTemplate' must not be null");
 		this.syncTemplate = restTemplate;
 		setAsyncRequestFactory(requestFactory);
 	}
+
 
 	/**
 	 * Set the error handler.
@@ -160,11 +161,13 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return syncTemplate.getMessageConverters();
 	}
 
+
 	// GET
 
 	@Override
-	public <T> Future<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
-			Object... uriVariables) throws RestClientException {
+	public <T> Future<ResponseEntity<T>> getForEntity(String url, Class<T> responseType, Object... uriVariables)
+			throws RestClientException {
+
 		AsyncRequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, uriVariables);
@@ -173,14 +176,14 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	@Override
 	public <T> Future<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
 			Map<String, ?> urlVariables) throws RestClientException {
+
 		AsyncRequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
 	@Override
-	public <T> Future<ResponseEntity<T>> getForEntity(URI url, Class<T> responseType)
-			throws RestClientException {
+	public <T> Future<ResponseEntity<T>> getForEntity(URI url, Class<T> responseType) throws RestClientException {
 		AsyncRequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
@@ -189,15 +192,13 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// HEAD
 
 	@Override
-	public Future<HttpHeaders> headForHeaders(String url, Object... uriVariables)
-			throws RestClientException {
+	public Future<HttpHeaders> headForHeaders(String url, Object... uriVariables) throws RestClientException {
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		return execute(url, HttpMethod.HEAD, null, headersExtractor, uriVariables);
 	}
 
 	@Override
-	public Future<HttpHeaders> headForHeaders(String url, Map<String, ?> uriVariables)
-			throws RestClientException {
+	public Future<HttpHeaders> headForHeaders(String url, Map<String, ?> uriVariables) throws RestClientException {
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		return execute(url, HttpMethod.HEAD, null, headersExtractor, uriVariables);
 	}
@@ -248,23 +249,19 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 			public boolean cancel(boolean mayInterruptIfRunning) {
 				return headersFuture.cancel(mayInterruptIfRunning);
 			}
-
 			@Override
 			public boolean isCancelled() {
 				return headersFuture.isCancelled();
 			}
-
 			@Override
 			public boolean isDone() {
 				return headersFuture.isDone();
 			}
-
 			@Override
 			public URI get() throws InterruptedException, ExecutionException {
 				HttpHeaders headers = headersFuture.get();
 				return headers.getLocation();
 			}
-
 			@Override
 			public URI get(long timeout, TimeUnit unit)
 					throws InterruptedException, ExecutionException, TimeoutException {
@@ -348,30 +345,23 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// OPTIONS
 
 	@Override
-	public Future<Set<HttpMethod>> optionsForAllow(String url, Object... uriVariables)
-			throws RestClientException {
+	public Future<Set<HttpMethod>> optionsForAllow(String url, Object... uriVariables) throws RestClientException {
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
-		Future<HttpHeaders>
-				headersFuture = execute(url, HttpMethod.OPTIONS, null, headersExtractor,
-				uriVariables);
+		Future<HttpHeaders> headersFuture = execute(url, HttpMethod.OPTIONS, null, headersExtractor, uriVariables);
 		return extractAllowHeader(headersFuture);
 	}
 
 	@Override
-	public Future<Set<HttpMethod>> optionsForAllow(String url,
-			Map<String, ?> uriVariables) throws RestClientException {
+	public Future<Set<HttpMethod>> optionsForAllow(String url, Map<String, ?> uriVariables) throws RestClientException {
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
-		Future<HttpHeaders>
-				headersFuture = execute(url, HttpMethod.OPTIONS, null, headersExtractor,
-				uriVariables);
+		Future<HttpHeaders> headersFuture = execute(url, HttpMethod.OPTIONS, null, headersExtractor, uriVariables);
 		return extractAllowHeader(headersFuture);
 	}
 
 	@Override
 	public Future<Set<HttpMethod>> optionsForAllow(URI url) throws RestClientException {
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
-		Future<HttpHeaders>
-				headersFuture = execute(url, HttpMethod.OPTIONS, null, headersExtractor);
+		Future<HttpHeaders> headersFuture = execute(url, HttpMethod.OPTIONS, null, headersExtractor);
 		return extractAllowHeader(headersFuture);
 	}
 
@@ -381,23 +371,19 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 			public boolean cancel(boolean mayInterruptIfRunning) {
 				return headersFuture.cancel(mayInterruptIfRunning);
 			}
-
 			@Override
 			public boolean isCancelled() {
 				return headersFuture.isCancelled();
 			}
-
 			@Override
 			public boolean isDone() {
 				return headersFuture.isDone();
 			}
-
 			@Override
 			public Set<HttpMethod> get() throws InterruptedException, ExecutionException {
 				HttpHeaders headers = headersFuture.get();
 				return headers.getAllow();
 			}
-
 			@Override
 			public Set<HttpMethod> get(long timeout, TimeUnit unit)
 					throws InterruptedException, ExecutionException, TimeoutException {
@@ -406,6 +392,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 			}
 		};
 	}
+
 
 	// exchange
 
@@ -475,6 +462,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return execute(url, method, requestCallback, responseExtractor);
 	}
 
+
 	// general execution
 
 	@Override
@@ -496,8 +484,9 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	}
 
 	@Override
-	public <T> Future<T> execute(URI url, HttpMethod method, AsyncRequestCallback requestCallback,
-			ResponseExtractor<T> responseExtractor) throws RestClientException {
+	public <T> Future<T> execute(URI url, HttpMethod method,
+			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor)
+			throws RestClientException {
 
 		return doExecute(url, method, requestCallback, responseExtractor);
 	}
@@ -507,7 +496,6 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * {@link org.springframework.http.client.ClientHttpRequest}
 	 * is processed using the {@link RequestCallback}; the response with
 	 * the {@link ResponseExtractor}.
-	 *
 	 * @param url the fully-expanded URL to connect to
 	 * @param method the HTTP method to execute (GET, POST, etc.)
 	 * @param requestCallback object that prepares the request (can be {@code null})
@@ -516,9 +504,8 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Future<T> doExecute(URI url, HttpMethod method,
-			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor)
-			throws RestClientException {
+	protected <T> Future<T> doExecute(URI url, HttpMethod method, AsyncRequestCallback requestCallback,
+			ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		Assert.notNull(url, "'url' must not be null");
 		Assert.notNull(method, "'method' must not be null");
@@ -541,8 +528,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		}
 	}
 
-	private void logResponseStatus(HttpMethod method, URI url,
-			ClientHttpResponse response) {
+	private void logResponseStatus(HttpMethod method, URI url, ClientHttpResponse response) {
 		if (logger.isDebugEnabled()) {
 			try {
 				logger.debug("Async " + method.name() + " request for \"" + url +
@@ -555,8 +541,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		}
 	}
 
-	private void handleResponseError(HttpMethod method, URI url,
-			ClientHttpResponse response) throws IOException {
+	private void handleResponseError(HttpMethod method, URI url, ClientHttpResponse response) throws IOException {
 		if (logger.isWarnEnabled()) {
 			try {
 				logger.warn("Async " + method.name() + " request for \"" + url +
@@ -575,10 +560,8 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * headers based on the given response type and configured {@linkplain
 	 * #getMessageConverters() message converters}.
 	 */
-	protected <T> AsyncRequestCallbackAdapter acceptHeaderRequestCallback(
-			Class<T> responseType) {
-		return new AsyncRequestCallbackAdapter(
-				this.syncTemplate.acceptHeaderRequestCallback(responseType));
+	protected <T> AsyncRequestCallback acceptHeaderRequestCallback(Class<T> responseType) {
+		return new AsyncRequestCallbackAdapter(this.syncTemplate.acceptHeaderRequestCallback(responseType));
 	}
 
 	/**
@@ -586,25 +569,21 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * request stream.
 	 */
 	protected <T> AsyncRequestCallback httpEntityCallback(HttpEntity<T> requestBody) {
-		return new AsyncRequestCallbackAdapter(
-				this.syncTemplate.httpEntityCallback(requestBody));
+		return new AsyncRequestCallbackAdapter(this.syncTemplate.httpEntityCallback(requestBody));
 	}
 
 	/**
 	 * Returns a request callback implementation that writes the given object to the
 	 * request stream.
 	 */
-	protected <T> AsyncRequestCallback httpEntityCallback(HttpEntity<T> request,
-			Type responseType) {
-		return new AsyncRequestCallbackAdapter(
-				this.syncTemplate.httpEntityCallback(request, responseType));
+	protected <T> AsyncRequestCallback httpEntityCallback(HttpEntity<T> request, Type responseType) {
+		return new AsyncRequestCallbackAdapter(this.syncTemplate.httpEntityCallback(request, responseType));
 	}
 
 	/**
 	 * Returns a response extractor for {@link ResponseEntity}.
 	 */
-	protected <T> ResponseExtractor<ResponseEntity<T>> responseEntityExtractor(
-			Type responseType) {
+	protected <T> ResponseExtractor<ResponseEntity<T>> responseEntityExtractor(Type responseType) {
 		return this.syncTemplate.responseEntityExtractor(responseType);
 	}
 
@@ -615,6 +594,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		return this.syncTemplate.headersExtractor();
 	}
 
+
 	private abstract class ResponseFuture<T> implements Future<T> {
 
 		private final HttpMethod method;
@@ -623,7 +603,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 
 		private final Future<ClientHttpResponse> responseFuture;
 
-		protected ResponseFuture(HttpMethod method, URI url, Future<ClientHttpResponse> responseFuture) {
+		public ResponseFuture(HttpMethod method, URI url, Future<ClientHttpResponse> responseFuture) {
 			this.method = method;
 			this.url = url;
 			this.responseFuture = responseFuture;
@@ -650,8 +630,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		}
 
 		@Override
-		public T get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException, TimeoutException {
+		public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 			return getInternal(this.responseFuture.get(timeout, unit));
 		}
 
@@ -685,8 +664,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 
 		private final ResponseExtractor<T> responseExtractor;
 
-		private ResponseExtractorFuture(HttpMethod method, URI url,
-				Future<ClientHttpResponse> responseFuture,
+		public ResponseExtractorFuture(HttpMethod method, URI url, Future<ClientHttpResponse> responseFuture,
 				ResponseExtractor<T> responseExtractor) {
 			super(method, url, responseFuture);
 			this.responseExtractor = responseExtractor;
@@ -698,10 +676,10 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		}
 	}
 
+
 	private class VoidResponseFuture extends ResponseFuture<Void> {
 
-		private VoidResponseFuture(HttpMethod method, URI url,
-				Future<ClientHttpResponse> responseFuture) {
+		public VoidResponseFuture(HttpMethod method, URI url, Future<ClientHttpResponse> responseFuture) {
 			super(method, url, responseFuture);
 		}
 
@@ -711,5 +689,50 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		}
 	}
 
+
+	/**
+	 * Adapts a {@link RequestCallback} to the {@link AsyncRequestCallback} interface.
+	 */
+	private static class AsyncRequestCallbackAdapter implements AsyncRequestCallback {
+
+		private final RequestCallback adaptee;
+
+		/**
+		 * Create a new {@code AsyncRequestCallbackAdapter} from the given
+		 * {@link RequestCallback}.
+		 * @param requestCallback the callback to base this adapter on
+		 */
+		public AsyncRequestCallbackAdapter(RequestCallback requestCallback) {
+			this.adaptee = requestCallback;
+		}
+
+		@Override
+		public void doWithRequest(final AsyncClientHttpRequest request) throws IOException {
+			if (this.adaptee != null) {
+				this.adaptee.doWithRequest(new ClientHttpRequest() {
+					@Override
+					public ClientHttpResponse execute() throws IOException {
+						throw new UnsupportedOperationException("execute not supported");
+					}
+					@Override
+					public OutputStream getBody() throws IOException {
+						return request.getBody();
+					}
+					@Override
+					public HttpMethod getMethod() {
+						return request.getMethod();
+					}
+					@Override
+					public URI getURI() {
+						return request.getURI();
+					}
+					@Override
+					public HttpHeaders getHeaders() {
+						return request.getHeaders();
+					}
+				});
+			}
+		}
+	}
 
 }
