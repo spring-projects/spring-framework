@@ -1125,7 +1125,7 @@ String result =
       <classname>HttpClient</classname> directly rewritten to use the
       <classname>RestTemplate</classname> is shown below</para>
 
-      <programlisting>uri = "http://example.com/hotels/{id}/bookings";
+        <programlisting language="java">uri = "http://example.com/hotels/{id}/bookings";
 
 RestTemplate template = new RestTemplate();
 
@@ -1133,6 +1133,20 @@ Booking booking = // create booking object
 
 URI location = template.postForLocation(uri, booking, "1");
 </programlisting>
+
+      <para>To use Apache HttpComponents instead of the native <literal>java.net</literal>
+      functionality, construct the <classname>RestTemplate</classname> as follows:</para>
+
+      <programlisting language="java">RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());</programlisting>
+
+      <tip><para>Apache HttpClient supports gzip encoding via the
+      <classname>DecompressingHttpClient</classname>. To use it, construct a
+      <classname>HttpComponentsClientHttpRequestFactory</classname> like so:</para>
+
+      <programlisting language="java">HttpClient httpClient = new DecompressingHttpClient(new DefaultHttpClient());
+ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+RestTemplate template = new RestTemplate(requestFactory);</programlisting>
+      </tip>
 
       <para>The general callback interface is
       <interfacename>RequestCallback</interfacename> and is called when the
