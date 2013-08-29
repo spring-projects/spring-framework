@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.aop.support.AopUtils;
@@ -36,6 +37,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -183,10 +185,23 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!"".equals(cron)) {
 				Assert.isTrue(initialDelay == -1, "'initialDelay' not supported for cron triggers");
 				processedSchedule = true;
+				String zone = scheduled.zone();
 				if (this.embeddedValueResolver != null) {
 					cron = this.embeddedValueResolver.resolveStringValue(cron);
+					zone = this.embeddedValueResolver.resolveStringValue(zone);
 				}
-				this.registrar.addCronTask(new CronTask(runnable, cron));
+				TimeZone timeZone;
+				if (!"".equals(zone)) {
+					timeZone = TimeZone.getTimeZone(zone);
+					// Check for that silly TimeZone fallback...
+					if ("GMT".equals(timeZone.getID()) && !zone.startsWith("GMT")) {
+						throw new IllegalArgumentException("Invalid time zone id '" + zone + "'");
+					}
+				}
+				else {
+					timeZone = TimeZone.getDefault();
+				}
+				this.registrar.addCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone)));
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore

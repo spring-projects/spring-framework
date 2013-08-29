@@ -60,6 +60,16 @@ public @interface Scheduled {
 	String cron() default "";
 
 	/**
+	 * A time zone for which the cron expression will be resolved.
+	 * By default, the server's local time zone will be used.
+	 * @return a zone id accepted by {@link java.util.TimeZone#getTimeZone(String)}
+	 * @see org.springframework.scheduling.support.CronTrigger#CronTrigger(String, java.util.TimeZone)
+	 * @see java.util.TimeZone
+	 * @since 4.0
+	 */
+	String zone() default "";
+
+	/**
 	 * Execute the annotated method with a fixed period between the end
 	 * of the last invocation and the start of the next.
 	 * @return the delay in milliseconds

@@ -22,8 +22,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -33,10 +36,14 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
@@ -47,6 +54,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Stevo Slavić
  */
 public class ScheduledAnnotationBeanPostProcessorTests {
 
@@ -128,16 +136,13 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(3000L, task.getInterval());
 	}
 
-	// TODO Reinstate repeated @Scheduled tests once we have full Java 8 support in the
-	// IDEs.
-	// @Test
-	// public void severalFixedRatesWithRepeatedScheduledAnnotation() {
-	// BeanDefinition processorDefinition = new
-	// RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-	// BeanDefinition targetDefinition = new RootBeanDefinition(
-	// SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
-	// severalFixedRates(context, processorDefinition, targetDefinition);
-	// }
+	@Test
+	public void severalFixedRatesWithRepeatedScheduledAnnotation() {
+		BeanDefinition processorDefinition = new
+		RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
+		severalFixedRates(context, processorDefinition, targetDefinition);
+	}
 
 	@Test
 	public void severalFixedRatesWithSchedulesContainerAnnotation() {
@@ -204,6 +209,63 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(target, targetObject);
 		assertEquals("cron", targetMethod.getName());
 		assertEquals("*/7 * * * * ?", task.getExpression());
+		Thread.sleep(10000);
+	}
+
+	@Test
+	public void cronTaskWithZone() throws InterruptedException {
+		Assume.group(TestGroup.LONG_RUNNING);
+
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.CronWithTimezoneTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<CronTask> cronTasks = (List<CronTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
+		assertEquals(1, cronTasks.size());
+		CronTask task = cronTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertEquals(target, targetObject);
+		assertEquals("cron", targetMethod.getName());
+		assertEquals("0 0 0-4,6-23 * * ?", task.getExpression());
+		Trigger trigger = task.getTrigger();
+		assertNotNull(trigger);
+		assertTrue(trigger instanceof CronTrigger);
+		CronTrigger cronTrigger = (CronTrigger) trigger;
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10"));
+		cal.clear();
+		cal.set(2013, 3, 15, 4, 0); // 15-04-2013 4:00 GMT+10
+		Date lastScheduledExecutionTime = cal.getTime();
+		Date lastActualExecutionTime = cal.getTime();
+		cal.add(Calendar.MINUTE, 30); // 4:30
+		Date lastCompletionTime = cal.getTime();
+		TriggerContext triggerContext = new SimpleTriggerContext(lastScheduledExecutionTime, lastActualExecutionTime, lastCompletionTime);
+		cal.add(Calendar.MINUTE, 30);
+		cal.add(Calendar.HOUR_OF_DAY, 1); // 6:00
+		Date nextExecutionTime = cronTrigger.nextExecutionTime(triggerContext);
+		assertEquals(cal.getTime(), nextExecutionTime); // assert that 6:00 is next execution time
+		Thread.sleep(10000);
+	}
+
+	@Test(expected = BeanCreationException.class)
+	public void cronTaskWithInvalidZone() throws InterruptedException {
+		Assume.group(TestGroup.LONG_RUNNING);
+
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(
+				ScheduledAnnotationBeanPostProcessorTests.CronWithInvalidTimezoneTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		context.refresh();
 		Thread.sleep(10000);
 	}
 
@@ -453,15 +515,17 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	// TODO Reinstate repeated @Scheduled tests once we have full Java 8 support in the
-	// IDEs.
-	// static class SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean {
-	//
-	// @Scheduled(fixedRate=4000)
-	// @Scheduled(fixedRate=4000, initialDelay=2000)
-	// public void fixedRate() {
-	// }
-	// }
+	static class SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean {
+
+		// can use Java 8 repeated @Scheduled once we have Eclipse IDE support for it
+		@Schedules({
+			@Scheduled(fixedRate=4000),
+			@Scheduled(fixedRate=4000, initialDelay=2000)
+		})
+		public void fixedRate() {
+		}
+	}
+
 
 	static class CronTestBean {
 
@@ -469,7 +533,24 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		public void cron() throws IOException {
 			throw new IOException("no no no");
 		}
+	}
 
+
+	static class CronWithTimezoneTestBean {
+
+		@Scheduled(cron="0 0 0-4,6-23 * * ?", zone = "GMT+10")
+		public void cron() throws IOException {
+			throw new IOException("no no no");
+		}
+	}
+
+
+	static class CronWithInvalidTimezoneTestBean {
+
+		@Scheduled(cron="0 0 0-4,6-23 * * ?", zone = "FOO")
+		public void cron() throws IOException {
+			throw new IOException("no no no");
+		}
 	}
 
 
@@ -478,7 +559,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		@Scheduled
 		public void invalid() {
 		}
-
 	}
 
 
@@ -487,7 +567,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		@Scheduled(cron="abc")
 		public void invalid() {
 		}
-
 	}
 
 
@@ -497,7 +576,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		public String invalid() {
 			return "oops";
 		}
-
 	}
 
 
@@ -506,7 +584,6 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		@Scheduled(fixedRate=3000)
 		public void invalid(String oops) {
 		}
-
 	}
 
 
