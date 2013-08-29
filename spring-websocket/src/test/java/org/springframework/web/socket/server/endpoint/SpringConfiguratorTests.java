@@ -16,9 +16,7 @@
 
 package org.springframework.web.socket.server.endpoint;
 
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,22 +63,22 @@ public class SpringConfiguratorTests {
 
 
 	@Test
-	public void getEndpointInstancePerConnection() throws Exception {
+	public void getEndpointPerConnection() throws Exception {
 		PerConnectionEchoEndpoint endpoint = this.configurator.getEndpointInstance(PerConnectionEchoEndpoint.class);
 		assertNotNull(endpoint);
 	}
 
 	@Test
-	public void getEndpointInstanceSingletonByType() throws Exception {
+	public void getEndpointSingletonByType() throws Exception {
 		EchoEndpoint expected = this.webAppContext.getBean(EchoEndpoint.class);
 		EchoEndpoint actual = this.configurator.getEndpointInstance(EchoEndpoint.class);
 		assertSame(expected, actual);
 	}
 
 	@Test
-	public void getEndpointInstanceSingletonByComponentName() throws Exception {
-		AnotherEchoEndpoint expected = this.webAppContext.getBean(AnotherEchoEndpoint.class);
-		AnotherEchoEndpoint actual = this.configurator.getEndpointInstance(AnotherEchoEndpoint.class);
+	public void getEndpointSingletonByComponentName() throws Exception {
+		ComponentEchoEndpoint expected = this.webAppContext.getBean(ComponentEchoEndpoint.class);
+		ComponentEchoEndpoint actual = this.configurator.getEndpointInstance(ComponentEchoEndpoint.class);
 		assertSame(expected, actual);
 	}
 
@@ -90,7 +88,7 @@ public class SpringConfiguratorTests {
 	static class Config {
 
 		@Bean
-		public EchoEndpoint echoEndpoint() {
+		public EchoEndpoint javaConfigEndpoint() {
 			return new EchoEndpoint(echoService());
 		}
 
@@ -100,7 +98,8 @@ public class SpringConfiguratorTests {
 		}
 	}
 
-	private static class EchoEndpoint extends Endpoint {
+	@ServerEndpoint("/echo")
+	private static class EchoEndpoint {
 
 		@SuppressWarnings("unused")
 		private final EchoService service;
@@ -109,29 +108,23 @@ public class SpringConfiguratorTests {
 		public EchoEndpoint(EchoService service) {
 			this.service = service;
 		}
-
-		@Override
-		public void onOpen(Session session, EndpointConfig config) {
-		}
 	}
 
-	@Component("myEchoEndpoint")
-	private static class AnotherEchoEndpoint extends Endpoint {
+	@Component("myComponentEchoEndpoint")
+	@ServerEndpoint("/echo")
+	private static class ComponentEchoEndpoint {
 
 		@SuppressWarnings("unused")
 		private final EchoService service;
 
 		@Autowired
-		public AnotherEchoEndpoint(EchoService service) {
+		public ComponentEchoEndpoint(EchoService service) {
 			this.service = service;
-		}
-
-		@Override
-		public void onOpen(Session session, EndpointConfig config) {
 		}
 	}
 
-	private static class PerConnectionEchoEndpoint extends Endpoint {
+	@ServerEndpoint("/echo")
+	private static class PerConnectionEchoEndpoint {
 
 		@SuppressWarnings("unused")
 		private final EchoService service;
@@ -139,10 +132,6 @@ public class SpringConfiguratorTests {
 		@Autowired
 		public PerConnectionEchoEndpoint(EchoService service) {
 			this.service = service;
-		}
-
-		@Override
-		public void onOpen(Session session, EndpointConfig config) {
 		}
 	}
 

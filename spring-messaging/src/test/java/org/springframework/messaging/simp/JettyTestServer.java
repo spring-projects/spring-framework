@@ -22,7 +22,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.socket.TestServer;
 
 
 /**
