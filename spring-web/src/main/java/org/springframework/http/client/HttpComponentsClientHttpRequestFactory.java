@@ -16,7 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 
@@ -56,7 +55,8 @@ import org.springframework.util.Assert;
 public class HttpComponentsClientHttpRequestFactory
 		implements ClientHttpRequestFactory, DisposableBean {
 
-	private final RequestConfig.Builder configBuilder;
+	private int connectTimeout;
+    private int socketTimeout;
     private CloseableHttpClient httpClient;
 
 	private boolean bufferRequestBody = true;
@@ -77,7 +77,6 @@ public class HttpComponentsClientHttpRequestFactory
 	 */
 	public HttpComponentsClientHttpRequestFactory(CloseableHttpClient httpClient) {
 		Assert.notNull(httpClient, "'httpClient' must not be null");
-		this.configBuilder = RequestConfig.custom();
         this.httpClient = httpClient;
 	}
 
@@ -104,7 +103,7 @@ public class HttpComponentsClientHttpRequestFactory
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-        configBuilder.setConnectTimeout(timeout);
+        this.connectTimeout = timeout;
 	}
 
 	/**
@@ -114,7 +113,7 @@ public class HttpComponentsClientHttpRequestFactory
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-        configBuilder.setSocketTimeout(timeout);
+        this.socketTimeout= timeout;
 	}
 
 	/**
@@ -155,7 +154,14 @@ public class HttpComponentsClientHttpRequestFactory
                 config = ((Configurable) httpRequest).getConfig();
             }
             if (config == null) {
-                config = configBuilder.build();
+                if (this.socketTimeout > 0 || this.connectTimeout > 0) {
+                    config = RequestConfig.custom()
+                            .setConnectTimeout(this.connectTimeout)
+                            .setSocketTimeout(this.socketTimeout)
+                            .build();
+                } else {
+                    config = RequestConfig.DEFAULT;
+                }
             }
             context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
         }
