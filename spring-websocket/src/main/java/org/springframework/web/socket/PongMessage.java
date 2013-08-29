@@ -16,40 +16,29 @@
 
 package org.springframework.web.socket;
 
+import java.nio.ByteBuffer;
+
 /**
- * A {@link WebSocketMessage} that contains a textual {@link String} payload.
+ * A WebSocket pong message.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public final class TextMessage extends WebSocketMessage<String> {
+public final class PongMessage extends WebSocketMessage<ByteBuffer> {
 
-	/**
-	 * Create a new {@link TextMessage} instance.
-	 * @param payload the non-null payload
-	 */
-	public TextMessage(CharSequence payload) {
-		super(payload.toString(), true);
+
+	public PongMessage(ByteBuffer payload) {
+		super(payload);
 	}
-
-	/**
-	 * Create a new {@link TextMessage} instance.
-	 * @param payload the non-null payload
-	 * @param isLast whether this the last part of a message received or transmitted in parts
-	 */
-	public TextMessage(CharSequence payload, boolean isLast) {
-		super(payload.toString(), isLast);
-	}
-
 
 	@Override
 	protected int getPayloadSize() {
-		return getPayload().length();
+		return (getPayload() != null) ? getPayload().remaining() : 0;
 	}
 
 	@Override
 	protected String toStringPayload() {
-		return (getPayloadSize() > 10) ? getPayload().substring(0, 10) + ".." : getPayload();
+		return (getPayload() != null) ? getPayload().toString() : null;
 	}
 
 }

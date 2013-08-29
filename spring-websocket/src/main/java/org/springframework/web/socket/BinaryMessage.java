@@ -31,7 +31,7 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
 	/**
 	 * Create a new {@link BinaryMessage} instance.
-	 * @param payload a non-null payload
+	 * @param payload the non-null payload
 	 */
 	public BinaryMessage(ByteBuffer payload) {
 		this(payload, true);
@@ -39,7 +39,7 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
 	/**
 	 * Create a new {@link BinaryMessage} instance.
-	 * @param payload a non-null payload
+	 * @param payload the non-null payload
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(ByteBuffer payload, boolean isLast) {
@@ -49,7 +49,7 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
 	/**
 	 * Create a new {@link BinaryMessage} instance.
-	 * @param payload a non-null payload
+	 * @param payload the non-null payload
 	 */
 	public BinaryMessage(byte[] payload) {
 		this(payload, 0, (payload == null ? 0 : payload.length), true);
@@ -57,7 +57,7 @@ public final class BinaryMessage extends WebSocketMessage<ByteBuffer> {
 
 	/**
 	 * Create a new {@link BinaryMessage} instance.
-	 * @param payload a non-null payload
+	 * @param payload the non-null payload
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(byte[] payload, boolean isLast) {

@@ -18,6 +18,7 @@ package org.springframework.web.socket.adapter;
 
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
@@ -32,6 +33,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class WebSocketHandlerAdapter implements WebSocketHandler {
 
+
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 	}
@@ -44,6 +46,9 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 		else if (message instanceof BinaryMessage) {
 			handleBinaryMessage(session, (BinaryMessage) message);
 		}
+		else if (message instanceof PongMessage) {
+			handlePongMessage(session, (PongMessage) message);
+		}
 		else {
 			throw new IllegalStateException("Unexpected WebSocket message type: " + message);
 		}
@@ -53,6 +58,9 @@ public class WebSocketHandlerAdapter implements WebSocketHandler {
 	}
 
 	protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
+	}
+
+	protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
 	}
 
 	@Override

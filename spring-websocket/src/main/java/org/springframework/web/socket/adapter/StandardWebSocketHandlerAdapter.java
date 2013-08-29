@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
@@ -89,6 +90,13 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			});
 		}
 
+		session.addMessageHandler(new MessageHandler.Whole<javax.websocket.PongMessage>() {
+			@Override
+			public void onMessage(javax.websocket.PongMessage message) {
+				handlePongMessage(session, message.getApplicationData());
+			}
+		});
+
 		try {
 			this.handler.afterConnectionEstablished(this.wsSession);
 		}
@@ -112,6 +120,16 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		BinaryMessage binaryMessage = new BinaryMessage(payload, isLast);
 		try {
 			this.handler.handleMessage(this.wsSession, binaryMessage);
+		}
+		catch (Throwable t) {
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+		}
+	}
+
+	private void handlePongMessage(javax.websocket.Session session, ByteBuffer payload) {
+		PongMessage pongMessage = new PongMessage(payload);
+		try {
+			this.handler.handleMessage(this.wsSession, pongMessage);
 		}
 		catch (Throwable t) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);

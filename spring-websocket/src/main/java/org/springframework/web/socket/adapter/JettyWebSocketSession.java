@@ -26,6 +26,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PingMessage;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -115,6 +117,16 @@ public class JettyWebSocketSession extends AbstractWebSocketSesssion<org.eclipse
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
 		getNativeSession().getRemote().sendBytes(message.getPayload());
+	}
+
+	@Override
+	protected void sendPingMessage(PingMessage message) throws IOException {
+		getNativeSession().getRemote().sendPing(message.getPayload());
+	}
+
+	@Override
+	protected void sendPongMessage(PongMessage message) throws IOException {
+		getNativeSession().getRemote().sendPong(message.getPayload());
 	}
 
 	@Override

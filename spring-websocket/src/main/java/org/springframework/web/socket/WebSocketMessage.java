@@ -24,8 +24,6 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @see BinaryMessage
- * @see TextMessage
  */
 public abstract class WebSocketMessage<T> {
 
@@ -36,10 +34,17 @@ public abstract class WebSocketMessage<T> {
 
 	/**
 	 * Create a new {@link WebSocketMessage} instance with the given payload.
+	 */
+	WebSocketMessage(T payload) {
+		this(payload, true);
+	}
+
+	/**
+	 * Create a new {@link WebSocketMessage} instance with the given payload.
 	 * @param payload a non-null payload
 	 */
 	WebSocketMessage(T payload, boolean isLast) {
-		Assert.notNull(payload, "Payload must not be null");
+		Assert.notNull(payload, "payload is required");
 		this.payload = payload;
 		this.last = isLast;
 	}

@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PingMessage;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -101,15 +103,24 @@ public abstract class AbstractWebSocketSesssion<T> implements WebSocketSession, 
 		else if (message instanceof BinaryMessage) {
 			sendBinaryMessage((BinaryMessage) message);
 		}
+		else if (message instanceof PingMessage) {
+			sendPingMessage((PingMessage) message);
+		}
+		else if (message instanceof PongMessage) {
+			sendPongMessage((PongMessage) message);
+		}
 		else {
 			throw new IllegalStateException("Unexpected WebSocketMessage type: " + message);
 		}
 	}
 
-	protected abstract void sendTextMessage(TextMessage message) throws IOException ;
+	protected abstract void sendTextMessage(TextMessage message) throws IOException;
 
-	protected abstract void sendBinaryMessage(BinaryMessage message) throws IOException ;
+	protected abstract void sendBinaryMessage(BinaryMessage message) throws IOException;
 
+	protected abstract void sendPingMessage(PingMessage message) throws IOException;
+
+	protected abstract void sendPongMessage(PongMessage message) throws IOException;
 
 	@Override
 	public final void close() throws IOException {
