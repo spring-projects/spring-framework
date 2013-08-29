@@ -30,6 +30,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.websocket.SubProtocolHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
+import org.springframework.messaging.simp.handler.SimpleUserQueueSuffixResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
@@ -64,7 +65,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
 
-	private MutableUserQueueSuffixResolver queueSuffixResolver;
+	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
 
 	/**

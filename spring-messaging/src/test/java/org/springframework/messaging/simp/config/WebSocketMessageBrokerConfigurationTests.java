@@ -27,15 +27,12 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.AbstractWebSocketIntegrationTests;
 import org.springframework.messaging.simp.JettyTestServer;
 import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.stomp.StompMessageConverter;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.simp.stomp.StompTextMessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -76,16 +73,13 @@ public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketI
 		this.server.init(cxt);
 		this.server.start();
 
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		headers.setDestination("/app/foo");
-		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		byte[] bytes = new StompMessageConverter().fromMessage(message);
-		final TextMessage webSocketMessage = new TextMessage(new String(bytes));
+		final TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.SEND)
+				.headers("destination:/app/foo").build();
 
 		WebSocketHandler clientHandler = new TextWebSocketHandlerAdapter() {
 			@Override
 			public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-				session.sendMessage(webSocketMessage);
+				session.sendMessage(textMessage);
 			}
 		};
 

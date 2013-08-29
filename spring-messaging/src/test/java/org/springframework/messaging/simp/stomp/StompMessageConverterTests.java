@@ -24,6 +24,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.web.socket.TextMessage;
 
 import static org.junit.Assert.*;
 
@@ -41,14 +42,17 @@ public class StompMessageConverterTests {
 		this.converter = new StompMessageConverter();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void connectFrame() throws Exception {
 
-		String accept = "accept-version:1.1\n";
-		String host = "host:github.org\n";
-		String frame = "\n\n\nCONNECT\n" + accept + host + "\n";
-		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"));
+		String accept = "accept-version:1.1";
+		String host = "host:github.org";
+
+		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT)
+				.headers(accept, host).build();
+
+		@SuppressWarnings("unchecked")
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(textMessage.getPayload());
 
 		assertEquals(0, message.getPayload().length);
 
@@ -80,11 +84,14 @@ public class StompMessageConverterTests {
 	@Test
 	public void connectWithEscapes() throws Exception {
 
-		String accept = "accept-version:1.1\n";
-		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
-		String frame = "CONNECT\n" + accept + host + "\n";
+		String accept = "accept-version:1.1";
+		String host = "ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org";
+
+		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT)
+				.headers(accept, host).build();
+
 		@SuppressWarnings("unchecked")
-		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(frame.getBytes("UTF-8"));
+		Message<byte[]> message = (Message<byte[]>) this.converter.toMessage(textMessage.getPayload());
 
 		assertEquals(0, message.getPayload().length);
 

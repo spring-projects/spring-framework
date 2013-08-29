@@ -17,26 +17,26 @@
 package org.springframework.web.socket.server.config;
 
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
 import org.springframework.web.socket.JettyTestServer;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 
 /**
@@ -63,13 +63,10 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		this.server.init(cxt);
 		this.server.start();
 
-		WebSocketHandler clientHandler = Mockito.mock(WebSocketHandler.class);
-		WebSocketHandler serverHandler = cxt.getBean(WebSocketHandler.class);
+		this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws");
 
-		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/ws");
-
-		verify(serverHandler).afterConnectionEstablished(any(WebSocketSession.class));
-		verify(clientHandler).afterConnectionEstablished(any(WebSocketSession.class));
+		TestWebSocketHandler serverHandler = cxt.getBean(TestWebSocketHandler.class);
+		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
 	}
 
 	@Test
@@ -81,13 +78,10 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		this.server.init(cxt);
 		this.server.start();
 
-		WebSocketHandler clientHandler = Mockito.mock(WebSocketHandler.class);
-		WebSocketHandler serverHandler = cxt.getBean(WebSocketHandler.class);
+		this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket");
 
-		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/sockjs/websocket");
-
-		verify(serverHandler).afterConnectionEstablished(any(WebSocketSession.class));
-		verify(clientHandler).afterConnectionEstablished(any(WebSocketSession.class));
+		TestWebSocketHandler serverHandler = cxt.getBean(TestWebSocketHandler.class);
+		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
 	}
 
 
@@ -110,8 +104,18 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		}
 
 		@Bean
-		public WebSocketHandler serverHandler() {
-			return Mockito.mock(WebSocketHandler.class);
+		public TestWebSocketHandler serverHandler() {
+			return new TestWebSocketHandler();
+		}
+	}
+
+	private static class TestWebSocketHandler extends WebSocketHandlerAdapter {
+
+		private CountDownLatch latch = new CountDownLatch(1);
+
+		@Override
+		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+			this.latch.countDown();
 		}
 	}
 
