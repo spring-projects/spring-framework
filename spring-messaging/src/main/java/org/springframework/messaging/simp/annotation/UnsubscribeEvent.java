@@ -24,6 +24,9 @@ import java.lang.annotation.Target;
 
 
 /**
+ * Annotation for mapping unsubscribe events onto specific handler handler methods based
+ * on the destination for the message (e.g. STOMP UNSUBSCRIBE message).
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

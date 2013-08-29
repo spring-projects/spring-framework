@@ -22,9 +22,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.messaging.Message;
+
 
 /**
- * Annotation indicating a method parameter should be bound to the body of a message.
+ * Annotation indicating a method parameter should be bound to the body of a
+ * {@link Message}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

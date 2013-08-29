@@ -22,10 +22,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+
 
 /**
+ * Annotation that can be used on methods processing an input message to indicate that the
+ * method's return value should be converted to a {@link Message} and sent to the
+ * specified destination with the prefix <code>"/user/{username}"</code> automatically
+ * prepended with the user information expected to be the input message header
+ * {@link SimpMessageHeaderAccessor#USER_HEADER}. Such user destinations may need to be
+ * further resolved to actual destinations.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
+ *
+ * @see org.springframework.messaging.handler.annotation.ReplyTo
+ * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

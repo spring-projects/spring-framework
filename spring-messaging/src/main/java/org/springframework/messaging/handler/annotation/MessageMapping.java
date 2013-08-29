@@ -22,7 +22,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.messaging.Message;
+
+
 /**
+ * Annotation for mapping a {@link Message} onto specific handler handler methods based on
+ * the destination for the message.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
