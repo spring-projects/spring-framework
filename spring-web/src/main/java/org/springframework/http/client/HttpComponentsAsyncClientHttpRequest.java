@@ -27,8 +27,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
@@ -79,7 +79,7 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest =
 					(HttpEntityEnclosingRequest) this.httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
+			HttpEntity requestEntity = new NByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -117,14 +117,14 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 		public ClientHttpResponse get()
 				throws InterruptedException, ExecutionException {
 			HttpResponse response = futureResponse.get();
-			return new HttpComponentsClientHttpResponse(response);
+			return new HttpComponentsAsyncClientHttpResponse(response);
 		}
 
 		@Override
 		public ClientHttpResponse get(long timeout, TimeUnit unit)
 				throws InterruptedException, ExecutionException, TimeoutException {
 			HttpResponse response = futureResponse.get(timeout, unit);
-			return new HttpComponentsClientHttpResponse(response);
+			return new HttpComponentsAsyncClientHttpResponse(response);
 		}
 
 	}

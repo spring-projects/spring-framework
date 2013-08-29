@@ -21,6 +21,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -46,14 +48,14 @@ import org.apache.http.protocol.HttpContext;
  */
 final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
-	private final HttpClient httpClient;
+	private final CloseableHttpClient httpClient;
 
 	private final HttpUriRequest httpRequest;
 
 	private final HttpContext httpContext;
 
 
-	public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+	public HttpComponentsClientHttpRequest(CloseableHttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -81,7 +83,7 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
-		HttpResponse httpResponse =
+		CloseableHttpResponse httpResponse =
 				this.httpClient.execute(this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
