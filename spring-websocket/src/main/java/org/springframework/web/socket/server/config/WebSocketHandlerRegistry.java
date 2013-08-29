@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
@@ -45,10 +46,13 @@ public class WebSocketHandlerRegistry {
 	private TaskScheduler defaultTaskScheduler;
 
 
+	public WebSocketHandlerRegistry(ThreadPoolTaskScheduler defaultSockJsTaskScheduler) {
+		this.defaultTaskScheduler = defaultSockJsTaskScheduler;
+	}
+
 	public WebSocketHandlerRegistration addHandler(WebSocketHandler wsHandler, String... paths) {
-		WebSocketHandlerRegistration r = new WebSocketHandlerRegistration();
+		WebSocketHandlerRegistration r = new WebSocketHandlerRegistration(this.defaultTaskScheduler);
 		r.addHandler(wsHandler, paths);
-		r.setDefaultTaskScheduler(this.defaultTaskScheduler);
 		this.registrations.add(r);
 		return r;
 	}
@@ -59,29 +63,16 @@ public class WebSocketHandlerRegistry {
 
 	/**
 	 * Specify the order to use for WebSocket {@link HandlerMapping} relative to other
-	 * handler mappings configured in the Spring MVC configuration. The default value is
-	 * 1.
+	 * handler mappings configured in the Spring MVC configuration. The default value is 1.
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
-	protected int getOrder() {
-		return this.order;
-	}
-
-	protected void setDefaultTaskScheduler(TaskScheduler defaultTaskScheduler) {
-		this.defaultTaskScheduler = defaultTaskScheduler;
-	}
-
-	protected TaskScheduler getDefaultTaskScheduler() {
-		return this.defaultTaskScheduler;
-	}
-
 	/**
 	 * Returns a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
 	 */
-	protected AbstractHandlerMapping getHandlerMapping() {
+	AbstractHandlerMapping getHandlerMapping() {
 		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 		for (WebSocketHandlerRegistration registration : this.registrations) {
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();

@@ -18,81 +18,101 @@ package org.springframework.web.socket.server.config;
 
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
+import org.springframework.web.socket.JettyTestServer;
 import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
-import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
-import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.server.HandshakeHandler;
+import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 
 /**
- * Test fixture for {@link WebSocketConfigurationSupport}.
+ * Test fixture for WebSocket Java config support.
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketConfigurationTests {
+@RunWith(Parameterized.class)
+public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 
-	private DelegatingWebSocketConfiguration config;
+	@Parameters
+	public static Iterable<Object[]> arguments() {
+		return Arrays.asList(new Object[][] {
+				{ new JettyTestServer(), new JettyWebSocketClient()} });
+	};
 
-	private GenericWebApplicationContext context;
 
+	@Test
+	public void registerWebSocketHandler() throws Exception {
 
-	@Before
-	public void setup() {
-		this.config = new DelegatingWebSocketConfiguration();
-		this.context = new GenericWebApplicationContext();
-		this.context.refresh();
+		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
+		cxt.register(TestWebSocketConfigurer.class, getUpgradeStrategyConfigClass());
+
+		this.server.init(cxt);
+		this.server.start();
+
+		WebSocketHandler clientHandler = Mockito.mock(WebSocketHandler.class);
+		WebSocketHandler serverHandler = cxt.getBean(WebSocketHandler.class);
+
+		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/ws");
+
+		verify(serverHandler).afterConnectionEstablished(any(WebSocketSession.class));
+		verify(clientHandler).afterConnectionEstablished(any(WebSocketSession.class));
 	}
 
 	@Test
-	public void webSocket() throws Exception {
+	public void registerWebSocketHandlerWithSockJS() throws Exception {
 
-		final WebSocketHandler handler = new TextWebSocketHandlerAdapter();
+		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
+		cxt.register(TestWebSocketConfigurer.class, getUpgradeStrategyConfigClass());
 
-		WebSocketConfigurer configurer = new WebSocketConfigurer() {
-			@Override
-			public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-				registry.addHandler(handler, "/h1");
-			}
-		};
+		this.server.init(cxt);
+		this.server.start();
 
-		this.config.setConfigurers(Arrays.asList(configurer));
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.config.webSocketHandlerMapping();
-		hm.setApplicationContext(this.context);
+		WebSocketHandler clientHandler = Mockito.mock(WebSocketHandler.class);
+		WebSocketHandler serverHandler = cxt.getBean(WebSocketHandler.class);
 
-		Object actual = hm.getUrlMap().get("/h1");
+		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/sockjs/websocket");
 
-		assertNotNull(actual);
-		assertEquals(WebSocketHttpRequestHandler.class, actual.getClass());
-		assertEquals(1, hm.getUrlMap().size());
+		verify(serverHandler).afterConnectionEstablished(any(WebSocketSession.class));
+		verify(clientHandler).afterConnectionEstablished(any(WebSocketSession.class));
 	}
 
-	@Test
-	public void webSocketWithSockJS() throws Exception {
 
-		final WebSocketHandler handler = new TextWebSocketHandlerAdapter();
+	@Configuration
+	@EnableWebSocket
+	static class TestWebSocketConfigurer implements WebSocketConfigurer {
 
-		WebSocketConfigurer configurer = new WebSocketConfigurer() {
-			@Override
-			public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-				registry.addHandler(handler, "/h1").withSockJS();
-			}
-		};
+		@Autowired
+		private HandshakeHandler handshakeHandler; // can't rely on classpath for server detection
 
-		this.config.setConfigurers(Arrays.asList(configurer));
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.config.webSocketHandlerMapping();
-		hm.setApplicationContext(this.context);
 
-		Object actual = hm.getUrlMap().get("/h1/**");
+		@Override
+		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
-		assertNotNull(actual);
-		assertEquals(SockJsHttpRequestHandler.class, actual.getClass());
-		assertEquals(1, hm.getUrlMap().size());
+			registry.addHandler(serverHandler(), "/ws")
+				.setHandshakeHandler(this.handshakeHandler);
+
+			registry.addHandler(serverHandler(), "/sockjs").withSockJS()
+				.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));
+		}
+
+		@Bean
+		public WebSocketHandler serverHandler() {
+			return Mockito.mock(WebSocketHandler.class);
+		}
 	}
 
 }

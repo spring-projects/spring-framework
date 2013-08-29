@@ -33,6 +33,7 @@ import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 
 
 /**
@@ -54,9 +55,8 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public HandlerMapping brokerWebSocketHandlerMapping() {
-		StompEndpointRegistry registry =
-				new StompEndpointRegistry(subProtocolWebSocketHandler(), userQueueSuffixResolver());
-		registry.setDefaultTaskScheduler(brokerDefaultSockJsTaskScheduler());
+		StompEndpointRegistry registry = new StompEndpointRegistry(
+				subProtocolWebSocketHandler(), userQueueSuffixResolver(), brokerDefaultSockJsTaskScheduler());
 		registerStompEndpoints(registry);
 		return registry.getHandlerMapping();
 	}
@@ -73,11 +73,14 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		return new SimpleUserQueueSuffixResolver();
 	}
 
+	/**
+	 * The default TaskScheduler to use if none is configured via
+	 * {@link SockJsServiceRegistration#setTaskScheduler()}
+	 */
 	@Bean
 	public ThreadPoolTaskScheduler brokerDefaultSockJsTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("BrokerSockJS-");
-		scheduler.setPoolSize(10);
 		return scheduler;
 	}
 
@@ -97,9 +100,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	@Bean
 	public ThreadPoolTaskExecutor webSocketChannelExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(4);
-		executor.setCorePoolSize(8);
-		executor.setThreadNamePrefix("MessageChannel-");
+		executor.setThreadNamePrefix("BrokerWebSocketChannel-");
 		return executor;
 	}
 

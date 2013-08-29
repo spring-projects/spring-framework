@@ -32,8 +32,7 @@ public class WebSocketConfigurationSupport {
 
 	@Bean
 	public HandlerMapping webSocketHandlerMapping() {
-		WebSocketHandlerRegistry registry = new WebSocketHandlerRegistry();
-		registry.setDefaultTaskScheduler(sockJsTaskScheduler());
+		WebSocketHandlerRegistry registry = new WebSocketHandlerRegistry(defaultSockJsTaskScheduler());
 		registerWebSocketHandlers(registry);
 		return registry.getHandlerMapping();
 	}
@@ -41,11 +40,14 @@ public class WebSocketConfigurationSupport {
 	protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 	}
 
+	/**
+	 * The default TaskScheduler to use if none is configured via
+	 * {@link SockJsServiceRegistration#setTaskScheduler()}
+	 */
 	@Bean
-	public ThreadPoolTaskScheduler sockJsTaskScheduler() {
+	public ThreadPoolTaskScheduler defaultSockJsTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("SockJS-");
-		scheduler.setPoolSize(10);
 		return scheduler;
 	}
 

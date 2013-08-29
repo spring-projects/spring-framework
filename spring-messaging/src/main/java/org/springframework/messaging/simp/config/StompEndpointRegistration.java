@@ -19,11 +19,13 @@ package org.springframework.messaging.simp.config;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -46,53 +48,43 @@ public class StompEndpointRegistration {
 
 	private final SubProtocolWebSocketHandler wsHandler;
 
+	private HandshakeHandler handshakeHandler;
+
 	private StompSockJsServiceRegistration sockJsServiceRegistration;
 
-	private TaskScheduler defaultTaskScheduler;
+	private final TaskScheduler defaultSockJsTaskScheduler;
 
 
-	public StompEndpointRegistration(Collection<String> paths, SubProtocolWebSocketHandler webSocketHandler) {
+	public StompEndpointRegistration(Collection<String> paths, SubProtocolWebSocketHandler webSocketHandler,
+			TaskScheduler defaultSockJsTaskScheduler) {
+
 		this.paths = new ArrayList<String>(paths);
 		this.wsHandler = webSocketHandler;
+		this.defaultSockJsTaskScheduler = defaultSockJsTaskScheduler;
 	}
 
 
-	protected List<String> getPaths() {
-		return this.paths;
-	}
-
-	protected SubProtocolWebSocketHandler getSubProtocolWebSocketHandler() {
-		return this.wsHandler;
-	}
-
-	protected StompSockJsServiceRegistration getSockJsServiceRegistration() {
-		return this.sockJsServiceRegistration;
+	public StompEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
+		this.handshakeHandler = handshakeHandler;
+		return this;
 	}
 
 	public SockJsServiceRegistration withSockJS() {
-		this.sockJsServiceRegistration = new StompSockJsServiceRegistration(this.defaultTaskScheduler);
+		this.sockJsServiceRegistration = new StompSockJsServiceRegistration(this.defaultSockJsTaskScheduler);
 		return this.sockJsServiceRegistration;
-	}
-
-	protected void setDefaultTaskScheduler(TaskScheduler defaultTaskScheduler) {
-		this.defaultTaskScheduler = defaultTaskScheduler;
-	}
-
-	protected TaskScheduler getDefaultTaskScheduler() {
-		return this.defaultTaskScheduler;
 	}
 
 	protected MultiValueMap<HttpRequestHandler, String> getMappings() {
 		MultiValueMap<HttpRequestHandler, String> mappings = new LinkedMultiValueMap<HttpRequestHandler, String>();
-		if (getSockJsServiceRegistration() == null) {
-			HandshakeHandler handshakeHandler = createHandshakeHandler();
-			for (String path : getPaths()) {
+		if (this.sockJsServiceRegistration == null) {
+			HandshakeHandler handshakeHandler = getOrCreateHandshakeHandler();
+			for (String path : this.paths) {
 				WebSocketHttpRequestHandler handler = new WebSocketHttpRequestHandler(this.wsHandler, handshakeHandler);
 				mappings.add(handler, path);
 			}
 		}
 		else {
-			SockJsService sockJsService = getSockJsServiceRegistration().getSockJsService();
+			SockJsService sockJsService = this.sockJsServiceRegistration.getSockJsService();
 			for (String path : this.paths) {
 				SockJsHttpRequestHandler httpHandler = new SockJsHttpRequestHandler(sockJsService, this.wsHandler);
 				mappings.add(httpHandler, path.endsWith("/") ? path + "**" : path + "/**");
@@ -101,8 +93,20 @@ public class StompEndpointRegistration {
 		return mappings;
 	}
 
-	protected DefaultHandshakeHandler createHandshakeHandler() {
-		return new DefaultHandshakeHandler();
+	private HandshakeHandler getOrCreateHandshakeHandler() {
+
+		HandshakeHandler handler = (this.handshakeHandler != null)
+				? this.handshakeHandler : new DefaultHandshakeHandler();
+
+		if (handler instanceof DefaultHandshakeHandler) {
+			DefaultHandshakeHandler defaultHandshakeHandler = (DefaultHandshakeHandler) handler;
+			if (ObjectUtils.isEmpty(defaultHandshakeHandler.getSupportedProtocols())) {
+				Set<String> protocols = this.wsHandler.getSupportedProtocols();
+				defaultHandshakeHandler.setSupportedProtocols(protocols.toArray(new String[protocols.size()]));
+			}
+		}
+
+		return handler;
 	}
 
 
@@ -114,7 +118,7 @@ public class StompEndpointRegistration {
 		}
 
 		protected SockJsService getSockJsService() {
-			return super.getSockJsService(getPaths().toArray(new String[getPaths().size()]));
+			return super.getSockJsService(paths.toArray(new String[paths.size()]));
 		}
 	}
 

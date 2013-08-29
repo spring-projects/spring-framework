@@ -334,7 +334,8 @@ project("spring-messaging") {
 		testCompile("org.eclipse.jetty:jetty-webapp:9.0.5.v20130815") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}
-		testCompile("org.eclipse.jetty.websocket:websocket-server:9.0.5.v20130815")
+		optional("org.eclipse.jetty.websocket:websocket-server:9.0.5.v20130815")
+		optional("org.eclipse.jetty.websocket:websocket-client:9.0.5.v20130815")
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("log4j:log4j:1.2.17")
@@ -527,6 +528,8 @@ project("spring-websocket") {
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.5.v20130815")
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
 		optional("org.codehaus.jackson:jackson-mapper-asl:1.9.12")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("log4j:log4j:1.2.17")
 	}
 
 	repositories {

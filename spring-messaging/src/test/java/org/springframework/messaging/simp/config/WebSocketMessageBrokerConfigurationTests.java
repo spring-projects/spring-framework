@@ -16,28 +16,37 @@
 
 package org.springframework.messaging.simp.config;
 
-import org.junit.Before;
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
+import org.springframework.messaging.simp.AbstractWebSocketIntegrationTests;
+import org.springframework.messaging.simp.JettyTestServer;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.stomp.StompMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.config.WebSocketConfigurationSupport;
-import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
-import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
-import org.springframework.web.socket.support.TestWebSocketSession;
+import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 import static org.junit.Assert.*;
 
@@ -47,65 +56,47 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketMessageBrokerConfigurationTests {
+@RunWith(Parameterized.class)
+public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketIntegrationTests {
 
-	@Before
-	public void setup() {
-	}
+	@Parameters
+	public static Iterable<Object[]> arguments() {
+		return Arrays.asList(new Object[][] {
+				{ new JettyTestServer(), new JettyWebSocketClient()} });
+	};
 
-	@Test
-	public void webSocketHandler() throws Exception {
-
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext();
-		cxt.register(TestWebSocketMessageBrokerConfiguration.class, SimpleBrokerConfigurer.class);
-		cxt.refresh();
-
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) cxt.getBean(HandlerMapping.class);
-		Object actual = hm.getUrlMap().get("/e1");
-
-		assertNotNull(actual);
-		assertEquals(WebSocketHttpRequestHandler.class, actual.getClass());
-
-		cxt.close();
-	}
 
 	@Test
-	public void webSocketHandlerWithSockJS() throws Exception {
+	public void sendMessage() throws Exception {
 
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext();
+		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
 		cxt.register(TestWebSocketMessageBrokerConfiguration.class, SimpleBrokerConfigurer.class);
-		cxt.refresh();
+		cxt.register(getUpgradeStrategyConfigClass());
 
-		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) cxt.getBean(HandlerMapping.class);
-		Object actual = hm.getUrlMap().get("/e2/**");
-
-		assertNotNull(actual);
-		assertEquals(SockJsHttpRequestHandler.class, actual.getClass());
-
-		cxt.close();
-	}
-
-	@Test
-	public void annotationMethodMessageHandler() throws Exception {
-
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext();
-		cxt.register(TestWebSocketMessageBrokerConfiguration.class, SimpleBrokerConfigurer.class);
-		cxt.refresh();
+		this.server.init(cxt);
+		this.server.start();
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
 		headers.setDestination("/app/foo");
 		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 		byte[] bytes = new StompMessageConverter().fromMessage(message);
+		final TextMessage webSocketMessage = new TextMessage(new String(bytes));
 
-		TestWebSocketSession session = new TestWebSocketSession();
-		session.setAcceptedProtocol("v12.stomp");
+		WebSocketHandler clientHandler = new TextWebSocketHandlerAdapter() {
+			@Override
+			public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+				session.sendMessage(webSocketMessage);
+			}
+		};
 
-		SubProtocolWebSocketHandler wsHandler = cxt.getBean(SubProtocolWebSocketHandler.class);
-		wsHandler.handleMessage(session, new TextMessage(new String(bytes)));
+		TestController testController = cxt.getBean(TestController.class);
 
-		assertTrue(cxt.getBean(TestController.class).foo);
+		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/ws");
+		assertTrue(testController.latch.await(2, TimeUnit.SECONDS));
 
-		cxt.close();
+		testController.latch = new CountDownLatch(1);
+		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/sockjs/websocket");
+		assertTrue(testController.latch.await(2, TimeUnit.SECONDS));
 	}
 
 
@@ -128,16 +119,23 @@ public class WebSocketMessageBrokerConfigurationTests {
 		public TestController testController() {
 			return new TestController();
 		}
-
 	}
 
 	@Configuration
 	static class SimpleBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
+		@Autowired
+		private HandshakeHandler handshakeHandler; // can't rely on classpath for server detection
+
+
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/e1");
-			registry.addEndpoint("/e2").withSockJS();
+
+			registry.addEndpoint("/ws")
+				.setHandshakeHandler(this.handshakeHandler);
+
+			registry.addEndpoint("/sockjs").withSockJS()
+				.setTransportHandlerOverrides(new WebSocketTransportHandler(this.handshakeHandler));;
 		}
 
 		@Override
@@ -150,12 +148,11 @@ public class WebSocketMessageBrokerConfigurationTests {
 	@Controller
 	private static class TestController {
 
-		private boolean foo;
-
+		private CountDownLatch latch = new CountDownLatch(1);
 
 		@MessageMapping(value="/app/foo")
 		public void handleFoo() {
-			this.foo = true;
+			this.latch.countDown();
 		}
 	}
 

@@ -72,6 +72,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 		this.outputChannel = outputChannel;
 	}
 
+
 	/**
 	 * Configure one or more handlers to use depending on the sub-protocol requested by
 	 * the client in the WebSocket handshake request.
@@ -130,6 +131,12 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler, MessageHan
 		return this.defaultProtocolHandler;
 	}
 
+	/**
+	 * Return all supported protocols.
+	 */
+	public Set<String> getSupportedProtocols() {
+		return this.protocolHandlers.keySet();
+	}
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {

@@ -48,10 +48,16 @@ public class WebSocketHandlerRegistration {
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
+	private HandshakeHandler handshakeHandler;
+
 	private SockJsServiceRegistration sockJsServiceRegistration;
 
-	private TaskScheduler defaultTaskScheduler;
+	private final TaskScheduler defaultTaskScheduler;
 
+
+	public WebSocketHandlerRegistration(TaskScheduler defaultTaskScheduler) {
+		this.defaultTaskScheduler = defaultTaskScheduler;
+	}
 
 	public WebSocketHandlerRegistration addHandler(WebSocketHandler handler, String... paths) {
 		Assert.notNull(handler);
@@ -60,67 +66,55 @@ public class WebSocketHandlerRegistration {
 		return this;
 	}
 
-	protected MultiValueMap<WebSocketHandler, String> getHandlerMap() {
-		return this.handlerMap;
+	public WebSocketHandlerRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
+		this.handshakeHandler = handshakeHandler;
+		return this;
+	}
+
+	public HandshakeHandler getHandshakeHandler() {
+		return handshakeHandler;
 	}
 
 	public void addInterceptors(HandshakeInterceptor... interceptors) {
 		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
-	protected List<HandshakeInterceptor> getInterceptors() {
-		return this.interceptors;
-	}
-
 	public SockJsServiceRegistration withSockJS() {
 		this.sockJsServiceRegistration = new SockJsServiceRegistration(this.defaultTaskScheduler);
 		this.sockJsServiceRegistration.setInterceptors(
-				getInterceptors().toArray(new HandshakeInterceptor[getInterceptors().size()]));
+				this.interceptors.toArray(new HandshakeInterceptor[this.interceptors.size()]));
 		return this.sockJsServiceRegistration;
 	}
 
-	protected SockJsServiceRegistration getSockJsServiceRegistration() {
-		return this.sockJsServiceRegistration;
-	}
-
-	protected void setDefaultTaskScheduler(TaskScheduler defaultTaskScheduler) {
-		this.defaultTaskScheduler = defaultTaskScheduler;
-	}
-
-	protected TaskScheduler getDefaultTaskScheduler() {
-		return this.defaultTaskScheduler;
-	}
-
-	protected MultiValueMap<HttpRequestHandler, String> getMappings() {
+	MultiValueMap<HttpRequestHandler, String> getMappings() {
 		MultiValueMap<HttpRequestHandler, String> mappings = new LinkedMultiValueMap<HttpRequestHandler, String>();
-		if (getSockJsServiceRegistration() == null) {
-			HandshakeHandler handshakeHandler = createHandshakeHandler();
-			for (WebSocketHandler handler : getHandlerMap().keySet()) {
-				for (String path : getHandlerMap().get(handler)) {
+		if (this.sockJsServiceRegistration == null) {
+			HandshakeHandler handshakeHandler = getOrCreateHandshakeHandler();
+			for (WebSocketHandler handler : this.handlerMap.keySet()) {
+				for (String path : this.handlerMap.get(handler)) {
 					WebSocketHttpRequestHandler httpHandler = new WebSocketHttpRequestHandler(handler, handshakeHandler);
-					httpHandler.setHandshakeInterceptors(getInterceptors());
+					httpHandler.setHandshakeInterceptors(this.interceptors);
 					mappings.add(httpHandler, path);
 				}
 			}
 		}
 		else {
-			SockJsService sockJsService = getSockJsServiceRegistration().getSockJsService(getAllPrefixes());
-			for (WebSocketHandler handler : getHandlerMap().keySet()) {
-				for (String path : getHandlerMap().get(handler)) {
+			SockJsService sockJsService = this.sockJsServiceRegistration.getSockJsService(getAllPrefixes());
+			for (WebSocketHandler handler : this.handlerMap.keySet()) {
+				for (String path : this.handlerMap.get(handler)) {
 					SockJsHttpRequestHandler httpHandler = new SockJsHttpRequestHandler(sockJsService, handler);
 					mappings.add(httpHandler, path.endsWith("/") ? path + "**" : path + "/**");
 				}
 			}
-
 		}
 		return mappings;
 	}
 
-	protected DefaultHandshakeHandler createHandshakeHandler() {
-		return new DefaultHandshakeHandler();
+	private HandshakeHandler getOrCreateHandshakeHandler() {
+		return (this.handshakeHandler != null) ? this.handshakeHandler : new DefaultHandshakeHandler();
 	}
 
-	protected final String[] getAllPrefixes() {
+	private final String[] getAllPrefixes() {
 		List<String> all = new ArrayList<String>();
 		for (List<String> prefixes: this.handlerMap.values()) {
 			all.addAll(prefixes);

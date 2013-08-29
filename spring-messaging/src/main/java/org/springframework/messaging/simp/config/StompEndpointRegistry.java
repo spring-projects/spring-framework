@@ -51,11 +51,11 @@ public class StompEndpointRegistry {
 
 	private int order = 1;
 
-	private TaskScheduler defaultTaskScheduler;
+	private final TaskScheduler defaultSockJsTaskScheduler;
 
 
 	public StompEndpointRegistry(SubProtocolWebSocketHandler webSocketHandler,
-			MutableUserQueueSuffixResolver userQueueSuffixResolver) {
+			MutableUserQueueSuffixResolver userQueueSuffixResolver, TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userQueueSuffixResolver);
@@ -63,23 +63,16 @@ public class StompEndpointRegistry {
 		this.wsHandler = webSocketHandler;
 		this.stompHandler = new StompProtocolHandler();
 		this.stompHandler.setUserQueueSuffixResolver(userQueueSuffixResolver);
+		this.defaultSockJsTaskScheduler = defaultSockJsTaskScheduler;
 	}
 
 
 	public StompEndpointRegistration addEndpoint(String... paths) {
 		this.wsHandler.addProtocolHandler(this.stompHandler);
-		StompEndpointRegistration r = new StompEndpointRegistration(Arrays.asList(paths), this.wsHandler);
-		r.setDefaultTaskScheduler(getDefaultTaskScheduler());
+		StompEndpointRegistration r = new StompEndpointRegistration(
+				Arrays.asList(paths), this.wsHandler, this.defaultSockJsTaskScheduler);
 		this.registrations.add(r);
 		return r;
-	}
-
-	protected SubProtocolWebSocketHandler getSubProtocolWebSocketHandler() {
-		return this.wsHandler;
-	}
-
-	protected StompProtocolHandler getStompProtocolHandler() {
-		return this.stompHandler;
 	}
 
 	/**
@@ -89,18 +82,6 @@ public class StompEndpointRegistry {
 	 */
 	public void setOrder(int order) {
 		this.order = order;
-	}
-
-	protected int getOrder() {
-		return this.order;
-	}
-
-	protected void setDefaultTaskScheduler(TaskScheduler defaultTaskScheduler) {
-		this.defaultTaskScheduler = defaultTaskScheduler;
-	}
-
-	protected TaskScheduler getDefaultTaskScheduler() {
-		return this.defaultTaskScheduler;
 	}
 
 	/**
