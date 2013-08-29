@@ -25,6 +25,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A UriComponentsBuilder that extracts information from an HttpServletRequest.
@@ -33,6 +34,9 @@ import org.springframework.web.util.UrlPathHelper;
  * @since 3.1
  */
 public class ServletUriComponentsBuilder extends UriComponentsBuilder {
+
+	private String servletRequestURI;
+
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
@@ -82,7 +86,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 */
 	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromRequest(request);
-		builder.replacePath(request.getRequestURI());
+		builder.pathFromRequest(request);
 		builder.replaceQuery(null);
 		return builder;
 	}
@@ -115,7 +119,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
 			builder.port(port);
 		}
-		builder.path(request.getRequestURI());
+		builder.pathFromRequest(request);
 		builder.query(request.getQueryString());
 		return builder;
 	}
@@ -162,6 +166,41 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
 		return servletRequest;
+	}
+
+	private void pathFromRequest(HttpServletRequest request) {
+		this.servletRequestURI = request.getRequestURI();
+		replacePath(request.getRequestURI());
+	}
+
+	/**
+	 * Removes any path extension from the {@link HttpServletRequest#getRequestURI()
+	 * requestURI}. This method must be invoked before any calls to {@link #path(String)}
+	 * or {@link #pathSegment(String...)}.
+	 * <pre>
+	 * 	// GET http://foo.com/rest/books/6.json
+	 *
+	 *	ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
+	 *	String ext = builder.removePathExtension();
+	 *	String uri = builder.path("/pages/1.{ext}").buildAndExpand(ext).toUriString();
+	 *
+	 * 	assertEquals("http://foo.com/rest/books/6/pages/1.json", result);
+	 * </pre>
+	 * @return the removed path extension for possible re-use, or {@code null}
+	 * @since 4.0
+	 */
+	public String removePathExtension() {
+		String extension = null;
+		if (this.servletRequestURI != null) {
+			String filename = WebUtils.extractFullFilenameFromUrlPath(this.servletRequestURI);
+			extension = StringUtils.getFilenameExtension(filename);
+			if (!StringUtils.isEmpty(extension)) {
+				int end = this.servletRequestURI.length() - (extension.length() + 1);
+				replacePath(this.servletRequestURI.substring(0, end));
+			}
+			this.servletRequestURI = null;
+		}
+		return extension;
 	}
 
 }

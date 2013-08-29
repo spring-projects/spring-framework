@@ -141,4 +141,22 @@ public class ServletUriComponentsBuilderTests {
 		}
 	}
 
+	// SPR-10272
+
+	@Test
+	public void pathExtension() {
+		this.request.setRequestURI("/rest/books/6.json");
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
+		String extension = builder.removePathExtension();
+		String result = builder.path("/pages/1.{ext}").buildAndExpand(extension).toUriString();
+
+		assertEquals("http://localhost/rest/books/6/pages/1.json", result);
+	}
+
+	@Test
+	public void pathExtensionNone() {
+		this.request.setRequestURI("/rest/books/6");
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
+		assertNull(builder.removePathExtension());
+	}
 }
