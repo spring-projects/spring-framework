@@ -391,15 +391,16 @@ public class AntPathMatcher implements PathMatcher {
 
 		@Override
 		public int compare(String pattern1, String pattern2) {
-			if (pattern1 == null && pattern2 == null) {
+			if (isNullOrCaptureAllPattern(pattern1) && isNullOrCaptureAllPattern(pattern2)) {
 				return 0;
 			}
-			else if (pattern1 == null) {
+			else if (isNullOrCaptureAllPattern(pattern1)) {
 				return 1;
 			}
-			else if (pattern2 == null) {
+			else if (isNullOrCaptureAllPattern(pattern2)) {
 				return -1;
 			}
+
 			boolean pattern1EqualsPath = pattern1.equals(path);
 			boolean pattern2EqualsPath = pattern2.equals(path);
 			if (pattern1EqualsPath && pattern2EqualsPath) {
@@ -411,6 +412,7 @@ public class AntPathMatcher implements PathMatcher {
 			else if (pattern2EqualsPath) {
 				return 1;
 			}
+
 			int wildCardCount1 = getWildCardCount(pattern1);
 			int wildCardCount2 = getWildCardCount(pattern2);
 
@@ -446,6 +448,10 @@ public class AntPathMatcher implements PathMatcher {
 			}
 
 			return 0;
+		}
+
+		private boolean isNullOrCaptureAllPattern(String pattern) {
+			return pattern == null || "/**".equals(pattern);
 		}
 
 		private int getWildCardCount(String pattern) {
