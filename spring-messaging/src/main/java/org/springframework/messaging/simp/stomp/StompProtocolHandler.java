@@ -185,10 +185,10 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
 		if (acceptVersions.contains("1.2")) {
-			connectedHeaders.setAcceptVersion("1.2");
+			connectedHeaders.setVersion("1.2");
 		}
 		else if (acceptVersions.contains("1.1")) {
-			connectedHeaders.setAcceptVersion("1.1");
+			connectedHeaders.setVersion("1.1");
 		}
 		else if (acceptVersions.isEmpty()) {
 			// 1.0
