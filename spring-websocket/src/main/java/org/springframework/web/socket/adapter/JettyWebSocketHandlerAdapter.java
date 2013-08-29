@@ -19,22 +19,32 @@ package org.springframework.web.socket.adapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.extensions.Frame;
+import org.eclipse.jetty.websocket.common.OpCode;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.support.ExceptionWebSocketHandlerDecorator;
 
+import java.nio.ByteBuffer;
+
 /**
  * Adapts {@link WebSocketHandler} to the Jetty 9 WebSocket API.
  *
- * @author Phillip Webb
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JettyWebSocketHandlerAdapter implements WebSocketListener {
+@WebSocket
+public class JettyWebSocketHandlerAdapter {
 
 	private static final Log logger = LogFactory.getLog(JettyWebSocketHandlerAdapter.class);
 
@@ -44,14 +54,16 @@ public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 
 
 	public JettyWebSocketHandlerAdapter(WebSocketHandler webSocketHandler, JettyWebSocketSession wsSession) {
+
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		Assert.notNull(wsSession, "wsSession must not be null");
+
 		this.webSocketHandler = webSocketHandler;
 		this.wsSession = wsSession;
 	}
 
 
-	@Override
+	@OnWebSocketConnect
 	public void onWebSocketConnect(Session session) {
 		try {
 			this.wsSession.initializeNativeSession(session);
@@ -62,7 +74,7 @@ public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 		}
 	}
 
-	@Override
+	@OnWebSocketMessage
 	public void onWebSocketText(String payload) {
 		TextMessage message = new TextMessage(payload);
 		try {
@@ -73,9 +85,9 @@ public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 		}
 	}
 
-	@Override
-	public void onWebSocketBinary(byte[] payload, int offset, int len) {
-		BinaryMessage message = new BinaryMessage(payload, offset, len, true);
+	@OnWebSocketMessage
+	public void onWebSocketBinary(byte[] payload, int offset, int length) {
+		BinaryMessage message = new BinaryMessage(payload, offset, length, true);
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
@@ -84,7 +96,20 @@ public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 		}
 	}
 
-	@Override
+	@OnWebSocketFrame
+	public void onWebSocketFrame(Frame frame) {
+		if (OpCode.PONG == frame.getOpCode()) {
+			PongMessage message = new PongMessage(frame.getPayload());
+			try {
+				this.webSocketHandler.handleMessage(this.wsSession, message);
+			}
+			catch (Throwable t) {
+				ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, t, logger);
+			}
+		}
+	}
+
+	@OnWebSocketClose
 	public void onWebSocketClose(int statusCode, String reason) {
 		CloseStatus closeStatus = new CloseStatus(statusCode, reason);
 		try {
@@ -95,7 +120,7 @@ public class JettyWebSocketHandlerAdapter implements WebSocketListener {
 		}
 	}
 
-	@Override
+	@OnWebSocketError
 	public void onWebSocketError(Throwable cause) {
 		try {
 			this.webSocketHandler.handleTransportError(this.wsSession, cause);

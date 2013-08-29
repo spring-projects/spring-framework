@@ -28,6 +28,8 @@ import org.springframework.messaging.MessagingException;
  */
 public class MessageHandlingException extends MessagingException {
 
+	private static final long serialVersionUID = 690969923668400297L;
+
 
 	public MessageHandlingException(Message<?> message, String description, Throwable cause) {
 		super(message, description, cause);

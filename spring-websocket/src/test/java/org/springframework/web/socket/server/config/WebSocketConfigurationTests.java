@@ -69,7 +69,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 				new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws").get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
-		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
+		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
 
 		session.close();
 	}
@@ -81,7 +81,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 				new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket").get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
-		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
+		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
 
 		session.close();
 	}
@@ -113,11 +113,11 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 
 	private static class TestWebSocketHandler extends WebSocketHandlerAdapter {
 
-		private CountDownLatch latch = new CountDownLatch(1);
+		private CountDownLatch connectLatch = new CountDownLatch(1);
 
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-			this.latch.countDown();
+			this.connectLatch.countDown();
 		}
 	}
 

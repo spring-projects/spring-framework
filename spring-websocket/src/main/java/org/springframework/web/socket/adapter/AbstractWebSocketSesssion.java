@@ -32,8 +32,6 @@ import org.springframework.web.socket.WebSocketSession;
 /**
  * An abstract base class for implementations of {@link WebSocketSession}.
  *
- * @param T the type of the native (or delegate) WebSocket session
- *
  * @author Rossen Stoyanchev
  * @since 4.0
  */

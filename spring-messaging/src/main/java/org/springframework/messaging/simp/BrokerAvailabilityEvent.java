@@ -26,7 +26,10 @@ import org.springframework.context.ApplicationEvent;
  */
 public class BrokerAvailabilityEvent extends ApplicationEvent {
 
+	private static final long serialVersionUID = -8156742505179181002L;
+
 	private final boolean brokerAvailable;
+
 
 	/**
 	 * Creates a new {@code BrokerAvailabilityEvent}.

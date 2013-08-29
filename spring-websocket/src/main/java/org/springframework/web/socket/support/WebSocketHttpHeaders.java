@@ -35,6 +35,8 @@ import org.springframework.util.CollectionUtils;
  */
 public class WebSocketHttpHeaders extends HttpHeaders {
 
+	private static final long serialVersionUID = -6644521016187828916L;
+
 	public static final String SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
 
 	public static final String SEC_WEBSOCKET_EXTENSIONS = "Sec-WebSocket-Extensions";

@@ -18,8 +18,8 @@ package org.springframework.web.socket;
 
 /**
  * A handler for WebSocket messages and lifecycle events.
- *
- * <p>Implementations of this interface are encouraged to handle exceptions locally where
+ * <p>
+ * Implementations of this interface are encouraged to handle exceptions locally where
  * it makes sense or alternatively let the exception bubble up in which case by default
  * the exception is logged and the session closed with
  * {@link CloseStatus#SERVER_ERROR SERVER_ERROR(1011)}. The exception handling
@@ -68,7 +68,13 @@ public interface WebSocketHandler {
 	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception;
 
 	/**
-	 * Whether the WebSocketHandler handles messages in parts.
+	 * Whether the WebSocketHandler handles partial messages. If this flag is set to
+	 * {@code true} and the underlying WebSocket server supports partial messages,
+	 * then a large WebSocket message, or one of an unknown size may be split and
+	 * maybe received over multiple calls to
+	 * {@link #handleMessage(WebSocketSession, WebSocketMessage)}. The flag
+	 * {@link org.springframework.web.socket.WebSocketMessage#isLast()} indicates if
+	 * the message is partial and whether it is the last part.
 	 */
 	boolean supportsPartialMessages();
 
