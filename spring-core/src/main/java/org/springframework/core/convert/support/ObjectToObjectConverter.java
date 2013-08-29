@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Generic Converter that attempts to convert a source Object to a target type
+ * Generic converter that attempts to convert a source Object to a target type
  * by delegating to methods on the target type.
  *
- * <p>Calls the static {@code valueOf(sourceType)} method on the target type
- * to perform the conversion, if such a method exists. Else calls the target type's
- * Constructor that accepts a single sourceType argument, if such a Constructor exists.
- * Else throws a ConversionFailedException.
+ * <p>Calls a static {@code valueOf(sourceType)} or Java 8 style {@code of(sourceType)} method
+ * on the target type to perform the conversion, if such a method exists. Otherwise, it calls
+ * the target type's constructor that accepts a single {@code sourceType} argument, if such
+ * a constructor exists. If neither strategy works, it throws a ConversionFailedException.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -92,7 +92,11 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	private static Method getValueOfMethodOn(Class<?> clazz, Class<?> sourceParameterType) {
-		return ClassUtils.getStaticMethod(clazz, "valueOf", sourceParameterType);
+		Method method = ClassUtils.getStaticMethod(clazz, "valueOf", sourceParameterType);
+		if (method == null) {
+			method = ClassUtils.getStaticMethod(clazz, "of", sourceParameterType);
+		}
+		return method;
 	}
 
 	private static Constructor<?> getConstructor(Class<?> clazz, Class<?> sourceParameterType) {

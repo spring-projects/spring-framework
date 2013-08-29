@@ -17,28 +17,28 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 /**
- * Editor for {@code java.util.TimeZone}, translating timezone IDs into
- * TimeZone objects. Exposed the TimeZone ID as a text representation.
+ * Editor for {@code java.time.ZoneId}, translating zone ID Strings into
+ * ZoneId objects. Exposed the TimeZone ID as a text representation.
  *
  * @author Juergen Hoeller
- * @since 3.0
- * @see java.util.TimeZone
- * @see ZoneIdEditor
+ * @since 4.0
+ * @see java.time.ZoneId
+ * @see TimeZoneEditor
  */
-public class TimeZoneEditor extends PropertyEditorSupport {
+public class ZoneIdEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		setValue(TimeZone.getTimeZone(text));
+		setValue(ZoneId.of(text));
 	}
 
 	@Override
 	public String getAsText() {
-		TimeZone value = (TimeZone) getValue();
-		return (value != null ? value.getID() : "");
+		ZoneId value = (ZoneId) getValue();
+		return (value != null ? value.getId() : "");
 	}
 
 }

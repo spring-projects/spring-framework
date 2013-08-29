@@ -16,19 +16,10 @@
 
 package org.springframework.core.convert.support;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,12 +36,16 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -710,6 +705,11 @@ public class DefaultConversionTests {
 	}
 
 	@Test
+	public void convertObjectToStringWithJavaTimeOfMethodPresent() {
+		assertTrue(conversionService.convert(ZoneId.of("GMT+1"), String.class).startsWith("GMT+"));
+	}
+
+	@Test
 	public void convertObjectToStringNotSupported() {
 		assertFalse(conversionService.canConvert(TestEntity.class, String.class));
 	}
@@ -725,71 +725,14 @@ public class DefaultConversionTests {
 		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
 	}
 
+	@Test
+	public void convertObjectToObjectWithJavaTimeOfMethod() {
+		assertEquals(ZoneId.of("GMT+1"), conversionService.convert("GMT+1", ZoneId.class));
+	}
+
 	@Test(expected=ConverterNotFoundException.class)
 	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
 		conversionService.convert(new Long(3), SSN.class);
-	}
-
-	public Object assignableTarget;
-
-	private static class SSN {
-
-		private String value;
-
-		public SSN(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (!(o instanceof SSN)) {
-				return false;
-			}
-			SSN ssn = (SSN) o;
-			return this.value.equals(ssn.value);
-		}
-
-		@Override
-		public int hashCode() {
-			return value.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return value;
-		}
-	}
-
-	private static class ISBN {
-
-		private String value;
-
-		private ISBN(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (!(o instanceof ISBN)) {
-				return false;
-			}
-			ISBN isbn = (ISBN) o;
-			return this.value.equals(isbn.value);
-		}
-
-		@Override
-		public int hashCode() {
-			return value.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return value;
-		}
-
-		public static ISBN valueOf(String value) {
-			return new ISBN(value);
-		}
 	}
 
 	@Test
@@ -861,6 +804,68 @@ public class DefaultConversionTests {
 
 		public List<?> getList() {
 			return list;
+		}
+	}
+
+	public Object assignableTarget;
+
+	private static class SSN {
+
+		private String value;
+
+		public SSN(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof SSN)) {
+				return false;
+			}
+			SSN ssn = (SSN) o;
+			return this.value.equals(ssn.value);
+		}
+
+		@Override
+		public int hashCode() {
+			return value.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+	}
+
+	private static class ISBN {
+
+		private String value;
+
+		private ISBN(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof ISBN)) {
+				return false;
+			}
+			ISBN isbn = (ISBN) o;
+			return this.value.equals(isbn.value);
+		}
+
+		@Override
+		public int hashCode() {
+			return value.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+
+		public static ISBN valueOf(String value) {
+			return new ISBN(value);
 		}
 	}
 

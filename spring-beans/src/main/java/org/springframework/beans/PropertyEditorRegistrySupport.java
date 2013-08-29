@@ -65,6 +65,7 @@ import org.springframework.beans.propertyeditors.TimeZoneEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.beans.propertyeditors.UUIDEditor;
+import org.springframework.beans.propertyeditors.ZoneIdEditor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
@@ -83,6 +84,19 @@ import org.springframework.util.ClassUtils;
  * @see java.beans.PropertyEditorSupport#setValue
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
+
+	private static Class<?> zoneIdClass;
+
+	static {
+		try {
+			zoneIdClass = PropertyEditorRegistrySupport.class.getClassLoader().loadClass("java.time.ZoneId");
+		}
+		catch (ClassNotFoundException ex) {
+			// Java 8 ZoneId class not available
+			zoneIdClass = null;
+		}
+	}
+
 
 	private ConversionService conversionService;
 
@@ -202,6 +216,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(URI.class, new URIEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
 		this.defaultEditors.put(UUID.class, new UUIDEditor());
+		if (zoneIdClass != null) {
+			this.defaultEditors.put(zoneIdClass, new ZoneIdEditor());
+		}
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
