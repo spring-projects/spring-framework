@@ -20,10 +20,16 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.reactor.IOReactorStatus;
+import org.apache.http.protocol.HttpContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -41,7 +47,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 		extends HttpComponentsClientHttpRequestFactory
 		implements AsyncClientHttpRequestFactory, InitializingBean {
 
-	private HttpAsyncClient httpAsyncClient;
+	private CloseableHttpAsyncClient httpAsyncClient;
 
 
 	/**
@@ -49,7 +55,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * with a default {@link HttpAsyncClient} and {@link HttpClient}.
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory() {
-		this(HttpAsyncClients.createDefault());
+		this(HttpAsyncClients.createSystem());
 	}
 
 	/**
@@ -57,7 +63,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * with the given {@link HttpAsyncClient} instance and a default {@link HttpClient}.
 	 * @param httpAsyncClient the HttpAsyncClient instance to use for this request factory
 	 */
-	public HttpComponentsAsyncClientHttpRequestFactory(HttpAsyncClient httpAsyncClient) {
+	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient httpAsyncClient) {
 		super();
 		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
 		this.httpAsyncClient = httpAsyncClient;
@@ -69,8 +75,8 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 * @param httpAsyncClient the HttpAsyncClient instance to use for this request factory
 	 */
-	public HttpComponentsAsyncClientHttpRequestFactory(HttpClient httpClient,
-			HttpAsyncClient httpAsyncClient) {
+	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpClient httpClient,
+                                                       CloseableHttpAsyncClient httpAsyncClient) {
 		super(httpClient);
 		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
 		this.httpAsyncClient = httpAsyncClient;
@@ -80,7 +86,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * Set the {@code HttpClient} used for
 	 * {@linkplain #createAsyncRequest(java.net.URI, org.springframework.http.HttpMethod) asynchronous execution}.
 	 */
-	public void setHttpAsyncClient(HttpAsyncClient httpAsyncClient) {
+	public void setHttpAsyncClient(CloseableHttpAsyncClient httpAsyncClient) {
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
@@ -88,7 +94,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
 	 */
-	public HttpAsyncClient getHttpAsyncClient() {
+	public CloseableHttpAsyncClient getHttpAsyncClient() {
 		return httpAsyncClient;
 	}
 
@@ -98,7 +104,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	}
 
 	private void startAsyncClient() {
-		HttpAsyncClient asyncClient = getHttpAsyncClient();
+        CloseableHttpAsyncClient asyncClient = getHttpAsyncClient();
 		if (asyncClient.getStatus() != IOReactorStatus.ACTIVE) {
 			asyncClient.start();
 		}
@@ -111,8 +117,23 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 		startAsyncClient();
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
-		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest,
-				createHttpContext(httpMethod, uri));
+        HttpContext context = createHttpContext(httpMethod, uri);
+        if (context == null) {
+            context = HttpClientContext.create();
+        }
+        // Request configuration not set in the context
+        if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+            // Use request configuration given by the user, when available
+            RequestConfig config = null;
+            if (httpRequest instanceof Configurable) {
+                config = ((Configurable) httpRequest).getConfig();
+            }
+            if (config == null) {
+                config = RequestConfig.DEFAULT;
+            }
+            context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+        }
+		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest, context);
 	}
 
 	@Override
@@ -121,7 +142,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 			super.destroy();
 		}
 		finally {
-			getHttpAsyncClient().shutdown();
+			getHttpAsyncClient().close();
 		}
 	}
 }

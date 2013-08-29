@@ -16,35 +16,35 @@
 
 package org.springframework.http.client;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
+import org.springframework.http.HttpHeaders;
+
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
-
-import org.springframework.http.HttpHeaders;
-
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
+ * {@link ClientHttpResponse} implementation that uses
  * Apache HttpComponents HttpClient to execute requests.
  *
- * <p>Created via the {@link HttpComponentsClientHttpRequest}.
+ * <p>Created via the {@link HttpComponentsAsyncClientHttpRequest}.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
  * @since 3.1
- * @see HttpComponentsClientHttpRequest#execute()
+ * @see HttpComponentsAsyncClientHttpRequest#executeAsync()
  */
-final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
+final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResponse {
 
-	private final CloseableHttpResponse httpResponse;
+	private final HttpResponse httpResponse;
 
 	private HttpHeaders headers;
 
 
-	HttpComponentsClientHttpResponse(CloseableHttpResponse httpResponse) {
+	HttpComponentsAsyncClientHttpResponse(HttpResponse httpResponse) {
 		this.httpResponse = httpResponse;
 	}
 
@@ -78,18 +78,9 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 
 	@Override
 	public void close() {
-        // Release underlying connection back to the connection manager
-        try {
-            try {
-                // Attempt to keep connection alive by consuming its remaining content
-                EntityUtils.consume(this.httpResponse.getEntity());
-            } finally {
-                // Paranoia
-                this.httpResponse.close();
-            }
-        }
-        catch (IOException ignore) {
-        }
+        // HTTP responses returned by async HTTP client
+        // are not bound to an active connection and
+        // do not have to deallocate any resources
 	}
 
 }
