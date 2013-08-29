@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -29,8 +31,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -52,7 +55,9 @@ import org.springframework.util.Assert;
 public class HttpComponentsClientHttpRequestFactory
 		implements ClientHttpRequestFactory, DisposableBean {
 
-	private HttpClient httpClient;
+	private int connectTimeout;
+    private int socketTimeout;
+    private CloseableHttpClient httpClient;
 
 	private boolean bufferRequestBody = true;
 
@@ -62,7 +67,7 @@ public class HttpComponentsClientHttpRequestFactory
 	 * a default {@link HttpClient}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
-		this(HttpClients.createDefault());
+		this(HttpClients.createSystem());
 	}
 
 	/**
@@ -70,24 +75,24 @@ public class HttpComponentsClientHttpRequestFactory
 	 * with the given {@link HttpClient} instance.
 	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
-	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
+	public HttpComponentsClientHttpRequestFactory(CloseableHttpClient httpClient) {
 		Assert.notNull(httpClient, "'httpClient' must not be null");
-		this.httpClient = httpClient;
+        this.httpClient = httpClient;
 	}
 
-	/**
-	 * Set the {@code HttpClient} used for
-	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
-	 */
-	public void setHttpClient(HttpClient httpClient) {
-		this.httpClient = httpClient;
-	}
+    /**
+     * Set the {@code HttpClient} used for
+     * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
+     */
+    public void setHttpClient(CloseableHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 
-	/**
+    /**
 	 * Return the {@code HttpClient} used for
 	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
 	 */
-	public HttpClient getHttpClient() {
+	public CloseableHttpClient getHttpClient() {
 		return this.httpClient;
 	}
 
@@ -95,24 +100,20 @@ public class HttpComponentsClientHttpRequestFactory
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
-	 * @deprecated With no direct replacement
 	 */
-	@Deprecated
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+        this.connectTimeout = timeout;
 	}
 
 	/**
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
-	 * @deprecated With no direct replacement
 	 */
-	@Deprecated
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
+        this.socketTimeout= timeout;
 	}
 
 	/**
@@ -136,18 +137,39 @@ public class HttpComponentsClientHttpRequestFactory
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		HttpClient client = getHttpClient();
+		CloseableHttpClient client = getHttpClient();
 		Assert.state(client != null,
 				"Synchronous execution requires an HttpClient to be set");
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
+        HttpContext context = createHttpContext(httpMethod, uri);
+        if (context == null) {
+            context = HttpClientContext.create();
+        }
+        // Request configuration not set in the context
+        if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+            // Use request configuration given by the user, when available
+            RequestConfig config = null;
+            if (httpRequest instanceof Configurable) {
+                config = ((Configurable) httpRequest).getConfig();
+            }
+            if (config == null) {
+                if (this.socketTimeout > 0 || this.connectTimeout > 0) {
+                    config = RequestConfig.custom()
+                            .setConnectTimeout(this.connectTimeout)
+                            .setSocketTimeout(this.socketTimeout)
+                            .build();
+                } else {
+                    config = RequestConfig.DEFAULT;
+                }
+            }
+            context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+        }
 		if (bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(client, httpRequest,
-					createHttpContext(httpMethod, uri));
+			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
 		}
 		else {
-			return new HttpComponentsStreamingClientHttpRequest(client,
-					httpRequest, createHttpContext(httpMethod, uri));
+			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
 		}
 	}
 
@@ -202,12 +224,12 @@ public class HttpComponentsClientHttpRequestFactory
 
 	/**
 	 * Shutdown hook that closes the underlying
-	 * {@link org.apache.http.conn.ClientConnectionManager ClientConnectionManager}'s
+	 * {@link org.apache.http.conn.HttpClientConnectionManager ClientConnectionManager}'s
 	 * connection pool, if any.
 	 */
 	@Override
 	public void destroy() throws Exception {
-		getHttpClient().getConnectionManager().shutdown();
-	}
+        httpClient.close();
+    }
 
 }
