@@ -91,6 +91,26 @@ public class StompHeaderAccessorTests {
 	}
 
 	@Test
+	public void createWithConnectNativeHeaders() {
+
+		MultiValueMap<String, String> extHeaders = new LinkedMultiValueMap<>();
+		extHeaders.add(StompHeaderAccessor.STOMP_LOGIN_HEADER, "joe");
+		extHeaders.add(StompHeaderAccessor.STOMP_PASSCODE_HEADER, "joe123");
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT, extHeaders);
+
+		assertEquals(StompCommand.CONNECT, headers.getCommand());
+		assertEquals(SimpMessageType.CONNECT, headers.getMessageType());
+		assertNotNull(headers.getHeader("stompCredentials"));
+		assertEquals("joe", headers.getLogin());
+		assertEquals("PROTECTED", headers.getPasscode());
+
+		Map<String, List<String>> output = headers.toStompHeaderMap();
+		assertEquals("joe", output.get(StompHeaderAccessor.STOMP_LOGIN_HEADER).get(0));
+		assertEquals("joe123", output.get(StompHeaderAccessor.STOMP_PASSCODE_HEADER).get(0));
+	}
+
+	@Test
 	public void toNativeHeadersSubscribe() {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);

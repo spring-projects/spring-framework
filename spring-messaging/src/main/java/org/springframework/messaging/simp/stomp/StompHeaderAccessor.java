@@ -44,6 +44,8 @@ import org.springframework.util.StringUtils;
  */
 public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
+	private static final AtomicLong messageIdCounter = new AtomicLong();
+
 	// STOMP header names
 
 	public static final String STOMP_ID_HEADER = "id";
@@ -83,10 +85,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	// Other header names
 
-	public static final String COMMAND_HEADER = "stompCommand";
+	private static final String COMMAND_HEADER = "stompCommand";
 
-
-	private static final AtomicLong messageIdCounter = new AtomicLong();
+	private static final String CREDENTIALS_HEADER = "stompCredentials";
 
 
 	/**
@@ -126,6 +127,12 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			values = extHeaders.get(StompHeaderAccessor.STOMP_SUBSCRIPTION_HEADER);
 			if (!CollectionUtils.isEmpty(values)) {
 				super.setSubscriptionId(values.get(0));
+			}
+		}
+		else if (StompCommand.CONNECT.equals(command)) {
+			if (!StringUtils.isEmpty(getPasscode())) {
+				setHeader(CREDENTIALS_HEADER, new StompPasscode(getPasscode()));
+				setPasscode("PROTECTED");
 			}
 		}
 	}
@@ -195,6 +202,18 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		}
 
 		return result;
+	}
+
+	public Map<String, List<String>> toStompHeaderMap() {
+		if (StompCommand.CONNECT.equals(getCommand())) {
+			StompPasscode credentials = (StompPasscode) getHeader(CREDENTIALS_HEADER);
+			if (credentials != null) {
+				Map<String, List<String>> headers = toNativeHeaderMap();
+				headers.put(STOMP_PASSCODE_HEADER, Arrays.asList(credentials.passcode));
+				return headers;
+			}
+		}
+		return toNativeHeaderMap();
 	}
 
 	public void setCommandIfNotSet(StompCommand command) {
@@ -338,4 +357,18 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		setNativeHeader(STOMP_VERSION_HEADER, version);
 	}
 
+
+	private static class StompPasscode {
+
+		private final String passcode;
+
+		public StompPasscode(String passcode) {
+			this.passcode = passcode;
+		}
+
+		@Override
+		public String toString() {
+			return "[PROTECTED]";
+		}
+	}
 }

@@ -49,7 +49,7 @@ public final class TextMessage extends WebSocketMessage<String> {
 
 	@Override
 	protected String toStringPayload() {
-		return (getPayloadSize() > 80) ? getPayload().substring(0, 80) + "..." : getPayload();
+		return (getPayloadSize() > 10) ? getPayload().substring(0, 10) + ".." : getPayload();
 	}
 
 }
