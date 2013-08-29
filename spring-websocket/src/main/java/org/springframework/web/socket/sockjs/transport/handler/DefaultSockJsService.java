@@ -157,7 +157,7 @@ public class DefaultSockJsService extends AbstractSockJsService {
 		}
 		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Failed to add default WebSocketTransportHandler: " + ex.getMessage());
+				logger.warn("Failed to create default WebSocketTransportHandler", ex);
 			}
 		}
 		return result;

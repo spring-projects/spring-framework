@@ -325,7 +325,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return the pattern specification to be used for package searching
 	 */
 	protected String resolveBasePackage(String basePackage) {
-		return ClassUtils.convertClassNameToResourcePath(environment.resolveRequiredPlaceholders(basePackage));
+		return ClassUtils.convertClassNameToResourcePath(this.environment.resolveRequiredPlaceholders(basePackage));
 	}
 
 	/**
@@ -358,7 +358,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		if (this.conditionEvaluator == null) {
 			this.conditionEvaluator = new ConditionEvaluator(getRegistry(), getEnvironment(), getResourceLoader());
 		}
-		return !conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
+		return !this.conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
 	}
 
 	/**

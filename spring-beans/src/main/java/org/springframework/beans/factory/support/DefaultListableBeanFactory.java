@@ -691,12 +691,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		synchronized (this.beanDefinitionMap) {
-			Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
+			BeanDefinition oldBeanDefinition = this.beanDefinitionMap.get(beanName);
 			if (oldBeanDefinition != null) {
 				if (!this.allowBeanDefinitionOverriding) {
 					throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 							"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
 							"': There is already [" + oldBeanDefinition + "] bound.");
+				}
+				else if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
+					// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
+					if (this.logger.isWarnEnabled()) {
+						this.logger.warn("Overriding user-defined bean definition for bean '" + beanName +
+								" with a framework-generated bean definition ': replacing [" +
+								oldBeanDefinition + "] with [" + beanDefinition + "]");
+					}
 				}
 				else {
 					if (this.logger.isInfoEnabled()) {

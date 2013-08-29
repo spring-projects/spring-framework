@@ -1,0 +1,78 @@
+/*
+ * Copyright 2002-2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.messaging.support;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+import org.springframework.messaging.MessageHeaders;
+
+import static org.junit.Assert.*;
+
+
+/**
+ * Test fixture for {@link MessageHeaderAccessor}.
+ *
+ * @author Rossen Stoyanchev
+ */
+public class MessageHeaderAccessorTests {
+
+
+	@Test
+	public void empty() {
+		MessageHeaderAccessor headers = new MessageHeaderAccessor();
+		assertEquals(Collections.emptyMap(), headers.toMap());
+	}
+
+	@Test
+	public void wrapMessage() {
+		Map<String, Object> original = new HashMap<>();
+		original.put("foo", "bar");
+		original.put("bar", "baz");
+		GenericMessage<String> message = new GenericMessage<>("p", original);
+
+		MessageHeaderAccessor headers = new MessageHeaderAccessor(message);
+		Map<String, Object> actual = headers.toMap();
+
+		assertEquals(4, actual.size());
+		assertNotNull(actual.get(MessageHeaders.ID));
+		assertNotNull(actual.get(MessageHeaders.TIMESTAMP));
+		assertEquals("bar", actual.get("foo"));
+		assertEquals("baz", actual.get("bar"));
+	}
+
+	@Test
+	public void wrapMessageAndModifyHeaders() {
+		Map<String, Object> original = new HashMap<>();
+		original.put("foo", "bar");
+		original.put("bar", "baz");
+		GenericMessage<String> message = new GenericMessage<>("p", original);
+
+		MessageHeaderAccessor headers = new MessageHeaderAccessor(message);
+		headers.setHeader("foo", "BAR");
+		Map<String, Object> actual = headers.toMap();
+
+		assertEquals(4, actual.size());
+		assertNotNull(actual.get(MessageHeaders.ID));
+		assertNotNull(actual.get(MessageHeaders.TIMESTAMP));
+		assertEquals("BAR", actual.get("foo"));
+		assertEquals("baz", actual.get("bar"));
+	}
+
+}

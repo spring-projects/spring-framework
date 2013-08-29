@@ -108,11 +108,9 @@ public class JettyWebSocketClientTests {
 					factory.setCreator(new WebSocketCreator() {
 						@Override
 						public Object createWebSocket(UpgradeRequest req, UpgradeResponse resp) {
-
 							if (!CollectionUtils.isEmpty(req.getSubProtocols())) {
 								resp.setAcceptedSubProtocol(req.getSubProtocols().get(0));
 							}
-
 							JettyWebSocketSession session = new JettyWebSocketSession(null, null);
 							return new JettyWebSocketHandlerAdapter(webSocketHandler, session);
 						}

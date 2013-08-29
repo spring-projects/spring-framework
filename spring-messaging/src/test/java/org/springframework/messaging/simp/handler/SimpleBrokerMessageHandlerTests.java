@@ -59,6 +59,8 @@ public class SimpleBrokerMessageHandlerTests {
 	@Test
 	public void subcribePublish() {
 
+		this.messageHandler.start();
+
 		this.messageHandler.handleMessage(createSubscriptionMessage("sess1", "sub1", "/foo"));
 		this.messageHandler.handleMessage(createSubscriptionMessage("sess1", "sub2", "/foo"));
 		this.messageHandler.handleMessage(createSubscriptionMessage("sess1", "sub3", "/bar"));
@@ -84,6 +86,8 @@ public class SimpleBrokerMessageHandlerTests {
 
 		String sess1 = "sess1";
 		String sess2 = "sess2";
+
+		this.messageHandler.start();
 
 		this.messageHandler.handleMessage(createSubscriptionMessage(sess1, "sub1", "/foo"));
 		this.messageHandler.handleMessage(createSubscriptionMessage(sess1, "sub2", "/foo"));

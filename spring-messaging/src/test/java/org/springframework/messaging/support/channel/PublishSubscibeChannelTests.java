@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
@@ -117,8 +118,8 @@ public class PublishSubscibeChannelTests {
 		try {
 			this.channel.send(message);
 		}
-		catch(RuntimeException actualException) {
-			assertThat(actualException, equalTo(ex));
+		catch(MessageDeliveryException actualException) {
+			assertThat((RuntimeException) actualException.getCause(), equalTo(ex));
 		}
 		verifyZeroInteractions(secondHandler);
 	}

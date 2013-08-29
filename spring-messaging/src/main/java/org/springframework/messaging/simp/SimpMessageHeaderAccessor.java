@@ -68,7 +68,6 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 */
 	protected SimpMessageHeaderAccessor(Message<?> message) {
 		super(message);
-		Assert.notNull(message, "message is required");
 	}
 
 

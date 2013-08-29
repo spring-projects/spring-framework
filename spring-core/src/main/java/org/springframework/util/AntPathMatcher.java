@@ -317,10 +317,10 @@ public class AntPathMatcher implements PathMatcher {
 		if (!StringUtils.hasText(pattern1) && !StringUtils.hasText(pattern2)) {
 			return "";
 		}
-		else if (!StringUtils.hasText(pattern1)) {
+		if (!StringUtils.hasText(pattern1)) {
 			return pattern2;
 		}
-		else if (!StringUtils.hasText(pattern2)) {
+		if (!StringUtils.hasText(pattern2)) {
 			return pattern1;
 		}
 
@@ -330,55 +330,37 @@ public class AntPathMatcher implements PathMatcher {
 			// However /user + /user -> /usr/user ; /{foo} + /bar -> /{foo}/bar
 			return pattern2;
 		}
-		else if (pattern1.endsWith("/*")) {
-			if (pattern2.startsWith("/")) {
-				// /hotels/* + /booking -> /hotels/booking
-				return pattern1.substring(0, pattern1.length() - 1) + pattern2.substring(1);
-			}
-			else {
-				// /hotels/* + booking -> /hotels/booking
-				return pattern1.substring(0, pattern1.length() - 1) + pattern2;
-			}
-		}
-		else if (pattern1.endsWith("/**")) {
-			if (pattern2.startsWith("/")) {
-				// /hotels/** + /booking -> /hotels/**/booking
-				return pattern1 + pattern2;
-			}
-			else {
-				// /hotels/** + booking -> /hotels/**/booking
-				return pattern1 + "/" + pattern2;
-			}
-		}
-		else {
-			int dotPos1 = pattern1.indexOf('.');
-			if (dotPos1 == -1 || pattern1ContainsUriVar) {
-				// simply concatenate the two patterns
-				if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
-					return pattern1 + pattern2;
-				}
-				else {
-					return pattern1 + "/" + pattern2;
-				}
-			}
-			String fileName1 = pattern1.substring(0, dotPos1);
-			String extension1 = pattern1.substring(dotPos1);
-			String fileName2;
-			String extension2;
-			int dotPos2 = pattern2.indexOf('.');
-			if (dotPos2 != -1) {
-				fileName2 = pattern2.substring(0, dotPos2);
-				extension2 = pattern2.substring(dotPos2);
-			}
-			else {
-				fileName2 = pattern2;
-				extension2 = "";
-			}
-			String fileName = fileName1.endsWith("*") ? fileName2 : fileName1;
-			String extension = extension1.startsWith("*") ? extension2 : extension1;
 
-			return fileName + extension;
+		// /hotels/* + /booking -> /hotels/booking
+		// /hotels/* + booking -> /hotels/booking
+		if (pattern1.endsWith("/*")) {
+			return slashConcat(pattern1.substring(0, pattern1.length() - 2), pattern2);
 		}
+
+		// /hotels/** + /booking -> /hotels/**/booking
+		// /hotels/** + booking -> /hotels/**/booking
+		if (pattern1.endsWith("/**")) {
+			return slashConcat(pattern1, pattern2);
+		}
+
+		int starDotPos1 = pattern1.indexOf("*.");
+		if (pattern1ContainsUriVar || starDotPos1 == -1) {
+			// simply concatenate the two patterns
+			return slashConcat(pattern1, pattern2);
+		}
+		String extension1 = pattern1.substring(starDotPos1 + 1);
+		int dotPos2 = pattern2.indexOf('.');
+		String fileName2 = (dotPos2 == -1 ? pattern2 : pattern2.substring(0, dotPos2));
+		String extension2 = (dotPos2 == -1 ? "" : pattern2.substring(dotPos2));
+		String extension = extension1.startsWith("*") ? extension2 : extension1;
+		return fileName2 + extension;
+	}
+
+	private String slashConcat(String path1, String path2) {
+		if (path1.endsWith("/") || path2.startsWith("/")) {
+			return path1 + path2;
+		}
+		return path1 + "/" + path2;
 	}
 
 	/**
@@ -409,15 +391,16 @@ public class AntPathMatcher implements PathMatcher {
 
 		@Override
 		public int compare(String pattern1, String pattern2) {
-			if (pattern1 == null && pattern2 == null) {
+			if (isNullOrCaptureAllPattern(pattern1) && isNullOrCaptureAllPattern(pattern2)) {
 				return 0;
 			}
-			else if (pattern1 == null) {
+			else if (isNullOrCaptureAllPattern(pattern1)) {
 				return 1;
 			}
-			else if (pattern2 == null) {
+			else if (isNullOrCaptureAllPattern(pattern2)) {
 				return -1;
 			}
+
 			boolean pattern1EqualsPath = pattern1.equals(path);
 			boolean pattern2EqualsPath = pattern2.equals(path);
 			if (pattern1EqualsPath && pattern2EqualsPath) {
@@ -429,6 +412,7 @@ public class AntPathMatcher implements PathMatcher {
 			else if (pattern2EqualsPath) {
 				return 1;
 			}
+
 			int wildCardCount1 = getWildCardCount(pattern1);
 			int wildCardCount2 = getWildCardCount(pattern2);
 
@@ -464,6 +448,10 @@ public class AntPathMatcher implements PathMatcher {
 			}
 
 			return 0;
+		}
+
+		private boolean isNullOrCaptureAllPattern(String pattern) {
+			return pattern == null || "/**".equals(pattern);
 		}
 
 		private int getWildCardCount(String pattern) {

@@ -141,7 +141,7 @@ public class StompMessageConverter {
 		try {
 			out.write(stompHeaders.getCommand().toString().getBytes("UTF-8"));
 			out.write(LF);
-			for (Entry<String, List<String>> entry : stompHeaders.toNativeHeaderMap().entrySet()) {
+			for (Entry<String, List<String>> entry : stompHeaders.toStompHeaderMap().entrySet()) {
 				String key = entry.getKey();
 				key = replaceAllOutbound(key);
 				for (String value : entry.getValue()) {

@@ -24,6 +24,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
+import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 
 
@@ -53,7 +54,11 @@ public class SockJsServiceRegistration {
 
 	private Boolean webSocketEnabled;
 
-	private final List<HandshakeInterceptor> handshakeInterceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<TransportHandler> transportHandlers = new ArrayList<TransportHandler>();
+
+	private final List<TransportHandler> transportHandlerOverrides = new ArrayList<TransportHandler>();
+
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 
 
 	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
@@ -64,10 +69,6 @@ public class SockJsServiceRegistration {
 	public SockJsServiceRegistration setTaskScheduler(TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
 		return this;
-	}
-
-	protected TaskScheduler getTaskScheduler() {
-		return this.taskScheduler;
 	}
 
 	/**
@@ -88,14 +89,6 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
-	 * The URL to the SockJS JavaScript client library.
-	 * @see #setSockJsClientLibraryUrl(String)
-	 */
-	protected String getClientLibraryUrl() {
-		return this.clientLibraryUrl;
-	}
-
-	/**
 	 * Streaming transports save responses on the client side and don't free
 	 * memory used by delivered messages. Such transports need to recycle the
 	 * connection once in a while. This property sets a minimum number of bytes
@@ -111,10 +104,6 @@ public class SockJsServiceRegistration {
 		return this;
 	}
 
-	protected Integer getStreamBytesLimit() {
-		return this.streamBytesLimit;
-	}
-
 	/**
 	 * Some load balancers do sticky sessions, but only if there is a "JSESSIONID"
 	 * cookie. Even if it is set to a dummy value, it doesn't matter since
@@ -125,14 +114,6 @@ public class SockJsServiceRegistration {
 	public SockJsServiceRegistration setDummySessionCookieEnabled(boolean sessionCookieEnabled) {
 		this.sessionCookieEnabled = sessionCookieEnabled;
 		return this;
-	}
-
-	/**
-	 * Whether setting JSESSIONID cookie is necessary.
-	 * @see #setDummySessionCookieEnabled(boolean)
-	 */
-	protected Boolean getDummySessionCookieEnabled() {
-		return this.sessionCookieEnabled;
 	}
 
 	/**
@@ -147,10 +128,6 @@ public class SockJsServiceRegistration {
 		return this;
 	}
 
-	protected Long getHeartbeatTime() {
-		return this.heartbeatTime;
-	}
-
 	/**
 	 * The amount of time in milliseconds before a client is considered
 	 * disconnected after not having a receiving connection, i.e. an active
@@ -161,13 +138,6 @@ public class SockJsServiceRegistration {
 	public SockJsServiceRegistration setDisconnectDelay(long disconnectDelay) {
 		this.disconnectDelay = disconnectDelay;
 		return this;
-	}
-
-	/**
-	 * Return the amount of time in milliseconds before a client is considered disconnected.
-	 */
-	protected Long getDisconnectDelay() {
-		return this.disconnectDelay;
 	}
 
 	/**
@@ -187,13 +157,6 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
-	 * Return the size of the HTTP message cache.
-	 */
-	protected Integer getHttpMessageCacheSize() {
-		return this.httpMessageCacheSize;
-	}
-
-	/**
 	 * Some load balancers don't support WebSocket. This option can be used to
 	 * disable the WebSocket transport on the server side.
 	 *
@@ -204,23 +167,27 @@ public class SockJsServiceRegistration {
 		return this;
 	}
 
-	/**
-	 * Whether WebSocket transport is enabled.
-	 * @see #setWebSocketsEnabled(boolean)
-	 */
-	protected Boolean getWebSocketEnabled() {
-		return this.webSocketEnabled;
-	}
-
-	public SockJsServiceRegistration setInterceptors(HandshakeInterceptor... interceptors) {
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			this.handshakeInterceptors.addAll(Arrays.asList(interceptors));
+	public SockJsServiceRegistration setTransportHandlers(TransportHandler... handlers) {
+		this.transportHandlers.clear();
+		if (!ObjectUtils.isEmpty(handlers)) {
+			this.transportHandlers.addAll(Arrays.asList(handlers));
 		}
 		return this;
 	}
 
-	protected List<HandshakeInterceptor> getInterceptors() {
-		return this.handshakeInterceptors;
+	public SockJsServiceRegistration setTransportHandlerOverrides(TransportHandler... handlers) {
+		this.transportHandlerOverrides.clear();
+		if (!ObjectUtils.isEmpty(handlers)) {
+			this.transportHandlerOverrides.addAll(Arrays.asList(handlers));
+		}
+		return this;
+	}
+
+	public SockJsServiceRegistration setInterceptors(HandshakeInterceptor... interceptors) {
+		if (!ObjectUtils.isEmpty(interceptors)) {
+			this.interceptors.addAll(Arrays.asList(interceptors));
+		}
+		return this;
 	}
 
 	protected SockJsService getSockJsService(String[] sockJsPrefixes) {
@@ -228,33 +195,34 @@ public class SockJsServiceRegistration {
 		if (sockJsPrefixes != null) {
 			service.setValidSockJsPrefixes(sockJsPrefixes);
 		}
-		if (getClientLibraryUrl() != null) {
-			service.setSockJsClientLibraryUrl(getClientLibraryUrl());
+		if (this.clientLibraryUrl != null) {
+			service.setSockJsClientLibraryUrl(this.clientLibraryUrl);
 		}
-		if (getStreamBytesLimit() != null) {
-			service.setStreamBytesLimit(getStreamBytesLimit());
+		if (this.streamBytesLimit != null) {
+			service.setStreamBytesLimit(this.streamBytesLimit);
 		}
-		if (getDummySessionCookieEnabled() != null) {
-			service.setDummySessionCookieEnabled(getDummySessionCookieEnabled());
+		if (this.sessionCookieEnabled != null) {
+			service.setDummySessionCookieEnabled(this.sessionCookieEnabled);
 		}
-		if (getHeartbeatTime() != null) {
-			service.setHeartbeatTime(getHeartbeatTime());
+		if (this.heartbeatTime != null) {
+			service.setHeartbeatTime(this.heartbeatTime);
 		}
-		if (getDisconnectDelay() != null) {
-			service.setDisconnectDelay(getDisconnectDelay());
+		if (this.disconnectDelay != null) {
+			service.setDisconnectDelay(this.heartbeatTime);
 		}
-		if (getHttpMessageCacheSize() != null) {
-			service.setHttpMessageCacheSize(getHttpMessageCacheSize());
+		if (this.httpMessageCacheSize != null) {
+			service.setHttpMessageCacheSize(this.httpMessageCacheSize);
 		}
-		if (getWebSocketEnabled() != null) {
-			service.setWebSocketsEnabled(getWebSocketEnabled());
+		if (this.webSocketEnabled != null) {
+			service.setWebSocketsEnabled(this.webSocketEnabled);
 		}
-		service.setHandshakeInterceptors(getInterceptors());
+		service.setHandshakeInterceptors(this.interceptors);
 		return service;
 	}
 
-	protected DefaultSockJsService createSockJsService() {
-		return new DefaultSockJsService(getTaskScheduler());
+	private DefaultSockJsService createSockJsService() {
+		return new DefaultSockJsService(this.taskScheduler, this.transportHandlers,
+				this.transportHandlerOverrides.toArray(new TransportHandler[this.transportHandlerOverrides.size()]));
 	}
 
 }
