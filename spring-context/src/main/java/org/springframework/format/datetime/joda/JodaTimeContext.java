@@ -38,31 +38,31 @@ public class JodaTimeContext {
 
 
 	/**
-	 * Set the user's chronology.
+	 * Set the user's chronology (calendar system).
 	 */
 	public void setChronology(Chronology chronology) {
 		this.chronology = chronology;
 	}
 
 	/**
-	 * The user's chronology (calendar system), if any.
+	 * Return the user's chronology (calendar system), if any.
 	 */
 	public Chronology getChronology() {
 		return this.chronology;
 	}
 
 	/**
-	 * Set the user's timezone.
+	 * Set the user's time zone.
 	 */
 	public void setTimeZone(DateTimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
 
 	/**
-	 * The user's timezone, if any.
+	 * Return the user's time zone, if any.
 	 */
 	public DateTimeZone getTimeZone() {
-		return timeZone;
+		return this.timeZone;
 	}
 
 

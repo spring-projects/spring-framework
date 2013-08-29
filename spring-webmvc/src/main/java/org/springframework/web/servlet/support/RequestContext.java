@@ -20,14 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -90,6 +88,7 @@ public class RequestContext {
 	 */
 	private static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
+
 	protected static final boolean jstlPresent = ClassUtils.isPresent("javax.servlet.jsp.jstl.core.Config",
 			RequestContext.class.getClassLoader());
 
@@ -112,6 +111,7 @@ public class RequestContext {
 	private RequestDataValueProcessor requestDataValueProcessor;
 
 	private Map<String, Errors> errorsMap;
+
 
 	/**
 	 * Create a new RequestContext for the given request, using the request attributes for Errors retrieval. <p>This
@@ -181,6 +181,7 @@ public class RequestContext {
 	protected RequestContext() {
 	}
 
+
 	/**
 	 * Initialize this context with the given request, using the given model attributes for Errors retrieval.
 	 * <p>Delegates to {@code getFallbackLocale} and {@code getFallbackTheme} for determining the fallback
@@ -214,7 +215,8 @@ public class RequestContext {
 		if (localeResolver != null) {
 			// Try LocaleResolver (we're within a DispatcherServlet request).
 			this.locale = localeResolver.resolveLocale(request);
-		} else {
+		}
+		else {
 			// No LocaleResolver available -> try fallback.
 			this.locale = getFallbackLocale();
 		}
@@ -225,12 +227,9 @@ public class RequestContext {
 
 		this.urlPathHelper = new UrlPathHelper();
 
-		try {
+		if (this.webApplicationContext.containsBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
 			this.requestDataValueProcessor = this.webApplicationContext.getBean(
 					REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Ignored
 		}
 	}
 
@@ -268,6 +267,7 @@ public class RequestContext {
 		}
 		return theme;
 	}
+
 
 	/**
 	 * Return the underlying HttpServletRequest. Only intended for cooperating classes in this package.
@@ -702,7 +702,8 @@ public class RequestContext {
 		if (htmlEscape && !(errors instanceof EscapedErrors)) {
 			errors = new EscapedErrors(errors);
 			put = true;
-		} else if (!htmlEscape && errors instanceof EscapedErrors) {
+		}
+		else if (!htmlEscape && errors instanceof EscapedErrors) {
 			errors = ((EscapedErrors) errors).getSource();
 			put = true;
 		}
@@ -720,7 +721,8 @@ public class RequestContext {
 	protected Object getModelObject(String modelName) {
 		if (this.model != null) {
 			return this.model.get(modelName);
-		} else {
+		}
+		else {
 			return this.request.getAttribute(modelName);
 		}
 	}
@@ -746,9 +748,10 @@ public class RequestContext {
 		return new BindStatus(this, path, htmlEscape);
 	}
 
+
 	/**
-	 * Inner class that isolates the JSTL dependency. Just called to resolve the fallback locale if the JSTL API is
-	 * present.
+	 * Inner class that isolates the JSTL dependency.
+	 * Just called to resolve the fallback locale if the JSTL API is present.
 	 */
 	private static class JstlLocaleResolver {
 
