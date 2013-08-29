@@ -24,9 +24,9 @@ import java.net.URI;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
@@ -49,7 +49,7 @@ import org.springframework.http.StreamingHttpOutputMessage;
 final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest
 		implements StreamingHttpOutputMessage {
 
-	private final HttpClient httpClient;
+	private final CloseableHttpClient httpClient;
 
 	private final HttpUriRequest httpRequest;
 
@@ -57,7 +57,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	private Body body;
 
-	public HttpComponentsStreamingClientHttpRequest(HttpClient httpClient,
+	public HttpComponentsStreamingClientHttpRequest(CloseableHttpClient httpClient,
 			HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
@@ -97,7 +97,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 			HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), body);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
-		HttpResponse httpResponse =
+		CloseableHttpResponse httpResponse =
 				this.httpClient.execute(this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
