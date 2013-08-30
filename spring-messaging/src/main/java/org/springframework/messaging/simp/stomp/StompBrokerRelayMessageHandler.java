@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +33,6 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import reactor.core.Environment;
 import reactor.core.composable.Composable;
@@ -45,8 +43,6 @@ import reactor.function.Consumer;
 import reactor.tcp.Reconnect;
 import reactor.tcp.TcpClient;
 import reactor.tcp.TcpConnection;
-import reactor.tcp.encoding.DelimitedCodec;
-import reactor.tcp.encoding.StandardCodecs;
 import reactor.tcp.netty.NettyTcpClient;
 import reactor.tcp.spec.TcpClientSpec;
 import reactor.tuple.Tuple;
@@ -74,11 +70,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private String systemPasscode = "guest";
 
-	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
-
 	private Environment environment;
 
-	private TcpClient<String, String> tcpClient;
+	private TcpClient<Message<byte[]>, Message<byte[]>> tcpClient;
 
 	private final Map<String, RelaySession> relaySessions = new ConcurrentHashMap<String, RelaySession>();
 
@@ -159,9 +153,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Override
 	protected void startInternal() {
 		this.environment = new Environment();
-		this.tcpClient = new TcpClientSpec<String, String>(NettyTcpClient.class)
+		this.tcpClient = new TcpClientSpec<Message<byte[]>, Message<byte[]>>(NettyTcpClient.class)
 				.env(this.environment)
-				.codec(new DelimitedCodec<String, String>((byte) 0, true, StandardCodecs.STRING_CODEC))
+				.codec(new StompCodec())
 				.connect(this.relayHost, this.relayPort)
 				.get();
 
@@ -275,14 +269,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public void connect(final Message<?> connectMessage) {
 			Assert.notNull(connectMessage, "connectMessage is required");
 
-			Composable<TcpConnection<String, String>> connectionComposable = openTcpConnection();
-			connectionComposable.consume(new Consumer<TcpConnection<String, String>>() {
+			Composable<TcpConnection<Message<byte[]>, Message<byte[]>>> promise = openTcpConnection();
+			promise.consume(new Consumer<TcpConnection<Message<byte[]>, Message<byte[]>>>() {
 				@Override
-				public void accept(TcpConnection<String, String> connection) {
+				public void accept(TcpConnection<Message<byte[]>, Message<byte[]>> connection) {
 					handleTcpConnection(connection, connectMessage);
 				}
 			});
-			connectionComposable.when(Throwable.class, new Consumer<Throwable>() {
+			promise.when(Throwable.class, new Consumer<Throwable>() {
 				@Override
 				public void accept(Throwable ex) {
 					relaySessions.remove(sessionId);
@@ -291,29 +285,22 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			});
 		}
 
-		protected Composable<TcpConnection<String, String>> openTcpConnection() {
+		protected Composable<TcpConnection<Message<byte[]>, Message<byte[]>>> openTcpConnection() {
 			return tcpClient.open();
 		}
 
-		protected void handleTcpConnection(TcpConnection<String, String> tcpConn, final Message<?> connectMessage) {
+		protected void handleTcpConnection(TcpConnection<Message<byte[]>, Message<byte[]>> tcpConn, final Message<?> connectMessage) {
 			this.stompConnection.setTcpConnection(tcpConn);
-			tcpConn.in().consume(new Consumer<String>() {
+			tcpConn.in().consume(new Consumer<Message<byte[]>>() {
 				@Override
-				public void accept(String message) {
+				public void accept(Message<byte[]> message) {
 					readStompFrame(message);
 				}
 			});
 			forwardInternal(tcpConn, connectMessage);
 		}
 
-		private void readStompFrame(String stompFrame) {
-
-			// heartbeat
-			if (StringUtils.isEmpty(stompFrame)) {
-				return;
-			}
-
-			Message<?> message = stompMessageConverter.toMessage(stompFrame);
+		private void readStompFrame(Message<byte[]> message) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Reading message " + message);
 			}
@@ -378,24 +365,24 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		private boolean forwardInternal(final Message<?> message) {
-			TcpConnection<String, String> tcpConnection = this.stompConnection.getReadyConnection();
+			TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection = this.stompConnection.getReadyConnection();
 			if (tcpConnection == null) {
 				return false;
 			}
 			return forwardInternal(tcpConnection, message);
 		}
 
-		private boolean forwardInternal(TcpConnection<String, String> tcpConnection, final Message<?> message) {
+		@SuppressWarnings("unchecked")
+		private boolean forwardInternal(TcpConnection<Message<byte[]>, Message<byte[]>> tcpConnection, final Message<?> message) {
+
+			Assert.isInstanceOf(byte[].class, message.getPayload(), "Message's payload must be a byte[]");
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Forwarding to STOMP broker, message: " + message);
 			}
 
-			byte[] bytes = stompMessageConverter.fromMessage(message);
-			String payload = new String(bytes, Charset.forName("UTF-8"));
-
 			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
-			tcpConnection.send(payload, new Consumer<Boolean>() {
+			tcpConnection.send((Message<byte[]>)message, new Consumer<Boolean>() {
 				@Override
 				public void accept(Boolean success) {
 					deferred.accept(success);
@@ -434,18 +421,22 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static class StompConnection {
 
-		private volatile TcpConnection<String, String> connection;
+		private volatile TcpConnection<Message<byte[]>, Message<byte[]>> connection;
 
-		private AtomicReference<TcpConnection<String, String>> readyConnection =
-				new AtomicReference<TcpConnection<String, String>>();
+		private AtomicReference<TcpConnection<Message<byte[]>, Message<byte[]>>> readyConnection =
+				new AtomicReference<TcpConnection<Message<byte[]>, Message<byte[]>>>();
 
 
-		public void setTcpConnection(TcpConnection<String, String> connection) {
+		public void setTcpConnection(TcpConnection<Message<byte[]>, Message<byte[]>> connection) {
 			Assert.notNull(connection, "connection must not be null");
 			this.connection = connection;
 		}
 
-		public TcpConnection<String, String> getReadyConnection() {
+		/**
+		 * Return the underlying {@link TcpConnection} but only after the CONNECTED STOMP
+		 * frame is received.
+		 */
+		public TcpConnection<Message<byte[]>, Message<byte[]>> getReadyConnection() {
 			return this.readyConnection.get();
 		}
 
@@ -488,7 +479,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		protected Composable<TcpConnection<String, String>> openTcpConnection() {
+		protected Composable<TcpConnection<Message<byte[]>, Message<byte[]>>> openTcpConnection() {
 			return tcpClient.open(new Reconnect() {
 				@Override
 				public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {

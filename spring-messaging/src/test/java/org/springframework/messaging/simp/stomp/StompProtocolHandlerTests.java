@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -84,7 +85,7 @@ public class StompProtocolHandlerTests {
 
 		assertEquals(1, this.session.getSentMessages().size());
 		textMessage = (TextMessage) this.session.getSentMessages().get(0);
-		Message<?> message = new StompMessageConverter().toMessage(textMessage.getPayload());
+		Message<?> message = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
 		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(message);
 
 		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());

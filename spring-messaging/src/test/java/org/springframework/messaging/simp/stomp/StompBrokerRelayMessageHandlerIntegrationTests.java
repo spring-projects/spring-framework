@@ -253,7 +253,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public void awaitAndAssert() throws InterruptedException {
-			boolean result = this.latch.await(5000, TimeUnit.MILLISECONDS);
+			boolean result = this.latch.await(10000, TimeUnit.MILLISECONDS);
 			assertTrue(getAsString(), result && this.unexpected.isEmpty());
 		}
 
@@ -356,6 +356,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		public static MessageExchangeBuilder connect(String sessionId) {
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 			headers.setSessionId(sessionId);
+			headers.setAcceptVersion("1.1,1.2");
 			Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 			return new MessageExchangeBuilder(message);
 		}

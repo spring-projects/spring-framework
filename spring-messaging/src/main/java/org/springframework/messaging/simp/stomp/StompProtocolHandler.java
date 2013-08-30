@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Arrays;
@@ -63,7 +64,9 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 	private final Log logger = LogFactory.getLog(StompProtocolHandler.class);
 
-	private final StompMessageConverter stompMessageConverter = new StompMessageConverter();
+	private final StompDecoder stompDecoder = new StompDecoder();
+
+	private final StompEncoder stompEncoder = new StompEncoder();
 
 	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
@@ -98,7 +101,8 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
 			String payload = ((TextMessage)webSocketMessage).getPayload();
-			message = this.stompMessageConverter.toMessage(payload);
+			ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(Charset.forName("UTF-8")));
+			message = this.stompDecoder.decode(byteBuffer);
 		}
 		catch (Throwable error) {
 			logger.error("Failed to parse STOMP frame, WebSocket message payload: ", error);
@@ -133,6 +137,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	/**
 	 * Handle STOMP messages going back out to WebSocket clients.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
 
@@ -156,7 +161,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 		try {
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-			byte[] bytes = this.stompMessageConverter.fromMessage(message);
+			byte[] bytes = this.stompEncoder.encode((Message<byte[]>)message);
 			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
 		}
 		catch (Throwable t) {
@@ -204,19 +209,19 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			}
 		}
 
-		Message<?> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
-		byte[] bytes = this.stompMessageConverter.fromMessage(connectedMessage);
-		session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
+		Message<byte[]> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
+		String payload = new String(this.stompEncoder.encode(connectedMessage), Charset.forName("UTF-8"));
+		session.sendMessage(new TextMessage(payload));
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.ERROR);
 		headers.setMessage(error.getMessage());
-		Message<?> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
-		byte[] bytes = this.stompMessageConverter.fromMessage(message);
+		Message<byte[]> message = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
+		String payload = new String(this.stompEncoder.encode(message), Charset.forName("UTF-8"));
 		try {
-			session.sendMessage(new TextMessage(new String(bytes, Charset.forName("UTF-8"))));
+			session.sendMessage(new TextMessage(payload));
 		}
 		catch (Throwable t) {
 			// ignore
