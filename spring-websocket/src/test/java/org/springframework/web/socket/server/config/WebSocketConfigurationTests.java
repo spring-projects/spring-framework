@@ -27,7 +27,6 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
 import org.springframework.web.socket.JettyTestServer;
 import org.springframework.web.socket.WebSocketSession;
@@ -54,33 +53,26 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	};
 
 
+	@Override
+	protected Class<?>[] getAnnotatedConfigClasses() {
+		return new Class<?>[] { TestWebSocketConfigurer.class };
+	}
+
 	@Test
 	public void registerWebSocketHandler() throws Exception {
 
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.register(TestWebSocketConfigurer.class, getUpgradeStrategyConfigClass());
-
-		this.server.init(cxt);
-		this.server.start();
-
 		this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws");
 
-		TestWebSocketHandler serverHandler = cxt.getBean(TestWebSocketHandler.class);
+		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
 	}
 
 	@Test
 	public void registerWebSocketHandlerWithSockJS() throws Exception {
 
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.register(TestWebSocketConfigurer.class, getUpgradeStrategyConfigClass());
-
-		this.server.init(cxt);
-		this.server.start();
-
 		this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket");
 
-		TestWebSocketHandler serverHandler = cxt.getBean(TestWebSocketHandler.class);
+		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
 	}
 

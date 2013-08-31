@@ -35,7 +35,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompTextMessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
@@ -63,15 +62,13 @@ public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketI
 	};
 
 
+	@Override
+	protected Class<?>[] getAnnotatedConfigClasses() {
+		return new Class<?>[] { TestWebSocketMessageBrokerConfiguration.class, SimpleBrokerConfigurer.class };
+	}
+
 	@Test
 	public void sendMessage() throws Exception {
-
-		AnnotationConfigWebApplicationContext cxt = new AnnotationConfigWebApplicationContext();
-		cxt.register(TestWebSocketMessageBrokerConfiguration.class, SimpleBrokerConfigurer.class);
-		cxt.register(getUpgradeStrategyConfigClass());
-
-		this.server.init(cxt);
-		this.server.start();
 
 		final TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.SEND)
 				.headers("destination:/app/foo").build();
@@ -83,7 +80,7 @@ public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketI
 			}
 		};
 
-		TestController testController = cxt.getBean(TestController.class);
+		TestController testController = this.wac.getBean(TestController.class);
 
 		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/ws");
 		assertTrue(testController.latch.await(2, TimeUnit.SECONDS));

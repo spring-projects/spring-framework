@@ -61,6 +61,10 @@ public class WebSocketTransportHandler extends TransportHandlerSupport
 		return TransportType.WEBSOCKET;
 	}
 
+	public HandshakeHandler getHandshakeHandler() {
+		return this.handshakeHandler;
+	}
+
 	@Override
 	public AbstractSockJsSession createSession(String sessionId, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) {

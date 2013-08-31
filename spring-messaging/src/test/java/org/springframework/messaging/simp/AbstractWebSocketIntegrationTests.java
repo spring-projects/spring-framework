@@ -25,6 +25,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
@@ -52,13 +53,25 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Parameter(1)
 	public WebSocketClient webSocketClient;
 
+	protected AnnotationConfigWebApplicationContext wac;
+
 
 	@Before
 	public void setup() throws Exception {
+
+		this.wac = new AnnotationConfigWebApplicationContext();
+		this.wac.register(getAnnotatedConfigClasses());
+		this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
+
 		if (this.webSocketClient instanceof Lifecycle) {
 			((Lifecycle) this.webSocketClient).start();
 		}
+
+		this.server.init(this.wac);
+		this.server.start();
 	}
+
+	protected abstract Class<?>[] getAnnotatedConfigClasses();
 
 	@After
 	public void teardown() throws Exception {
@@ -74,10 +87,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	protected String getWsBaseUrl() {
 		return "ws://localhost:" + this.server.getPort();
-	}
-
-	protected Class<?> getUpgradeStrategyConfigClass() {
-		return upgradeStrategyConfigTypes.get(this.server.getClass());
 	}
 
 

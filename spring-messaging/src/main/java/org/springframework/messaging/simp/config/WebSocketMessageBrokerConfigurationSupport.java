@@ -33,6 +33,7 @@ import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 
 
@@ -55,10 +56,12 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	@Bean
 	public HandlerMapping brokerWebSocketHandlerMapping() {
-		StompEndpointRegistry registry = new StompEndpointRegistry(
+		ServletStompEndpointRegistry registry = new ServletStompEndpointRegistry(
 				subProtocolWebSocketHandler(), userQueueSuffixResolver(), brokerDefaultSockJsTaskScheduler());
 		registerStompEndpoints(registry);
-		return registry.getHandlerMapping();
+		AbstractHandlerMapping hm = registry.getHandlerMapping();
+		hm.setOrder(1);
+		return hm;
 	}
 
 	@Bean
@@ -75,7 +78,20 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 
 	/**
 	 * The default TaskScheduler to use if none is configured via
-	 * {@link SockJsServiceRegistration#setTaskScheduler()}
+	 * {@link SockJsServiceRegistration#setTaskScheduler()}, i.e.
+	 * <pre class="code">
+	 * &#064;Configuration
+	 * &#064;EnableWebSocketMessageBroker
+	 * public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+	 *
+	 *   public void registerStompEndpoints(StompEndpointRegistry registry) {
+	 *     registry.addEndpoint("/stomp").withSockJS().setTaskScheduler(myScheduler());
+	 *   }
+	 *
+	 *   // ...
+	 *
+	 * }
+	 * </pre>
 	 */
 	@Bean
 	public ThreadPoolTaskScheduler brokerDefaultSockJsTaskScheduler() {

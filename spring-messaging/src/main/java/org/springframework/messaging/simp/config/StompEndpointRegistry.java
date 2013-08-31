@@ -16,90 +16,18 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
-import org.springframework.messaging.simp.handler.MutableUserQueueSuffixResolver;
-import org.springframework.messaging.simp.stomp.StompProtocolHandler;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.AbstractHandlerMapping;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-
-
 /**
- * A helper class for configuring STOMP protocol handling over WebSocket.
+ * Provides methods for configuring STOMP protocol handlers at specific URL paths.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class StompEndpointRegistry {
+public interface StompEndpointRegistry {
 
-	private final SubProtocolWebSocketHandler wsHandler;
-
-	private final StompProtocolHandler stompHandler;
-
-	private final List<StompEndpointRegistration> registrations = new ArrayList<StompEndpointRegistration>();
-
-	private int order = 1;
-
-	private final TaskScheduler defaultSockJsTaskScheduler;
-
-
-	public StompEndpointRegistry(SubProtocolWebSocketHandler webSocketHandler,
-			MutableUserQueueSuffixResolver userQueueSuffixResolver, TaskScheduler defaultSockJsTaskScheduler) {
-
-		Assert.notNull(webSocketHandler);
-		Assert.notNull(userQueueSuffixResolver);
-
-		this.wsHandler = webSocketHandler;
-		this.stompHandler = new StompProtocolHandler();
-		this.stompHandler.setUserQueueSuffixResolver(userQueueSuffixResolver);
-		this.defaultSockJsTaskScheduler = defaultSockJsTaskScheduler;
-	}
-
-
-	public StompEndpointRegistration addEndpoint(String... paths) {
-		this.wsHandler.addProtocolHandler(this.stompHandler);
-		StompEndpointRegistration r = new StompEndpointRegistration(
-				Arrays.asList(paths), this.wsHandler, this.defaultSockJsTaskScheduler);
-		this.registrations.add(r);
-		return r;
-	}
 
 	/**
-	 * Specify the order to use for the STOMP endpoint {@link HandlerMapping} relative to
-	 * other handler mappings configured in the Spring MVC configuration. The default
-	 * value is 1.
+	 * Expose a STOMP endpoint at the specified URL path (or paths_.
 	 */
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	/**
-	 * Returns a handler mapping with the mapped ViewControllers; or {@code null} in case of no registrations.
-	 */
-	protected AbstractHandlerMapping getHandlerMapping() {
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
-		for (StompEndpointRegistration registration : this.registrations) {
-			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
-			for (HttpRequestHandler httpHandler : mappings.keySet()) {
-				for (String pattern : mappings.get(httpHandler)) {
-					urlMap.put(pattern, httpHandler);
-				}
-			}
-		}
-		SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-		hm.setOrder(this.order);
-		hm.setUrlMap(urlMap);
-		return hm;
-	}
+	StompEndpointRegistration addEndpoint(String... paths);
 
 }

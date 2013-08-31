@@ -19,6 +19,7 @@ package org.springframework.web.socket.server.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 
 
 /**
@@ -32,9 +33,11 @@ public class WebSocketConfigurationSupport {
 
 	@Bean
 	public HandlerMapping webSocketHandlerMapping() {
-		WebSocketHandlerRegistry registry = new WebSocketHandlerRegistry(defaultSockJsTaskScheduler());
+		ServletWebSocketHandlerRegistry registry = new ServletWebSocketHandlerRegistry(defaultSockJsTaskScheduler());
 		registerWebSocketHandlers(registry);
-		return registry.getHandlerMapping();
+		AbstractHandlerMapping hm = registry.getHandlerMapping();
+		hm.setOrder(1);
+		return hm;
 	}
 
 	protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -42,7 +45,20 @@ public class WebSocketConfigurationSupport {
 
 	/**
 	 * The default TaskScheduler to use if none is configured via
-	 * {@link SockJsServiceRegistration#setTaskScheduler()}
+	 * {@link SockJsServiceRegistration#setTaskScheduler()}, i.e.
+	 * <pre class="code">
+	 * &#064;Configuration
+	 * &#064;EnableWebSocket
+	 * public class WebSocketConfig implements WebSocketConfigurer {
+	 *
+	 *   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+	 *     registry.addHandler(myWsHandler(), "/echo").withSockJS().setTaskScheduler(myScheduler());
+	 *   }
+	 *
+	 *   // ...
+	 *
+	 * }
+	 * </pre>
 	 */
 	@Bean
 	public ThreadPoolTaskScheduler defaultSockJsTaskScheduler() {
