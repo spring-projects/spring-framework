@@ -19,6 +19,8 @@ package org.springframework.messaging.simp;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runners.Parameterized.Parameter;
@@ -31,7 +33,9 @@ import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy;
+import org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy;
 
+import reactor.util.Assert;
 
 
 /**
@@ -41,10 +45,13 @@ import org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
+	protected Log logger = LogFactory.getLog(getClass());
+
 	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<Class<?>, Class<?>>();
 
 	static {
 		upgradeStrategyConfigTypes.put(JettyTestServer.class, JettyUpgradeStrategyConfig.class);
+		upgradeStrategyConfigTypes.put(TomcatTestServer.class, TomcatUpgradeStrategyConfig.class);
 	}
 
 	@Parameter(0)
@@ -59,15 +66,19 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Before
 	public void setup() throws Exception {
 
+		Class<?> upgradeStrategyConfigClass = upgradeStrategyConfigTypes.get(this.server.getClass());
+		Assert.notNull(upgradeStrategyConfigClass, "No UpgradeStrategyConfig class");
+
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(getAnnotatedConfigClasses());
-		this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
+		this.wac.register(upgradeStrategyConfigClass);
+		this.wac.refresh();
 
 		if (this.webSocketClient instanceof Lifecycle) {
 			((Lifecycle) this.webSocketClient).start();
 		}
 
-		this.server.init(this.wac);
+		this.server.deployConfig(this.wac);
 		this.server.start();
 	}
 
@@ -80,8 +91,22 @@ public abstract class AbstractWebSocketIntegrationTests {
 				((Lifecycle) this.webSocketClient).stop();
 			}
 		}
-		finally {
+		catch (Throwable t) {
+			logger.error("Failed to stop WebSocket client", t);
+		}
+
+		try {
+			this.server.undeployConfig();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to undeploy application config", t);
+		}
+
+		try {
 			this.server.stop();
+		}
+		catch (Throwable t) {
+			logger.error("Failed to stop server", t);
 		}
 	}
 
@@ -107,6 +132,15 @@ public abstract class AbstractWebSocketIntegrationTests {
 		@Bean
 		public RequestUpgradeStrategy requestUpgradeStrategy() {
 			return new JettyRequestUpgradeStrategy();
+		}
+	}
+
+	@Configuration
+	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
+
+		@Bean
+		public RequestUpgradeStrategy requestUpgradeStrategy() {
+			return new TomcatRequestUpgradeStrategy();
 		}
 	}
 

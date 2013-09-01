@@ -31,6 +31,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.AbstractWebSocketIntegrationTests;
 import org.springframework.messaging.simp.JettyTestServer;
+import org.springframework.messaging.simp.TomcatTestServer;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompTextMessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
@@ -39,6 +40,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
+import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.config.WebSocketConfigurationSupport;
@@ -58,7 +60,9 @@ public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketI
 	@Parameters
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
-				{ new JettyTestServer(), new JettyWebSocketClient()} });
+				{new JettyTestServer(), new JettyWebSocketClient()},
+				{new TomcatTestServer(), new StandardWebSocketClient()}
+		});
 	};
 
 
@@ -82,12 +86,14 @@ public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketI
 
 		TestController testController = this.wac.getBean(TestController.class);
 
-		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/ws");
+		WebSocketSession session = this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/ws");
 		assertTrue(testController.latch.await(2, TimeUnit.SECONDS));
+		session.close();
 
 		testController.latch = new CountDownLatch(1);
-		this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/sockjs/websocket");
+		session = this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + "/sockjs/websocket");
 		assertTrue(testController.latch.await(2, TimeUnit.SECONDS));
+		session.close();
 	}
 
 

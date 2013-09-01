@@ -27,7 +27,9 @@ public interface TestServer {
 
 	int getPort();
 
-	void init(WebApplicationContext cxt);
+	void deployConfig(WebApplicationContext cxt);
+
+	void undeployConfig();
 
 	void start() throws Exception;
 

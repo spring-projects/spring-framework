@@ -47,10 +47,16 @@ public class JettyTestServer implements TestServer {
 	}
 
 	@Override
-	public void init(WebApplicationContext cxt) {
-		ServletContextHandler handler = new ServletContextHandler();
-		handler.addServlet(new ServletHolder(new DispatcherServlet(cxt)), "/");
-		this.jettyServer.setHandler(handler);
+	public void deployConfig(WebApplicationContext cxt) {
+		ServletContextHandler contextHandler = new ServletContextHandler();
+		ServletHolder servletHolder = new ServletHolder(new DispatcherServlet(cxt));
+		contextHandler.addServlet(servletHolder, "/");
+		this.jettyServer.setHandler(contextHandler);
+	}
+
+	@Override
+	public void undeployConfig() {
+		// Stopping jetty will undeploy the servlet
 	}
 
 	@Override

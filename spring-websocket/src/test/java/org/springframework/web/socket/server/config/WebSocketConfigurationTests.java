@@ -29,8 +29,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
 import org.springframework.web.socket.JettyTestServer;
+import org.springframework.web.socket.TomcatTestServer;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
+import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
@@ -49,7 +51,9 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	@Parameters
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
-				{ new JettyTestServer(), new JettyWebSocketClient()} });
+				{new JettyTestServer(), new JettyWebSocketClient()},
+				{new TomcatTestServer(), new StandardWebSocketClient()}
+		});
 	};
 
 
@@ -61,19 +65,25 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	@Test
 	public void registerWebSocketHandler() throws Exception {
 
-		this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws");
+		WebSocketSession session =
+				this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws");
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
+
+		session.close();
 	}
 
 	@Test
 	public void registerWebSocketHandlerWithSockJS() throws Exception {
 
-		this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket");
+		WebSocketSession session =
+				this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket");
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
+
+		session.close();
 	}
 
 
