@@ -71,7 +71,6 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	/**
 	 * Set the ThreadPoolExecutor's core pool size.
 	 * Default is 1.
-	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setCorePoolSize(int corePoolSize) {
 		this.corePoolSize = corePoolSize;
@@ -80,7 +79,6 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
 	 * Default is {@code Integer.MAX_VALUE}.
-	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
 		this.maxPoolSize = maxPoolSize;
@@ -89,7 +87,6 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	/**
 	 * Set the ThreadPoolExecutor's keep-alive seconds.
 	 * Default is 60.
-	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setKeepAliveSeconds(int keepAliveSeconds) {
 		this.keepAliveSeconds = keepAliveSeconds;
@@ -99,9 +96,7 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	 * Specify whether to allow core threads to time out. This enables dynamic
 	 * growing and shrinking even in combination with a non-zero queue (since
 	 * the max pool size will only grow once the queue is full).
-	 * <p>Default is "false". Note that this feature is only available on Java 6
-	 * or above. On Java 5, consider switching to the backport-concurrent
-	 * version of ThreadPoolTaskExecutor which also supports this feature.
+	 * <p>Default is "false".
 	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
 	 */
 	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
