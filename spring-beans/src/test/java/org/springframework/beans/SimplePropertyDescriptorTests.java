@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link SimpleNonIndexedPropertyDescriptor} and
+ * Unit tests for {@link SimplePropertyDescriptor} and
  * {@link SimpleIndexedPropertyDescriptor}.
  *
  * @author Chris Beams
@@ -39,7 +39,7 @@ public class SimplePropertyDescriptorTests {
 	@Test
 	public void toStringOutput() throws IntrospectionException, SecurityException, NoSuchMethodException {
 		{
-			Object pd = new SimpleNonIndexedPropertyDescriptor("foo", null, null);
+			Object pd = new SimplePropertyDescriptor("foo", null, null);
 			assertThat(pd.toString(), containsString(
 					"PropertyDescriptor[name=foo, propertyType=null, readMethod=null"));
 		}
@@ -49,7 +49,7 @@ public class SimplePropertyDescriptorTests {
 				public Object setFoo(String foo) { return null; }
 			}
 			Method m = C.class.getMethod("setFoo", String.class);
-			Object pd = new SimpleNonIndexedPropertyDescriptor("foo", null, m);
+			Object pd = new SimplePropertyDescriptor("foo", null, m);
 			assertThat(pd.toString(), allOf(
 					containsString("PropertyDescriptor[name=foo"),
 					containsString("propertyType=class java.lang.String"),
@@ -76,10 +76,10 @@ public class SimplePropertyDescriptorTests {
 
 	@Test
 	public void nonIndexedEquality() throws IntrospectionException, SecurityException, NoSuchMethodException {
-		Object pd1 = new SimpleNonIndexedPropertyDescriptor("foo", null, null);
+		Object pd1 = new SimplePropertyDescriptor("foo", null, null);
 		assertThat(pd1, equalTo(pd1));
 
-		Object pd2 = new SimpleNonIndexedPropertyDescriptor("foo", null, null);
+		Object pd2 = new SimplePropertyDescriptor("foo", null, null);
 		assertThat(pd1, equalTo(pd2));
 		assertThat(pd2, equalTo(pd1));
 
@@ -89,12 +89,12 @@ public class SimplePropertyDescriptorTests {
 			public String getFoo() { return null; }
 		}
 		Method wm1 = C.class.getMethod("setFoo", String.class);
-		Object pd3 = new SimpleNonIndexedPropertyDescriptor("foo", null, wm1);
+		Object pd3 = new SimplePropertyDescriptor("foo", null, wm1);
 		assertThat(pd1, not(equalTo(pd3)));
 		assertThat(pd3, not(equalTo(pd1)));
 
 		Method rm1 = C.class.getMethod("getFoo");
-		Object pd4 = new SimpleNonIndexedPropertyDescriptor("foo", rm1, null);
+		Object pd4 = new SimplePropertyDescriptor("foo", rm1, null);
 		assertThat(pd1, not(equalTo(pd4)));
 		assertThat(pd4, not(equalTo(pd1)));
 
@@ -147,4 +147,5 @@ public class SimplePropertyDescriptorTests {
 		assertThat(pd1, not(equalTo(pd7)));
 		assertThat(pd7, not(equalTo(pd1)));
 	}
+
 }
