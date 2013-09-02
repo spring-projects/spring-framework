@@ -107,7 +107,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	private IBindingFactory bindingFactory;
 
-	private TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 
 	/**
@@ -127,6 +127,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	public void setTargetPackage(String targetPackage) {
 		this.targetPackage = targetPackage;
 	}
+
 	/**
 	 * Set the optional binding name for this instance.
 	 */
@@ -167,7 +168,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Set the system Id for the DTD declaration written when marshalling.
+	 * Set the system id for the DTD declaration written when marshalling.
 	 * By default, this is {@code null}. Only used when the root element also has been set.
 	 * <p>Set either this property or {@code docTypePublicId}, not both.
 	 * @see #setDocTypeRootElementName(String)
@@ -177,7 +178,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	/**
-	 * Set the public Id for the DTD declaration written when marshalling.
+	 * Set the public id for the DTD declaration written when marshalling.
 	 * By default, this is {@code null}. Only used when the root element also has been set.
 	 * <p>Set either this property or {@code docTypeSystemId}, not both.
 	 * @see #setDocTypeRootElementName(String)
@@ -217,12 +218,12 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 				bindingName = DEFAULT_BINDING_NAME;
 			}
 			if (logger.isInfoEnabled()) {
-				logger.info("Configured for target package [" + targetPackage	+ "] using binding [" + bindingName + "]");
+				logger.info("Configured for target package [" + this.targetPackage	+ "] using binding [" + this.bindingName + "]");
 			}
-			this.bindingFactory = BindingDirectory.getFactory(bindingName, targetPackage);
+			this.bindingFactory = BindingDirectory.getFactory(this.bindingName, this.targetPackage);
 		}
 		else {
-			throw new IllegalArgumentException("either 'targetClass' or 'targetPackage' is required");
+			throw new IllegalArgumentException("Either 'targetClass' or 'targetPackage' is required");
 		}
 	}
 
@@ -407,12 +408,13 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	@Override
 	protected Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
 			throws XmlMappingException, IOException {
+
 		return transformAndUnmarshal(new SAXSource(xmlReader, inputSource));
 	}
 
 	private Object transformAndUnmarshal(Source source) throws IOException {
 		try {
-			Transformer transformer = transformerFactory.newTransformer();
+			Transformer transformer = this.transformerFactory.newTransformer();
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			transformer.transform(source, new StreamResult(os));
 			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());

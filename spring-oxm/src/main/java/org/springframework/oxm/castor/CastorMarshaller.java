@@ -170,30 +170,32 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Set the locations of the Castor XML Mapping files.
+	 * Set the locations of the Castor XML mapping files.
 	 */
 	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
 	/**
-	 * Set the Castor target class. Alternative means of configuring {@code CastorMarshaller} for unmarshalling
-	 * multiple classes include use of mapping files, and specifying packages with Castor descriptor classes.
+	 * Set the Castor target class.
+	 * @see #setTargetPackage
+	 * @see #setMappingLocation
 	 */
 	public void setTargetClass(Class<?> targetClass) {
 		this.targetClasses = new Class<?>[] {targetClass};
 	}
 
 	/**
-	 * Set the Castor target classes. Alternative means of configuring {@code CastorMarshaller} for unmarshalling
-	 * multiple classes include use of mapping files, and specifying packages with Castor descriptor classes.
+	 * Set the Castor target classes.
+	 * @see #setTargetPackages
+	 * @see #setMappingLocations
 	 */
 	public void setTargetClasses(Class<?>... targetClasses) {
 		this.targetClasses = targetClasses;
 	}
 
 	/**
-	 * Set the names of package with the Castor descriptor classes.
+	 * Set the name of a package with the Castor descriptor classes.
 	 */
 	public void setTargetPackage(String targetPackage) {
 		this.targetPackages = new String[] {targetPackage};
