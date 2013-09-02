@@ -70,6 +70,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 	private MutableUserQueueSuffixResolver queueSuffixResolver = new SimpleUserQueueSuffixResolver();
 
+	private volatile boolean handleConnect = false;
 
 	/**
 	 * Configure a resolver to use to maintain queue suffixes for user
@@ -84,6 +85,29 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	 */
 	public MutableUserQueueSuffixResolver getUserQueueSuffixResolver() {
 		return this.queueSuffixResolver;
+	}
+
+	/**
+	 * Configures the handling of CONNECT frames. When {@code true}, CONNECT
+	 * frames will be handled by this handler, and a CONNECTED response will be
+	 * sent. When {@code false}, CONNECT frames will be forwarded for
+	 * handling by another component.
+	 *
+	 * @param handleConnect {@code true} if connect frames should be handled
+	 * by this handler, {@code false} otherwise.
+	 */
+	public void setHandleConnect(boolean handleConnect) {
+		this.handleConnect = handleConnect;
+	}
+
+	/**
+	 * Returns whether or not this handler will handle CONNECT frames.
+	 *
+	 * @return Returns {@code true} if this handler will handle CONNECT frames,
+	 * otherwise {@code false}.
+	 */
+	public boolean willHandleConnect() {
+		return this.handleConnect;
 	}
 
 	@Override
@@ -121,17 +145,17 @@ public class StompProtocolHandler implements SubProtocolHandler {
 
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 
-			if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
+			if (this.handleConnect && SimpMessageType.CONNECT.equals(headers.getMessageType())) {
 				handleConnect(session, message);
 			}
-
-			outputChannel.send(message);
+			else {
+				outputChannel.send(message);
+			}
 		}
 		catch (Throwable t) {
 			logger.error("Terminating STOMP session due to failure to send message: ", t);
 			sendErrorMessage(session, t);
 		}
-
 	}
 
 	/**
@@ -144,8 +168,8 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 		headers.setCommandIfNotSet(StompCommand.MESSAGE);
 
-		if (StompCommand.CONNECTED.equals(headers.getCommand())) {
-			// Ignore for now since we already sent it
+		if (this.handleConnect && StompCommand.CONNECTED.equals(headers.getCommand())) {
+			// Ignore since we already sent it
 			return;
 		}
 

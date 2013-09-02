@@ -53,7 +53,7 @@ public class ServletStompEndpointRegistryTests {
 		this.webSocketHandler = new SubProtocolWebSocketHandler(channel);
 		this.queueSuffixResolver = new SimpleUserQueueSuffixResolver();
 		TaskScheduler taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registry = new ServletStompEndpointRegistry(webSocketHandler, queueSuffixResolver, taskScheduler);
+		this.registry = new ServletStompEndpointRegistry(webSocketHandler, queueSuffixResolver, taskScheduler, false);
 	}
 
 

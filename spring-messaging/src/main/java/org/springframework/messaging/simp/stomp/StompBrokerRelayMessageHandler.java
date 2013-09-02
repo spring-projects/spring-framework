@@ -17,13 +17,9 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.messaging.Message;
@@ -249,11 +245,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		private final String sessionId;
 
-		private final BlockingQueue<Message<?>> messageQueue = new LinkedBlockingQueue<Message<?>>(50);
-
 		private volatile StompConnection stompConnection = new StompConnection();
-
-		private final Object monitor = new Object();
 
 
 		private RelaySession(String sessionId) {
@@ -291,6 +283,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 		protected void handleTcpConnection(TcpConnection<Message<byte[]>, Message<byte[]>> tcpConn, final Message<?> connectMessage) {
 			this.stompConnection.setTcpConnection(tcpConn);
+			tcpConn.on().close(new Runnable() {
+				@Override
+				public void run() {
+					connectionClosed();
+				}
+			});
 			tcpConn.in().consume(new Consumer<Message<byte[]>>() {
 				@Override
 				public void accept(Message<byte[]> message) {
@@ -307,12 +305,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 			if (StompCommand.CONNECTED == headers.getCommand()) {
-				synchronized(this.monitor) {
-					this.stompConnection.setReady();
-					publishBrokerAvailableEvent();
-					flushMessages();
-				}
-				return;
+				this.stompConnection.setReady();
+				publishBrokerAvailableEvent();
 			}
 
 			headers.setSessionId(this.sessionId);
@@ -344,24 +338,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public void forward(Message<?> message) {
 
 			if (!this.stompConnection.isReady()) {
-				synchronized(this.monitor) {
-					if (!this.stompConnection.isReady()) {
-						this.messageQueue.add(message);
-						if (logger.isTraceEnabled()) {
-							logger.trace("Not connected, message queued. Queue size=" + this.messageQueue.size());
-						}
-						return;
-					}
-				}
+				logger.warn("Message sent to relay before it was CONNECTED. Discarding message: " + message);
+				return;
 			}
 
-			if (this.messageQueue.isEmpty()) {
-				forwardInternal(message);
-			}
-			else {
-				this.messageQueue.add(message);
-				flushMessages();
-			}
+			forwardInternal(message);
 		}
 
 		private boolean forwardInternal(final Message<?> message) {
@@ -381,6 +362,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.trace("Forwarding to STOMP broker, message: " + message);
 			}
 
+			StompCommand command = StompHeaderAccessor.wrap(message).getCommand();
+
+			if (command == StompCommand.DISCONNECT) {
+				this.stompConnection.setDisconnected();
+			}
+
 			final Deferred<Boolean, Promise<Boolean>> deferred = new DeferredPromiseSpec<Boolean>().get();
 			tcpConnection.send((Message<byte[]>)message, new Consumer<Boolean>() {
 				@Override
@@ -396,7 +383,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker", null);
 				}
 				else if (!success) {
-					if (StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
+					if (command != StompCommand.DISCONNECT) {
 						handleTcpClientFailure("Failed to forward message to the broker", null);
 					}
 				}
@@ -408,13 +395,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return (success != null) ? success : false;
 		}
 
-		private void flushMessages() {
-			List<Message<?>> messages = new ArrayList<Message<?>>();
-			this.messageQueue.drainTo(messages);
-			for (Message<?> message : messages) {
-				if (!forwardInternal(message)) {
-					return;
-				}
+		protected void connectionClosed() {
+			relaySessions.remove(this.sessionId);
+			if (this.stompConnection.isReady()) {
+				sendError("Lost connection to the broker");
 			}
 		}
 	}
@@ -461,6 +445,10 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private class SystemRelaySession extends RelaySession {
 
+		 private static final long HEARTBEAT_SEND_INTERVAL = 10000;
+
+		 private static final long HEARTBEAT_RECEIVE_INTERVAL = 10000;
+
 		public static final String ID = "stompRelaySystemSessionId";
 
 
@@ -473,7 +461,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			headers.setAcceptVersion("1.1,1.2");
 			headers.setLogin(systemLogin);
 			headers.setPasscode(systemPasscode);
-			headers.setHeartbeat(0,0);
+			headers.setHeartbeat(HEARTBEAT_SEND_INTERVAL, HEARTBEAT_RECEIVE_INTERVAL);
 			Message<?> connectMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], headers).build();
 			super.connect(connectMessage);
 		}
@@ -486,6 +474,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 					return Tuple.of(address, 5000L);
 				}
 			});
+		}
+
+		@Override
+		protected void connectionClosed() {
+			publishBrokerUnavailableEvent();
 		}
 
 		@Override
