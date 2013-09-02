@@ -118,8 +118,7 @@ public class MethodReference extends SpelNodeImpl {
 		executorToUse = findAccessorForMethod(this.name, argumentTypes, value, evaluationContext);
 		this.cachedExecutor = new CachedMethodExecutor(executorToUse, targetType, argumentTypes);
 		try {
-			return executorToUse.execute(evaluationContext,
-					value, arguments);
+			return executorToUse.execute(evaluationContext, value, arguments);
 		}
 		catch (AccessException ex) {
 			// Same unwrapping exception handling as above in above catch block
@@ -163,8 +162,9 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 	private MethodExecutor getCachedExecutor(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
-		if (this.cachedExecutor != null && this.cachedExecutor.isSuitable(target, argumentTypes)) {
-			return this.cachedExecutor.get();
+		CachedMethodExecutor executorToCheck = this.cachedExecutor;
+		if (executorToCheck != null && executorToCheck.isSuitable(target, argumentTypes)) {
+			return executorToCheck.get();
 		}
 		this.cachedExecutor = null;
 		return null;
@@ -249,8 +249,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			return MethodReference.this.getValueInternal(this.evaluationContext,
-					this.value, this.arguments, this.targetType);
+			return getValueInternal(this.evaluationContext, this.value, this.arguments, this.targetType);
 		}
 
 		@Override
