@@ -192,57 +192,63 @@ public interface AsyncRestOperations {
 	/**
 	 * Create or update a resource by PUTting the given object to the URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 * @param request the Object to be PUT, may be {@code null}
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	Future<Void> put(String url, HttpEntity<?> request, Object... uriVariables)
+	Future<?> put(String url, HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
 	 * Creates a new resource by PUTting the given object to URI template.
 	 * <p>URI Template variables are expanded using the given map.
+	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 * @param request the Object to be PUT, may be {@code null}
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	Future<Void> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	Future<?> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
 	 * Creates a new resource by PUTting the given object to URL.
+	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 * @param request the Object to be PUT, may be {@code null}
 	 * @see HttpEntity
 	 */
-	Future<Void> put(URI url, HttpEntity<?> request) throws RestClientException;
+	Future<?> put(URI url, HttpEntity<?> request) throws RestClientException;
 
 	// DELETE
 
 	/**
 	 * Asynchronously delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 */
-	Future<Void> delete(String url, Object... uriVariables) throws RestClientException;
+	Future<?> delete(String url, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Asynchronously delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 */
-	Future<Void> delete(String url, Map<String, ?> uriVariables) throws RestClientException;
+	Future<?> delete(String url, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Asynchronously delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 */
-	Future<Void> delete(URI url) throws RestClientException;
+	Future<?> delete(URI url) throws RestClientException;
 
 	// OPTIONS
 

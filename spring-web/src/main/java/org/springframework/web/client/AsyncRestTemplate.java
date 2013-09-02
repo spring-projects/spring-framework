@@ -304,21 +304,21 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// PUT
 
 	@Override
-	public Future<Void> put(String url, HttpEntity<?> request, Object... uriVariables)
+	public Future<?> put(String url, HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException {
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
 		return execute(url, HttpMethod.PUT, requestCallback, null, uriVariables);
 	}
 
 	@Override
-	public Future<Void> put(String url, HttpEntity<?> request,
+	public Future<?> put(String url, HttpEntity<?> request,
 			Map<String, ?> uriVariables) throws RestClientException {
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
 		return execute(url, HttpMethod.PUT, requestCallback, null, uriVariables);
 	}
 
 	@Override
-	public Future<Void> put(URI url, HttpEntity<?> request) throws RestClientException {
+	public Future<?> put(URI url, HttpEntity<?> request) throws RestClientException {
 		AsyncRequestCallback requestCallback = httpEntityCallback(request);
 		return execute(url, HttpMethod.PUT, requestCallback, null);
 	}
@@ -326,19 +326,19 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	// DELETE
 
 	@Override
-	public Future<Void> delete(String url, Object... urlVariables)
+	public Future<?> delete(String url, Object... urlVariables)
 			throws RestClientException {
 		return execute(url, HttpMethod.DELETE, null, null, urlVariables);
 	}
 
 	@Override
-	public Future<Void> delete(String url, Map<String, ?> urlVariables)
+	public Future<?> delete(String url, Map<String, ?> urlVariables)
 			throws RestClientException {
 		return execute(url, HttpMethod.DELETE, null, null, urlVariables);
 	}
 
 	@Override
-	public Future<Void> delete(URI url) throws RestClientException {
+	public Future<?> delete(URI url) throws RestClientException {
 		return execute(url, HttpMethod.DELETE, null, null);
 	}
 

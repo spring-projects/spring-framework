@@ -149,7 +149,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	public void put()
 			throws URISyntaxException, ExecutionException, InterruptedException {
 		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld);
-		Future<Void>
+		Future<?>
 				responseEntityFuture = template.put(baseUrl + "/{method}", requestEntity,
 				"put");
 		responseEntityFuture.get();
@@ -158,7 +158,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	@Test
 	public void delete()
 			throws URISyntaxException, ExecutionException, InterruptedException {
-		Future<Void> deletedFuture = template.delete(new URI(baseUrl + "/delete"));
+		Future<?> deletedFuture = template.delete(new URI(baseUrl + "/delete"));
 		deletedFuture.get();
 	}
 
