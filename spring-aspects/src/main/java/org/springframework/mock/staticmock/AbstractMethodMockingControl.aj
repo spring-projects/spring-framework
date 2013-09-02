@@ -97,36 +97,34 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 
 		public void verify() {
 			if (verified != calls.size()) {
-				throw new IllegalStateException("Expected " + calls.size()
-						+ " calls, received " + verified);
+				throw new IllegalStateException("Expected " + calls.size() + " calls, received " + verified);
 			}
 		}
 
 		/**
-		 * Validate the call and provide the expected return value
-		 * @param lastSig
-		 * @param args
-		 * @return
+		 * Validate the call and provide the expected return value.
 		 */
 		public Object respond(String lastSig, Object[] args) {
 			Call call = nextCall();
 			CallResponse responseType = call.responseType;
 			if (responseType == CallResponse.return_) {
 				return call.returnValue(lastSig, args);
-			} else if(responseType == CallResponse.throw_) {
-				return (RuntimeException)call.throwException(lastSig, args);
-			} else if(responseType == CallResponse.nothing) {
+			}
+			else if (responseType == CallResponse.throw_) {
+				return call.throwException(lastSig, args);
+			}
+			else if (responseType == CallResponse.nothing) {
 				// do nothing
 			}
 			throw new IllegalStateException("Behavior of " + call + " not specified");
 		}
 
 		private Call nextCall() {
-			if (verified > calls.size() - 1) {
-				throw new IllegalStateException("Expected " + calls.size()
-						+ " calls, received " + verified);
+			verified++;
+			if (verified > calls.size()) {
+				throw new IllegalStateException("Expected " + calls.size() + " calls, received " + verified);
 			}
-			return calls.get(verified++);
+			return calls.get(verified);
 		}
 
 		public void expectCall(String lastSig, Object lastArgs[]) {
@@ -171,7 +169,8 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 			expectations.expectCall(thisJoinPointStaticPart.toLongString(), thisJoinPoint.getArgs());
 			// Return value doesn't matter
 			return null;
-		} else {
+		}
+		else {
 			return expectations.respond(thisJoinPointStaticPart.toLongString(), thisJoinPoint.getArgs());
 		}
 	}
