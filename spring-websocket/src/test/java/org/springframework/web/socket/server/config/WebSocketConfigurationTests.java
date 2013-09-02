@@ -28,8 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
-import org.springframework.web.socket.JettyTestServer;
-import org.springframework.web.socket.TomcatTestServer;
+import org.springframework.web.socket.JettyWebSocketTestServer;
+import org.springframework.web.socket.TomcatWebSocketTestServer;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 import org.springframework.web.socket.client.endpoint.StandardWebSocketClient;
@@ -51,8 +51,8 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	@Parameters
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
-				{new JettyTestServer(), new JettyWebSocketClient()},
-				{new TomcatTestServer(), new StandardWebSocketClient()}
+				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
+				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()}
 		});
 	};
 

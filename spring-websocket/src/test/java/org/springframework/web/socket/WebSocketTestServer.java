@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp;
+package org.springframework.web.socket;
 
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Contract for a test server to use for integration tests.
+ * Contract for a test server to use for WebSocket integration tests.
  *
  * @author Rossen Stoyanchev
  */
-public interface TestServer {
+public interface WebSocketTestServer {
 
 	int getPort();
 

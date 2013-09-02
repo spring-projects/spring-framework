@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.simp;
+package org.springframework.web.socket;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,17 +26,18 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.ApplicationListener;
 import org.apache.tomcat.websocket.server.WsListener;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 
 /**
- * Tomcat based {@link TestServer}.
+ * Tomcat based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
  */
-public class TomcatTestServer implements TestServer {
+public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
 	private static final ApplicationListener WS_APPLICATION_LISTENER =
 			new ApplicationListener(WsListener.class.getName(), false);
@@ -48,7 +49,7 @@ public class TomcatTestServer implements TestServer {
 	private Context context;
 
 
-	public TomcatTestServer() {
+	public TomcatWebSocketTestServer() {
 
 		this.port = SocketUtils.findAvailableTcpPort();
 
@@ -93,10 +94,9 @@ public class TomcatTestServer implements TestServer {
 
 	@Override
 	public void undeployConfig() {
-		if (this.context != null) {
-			this.context.removeServletMapping("/");
-			this.tomcatServer.getHost().removeChild(this.context);
-		}
+		Assert.notNull(this.context, "deployConfig/undeployConfig must be invoked in pairs");
+		this.context.removeServletMapping("/");
+		this.tomcatServer.getHost().removeChild(this.context);
 	}
 
 	@Override

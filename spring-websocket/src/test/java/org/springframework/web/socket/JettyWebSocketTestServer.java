@@ -25,18 +25,18 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 
 /**
- * Jetty based {@link TestServer}.
+ * Jetty based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
  */
-public class JettyTestServer implements TestServer {
+public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	private final Server jettyServer;
 
 	private final int port;
 
 
-	public JettyTestServer() {
+	public JettyWebSocketTestServer() {
 		this.port = SocketUtils.findAvailableTcpPort();
 		this.jettyServer = new Server(this.port);
 	}

@@ -47,12 +47,12 @@ public abstract class AbstractWebSocketIntegrationTests {
 	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<Class<?>, Class<?>>();
 
 	static {
-		upgradeStrategyConfigTypes.put(JettyTestServer.class, JettyUpgradeStrategyConfig.class);
-		upgradeStrategyConfigTypes.put(TomcatTestServer.class, TomcatUpgradeStrategyConfig.class);
+		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
+		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
 	}
 
 	@Parameter(0)
-	public TestServer server;
+	public WebSocketTestServer server;
 
 	@Parameter(1)
 	public WebSocketClient webSocketClient;

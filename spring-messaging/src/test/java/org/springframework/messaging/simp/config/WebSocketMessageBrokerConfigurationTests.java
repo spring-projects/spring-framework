@@ -29,14 +29,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.AbstractWebSocketIntegrationTests;
-import org.springframework.messaging.simp.JettyTestServer;
-import org.springframework.messaging.simp.TomcatTestServer;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompTextMessageBuilder;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
+import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.TomcatWebSocketTestServer;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.TextWebSocketHandlerAdapter;
@@ -60,8 +60,8 @@ public class WebSocketMessageBrokerConfigurationTests extends AbstractWebSocketI
 	@Parameters
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
-				{new JettyTestServer(), new JettyWebSocketClient()},
-				{new TomcatTestServer(), new StandardWebSocketClient()}
+				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
+				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()}
 		});
 	};
 
