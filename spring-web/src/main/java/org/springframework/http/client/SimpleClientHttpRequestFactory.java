@@ -23,7 +23,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
@@ -54,7 +54,7 @@ public class SimpleClientHttpRequestFactory
 
 	private boolean outputStreaming = true;
 
-	private AsyncTaskExecutor taskExecutor;
+	private AsyncListenableTaskExecutor taskExecutor;
 
 
 	/**
@@ -131,7 +131,7 @@ public class SimpleClientHttpRequestFactory
 	 * request}.
 	 * @param taskExecutor the task executor
 	 */
-	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
+	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
@@ -149,7 +149,7 @@ public class SimpleClientHttpRequestFactory
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Setting the {@link #setTaskExecutor(AsyncTaskExecutor) taskExecutor} property
+	 * <p>Setting the {@link #setTaskExecutor(org.springframework.core.task.AsyncListenableTaskExecutor) taskExecutor} property
 	 * is required before calling this method.
 	 */
 	@Override

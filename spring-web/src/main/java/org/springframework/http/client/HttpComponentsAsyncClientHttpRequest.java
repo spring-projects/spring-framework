@@ -18,21 +18,23 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.concurrent.FutureAdapter;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 
 /**
  * {@link ClientHttpRequest} implementation that uses Apache HttpComponents HttpClient to
@@ -72,7 +74,7 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 	}
 
 	@Override
-	protected Future<ClientHttpResponse> executeInternal(HttpHeaders headers,
+	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers,
 			byte[] bufferedOutput) throws IOException {
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);
 
@@ -83,50 +85,61 @@ final class HttpComponentsAsyncClientHttpRequest extends AbstractBufferingAsyncC
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
+		final HttpResponseFutureCallback callback = new HttpResponseFutureCallback();
+
 		final Future<HttpResponse> futureResponse =
-				this.httpClient.execute(this.httpRequest, this.httpContext, null);
-		return new ClientHttpResponseFuture(futureResponse);
+				this.httpClient.execute(this.httpRequest, this.httpContext, callback);
+		return new ClientHttpResponseFuture(futureResponse, callback);
+	}
+
+	private static class HttpResponseFutureCallback implements FutureCallback<HttpResponse> {
+
+		private final ListenableFutureCallbackRegistry<ClientHttpResponse> callbacks =
+				new ListenableFutureCallbackRegistry<ClientHttpResponse>();
+
+		public void addCallback(
+				ListenableFutureCallback<? super ClientHttpResponse> callback) {
+			callbacks.addCallback(callback);
+		}
+
+		@Override
+		public void completed(HttpResponse result) {
+			callbacks.success(new HttpComponentsAsyncClientHttpResponse(result));
+		}
+
+		@Override
+		public void failed(Exception ex) {
+			callbacks.failure(ex);
+		}
+
+		@Override
+		public void cancelled() {
+		}
+
 	}
 
 
-	private static class ClientHttpResponseFuture implements Future<ClientHttpResponse> {
+	private static class ClientHttpResponseFuture extends FutureAdapter<ClientHttpResponse, HttpResponse>
+			implements ListenableFuture<ClientHttpResponse> {
 
-		private final Future<HttpResponse> futureResponse;
+		private final HttpResponseFutureCallback callback;
 
-
-		public ClientHttpResponseFuture(Future<HttpResponse> futureResponse) {
-			this.futureResponse = futureResponse;
+		private ClientHttpResponseFuture(Future<HttpResponse> futureResponse,
+				HttpResponseFutureCallback callback) {
+			super(futureResponse);
+			this.callback = callback;
 		}
 
 		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return futureResponse.cancel(mayInterruptIfRunning);
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return futureResponse.isCancelled();
-		}
-
-		@Override
-		public boolean isDone() {
-			return futureResponse.isDone();
-		}
-
-		@Override
-		public ClientHttpResponse get()
-				throws InterruptedException, ExecutionException {
-			HttpResponse response = futureResponse.get();
+		protected ClientHttpResponse adapt(HttpResponse response) {
 			return new HttpComponentsAsyncClientHttpResponse(response);
 		}
 
 		@Override
-		public ClientHttpResponse get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException, TimeoutException {
-			HttpResponse response = futureResponse.get(timeout, unit);
-			return new HttpComponentsAsyncClientHttpResponse(response);
+		public void addCallback(
+				ListenableFutureCallback<? super ClientHttpResponse> callback) {
+			this.callback.addCallback(callback);
 		}
-
 	}
 
 

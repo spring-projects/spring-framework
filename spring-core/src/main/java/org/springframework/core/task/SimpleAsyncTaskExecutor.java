@@ -25,6 +25,8 @@ import java.util.concurrent.ThreadFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * {@link TaskExecutor} implementation that fires up a new Thread for each task,
@@ -45,7 +47,7 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
 @SuppressWarnings("serial")
-public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements AsyncTaskExecutor, Serializable {
+public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements AsyncListenableTaskExecutor, Serializable {
 
 	/**
 	 * Permit any number of concurrent invocations: that is, don't throttle concurrency.
@@ -180,6 +182,20 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
+	@Override
+	public ListenableFuture<?> submitListenable(Runnable task) {
+		ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+		execute(future, TIMEOUT_INDEFINITE);
+		return future;
+	}
+
+	@Override
+	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
+		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}

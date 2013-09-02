@@ -34,6 +34,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 		AbstractJettyServerTestCase {
@@ -60,6 +62,47 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends
 		ClientHttpResponse response = futureResponse.get();
 		assertEquals("Invalid status code", HttpStatus.NOT_FOUND,
 				response.getStatusCode());
+	}
+
+	@Test
+	public void statusCallback() throws Exception {
+		URI uri = new URI(baseUrl + "/status/notfound");
+		AsyncClientHttpRequest request = factory.createAsyncRequest(uri, HttpMethod.GET);
+		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
+		assertEquals("Invalid HTTP URI", uri, request.getURI());
+		Future<ClientHttpResponse> futureResponse = request.executeAsync();
+		if (futureResponse instanceof ListenableFuture) {
+			ListenableFuture<ClientHttpResponse> listenableFuture =
+					(ListenableFuture<ClientHttpResponse>) futureResponse;
+
+
+			listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>() {
+				@Override
+				public void onSuccess(ClientHttpResponse result) {
+					try {
+						System.out.println("SUCCESS! " + result.getStatusCode());
+						System.out.println("Callback: " + System.currentTimeMillis());
+						System.out.println(Thread.currentThread().getId());
+						assertEquals("Invalid status code", HttpStatus.NOT_FOUND,
+								result.getStatusCode());
+					}
+					catch (IOException e) {
+						e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+					}
+				}
+
+				@Override
+				public void onFailure(Throwable t) {
+					System.out.println("FAILURE: " + t);
+				}
+			});
+
+		}
+		ClientHttpResponse response = futureResponse.get();
+		System.out.println("Main thread: " + System.currentTimeMillis());
+		assertEquals("Invalid status code", HttpStatus.NOT_FOUND,
+				response.getStatusCode());
+		System.out.println(Thread.currentThread().getId());
 	}
 
 	@Test
