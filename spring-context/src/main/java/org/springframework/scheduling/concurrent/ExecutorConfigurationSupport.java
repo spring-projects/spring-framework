@@ -63,8 +63,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
-	 * Set the ThreadFactory to use for the ThreadPoolExecutor's thread pool.
-	 * Default is the ThreadPoolExecutor's default thread factory.
+	 * Set the ThreadFactory to use for the ExecutorService's thread pool.
+	 * Default is the underlying ExecutorService's default thread factory.
 	 * @see java.util.concurrent.Executors#defaultThreadFactory()
 	 */
 	public void setThreadFactory(ThreadFactory threadFactory) {
@@ -78,8 +78,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	/**
-	 * Set the RejectedExecutionHandler to use for the ThreadPoolExecutor.
-	 * Default is the ThreadPoolExecutor's default abort policy.
+	 * Set the RejectedExecutionHandler to use for the ExecutorService.
+	 * Default is the ExecutorService's default abort policy.
 	 * @see java.util.concurrent.ThreadPoolExecutor.AbortPolicy
 	 */
 	public void setRejectedExecutionHandler(RejectedExecutionHandler rejectedExecutionHandler) {
@@ -181,7 +181,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	/**
-	 * Perform a shutdown on the ThreadPoolExecutor.
+	 * Perform a shutdown on the underlying ExecutorService.
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
 	 * @see #awaitTerminationIfNecessary()
