@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,18 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	/**
 	 * Set the ScheduledExecutorService's pool size.
 	 * Default is 1.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setPoolSize(int poolSize) {
 		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
 		this.poolSize = poolSize;
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setCorePoolSize(poolSize);
+		}
 	}
 
 	/**
-	 * Provide an {@link ErrorHandler} strategy.
+	 * Set a custom {@link ErrorHandler} strategy.
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "'errorHandler' must not be null");
@@ -109,6 +113,47 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ScheduledExecutorService getScheduledExecutor() throws IllegalStateException {
 		Assert.state(this.scheduledExecutor != null, "ThreadPoolTaskScheduler not initialized");
 		return this.scheduledExecutor;
+	}
+
+	/**
+	 * Return the underlying ScheduledThreadPoolExecutor, if available.
+	 * @return the underlying ScheduledExecutorService (never {@code null})
+	 * @throws IllegalStateException if the ThreadPoolTaskScheduler hasn't been initialized yet
+	 * or if the underlying ScheduledExecutorService isn't a ScheduledThreadPoolExecutor
+	 * @see #getScheduledExecutor()
+	 */
+	public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() throws IllegalStateException {
+		Assert.state(this.scheduledExecutor instanceof ScheduledThreadPoolExecutor,
+				"No ScheduledThreadPoolExecutor available");
+		return (ScheduledThreadPoolExecutor) this.scheduledExecutor;
+	}
+
+	/**
+	 * Return the current pool size.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
+	 * @see #getScheduledThreadPoolExecutor()
+	 * @see java.util.concurrent.ScheduledThreadPoolExecutor#getPoolSize()
+	 */
+	public int getPoolSize() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: assume initial pool size.
+			return this.poolSize;
+		}
+		return getScheduledThreadPoolExecutor().getPoolSize();
+	}
+
+	/**
+	 * Return the number of currently active threads.
+	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
+	 * @see #getScheduledThreadPoolExecutor()
+	 * @see java.util.concurrent.ScheduledThreadPoolExecutor#getActiveCount()
+	 */
+	public int getActiveCount() {
+		if (this.scheduledExecutor == null) {
+			// Not initialized yet: assume no active threads.
+			return 0;
+		}
+		return getScheduledThreadPoolExecutor().getActiveCount();
 	}
 
 

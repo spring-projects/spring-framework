@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,9 +154,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	 * Specify whether to allow core threads to time out. This enables dynamic
 	 * growing and shrinking even in combination with a non-zero queue (since
 	 * the max pool size will only grow once the queue is full).
-	 * <p>Default is "false". Note that this feature is only available on Java 6
-	 * or above. On Java 5, consider switching to the backport-concurrent
-	 * version of ThreadPoolTaskExecutor which also supports this feature.
+	 * <p>Default is "false".
 	 * @see java.util.concurrent.ThreadPoolExecutor#allowCoreThreadTimeOut(boolean)
 	 */
 	public void setAllowCoreThreadTimeOut(boolean allowCoreThreadTimeOut) {
@@ -225,7 +223,11 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	 * @see java.util.concurrent.ThreadPoolExecutor#getPoolSize()
 	 */
 	public int getPoolSize() {
-		return getThreadPoolExecutor().getPoolSize();
+		if (this.threadPoolExecutor == null) {
+			// Not initialized yet: assume core pool size.
+			return this.corePoolSize;
+		}
+		return this.threadPoolExecutor.getPoolSize();
 	}
 
 	/**
@@ -233,7 +235,11 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	 * @see java.util.concurrent.ThreadPoolExecutor#getActiveCount()
 	 */
 	public int getActiveCount() {
-		return getThreadPoolExecutor().getActiveCount();
+		if (this.threadPoolExecutor == null) {
+			// Not initialized yet: assume no active threads.
+			return 0;
+		}
+		return this.threadPoolExecutor.getActiveCount();
 	}
 
 
