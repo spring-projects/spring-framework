@@ -287,20 +287,22 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		public void handleMessage(Message<?> message) throws MessagingException {
-			synchronized(this.monitor) {
-				for (MessageExchange exch : this.expected) {
-					if (exch.matchMessage(message)) {
-						if (exch.isDone()) {
-							this.expected.remove(exch);
-							this.actual.add(exch);
-							if (this.expected.isEmpty()) {
-								this.monitor.notifyAll();
+			if (StompHeaderAccessor.wrap(message).getCommand() != null) {
+				synchronized(this.monitor) {
+					for (MessageExchange exch : this.expected) {
+						if (exch.matchMessage(message)) {
+							if (exch.isDone()) {
+								this.expected.remove(exch);
+								this.actual.add(exch);
+								if (this.expected.isEmpty()) {
+									this.monitor.notifyAll();
+								}
 							}
+							return;
 						}
-						return;
 					}
+					this.unexpected.add(message);
 				}
-				this.unexpected.add(message);
 			}
 		}
 

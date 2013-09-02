@@ -23,6 +23,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 
 /**
@@ -39,6 +41,7 @@ public final class StompEncoder  {
 
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
+	private final Log logger = LogFactory.getLog(StompEncoder.class);
 
 	/**
 	 * Encodes the given STOMP {@code message} into a {@code byte[]}
@@ -49,22 +52,33 @@ public final class StompEncoder  {
 	 */
 	public byte[] encode(Message<byte[]> message) {
 		try {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Encoding " + message);
+			}
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream output = new DataOutputStream(baos);
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 
-			writeCommand(headers, output);
-			writeHeaders(headers, message, output);
-			output.write(LF);
-			writeBody(message, output);
-			output.write((byte)0);
+			if (isHeartbeat(headers)) {
+				output.write(message.getPayload());
+			} else {
+				writeCommand(headers, output);
+				writeHeaders(headers, message, output);
+				output.write(LF);
+				writeBody(message, output);
+				output.write((byte)0);
+			}
 
 			return baos.toByteArray();
 		}
 		catch (IOException e) {
 			throw new StompConversionException("Failed to encode STOMP frame",  e);
 		}
+	}
+
+	private boolean isHeartbeat(StompHeaderAccessor headers) {
+		return headers.getCommand() == null;
 	}
 
 	private void writeCommand(StompHeaderAccessor headers, DataOutputStream output) throws IOException {

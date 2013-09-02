@@ -166,11 +166,17 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-		headers.setCommandIfNotSet(StompCommand.MESSAGE);
+		if (headers.getCommand() == null && SimpMessageType.MESSAGE == headers.getMessageType()) {
+			headers.setCommandIfNotSet(StompCommand.MESSAGE);
+		}
 
-		if (this.handleConnect && StompCommand.CONNECTED.equals(headers.getCommand())) {
-			// Ignore since we already sent it
-			return;
+		if (headers.getCommand() == StompCommand.CONNECTED) {
+			if (this.handleConnect) {
+				// Ignore since we already sent it
+				return;
+			} else {
+				augmentConnectedHeaders(headers, session);
+			}
 		}
 
 		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
@@ -222,20 +228,26 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 		connectedHeaders.setHeartbeat(0,0);
 
+		augmentConnectedHeaders(connectedHeaders, session);
+
+		// TODO: security
+
+		Message<byte[]> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
+		String payload = new String(this.stompEncoder.encode(connectedMessage), Charset.forName("UTF-8"));
+		session.sendMessage(new TextMessage(payload));
+	}
+
+	private void augmentConnectedHeaders(StompHeaderAccessor headers, WebSocketSession session) {
 		Principal principal = session.getPrincipal();
 		if (principal != null) {
-			connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
-			connectedHeaders.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
+			headers.setNativeHeader(CONNECTED_USER_HEADER, principal.getName());
+			headers.setNativeHeader(QUEUE_SUFFIX_HEADER, session.getId());
 
 			if (this.queueSuffixResolver != null) {
 				String suffix = session.getId();
 				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
 			}
 		}
-
-		Message<byte[]> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
-		String payload = new String(this.stompEncoder.encode(connectedMessage), Charset.forName("UTF-8"));
-		session.sendMessage(new TextMessage(payload));
 	}
 
 	protected void sendErrorMessage(WebSocketSession session, Throwable error) {

@@ -23,6 +23,7 @@ import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.support.MessageBuilder;
@@ -97,6 +98,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 			SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
 			headers.setSessionId(this.sessionId);
 			headers.setSubscriptionId(this.subscriptionId);
+			headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
 			return MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 	}

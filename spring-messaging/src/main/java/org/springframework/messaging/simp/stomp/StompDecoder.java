@@ -20,6 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.LinkedMultiValueMap;
@@ -35,6 +37,10 @@ public class StompDecoder {
 
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
+	private static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
+
+	private final Log logger = LogFactory.getLog(StompDecoder.class);
+
 
 	/**
 	 * Decodes a STOMP frame in the given {@code buffer} into a {@link Message}.
@@ -49,12 +55,20 @@ public class StompDecoder {
 			MultiValueMap<String, String> headers = readHeaders(buffer);
 			byte[] payload = readPayload(buffer, headers);
 
-			return MessageBuilder.withPayloadAndHeaders(payload,
+			Message<byte[]> decodedMessage = MessageBuilder.withPayloadAndHeaders(payload,
 					StompHeaderAccessor.create(StompCommand.valueOf(command), headers)).build();
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Decoded " + decodedMessage);
+			}
+
+			return decodedMessage;
 		}
 		else {
-			// Heartbeat
-			return null;
+			if (logger.isTraceEnabled()) {
+				logger.trace("Decoded heartbeat");
+			}
+			return MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).build();
 		}
 
 	}

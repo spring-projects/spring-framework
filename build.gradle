@@ -71,6 +71,7 @@ configure(allprojects) { project ->
 		maven { url "https://repository.apache.org/content/repositories/releases" } // tomcat 8 RC3
 		maven { url "https://repository.apache.org/content/repositories/snapshots" } // tomcat-websocket-* snapshots
 		maven { url "https://maven.java.net/content/repositories/releases" } //  javax.websocket, tyrus
+		maven { url 'http://repo.springsource.org/libs-snapshot' } // reactor
 	}
 
 	dependencies {
@@ -352,8 +353,8 @@ project("spring-messaging") {
 		optional(project(":spring-websocket"))
 		optional(project(":spring-webmvc"))
 		optional("com.fasterxml.jackson.core:jackson-databind:2.2.0")
-		optional("org.projectreactor:reactor-core:1.0.0.M2")
-		optional("org.projectreactor:reactor-tcp:1.0.0.M2")
+		optional("org.projectreactor:reactor-core:1.0.0.BUILD-SNAPSHOT")
+		optional("org.projectreactor:reactor-tcp:1.0.0.BUILD-SNAPSHOT")
 		optional("com.lmax:disruptor:3.1.1")
 		optional("org.eclipse.jetty.websocket:websocket-server:9.0.5.v20130815")
 		optional("org.eclipse.jetty.websocket:websocket-client:9.0.5.v20130815")

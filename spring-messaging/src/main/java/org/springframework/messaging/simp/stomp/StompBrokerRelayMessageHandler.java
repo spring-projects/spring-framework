@@ -196,21 +196,17 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 
-		if (headers.getCommand() == null) {
-			logger.error("No STOMP command, ignoring message: " + message);
-			return;
-		}
 		if (sessionId == null) {
 			logger.error("No sessionId, ignoring message: " + message);
 			return;
 		}
-		if (command.requiresDestination() && !checkDestinationPrefix(destination)) {
+
+		if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
 			return;
 		}
 
 		try {
 			if (SimpMessageType.CONNECT.equals(messageType)) {
-				headers.setHeartbeat(0, 0);
 				message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 				RelaySession session = new RelaySession(sessionId);
 				this.relaySessions.put(sessionId, session);
@@ -305,8 +301,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
 			if (StompCommand.CONNECTED == headers.getCommand()) {
-				this.stompConnection.setReady();
-				publishBrokerAvailableEvent();
+				connected(headers, this.stompConnection);
 			}
 
 			headers.setSessionId(this.sessionId);
@@ -314,12 +309,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			sendMessageToClient(message);
 		}
 
+		protected void connected(StompHeaderAccessor headers, StompConnection stompConnection) {
+			this.stompConnection.setReady();
+			publishBrokerAvailableEvent();
+		}
+
 		private void handleTcpClientFailure(String message, Throwable ex) {
 			if (logger.isErrorEnabled()) {
 				logger.error(message + ", sessionId=" + this.sessionId, ex);
 			}
+			disconnected(message);
+		}
+
+		protected void disconnected(String errorMessage) {
 			this.stompConnection.setDisconnected();
-			sendError(message);
+			sendError(errorMessage);
 			publishBrokerUnavailableEvent();
 		}
 
@@ -445,11 +449,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private class SystemRelaySession extends RelaySession {
 
-		 private static final long HEARTBEAT_SEND_INTERVAL = 10000;
+		private static final long HEARTBEAT_RECEIVE_MULTIPLIER = 3;
 
-		 private static final long HEARTBEAT_RECEIVE_INTERVAL = 10000;
+		private static final long HEARTBEAT_SEND_INTERVAL = 10000;
+
+		private static final long HEARTBEAT_RECEIVE_INTERVAL = 10000;
 
 		public static final String ID = "stompRelaySystemSessionId";
+
+		private final byte[] heartbeatPayload = new byte[] {'\n'};
 
 
 		public SystemRelaySession() {
@@ -479,6 +487,39 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		protected void connectionClosed() {
 			publishBrokerUnavailableEvent();
+		}
+
+		@Override
+		protected void connected(StompHeaderAccessor headers, final StompConnection stompConnection) {
+			long brokerReceiveInterval = headers.getHeartbeat()[1];
+
+			if (HEARTBEAT_SEND_INTERVAL > 0 && brokerReceiveInterval > 0) {
+				long interval = Math.max(HEARTBEAT_SEND_INTERVAL,  brokerReceiveInterval);
+				stompConnection.connection.on().writeIdle(interval, new Runnable() {
+
+					@Override
+					public void run() {
+						stompConnection.connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+					}
+
+				});
+			}
+
+			long brokerSendInterval = headers.getHeartbeat()[0];
+			if (HEARTBEAT_RECEIVE_INTERVAL > 0 && brokerSendInterval > 0) {
+				final long interval =
+						Math.max(HEARTBEAT_RECEIVE_INTERVAL, brokerSendInterval) * HEARTBEAT_RECEIVE_MULTIPLIER;
+				stompConnection.connection.on().readIdle(interval,  new Runnable() {
+					@Override
+					public void run() {
+						String message = "Broker hearbeat missed: connection idle for more than " + interval + "ms";
+						logger.warn(message);
+						disconnected(message);
+					}
+				});
+			}
+
+			super.connected(headers, stompConnection);
 		}
 
 		@Override
