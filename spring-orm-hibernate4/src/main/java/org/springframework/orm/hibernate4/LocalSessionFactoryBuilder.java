@@ -33,7 +33,6 @@ import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory;
-import org.hibernate.service.jta.platform.internal.WebSphereExtendedJtaPlatform;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -140,7 +139,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * instructing Hibernate to interact with externally managed transactions.
 	 * <p>A passed-in Spring {@link JtaTransactionManager} needs to contain a JTA
 	 * {@link TransactionManager} reference to be usable here, except for the WebSphere
-	 * case where we'll automatically set {@link WebSphereExtendedJtaPlatform} accordingly.
+	 * case where we'll automatically set {@code WebSphereExtendedJtaPlatform} accordingly.
 	 * <p>Note: If this is set, the Hibernate settings should not contain a JTA platform
 	 * setting to avoid meaningless double configuration.
 	 */
@@ -149,7 +148,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		if (jtaTransactionManager instanceof JtaTransactionManager) {
 			boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", getClass().getClassLoader());
 			if (webspherePresent) {
-				getProperties().put(AvailableSettings.JTA_PLATFORM, new WebSphereExtendedJtaPlatform());
+				getProperties().put(AvailableSettings.JTA_PLATFORM,
+						ConfigurableJtaPlatform.getJtaPlatformBasePackage() + "internal.WebSphereExtendedJtaPlatform");
 			}
 			else {
 				JtaTransactionManager jtaTm = (JtaTransactionManager) jtaTransactionManager;
@@ -158,12 +158,13 @@ public class LocalSessionFactoryBuilder extends Configuration {
 							"Can only apply JtaTransactionManager which has a TransactionManager reference set");
 				}
 				getProperties().put(AvailableSettings.JTA_PLATFORM,
-						new ConfigurableJtaPlatform(jtaTm.getTransactionManager(), jtaTm.getUserTransaction()));
+						new ConfigurableJtaPlatform(jtaTm.getTransactionManager(), jtaTm.getUserTransaction(),
+								jtaTm.getTransactionSynchronizationRegistry()).getJtaPlatformProxy());
 			}
 		}
 		else if (jtaTransactionManager instanceof TransactionManager) {
 			getProperties().put(AvailableSettings.JTA_PLATFORM,
-					new ConfigurableJtaPlatform((TransactionManager) jtaTransactionManager, null));
+					new ConfigurableJtaPlatform((TransactionManager) jtaTransactionManager, null, null).getJtaPlatformProxy());
 		}
 		else {
 			throw new IllegalArgumentException(

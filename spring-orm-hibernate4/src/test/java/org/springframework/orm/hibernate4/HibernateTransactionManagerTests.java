@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
+import javax.transaction.UserTransaction;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Interceptor;
@@ -32,8 +35,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionBuilder;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.After;
 import org.junit.Test;
@@ -49,6 +54,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -1178,6 +1184,37 @@ public class HibernateTransactionManagerTests {
 		verify(session).flush();
 		verify(tx).commit();
 		verify(session).close();
+	}
+
+	@Test
+	public void testSetJtaTransactionManager() throws Exception {
+		DataSource ds = mock(DataSource.class);
+		TransactionManager tm = mock(TransactionManager.class);
+		UserTransaction ut = mock(UserTransaction.class);
+		TransactionSynchronizationRegistry tsr = mock(TransactionSynchronizationRegistry.class);
+		JtaTransactionManager jtm = new JtaTransactionManager();
+		jtm.setTransactionManager(tm);
+		jtm.setUserTransaction(ut);
+		jtm.setTransactionSynchronizationRegistry(tsr);
+		LocalSessionFactoryBuilder lsfb = new LocalSessionFactoryBuilder(ds);
+		lsfb.setJtaTransactionManager(jtm);
+		Object jtaPlatform = lsfb.getProperties().get(AvailableSettings.JTA_PLATFORM);
+		assertNotNull(jtaPlatform);
+		assertSame(tm, jtaPlatform.getClass().getMethod("retrieveTransactionManager").invoke(jtaPlatform));
+		assertSame(ut, jtaPlatform.getClass().getMethod("retrieveUserTransaction").invoke(jtaPlatform));
+		assertTrue(lsfb.getProperties().get(AvailableSettings.TRANSACTION_STRATEGY) instanceof CMTTransactionFactory);
+	}
+
+	@Test
+	public void testSetTransactionManager() throws Exception {
+		DataSource ds = mock(DataSource.class);
+		TransactionManager tm = mock(TransactionManager.class);
+		LocalSessionFactoryBuilder lsfb = new LocalSessionFactoryBuilder(ds);
+		lsfb.setJtaTransactionManager(tm);
+		Object jtaPlatform = lsfb.getProperties().get(AvailableSettings.JTA_PLATFORM);
+		assertNotNull(jtaPlatform);
+		assertSame(tm, jtaPlatform.getClass().getMethod("retrieveTransactionManager").invoke(jtaPlatform));
+		assertTrue(lsfb.getProperties().get(AvailableSettings.TRANSACTION_STRATEGY) instanceof CMTTransactionFactory);
 	}
 
 

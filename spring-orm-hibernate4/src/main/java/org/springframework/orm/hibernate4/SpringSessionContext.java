@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.orm.hibernate4;
 
-import javax.transaction.TransactionManager;
+import java.lang.reflect.Method;
 
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.context.spi.CurrentSessionContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.service.jta.platform.spi.JtaPlatform;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of Hibernate 3.1's CurrentSessionContext interface
@@ -44,7 +44,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 
 	private final SessionFactoryImplementor sessionFactory;
 
-	private final CurrentSessionContext jtaSessionContext;
+	private CurrentSessionContext jtaSessionContext;
 
 
 	/**
@@ -53,9 +53,17 @@ public class SpringSessionContext implements CurrentSessionContext {
 	 */
 	public SpringSessionContext(SessionFactoryImplementor sessionFactory) {
 		this.sessionFactory = sessionFactory;
-		JtaPlatform jtaPlatform = sessionFactory.getServiceRegistry().getService(JtaPlatform.class);
-		TransactionManager transactionManager = jtaPlatform.retrieveTransactionManager();
-		this.jtaSessionContext = (transactionManager != null ? new SpringJtaSessionContext(sessionFactory) : null);
+		try {
+			Object jtaPlatform = sessionFactory.getServiceRegistry().getService(ConfigurableJtaPlatform.jtaPlatformClass);
+			Method rtmMethod = ConfigurableJtaPlatform.jtaPlatformClass.getMethod("retrieveTransactionManager");
+			Object transactionManager = ReflectionUtils.invokeMethod(rtmMethod, jtaPlatform);
+			if (transactionManager != null) {
+				this.jtaSessionContext = new SpringJtaSessionContext(sessionFactory);
+			}
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Could not introspect Hibernate JtaPlatform for SpringJtaSessionContext", ex);
+		}
 	}
 
 
@@ -79,7 +87,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 				// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
 				// with FlushMode.MANUAL, which needs to allow flushing within the transaction.
 				FlushMode flushMode = session.getFlushMode();
-				if (FlushMode.isManualFlushMode(flushMode) &&
+				if (flushMode.equals(FlushMode.MANUAL) &&
 						!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 					session.setFlushMode(FlushMode.AUTO);
 					sessionHolder.setPreviousFlushMode(flushMode);

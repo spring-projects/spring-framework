@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate4;
 
+import java.lang.reflect.Method;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -45,7 +46,7 @@ import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
-import org.hibernate.service.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.service.spi.Wrapped;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -57,6 +58,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.
@@ -83,6 +86,12 @@ public abstract class SessionFactoryUtils {
 
 	static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
+	/**
+	 * Bridging between the different ConnectionProvider package location in 4.0-4.2 vs 4.3.
+	 */
+	private static final Method getConnectionProviderMethod =
+			ClassUtils.getMethodIfAvailable(SessionFactoryImplementor.class, "getConnectionProvider");
+
 
 	/**
 	 * Determine the DataSource of the given SessionFactory.
@@ -91,8 +100,8 @@ public abstract class SessionFactoryUtils {
 	 * @see org.hibernate.engine.spi.SessionFactoryImplementor#getConnectionProvider
 	 */
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
-		if (sessionFactory instanceof SessionFactoryImplementor) {
-			ConnectionProvider cp = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
+		if (getConnectionProviderMethod != null && sessionFactory instanceof SessionFactoryImplementor) {
+			Wrapped cp = (Wrapped) ReflectionUtils.invokeMethod(getConnectionProviderMethod, sessionFactory);
 			return cp.unwrap(DataSource.class);
 		}
 		return null;

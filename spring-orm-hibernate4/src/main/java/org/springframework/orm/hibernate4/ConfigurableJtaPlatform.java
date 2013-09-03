@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,67 @@
 
 package org.springframework.orm.hibernate4;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 
-import org.hibernate.service.jta.platform.internal.AbstractJtaPlatform;
+import org.hibernate.TransactionException;
+import org.hibernate.service.Service;
 
 import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of Hibernate 4's {@link org.hibernate.service.jta.platform.spi.JtaPlatform}
- * SPI, exposing passed-in {@link TransactionManager} and {@link UserTransaction} references.
+ * Implementation of Hibernate 4's JtaPlatform SPI (which has a different package
+ * location in Hibernate 4.0-4.2 vs 4.3), exposing passed-in {@link TransactionManager},
+ * {@link UserTransaction} and {@link TransactionSynchronizationRegistry} references.
  *
  * @author Juergen Hoeller
  * @since 3.1.2
  */
-@SuppressWarnings("serial")
-class ConfigurableJtaPlatform extends AbstractJtaPlatform {
+@SuppressWarnings({"serial", "unchecked"})
+class ConfigurableJtaPlatform implements InvocationHandler {
+
+	static final Class<? extends Service> jtaPlatformClass;
+
+	static {
+		Class<?> jpClass;
+		try {
+			// Try Hibernate 4.0-4.2 JtaPlatform variant
+			jpClass = SpringSessionContext.class.getClassLoader().loadClass(
+					"org.hibernate.service.jta.platform.spi.JtaPlatform");
+		}
+		catch (ClassNotFoundException ex) {
+			try {
+				// Try Hibernate 4.3 JtaPlatform variant
+				jpClass = SpringSessionContext.class.getClassLoader().loadClass(
+						"org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform");
+			}
+			catch (ClassNotFoundException ex2) {
+				throw new IllegalStateException("Neither Hibernate 4.0-4.2 nor 4.3 variant of JtaPlatform found");
+			}
+		}
+		jtaPlatformClass = (Class<? extends Service>) jpClass;
+	}
+
+	static String getJtaPlatformBasePackage() {
+		String className = jtaPlatformClass.getName();
+		return className.substring(0, className.length() - "spi.JtaPlatform".length());
+	}
+
 
 	private final TransactionManager transactionManager;
 
 	private final UserTransaction userTransaction;
+
+	private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
 
 	/**
@@ -44,32 +84,69 @@ class ConfigurableJtaPlatform extends AbstractJtaPlatform {
 	 * JTA TransactionManager and optionally a given UserTransaction.
 	 * @param tm the JTA TransactionManager reference (required)
 	 * @param ut the JTA UserTransaction reference (optional)
+	 * @param tsr the JTA 1.1 TransactionSynchronizationRegistry (optional)
 	 */
-	public ConfigurableJtaPlatform(TransactionManager tm, UserTransaction ut) {
+	public ConfigurableJtaPlatform(TransactionManager tm, UserTransaction ut, TransactionSynchronizationRegistry tsr) {
 		Assert.notNull(tm, "TransactionManager reference must not be null");
 		this.transactionManager = tm;
 		this.userTransaction = (ut != null ? ut : new UserTransactionAdapter(tm));
+		this.transactionSynchronizationRegistry = tsr;
 	}
 
 
-	@Override
-	protected TransactionManager locateTransactionManager() {
+	public TransactionManager retrieveTransactionManager() {
 		return this.transactionManager;
 	}
 
-	@Override
-	protected UserTransaction locateUserTransaction() {
+	public UserTransaction retrieveUserTransaction() {
 		return this.userTransaction;
 	}
 
-	@Override
-	protected boolean canCacheTransactionManager() {
-		return true;
+	public Object getTransactionIdentifier(Transaction transaction) {
+		return transaction;
 	}
 
+	public boolean canRegisterSynchronization() {
+		try {
+			return (this.transactionManager.getStatus() == Status.STATUS_ACTIVE);
+		}
+		catch (SystemException ex) {
+			throw new TransactionException("Could not determine JTA transaction status", ex);
+		}
+	}
+
+	public void registerSynchronization(Synchronization synchronization) {
+		if (this.transactionSynchronizationRegistry != null) {
+			this.transactionSynchronizationRegistry.registerInterposedSynchronization(synchronization);
+		}
+		else {
+			try {
+				this.transactionManager.getTransaction().registerSynchronization(synchronization);
+			}
+			catch (Exception ex) {
+				throw new TransactionException("Could not access JTA Transaction to register synchronization", ex);
+			}
+		}
+	}
+
+	public int getCurrentStatus() throws SystemException {
+		return this.transactionManager.getStatus();
+	}
+
+
 	@Override
-	protected boolean canCacheUserTransaction() {
-		return true;
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		Method targetMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
+		return targetMethod.invoke(this, args);
+	}
+
+	/**
+	 * Obtain a proxy that implements the current Hibernate version's JtaPlatform interface
+	 * in the right package location, delegating all invocations to the same-named methods
+	 * on this ConfigurableJtaPlatform class itself.
+	 */
+	public Object getJtaPlatformProxy() {
+		return Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] {jtaPlatformClass}, this);
 	}
 
 }
