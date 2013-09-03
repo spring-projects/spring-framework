@@ -21,9 +21,7 @@ import java.util.Collection;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
-
-import reactor.util.Assert;
-
+import org.springframework.util.Assert;
 
 /**
  * A helper class for configuring message broker options.

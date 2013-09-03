@@ -22,9 +22,7 @@ import java.util.Collections;
 
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.handler.AbstractBrokerMessageHandler;
-
-import reactor.util.Assert;
-
+import org.springframework.util.Assert;
 
 /**
  * Base class for message broker registration classes.

@@ -26,11 +26,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import reactor.util.Assert;
-
 
 /**
  * @author Rossen Stoyanchev
