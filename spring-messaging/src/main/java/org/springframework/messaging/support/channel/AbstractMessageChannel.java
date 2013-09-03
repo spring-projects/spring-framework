@@ -127,4 +127,10 @@ public abstract class AbstractMessageChannel implements MessageChannel, BeanName
 
 	protected abstract boolean sendInternal(Message<?> message, long timeout);
 
+
+	@Override
+	public String toString() {
+		return "MessageChannel [name=" + this.beanName + "]";
+	}
+
 }

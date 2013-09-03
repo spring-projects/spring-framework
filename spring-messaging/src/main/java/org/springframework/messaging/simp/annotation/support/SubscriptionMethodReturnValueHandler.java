@@ -31,10 +31,10 @@ import org.springframework.util.Assert;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for replying directly to a subscription. It
- * supports methods annotated with {@link SubscribeEvent} that do not also annotated with
- * neither {@link ReplyTo} nor {@link ReplyToUser}.
- *
- * <p>The value returned from the method is converted, and turned to a {@link Message} and
+ * supports methods annotated with {@link SubscribeEvent} unless they're also annotated
+ * with {@link ReplyTo} or {@link ReplyToUser}.
+ * <p>
+ * The value returned from the method is converted, and turned to a {@link Message} and
  * then enriched with the sessionId, subscriptionId, and destination of the input message.
  * The message is then sent directly back to the connected client.
  *
@@ -73,8 +73,7 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		String destination = inputHeaders.getDestination();
 
 		Assert.state(inputHeaders.getSubscriptionId() != null,
-				"No subsriptiondId in input message. Add @ReplyTo or @ReplyToUser to method: "
-						+ returnType.getMethod());
+				"No subsriptiondId in input message to method " + returnType.getMethod());
 
 		MessagePostProcessor postProcessor = new SubscriptionHeaderPostProcessor(sessionId, subscriptionId);
 		this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);

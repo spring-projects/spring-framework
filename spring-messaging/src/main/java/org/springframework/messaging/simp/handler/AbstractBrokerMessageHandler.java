@@ -47,6 +47,8 @@ public abstract class AbstractBrokerMessageHandler
 
 	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
 
+	private boolean autoStartup = true;
+
 	private Object lifecycleMonitor = new Object();
 
 	private volatile boolean running = false;
@@ -71,9 +73,13 @@ public abstract class AbstractBrokerMessageHandler
 		return this.eventPublisher;
 	}
 
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
+
 	@Override
 	public boolean isAutoStartup() {
-		return true;
+		return this.autoStartup;
 	}
 
 	@Override

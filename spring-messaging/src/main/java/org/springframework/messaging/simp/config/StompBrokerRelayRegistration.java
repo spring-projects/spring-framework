@@ -37,6 +37,8 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	private String applicationPasscode = "guest";
 
+	private boolean autoStartup = true;
+
 
 	public StompBrokerRelayRegistration(MessageChannel webSocketReplyChannel, String[] destinationPrefixes) {
 		super(webSocketReplyChannel, destinationPrefixes);
@@ -53,25 +55,11 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
-	 * @return the STOMP message broker host.
-	 */
-	protected String getRelayHost() {
-		return this.relayHost;
-	}
-
-	/**
 	 * Set the STOMP message broker port.
 	 */
 	public StompBrokerRelayRegistration setRelayPort(int relayPort) {
 		this.relayPort = relayPort;
 		return this;
-	}
-
-	/**
-	 * @return the STOMP message broker port.
-	 */
-	protected int getRelayPort() {
-		return this.relayPort;
 	}
 
 	/**
@@ -85,13 +73,6 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
-	 * @return the login for a shared, "system" connection to the STOMP message broker.
-	 */
-	protected String getApplicationLogin() {
-		return this.applicationLogin;
-	}
-
-	/**
 	 * Set the passcode for a "system" TCP connection used to send messages to the STOMP
 	 * broker without having a client session (e.g. REST/HTTP request handling method).
 	 */
@@ -102,10 +83,14 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	}
 
 	/**
-	 * @return the passcode for a shared, "system" connection to the STOMP message broker.
+	 * Configure whether the {@link StompBrokerRelayMessageHandler} should start
+	 * automatically when the Spring ApplicationContext is refreshed.
+	 * <p>
+	 * The default setting is {@code true}.
 	 */
-	protected String getApplicationPasscode() {
-		return this.applicationPasscode;
+	public StompBrokerRelayRegistration setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+		return this;
 	}
 
 
@@ -116,6 +101,7 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		handler.setRelayPort(this.relayPort);
 		handler.setSystemLogin(this.applicationLogin);
 		handler.setSystemPasscode(this.applicationPasscode);
+		handler.setAutoStartup(this.autoStartup);
 		return handler;
 	}
 

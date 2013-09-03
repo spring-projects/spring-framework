@@ -54,7 +54,7 @@ public class AbstractStompEndpointRegistrationTests {
 	}
 
 	@Test
-	public void minimal() {
+	public void minimalRegistration() {
 
 		TestStompEndpointRegistration registration =
 				new TestStompEndpointRegistration(new String[] {"/foo"}, this.wsHandler, this.scheduler);
@@ -68,7 +68,7 @@ public class AbstractStompEndpointRegistrationTests {
 	}
 
 	@Test
-	public void handshakeHandler() {
+	public void customHandshakeHandler() {
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 
@@ -86,7 +86,7 @@ public class AbstractStompEndpointRegistrationTests {
 	}
 
 	@Test
-	public void handshakeHandlerPassedToSockJsService() {
+	public void customHandshakeHandlerPassedToSockJsService() {
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 

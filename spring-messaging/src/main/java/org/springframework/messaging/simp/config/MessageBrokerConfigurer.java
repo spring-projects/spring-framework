@@ -33,7 +33,7 @@ import reactor.util.Assert;
  */
 public class MessageBrokerConfigurer {
 
-	private final MessageChannel webSocketReplyChannel;
+	private final MessageChannel webSocketResponseChannel;
 
 	private SimpleBrokerRegistration simpleBroker;
 
@@ -42,18 +42,18 @@ public class MessageBrokerConfigurer {
 	private String[] annotationMethodDestinationPrefixes;
 
 
-	public MessageBrokerConfigurer(MessageChannel webSocketReplyChannel) {
-		Assert.notNull(webSocketReplyChannel);
-		this.webSocketReplyChannel = webSocketReplyChannel;
+	public MessageBrokerConfigurer(MessageChannel webSocketResponseChannel) {
+		Assert.notNull(webSocketResponseChannel);
+		this.webSocketResponseChannel = webSocketResponseChannel;
 	}
 
 	public SimpleBrokerRegistration enableSimpleBroker(String... destinationPrefixes) {
-		this.simpleBroker = new SimpleBrokerRegistration(this.webSocketReplyChannel, destinationPrefixes);
+		this.simpleBroker = new SimpleBrokerRegistration(this.webSocketResponseChannel, destinationPrefixes);
 		return this.simpleBroker;
 	}
 
 	public StompBrokerRelayRegistration enableStompBrokerRelay(String... destinationPrefixes) {
-		this.stompRelay = new StompBrokerRelayRegistration(this.webSocketReplyChannel, destinationPrefixes);
+		this.stompRelay = new StompBrokerRelayRegistration(this.webSocketResponseChannel, destinationPrefixes);
 		return this.stompRelay;
 	}
 
@@ -69,7 +69,7 @@ public class MessageBrokerConfigurer {
 
 	protected void initSimpleBrokerIfNecessary() {
 		if ((this.simpleBroker == null) && (this.stompRelay == null)) {
-			this.simpleBroker = new SimpleBrokerRegistration(this.webSocketReplyChannel, null);
+			this.simpleBroker = new SimpleBrokerRegistration(this.webSocketResponseChannel, null);
 		}
 	}
 

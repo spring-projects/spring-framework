@@ -30,8 +30,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 
 
 /**
- * A helper class for configuring STOMP protocol handling over WebSocket
- * with optional SockJS fallback options.
+ * An abstract base class class for configuring STOMP over WebSocket/SockJS endpoints.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -46,33 +45,36 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 
 	private StompSockJsServiceRegistration sockJsServiceRegistration;
 
-	private final TaskScheduler defaultSockJsTaskScheduler;
+	private final TaskScheduler sockJsTaskScheduler;
 
 
 	public AbstractStompEndpointRegistration(String[] paths, SubProtocolWebSocketHandler webSocketHandler,
-			TaskScheduler defaultSockJsTaskScheduler) {
+			TaskScheduler sockJsTaskScheduler) {
 
 		Assert.notEmpty(paths, "No paths specified");
 		this.paths = paths;
 		this.wsHandler = webSocketHandler;
-		this.defaultSockJsTaskScheduler = defaultSockJsTaskScheduler;
+		this.sockJsTaskScheduler = sockJsTaskScheduler;
 	}
 
 
-	protected SubProtocolWebSocketHandler getWsHandler() {
-		return this.wsHandler;
-	}
-
+	/**
+	 * Provide a custom or pre-configured {@link HandshakeHandler}. This property is
+	 * optional.
+	 */
 	@Override
 	public StompEndpointRegistration setHandshakeHandler(HandshakeHandler handshakeHandler) {
 		this.handshakeHandler = handshakeHandler;
 		return this;
 	}
 
+	/**
+	 * Enable SockJS fallback options.
+	 */
 	@Override
 	public SockJsServiceRegistration withSockJS() {
 
-		this.sockJsServiceRegistration = new StompSockJsServiceRegistration(this.defaultSockJsTaskScheduler);
+		this.sockJsServiceRegistration = new StompSockJsServiceRegistration(this.sockJsTaskScheduler);
 
 		if (this.handshakeHandler != null) {
 			WebSocketTransportHandler transportHandler = new WebSocketTransportHandler(this.handshakeHandler);
@@ -82,7 +84,7 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 		return this.sockJsServiceRegistration;
 	}
 
-	protected M getMappings() {
+	protected final M getMappings() {
 
 		M mappings = createMappings();
 

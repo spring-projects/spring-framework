@@ -78,7 +78,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private final SimpMessageSendingOperations brokerTemplate;
 
-	private final SimpMessageSendingOperations webSocketReplyTemplate;
+	private final SimpMessageSendingOperations webSocketResponseTemplate;
 
 	private Collection<String> destinationPrefixes;
 
@@ -106,15 +106,15 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	/**
 	 * @param brokerTemplate a messaging template to sending messages to the broker
-	 * @param webSocketReplyChannel the channel for messages to WebSocket clients
+	 * @param webSocketResponseChannel the channel for messages to WebSocket clients
 	 */
 	public AnnotationMethodMessageHandler(SimpMessageSendingOperations brokerTemplate,
-			MessageChannel webSocketReplyChannel) {
+			MessageChannel webSocketResponseChannel) {
 
 		Assert.notNull(brokerTemplate, "brokerTemplate is required");
-		Assert.notNull(webSocketReplyChannel, "webSocketReplyChannel is required");
+		Assert.notNull(webSocketResponseChannel, "webSocketReplyChannel is required");
 		this.brokerTemplate = brokerTemplate;
-		this.webSocketReplyTemplate = new SimpMessagingTemplate(webSocketReplyChannel);
+		this.webSocketResponseTemplate = new SimpMessagingTemplate(webSocketResponseChannel);
 	}
 
 
@@ -129,7 +129,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 	public void setMessageConverter(MessageConverter<?> converter) {
 		this.messageConverter = converter;
 		if (converter != null) {
-			((AbstractMessageSendingTemplate<?>) this.webSocketReplyTemplate).setMessageConverter(converter);
+			((AbstractMessageSendingTemplate<?>) this.webSocketResponseTemplate).setMessageConverter(converter);
 		}
 	}
 
@@ -181,7 +181,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		// Annotation-based return value types
 		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate));
-		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketReplyTemplate));
+		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketResponseTemplate));
 
 		// custom return value types
 		this.returnValueHandlers.addHandlers(this.customReturnValueHandlers);
@@ -221,14 +221,14 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			final Class<A> annotationType, MappingInfoCreator<A> mappingInfoCreator,
 			Map<MappingInfo, HandlerMethod> handlerMethods) {
 
-		Set<Method> messageMethods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
+		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
 			@Override
 			public boolean matches(Method method) {
 				return AnnotationUtils.findAnnotation(method, annotationType) != null;
 			}
 		});
 
-		for (Method method : messageMethods) {
+		for (Method method : methods) {
 			A annotation = AnnotationUtils.findAnnotation(method, annotationType);
 			HandlerMethod hm = createHandlerMethod(handler, method);
 			handlerMethods.put(mappingInfoCreator.create(annotation), hm);

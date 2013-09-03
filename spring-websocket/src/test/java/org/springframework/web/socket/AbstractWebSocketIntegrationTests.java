@@ -108,6 +108,10 @@ public abstract class AbstractWebSocketIntegrationTests {
 		return "ws://localhost:" + this.server.getPort();
 	}
 
+	protected WebSocketSession doHandshake(WebSocketHandler clientHandler, String endpointPath) {
+		return this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + endpointPath);
+	}
+
 
 	static abstract class AbstractRequestUpgradeStrategyConfig {
 

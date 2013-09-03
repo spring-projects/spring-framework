@@ -67,7 +67,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	@Bean
 	public SubProtocolWebSocketHandler subProtocolWebSocketHandler() {
 		SubProtocolWebSocketHandler wsHandler = new SubProtocolWebSocketHandler(webSocketRequestChannel());
-		webSocketReplyChannel().subscribe(wsHandler);
+		webSocketResponseChannel().subscribe(wsHandler);
 		return wsHandler;
 	}
 
@@ -109,7 +109,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	}
 
 	@Bean
-	public SubscribableChannel webSocketReplyChannel() {
+	public SubscribableChannel webSocketResponseChannel() {
 		return new ExecutorSubscribableChannel(webSocketChannelExecutor());
 	}
 
@@ -125,7 +125,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	@Bean
 	public AnnotationMethodMessageHandler annotationMethodMessageHandler() {
 		AnnotationMethodMessageHandler handler =
-				new AnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketReplyChannel());
+				new AnnotationMethodMessageHandler(brokerMessagingTemplate(), webSocketResponseChannel());
 		handler.setDestinationPrefixes(getMessageBrokerConfigurer().getAnnotationMethodDestinationPrefixes());
 		handler.setMessageConverter(brokerMessageConverter());
 		webSocketRequestChannel().subscribe(handler);
@@ -140,7 +140,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		}
 		else {
 			webSocketRequestChannel().subscribe(handler);
-			brokerMessageChannel().subscribe(handler);
+			brokerChannel().subscribe(handler);
 			return handler;
 		}
 	}
@@ -153,14 +153,14 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		}
 		else {
 			webSocketRequestChannel().subscribe(handler);
-			brokerMessageChannel().subscribe(handler);
+			brokerChannel().subscribe(handler);
 			return handler;
 		}
 	}
 
 	protected final MessageBrokerConfigurer getMessageBrokerConfigurer() {
 		if (this.messageBrokerConfigurer == null) {
-			MessageBrokerConfigurer configurer = new MessageBrokerConfigurer(webSocketReplyChannel());
+			MessageBrokerConfigurer configurer = new MessageBrokerConfigurer(webSocketResponseChannel());
 			configureMessageBroker(configurer);
 			this.messageBrokerConfigurer = configurer;
 		}
@@ -175,19 +175,19 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(
 				brokerMessagingTemplate(), userQueueSuffixResolver());
 		webSocketRequestChannel().subscribe(handler);
-		brokerMessageChannel().subscribe(handler);
+		brokerChannel().subscribe(handler);
 		return handler;
 	}
 
 	@Bean
 	public SimpMessageSendingOperations brokerMessagingTemplate() {
-		SimpMessagingTemplate template = new SimpMessagingTemplate(webSocketRequestChannel());
+		SimpMessagingTemplate template = new SimpMessagingTemplate(brokerChannel());
 		template.setMessageConverter(brokerMessageConverter());
 		return template;
 	}
 
 	@Bean
-	public SubscribableChannel brokerMessageChannel() {
+	public SubscribableChannel brokerChannel() {
 		return new ExecutorSubscribableChannel(); // synchronous
 	}
 
