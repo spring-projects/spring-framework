@@ -30,6 +30,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 
 
 /**
@@ -40,7 +42,9 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 
-	private final SubProtocolWebSocketHandler wsHandler;
+	private final WebSocketHandler webSocketHandler;
+
+	private final SubProtocolWebSocketHandler subProtocolWebSocketHandler;
 
 	private final StompProtocolHandler stompHandler;
 
@@ -49,23 +53,36 @@ public class ServletStompEndpointRegistry implements StompEndpointRegistry {
 	private final TaskScheduler sockJsScheduler;
 
 
-	public ServletStompEndpointRegistry(SubProtocolWebSocketHandler webSocketHandler,
+	public ServletStompEndpointRegistry(WebSocketHandler webSocketHandler,
 			MutableUserQueueSuffixResolver userQueueSuffixResolver, TaskScheduler defaultSockJsTaskScheduler) {
 
 		Assert.notNull(webSocketHandler);
 		Assert.notNull(userQueueSuffixResolver);
 
-		this.wsHandler = webSocketHandler;
+		this.webSocketHandler = webSocketHandler;
+		this.subProtocolWebSocketHandler = findSubProtocolWebSocketHandler(webSocketHandler);
 		this.stompHandler = new StompProtocolHandler();
 		this.stompHandler.setUserQueueSuffixResolver(userQueueSuffixResolver);
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
+	private static SubProtocolWebSocketHandler findSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
+
+		WebSocketHandler actual = (webSocketHandler instanceof WebSocketHandlerDecorator) ?
+				((WebSocketHandlerDecorator) webSocketHandler).getLastHandler() : webSocketHandler;
+
+		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual,
+						"No SubProtocolWebSocketHandler found: " + webSocketHandler);
+
+		return (SubProtocolWebSocketHandler) actual;
+	}
+
 
 	@Override
 	public StompEndpointRegistration addEndpoint(String... paths) {
-		this.wsHandler.addProtocolHandler(this.stompHandler);
-		ServletStompEndpointRegistration r = new ServletStompEndpointRegistration(paths, this.wsHandler, this.sockJsScheduler);
+		this.subProtocolWebSocketHandler.addProtocolHandler(this.stompHandler);
+		ServletStompEndpointRegistration r = new ServletStompEndpointRegistration(
+				paths, this.webSocketHandler, this.sockJsScheduler);
 		this.registrations.add(r);
 		return r;
 	}

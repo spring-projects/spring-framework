@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.support.channel.ExecutorSubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.SockJsService;
@@ -122,13 +123,13 @@ public class AbstractStompEndpointRegistrationTests {
 
 		@Override
 		protected void addSockJsServiceMapping(List<Mapping> mappings, SockJsService sockJsService,
-				SubProtocolWebSocketHandler wsHandler, String pathPattern) {
+				WebSocketHandler wsHandler, String pathPattern) {
 
 			mappings.add(new Mapping(wsHandler, pathPattern, sockJsService));
 		}
 
 		@Override
-		protected void addWebSocketHandlerMapping(List<Mapping> mappings, SubProtocolWebSocketHandler wsHandler,
+		protected void addWebSocketHandlerMapping(List<Mapping> mappings, WebSocketHandler wsHandler,
 				HandshakeHandler handshakeHandler, String path) {
 
 			mappings.add(new Mapping(wsHandler, path, handshakeHandler));
@@ -137,7 +138,7 @@ public class AbstractStompEndpointRegistrationTests {
 
 	private static class Mapping {
 
-		private final SubProtocolWebSocketHandler webSocketHandler;
+		private final WebSocketHandler webSocketHandler;
 
 		private final String path;
 
@@ -145,14 +146,14 @@ public class AbstractStompEndpointRegistrationTests {
 
 		private final DefaultSockJsService sockJsService;
 
-		public Mapping(SubProtocolWebSocketHandler handler, String path, SockJsService sockJsService) {
+		public Mapping(WebSocketHandler handler, String path, SockJsService sockJsService) {
 			this.webSocketHandler = handler;
 			this.path = path;
 			this.handshakeHandler = null;
 			this.sockJsService = (DefaultSockJsService) sockJsService;
 		}
 
-		public Mapping(SubProtocolWebSocketHandler h, String path, HandshakeHandler hh) {
+		public Mapping(WebSocketHandler h, String path, HandshakeHandler hh) {
 			this.webSocketHandler = h;
 			this.path = path;
 			this.handshakeHandler = hh;

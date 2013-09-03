@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.simp.config;
 
-import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.SockJsHttpRequestHandler;
@@ -38,8 +38,8 @@ public class ServletStompEndpointRegistration
 		extends AbstractStompEndpointRegistration<MultiValueMap<HttpRequestHandler, String>> {
 
 
-	public ServletStompEndpointRegistration(String[] paths, SubProtocolWebSocketHandler wsHandler,
-			TaskScheduler sockJsTaskScheduler) {
+	public ServletStompEndpointRegistration(String[] paths,
+			WebSocketHandler wsHandler, TaskScheduler sockJsTaskScheduler) {
 
 		super(paths, wsHandler, sockJsTaskScheduler);
 	}
@@ -51,7 +51,7 @@ public class ServletStompEndpointRegistration
 
 	@Override
 	protected void addSockJsServiceMapping(MultiValueMap<HttpRequestHandler, String> mappings,
-			SockJsService sockJsService, SubProtocolWebSocketHandler wsHandler, String pathPattern) {
+			SockJsService sockJsService, WebSocketHandler wsHandler, String pathPattern) {
 
 		SockJsHttpRequestHandler httpHandler = new SockJsHttpRequestHandler(sockJsService, wsHandler);
 		mappings.add(httpHandler, pathPattern);
@@ -59,7 +59,7 @@ public class ServletStompEndpointRegistration
 
 	@Override
 	protected void addWebSocketHandlerMapping(MultiValueMap<HttpRequestHandler, String> mappings,
-			SubProtocolWebSocketHandler wsHandler, HandshakeHandler handshakeHandler, String path) {
+			WebSocketHandler wsHandler, HandshakeHandler handshakeHandler, String path) {
 
 		WebSocketHttpRequestHandler handler = new WebSocketHttpRequestHandler(wsHandler, handshakeHandler);
 		mappings.add(handler, path);

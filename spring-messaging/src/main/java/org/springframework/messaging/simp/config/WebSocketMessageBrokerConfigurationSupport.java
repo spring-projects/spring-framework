@@ -34,6 +34,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 
 
@@ -65,7 +66,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport {
 	}
 
 	@Bean
-	public SubProtocolWebSocketHandler subProtocolWebSocketHandler() {
+	public WebSocketHandler subProtocolWebSocketHandler() {
 		SubProtocolWebSocketHandler wsHandler = new SubProtocolWebSocketHandler(webSocketRequestChannel());
 		webSocketResponseChannel().subscribe(wsHandler);
 		return wsHandler;

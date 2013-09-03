@@ -22,11 +22,13 @@ import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandl
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.config.SockJsServiceRegistration;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
+import org.springframework.web.socket.support.WebSocketHandlerDecorator;
 
 
 /**
@@ -39,7 +41,7 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 
 	private final String[] paths;
 
-	private final SubProtocolWebSocketHandler wsHandler;
+	private final WebSocketHandler wsHandler;
 
 	private HandshakeHandler handshakeHandler;
 
@@ -48,7 +50,7 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 	private final TaskScheduler sockJsTaskScheduler;
 
 
-	public AbstractStompEndpointRegistration(String[] paths, SubProtocolWebSocketHandler webSocketHandler,
+	public AbstractStompEndpointRegistration(String[] paths, WebSocketHandler webSocketHandler,
 			TaskScheduler sockJsTaskScheduler) {
 
 		Assert.notEmpty(paths, "No paths specified");
@@ -115,7 +117,7 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 		if (handler instanceof DefaultHandshakeHandler) {
 			DefaultHandshakeHandler defaultHandshakeHandler = (DefaultHandshakeHandler) handler;
 			if (ObjectUtils.isEmpty(defaultHandshakeHandler.getSupportedProtocols())) {
-				Set<String> protocols = this.wsHandler.getSupportedProtocols();
+				Set<String> protocols = findSubProtocolWebSocketHandler(this.wsHandler).getSupportedProtocols();
 				defaultHandshakeHandler.setSupportedProtocols(protocols.toArray(new String[protocols.size()]));
 			}
 		}
@@ -123,12 +125,19 @@ public abstract class AbstractStompEndpointRegistration<M> implements StompEndpo
 		return handler;
 	}
 
+	private static SubProtocolWebSocketHandler findSubProtocolWebSocketHandler(WebSocketHandler webSocketHandler) {
+		WebSocketHandler actual = (webSocketHandler instanceof WebSocketHandlerDecorator) ?
+				((WebSocketHandlerDecorator) webSocketHandler).getLastHandler() : webSocketHandler;
+		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual,
+						"No SubProtocolWebSocketHandler found: " + webSocketHandler);
+		return (SubProtocolWebSocketHandler) actual;
+	}
+
 	protected abstract void addSockJsServiceMapping(M mappings, SockJsService sockJsService,
-			SubProtocolWebSocketHandler wsHandler, String pathPattern);
+			WebSocketHandler wsHandler, String pathPattern);
 
 	protected abstract void addWebSocketHandlerMapping(M mappings,
-			SubProtocolWebSocketHandler wsHandler, HandshakeHandler handshakeHandler, String path);
-
+			WebSocketHandler wsHandler, HandshakeHandler handshakeHandler, String path);
 
 
 	private class StompSockJsServiceRegistration extends SockJsServiceRegistration {
