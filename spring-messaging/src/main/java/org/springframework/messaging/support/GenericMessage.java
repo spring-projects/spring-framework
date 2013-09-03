@@ -82,7 +82,10 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	}
 
 	public String toString() {
-		return "[Payload=" + this.payload + "][Headers=" + this.headers + "]";
+		StringBuilder sb = new StringBuilder("[Headers=" + this.headers + "]");
+		sb.append("[Payload ").append(this.payload.getClass().getSimpleName());
+		sb.append(" content=").append(this.payload).append("]");
+		return sb.toString();
 	}
 
 	public int hashCode() {

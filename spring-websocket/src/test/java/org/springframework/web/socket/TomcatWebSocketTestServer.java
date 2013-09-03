@@ -26,7 +26,6 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.ApplicationListener;
 import org.apache.tomcat.websocket.server.WsListener;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -94,9 +93,10 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
 	@Override
 	public void undeployConfig() {
-		Assert.notNull(this.context, "deployConfig/undeployConfig must be invoked in pairs");
-		this.context.removeServletMapping("/");
-		this.tomcatServer.getHost().removeChild(this.context);
+		if (this.context != null) {
+			this.context.removeServletMapping("/");
+			this.tomcatServer.getHost().removeChild(this.context);
+		}
 	}
 
 	@Override

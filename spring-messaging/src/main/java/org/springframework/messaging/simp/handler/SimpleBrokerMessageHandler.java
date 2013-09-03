@@ -80,31 +80,24 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		String destination = headers.getDestination();
 
 		if (!checkDestinationPrefix(destination)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ingoring message with destination " + destination);
+			}
 			return;
 		}
 
 		if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-			preProcessMessage(message);
 			this.subscriptionRegistry.registerSubscription(message);
 		}
 		else if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-			preProcessMessage(message);
 			this.subscriptionRegistry.unregisterSubscription(message);
 		}
 		else if (SimpMessageType.MESSAGE.equals(messageType)) {
-			preProcessMessage(message);
 			sendMessageToSubscribers(headers.getDestination(), message);
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
-			preProcessMessage(message);
 			String sessionId = SimpMessageHeaderAccessor.wrap(message).getSessionId();
 			this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
-		}
-	}
-
-	private void preProcessMessage(Message<?> message) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Processing " + message);
 		}
 	}
 

@@ -55,6 +55,8 @@ public class ReplyToMethodReturnValueHandlerTests {
 
 	private ReplyToMethodReturnValueHandler handler;
 
+	private ReplyToMethodReturnValueHandler handlerAnnotationNotRequired;
+
 	@Mock private MessageChannel messageChannel;
 
 	@Captor ArgumentCaptor<Message<?>> messageCaptor;
@@ -80,7 +82,8 @@ public class ReplyToMethodReturnValueHandlerTests {
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
 		messagingTemplate.setConverter(this.messageConverter);
 
-		this.handler = new ReplyToMethodReturnValueHandler(messagingTemplate);
+		this.handler = new ReplyToMethodReturnValueHandler(messagingTemplate, true);
+		this.handlerAnnotationNotRequired = new ReplyToMethodReturnValueHandler(messagingTemplate, false);
 
 		Method method = this.getClass().getDeclaredMethod("handleAndReplyTo");
 		this.replyToReturnType = new MethodParameter(method, -1);
@@ -98,6 +101,7 @@ public class ReplyToMethodReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(this.replyToReturnType));
 		assertTrue(this.handler.supportsReturnType(this.replyToUserReturnType));
 		assertFalse(this.handler.supportsReturnType(this.missingReplyToReturnType));
+		assertTrue(this.handlerAnnotationNotRequired.supportsReturnType(this.missingReplyToReturnType));
 	}
 
 	@Test

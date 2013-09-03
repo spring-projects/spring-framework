@@ -56,7 +56,8 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 			return;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Subscribe request: " + message);
+			logger.debug("Adding subscription id=" + headers.getSubscriptionId()
+					+ ", destination=" + headers.getDestination());
 		}
 		addSubscriptionInternal(sessionId, subscriptionId, destination, message);
 	}

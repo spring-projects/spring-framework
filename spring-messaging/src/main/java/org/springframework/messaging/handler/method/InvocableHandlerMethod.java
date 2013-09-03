@@ -104,16 +104,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 
 		if (logger.isTraceEnabled()) {
-			StringBuilder builder = new StringBuilder("Invoking [");
-			builder.append(this.getMethod().getName()).append("] method with arguments ");
-			builder.append(Arrays.asList(args));
-			logger.trace(builder.toString());
+			StringBuilder sb = new StringBuilder("Invoking [");
+			sb.append(this.getBeanType().getSimpleName()).append(".");
+			sb.append(this.getMethod().getName()).append("] method with arguments ");
+			sb.append(Arrays.asList(args));
+			logger.trace(sb.toString());
 		}
 
 		Object returnValue = invoke(args);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + this.getMethod().getName() + "] returned [" + returnValue + "]");
+			logger.trace("Method returned [" + returnValue + "]");
 		}
 
 		return returnValue;

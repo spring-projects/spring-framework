@@ -64,6 +64,9 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 	@Override
 	public boolean sendInternal(final Message<?> message, long timeout) {
+
+		logger.trace("subscribers " + this.handlers);
+
 		for (final MessageHandler handler : this.handlers) {
 			if (this.executor == null) {
 				handler.handleMessage(message);

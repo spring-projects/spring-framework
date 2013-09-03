@@ -83,12 +83,35 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 	public void simpleController() throws Exception {
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
-		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(message, 0), "/ws");
+		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws");
 
 		SimpleController controller = this.wac.getBean(SimpleController.class);
-		assertTrue(controller.latch.await(2, TimeUnit.SECONDS));
+		try {
+			assertTrue(controller.latch.await(2, TimeUnit.SECONDS));
+		}
+		finally {
+			session.close();
+		}
+	}
 
-		session.close();
+	@Test
+	public void incrementController() throws Exception {
+
+		TextMessage message1 = create(StompCommand.SUBSCRIBE).headers(
+				"id:subs1", "destination:/topic/increment").body("5").build();
+
+		TextMessage message2 = create(StompCommand.SEND).headers(
+				"destination:/app/topic/increment").body("5").build();
+
+		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
+		WebSocketSession session = doHandshake(clientHandler, "/ws");
+
+		try {
+			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
+		}
+		finally {
+			session.close();
+		}
 	}
 
 
@@ -97,15 +120,25 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 
 		private CountDownLatch latch = new CountDownLatch(1);
 
-		@MessageMapping(value="/app/simple")
+		@MessageMapping(value="/simple")
 		public void handle() {
 			this.latch.countDown();
 		}
 	}
 
+	@IntegrationTestController
+	static class IncrementController {
+
+		@MessageMapping(value="/topic/increment")
+		public int handle(int i) {
+			return i + 1;
+		}
+	}
+
+
 	private static class TestClientWebSocketHandler extends TextWebSocketHandlerAdapter {
 
-		private final TextMessage messageToSend;
+		private final TextMessage[] messagesToSend;
 
 		private final int expected;
 
@@ -114,15 +147,17 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 		private final CountDownLatch latch;
 
 
-		public TestClientWebSocketHandler(TextMessage messageToSend, int expectedNumberOfMessages) {
-			this.messageToSend = messageToSend;
+		public TestClientWebSocketHandler(int expectedNumberOfMessages, TextMessage... messagesToSend) {
+			this.messagesToSend = messagesToSend;
 			this.expected = expectedNumberOfMessages;
 			this.latch = new CountDownLatch(this.expected);
 		}
 
 		@Override
 		public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-			session.sendMessage(this.messageToSend);
+			for (TextMessage message : this.messagesToSend) {
+				session.sendMessage(message);
+			}
 		}
 
 		@Override
@@ -134,6 +169,7 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 
 	@Configuration
 	@ComponentScan(basePackageClasses=AnnotationMethodIntegrationTests.class,
+			useDefaultFilters=false,
 			includeFilters=@ComponentScan.Filter(IntegrationTestController.class))
 	static class TestMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
@@ -147,7 +183,7 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 
 		@Override
 		public void configureMessageBroker(MessageBrokerConfigurer configurer) {
-			configurer.setAnnotationMethodDestinationPrefixes("/app/");
+			configurer.setAnnotationMethodDestinationPrefixes("/app");
 			configurer.enableSimpleBroker("/topic", "/queue");
 		}
 	}

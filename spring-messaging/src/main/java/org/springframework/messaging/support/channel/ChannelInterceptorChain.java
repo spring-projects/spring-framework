@@ -18,6 +18,7 @@ package org.springframework.messaging.support.channel;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
@@ -57,13 +58,22 @@ class ChannelInterceptorChain {
 
 
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
+		UUID originalId = message.getHeaders().getId();
 		if (logger.isTraceEnabled()) {
-			logger.trace("preSend on channel '" + channel + "', message: " + message);
+			logger.trace("preSend message id " + originalId);
 		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			message = interceptor.preSend(message, channel);
 			if (message == null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("preSend returned null (precluding the send)");
+				}
 				return null;
+			}
+		}
+		if (logger.isTraceEnabled()) {
+			if (!message.getHeaders().getId().equals(originalId)) {
+				logger.trace("preSend returned modified message " + message);
 			}
 		}
 		return message;
@@ -71,7 +81,7 @@ class ChannelInterceptorChain {
 
 	public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("postSend (sent=" + sent + ") on channel '" + channel + "', message: " + message);
+			logger.trace("postSend (sent=" + sent + ") message id " + message.getHeaders().getId());
 		}
 		for (ChannelInterceptor interceptor : this.interceptors) {
 			interceptor.postSend(message, channel, sent);

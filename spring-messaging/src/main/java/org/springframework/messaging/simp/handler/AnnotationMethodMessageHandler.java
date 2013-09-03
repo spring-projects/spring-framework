@@ -60,6 +60,7 @@ import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
 import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
 import org.springframework.messaging.simp.annotation.support.ReplyToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.converter.MessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -80,7 +81,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private final SimpMessageSendingOperations webSocketResponseTemplate;
 
-	private Collection<String> destinationPrefixes;
+	private Collection<String> destinationPrefixes = new ArrayList<String>();
 
 	private MessageConverter<?> messageConverter;
 
@@ -117,9 +118,29 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.webSocketResponseTemplate = new SimpMessagingTemplate(webSocketResponseChannel);
 	}
 
-
+	/**
+	 * Configure one or more prefixes to filter destinations targeting annotated
+	 * application methods. For example destinations prefixed with "/app" may be processed
+	 * by annotated application methods while other destinations may target the message
+	 * broker (e.g. "/topic", "/queue").
+	 * <p>
+	 * When messages are processed, the matching prefix is removed from the destination in
+	 * order to form the lookup path. This means annotations should not contain the
+	 * destination prefix.
+	 * <p>
+	 * Prefixes that do not have a trailing slash will have one automatically appended.
+	 */
 	public void setDestinationPrefixes(Collection<String> destinationPrefixes) {
-		this.destinationPrefixes = destinationPrefixes;
+		this.destinationPrefixes.clear();
+		if (destinationPrefixes != null) {
+			for (String prefix : destinationPrefixes) {
+				prefix = prefix.trim();
+				if (!prefix.endsWith("/")) {
+					prefix += "/";
+				}
+				this.destinationPrefixes.add(prefix);
+			}
+		}
 	}
 
 	public Collection<String> getDestinationPrefixes() {
@@ -180,14 +201,17 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
 		// Annotation-based return value types
-		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate));
+		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate, true));
 		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketResponseTemplate));
 
 		// custom return value types
 		this.returnValueHandlers.addHandlers(this.customReturnValueHandlers);
+
+		// catch-all
+		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate, false));
 	}
 
-	protected void initHandlerMethods() {
+	protected final void initHandlerMethods() {
 		String[] beanNames = this.applicationContext.getBeanNamesForType(Object.class);
 		for (String beanName : beanNames) {
 			if (isHandler(this.applicationContext.getType(beanName))){
@@ -200,26 +224,20 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		return (AnnotationUtils.findAnnotation(beanType, Controller.class) != null);
 	}
 
-	protected void detectHandlerMethods(Object handler) {
+	protected final void detectHandlerMethods(Object handler) {
 
 		Class<?> handlerType = (handler instanceof String) ?
 				this.applicationContext.getType((String) handler) : handler.getClass();
 
-		final Class<?> userType = ClassUtils.getUserClass(handlerType);
+		handlerType = ClassUtils.getUserClass(handlerType);
 
-		initHandlerMethods(handler, userType, MessageMapping.class,
-				new MessageMappingInfoCreator(), this.messageMethods);
-
-		initHandlerMethods(handler, userType, SubscribeEvent.class,
-				new SubscribeMappingInfoCreator(), this.subscribeMethods);
-
-		initHandlerMethods(handler, userType, UnsubscribeEvent.class,
-				new UnsubscribeMappingInfoCreator(), this.unsubscribeMethods);
+		initHandlerMethods(handler, handlerType, MessageMapping.class, this.messageMethods);
+		initHandlerMethods(handler, handlerType, SubscribeEvent.class, this.subscribeMethods);
+		initHandlerMethods(handler, handlerType, UnsubscribeEvent.class, this.unsubscribeMethods);
 	}
 
 	private <A extends Annotation> void initHandlerMethods(Object handler, Class<?> handlerType,
-			final Class<A> annotationType, MappingInfoCreator<A> mappingInfoCreator,
-			Map<MappingInfo, HandlerMethod> handlerMethods) {
+			final Class<A> annotationType, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
 		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
 			@Override
@@ -230,12 +248,25 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 		for (Method method : methods) {
 			A annotation = AnnotationUtils.findAnnotation(method, annotationType);
-			HandlerMethod hm = createHandlerMethod(handler, method);
-			handlerMethods.put(mappingInfoCreator.create(annotation), hm);
+			String[] destinations = (String[]) AnnotationUtils.getValue(annotation);
+			MappingInfo mapping = new MappingInfo(destinations);
+
+			HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
+			HandlerMethod oldHandlerMethod = handlerMethods.get(mapping);
+			if (oldHandlerMethod != null && !oldHandlerMethod.equals(newHandlerMethod)) {
+				throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + newHandlerMethod.getBean()
+						+ "' bean method \n" + newHandlerMethod + "\nto " + mapping + ": There is already '"
+						+ oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
+			}
+			handlerMethods.put(mapping, newHandlerMethod);
+			if (logger.isInfoEnabled()) {
+				logger.info("Mapped \"@" + annotationType.getSimpleName()
+						+ " " + mapping + "\" onto " + newHandlerMethod);
+			}
 		}
 	}
 
-	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+	private HandlerMethod createHandlerMethod(Object handler, Method method) {
 		HandlerMethod handlerMethod;
 		if (handler instanceof String) {
 			String beanName = (String) handler;
@@ -264,22 +295,27 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
-	private void handleMessageInternal(final Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
-
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
-		String destination = headers.getDestination();
-
-		if (!checkDestinationPrefix(destination)) {
-			return;
-		}
-
-		HandlerMethod match = getHandlerMethod(destination, handlerMethods);
-		if (match == null) {
-			return;
-		}
+	private void handleMessageInternal(Message<?> message, Map<MappingInfo, HandlerMethod> handlerMethods) {
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Processing message: " + message);
+			logger.trace("Message " + message);
+		}
+
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
+		String lookupPath = getLookupPath(headers.getDestination());
+		if (lookupPath == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Ignoring message with destination " + headers.getDestination());
+			}
+			return;
+		}
+
+		HandlerMethod match = getHandlerMethod(lookupPath, handlerMethods);
+		if (match == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No matching method, lookup path " + lookupPath);
+			}
+			return;
 		}
 
 		HandlerMethod handlerMethod = match.createWithResolvedBean();
@@ -288,6 +324,9 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
 
 		try {
+			headers.setDestination(lookupPath);
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+
 			Object returnValue = invocableHandlerMethod.invoke(message);
 
 			MethodParameter returnType = handlerMethod.getReturnType();
@@ -305,16 +344,18 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		}
 	}
 
-	private boolean checkDestinationPrefix(String destination) {
-		if ((destination == null) || CollectionUtils.isEmpty(this.destinationPrefixes)) {
-			return true;
-		}
-		for (String prefix : this.destinationPrefixes) {
-			if (destination.startsWith(prefix)) {
-				return true;
+	private String getLookupPath(String destination) {
+		if (destination != null) {
+			if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
+				return destination;
+			}
+			for (String prefix : this.destinationPrefixes) {
+				if (destination.startsWith(prefix)) {
+					return destination.substring(prefix.length() - 1);
+				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private void invokeExceptionHandler(Message<?> message, HandlerMethod handlerMethod, Exception ex) {
@@ -365,49 +406,38 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 
 	private static class MappingInfo {
 
-		private final List<String> destinations;
+		private final String[] destinations;
 
 
-		public MappingInfo(List<String> destinations) {
+		public MappingInfo(String[] destinations) {
+			Assert.notNull(destinations, "No destinations");
 			this.destinations = destinations;
 		}
 
-		public List<String> getDestinations() {
+		public String[] getDestinations() {
 			return this.destinations;
 		}
 
 		@Override
+		public int hashCode() {
+			return Arrays.hashCode(this.destinations);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o != null && getClass().equals(o.getClass())) {
+				MappingInfo other = (MappingInfo) o;
+				return Arrays.equals(destinations, other.getDestinations());
+			}
+			return false;
+		}
+
+		@Override
 		public String toString() {
-			return "MappingInfo [destinations=" + this.destinations + "]";
-		}
-	}
-
-	private interface MappingInfoCreator<A extends Annotation> {
-
-		MappingInfo create(A annotation);
-	}
-
-	private static class MessageMappingInfoCreator implements MappingInfoCreator<MessageMapping> {
-
-		@Override
-		public MappingInfo create(MessageMapping annotation) {
-			return new MappingInfo(Arrays.asList(annotation.value()));
-		}
-	}
-
-	private static class SubscribeMappingInfoCreator implements MappingInfoCreator<SubscribeEvent> {
-
-		@Override
-		public MappingInfo create(SubscribeEvent annotation) {
-			return new MappingInfo(Arrays.asList(annotation.value()));
-		}
-	}
-
-	private static class UnsubscribeMappingInfoCreator implements MappingInfoCreator<UnsubscribeEvent> {
-
-		@Override
-		public MappingInfo create(UnsubscribeEvent annotation) {
-			return new MappingInfo(Arrays.asList(annotation.value()));
+			return "[destinations=" + Arrays.toString(this.destinations) + "]";
 		}
 	}
 

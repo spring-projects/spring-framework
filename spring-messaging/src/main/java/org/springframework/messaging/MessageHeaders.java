@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,7 +150,10 @@ public final class MessageHeaders implements Map<String, Object>, Serializable {
 
 	@Override
 	public String toString() {
-		return this.headers.toString();
+		Map<String, Object> map = new LinkedHashMap<String, Object>(this.headers);
+		map.put(ID,  map.remove(ID)); // remove and add again at the end
+		map.put(TIMESTAMP, map.remove(TIMESTAMP));
+		return map.toString();
 	}
 
 	/*

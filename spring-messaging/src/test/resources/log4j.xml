@@ -12,7 +12,7 @@
 	</appender>
 
 	<logger name="org.springframework.messaging">
-		<level value="info" />
+		<level value="trace" />
 	</logger>
 
 	<logger name="org.apache.activemq">

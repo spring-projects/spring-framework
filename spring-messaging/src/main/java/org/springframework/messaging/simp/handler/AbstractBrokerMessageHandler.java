@@ -141,7 +141,7 @@ public abstract class AbstractBrokerMessageHandler
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Processing message: " + message);
+			logger.trace("Message " + message);
 		}
 
 		handleMessageInternal(message);

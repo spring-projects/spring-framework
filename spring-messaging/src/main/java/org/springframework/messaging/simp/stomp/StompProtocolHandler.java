@@ -103,7 +103,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("Processing STOMP message: " + message);
+				logger.trace("Message " + message);
 			}
 
 			try {

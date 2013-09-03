@@ -47,16 +47,37 @@ public class MessageBrokerConfigurer {
 		this.webSocketResponseChannel = webSocketResponseChannel;
 	}
 
+	/**
+	 * Enable a simple message broker and configure one or more prefixes to filter
+	 * destinations targeting the broker (e.g. destinations prefixed with "/topic").
+	 */
 	public SimpleBrokerRegistration enableSimpleBroker(String... destinationPrefixes) {
 		this.simpleBroker = new SimpleBrokerRegistration(this.webSocketResponseChannel, destinationPrefixes);
 		return this.simpleBroker;
 	}
 
+	/**
+	 * Enable a STOMP broker relay and configure the destination prefixes supported by the
+	 * message broker. Check the STOMP documentation of the message broker for supported
+	 * destinations.
+	 */
 	public StompBrokerRelayRegistration enableStompBrokerRelay(String... destinationPrefixes) {
 		this.stompRelay = new StompBrokerRelayRegistration(this.webSocketResponseChannel, destinationPrefixes);
 		return this.stompRelay;
 	}
 
+	/**
+	 * Configure one or more prefixes to filter destinations targeting annotated
+	 * application methods. For example destinations prefixed with "/app" may be processed
+	 * by annotated application methods while other destinations may target the message
+	 * broker (e.g. "/topic", "/queue").
+	 * <p>
+	 * When messages are processed, the matching prefix is removed from the destination in
+	 * order to form the lookup path. This means annotations should not contain the
+	 * destination prefix.
+	 * <p>
+	 * Prefixes that do not have a trailing slash will have one automatically appended.
+	 */
 	public MessageBrokerConfigurer setAnnotationMethodDestinationPrefixes(String... destinationPrefixes) {
 		this.annotationMethodDestinationPrefixes = destinationPrefixes;
 		return this;

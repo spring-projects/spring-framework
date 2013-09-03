@@ -19,6 +19,8 @@ package org.springframework.messaging.handler.method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
@@ -29,6 +31,8 @@ import org.springframework.util.Assert;
  * @since 4.0
  */
 public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
+
+	private static Log logger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
@@ -61,6 +65,9 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Processing return value with " + handler);
+				}
 				return handler;
 			}
 		}
@@ -72,7 +79,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 			throws Exception {
 
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
+		Assert.notNull(handler, "No handler for return value type [" + returnType.getParameterType().getName() + "]");
 		handler.handleReturnValue(returnValue, returnType, message);
 	}
 

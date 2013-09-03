@@ -16,7 +16,10 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
+import java.lang.annotation.Annotation;
+
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.MessagePostProcessor;
@@ -27,6 +30,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.ReplyToUser;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 
 /**
@@ -46,17 +50,23 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 
 	private final SimpMessageSendingOperations messagingTemplate;
 
+	private final boolean annotationRequired;
 
-	public ReplyToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate) {
+
+	public ReplyToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
 		Assert.notNull(messagingTemplate, "messagingTemplate is required");
 		this.messagingTemplate = messagingTemplate;
+		this.annotationRequired = annotationRequired;
 	}
 
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return ((returnType.getMethodAnnotation(ReplyTo.class) != null)
-				|| (returnType.getMethodAnnotation(ReplyToUser.class) != null));
+		if ((returnType.getMethodAnnotation(ReplyTo.class) != null) ||
+				(returnType.getMethodAnnotation(ReplyToUser.class) != null)) {
+			return true;
+		}
+		return (!this.annotationRequired);
 	}
 
 	@Override
@@ -72,23 +82,32 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 		String sessionId = inputHeaders.getSessionId();
 		MessagePostProcessor postProcessor = new SessionHeaderPostProcessor(sessionId);
 
-		ReplyTo replyTo = returnType.getMethodAnnotation(ReplyTo.class);
-		if (replyTo != null) {
-			for (String destination : replyTo.value()) {
-				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
-			}
-		}
-
 		ReplyToUser replyToUser = returnType.getMethodAnnotation(ReplyToUser.class);
 		if (replyToUser != null) {
 			if (inputHeaders.getUser() == null) {
 				throw new MissingSessionUserException(inputMessage);
 			}
 			String user = inputHeaders.getUser().getName();
-			for (String destination : replyToUser.value()) {
+			for (String destination : getDestinations(replyToUser, inputHeaders.getDestination())) {
 				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, postProcessor);
 			}
+			return;
 		}
+
+		ReplyTo replyTo = returnType.getMethodAnnotation(ReplyTo.class);
+		if (replyTo != null) {
+			for (String destination : getDestinations(replyTo, inputHeaders.getDestination())) {
+				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
+			}
+			return;
+		}
+
+		this.messagingTemplate.convertAndSend(inputHeaders.getDestination(), returnValue, postProcessor);
+	}
+
+	private String[] getDestinations(Annotation annot, String inputDestination) {
+		String[] destinations = (String[]) AnnotationUtils.getValue(annot);
+		return ObjectUtils.isEmpty(destinations) ? new String[] { inputDestination } : destinations;
 	}
 
 
@@ -107,4 +126,10 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 			return MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "ReplyToMethodReturnValueHandler [annotationRequired=" + annotationRequired + "]";
+	}
+
 }
