@@ -164,9 +164,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private boolean autodetectTransactionManager = true;
 
+	private transient TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+
 	private String transactionSynchronizationRegistryName;
 
-	private transient TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+	private boolean autodetectTransactionSynchronizationRegistry = true;
 
 	private boolean allowCustomIsolationLevels = false;
 
@@ -327,7 +329,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Return the JTA TransactionManager that this transaction manager uses.
+	 * Return the JTA TransactionManager that this transaction manager uses, if any.
 	 */
 	public TransactionManager getTransactionManager() {
 		return this.transactionManager;
@@ -364,6 +366,28 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
+	 * Set the JTA 1.1 TransactionSynchronizationRegistry to use as direct reference.
+	 * <p>A TransactionSynchronizationRegistry allows for interposed registration
+	 * of transaction synchronizations, as an alternative to the regular registration
+	 * methods on the JTA TransactionManager API. Also, it is an official part of the
+	 * Java EE 5 platform, in contrast to the JTA TransactionManager itself.
+	 * <p>Note that the TransactionSynchronizationRegistry will be autodetected in JNDI and
+	 * also from the UserTransaction/TransactionManager object if implemented there as well.
+	 * @see #setTransactionSynchronizationRegistryName
+	 * @see #setAutodetectTransactionSynchronizationRegistry
+	 */
+	public void setTransactionSynchronizationRegistry(TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
+		this.transactionSynchronizationRegistry = transactionSynchronizationRegistry;
+	}
+
+	/**
+	 * Return the JTA 1.1 TransactionSynchronizationRegistry that this transaction manager uses, if any.
+	 */
+	public TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
+		return this.transactionSynchronizationRegistry;
+	}
+
+	/**
 	 * Set the JNDI name of the JTA 1.1 TransactionSynchronizationRegistry.
 	 * <p>Note that the TransactionSynchronizationRegistry will be autodetected
 	 * at the Java EE 5 default location "java:comp/TransactionSynchronizationRegistry"
@@ -372,6 +396,20 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public void setTransactionSynchronizationRegistryName(String transactionSynchronizationRegistryName) {
 		this.transactionSynchronizationRegistryName = transactionSynchronizationRegistryName;
+	}
+
+	/**
+	 * Set whether to autodetect a JTA 1.1 TransactionSynchronizationRegistry object
+	 * at its default JDNI location ("java:comp/TransactionSynchronizationRegistry")
+	 * if the UserTransaction has also been obtained from JNDI, and also whether
+	 * to fall back to checking whether the JTA UserTransaction/TransactionManager
+	 * object implements the JTA TransactionSynchronizationRegistry interface too.
+	 * <p>Default is "true", autodetecting the TransactionSynchronizationRegistry
+	 * unless it has been specified explicitly. Can be turned off to delegate
+	 * synchronization registration to the regular JTA TransactionManager API.
+	 */
+	public void setAutodetectTransactionSynchronizationRegistry(boolean autodetectTransactionSynchronizationRegistry) {
+		this.autodetectTransactionSynchronizationRegistry = autodetectTransactionSynchronizationRegistry;
 	}
 
 	/**
@@ -404,36 +442,34 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException if initialization failed
 	 */
 	protected void initUserTransactionAndTransactionManager() throws TransactionSystemException {
-		// Fetch JTA UserTransaction from JNDI, if necessary.
 		if (this.userTransaction == null) {
+			// Fetch JTA UserTransaction from JNDI, if necessary.
 			if (StringUtils.hasLength(this.userTransactionName)) {
 				this.userTransaction = lookupUserTransaction(this.userTransactionName);
 				this.userTransactionObtainedFromJndi = true;
 			}
 			else {
 				this.userTransaction = retrieveUserTransaction();
+				if (this.userTransaction == null && this.autodetectUserTransaction) {
+					// Autodetect UserTransaction at its default JNDI location.
+					this.userTransaction = findUserTransaction();
+				}
 			}
 		}
 
-		// Fetch JTA TransactionManager from JNDI, if necessary.
 		if (this.transactionManager == null) {
+			// Fetch JTA TransactionManager from JNDI, if necessary.
 			if (StringUtils.hasLength(this.transactionManagerName)) {
 				this.transactionManager = lookupTransactionManager(this.transactionManagerName);
 			}
 			else {
 				this.transactionManager = retrieveTransactionManager();
+				if (this.transactionManager == null && this.autodetectTransactionManager) {
+					// Autodetect UserTransaction object that implements TransactionManager,
+					// and check fallback JNDI locations otherwise.
+					this.transactionManager = findTransactionManager(this.userTransaction);
+				}
 			}
-		}
-
-		// Autodetect UserTransaction at its default JNDI location.
-		if (this.userTransaction == null && this.autodetectUserTransaction) {
-			this.userTransaction = findUserTransaction();
-		}
-
-		// Autodetect UserTransaction object that implements TransactionManager,
-		// and check fallback JNDI locations else.
-		if (this.transactionManager == null && this.autodetectTransactionManager) {
-			this.transactionManager = findTransactionManager(this.userTransaction);
 		}
 
 		// If only JTA TransactionManager specified, create UserTransaction handle for it.
@@ -477,15 +513,20 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @throws TransactionSystemException if initialization failed
 	 */
 	protected void initTransactionSynchronizationRegistry() {
-		if (StringUtils.hasLength(this.transactionSynchronizationRegistryName)) {
-			this.transactionSynchronizationRegistry =
-					lookupTransactionSynchronizationRegistry(this.transactionSynchronizationRegistryName);
-		}
-		else {
-			this.transactionSynchronizationRegistry = retrieveTransactionSynchronizationRegistry();
-			if (this.transactionSynchronizationRegistry == null) {
+		if (this.transactionSynchronizationRegistry == null) {
+			// Fetch JTA TransactionSynchronizationRegistry from JNDI, if necessary.
+			if (StringUtils.hasLength(this.transactionSynchronizationRegistryName)) {
 				this.transactionSynchronizationRegistry =
-						findTransactionSynchronizationRegistry(this.userTransaction, this.transactionManager);
+						lookupTransactionSynchronizationRegistry(this.transactionSynchronizationRegistryName);
+			}
+			else {
+				this.transactionSynchronizationRegistry = retrieveTransactionSynchronizationRegistry();
+				if (this.transactionSynchronizationRegistry == null && this.autodetectTransactionSynchronizationRegistry) {
+					// Autodetect in JNDI if applicable, and check UserTransaction/TransactionManager
+					// object that implements TransactionSynchronizationRegistry otherwise.
+					this.transactionSynchronizationRegistry =
+							findTransactionSynchronizationRegistry(this.userTransaction, this.transactionManager);
+				}
 			}
 		}
 
