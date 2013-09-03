@@ -56,6 +56,9 @@ import org.springframework.util.ClassUtils;
  * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods.
  * Consider using {@link LocalSessionFactoryBean} for XML bean definition files.
  *
+ * <p>Requires Hibernate 4.0 or higher. As of Spring 4.0, it is compatible with
+ * (the quite refactored) Hibernate 4.3 as well.
+ *
  * <p><b>NOTE:</b> To set up Hibernate 4 for Spring-driven JTA transactions, make
  * sure to either use the {@link #setJtaTransactionManager} method or to set the
  * "hibernate.transaction.factory_class" property to {@link CMTTransactionFactory}.
@@ -171,6 +174,28 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 		getProperties().put(AvailableSettings.TRANSACTION_STRATEGY, new CMTTransactionFactory());
+		return this;
+	}
+
+	/**
+	 * Set a Hibernate 4.1/4.2/4.3 {@code MultiTenantConnectionProvider} to be passed
+	 * on to the SessionFactory: as an instance, a Class, or a String class name.
+	 * <p>Note that the package location of the {@code MultiTenantConnectionProvider}
+	 * interface changed between Hibernate 4.2 and 4.3. This method accepts both variants.
+	 * @see AvailableSettings#MULTI_TENANT_CONNECTION_PROVIDER
+	 */
+	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(Object multiTenantConnectionProvider) {
+		getProperties().put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
+		return this;
+	}
+
+	/**
+	 * Set a Hibernate 4.1/4.2/4.3 {@code CurrentTenantIdentifierResolver} to be passed
+	 * on to the SessionFactory: as an instance, a Class, or a String class name.
+	 * @see AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER
+	 */
+	public LocalSessionFactoryBuilder setCurrentTenantIdentifierResolver(Object currentTenantIdentifierResolver) {
+		getProperties().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
 		return this;
 	}
 

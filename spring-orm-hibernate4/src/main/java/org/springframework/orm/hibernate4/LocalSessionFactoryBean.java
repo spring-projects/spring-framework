@@ -44,6 +44,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * then be passed to Hibernate-based data access objects via dependency injection.
  *
  * <p><b>NOTE:</b> This variant of LocalSessionFactoryBean requires Hibernate 4.0 or higher.
+ * As of Spring 4.0, it is compatible with (the quite refactored) Hibernate 4.3 as well.
  * It is similar in role to the same-named class in the {@code orm.hibernate3} package.
  * However, in practice, it is closer to {@code AnnotationSessionFactoryBean} since
  * its core purpose is to bootstrap a {@code SessionFactory} from annotation scanning.
@@ -81,6 +82,12 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	private NamingStrategy namingStrategy;
 
+	private Object jtaTransactionManager;
+
+	private Object multiTenantConnectionProvider;
+
+	private Object currentTenantIdentifierResolver;
+
 	private Properties hibernateProperties;
 
 	private Class<?>[] annotatedClasses;
@@ -88,8 +95,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	private String[] annotatedPackages;
 
 	private String[] packagesToScan;
-
-	private Object jtaTransactionManager;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -126,7 +131,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * resources are specified locally via this bean.
 	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
 	 */
-	public void setConfigLocations(Resource[] configLocations) {
+	public void setConfigLocations(Resource... configLocations) {
 		this.configLocations = configLocations;
 	}
 
@@ -140,7 +145,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * @see #setMappingLocations
 	 * @see org.hibernate.cfg.Configuration#addResource
 	 */
-	public void setMappingResources(String[] mappingResources) {
+	public void setMappingResources(String... mappingResources) {
 		this.mappingResources = mappingResources;
 	}
 
@@ -153,7 +158,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addInputStream
 	 */
-	public void setMappingLocations(Resource[] mappingLocations) {
+	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 	}
 
@@ -166,7 +171,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addCacheableFile(java.io.File)
 	 */
-	public void setCacheableMappingLocations(Resource[] cacheableMappingLocations) {
+	public void setCacheableMappingLocations(Resource... cacheableMappingLocations) {
 		this.cacheableMappingLocations = cacheableMappingLocations;
 	}
 
@@ -177,7 +182,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addJar(java.io.File)
 	 */
-	public void setMappingJarLocations(Resource[] mappingJarLocations) {
+	public void setMappingJarLocations(Resource... mappingJarLocations) {
 		this.mappingJarLocations = mappingJarLocations;
 	}
 
@@ -188,7 +193,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addDirectory(java.io.File)
 	 */
-	public void setMappingDirectoryLocations(Resource[] mappingDirectoryLocations) {
+	public void setMappingDirectoryLocations(Resource... mappingDirectoryLocations) {
 		this.mappingDirectoryLocations = mappingDirectoryLocations;
 	}
 
@@ -209,6 +214,36 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setNamingStrategy(NamingStrategy namingStrategy) {
 		this.namingStrategy = namingStrategy;
+	}
+
+	/**
+	 * Set the Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
+	 * or the JTA {@link javax.transaction.TransactionManager} to be used with Hibernate,
+	 * if any. Implicitly sets up {@code JtaPlatform} and {@code CMTTransactionStrategy}.
+	 * @see LocalSessionFactoryBuilder#setJtaTransactionManager
+	 */
+	public void setJtaTransactionManager(Object jtaTransactionManager) {
+		this.jtaTransactionManager = jtaTransactionManager;
+	}
+
+	/**
+	 * Set a Hibernate 4.1/4.2/4.3 {@code MultiTenantConnectionProvider} to be passed
+	 * on to the SessionFactory: as an instance, a Class, or a String class name.
+	 * <p>Note that the package location of the {@code MultiTenantConnectionProvider}
+	 * interface changed between Hibernate 4.2 and 4.3. This method accepts both variants.
+	 * @see LocalSessionFactoryBuilder#setMultiTenantConnectionProvider
+	 */
+	public void setMultiTenantConnectionProvider(Object multiTenantConnectionProvider) {
+		this.multiTenantConnectionProvider = multiTenantConnectionProvider;
+	}
+
+	/**
+	 * Set a Hibernate 4.1/4.2/4.3 {@code CurrentTenantIdentifierResolver} to be passed
+	 * on to the SessionFactory: as an instance, a Class, or a String class name.
+	 * @see LocalSessionFactoryBuilder#setCurrentTenantIdentifierResolver
+	 */
+	public void setCurrentTenantIdentifierResolver(Object currentTenantIdentifierResolver) {
+		this.currentTenantIdentifierResolver = currentTenantIdentifierResolver;
 	}
 
 	/**
@@ -237,7 +272,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * Specify annotated entity classes to register with this Hibernate SessionFactory.
 	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
-	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
+	public void setAnnotatedClasses(Class<?>... annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
 	}
 
@@ -246,7 +281,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * annotation metadata will be read.
 	 * @see org.hibernate.cfg.Configuration#addPackage(String)
 	 */
-	public void setAnnotatedPackages(String[] annotatedPackages) {
+	public void setAnnotatedPackages(String... annotatedPackages) {
 		this.annotatedPackages = annotatedPackages;
 	}
 
@@ -257,16 +292,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
-	}
-
-	/**
-	 * Set the Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
-	 * or the JTA {@link javax.transaction.TransactionManager} to be used with Hibernate,
-	 * if any.
-	 * @see LocalSessionFactoryBuilder#setJtaTransactionManager
-	 */
-	public void setJtaTransactionManager(Object jtaTransactionManager) {
-		this.jtaTransactionManager = jtaTransactionManager;
 	}
 
 	@Override
@@ -335,6 +360,18 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			sfb.setNamingStrategy(this.namingStrategy);
 		}
 
+		if (this.jtaTransactionManager != null) {
+			sfb.setJtaTransactionManager(this.jtaTransactionManager);
+		}
+
+		if (this.multiTenantConnectionProvider != null) {
+			sfb.setMultiTenantConnectionProvider(this.multiTenantConnectionProvider);
+		}
+
+		if (this.currentTenantIdentifierResolver != null) {
+			sfb.setCurrentTenantIdentifierResolver(this.currentTenantIdentifierResolver);
+		}
+
 		if (this.hibernateProperties != null) {
 			sfb.addProperties(this.hibernateProperties);
 		}
@@ -349,10 +386,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 		if (this.packagesToScan != null) {
 			sfb.scanPackages(this.packagesToScan);
-		}
-
-		if (this.jtaTransactionManager != null) {
-			sfb.setJtaTransactionManager(this.jtaTransactionManager);
 		}
 
 		// Build SessionFactory instance.
