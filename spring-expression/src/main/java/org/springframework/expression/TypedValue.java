@@ -19,9 +19,9 @@ package org.springframework.expression;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
- * Encapsulates an object and a type descriptor that describes it. The type descriptor can
- * hold generic information that would not be accessible through a simple
- * {@code getClass()} call on the object.
+ * Encapsulates an object and a type descriptor that describes it.
+ * The type descriptor can hold generic information that would not be
+ * accessible through a simple {@code getClass()} call on the object.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -73,7 +73,7 @@ public class TypedValue {
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor() + "]");
+		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor()).append("]");
 		return str.toString();
 	}
 
