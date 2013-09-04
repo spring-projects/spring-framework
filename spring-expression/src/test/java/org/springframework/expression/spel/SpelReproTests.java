@@ -16,14 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,6 +31,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
@@ -57,6 +51,9 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Reproduction tests cornering various SpEL JIRA issues.
@@ -1752,6 +1749,38 @@ public class SpelReproTests extends ExpressionTestCase {
 		Expression exp = parser.parseExpression("$[]");
 		exp.getValue(Arrays.asList("foo", "bar", "baz"));
 	}
+
+	@Test
+	public void SPR_10452() throws Exception {
+		SpelParserConfiguration configuration = new SpelParserConfiguration(false, false);
+		ExpressionParser parser = new SpelExpressionParser(configuration);
+
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Expression spel = parser.parseExpression("#enumType.values()");
+
+		context.setVariable("enumType", ABC.class);
+		Object result = spel.getValue(context);
+		assertNotNull(result);
+		assertTrue(result.getClass().isArray());
+		assertEquals(ABC.A, Array.get(result, 0));
+		assertEquals(ABC.B, Array.get(result, 1));
+		assertEquals(ABC.C, Array.get(result, 2));
+
+		context.setVariable("enumType", XYZ.class);
+		result = spel.getValue(context);
+		assertNotNull(result);
+		assertTrue(result.getClass().isArray());
+		assertEquals(XYZ.X, Array.get(result, 0));
+		assertEquals(XYZ.Y, Array.get(result, 1));
+		assertEquals(XYZ.Z, Array.get(result, 2));
+	}
+
+
+
+	private static enum ABC {A, B, C}
+
+	private static enum XYZ {X, Y, Z}
+
 
 	public static class BooleanHolder {
 

@@ -76,11 +76,11 @@ public class MethodReference extends SpelNodeImpl {
 		Object value = state.getActiveContextObject().getValue();
 		TypeDescriptor targetType = state.getActiveContextObject().getTypeDescriptor();
 		Object[] arguments = getArguments(state);
-		return getValueInternal(evaluationContext, value, arguments, targetType);
+		return getValueInternal(evaluationContext, value, targetType, arguments);
 	}
 
 	private TypedValue getValueInternal(EvaluationContext evaluationContext,
-			Object value, Object[] arguments, TypeDescriptor targetType) {
+			Object value, TypeDescriptor targetType, Object[] arguments) {
 
 		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
 		if (value == null) {
@@ -88,7 +88,7 @@ public class MethodReference extends SpelNodeImpl {
 			return TypedValue.NULL;
 		}
 
-		MethodExecutor executorToUse = getCachedExecutor(targetType, argumentTypes);
+		MethodExecutor executorToUse = getCachedExecutor(value, targetType, argumentTypes);
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(evaluationContext, value, arguments);
@@ -108,7 +108,7 @@ public class MethodReference extends SpelNodeImpl {
 				// Otherwise the method could not be invoked.
 				throwSimpleExceptionIfPossible(value, ae);
 
-				// at this point we know it wasn't a user problem so worth a retry if a
+				// At this point we know it wasn't a user problem so worth a retry if a
 				// better candidate can be found
 				this.cachedExecutor = null;
 			}
@@ -116,7 +116,8 @@ public class MethodReference extends SpelNodeImpl {
 
 		// either there was no accessor or it no longer existed
 		executorToUse = findAccessorForMethod(this.name, argumentTypes, value, evaluationContext);
-		this.cachedExecutor = new CachedMethodExecutor(executorToUse, targetType, argumentTypes);
+		this.cachedExecutor = new CachedMethodExecutor(
+				executorToUse, (value instanceof Class ? (Class<?>) value : null), targetType, argumentTypes);
 		try {
 			return executorToUse.execute(evaluationContext, value, arguments);
 		}
@@ -140,8 +141,7 @@ public class MethodReference extends SpelNodeImpl {
 	private Object[] getArguments(ExpressionState state) {
 		Object[] arguments = new Object[getChildCount()];
 		for (int i = 0; i < arguments.length; i++) {
-			// Make the root object the active context again for evaluating the parameter
-			// expressions
+			// Make the root object the active context again for evaluating the parameter expressions
 			try {
 				state.pushActiveContextObject(state.getRootContextObject());
 				arguments[i] = this.children[i].getValueInternal(state).getValue();
@@ -161,32 +161,31 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
-	private MethodExecutor getCachedExecutor(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+	private MethodExecutor getCachedExecutor(Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
-		if (executorToCheck != null && executorToCheck.isSuitable(target, argumentTypes)) {
+		if (executorToCheck != null && executorToCheck.isSuitable(value, target, argumentTypes)) {
 			return executorToCheck.get();
 		}
 		this.cachedExecutor = null;
 		return null;
 	}
 
-	private MethodExecutor findAccessorForMethod(String name,
-			List<TypeDescriptor> argumentTypes, Object contextObject,
-			EvaluationContext evaluationContext) throws SpelEvaluationException {
+	private MethodExecutor findAccessorForMethod(String name, List<TypeDescriptor> argumentTypes,
+			Object targetObject, EvaluationContext evaluationContext) throws SpelEvaluationException {
 
 		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
 		if (methodResolvers != null) {
 			for (MethodResolver methodResolver : methodResolvers) {
 				try {
 					MethodExecutor methodExecutor = methodResolver.resolve(
-							evaluationContext, contextObject, name, argumentTypes);
+							evaluationContext, targetObject, name, argumentTypes);
 					if (methodExecutor != null) {
 						return methodExecutor;
 					}
 				}
 				catch (AccessException ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
-							SpelMessage.PROBLEM_LOCATING_METHOD, name, contextObject.getClass());
+							SpelMessage.PROBLEM_LOCATING_METHOD, name, targetObject.getClass());
 				}
 			}
 		}
@@ -194,7 +193,7 @@ public class MethodReference extends SpelNodeImpl {
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.METHOD_NOT_FOUND,
 				FormatHelper.formatMethodForMessage(name, argumentTypes),
 				FormatHelper.formatClassNameForMessage(
-						contextObject instanceof Class ? ((Class<?>) contextObject) : contextObject.getClass()));
+						targetObject instanceof Class ? ((Class<?>) targetObject) : targetObject.getClass()));
 	}
 
 	/**
@@ -249,7 +248,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		@Override
 		public TypedValue getValue() {
-			return getValueInternal(this.evaluationContext, this.value, this.arguments, this.targetType);
+			return getValueInternal(this.evaluationContext, this.value, this.targetType, this.arguments);
 		}
 
 		@Override
@@ -268,18 +267,22 @@ public class MethodReference extends SpelNodeImpl {
 
 		private final MethodExecutor methodExecutor;
 
+		private final Class<?> staticClass;
+
 		private final TypeDescriptor target;
 
 		private final List<TypeDescriptor> argumentTypes;
 
-		public CachedMethodExecutor(MethodExecutor methodExecutor, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+		public CachedMethodExecutor(MethodExecutor methodExecutor, Class<?> staticClass,
+				TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
 			this.methodExecutor = methodExecutor;
+			this.staticClass = staticClass;
 			this.target = target;
 			this.argumentTypes = argumentTypes;
 		}
 
-		public boolean isSuitable(TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
-			return (this.methodExecutor != null && this.target != null &&
+		public boolean isSuitable(Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+			return ((this.staticClass == null || this.staticClass.equals(value)) &&
 					this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
 		}
 

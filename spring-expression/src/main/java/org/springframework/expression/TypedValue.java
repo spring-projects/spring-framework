@@ -73,7 +73,7 @@ public class TypedValue {
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor() + "]");
+		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor()).append("]");
 		return str.toString();
 	}
 
