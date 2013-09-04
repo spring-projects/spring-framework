@@ -18,10 +18,10 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.Future;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Abstract base for {@link AsyncClientHttpRequest} that makes sure that headers and body
@@ -49,15 +49,15 @@ abstract class AbstractAsyncClientHttpRequest implements AsyncClientHttpRequest 
 	}
 
 	@Override
-	public Future<ClientHttpResponse> executeAsync() throws IOException {
+	public ListenableFuture<ClientHttpResponse> executeAsync() throws IOException {
 		assertNotExecuted();
-		Future<ClientHttpResponse> result = executeInternal(this.headers);
+		ListenableFuture<ClientHttpResponse> result = executeInternal(this.headers);
 		this.executed = true;
 		return result;
 	}
 
 	/**
-	 * Asserts that this request has not been {@linkplain #execute() executed} yet.
+	 * Asserts that this request has not been {@linkplain #executeAsync() executed} yet.
 	 *
 	 * @throws IllegalStateException if this request has been executed
 	 */
@@ -74,10 +74,12 @@ abstract class AbstractAsyncClientHttpRequest implements AsyncClientHttpRequest 
 	protected abstract OutputStream getBodyInternal(HttpHeaders headers) throws IOException;
 
 	/**
-	 * Abstract template method that writes the given headers and content to the HTTP request.
+	 * Abstract template method that writes the given headers and content to the HTTP
+	 * request.
 	 * @param headers the HTTP headers
 	 * @return the response object for the executed request
 	 */
-	protected abstract Future<ClientHttpResponse> executeInternal(HttpHeaders headers) throws IOException;
+	protected abstract ListenableFuture<ClientHttpResponse> executeInternal(
+			HttpHeaders headers) throws IOException;
 
 }

@@ -17,10 +17,10 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.util.concurrent.Future;
 
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpRequest;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Represents a client-side asynchronous HTTP request. Created via an implementation of
@@ -41,7 +41,7 @@ public interface AsyncClientHttpRequest extends HttpRequest, HttpOutputMessage {
 	 * @return the future response result of the execution
 	 * @throws java.io.IOException in case of I/O errors
 	 */
-	Future<ClientHttpResponse> executeAsync() throws IOException;
+	ListenableFuture<ClientHttpResponse> executeAsync() throws IOException;
 
 
 }

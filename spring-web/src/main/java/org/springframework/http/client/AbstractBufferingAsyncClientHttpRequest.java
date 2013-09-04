@@ -19,9 +19,9 @@ package org.springframework.http.client;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.Future;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Abstract base for {@link org.springframework.http.client.ClientHttpRequest} that buffers output in a byte array before sending it over the wire.
@@ -40,12 +40,13 @@ abstract class AbstractBufferingAsyncClientHttpRequest
 	}
 
 	@Override
-	protected Future<ClientHttpResponse> executeInternal(HttpHeaders headers) throws IOException {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers)
+			throws IOException {
 		byte[] bytes = this.bufferedOutput.toByteArray();
 		if (headers.getContentLength() == -1) {
 			headers.setContentLength(bytes.length);
 		}
-		Future<ClientHttpResponse> result = executeInternal(headers, bytes);
+		ListenableFuture<ClientHttpResponse> result = executeInternal(headers, bytes);
 		this.bufferedOutput = null;
 		return result;
 	}
@@ -58,8 +59,8 @@ abstract class AbstractBufferingAsyncClientHttpRequest
 	 * @param bufferedOutput the body content
 	 * @return the response object for the executed request
 	 */
-	protected abstract Future<ClientHttpResponse> executeInternal(HttpHeaders headers,
-			byte[] bufferedOutput) throws IOException;
+	protected abstract ListenableFuture<ClientHttpResponse> executeInternal(
+			HttpHeaders headers, byte[] bufferedOutput) throws IOException;
 
 
 }
