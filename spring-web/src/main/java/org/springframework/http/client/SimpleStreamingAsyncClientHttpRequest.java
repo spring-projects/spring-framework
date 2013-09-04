@@ -24,12 +24,12 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
@@ -51,10 +51,10 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 
 	private final boolean outputStreaming;
 
-	private final AsyncTaskExecutor taskExecutor;
+	private final AsyncListenableTaskExecutor taskExecutor;
 
 	SimpleStreamingAsyncClientHttpRequest(HttpURLConnection connection, int chunkSize,
-			boolean outputStreaming, AsyncTaskExecutor taskExecutor) {
+			boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
 		this.connection = connection;
 		this.chunkSize = chunkSize;
 		this.outputStreaming = outputStreaming;
@@ -106,9 +106,9 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 	}
 
 	@Override
-	protected Future<ClientHttpResponse> executeInternal(final HttpHeaders headers)
+	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers)
 			throws IOException {
-		return taskExecutor.submit(new Callable<ClientHttpResponse>() {
+		return taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				try {

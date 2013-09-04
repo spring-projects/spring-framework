@@ -26,6 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Interface specifying a basic set of asynchronous RESTful operations. Implemented by
@@ -54,7 +55,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @return the entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
+	<T> ListenableFuture<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
 			Object... uriVariables) throws RestClientException;
 
 	/**
@@ -66,7 +67,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the map containing variables for the URI template
 	 * @return the entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
+	<T> ListenableFuture<ResponseEntity<T>> getForEntity(String url, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
@@ -76,7 +77,7 @@ public interface AsyncRestOperations {
 	 * @param responseType the type of the return value
 	 * @return the entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> getForEntity(URI url, Class<T> responseType)
+	<T> ListenableFuture<ResponseEntity<T>> getForEntity(URI url, Class<T> responseType)
 			throws RestClientException;
 
 	// HEAD
@@ -88,7 +89,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @return all HTTP headers of that resource wrapped in a {@link Future}
 	 */
-	Future<HttpHeaders> headForHeaders(String url, Object... uriVariables)
+	ListenableFuture<HttpHeaders> headForHeaders(String url, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -98,7 +99,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the map containing variables for the URI template
 	 * @return all HTTP headers of that resource wrapped in a {@link Future}
 	 */
-	Future<HttpHeaders> headForHeaders(String url, Map<String, ?> uriVariables)
+	ListenableFuture<HttpHeaders> headForHeaders(String url, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -106,7 +107,7 @@ public interface AsyncRestOperations {
 	 * @param url the URL
 	 * @return all HTTP headers of that resource wrapped in a {@link Future}
 	 */
-	Future<HttpHeaders> headForHeaders(URI url) throws RestClientException;
+	ListenableFuture<HttpHeaders> headForHeaders(URI url) throws RestClientException;
 
 	// POST
 
@@ -121,7 +122,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	Future<URI> postForLocation(String url, HttpEntity<?> request, Object... uriVariables)
+	ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -135,7 +136,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	Future<URI> postForLocation(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	ListenableFuture<URI> postForLocation(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -147,7 +148,7 @@ public interface AsyncRestOperations {
 	 * @return the value for the {@code Location} header wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	Future<URI> postForLocation(URI url, HttpEntity<?> request) throws RestClientException;
+	ListenableFuture<URI> postForLocation(URI url, HttpEntity<?> request) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template,
@@ -159,7 +160,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> Future<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
 			Class<T> responseType, Object... uriVariables) throws RestClientException;
 
 	/**
@@ -172,7 +173,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> Future<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(String url, HttpEntity<?> request,
 			Class<T> responseType, Map<String, ?> uriVariables)
 			throws RestClientException;
 
@@ -184,7 +185,7 @@ public interface AsyncRestOperations {
 	 * @return the entity wrapped in a {@link Future}
 	 * @see org.springframework.http.HttpEntity
 	 */
-	<T> Future<ResponseEntity<T>> postForEntity(URI url, HttpEntity<?> request,
+	<T> ListenableFuture<ResponseEntity<T>> postForEntity(URI url, HttpEntity<?> request,
 			Class<T> responseType) throws RestClientException;
 
 	// PUT
@@ -198,7 +199,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	Future<?> put(String url, HttpEntity<?> request, Object... uriVariables)
+	ListenableFuture<?> put(String url, HttpEntity<?> request, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -210,7 +211,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
-	Future<?> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
+	ListenableFuture<?> put(String url, HttpEntity<?> request, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -220,7 +221,7 @@ public interface AsyncRestOperations {
 	 * @param request the Object to be PUT, may be {@code null}
 	 * @see HttpEntity
 	 */
-	Future<?> put(URI url, HttpEntity<?> request) throws RestClientException;
+	ListenableFuture<?> put(URI url, HttpEntity<?> request) throws RestClientException;
 
 	// DELETE
 
@@ -231,7 +232,7 @@ public interface AsyncRestOperations {
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 */
-	Future<?> delete(String url, Object... uriVariables) throws RestClientException;
+	ListenableFuture<?> delete(String url, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Asynchronously delete the resources at the specified URI.
@@ -240,7 +241,7 @@ public interface AsyncRestOperations {
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
 	 */
-	Future<?> delete(String url, Map<String, ?> uriVariables) throws RestClientException;
+	ListenableFuture<?> delete(String url, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Asynchronously delete the resources at the specified URI.
@@ -248,7 +249,7 @@ public interface AsyncRestOperations {
 	 * <p>The Future will return a {@code null} result upon completion.
 	 * @param url the URL
 	 */
-	Future<?> delete(URI url) throws RestClientException;
+	ListenableFuture<?> delete(URI url) throws RestClientException;
 
 	// OPTIONS
 
@@ -259,7 +260,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return the value of the allow header wrapped in a {@link Future}
 	 */
-	Future<Set<HttpMethod>> optionsForAllow(String url, Object... uriVariables)
+	ListenableFuture<Set<HttpMethod>> optionsForAllow(String url, Object... uriVariables)
 			throws RestClientException;
 
 	/**
@@ -269,7 +270,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return the value of the allow header wrapped in a {@link Future}
 	 */
-	Future<Set<HttpMethod>> optionsForAllow(String url, Map<String, ?> uriVariables)
+	ListenableFuture<Set<HttpMethod>> optionsForAllow(String url, Map<String, ?> uriVariables)
 			throws RestClientException;
 
 	/**
@@ -277,7 +278,7 @@ public interface AsyncRestOperations {
 	 * @param url the URL
 	 * @return the value of the allow header wrapped in a {@link Future}
 	 */
-	Future<Set<HttpMethod>> optionsForAllow(URI url) throws RestClientException;
+	ListenableFuture<Set<HttpMethod>> optionsForAllow(URI url) throws RestClientException;
 
 
 	// exchange
@@ -295,7 +296,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> exchange(String url, HttpMethod method,
+	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables)
 			throws RestClientException;
 
@@ -312,7 +313,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> exchange(String url, HttpMethod method,
+	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
@@ -327,7 +328,7 @@ public interface AsyncRestOperations {
 	 * @param responseType the type of the return value
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> exchange(URI url, HttpMethod method,
+	<T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType)
 			throws RestClientException;
 
@@ -348,7 +349,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> exchange(String url, HttpMethod method,
+	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
 			Object... uriVariables) throws RestClientException;
 
@@ -368,7 +369,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> exchange(String url, HttpMethod method,
+	<T> ListenableFuture<ResponseEntity<T>> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException;
 
@@ -387,7 +388,7 @@ public interface AsyncRestOperations {
 	 * @param responseType the type of the return value
 	 * @return the response as entity wrapped in a {@link Future}
 	 */
-	<T> Future<ResponseEntity<T>> exchange(URI url, HttpMethod method,
+	<T> ListenableFuture<ResponseEntity<T>> exchange(URI url, HttpMethod method,
 			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
 			throws RestClientException;
 
@@ -406,7 +407,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	<T> Future<T> execute(String url, HttpMethod method,
+	<T> ListenableFuture<T> execute(String url, HttpMethod method,
 			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
 			Object... uriVariables) throws RestClientException;
 
@@ -422,7 +423,7 @@ public interface AsyncRestOperations {
 	 * @param uriVariables the variables to expand in the template
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	<T> Future<T> execute(String url, HttpMethod method,
+	<T> ListenableFuture<T> execute(String url, HttpMethod method,
 			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor,
 			Map<String, ?> uriVariables) throws RestClientException;
 
@@ -436,7 +437,7 @@ public interface AsyncRestOperations {
 	 * @param responseExtractor object that extracts the return value from the response
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
-	<T> Future<T> execute(URI url, HttpMethod method,
+	<T> ListenableFuture<T> execute(URI url, HttpMethod method,
 			AsyncRequestCallback requestCallback, ResponseExtractor<T> responseExtractor)
 			throws RestClientException;
 

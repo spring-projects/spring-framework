@@ -20,7 +20,7 @@ import java.net.ProtocolException;
 
 import org.junit.Test;
 
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpMethod;
 
@@ -29,7 +29,7 @@ public class BufferedSimpleAsyncHttpRequestFactoryTests extends AbstractAsyncHtt
 	@Override
 	protected AsyncClientHttpRequestFactory createRequestFactory() {
 		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-		AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+		AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 		requestFactory.setTaskExecutor(taskExecutor);
 		return requestFactory;
 	}

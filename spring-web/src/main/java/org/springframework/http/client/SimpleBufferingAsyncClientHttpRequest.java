@@ -23,12 +23,12 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
@@ -45,10 +45,10 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 
 	private final boolean outputStreaming;
 
-	private final AsyncTaskExecutor taskExecutor;
+	private final AsyncListenableTaskExecutor taskExecutor;
 
 	SimpleBufferingAsyncClientHttpRequest(HttpURLConnection connection,
-			boolean outputStreaming, AsyncTaskExecutor taskExecutor) {
+			boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
 		this.connection = connection;
 		this.outputStreaming = outputStreaming;
 		this.taskExecutor = taskExecutor;
@@ -70,9 +70,9 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 	}
 
 	@Override
-	protected Future<ClientHttpResponse> executeInternal(final HttpHeaders headers,
-			final byte[] bufferedOutput) throws IOException {
-		return taskExecutor.submit(new Callable<ClientHttpResponse>() {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(
+			final HttpHeaders headers, final byte[] bufferedOutput) throws IOException {
+		return taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
