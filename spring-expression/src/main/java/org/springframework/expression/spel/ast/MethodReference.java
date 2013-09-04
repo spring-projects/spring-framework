@@ -109,7 +109,7 @@ public class MethodReference extends SpelNodeImpl {
 				throwSimpleExceptionIfPossible(value, ae);
 
 				// At this point we know it wasn't a user problem so worth a retry if a
-				// better candidate can be found
+				// better candidate can be found.
 				this.cachedExecutor = null;
 			}
 		}
@@ -217,9 +217,7 @@ public class MethodReference extends SpelNodeImpl {
 			}
 			throw new ExpressionInvocationTargetException(getStartPosition(),
 					"A problem occurred when trying to execute method '" + this.name +
-							"' on object of type '" +
-							value.getClass().getName() + "'",
-					rootCause);
+					"' on object of type [" + value.getClass().getName() + "]", rootCause);
 		}
 	}
 
