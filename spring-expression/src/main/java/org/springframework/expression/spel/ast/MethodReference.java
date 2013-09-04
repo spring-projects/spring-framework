@@ -32,6 +32,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 
 /**
  * Expression language AST node that represents a method reference.
@@ -88,7 +89,7 @@ public class MethodReference extends SpelNodeImpl {
 			return TypedValue.NULL;
 		}
 
-		MethodExecutor executorToUse = getCachedExecutor(value, targetType, argumentTypes);
+		MethodExecutor executorToUse = getCachedExecutor(evaluationContext, value, targetType, argumentTypes);
 		if (executorToUse != null) {
 			try {
 				return executorToUse.execute(evaluationContext, value, arguments);
@@ -104,8 +105,7 @@ public class MethodReference extends SpelNodeImpl {
 
 				// To determine the situation, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was
-				// thrown inside the method.
-				// Otherwise the method could not be invoked.
+				// thrown inside the method. Otherwise the method could not be invoked.
 				throwSimpleExceptionIfPossible(value, ae);
 
 				// At this point we know it wasn't a user problem so worth a retry if a
@@ -161,7 +161,16 @@ public class MethodReference extends SpelNodeImpl {
 		return Collections.unmodifiableList(descriptors);
 	}
 
-	private MethodExecutor getCachedExecutor(Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+	private MethodExecutor getCachedExecutor(EvaluationContext evaluationContext, Object value,
+			TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
+
+		List<MethodResolver> methodResolvers = evaluationContext.getMethodResolvers();
+		if (methodResolvers == null || methodResolvers.size() != 1 ||
+				!(methodResolvers.get(0) instanceof ReflectiveMethodResolver)) {
+			// Not a default ReflectiveMethodResolver - don't know whether caching is valid
+			return null;
+		}
+
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
 		if (executorToCheck != null && executorToCheck.isSuitable(value, target, argumentTypes)) {
 			return executorToCheck.get();
