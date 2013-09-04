@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.expression;
 import java.util.List;
 
 /**
- * Expressions are executed in an evaluation context. It is in this context that references
- * are resolved when encountered during expression evaluation.
+ * Expressions are executed in an evaluation context. It is in this context that
+ * references are resolved when encountered during expression evaluation.
  *
  * <p>There is a default implementation of the EvaluationContext,
- * {@link org.springframework.expression.spel.support.StandardEvaluationContext}
- * that can be extended, rather than having to implement everything.
+ * {@link org.springframework.expression.spel.support.StandardEvaluationContext} that can
+ * be extended, rather than having to implement everything.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -33,49 +33,51 @@ import java.util.List;
 public interface EvaluationContext {
 
 	/**
-	 * @return the default root context object against which unqualified properties/methods/etc
-	 * should be resolved. This can be overridden when evaluating an expression.
+	 * Return the default root context object against which unqualified
+	 * properties/methods/etc should be resolved. This can be overridden
+	 * when evaluating an expression.
 	 */
 	TypedValue getRootObject();
 
 	/**
-	 * @return a list of resolvers that will be asked in turn to locate a constructor
+	 * Return a list of resolvers that will be asked in turn to locate a constructor.
 	 */
 	List<ConstructorResolver> getConstructorResolvers();
 
 	/**
-	 * @return a list of resolvers that will be asked in turn to locate a method
+	 * Return a list of resolvers that will be asked in turn to locate a method.
 	 */
 	List<MethodResolver> getMethodResolvers();
 
 	/**
-	 * @return a list of accessors that will be asked in turn to read/write a property
+	 * Return a list of accessors that will be asked in turn to read/write a property.
 	 */
 	List<PropertyAccessor> getPropertyAccessors();
 
 	/**
-	 * @return a type locator that can be used to find types, either by short or fully qualified name.
+	 * Return a type locator that can be used to find types, either by short or
+	 * fully qualified name.
 	 */
 	TypeLocator getTypeLocator();
 
 	/**
-	 * @return a type converter that can convert (or coerce) a value from one type to another.
+	 * Return a type converter that can convert (or coerce) a value from one type to another.
 	 */
 	TypeConverter getTypeConverter();
 
 	/**
-	 * @return a type comparator for comparing pairs of objects for equality.
+	 * Return a type comparator for comparing pairs of objects for equality.
 	 */
 	TypeComparator getTypeComparator();
 
 	/**
-	 * @return an operator overloader that may support mathematical operations
-	 * between more than the standard set of types
+	 * Return an operator overloader that may support mathematical operations
+	 * between more than the standard set of types.
 	 */
 	OperatorOverloader getOperatorOverloader();
 
 	/**
-	 * @return a bean resolver that can look up beans by name
+	 * Return a bean resolver that can look up beans by name.
 	 */
 	BeanResolver getBeanResolver();
 
