@@ -20,7 +20,9 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
+import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.springframework.context.SmartLifecycle;
@@ -158,8 +160,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
 		try {
-			// TODO: do not block
-			this.client.connect(listener, uri, request).get();
+			Future<Session> future = this.client.connect(listener, uri, request);
+			future.get();
 			return wsSession;
 		}
 		catch (Exception e) {

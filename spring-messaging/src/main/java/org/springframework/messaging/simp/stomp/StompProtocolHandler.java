@@ -99,9 +99,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 			String payload = ((TextMessage)webSocketMessage).getPayload();
 			Message<?> message = this.stompMessageConverter.toMessage(payload);
 
-			// TODO: validate size limits
-			// http://stomp.github.io/stomp-specification-1.2.html#Size_Limits
-
 			if (logger.isTraceEnabled()) {
 				logger.trace("Message " + message);
 			}
@@ -124,10 +121,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 				logger.error("Terminating STOMP session due to failure to send message: ", t);
 				sendErrorMessage(session, t);
 			}
-
-			// TODO: send RECEIPT message if incoming message has "receipt" header
-			// http://stomp.github.io/stomp-specification-1.2.html#Header_receipt
-
 		}
 		catch (Throwable error) {
 			sendErrorMessage(session, error);
@@ -149,13 +142,11 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		}
 
 		if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
-			// TODO: failed message delivery mechanism
 			logger.error("Ignoring message, no subscriptionId header: " + message);
 			return;
 		}
 
 		if (!(message.getPayload() instanceof byte[])) {
-			// TODO: failed message delivery mechanism
 			logger.error("Ignoring message, expected byte[] content: " + message);
 			return;
 		}
@@ -197,7 +188,7 @@ public class StompProtocolHandler implements SubProtocolHandler {
 		else {
 			throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
 		}
-		connectedHeaders.setHeartbeat(0,0); // TODO
+		connectedHeaders.setHeartbeat(0,0);
 
 		Principal principal = session.getPrincipal();
 		if (principal != null) {
@@ -209,8 +200,6 @@ public class StompProtocolHandler implements SubProtocolHandler {
 				this.queueSuffixResolver.addQueueSuffix(principal.getName(), session.getId(), suffix);
 			}
 		}
-
-		// TODO: security
 
 		Message<?> connectedMessage = MessageBuilder.withPayloadAndHeaders(new byte[0], connectedHeaders).build();
 		byte[] bytes = this.stompMessageConverter.fromMessage(connectedMessage);

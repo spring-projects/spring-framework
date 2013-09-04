@@ -255,7 +255,6 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 			return null;
 		}
 		String[] rawValues = StringUtils.commaDelimitedListToStringArray(rawValue);
-		// TODO assertions
 		return new long[] { Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
 	}
 

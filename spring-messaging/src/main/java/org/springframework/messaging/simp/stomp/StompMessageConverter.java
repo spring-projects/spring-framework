@@ -73,7 +73,6 @@ public class StompMessageConverter {
 		String headerContent = new String(byteContent, 0, payloadIndex, STOMP_CHARSET);
 		Parser parser = new Parser(headerContent);
 
-		// TODO: validate command and whether a payload is allowed
 		StompCommand command = StompCommand.valueOf(parser.nextToken(LF).trim());
 		Assert.notNull(command, "No command found");
 

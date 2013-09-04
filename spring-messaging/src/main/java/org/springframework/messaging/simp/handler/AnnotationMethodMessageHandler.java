@@ -339,8 +339,7 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 			invokeExceptionHandler(message, handlerMethod, ex);
 		}
 		catch (Throwable ex) {
-			// TODO
-			ex.printStackTrace();
+			logger.error("Error while processing message " + message, ex);
 		}
 	}
 

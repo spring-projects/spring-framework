@@ -42,11 +42,4 @@ public interface MessageHandler {
 	 */
 	void handleMessage(Message<?> message) throws MessagingException;
 
-	/*
-	 * TODO: exceptions
-	 * @throws org.springframework.integration.MessageRejectedException if the handler doesn't accept the message
-	 * @throws org.springframework.integration.MessageHandlingException when something fails during the handling
-	 * @throws org.springframework.integration.MessageDeliveryException when this handler failed to deliver the
-	 */
-
 }

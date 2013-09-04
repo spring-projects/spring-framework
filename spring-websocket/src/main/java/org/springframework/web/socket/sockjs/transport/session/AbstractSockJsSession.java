@@ -219,7 +219,6 @@ public abstract class AbstractSockJsSession implements WebSocketSession {
 			}
 			try {
 				if (isActive()) {
-					// TODO: deliver messages "in flight" before sending close frame
 					try {
 						// bypass writeFrame
 						writeFrameInternal(SockJsFrame.closeFrame(status.getCode(), status.getReason()));

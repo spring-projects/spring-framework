@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 
 /**
- * TODO
+ * A resolver for extracting the body of a message.
  *
  * <p>This {@link HandlerMethodArgumentResolver} should be ordered last as it supports all
  * types and does not require the {@link MessageBody} annotation.
@@ -62,7 +62,6 @@ public class MessageBodyMethodArgumentResolver implements HandlerMethodArgumentR
 				return message.getPayload();
 			}
 			else {
-				// TODO: use content-type header
 				return this.converter.fromMessage(message, targetClass);
 			}
 		}

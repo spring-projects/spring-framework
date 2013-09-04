@@ -94,7 +94,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * TODO
+	 * Invoke the method with the given message.
 	 *
 	 * @exception Exception raised if no suitable argument resolver can be found, or the
 	 *            method raised an exception

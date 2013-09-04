@@ -225,14 +225,6 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	}
 
 	protected boolean isValidOrigin(ServerHttpRequest request) {
-		String origin = request.getHeaders().getOrigin();
-		if (origin != null) {
-			// UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(origin);
-			// TODO
-			// A simple strategy checks against the current request's scheme/port/host
-			// Or match scheme, port, and host against configured allowed origins (wild cards for hosts?)
-			// return false;
-		}
 		return true;
 	}
 

@@ -89,10 +89,8 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		configBuidler.preferredSubprotocols(protocols);
 
 		try {
-			// TODO: do not block
 			Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
 			this.webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
-
 			return session;
 		}
 		catch (Exception e) {

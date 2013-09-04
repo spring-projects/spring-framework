@@ -188,7 +188,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		stopBrokerAndAwait();
 
-		// TODO:
 		// 1st message will see ERROR frame (broker shutdown is not but should be detected)
 		// 2nd message will be queued (a side effect of CONNECT/CONNECTED-buffering, likely to be removed)
 		// Finish this once the above changes are made.
