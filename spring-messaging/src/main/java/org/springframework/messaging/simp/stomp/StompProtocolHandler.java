@@ -94,37 +94,40 @@ public class StompProtocolHandler implements SubProtocolHandler {
 	public void handleMessageFromClient(WebSocketSession session, WebSocketMessage webSocketMessage,
 			MessageChannel outputChannel) {
 
+		Message<?> message;
 		try {
 			Assert.isInstanceOf(TextMessage.class,  webSocketMessage);
 			String payload = ((TextMessage)webSocketMessage).getPayload();
-			Message<?> message = this.stompMessageConverter.toMessage(payload);
-
-			if (logger.isTraceEnabled()) {
-				logger.trace("Message " + message);
-			}
-
-			try {
-				StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-				headers.setSessionId(session.getId());
-				headers.setUser(session.getPrincipal());
-
-				message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
-
-				if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
-					handleConnect(session, message);
-				}
-
-				outputChannel.send(message);
-
-			}
-			catch (Throwable t) {
-				logger.error("Terminating STOMP session due to failure to send message: ", t);
-				sendErrorMessage(session, t);
-			}
+			message = this.stompMessageConverter.toMessage(payload);
 		}
 		catch (Throwable error) {
+			logger.error("Failed to parse STOMP frame, WebSocket message payload: ", error);
 			sendErrorMessage(session, error);
+			return;
 		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Message " + message);
+		}
+
+		try {
+			StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+			headers.setSessionId(session.getId());
+			headers.setUser(session.getPrincipal());
+
+			message = MessageBuilder.withPayloadAndHeaders(message.getPayload(), headers).build();
+
+			if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
+				handleConnect(session, message);
+			}
+
+			outputChannel.send(message);
+		}
+		catch (Throwable t) {
+			logger.error("Terminating STOMP session due to failure to send message: ", t);
+			sendErrorMessage(session, t);
+		}
+
 	}
 
 	/**
