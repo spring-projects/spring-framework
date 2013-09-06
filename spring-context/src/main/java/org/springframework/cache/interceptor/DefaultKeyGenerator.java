@@ -48,11 +48,17 @@ public class DefaultKeyGenerator implements KeyGenerator {
 
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
-		if (params.length == 1) {
+		if (!method.isVarArgs() && params.length == 1) {
 			return (params[0] == null ? NULL_PARAM_KEY : params[0]);
 		}
 		if (params.length == 0) {
 			return NO_PARAM_KEY;
+		}
+		if (method.isVarArgs()) {
+			params = mergeVarArgs(params);
+			if (params.length == 1) {
+				return (params[0] == null ? NULL_PARAM_KEY : params[0]);
+			}
 		}
 		int hashCode = 17;
 		for (Object object : params) {
@@ -60,5 +66,19 @@ public class DefaultKeyGenerator implements KeyGenerator {
 		}
 		return Integer.valueOf(hashCode);
 	}
-
+	
+	private Object[] mergeVarArgs(Object[] params) {
+		if(params.length == 1) {
+			return (Object[]) params[0];
+		}
+		Object[] varArgs = (Object[]) params[params.length-1];
+		Object[] newArgs = new Object[params.length - 1 + varArgs.length];
+		for (int i = 0; i < params.length-1; i++) {
+			newArgs[i] = params[i];
+		}
+		for (int i = params.length-1; i < newArgs.length; i++) {
+			newArgs[i] = varArgs[i-params.length+1];
+		}
+		return newArgs;
+	}
 }
