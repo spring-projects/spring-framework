@@ -24,6 +24,9 @@ import javax.websocket.server.ServerEndpoint;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.client.ConnectionManagerSupport;
 import org.springframework.web.socket.support.BeanCreatingHandlerProvider;
 
@@ -45,6 +48,8 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 	private WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
 
 	private Session session;
+
+	private TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("AnnotatedEndpointConnectionManager-");
 
 
 	public AnnotatedEndpointConnectionManager(Object endpoint, String uriTemplate, Object... uriVariables) {
@@ -75,10 +80,38 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 		}
 	}
 
+	/**
+	 * Set a {@link TaskExecutor} to use to open the connection.
+	 * By default {@link SimpleAsyncTaskExecutor} is used.
+	 */
+	public void setTaskExecutor(TaskExecutor taskExecutor) {
+		Assert.notNull(taskExecutor, "taskExecutor is required");
+		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Return the configured {@link TaskExecutor}.
+	 */
+	public TaskExecutor getTaskExecutor() {
+		return this.taskExecutor;
+	}
+
 	@Override
-	protected void openConnection() throws Exception {
-		Object endpoint = (this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
-		this.session = this.webSocketContainer.connectToServer(endpoint, getUri());
+	protected void openConnection() {
+		this.taskExecutor.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					logger.info("Connecting to WebSocket at " + getUri());
+					Object endpointToUse = (endpoint != null) ? endpoint : endpointProvider.getHandler();
+					session = webSocketContainer.connectToServer(endpointToUse, getUri());
+					logger.info("Successfully connected");
+				}
+				catch (Throwable ex) {
+					logger.error("Failed to connect", ex);
+				}
+			}
+		});
 	}
 
 	@Override

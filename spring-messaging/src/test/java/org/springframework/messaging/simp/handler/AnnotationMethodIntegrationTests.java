@@ -83,7 +83,7 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 	public void simpleController() throws Exception {
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
-		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws");
+		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get();
 
 		SimpleController controller = this.wac.getBean(SimpleController.class);
 		try {
@@ -104,7 +104,7 @@ public class AnnotationMethodIntegrationTests extends AbstractWebSocketIntegrati
 				"destination:/app/topic/increment").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(1, message1, message2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws");
+		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
 			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));

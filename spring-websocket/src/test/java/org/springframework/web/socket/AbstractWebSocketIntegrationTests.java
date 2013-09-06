@@ -26,6 +26,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.server.DefaultHandshakeHandler;
@@ -108,7 +109,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		return "ws://localhost:" + this.server.getPort();
 	}
 
-	protected WebSocketSession doHandshake(WebSocketHandler clientHandler, String endpointPath) {
+	protected ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler clientHandler, String endpointPath) {
 		return this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + endpointPath);
 	}
 

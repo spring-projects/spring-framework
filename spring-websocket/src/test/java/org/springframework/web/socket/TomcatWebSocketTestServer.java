@@ -25,7 +25,6 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.ApplicationListener;
 import org.apache.tomcat.websocket.server.WsListener;
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -74,7 +73,7 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 			return tempFolder;
 		}
 		catch (IOException ex) {
-			throw new NestedRuntimeException("Unable to create temp directory", ex) {};
+			throw new RuntimeException("Unable to create temp directory", ex);
 		}
 	}
 

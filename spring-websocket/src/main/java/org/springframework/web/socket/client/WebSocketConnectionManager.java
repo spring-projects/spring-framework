@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
@@ -129,8 +131,24 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	}
 
 	@Override
-	protected void openConnection() throws Exception {
-		this.webSocketSession = this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
+	protected void openConnection() {
+
+		logger.info("Connecting to WebSocket at " + getUri());
+
+		ListenableFuture<WebSocketSession> future =
+				this.client.doHandshake(this.webSocketHandler, this.headers, getUri());
+
+		future.addCallback(new ListenableFutureCallback<WebSocketSession>() {
+			@Override
+			public void onSuccess(WebSocketSession result) {
+				webSocketSession = result;
+				logger.info("Successfully connected");
+			}
+			@Override
+			public void onFailure(Throwable t) {
+				logger.error("Failed to connect", t);
+			}
+		});
 	}
 
 	@Override

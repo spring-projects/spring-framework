@@ -20,19 +20,24 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-import org.springframework.web.socket.client.WebSocketConnectFailureException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -53,6 +58,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 
 	private final Object lifecycleMonitor = new Object();
 
+	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("WebSocketClient-");
+
 
 	/**
 	 * Default constructor that creates an instance of
@@ -70,6 +77,22 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 		this.client = client;
 	}
 
+
+	/**
+	 * Set a {@link TaskExecutor} to use to open the connection.
+	 * By default {@link SimpleAsyncTaskExecutor} is used.
+	 */
+	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
+		Assert.notNull(taskExecutor, "taskExecutor is required");
+		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Return the configured {@link TaskExecutor}.
+	 */
+	public AsyncListenableTaskExecutor getTaskExecutor() {
+		return this.taskExecutor;
+	}
 
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
@@ -137,38 +160,36 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Sma
 	}
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVars)
-			throws WebSocketConnectFailureException {
+	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+			String uriTemplate, Object... uriVars) {
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode();
 		return doHandshake(webSocketHandler, null, uriComponents.toUri());
 	}
 
 	@Override
-	public WebSocketSession doHandshakeInternal(WebSocketHandler wsHandler, HttpHeaders headers,
-			URI uri, List<String> protocols, Map<String, Object> handshakeAttributes)
-					throws WebSocketConnectFailureException {
+	public ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler wsHandler,
+			HttpHeaders headers, final URI uri, List<String> protocols, Map<String, Object> handshakeAttributes) {
 
-		ClientUpgradeRequest request = new ClientUpgradeRequest();
+		final ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);
 		for (String header : headers.keySet()) {
 			request.setHeader(header, headers.get(header));
 		}
 
 		Principal user = getUser();
-		JettyWebSocketSession wsSession = new JettyWebSocketSession(user, handshakeAttributes);
-		JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
+		final JettyWebSocketSession wsSession = new JettyWebSocketSession(user, handshakeAttributes);
+		final JettyWebSocketHandlerAdapter listener = new JettyWebSocketHandlerAdapter(wsHandler, wsSession);
 
-		try {
-			Future<Session> future = this.client.connect(listener, uri, request);
-			future.get();
-			return wsSession;
-		}
-		catch (Exception e) {
-			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);
-		}
+		return this.taskExecutor.submitListenable(new Callable<WebSocketSession>() {
+			@Override
+			public WebSocketSession call() throws Exception {
+				Future<Session> future = client.connect(listener, uri, request);
+				future.get();
+				return wsSession;
+			}
+		});
 	}
-
 
 	/**
 	 * @return the user to make available through {@link WebSocketSession#getPrincipal()};

@@ -19,19 +19,21 @@ package org.springframework.web.socket.client;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.WebSocketHandlerAdapter;
 import org.springframework.web.socket.support.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.support.WebSocketHandlerDecorator;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link WebSocketConnectionManager}.
@@ -45,26 +47,20 @@ public class WebSocketConnectionManagerTests {
 
 		List<String> subprotocols = Arrays.asList("abc");
 
-		WebSocketClient client = mock(WebSocketClient.class);
+		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
 		WebSocketHandler handler = new WebSocketHandlerAdapter();
 
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/path/{id}", "123");
 		manager.setSubProtocols(subprotocols);
 		manager.openConnection();
 
-		ArgumentCaptor<WebSocketHandlerDecorator> captor = ArgumentCaptor.forClass(WebSocketHandlerDecorator.class);
-		ArgumentCaptor<HttpHeaders> headersCaptor = ArgumentCaptor.forClass(HttpHeaders.class);
-		ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
-
-		verify(client).doHandshake(captor.capture(), headersCaptor.capture(), uriCaptor.capture());
-
 		HttpHeaders expectedHeaders = new HttpHeaders();
 		expectedHeaders.setSecWebSocketProtocol(subprotocols);
 
-		assertEquals(expectedHeaders, headersCaptor.getValue());
-		assertEquals(new URI("/path/123"), uriCaptor.getValue());
+		assertEquals(expectedHeaders, client.headers);
+		assertEquals(new URI("/path/123"), client.uri);
 
-		WebSocketHandlerDecorator loggingHandler = captor.getValue();
+		WebSocketHandlerDecorator loggingHandler = (WebSocketHandlerDecorator) client.webSocketHandler;
 		assertEquals(LoggingWebSocketHandlerDecorator.class, loggingHandler.getClass());
 
 		assertSame(handler, loggingHandler.getDelegate());
@@ -103,6 +99,13 @@ public class WebSocketConnectionManagerTests {
 
 		private boolean running;
 
+		private WebSocketHandler webSocketHandler;
+
+		private HttpHeaders headers;
+
+		private URI uri;
+
+
 		public TestLifecycleWebSocketClient(boolean running) {
 			this.running = running;
 		}
@@ -138,15 +141,27 @@ public class WebSocketConnectionManagerTests {
 		}
 
 		@Override
-		public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables)
-				throws WebSocketConnectFailureException {
-			return null;
+		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+				String uriTemplate, Object... uriVars) {
+
+			URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
+			return doHandshake(webSocketHandler, null, uri);
 		}
 
 		@Override
-		public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
-				throws WebSocketConnectFailureException {
-			return null;
+		public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+				HttpHeaders headers, URI uri) {
+
+			this.webSocketHandler = webSocketHandler;
+			this.headers = headers;
+			this.uri = uri;
+
+			return new ListenableFutureTask<WebSocketSession>(new Callable<WebSocketSession>() {
+				@Override
+				public WebSocketSession call() throws Exception {
+					return null;
+				}
+			});
 		}
 	}
 

@@ -66,7 +66,7 @@ public class StandardWebSocketClientTests {
 	@Test
 	public void localAddress() throws Exception {
 		URI uri = new URI("ws://example.com/abc");
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
+		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertNotNull(session.getLocalAddress());
 		assertEquals(80, session.getLocalAddress().getPort());
@@ -75,7 +75,7 @@ public class StandardWebSocketClientTests {
 	@Test
 	public void localAddressWss() throws Exception {
 		URI uri = new URI("wss://example.com/abc");
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
+		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertNotNull(session.getLocalAddress());
 		assertEquals(443, session.getLocalAddress().getPort());
@@ -90,7 +90,7 @@ public class StandardWebSocketClientTests {
 	@Test
 	public void remoteAddress() throws Exception {
 		URI uri = new URI("wss://example.com/abc");
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
+		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertNotNull(session.getRemoteAddress());
 		assertEquals("example.com", session.getRemoteAddress().getHostName());
@@ -105,7 +105,7 @@ public class StandardWebSocketClientTests {
 		this.headers.setSecWebSocketProtocol(protocols);
 		this.headers.add("foo", "bar");
 
-		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
+		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertEquals(Collections.singletonMap("foo", Arrays.asList("bar")), session.getHandshakeHeaders());
 	}
@@ -118,7 +118,7 @@ public class StandardWebSocketClientTests {
 		this.headers.setSecWebSocketProtocol(protocols);
 		this.headers.add("foo", "bar");
 
-		this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
+		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		ArgumentCaptor<Endpoint> arg1 = ArgumentCaptor.forClass(Endpoint.class);
 		ArgumentCaptor<ClientEndpointConfig> arg2 = ArgumentCaptor.forClass(ClientEndpointConfig.class);

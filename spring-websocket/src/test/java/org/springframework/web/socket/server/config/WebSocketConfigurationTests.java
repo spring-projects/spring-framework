@@ -65,8 +65,8 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	@Test
 	public void registerWebSocketHandler() throws Exception {
 
-		WebSocketSession session =
-				this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws");
+		WebSocketSession session = this.webSocketClient.doHandshake(
+				new WebSocketHandlerAdapter(), getWsBaseUrl() + "/ws").get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));
@@ -77,8 +77,8 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 	@Test
 	public void registerWebSocketHandlerWithSockJS() throws Exception {
 
-		WebSocketSession session =
-				this.webSocketClient.doHandshake(new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket");
+		WebSocketSession session = this.webSocketClient.doHandshake(
+				new WebSocketHandlerAdapter(), getWsBaseUrl() + "/sockjs/websocket").get();
 
 		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
 		assertTrue(serverHandler.latch.await(2, TimeUnit.SECONDS));

@@ -19,6 +19,7 @@ package org.springframework.web.socket.client;
 import java.net.URI;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -34,10 +35,9 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public interface WebSocketClient {
 
-	WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVariables) throws WebSocketConnectFailureException;
+	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+			String uriTemplate, Object... uriVariables);
 
-	WebSocketSession doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri)
-			throws WebSocketConnectFailureException;
+	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler, HttpHeaders headers, URI uri);
 
 }

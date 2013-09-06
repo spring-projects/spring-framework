@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -60,8 +61,8 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 
 
 	@Override
-	public WebSocketSession doHandshake(WebSocketHandler webSocketHandler, String uriTemplate,
-			Object... uriVars) throws WebSocketConnectFailureException {
+	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+			String uriTemplate, Object... uriVars) {
 
 		Assert.notNull(uriTemplate, "uriTemplate must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
@@ -69,8 +70,8 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
-	public final WebSocketSession doHandshake(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri) throws WebSocketConnectFailureException {
+	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
+			HttpHeaders headers, URI uri) {
 
 		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
 		Assert.notNull(uri, "uri must not be null");
@@ -111,12 +112,9 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 	 * @param handshakeAttributes attributes to make available via
 	 *        {@link WebSocketSession#getHandshakeAttributes()}; currently always an empty map.
 	 *
-	 * @return the established WebSocket session
-	 *
-	 * @throws WebSocketConnectFailureException
+	 * @return the established WebSocket session wrapped in a ListenableFuture.
 	 */
-	protected abstract WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> subProtocols,
-			Map<String, Object> handshakeAttributes) throws WebSocketConnectFailureException;
+	protected abstract ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
+			HttpHeaders headers, URI uri, List<String> subProtocols, Map<String, Object> handshakeAttributes);
 
 }

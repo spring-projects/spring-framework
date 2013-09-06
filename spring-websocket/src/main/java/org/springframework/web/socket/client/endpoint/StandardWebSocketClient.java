@@ -23,6 +23,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
@@ -31,14 +32,17 @@ import javax.websocket.Endpoint;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.WebSocketContainer;
 
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-import org.springframework.web.socket.client.WebSocketConnectFailureException;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programatically through the standard
@@ -50,6 +54,9 @@ import org.springframework.web.socket.client.WebSocketConnectFailureException;
 public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final WebSocketContainer webSocketContainer;
+
+	private AsyncListenableTaskExecutor taskExecutor =
+			new SimpleAsyncTaskExecutor("WebSocketClient-");
 
 
 	/**
@@ -71,31 +78,45 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		this.webSocketContainer = webSocketContainer;
 	}
 
+	/**
+	 * Set a {@link TaskExecutor} to use to open the connection.
+	 * By default {@link SimpleAsyncTaskExecutor} is used.
+	 */
+	public void setTaskExecutor(AsyncListenableTaskExecutor taskExecutor) {
+		Assert.notNull(taskExecutor, "taskExecutor is required");
+		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Return the configured {@link TaskExecutor}.
+	 */
+	public AsyncListenableTaskExecutor getTaskExecutor() {
+		return this.taskExecutor;
+	}
 
 	@Override
-	protected WebSocketSession doHandshakeInternal(WebSocketHandler webSocketHandler,
-			HttpHeaders headers, URI uri, List<String> protocols,
-			Map<String, Object> handshakeAttributes) throws WebSocketConnectFailureException {
+	protected ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler webSocketHandler,
+			HttpHeaders headers, final URI uri, List<String> protocols, Map<String, Object> handshakeAttributes) {
 
 		int port = getPort(uri);
 		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
 		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), port);
 
-		StandardWebSocketSession session = new StandardWebSocketSession(headers,
+		final StandardWebSocketSession session = new StandardWebSocketSession(headers,
 				handshakeAttributes, localAddress, remoteAddress);
 
-		ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
+		final ClientEndpointConfig.Builder configBuidler = ClientEndpointConfig.Builder.create();
 		configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));
 		configBuidler.preferredSubprotocols(protocols);
+		final Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
 
-		try {
-			Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
-			this.webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
-			return session;
-		}
-		catch (Exception e) {
-			throw new WebSocketConnectFailureException("Failed to connect to " + uri, e);
-		}
+		return this.taskExecutor.submitListenable(new Callable<WebSocketSession>() {
+			@Override
+			public WebSocketSession call() throws Exception {
+				webSocketContainer.connectToServer(endpoint, configBuidler.build(), uri);
+				return session;
+			}
+		});
 	}
 
 	private InetAddress getLocalHost() {

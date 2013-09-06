@@ -21,8 +21,6 @@ import java.net.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -47,8 +45,6 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	private boolean isRunning = false;
 
 	private int phase = Integer.MAX_VALUE;
-
-	private final TaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("EndpointConnectionManager-");
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -126,28 +122,16 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 	protected void startInternal() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting " + this.getClass().getSimpleName());
-		}
-		this.isRunning = true;
-		this.taskExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				synchronized (lifecycleMonitor) {
-					try {
-						logger.info("Connecting to WebSocket at " + uri);
-						openConnection();
-						logger.info("Successfully connected");
-					}
-					catch (Throwable ex) {
-						logger.error("Failed to connect", ex);
-					}
-				}
+		synchronized (lifecycleMonitor) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Starting " + this.getClass().getSimpleName());
 			}
-		});
+			this.isRunning = true;
+			openConnection();
+		}
 	}
 
-	protected abstract void openConnection() throws Exception;
+	protected abstract void openConnection();
 
 	@Override
 	public final void stop() {
