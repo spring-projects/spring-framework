@@ -21,7 +21,8 @@ import java.time.ZoneId;
 
 /**
  * Editor for {@code java.time.ZoneId}, translating zone ID Strings into
- * ZoneId objects. Exposed the TimeZone ID as a text representation.
+ * {@code ZoneId} objects. Exposes the {@code TimeZone} ID as a text
+ * representation.
  *
  * @author Juergen Hoeller
  * @since 4.0

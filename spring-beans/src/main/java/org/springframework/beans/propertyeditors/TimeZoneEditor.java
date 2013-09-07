@@ -21,7 +21,8 @@ import java.util.TimeZone;
 
 /**
  * Editor for {@code java.util.TimeZone}, translating timezone IDs into
- * TimeZone objects. Exposed the TimeZone ID as a text representation.
+ * {@code TimeZone} objects. Exposes the {@code TimeZone} ID as a text
+ * representation.
  *
  * @author Juergen Hoeller
  * @since 3.0
