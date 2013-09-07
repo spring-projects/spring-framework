@@ -1,0 +1,7 @@
+<dependencies>
+    <dependency>
+        <groupId>{@= groupId @}</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>{@= version @}</version>
+    </dependency>
+</dependencies>

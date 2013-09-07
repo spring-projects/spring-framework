@@ -1,0 +1,159 @@
+---
+# The name of your project
+title: Spring Framework
+
+badges:
+
+  # Specify your project's twitter handle, if any. Delete if none.
+  twitter: SpringFramework
+
+  # Customize your project's badges. Delete any entries that do not apply.
+  custom:
+    - name: Source (GitHub)
+      url:  https://github.com/spring-projects/spring-framework
+      icon: github
+
+    - name: Issues (JIRA)
+      url:  http://jira.springsource.org/browse/SPR
+      icon: tracking
+
+    - name: CI (Bamboo)
+      url:  https://build.springsource.org/browse/SPR
+      icon: ci
+
+    - name: Forum
+      url:  http://forum.spring.io/forum/spring-projects/container
+      icon: forum
+
+    - name: StackOverflow
+      url:  http://stackoverflow.com/questions/tagged/spring
+      icon: stackoverflow
+
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+
+{% capture billboard_description %}
+Core support for dependency injection, transaction management, web applications, data access, messaging, testing and more.
+{% endcapture %}
+
+{% capture main_content %}
+
+## Introduction
+
+The Spring Framework provides a comprehensive programming and
+configuration model for modern Java-based enterprise applications -
+on any kind of deployment platform. A key element of Spring is
+infrastructural support at the application level: Spring focuses on the
+"plumbing" of enterprise applications so that teams can focus on
+application-level business logic, without unnecessary ties to specific
+deployment environments.
+
+## Features
+
+* Dependency Injection
+* Aspect-Oriented Programming including Spring's declarative transaction management
+* Spring MVC web application and RESTful web service framework
+* Foundational support for JDBC, JPA, JMS
+* Much more...
+
+<span id="quick-start"></span>
+## Quick Start
+
+{% include download_widget.md %}
+
+Spring Framework includes a number of different modules, here we are showing `spring-context` which provides core functionality. Refer to the getting started guides on the right for other options.
+
+Once you've set up your build with the `spring-context` dependency, you'll be able to do the following:
+
+`hello/MessageService.java`
+
+```java
+package hello;
+
+public interface MessageService {
+    String getMessage();
+}
+```
+
+<br/>
+`hello/MessagePrinter.java`
+
+```java
+package hello;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MessagePrinter {
+
+    @Autowired
+    private MessageService service;
+
+    public void printMessage() {
+        System.out.println(this.service.getMessage());
+    }
+}
+```
+
+<br/>
+`hello/Application.java`
+
+```java
+package hello;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.*;
+
+@Configuration
+@ComponentScan
+public class Application {
+
+    @Bean
+    MessageService mockMessageService() {
+        return new MessageService() {
+            public String getMessage() {
+              return "Hello World!";
+            }
+        };
+    }
+
+  public static void main(String[] args) {
+      ApplicationContext context = 
+          new AnnotationConfigApplicationContext(Application.class);
+      MessagePrinter printer = context.getBean(MessagePrinter.class);
+      printer.printMessage();
+  }
+}
+```
+
+The example above shows the basic concept of dependency injection, the `MessagePrinter` is
+decoupled from the `MessageService` implementation, with Spring Framework wiring everything
+together.
+
+
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+### Getting Started Guides
+
+* [Building a RESTful Web Service]({{site.main_site_url}}/guides/gs/rest-service)
+* [Consuming a RESTful Web Service]({{site.main_site_url}}/guides/gs/consuming-rest)
+* [Managing Transactions]({{site.main_site_url}}/guides/gs/managing-transactions)
+* [Accessing Relational Data using JDBC with Spring]({{site.main_site_url}}/guides/gs/relational-data-access)
+* [Scheduling Tasks]({{site.main_site_url}}/guides/gs/scheduling-tasks)
+* [Serving Web Content]({{site.main_site_url}}/guides/gs/serving-web-content)
+* [Validating Form Input]({{site.main_site_url}}/guides/gs/validating-form-input)
+* [Messaging with JMS]({{site.main_site_url}}/guides/gs/messaging-jms)
+
+### Tutorials
+
+* [Designing and Implementing RESTful Web Services with Spring]({{site.main_site_url}}/guides/tutorials/rest)
+
+{% endcapture %}
+
+{% include project_page.html %}
+</html>
