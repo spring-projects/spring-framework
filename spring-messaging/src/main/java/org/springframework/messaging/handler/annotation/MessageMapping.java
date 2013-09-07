@@ -26,7 +26,7 @@ import org.springframework.messaging.Message;
 
 
 /**
- * Annotation for mapping a {@link Message} onto specific handler handler methods based on
+ * Annotation for mapping a {@link Message} onto specific handler methods based on
  * the destination for the message.
  *
  * @author Rossen Stoyanchev
