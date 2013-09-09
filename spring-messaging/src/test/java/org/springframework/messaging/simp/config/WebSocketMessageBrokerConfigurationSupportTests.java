@@ -30,7 +30,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.ReplyTo;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.websocket.SubProtocolWebSocketHandler;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
@@ -284,7 +284,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		}
 
 		@MessageMapping("/foo")
-		@ReplyTo("/bar")
+		@SendTo("/bar")
 		public String handleMessage() {
 			return "bar";
 		}

@@ -58,7 +58,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
 import org.springframework.messaging.simp.annotation.UnsubscribeEvent;
 import org.springframework.messaging.simp.annotation.support.PrincipalMethodArgumentResolver;
-import org.springframework.messaging.simp.annotation.support.ReplyToMethodReturnValueHandler;
+import org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler;
 import org.springframework.messaging.simp.annotation.support.SubscriptionMethodReturnValueHandler;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.converter.MessageConverter;
@@ -201,14 +201,14 @@ public class AnnotationMethodMessageHandler implements MessageHandler, Applicati
 		this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
 
 		// Annotation-based return value types
-		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate, true));
+		this.returnValueHandlers.addHandler(new SendToMethodReturnValueHandler(this.brokerTemplate, true));
 		this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketResponseTemplate));
 
 		// custom return value types
 		this.returnValueHandlers.addHandlers(this.customReturnValueHandlers);
 
 		// catch-all
-		this.returnValueHandlers.addHandler(new ReplyToMethodReturnValueHandler(this.brokerTemplate, false));
+		this.returnValueHandlers.addHandler(new SendToMethodReturnValueHandler(this.brokerTemplate, false));
 	}
 
 	protected final void initHandlerMethods() {

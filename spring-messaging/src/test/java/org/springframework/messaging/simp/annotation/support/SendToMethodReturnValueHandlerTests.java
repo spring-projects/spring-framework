@@ -31,10 +31,10 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.ReplyTo;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.ReplyToUser;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.converter.MessageConverter;
 
@@ -44,18 +44,18 @@ import static org.mockito.Mockito.*;
 
 
 /**
- * Test fixture for {@link ReplyToMethodReturnValueHandlerTests}.
+ * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
  *
  * @author Rossen Stoyanchev
  */
-public class ReplyToMethodReturnValueHandlerTests {
+public class SendToMethodReturnValueHandlerTests {
 
 	private static final String payloadContent = "payload";
 
 
-	private ReplyToMethodReturnValueHandler handler;
+	private SendToMethodReturnValueHandler handler;
 
-	private ReplyToMethodReturnValueHandler handlerAnnotationNotRequired;
+	private SendToMethodReturnValueHandler handlerAnnotationNotRequired;
 
 	@Mock private MessageChannel messageChannel;
 
@@ -63,11 +63,11 @@ public class ReplyToMethodReturnValueHandlerTests {
 
 	@Mock private MessageConverter messageConverter;
 
-	private MethodParameter replyToReturnType;
+	private MethodParameter sendToReturnType;
 
-	private MethodParameter replyToUserReturnType;
+	private MethodParameter sendToUserReturnType;
 
-	private MethodParameter missingReplyToReturnType;
+	private MethodParameter missingSendToReturnType;
 
 
 	@SuppressWarnings("unchecked")
@@ -82,37 +82,37 @@ public class ReplyToMethodReturnValueHandlerTests {
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
 		messagingTemplate.setConverter(this.messageConverter);
 
-		this.handler = new ReplyToMethodReturnValueHandler(messagingTemplate, true);
-		this.handlerAnnotationNotRequired = new ReplyToMethodReturnValueHandler(messagingTemplate, false);
+		this.handler = new SendToMethodReturnValueHandler(messagingTemplate, true);
+		this.handlerAnnotationNotRequired = new SendToMethodReturnValueHandler(messagingTemplate, false);
 
-		Method method = this.getClass().getDeclaredMethod("handleAndReplyTo");
-		this.replyToReturnType = new MethodParameter(method, -1);
+		Method method = this.getClass().getDeclaredMethod("handleAndSendTo");
+		this.sendToReturnType = new MethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndReplyToUser");
-		this.replyToUserReturnType = new MethodParameter(method, -1);
+		method = this.getClass().getDeclaredMethod("handleAndSendToUser");
+		this.sendToUserReturnType = new MethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleWithMissingReplyTo");
-		this.missingReplyToReturnType = new MethodParameter(method, -1);
+		method = this.getClass().getDeclaredMethod("handleWithMissingSendTo");
+		this.missingSendToReturnType = new MethodParameter(method, -1);
 	}
 
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(this.replyToReturnType));
-		assertTrue(this.handler.supportsReturnType(this.replyToUserReturnType));
-		assertFalse(this.handler.supportsReturnType(this.missingReplyToReturnType));
-		assertTrue(this.handlerAnnotationNotRequired.supportsReturnType(this.missingReplyToReturnType));
+		assertTrue(this.handler.supportsReturnType(this.sendToReturnType));
+		assertTrue(this.handler.supportsReturnType(this.sendToUserReturnType));
+		assertFalse(this.handler.supportsReturnType(this.missingSendToReturnType));
+		assertTrue(this.handlerAnnotationNotRequired.supportsReturnType(this.missingSendToReturnType));
 	}
 
 	@Test
-	public void replyToMethod() throws Exception {
+	public void sendToMethod() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
 		String sessionId = "sess1";
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/dest", null);
 
-		this.handler.handleReturnValue(payloadContent, this.replyToReturnType, inputMessage);
+		this.handler.handleReturnValue(payloadContent, this.sendToReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
@@ -132,7 +132,7 @@ public class ReplyToMethodReturnValueHandlerTests {
 	}
 
 	@Test
-	public void replyToUserMethod() throws Exception {
+	public void sendToUserMethod() throws Exception {
 
 		when(this.messageChannel.send(any(Message.class))).thenReturn(true);
 
@@ -140,7 +140,7 @@ public class ReplyToMethodReturnValueHandlerTests {
 		TestUser user = new TestUser();
 		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/dest", user);
 
-		this.handler.handleReturnValue(payloadContent, this.replyToUserReturnType, inputMessage);
+		this.handler.handleReturnValue(payloadContent, this.sendToUserReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 
@@ -181,19 +181,19 @@ public class ReplyToMethodReturnValueHandlerTests {
 	}
 
 	@MessageMapping("/handle")	// not needed for the tests but here for completeness
-	public String handleWithMissingReplyTo() {
+	public String handleWithMissingSendTo() {
 		return payloadContent;
 	}
 
 	@MessageMapping("/handle")	// not needed for the tests but here for completeness
-	@ReplyTo({"/dest1", "/dest2"})
-	public String handleAndReplyTo() {
+	@SendTo({"/dest1", "/dest2"})
+	public String handleAndSendTo() {
 		return payloadContent;
 	}
 
 	@MessageMapping("/handle")	// not needed for the tests but here for completeness
-	@ReplyToUser({"/dest1", "/dest2"})
-	public String handleAndReplyToUser() {
+	@SendToUser({"/dest1", "/dest2"})
+	public String handleAndSendToUser() {
 		return payloadContent;
 	}
 

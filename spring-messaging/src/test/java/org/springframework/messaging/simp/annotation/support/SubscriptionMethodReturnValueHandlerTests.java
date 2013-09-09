@@ -29,7 +29,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.ReplyTo;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeEvent;
@@ -61,7 +61,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	private MethodParameter subscribeEventReturnType;
 
-	private MethodParameter subscribeEventReplyToReturnType;
+	private MethodParameter subscribeEventSendToReturnType;
 
 	private MethodParameter messageMappingReturnType;
 
@@ -83,8 +83,8 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		Method method = this.getClass().getDeclaredMethod("getData");
 		this.subscribeEventReturnType = new MethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("getDataAndReplyTo");
-		this.subscribeEventReplyToReturnType = new MethodParameter(method, -1);
+		method = this.getClass().getDeclaredMethod("getDataAndSendTo");
+		this.subscribeEventSendToReturnType = new MethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handle");
 		this.messageMappingReturnType = new MethodParameter(method, -1);
@@ -94,7 +94,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	@Test
 	public void supportsReturnType() throws Exception {
 		assertTrue(this.handler.supportsReturnType(this.subscribeEventReturnType));
-		assertFalse(this.handler.supportsReturnType(this.subscribeEventReplyToReturnType));
+		assertFalse(this.handler.supportsReturnType(this.subscribeEventSendToReturnType));
 		assertFalse(this.handler.supportsReturnType(this.messageMappingReturnType));
 	}
 
@@ -138,8 +138,8 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@SubscribeEvent("/data") // not needed for the tests but here for completeness
-	@ReplyTo("/replyToDest")
-	private String getDataAndReplyTo() {
+	@SendTo("/sendToDest")
+	private String getDataAndSendTo() {
 		return payloadContent;
 	}
 

@@ -37,13 +37,13 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
  * @author Rossen Stoyanchev
  * @since 4.0
  *
- * @see org.springframework.messaging.handler.annotation.ReplyTo
+ * @see org.springframework.messaging.handler.annotation.SendTo
  * @see org.springframework.messaging.simp.handler.UserDestinationMessageHandler
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ReplyToUser {
+public @interface SendToUser {
 
 	/**
 	 * The destination for a message based on the return value of a method.

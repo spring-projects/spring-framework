@@ -35,7 +35,7 @@ import org.springframework.messaging.Message;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ReplyTo {
+public @interface SendTo {
 
 	/**
 	 * The destination for a message created from the return value of a method.

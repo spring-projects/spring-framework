@@ -23,19 +23,19 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.MessagePostProcessor;
-import org.springframework.messaging.handler.annotation.ReplyTo;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.method.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.annotation.ReplyToUser;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 
 /**
- * A {@link HandlerMethodReturnValueHandler} for replying to destinations specified in a
- * {@link ReplyTo} or {@link ReplyToUser} method-level annotations.
+ * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
+ * {@link SendTo} or {@link SendToUser} method-level annotations.
  * <p>
  * The value returned from the method is converted, and turned to a {@link Message} and
  * sent through the provided {@link MessageChannel}. The
@@ -46,14 +46,14 @@ import org.springframework.util.ObjectUtils;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	private final SimpMessageSendingOperations messagingTemplate;
 
 	private final boolean annotationRequired;
 
 
-	public ReplyToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
+	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
 		Assert.notNull(messagingTemplate, "messagingTemplate is required");
 		this.messagingTemplate = messagingTemplate;
 		this.annotationRequired = annotationRequired;
@@ -62,8 +62,8 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		if ((returnType.getMethodAnnotation(ReplyTo.class) != null) ||
-				(returnType.getMethodAnnotation(ReplyToUser.class) != null)) {
+		if ((returnType.getMethodAnnotation(SendTo.class) != null) ||
+				(returnType.getMethodAnnotation(SendToUser.class) != null)) {
 			return true;
 		}
 		return (!this.annotationRequired);
@@ -82,21 +82,21 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 		String sessionId = inputHeaders.getSessionId();
 		MessagePostProcessor postProcessor = new SessionHeaderPostProcessor(sessionId);
 
-		ReplyToUser replyToUser = returnType.getMethodAnnotation(ReplyToUser.class);
-		if (replyToUser != null) {
+		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
+		if (sendToUser != null) {
 			if (inputHeaders.getUser() == null) {
 				throw new MissingSessionUserException(inputMessage);
 			}
 			String user = inputHeaders.getUser().getName();
-			for (String destination : getDestinations(replyToUser, inputHeaders.getDestination())) {
+			for (String destination : getDestinations(sendToUser, inputHeaders.getDestination())) {
 				this.messagingTemplate.convertAndSendToUser(user, destination, returnValue, postProcessor);
 			}
 			return;
 		}
 
-		ReplyTo replyTo = returnType.getMethodAnnotation(ReplyTo.class);
-		if (replyTo != null) {
-			for (String destination : getDestinations(replyTo, inputHeaders.getDestination())) {
+		SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
+		if (sendTo != null) {
+			for (String destination : getDestinations(sendTo, inputHeaders.getDestination())) {
 				this.messagingTemplate.convertAndSend(destination, returnValue, postProcessor);
 			}
 			return;
@@ -129,7 +129,7 @@ public class ReplyToMethodReturnValueHandler implements HandlerMethodReturnValue
 
 	@Override
 	public String toString() {
-		return "ReplyToMethodReturnValueHandler [annotationRequired=" + annotationRequired + "]";
+		return "SendToMethodReturnValueHandler [annotationRequired=" + annotationRequired + "]";
 	}
 
 }
