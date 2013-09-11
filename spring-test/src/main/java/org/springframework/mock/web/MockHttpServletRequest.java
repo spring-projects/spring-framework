@@ -53,6 +53,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
@@ -249,8 +250,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
-		this.method = (method == null ? "" : method);
-		this.requestURI = (requestURI == null ? "" : requestURI);
+		this.method = method;
+		this.requestURI = requestURI;
 		this.locales.add(Locale.ENGLISH);
 	}
 
@@ -859,7 +860,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void setMethod(String method) {
-		this.method = (method == null ? "" : method);
+		this.method = method;
 	}
 
 	@Override
@@ -937,7 +938,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void setRequestURI(String requestURI) {
-		this.requestURI = (requestURI == null ? "" : requestURI);
+		this.requestURI = requestURI;
 	}
 
 	@Override
@@ -954,7 +955,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			url.append(':').append(this.serverPort);
 		}
 
-		url.append(getRequestURI());
+		if (StringUtils.hasText(getRequestURI())) {
+			url.append(getRequestURI());
+		}
+
 		return url;
 	}
 

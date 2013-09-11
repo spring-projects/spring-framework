@@ -212,6 +212,13 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void getRequestURLWithNullRequestUri() {
+		request.setRequestURI(null);
+		StringBuffer requestURL = request.getRequestURL();
+		assertEquals("http://localhost", requestURL.toString());
+	}
+
+	@Test
 	public void getRequestURLWithDefaultsAndHttps() {
 		request.setScheme("https");
 		request.setServerPort(443);
