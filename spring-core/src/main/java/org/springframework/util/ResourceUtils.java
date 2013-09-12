@@ -143,7 +143,7 @@ public abstract class ResourceUtils {
 	/**
 	 * Resolve the given resource location to a {@code java.io.File},
 	 * i.e. to a file in the file system.
-	 * <p>Does not check whether the fil actually exists; simply returns
+	 * <p>Does not check whether the file actually exists; simply returns
 	 * the File that the given location would correspond to.
 	 * @param resourceLocation the resource location to resolve: either a
 	 * "classpath:" pseudo URL, a "file:" URL, or a plain file path
