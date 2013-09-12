@@ -166,10 +166,12 @@ project("spring-core") {
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.0"
+	def objenesisVersion = "2.0"
 
 	configurations {
 		jarjar
 		cglib
+		objenesis
 	}
 
 	task cglibRepackJar(type: Jar) { repackJar ->
@@ -195,8 +197,28 @@ project("spring-core") {
 		}
 	}
 
+	task objenesisRepackJar(type: Jar) { repackJar ->
+		repackJar.baseName = "spring-objenesis-repack"
+		repackJar.version = objenesisVersion
+
+		doLast() {
+			project.ant {
+				taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+					classpath: configurations.jarjar.asPath
+				jarjar(destfile: repackJar.archivePath) {
+					configurations.objenesis.each { originalJar ->
+						zipfileset(src: originalJar)
+					}
+					// repackage org.objenesis => org.springframework.objenesis
+					rule(pattern: "org.objenesis.**", result: "org.springframework.objenesis.@1")
+				}
+			}
+		}
+	}
+
 	dependencies {
 		cglib("cglib:cglib:${cglibVersion}@jar")
+		objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 		jarjar("com.googlecode.jarjar:jarjar:1.3")
 
 		compile(files(cglibRepackJar))
@@ -215,6 +237,11 @@ project("spring-core") {
 		dependsOn cglibRepackJar
 		from(zipTree(cglibRepackJar.archivePath)) {
 			include "org/springframework/cglib/**"
+		}
+
+		dependsOn objenesisRepackJar
+		from(zipTree(objenesisRepackJar.archivePath)) {
+			include "org/springframework/objenesis/**"
 		}
 	}
 }
@@ -237,6 +264,7 @@ project("spring-aop") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
+		compile(files(project(":spring-core").objenesisRepackJar))
 		compile(project(":spring-beans"))
 		compile("aopalliance:aopalliance:1.0")
 		optional("com.jamonapi:jamon:2.4")

@@ -16,13 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -33,7 +26,6 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -43,6 +35,8 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import test.mixin.LockMixinAdvisor;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Additional and overridden tests for the CGLIB proxy.
@@ -133,31 +127,6 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 		TestBean tb = (TestBean) proxy;
 		assertEquals(32, tb.getAge());
-	}
-
-	@Test
-	public void testCglibProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
-
-		@SuppressWarnings("unused")
-		class YouCantSeeThis {
-			void hidden() {
-			}
-		}
-
-		YouCantSeeThis mine = new YouCantSeeThis();
-		try {
-			ProxyFactory pf = new ProxyFactory(mine);
-			pf.getProxy();
-			fail("Shouldn't be able to proxy non-visible class with CGLIB");
-		}
-		catch (AopConfigException ex) {
-			// Check that stack trace is preserved
-			assertTrue(ex.getCause() instanceof CodeGenerationException ||
-					ex.getCause() instanceof IllegalArgumentException);
-			// Check that error message is helpful
-			assertTrue(ex.getMessage().indexOf("final") != -1);
-			assertTrue(ex.getMessage().indexOf("visible") != -1);
-		}
 	}
 
 	@Test
@@ -348,6 +317,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testWithDependencyChecking() {
 		ApplicationContext ctx =
 				new ClassPathXmlApplicationContext(DEPENDENCY_CHECK_CONTEXT, getClass());
