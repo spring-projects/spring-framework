@@ -30,15 +30,15 @@ import java.net.URLConnection;
  *
  * <p>Consider using Spring's Resource abstraction in the core package
  * for handling all kinds of file resources in a uniform manner.
- * {@link org.springframework.core.io.ResourceLoader}'s {@code getResource}
+ * {@link org.springframework.core.io.ResourceLoader}'s {@code getResource()}
  * method can resolve any location to a {@link org.springframework.core.io.Resource}
- * object, which in turn allows to obtain a {@code java.io.File} in the
+ * object, which in turn allows one to obtain a {@code java.io.File} in the
  * file system through its {@code getFile()} method.
  *
  * <p>The main reason for these utility methods for resource location handling
  * is to support {@link Log4jConfigurer}, which must be able to resolve
  * resource locations <i>before the logging system has been initialized</i>.
- * Spring' Resource abstraction in the core package, on the other hand,
+ * Spring's {@code Resource} abstraction in the core package, on the other hand,
  * already expects the logging system to be available.
  *
  * @author Juergen Hoeller
@@ -143,7 +143,7 @@ public abstract class ResourceUtils {
 	/**
 	 * Resolve the given resource location to a {@code java.io.File},
 	 * i.e. to a file in the file system.
-	 * <p>Does not check whether the fil actually exists; simply returns
+	 * <p>Does not check whether the file actually exists; simply returns
 	 * the File that the given location would correspond to.
 	 * @param resourceLocation the resource location to resolve: either a
 	 * "classpath:" pseudo URL, a "file:" URL, or a plain file path
@@ -299,7 +299,7 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Create a URI instance for the given URL,
-	 * replacing spaces with "%20" quotes first.
+	 * replacing spaces with "%20" URI encoding first.
 	 * <p>Furthermore, this method works on JDK 1.4 as well,
 	 * in contrast to the {@code URL.toURI()} method.
 	 * @param url the URL to convert into a URI instance
@@ -313,7 +313,7 @@ public abstract class ResourceUtils {
 
 	/**
 	 * Create a URI instance for the given location String,
-	 * replacing spaces with "%20" quotes first.
+	 * replacing spaces with "%20" URI encoding first.
 	 * @param location the location String to convert into a URI instance
 	 * @return the URI instance
 	 * @throws URISyntaxException if the location wasn't a valid URI
