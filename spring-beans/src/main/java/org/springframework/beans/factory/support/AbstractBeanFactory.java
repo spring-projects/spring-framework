@@ -278,78 +278,84 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				markBeanAsCreated(beanName);
 			}
 
-			final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-			checkMergedBeanDefinition(mbd, beanName, args);
+			try {
+				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+				checkMergedBeanDefinition(mbd, beanName, args);
 
-			// Guarantee initialization of beans that the current bean depends on.
-			String[] dependsOn = mbd.getDependsOn();
-			if (dependsOn != null) {
-				for (String dependsOnBean : dependsOn) {
-					getBean(dependsOnBean);
-					registerDependentBean(dependsOnBean, beanName);
-				}
-			}
-
-			// Create bean instance.
-			if (mbd.isSingleton()) {
-				sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {
-					@Override
-					public Object getObject() throws BeansException {
-						try {
-							return createBean(beanName, mbd, args);
-						}
-						catch (BeansException ex) {
-							// Explicitly remove instance from singleton cache: It might have been put there
-							// eagerly by the creation process, to allow for circular reference resolution.
-							// Also remove any beans that received a temporary reference to the bean.
-							destroySingleton(beanName);
-							throw ex;
-						}
+				// Guarantee initialization of beans that the current bean depends on.
+				String[] dependsOn = mbd.getDependsOn();
+				if (dependsOn != null) {
+					for (String dependsOnBean : dependsOn) {
+						getBean(dependsOnBean);
+						registerDependentBean(dependsOnBean, beanName);
 					}
-				});
-				bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
-			}
+				}
 
-			else if (mbd.isPrototype()) {
-				// It's a prototype -> create a new instance.
-				Object prototypeInstance = null;
-				try {
-					beforePrototypeCreation(beanName);
-					prototypeInstance = createBean(beanName, mbd, args);
-				}
-				finally {
-					afterPrototypeCreation(beanName);
-				}
-				bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
-			}
-
-			else {
-				String scopeName = mbd.getScope();
-				final Scope scope = this.scopes.get(scopeName);
-				if (scope == null) {
-					throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
-				}
-				try {
-					Object scopedInstance = scope.get(beanName, new ObjectFactory<Object>() {
+				// Create bean instance.
+				if (mbd.isSingleton()) {
+					sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {
 						@Override
 						public Object getObject() throws BeansException {
-							beforePrototypeCreation(beanName);
 							try {
 								return createBean(beanName, mbd, args);
 							}
-							finally {
-								afterPrototypeCreation(beanName);
+							catch (BeansException ex) {
+								// Explicitly remove instance from singleton cache: It might have been put there
+								// eagerly by the creation process, to allow for circular reference resolution.
+								// Also remove any beans that received a temporary reference to the bean.
+								destroySingleton(beanName);
+								throw ex;
 							}
 						}
 					});
-					bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
+					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				}
-				catch (IllegalStateException ex) {
-					throw new BeanCreationException(beanName,
-							"Scope '" + scopeName + "' is not active for the current thread; " +
-							"consider defining a scoped proxy for this bean if you intend to refer to it from a singleton",
-							ex);
+
+				else if (mbd.isPrototype()) {
+					// It's a prototype -> create a new instance.
+					Object prototypeInstance = null;
+					try {
+						beforePrototypeCreation(beanName);
+						prototypeInstance = createBean(beanName, mbd, args);
+					}
+					finally {
+						afterPrototypeCreation(beanName);
+					}
+					bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
 				}
+
+				else {
+					String scopeName = mbd.getScope();
+					final Scope scope = this.scopes.get(scopeName);
+					if (scope == null) {
+						throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
+					}
+					try {
+						Object scopedInstance = scope.get(beanName, new ObjectFactory<Object>() {
+							@Override
+							public Object getObject() throws BeansException {
+								beforePrototypeCreation(beanName);
+								try {
+									return createBean(beanName, mbd, args);
+								}
+								finally {
+									afterPrototypeCreation(beanName);
+								}
+							}
+						});
+						bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
+					}
+					catch (IllegalStateException ex) {
+						throw new BeanCreationException(beanName,
+								"Scope '" + scopeName + "' is not active for the current thread; " +
+								"consider defining a scoped proxy for this bean if you intend to refer to it from a singleton",
+								ex);
+					}
+				}
+			}
+			catch (BeansException ex) {
+				cleanupAfterBeanCreationFailure(beanName);
+				throw ex;
 			}
 		}
 
@@ -1428,6 +1434,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected void markBeanAsCreated(String beanName) {
 		this.alreadyCreated.add(beanName);
+	}
+
+	/**
+	 * Perform appropriate cleanup of cached metadata after bean creation failed.
+	 * @param beanName the name of the bean
+	 */
+	protected void cleanupAfterBeanCreationFailure(String beanName) {
+		this.alreadyCreated.remove(beanName);
 	}
 
 	/**
