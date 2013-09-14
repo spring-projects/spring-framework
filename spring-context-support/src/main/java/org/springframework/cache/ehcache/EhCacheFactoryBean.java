@@ -231,7 +231,8 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 
 		// Fetch cache region: If none with the given name exists, create one on the fly.
 		Ehcache rawCache;
-		if (this.cacheManager.cacheExists(cacheName)) {
+		boolean cacheExists = this.cacheManager.cacheExists(cacheName);
+		if (cacheExists) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using existing EhCache cache region '" + cacheName + "'");
 			}
@@ -243,7 +244,6 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 			}
 			rawCache = createCache();
 			rawCache.setBootstrapCacheLoader(this.bootstrapCacheLoader);
-			this.cacheManager.addCache(rawCache);
 		}
 
 		if (this.cacheEventListeners != null) {
@@ -261,7 +261,9 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 			rawCache.setDisabled(true);
 		}
 
-		// Decorate cache if necessary.
+		if (!cacheExists) {
+			this.cacheManager.addCache(rawCache);
+		}
 		Ehcache decoratedCache = decorateCache(rawCache);
 		if (decoratedCache != rawCache) {
 			this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
