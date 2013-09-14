@@ -495,8 +495,12 @@ public class FormTag extends AbstractHtmlElementTag {
 		if (hiddenFields != null) {
 			for (String name : hiddenFields.keySet()) {
 				this.tagWriter.appendValue("<input type=\"hidden\" ");
-				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\" ");
-				this.tagWriter.appendValue("/>\n");
+				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\"");
+				if (this.tagWriter.isUseXmlCloseStyle()) {
+					this.tagWriter.appendValue(" />\n");
+				} else {
+					this.tagWriter.appendValue(">\n");
+				}
 			}
 		}
 	}

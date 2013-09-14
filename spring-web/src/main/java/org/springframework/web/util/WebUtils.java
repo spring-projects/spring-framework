@@ -108,6 +108,24 @@ public abstract class WebUtils {
 	public static final String HTML_ESCAPE_CONTEXT_PARAM = "defaultHtmlEscape";
 
 	/**
+	 * HTML tag close policy parameter at the servlet context level
+	 * (i.e., a context-param in {@code web.xml}): "defaultHtmlClosePolicy".
+	 * @see #HTML_CLOSE_POLICY_ATTRIBUTE
+	 */
+	public static final String HTML_CLOSE_POLICY_PARAM = "defaultHtmlClosePolicy";
+
+	/**
+	 * HTML tag close policy page context attribute. All code generating HTML
+	 * tags should first check this page context attribute to determine whether
+	 * HTML tags not requiring a closing tag should be closed using XML
+	 * (<code>/&gt;</code>, {@literal true}) or HTML (<code>&gt;</code>,
+	 * {@literal false}) style. If this attribute is not set, the code should then
+	 * check the servlet context parameter. If the parameter is also not set, the
+	 * code should use XML style tag closing.
+	 */
+	public static final String HTML_CLOSE_POLICY_ATTRIBUTE = "org.springframework.web.tag.htmlClosePolicy.xml";
+
+	/**
 	 * Web app root key parameter at the servlet context level
 	 * (i.e. a context-param in {@code web.xml}): "webAppRootKey".
 	 */
@@ -202,6 +220,27 @@ public abstract class WebUtils {
 		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
 		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
+	}
+
+	/**
+	 * Returns the default HTML tag close policy from the servlet context. All
+	 * code generating HTML tags should first check the page context attribute
+	 * ({@link #HTML_CLOSE_POLICY_ATTRIBUTE}) to determine whether HTML tags not
+	 * requiring a closing tag should be closed using XML (<code>/&gt;</code>,
+	 * {@literal true}) or HTML (<code>&gt;</code>, {@literal false}) style. If
+	 * this attribute is not set, the code should then check the servlet context
+	 * parameter using this method. If the parameter is also not set, the code
+	 * should use XML style tag closing.
+	 *
+	 * @param servletContext the servlet context of the web application
+	 * @return the default HTML tag close policy from the servlet context provided
+	 */
+	public static Boolean isDefaultHtmlClosePolicyXml(ServletContext servletContext) {
+		if (servletContext == null) {
+			return true;
+		}
+		String param = servletContext.getInitParameter(HTML_CLOSE_POLICY_PARAM);
+		return StringUtils.hasText(param) ? Boolean.valueOf(param) : null;
 	}
 
 	/**

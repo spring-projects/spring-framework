@@ -472,4 +472,25 @@
 		</attribute>
 	</tag>
 
+	<tag>
+		<description>
+			Sets the HTML close policy for the current page. This determines whether
+			HTML tags that don't require closing tags are ended in XML style (/&gt;)
+			or traditional HTML style (&gt;), allowing the user to control the syntax
+			and better pass W3C validators. This overrides the defaultHtmlClosePolicy
+			property set in web.xml, if any.
+		</description>
+		<name>htmlClosePolicy</name>
+		<tag-class>org.springframework.web.servlet.tags.HtmlClosePolicyTag</tag-class>
+		<body-content>empty</body-content>
+		<attribute>
+			<description>Set the policy for closing HTML tags in the current page,
+			    overriding the property specified in web.xml, if any.</description>
+			<name>xml</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
+		</attribute>
+	</tag>
+
 </taglib>

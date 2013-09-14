@@ -23,6 +23,7 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
+import org.springframework.web.util.WebUtils;
 
 import static org.mockito.BDDMockito.*;
 
@@ -45,6 +46,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 	private MockHttpServletRequest request;
 
+	private boolean useXmlCloseStyle;
+
 
 	@Override
 	@SuppressWarnings("serial")
@@ -52,7 +55,9 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag = new FormTag() {
 			@Override
 			protected TagWriter createTagWriter() {
-				return new TagWriter(getWriter());
+				TagWriter tagWriter = new TagWriter(getWriter());
+				tagWriter.setUseXmlCloseStyle(FormTagTests.this.useXmlCloseStyle);
+				return tagWriter;
 			}
 		};
 		this.tag.setPageContext(getPageContext());
@@ -323,11 +328,12 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
-	public void testRequestDataValueProcessorHooks() throws Exception {
+	public void testRequestDataValueProcessorHooksCloseStyleXml() throws Exception {
+		this.useXmlCloseStyle = true;
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
 		given(processor.processAction(this.request, action, "post")).willReturn(action);
-		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key", "value"));
+		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key1", "value1"));
 
 		this.tag.doStartTag();
 		this.tag.doEndTag();
@@ -335,10 +341,110 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 		String output = getOutput();
 
-		assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\" />", getInputTag(output));
+		assertEquals("<input type=\"hidden\" name=\"key1\" value=\"value1\" />", getInputTag(output));
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 	}
+
+	public void testRequestDataValueProcessorHooksCloseStyleHtml() throws Exception {
+		this.useXmlCloseStyle = false;
+		String action = "/my/form?foo=bar";
+		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
+		given(processor.processAction(this.request, action, "post")).willReturn(action);
+		given(processor.getExtraHiddenFields(this.request)).willReturn(Collections.singletonMap("key2", "value2"));
+
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+
+		assertEquals("<input type=\"hidden\" name=\"key2\" value=\"value2\">", getInputTag(output));
+		assertFormTagOpened(output);
+		assertFormTagClosed(output);
+	}
+
+	// the tests below test AbstractFormTag behavior, since there's nowhere better to put them
+
+	public void testCreateTagWriterDefault() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertTrue("The writer should be using XML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	public void testCreateTagWriterPageContextCloseStyleXml() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+		getPageContext().setAttribute(WebUtils.HTML_CLOSE_POLICY_ATTRIBUTE, true);
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertTrue("The writer should be using XML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	public void testCreateTagWriterPageContextCloseStyleHtml() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+		getPageContext().setAttribute(WebUtils.HTML_CLOSE_POLICY_ATTRIBUTE, false);
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertFalse("The writer should be using HTML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	public void testCreateTagWriterServletContextCloseStyleXml() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+		getPageContext().getServletContext().setInitParameter(WebUtils.HTML_CLOSE_POLICY_PARAM, "true");
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertTrue("The writer should be using XML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	public void testCreateTagWriterServletContextCloseStyleHtml() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+		getPageContext().getServletContext().setInitParameter(WebUtils.HTML_CLOSE_POLICY_PARAM, "false");
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertFalse("The writer should be using HTML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	public void testCreateTagWriterPageContextAttributeTakesPrecedence1() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+		getPageContext().setAttribute(WebUtils.HTML_CLOSE_POLICY_ATTRIBUTE, true);
+		getPageContext().getServletContext().setInitParameter(WebUtils.HTML_CLOSE_POLICY_PARAM, "false");
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertTrue("The writer should be using XML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	public void testCreateTagWriterPageContextAttributeTakesPrecedence2() {
+		this.tag = new FormTag();
+		this.tag.setPageContext(getPageContext());
+		getPageContext().setAttribute(WebUtils.HTML_CLOSE_POLICY_ATTRIBUTE, false);
+		getPageContext().getServletContext().setInitParameter(WebUtils.HTML_CLOSE_POLICY_PARAM, "true");
+
+		TagWriter writer = this.tag.createTagWriter();
+
+		assertNotNull("The writer should not be null.", writer);
+		assertFalse("The writer should be using HTML closing style.", writer.isUseXmlCloseStyle());
+	}
+
+	// the methods below are helper methods
 
 	private String getFormTag(String output) {
 		int inputStart = output.indexOf("<", 1);

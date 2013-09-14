@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,19 +38,53 @@ public class TagWriterTests extends TestCase {
 	}
 
 
-	public void testSimpleTag() throws Exception {
+	public void testSimpleTagDefaultClose() throws Exception {
 		this.writer.startTag("br");
 		this.writer.endTag();
 
-		assertEquals("<br/>", this.data.toString());
+		assertEquals("<br />", this.data.toString());
 	}
 
-	public void testEmptyTag() throws Exception {
+	public void testSimpleTagCloseStyleXml() throws Exception {
+		this.writer.setUseXmlCloseStyle(true);
+		this.writer.startTag("br");
+		this.writer.endTag();
+
+		assertEquals("<br />", this.data.toString());
+	}
+
+	public void testSimpleTagCloseStyleHtml() throws Exception {
+		this.writer.setUseXmlCloseStyle(false);
+		this.writer.startTag("br");
+		this.writer.endTag();
+
+		assertEquals("<br>", this.data.toString());
+	}
+
+	public void testEmptyTagDefaultClose() throws Exception {
 		this.writer.startTag("input");
 		this.writer.writeAttribute("type", "text");
 		this.writer.endTag();
 
-		assertEquals("<input type=\"text\"/>", this.data.toString());
+		assertEquals("<input type=\"text\" />", this.data.toString());
+	}
+
+	public void testEmptyTagCloseStyleXml() throws Exception {
+		this.writer.setUseXmlCloseStyle(true);
+		this.writer.startTag("input");
+		this.writer.writeAttribute("type", "text");
+		this.writer.endTag();
+
+		assertEquals("<input type=\"text\" />", this.data.toString());
+	}
+
+	public void testEmptyTagCloseStyleHtml() throws Exception {
+		this.writer.setUseXmlCloseStyle(false);
+		this.writer.startTag("input");
+		this.writer.writeAttribute("type", "text");
+		this.writer.endTag();
+
+		assertEquals("<input type=\"text\">", this.data.toString());
 	}
 
 	public void testSimpleBlockTag() throws Exception {

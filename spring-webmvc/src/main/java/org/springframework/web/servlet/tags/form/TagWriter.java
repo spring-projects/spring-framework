@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,11 @@ public class TagWriter {
 	 */
 	private final Stack tagState = new Stack();
 
+	/**
+	 * Indicates whether tags should be ended XML style or HTML style.
+	 */
+	private boolean useXmlCloseStyle = true;
+
 
 	/**
 	 * Create a new instance of the {@link TagWriter} class that writes to
@@ -68,6 +73,26 @@ public class TagWriter {
 		this.writer = new SafeWriter(writer);
 	}
 
+
+	/**
+	 * Indicates whether tags should be ended XML style or HTML style.
+	 *
+	 * @param useXmlCloseStyle {@code true} to use XML style (<code>/&gt;</code>),
+	 *                         {@code false} to use HTML style (<code>&gt;</code>).
+	 */
+	public void setUseXmlCloseStyle(boolean useXmlCloseStyle) {
+		this.useXmlCloseStyle = useXmlCloseStyle;
+	}
+
+	/**
+	 * Indicates whether tags should be ended XML style or HTML style.
+	 *
+	 * @return {@code true} to use XML style (<code>/&gt;</code>),
+	 *         {@code false} to use HTML style (<code>&gt;</code>).
+	 */
+	public boolean isUseXmlCloseStyle() {
+		return this.useXmlCloseStyle;
+	}
 
 	/**
 	 * Start a new tag with the supplied name. Leaves the tag open so
@@ -161,7 +186,11 @@ public class TagWriter {
 				this.writer.append(">");
 			}
 			else {
-				this.writer.append("/>");
+				if (this.isUseXmlCloseStyle()) {
+					this.writer.append(" />");
+				} else {
+					this.writer.append(">");
+				}
 				renderClosingTag = false;
 			}
 		}

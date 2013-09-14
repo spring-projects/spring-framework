@@ -21,6 +21,7 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Base class for all JSP form tags. Provides utility methods for
@@ -71,7 +72,17 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * change the {@link java.io.Writer} to which output is actually written.
 	 */
 	protected TagWriter createTagWriter() {
-		return new TagWriter(this.pageContext);
+		TagWriter tagWriter = new TagWriter(this.pageContext);
+		Object attribute = this.pageContext.getAttribute(WebUtils.HTML_CLOSE_POLICY_ATTRIBUTE);
+		if (attribute != null) {
+			tagWriter.setUseXmlCloseStyle((Boolean) attribute);
+		} else {
+			Boolean param = WebUtils.isDefaultHtmlClosePolicyXml(this.pageContext.getServletContext());
+			if (param != null) {
+				tagWriter.setUseXmlCloseStyle(param);
+			}
+		}
+		return tagWriter;
 	}
 
 	/**
